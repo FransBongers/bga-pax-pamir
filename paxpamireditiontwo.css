@@ -1,0 +1,757 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * PaxPamirEditionTwo implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * paxpamireditiontwo.css
+ *
+ * PaxPamirEditionTwo stylesheet
+ *
+ */
+
+/*
+    This is the CSS stylesheet of your game User Interface.
+    
+    Styles defined on this file will be applied to the HTML elements you define in your
+    HTML template (paxpamireditiontwo_paxpamireditiontwo.tpl), and to HTML elements you create dynamically
+    (in paxpamireditiontwo.js).
+    
+    Usually, you are using CSS to:
+    
+    1°) define the overall layout of your game
+        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+
+    2°) create your CSS-sprites:
+        All images of your games should be gathered into a small number of image files. Then, using
+        background-image and background-position CSS properties, you create HTML blocks that can 
+        display these images correctly (see example below).
+    
+    3°) ... anything else:
+        It is really easy to add and remove CSS classes dynamically from your Javascript with
+        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
+        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
+        very often, using CSS classes for the logic of your user interface allow you to do complex
+        thing easily.
+        
+        
+     Note: on the production platform, this file will be compressed and comments will be removed.
+           Consequently, don't hesitate to put as many comments as necessary.
+*/
+
+
+/* Note: you must not use any @import directive */
+
+
+/********* You can start writing your CSS below this line: **********/
+
+
+/*
+    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+
+    .white_token {
+        background-image: url('img/tokens.png');
+        background-position: 0px 0px;
+    }
+    .black_token {
+        background-image: url('img/tokens.png');
+        background-position: -20px 0px;
+    }
+    .token {
+        width: 20px;
+        height: 20px;
+        background-repeat: none;
+    }
+*/
+
+html {
+    background: url("") rgb(192, 192, 192);
+}
+
+.player-board {
+    background-color: antiquewhite;
+}
+
+#pp_play_area {
+    grid-gap: 10px;
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: 192px 250px 250px 250px 250px 192px;
+    grid-template-rows: 285px 285px 295px 295px 249px 249px 285px;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    top: 5px;
+}
+
+#pp_player_hand {
+    background-color: white;
+    grid-column: 1 / span 6;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.pp_player_tableau {
+    /* box-shadow: rgb(0 0 0) 2px 2px 8px; */
+    /* position: relative; */
+    display: flex;
+    flex-direction: column;
+}
+
+.pp_player_tableau_E8CAAA {
+    background-color: #E8CAAA;
+}
+
+.pp_player_tableau_E8CAAA {
+    background-color: #E8CAAA;
+}
+
+.pp_court {
+    margin: 10px 20px;
+    flex-grow: 1;
+    /* border: solid 2px white; */
+}
+
+.pp_tableau_title {
+    font-weight: bold;
+    font-size: large;
+    word-wrap: break-word;
+    margin: 10px;
+}
+
+/* .pp_player_board {
+    width: 600px;
+    height: 137px;
+    background-image: url('img/temp/player_board.png');
+    background-size: 600px 685px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    box-shadow: 1px 1px 4px;
+    border-radius: 10px;
+}
+*/
+
+#pp_map {
+    background-image: url('img/temp/paxpamir_board.jpg');
+    background-size: 1030px 600px;
+    grid-column-start: 2;
+    grid-column-end: 6;
+    grid-row-start: 3;
+    grid-row-end: 5;
+    height: 600px;
+    position: relative;
+    width: 1030px;
+    box-shadow: rgb(0 0 0) 2px 2px 8px;
+}
+
+#pp_market_board {
+    background-image: url('img/temp/paxpamir_market.jpg');
+    background-size: 1030px 508px;
+    grid-column-start: 2;
+    grid-column-end: 6;
+    grid-row-start: 5;
+    grid-row-end: 7;
+    width: 1030px;
+    box-shadow: rgb(0 0 0) 2px 2px 8px;
+    height: 508px;
+    position: relative;
+    background-repeat: no-repeat;
+}
+
+.pp_market {
+    width: 151px;
+    height: 209px;
+    /* background-color: red; */
+    position: absolute;
+    /* border: 1px blue solid; */
+}
+
+.pp_market_coin_zone {
+    width: 130px;
+    height: 50px;
+    left: 8px;
+    top: 50px;
+    position: absolute;
+    /* border: 2px black solid; */
+    /* z-index: 10; */
+}
+
+.pp_card {
+    width: 151px;
+    height: 209px;
+    background-size: 151px 209px;
+    position: absolute;
+    box-shadow: 1px 1px 4px;
+    border-radius: 10px;
+}
+
+.pp_card_in_court:hover, .pp_card_in_court:active {
+    z-index: 100 !important;
+    /* border: 2px blue solid; */
+}
+
+.pp_coin {
+    /* width: 50px; */
+    /* height: 50px; */
+    /* background-image: url('img/temp/tokens.png'); */
+    /* background-size: 300px 50px; */
+    /* background-position: -250px 0px; */
+    /* position: absolute; */
+    border-radius: 25px;
+    box-shadow: 1px 1px 4px;
+}
+
+/* ------- PLAYER BOARD ------- */
+
+.pp_suit_icon {
+    background-image: url(img/temp/suits.png);
+    height: 44px;
+}
+
+.pp_suit_icon.economic {
+    background-position:0px 0;
+}
+
+.pp_suit_icon.military {
+    background-position:-42px 0;
+}
+
+.pp_suit_icon.political {
+    background-position:-85px 0;
+}
+
+.pp_suit_icon.intelligence {
+    background-position:-128px 0;
+}
+
+.pp_icon_count {
+    position: absolute;
+    color: black;
+    /* bottom: 11px; */
+    /* left: 18px; */
+    bottom: 0px;
+    right: 0px;
+    /* font-weight: 700; */
+    padding: 0px 2px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.pp_icon_container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    margin: 3px;
+}
+
+.pp_icon {
+    background-repeat: no-repeat;
+    position: relative;
+    margin: 4px;
+    width: 44px;
+}
+
+.pp_loyalty_icon{
+    height: 30px;
+    background-image: url('img/temp/loyalty_icon.png');
+    background-size: 132px 30px; 
+    /* background-position: -250px 0px; */
+    padding-bottom: 12px;
+}
+
+.pp_token_icon {
+    background-image: url(img/temp/tokens.png);
+    background-size: 220px 44px;
+    height: 44px;
+}
+
+.pp_player_board_coin {
+    height: 44px;
+    background-size: 44px;
+    background-image: url('img/temp/coin.png');
+}
+
+.pp_card_icon {
+    height: 44px;
+    width: 32px;
+    background-size: 32px 44px;
+    background-image: url('img/temp/cards/back.jpg');
+    margin-left: 16px;
+}
+
+/* ------- CARDS START ------- */
+
+.pp_card_1 {
+    background-image: url('img/temp/cards/1.jpg');
+}
+
+.pp_card_2 {
+    background-image: url('img/temp/cards/2.jpg');
+}
+
+.pp_card_3 {
+    background-image: url('img/temp/cards/3.jpg');
+}
+
+.pp_card_4 {
+    background-image: url('img/temp/cards/4.jpg');
+}
+
+.pp_card_5 {
+    background-image: url('img/temp/cards/5.jpg');
+}
+
+.pp_card_6 {
+    background-image: url('img/temp/cards/6.jpg');
+}
+
+.pp_card_7 {
+    background-image: url('img/temp/cards/7.jpg');
+}
+
+.pp_card_8 {
+    background-image: url('img/temp/cards/8.jpg');
+}
+
+.pp_card_9 {
+    background-image: url('img/temp/cards/9.jpg');
+}
+
+.pp_card_10 {
+    background-image: url('img/temp/cards/10.jpg');
+}
+
+.pp_card_11 {
+    background-image: url('img/temp/cards/11.jpg');
+}
+
+.pp_card_12 {
+    background-image: url('img/temp/cards/12.jpg');
+}
+
+.pp_card_13 {
+    background-image: url('img/temp/cards/13.jpg');
+}
+
+.pp_card_14 {
+    background-image: url('img/temp/cards/14.jpg');
+}
+
+.pp_card_15 {
+    background-image: url('img/temp/cards/15.jpg');
+}
+
+.pp_card_16 {
+    background-image: url('img/temp/cards/16.jpg');
+}
+
+.pp_card_17 {
+    background-image: url('img/temp/cards/17.jpg');
+}
+
+.pp_card_18 {
+    background-image: url('img/temp/cards/18.jpg');
+}
+
+.pp_card_19 {
+    background-image: url('img/temp/cards/19.jpg');
+}
+
+.pp_card_20 {
+    background-image: url('img/temp/cards/20.jpg');
+}
+
+.pp_card_21 {
+    background-image: url('img/temp/cards/21.jpg');
+}
+
+.pp_card_22 {
+    background-image: url('img/temp/cards/22.jpg');
+}
+
+.pp_card_23 {
+    background-image: url('img/temp/cards/23.jpg');
+}
+
+.pp_card_24 {
+    background-image: url('img/temp/cards/24.jpg');
+}
+
+.pp_card_25 {
+    background-image: url('img/temp/cards/25.jpg');
+}
+
+.pp_card_26 {
+    background-image: url('img/temp/cards/26.jpg');
+}
+
+.pp_card_27 {
+    background-image: url('img/temp/cards/27.jpg');
+}
+
+.pp_card_28 {
+    background-image: url('img/temp/cards/28.jpg');
+}
+
+.pp_card_29 {
+    background-image: url('img/temp/cards/29.jpg');
+}
+
+.pp_card_30 {
+    background-image: url('img/temp/cards/30.jpg');
+}
+
+.pp_card_31 {
+    background-image: url('img/temp/cards/31.jpg');
+}
+
+.pp_card_32 {
+    background-image: url('img/temp/cards/32.jpg');
+}
+
+.pp_card_33 {
+    background-image: url('img/temp/cards/33.jpg');
+}
+
+.pp_card_34 {
+    background-image: url('img/temp/cards/34.jpg');
+}
+
+.pp_card_35 {
+    background-image: url('img/temp/cards/35.jpg');
+}
+
+.pp_card_36 {
+    background-image: url('img/temp/cards/36.jpg');
+}
+
+.pp_card_37 {
+    background-image: url('img/temp/cards/37.jpg');
+}
+
+.pp_card_38 {
+    background-image: url('img/temp/cards/38.jpg');
+}
+
+.pp_card_39 {
+    background-image: url('img/temp/cards/39.jpg');
+}
+
+.pp_card_40 {
+    background-image: url('img/temp/cards/40.jpg');
+}
+
+.pp_card_41 {
+    background-image: url('img/temp/cards/41.jpg');
+}
+
+.pp_card_42 {
+    background-image: url('img/temp/cards/42.jpg');
+}
+
+.pp_card_43 {
+    background-image: url('img/temp/cards/43.jpg');
+}
+
+.pp_card_44 {
+    background-image: url('img/temp/cards/44.jpg');
+}
+
+.pp_card_45 {
+    background-image: url('img/temp/cards/45.jpg');
+}
+
+.pp_card_46 {
+    background-image: url('img/temp/cards/46.jpg');
+}
+
+.pp_card_47 {
+    background-image: url('img/temp/cards/47.jpg');
+}
+
+.pp_card_48 {
+    background-image: url('img/temp/cards/48.jpg');
+}
+
+.pp_card_49 {
+    background-image: url('img/temp/cards/49.jpg');
+}
+
+.pp_card_50 {
+    background-image: url('img/temp/cards/50.jpg');
+}
+
+.pp_card_51 {
+    background-image: url('img/temp/cards/51.jpg');
+}
+
+.pp_card_52 {
+    background-image: url('img/temp/cards/52.jpg');
+}
+
+.pp_card_53 {
+    background-image: url('img/temp/cards/53.jpg');
+}
+
+.pp_card_54 {
+    background-image: url('img/temp/cards/54.jpg');
+}
+
+.pp_card_55 {
+    background-image: url('img/temp/cards/55.jpg');
+}
+
+.pp_card_56 {
+    background-image: url('img/temp/cards/56.jpg');
+}
+
+.pp_card_57 {
+    background-image: url('img/temp/cards/57.jpg');
+}
+
+.pp_card_58 {
+    background-image: url('img/temp/cards/58.jpg');
+}
+
+.pp_card_59 {
+    background-image: url('img/temp/cards/59.jpg');
+}
+
+.pp_card_60 {
+    background-image: url('img/temp/cards/60.jpg');
+}
+
+.pp_card_61 {
+    background-image: url('img/temp/cards/61.jpg');
+}
+
+.pp_card_62 {
+    background-image: url('img/temp/cards/62.jpg');
+}
+
+.pp_card_63 {
+    background-image: url('img/temp/cards/63.jpg');
+}
+
+.pp_card_64 {
+    background-image: url('img/temp/cards/64.jpg');
+}
+
+.pp_card_65 {
+    background-image: url('img/temp/cards/65.jpg');
+}
+
+.pp_card_66 {
+    background-image: url('img/temp/cards/66.jpg');
+}
+
+.pp_card_67 {
+    background-image: url('img/temp/cards/67.jpg');
+}
+
+.pp_card_68 {
+    background-image: url('img/temp/cards/68.jpg');
+}
+
+.pp_card_69 {
+    background-image: url('img/temp/cards/69.jpg');
+}
+
+.pp_card_70 {
+    background-image: url('img/temp/cards/70.jpg');
+}
+
+.pp_card_71 {
+    background-image: url('img/temp/cards/71.jpg');
+}
+
+.pp_card_72 {
+    background-image: url('img/temp/cards/72.jpg');
+}
+
+.pp_card_73 {
+    background-image: url('img/temp/cards/73.jpg');
+}
+
+.pp_card_74 {
+    background-image: url('img/temp/cards/74.jpg');
+}
+
+.pp_card_75 {
+    background-image: url('img/temp/cards/75.jpg');
+}
+
+.pp_card_76 {
+    background-image: url('img/temp/cards/76.jpg');
+}
+
+.pp_card_77 {
+    background-image: url('img/temp/cards/77.jpg');
+}
+
+.pp_card_78 {
+    background-image: url('img/temp/cards/78.jpg');
+}
+
+.pp_card_79 {
+    background-image: url('img/temp/cards/79.jpg');
+}
+
+.pp_card_80 {
+    background-image: url('img/temp/cards/80.jpg');
+}
+
+.pp_card_81 {
+    background-image: url('img/temp/cards/81.jpg');
+}
+
+.pp_card_82 {
+    background-image: url('img/temp/cards/82.jpg');
+}
+
+.pp_card_83 {
+    background-image: url('img/temp/cards/83.jpg');
+}
+
+.pp_card_84 {
+    background-image: url('img/temp/cards/84.jpg');
+}
+
+.pp_card_85 {
+    background-image: url('img/temp/cards/85.jpg');
+}
+
+.pp_card_86 {
+    background-image: url('img/temp/cards/86.jpg');
+}
+
+.pp_card_87 {
+    background-image: url('img/temp/cards/87.jpg');
+}
+
+.pp_card_88 {
+    background-image: url('img/temp/cards/88.jpg');
+}
+
+.pp_card_89 {
+    background-image: url('img/temp/cards/89.jpg');
+}
+
+.pp_card_90 {
+    background-image: url('img/temp/cards/90.jpg');
+}
+
+.pp_card_91 {
+    background-image: url('img/temp/cards/91.jpg');
+}
+
+.pp_card_92 {
+    background-image: url('img/temp/cards/92.jpg');
+}
+
+.pp_card_93 {
+    background-image: url('img/temp/cards/93.jpg');
+}
+
+.pp_card_94 {
+    background-image: url('img/temp/cards/94.jpg');
+}
+
+.pp_card_95 {
+    background-image: url('img/temp/cards/95.jpg');
+}
+
+.pp_card_96 {
+    background-image: url('img/temp/cards/96.jpg');
+}
+
+.pp_card_97 {
+    background-image: url('img/temp/cards/97.jpg');
+}
+
+.pp_card_98 {
+    background-image: url('img/temp/cards/98.jpg');
+}
+
+.pp_card_99 {
+    background-image: url('img/temp/cards/99.jpg');
+}
+
+.pp_card_100 {
+    background-image: url('img/temp/cards/100.jpg');
+}
+
+.pp_card_101 {
+    background-image: url('img/temp/cards/101.jpg');
+}
+
+.pp_card_102 {
+    background-image: url('img/temp/cards/102.jpg');
+}
+
+.pp_card_103 {
+    background-image: url('img/temp/cards/103.jpg');
+}
+
+.pp_card_104 {
+    background-image: url('img/temp/cards/104.jpg');
+}
+
+.pp_card_105 {
+    background-image: url('img/temp/cards/105.jpg');
+}
+
+.pp_card_106 {
+    background-image: url('img/temp/cards/106.jpg');
+}
+
+.pp_card_107 {
+    background-image: url('img/temp/cards/107.jpg');
+}
+
+.pp_card_108 {
+    background-image: url('img/temp/cards/108.jpg');
+}
+
+.pp_card_109 {
+    background-image: url('img/temp/cards/109.jpg');
+}
+
+.pp_card_110 {
+    background-image: url('img/temp/cards/110.jpg');
+}
+
+.pp_card_111 {
+    background-image: url('img/temp/cards/111.jpg');
+}
+
+.pp_card_112 {
+    background-image: url('img/temp/cards/112.jpg');
+}
+
+.pp_card_113 {
+    background-image: url('img/temp/cards/113.jpg');
+}
+
+.pp_card_114 {
+    background-image: url('img/temp/cards/114.jpg');
+}
+
+.pp_card_115 {
+    background-image: url('img/temp/cards/115.jpg');
+}
+
+.pp_card_116 {
+    background-image: url('img/temp/cards/116.jpg');
+}
+
+.pp_card_back {
+    background-image: url('img/temp/cards/back.jpg');
+}
+
+
+/* ------- CARDS END ------- */

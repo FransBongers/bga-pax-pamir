@@ -87,6 +87,8 @@ html {
     top: 5px;
 }
 
+/* ------- MAP AND REGIONS ------- */
+
 #pp_map {
     background-image: url('img/temp/paxpamir_board.jpg');
     background-size: 1000px 581px;
@@ -99,14 +101,163 @@ html {
     box-shadow: rgb(0 0 0) 2px 2px 8px;
 }
 
-#transcaspia_armies {
+.pp_location {
     position: absolute;
-    top: 220px;
-    left: 100px;
     /* border: 2px solid blue; */
-    height: 50px;
+}
+
+#pp_herat_armies {
+    top: 380px;
+    left: 320px;
+    height: 80px;
     width: 190px;
 }
+
+#pp_kabul_armies {
+    top: 180px;
+    left: 520px;
+    height: 40px;
+    width: 190px;
+}
+
+#pp_kandahar_armies {
+    top: 420px;
+    left: 580px;
+    height: 40px;
+    width: 160px;
+}
+
+#pp_persia_armies {
+    top: 420px;
+    left: 100px;
+    height: 60px;
+    width: 160px;
+}
+
+#pp_punjab_armies {
+    top: 300px;
+    left: 800px;
+    height: 160px;
+    width: 100px;
+}
+
+#pp_transcaspia_armies {
+    top: 220px;
+    left: 100px;
+    height: 40px;
+    width: 190px;
+}
+
+
+#pp_herat_tribes {
+    top: 320px;
+    left: 320px;
+    height: 40px;
+    width: 190px;
+}
+
+#pp_kabul_tribes {
+    top: 100px;
+    left: 520px;
+    height: 40px;
+    width: 190px;
+}
+
+#pp_kandahar_tribes {
+    top: 360px;
+    left: 580px;
+    height: 40px;
+    width: 160px;
+}
+
+#pp_persia_tribes {
+    top: 360px;
+    left: 100px;
+    height: 40px;
+    width: 160px;
+}
+
+#pp_punjab_tribes {
+    top: 240px;
+    left: 800px;
+    height: 40px;
+    width: 100px;
+}
+
+#pp_transcaspia_tribes {
+    top: 120px;
+    left: 100px;
+    height: 40px;
+    width: 190px;
+}
+
+/* Borders */
+#pp_herat_kabul_border {
+    top: 230px;
+    left: 420px;
+    height: 80px;
+    width: 110px;
+}
+
+#pp_herat_kandahar_border {
+    top: 340px;
+    left: 525px;
+    height: 140px;
+    width: 40px;
+}
+
+#pp_herat_transcaspia_border {
+    top: 230px;
+    left: 280px;
+    height: 100px;
+    width: 130px;
+}
+
+#pp_herat_persia_border {
+    top: 340px;
+    left: 270px;
+    height: 140px;
+    width: 40px;
+}
+
+#pp_kabul_kandahar_border {
+    top: 290px;
+    left: 560px;
+    height: 40px;
+    width: 160px;
+}
+
+#pp_kabul_punjab_border {
+    top: 100px;
+    left: 770px;
+    height: 110px;
+    width: 100px;
+}
+
+#pp_kabul_transcaspia_border {
+    top: 100px;
+    left: 410px;
+    height: 120px;
+    width: 40px;
+}
+
+#pp_kandahar_punjab_border {
+    top: 360px;
+    left: 750px;
+    height: 120px;
+    width: 40px;
+}
+
+#pp_persia_transcaspia_border {
+    top: 290px;
+    left: 100px;
+    height: 40px;
+    width: 150px;
+}
+
+
+
+/* ------- TOKENS ------- */
 
 .pp_army {
     background-size: contain;
@@ -146,14 +297,14 @@ html {
     background-image: url('img/road_russian.svg');
 }
 
-#herat_transcaspia_roads {
-    position: absolute;
-    top: 230px;
-    left: 280px;
-    /* border: 2px solid blue; */
-    height: 100px;
-    width: 130px;
+.pp_tribe {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 25px;
+    width: 25px;
+    background-image: url('img/cylinder_red.svg');
 }
+
 
 #pp_market_board {
     background-image: url('img/temp/paxpamir_market.jpg');

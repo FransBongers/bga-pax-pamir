@@ -27,8 +27,30 @@
 
 <div id="pp_play_area">
     <div id="pp_map">
-        <div id="transcaspia_armies"></div>
-        <div id="herat_transcaspia_roads"></div>
+        <!-- tribe locations -->
+        <div id="pp_herat_tribes" class="pp_location"></div>
+        <div id="pp_kabul_tribes" class="pp_location"></div>
+        <div id="pp_kandahar_tribes" class="pp_location"></div>
+        <div id="pp_persia_tribes" class="pp_location"></div>
+        <div id="pp_punjab_tribes" class="pp_location"></div>
+        <div id="pp_transcaspia_tribes" class="pp_location"></div>
+        <!-- army locations -->
+        <div id="pp_herat_armies" class="pp_location"></div>
+        <div id="pp_kabul_armies" class="pp_location"></div>
+        <div id="pp_kandahar_armies" class="pp_location"></div>
+        <div id="pp_persia_armies" class="pp_location"></div>
+        <div id="pp_punjab_armies" class="pp_location"></div>
+        <div id="pp_transcaspia_armies" class="pp_location"></div>
+        <!-- borders -->
+        <div id="pp_herat_kabul_border" class="pp_location"></div>
+        <div id="pp_herat_transcaspia_border" class="pp_location"></div>
+        <div id="pp_herat_persia_border" class="pp_location"></div>
+        <div id="pp_herat_kandahar_border" class="pp_location"></div>
+        <div id="pp_kabul_transcaspia_border" class="pp_location"></div>
+        <div id="pp_kabul_kandahar_border" class="pp_location"></div>
+        <div id="pp_kabul_punjab_border" class="pp_location"></div>
+        <div id="pp_kandahar_punjab_border" class="pp_location"></div>
+        <div id="pp_persia_transcaspia_border" class="pp_location"></div>
     </div>
     
 
@@ -62,6 +84,7 @@ var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
 var jstpl_rupee='<div class="pp_rupee" id="pp_rupee_${number}"></div>';
 var jstpl_army='<div class="pp_army pp_${faction}" id="pp_army_${id}"></div>';
 var jstpl_road='<div class="pp_road pp_${faction}" id="pp_road_${id}"></div>';
+var jstpl_tribe='<div class="pp_tribe pp_${player}" id="pp_tribe_${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_{id}" class="pp_player_board">\
     <div class="pp_icon_container">\

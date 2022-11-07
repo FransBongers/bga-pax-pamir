@@ -29,9 +29,38 @@ function (dojo, declare) {
             console.log('paxpamireditiontwo constructor');
             // Here, you can init the global variables of your user interface
             // Example:
-            // this.myGlobalValue = 0;
+            
+            // size of tokens
             this.cardWidth = 150;
             this.cardHeight = 209;
+            this.armyHeight = 40;
+            this.armyWidth = 25;
+            this.roadHeight = 27;
+            this.roadWidth = 40;
+            this.tribeWidth = 25;
+            this.tribeHeight = 25;
+
+            this.regions = [
+                'herat',
+                'kabul',
+                'kandahar',
+                'persia',
+                'punjab',
+                'transcaspia',
+            ]
+
+            // for all borders regions are in alphabetical order
+            this.borders = [
+                'herat_kabul',
+                'herat_kandahar',
+                'herat_persia',
+                'herat_transcaspia',
+                'kabul_transcaspia',
+                'kabul_kandahar',
+                'kabul_punjab',
+                'kandahar_punjab',
+                'persia_transcaspia',
+            ]
         },
         
         /*
@@ -122,29 +151,51 @@ function (dojo, declare) {
                 }
             } 
 
-            this.createArmyZone();
-            this.addArmyToLocation({id: 1, faction: 'british', location: 'transcaspia'})
-            this.addArmyToLocation({id: 2, faction: 'afghan', location: 'transcaspia'})
-            this.addArmyToLocation({id: 3, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 5, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 6, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 7, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 8, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 9, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 10, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 11, faction: 'russian', location: 'transcaspia'})
-            this.addArmyToLocation({id: 12, faction: 'russian', location: 'transcaspia'})
-            // this.addArmyToLocation({id: 13, faction: 'russian', location: 'transcaspia'})
-            // this.addArmyToLocation({id: 14, faction: 'russian', location: 'transcaspia'})
-            // this.addArmyToLocation({id: 15, faction: 'russian', location: 'transcaspia'})
-            // this.addArmyToLocation({id: 16, faction: 'russian', location: 'transcaspia'})
+            // Create army zone for each region
+            this.regions.forEach((region) => {
+                this.createArmyZone({region});
+            })
 
-            this.createRoadZone();
-            this.addRoadToLocation({id: 1, faction: 'russian', location: 'herat_transcaspia'});
-            this.addRoadToLocation({id: 2, faction: 'russian', location: 'herat_transcaspia'});
-            // this.addRoadToLocation({id: 3, faction: 'british', location: 'herat_transcaspia'});
-            // this.addRoadToLocation({id: 4, faction: 'afghan', location: 'herat_transcaspia'});
-            // this.addRoadToLocation({id: 5, faction: 'afghan', location: 'herat_transcaspia'});
+            
+            this.addArmyToRegion({id: 1, faction: 'british', region: 'transcaspia'})
+            this.addArmyToRegion({id: 2, faction: 'afghan', region: 'transcaspia'})
+            this.addArmyToRegion({id: 3, faction: 'russian', region: 'transcaspia'})
+            this.addArmyToRegion({id: 5, faction: 'russian', region: 'transcaspia'})
+            this.addArmyToRegion({id: 6, faction: 'russian', region: 'transcaspia'})
+            this.addArmyToRegion({id: 7, faction: 'russian', region: 'transcaspia'})
+            this.addArmyToRegion({id: 8, faction: 'russian', region: 'kabul'})
+            this.addArmyToRegion({id: 9, faction: 'russian', region: 'herat'})
+            this.addArmyToRegion({id: 10, faction: 'russian', region: 'kandahar'})
+            this.addArmyToRegion({id: 11, faction: 'russian', region: 'persia'})
+            this.addArmyToRegion({id: 12, faction: 'russian', region: 'punjab'})
+            this.addArmyToRegion({id: 13, faction: 'afghan', region: 'kabul'});
+            this.addArmyToRegion({id: 14, faction: 'british', region: 'kabul'});
+
+            // Create army zone for each region
+            this.regions.forEach((region, index) => {
+                this.createTribeZone({region});
+                this.addTribeToRegion({id: index, player: 'red', region})
+            })
+
+            
+
+            // Create border zones
+            this.borders.forEach((border) => {
+                this.createBorderZone({border});
+            })
+            
+            this.addRoadToBorder({id: 1, faction: 'russian', border: 'herat_transcaspia'});
+            this.addRoadToBorder({id: 2, faction: 'russian', border: 'herat_transcaspia'});
+            this.addRoadToBorder({id: 3, faction: 'british', border: 'herat_kabul'});
+            this.addRoadToBorder({id: 4, faction: 'afghan', border: 'herat_kandahar'});
+            this.addRoadToBorder({id: 5, faction: 'british', border: 'herat_persia'});
+            this.addRoadToBorder({id: 6, faction: 'afghan', border: 'herat_transcaspia'});
+            this.addRoadToBorder({id: 7, faction: 'british', border: 'kabul_transcaspia'});
+            this.addRoadToBorder({id: 8, faction: 'british', border: 'kabul_kandahar'});
+            this.addRoadToBorder({id: 9, faction: 'afghan', border: 'kabul_punjab'});
+            this.addRoadToBorder({id: 10, faction: 'afghan', border: 'kandahar_punjab'});
+            this.addRoadToBorder({id: 11, faction: 'russian', border: 'persia_transcaspia'});
+
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -238,63 +289,86 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
         
+
         createMarketSquareRupeeZone: function({row, column})
         {
             this[`rupee_zone_${row}_${column}`] = new ebg.stock();
             this[`rupee_zone_${row}_${column}`].create( this, $(`market_${row}_${column}_rupee_zone`), 50, 50 );
-            // this[`rupee_stock_${row}_${column}`].image_items_per_row = 6;
-            // this[`rupee_stock_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/tokens.png', 5 );
             this[`rupee_zone_${row}_${column}`].image_items_per_row = 1;
             this[`rupee_zone_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/rupee.png', 0 );
             this[`rupee_zone_${row}_${column}`].setSelectionMode(1);
-            // this[`rupee_stock_${row}_${column}`].autowidth = true;
             this[`rupee_zone_${row}_${column}`].setOverlap(30, 0);
             this[`rupee_zone_${row}_${column}`].extraClasses='pp_rupee';
         },
 
-        createArmyZone: function() 
+        createArmyZone: function({region}) 
         {
-            this['transcaspia_armies'] = new ebg.zone();
-            this['transcaspia_armies'].create(this, 'transcaspia_armies', 25, 40);
-            this['transcaspia_armies'].item_margin = -5;
+            this[`${region}_armies`] = new ebg.zone();
+            this[`${region}_armies`].create(this, `pp_${region}_armies`, this.armyWidth, this.armyHeight);
+            this[`${region}_armies`].item_margin = -5;
             // this['transcaspia_armies'].setPattern( 'horizontalfit' );
         },
 
-        createRoadZone: function() 
+        createBorderZone: function({border}) 
         {
-            this['herat_transcaspia_roads'] = new ebg.zone();
-            this['herat_transcaspia_roads'].create(this, 'herat_transcaspia_roads', 40, 27);
-            // this['herat_transcaspia_roads'].item_margin = -10;
+            this[`${border}_border`] = new ebg.zone();
+            this[`${border}_border`].create(this, `pp_${border}_border`, this.roadWidth, this.roadHeight);
+            // this[`${border}_border`].item_margin = -10;
             // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-            this.herat_transcaspia_roads.setPattern( 'custom' );
-            console.log('roads', this['herat_transcaspia_roads'])    
-            this['herat_transcaspia_roads'].itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
-                console.log('numberOfItems', numberOfItems);
-                if( i%8==0 && numberOfItems === 1 )
-                {   return {  x:50,y:25, w:40, h:27 }; }
-                else if( i%8==0)
-                {   return {  x:90,y:-5, w:40, h:27 }; }
-                else if( i%8==1 )
-                {   return {  x:85,y:5, w:40, h:27 }; }
-                else if( i%8==2 )
-                {   return {  x:70 ,y:17, w:40, h:27 }; }
-                else if( i%8==3 )
-                {   return {  x:55,y:29, w:40, h:27 }; }
-                else if( i%8==4 )
-                {   return {  x:40,y:41, w:40, h:27 }; }
-                else if( i%8==5 )
-                {   return {  x:35,y:43, w:40, h:27 }; }
-                else if( i%8==6 )
-                {   return {  x:47,y:13, w:40, h:27 }; }
-                else if( i%8==7 )
-                {   return {  x:10,y:63, w:40, h:27 }; }
-            };
+
+            // TODO (Frans): at some point we need to update this so it looks nice,
+            // probably do a lot more custom
+            const borderPattern = {
+                herat_kabul: 'horizontalfit',
+                herat_kandahar: 'verticalfit',
+                herat_persia: 'verticalfit',
+                herat_transcaspia: 'custom',
+                kabul_transcaspia: 'verticalfit',
+                kabul_kandahar: 'horizontalfit',
+                kabul_punjab: 'verticalfit',
+                kandahar_punjab: 'verticalfit',
+                persia_transcaspia: 'horizontalfit',
+            }
+
+            this[`${border}_border`].setPattern( borderPattern[border] );
+
+            if (border === 'herat_transcaspia') {
+                this[`${border}_border`].itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
+                    console.log('numberOfItems', numberOfItems);
+                    if( i%8==0 && numberOfItems === 1 )
+                    {   return {  x:50,y:25, w:40, h:27 }; }
+                    else if( i%8==0)
+                    {   return {  x:90,y:-5, w:40, h:27 }; }
+                    else if( i%8==1 )
+                    {   return {  x:85,y:5, w:40, h:27 }; }
+                    else if( i%8==2 )
+                    {   return {  x:70 ,y:17, w:40, h:27 }; }
+                    else if( i%8==3 )
+                    {   return {  x:55,y:29, w:40, h:27 }; }
+                    else if( i%8==4 )
+                    {   return {  x:40,y:41, w:40, h:27 }; }
+                    else if( i%8==5 )
+                    {   return {  x:35,y:43, w:40, h:27 }; }
+                    else if( i%8==6 )
+                    {   return {  x:47,y:13, w:40, h:27 }; }
+                    else if( i%8==7 )
+                    {   return {  x:10,y:63, w:40, h:27 }; }
+                };
+            }
+        },
+
+        createTribeZone: function({region}) 
+        {
+            this[`${region}_tribes`] = new ebg.zone();
+            this[`${region}_tribes`].create(this, `pp_${region}_tribes`, this.tribeWidth, this.tribeHeight);
+            // this[`${region}_tribes`].item_margin = -5;
+            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
         },
 
         createPlayerCourt: function({numberOfPlayers, playerNumber}){
             console.log('createPlayerCourt', numberOfPlayers, playerNumber)
             this[`court_player_${playerNumber}`] = new ebg.zone();
-            this[`court_player_${playerNumber}`].create( this, `pp_court_player_${playerNumber}`,179, 250 );
+            this[`court_player_${playerNumber}`].create( this, `pp_court_player_${playerNumber}`,this.cardWidth, this.cardHeight );
             this[`court_player_${playerNumber}`].setPattern( 'horizontalfit' );
         },
 
@@ -320,24 +394,40 @@ function (dojo, declare) {
             this[`court_player_${playerNumber}`].placeInZone( `pp_card_${cardNumber}`, 1 );
         },
 
-        addArmyToLocation: function( {id, faction, location} )
+        addArmyToRegion: function( {id, faction, region} )
         {
             dojo.place( this.format_block( 'jstpl_army', {
                 faction,
                 id,
             } ) , 'cards' ); // Todo: create in which location?
             // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            this[`${location}_armies`].placeInZone( `pp_army_${id}`, 1 );
+            const weight = {
+                afghan: 1,
+                british: 2,
+                russian: 3,
+            }
+            this[`${region}_armies`].placeInZone( `pp_army_${id}`, weight[faction] );
         },
 
-        addRoadToLocation: function( {id, faction, location} )
+        addRoadToBorder: function( {id, faction, border} )
         {
             dojo.place( this.format_block( 'jstpl_road', {
                 faction,
                 id,
             } ) , 'cards' ); // Todo: create in which location?
             // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            this[`${location}_roads`].placeInZone( `pp_road_${id}`, 1 );
+            this[`${border}_border`].placeInZone( `pp_road_${id}`, 1 );
+        },
+
+        addTribeToRegion: function( {id, player, region} )
+        {
+            dojo.place( this.format_block( 'jstpl_tribe', {
+                player,
+                id,
+            } ) , 'cards' ); // Todo: create in which location?
+            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
+
+            this[`${region}_tribes`].placeInZone( `pp_tribe_${id}`, 1 );
         },
 
         addRupeeToMarket: function({row, column, number})

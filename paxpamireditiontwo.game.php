@@ -146,7 +146,7 @@ class PaxPamirEditionTwo extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, loyalty, coins FROM player ";
+        $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

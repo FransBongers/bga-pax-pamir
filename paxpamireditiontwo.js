@@ -27,19 +27,11 @@ function (dojo, declare) {
         
         constructor: function(){
             console.log('paxpamireditiontwo constructor');
-            // playerNumber is index + 1. So in case of 4 players, players 2 and 4 (index 1 and 3)
-            // will have a vertical tableau.
-            this.verticalTableauMapping = {
-                players2: [false, false],
-                players3: [false, true, true],
-                players4: [false, true, false, true],
-                players5: [false, true, false, false, true],
-            }
-            console.log('mapping', this.verticalTableauMapping);
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
-
+            this.cardWidth = 150;
+            this.cardHeight = 209;
         },
         
         /*
@@ -78,16 +70,12 @@ function (dojo, declare) {
                 //     this.disablePlayerPanel( playerId )
                 // }
                 const playerNumber = index + 1;
-                // const isVerticalTableau = this.verticalTableauMapping['players'+ numberOfPlayers][index];
                 
                 // set background color of tableay
                 const tableau = document.querySelector(`#player_tableau_${playerNumber}`);
                 console.log('typeof playerId', typeof playerId);
                 const color = players[playerId].color
                 tableau.style.backgroundColor = '#' + color;
-                // if (isVerticalTableau) {
-                //     tableau.style.flexDirection = 'column';
-                // }
 
                 const titleDiv = document.getElementById(`pp_tableau_title_player_${playerNumber}`);
 
@@ -98,32 +86,28 @@ function (dojo, declare) {
                 this.createPlayerCourt({numberOfPlayers, playerNumber});
             })
 
-            // Market 'stocks;
+            // Market stocks;
             for (let column = 0; column <= 5; column++) {
                 for (let row = 0; row <= 1; row++) {
-                    this.createMarketSquareCoinZone({row, column})
+                    this.createMarketSquareRupeeZone({row, column})
                 }   
             }
 
-            // this.coin_zone_1_1.addToStockWithId( 6, 15 );
-            this.coin_zone_1_1.addToStockWithId( 6, 16 );
-            // this.coin_zone_1_1.addToStockWithId( 6, 17 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 18 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 2 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 3 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 4 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 7 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 8 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 9 );
-            // this.coin_zone_2_1.addToStockWithId( 6, 10 );
+            this.rupee_zone_1_1.addToStockWithId( 6, 16 );
+            this.rupee_zone_0_5.addToStockWithId( 6, 6 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 1 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 2 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 3 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 4 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 5 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 7 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 8 );
+            this.rupee_zone_0_3.addToStockWithId( 6, 9 );
 
-            // this.coin_zone_1_2.addToStockWithId( 6, 11 );
-            // this.coin_zone_2_2.addToStockWithId( 6, 12 );
-            // this.coin_zone_3_2.addToStockWithId( 6, 13 );
-            // this.coin_zone_4_2.addToStockWithId( 6, 14 );
-            this.coin_zone_0_5.addToStockWithId( 6, 6 );
-            // this.coin_zone_5_2.setSelectionMode(0);
-            
+            // this.addCardToCourt({playerNumber: 1, cardNumber: 40} )
+            // this.addCardToCourt({playerNumber: 1, cardNumber: 41} )
+            // this.addCardToCourt({playerNumber: 1, cardNumber: 42} )
+
             // TODO: Set up your game interface here, according to "gamedatas"
 
             // Place cards in market
@@ -136,18 +120,31 @@ function (dojo, declare) {
                         this.addCardToMarket({location, card: key});
                     }
                 }
-            }   
+            } 
 
-            // this.addCardToCourt({cardNumber: 13, playerNumber: 2});
-            // this.addCardToCourt({cardNumber: 14, playerNumber: 1});
-            // this.addCardToCourt({cardNumber: 15, playerNumber: 1});
-            // this.addCardToCourt({cardNumber: 16, playerNumber: 3});
-            // this.addCardToCourt({cardNumber: 17, playerNumber: 3});
-            // this.addCardToCourt({cardNumber: 18, playerNumber: 4});
-            // this.addCardToCourt({cardNumber: 19, playerNumber: 4});
-            // this.addCardToCourt({cardNumber: 20, playerNumber: 4});
-            // this.addCardToCourt({cardNumber: 21, playerNumber: 4});
-            // this.addCardToCourt({cardNumber: 22, playerNumber: 1});
+            this.createArmyZone();
+            this.addArmyToLocation({id: 1, faction: 'british', location: 'transcaspia'})
+            this.addArmyToLocation({id: 2, faction: 'afghan', location: 'transcaspia'})
+            this.addArmyToLocation({id: 3, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 5, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 6, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 7, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 8, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 9, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 10, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 11, faction: 'russian', location: 'transcaspia'})
+            this.addArmyToLocation({id: 12, faction: 'russian', location: 'transcaspia'})
+            // this.addArmyToLocation({id: 13, faction: 'russian', location: 'transcaspia'})
+            // this.addArmyToLocation({id: 14, faction: 'russian', location: 'transcaspia'})
+            // this.addArmyToLocation({id: 15, faction: 'russian', location: 'transcaspia'})
+            // this.addArmyToLocation({id: 16, faction: 'russian', location: 'transcaspia'})
+
+            this.createRoadZone();
+            this.addRoadToLocation({id: 1, faction: 'russian', location: 'herat_transcaspia'});
+            this.addRoadToLocation({id: 2, faction: 'russian', location: 'herat_transcaspia'});
+            // this.addRoadToLocation({id: 3, faction: 'british', location: 'herat_transcaspia'});
+            // this.addRoadToLocation({id: 4, faction: 'afghan', location: 'herat_transcaspia'});
+            // this.addRoadToLocation({id: 5, faction: 'afghan', location: 'herat_transcaspia'});
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -241,27 +238,64 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
         
-        createMarketSquareCoinZone: function({row, column})
+        createMarketSquareRupeeZone: function({row, column})
         {
-            this[`coin_zone_${row}_${column}`] = new ebg.stock();
-            this[`coin_zone_${row}_${column}`].create( this, $(`market_${row}_${column}_coin_zone`), 50, 50 );
-            // this[`coin_stock_${row}_${column}`].image_items_per_row = 6;
-            // this[`coin_stock_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/tokens.png', 5 );
-            this[`coin_zone_${row}_${column}`].image_items_per_row = 1;
-            this[`coin_zone_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/coin.png', 0 );
-            this[`coin_zone_${row}_${column}`].setSelectionMode(1);
-            // this[`coin_stock_${row}_${column}`].autowidth = true;
-            this[`coin_zone_${row}_${column}`].setOverlap(30, 0);
-            this[`coin_zone_${row}_${column}`].extraClasses='pp_coin';
+            this[`rupee_zone_${row}_${column}`] = new ebg.stock();
+            this[`rupee_zone_${row}_${column}`].create( this, $(`market_${row}_${column}_rupee_zone`), 50, 50 );
+            // this[`rupee_stock_${row}_${column}`].image_items_per_row = 6;
+            // this[`rupee_stock_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/tokens.png', 5 );
+            this[`rupee_zone_${row}_${column}`].image_items_per_row = 1;
+            this[`rupee_zone_${row}_${column}`].addItemType( 6, 1, g_gamethemeurl+'img/temp/rupee.png', 0 );
+            this[`rupee_zone_${row}_${column}`].setSelectionMode(1);
+            // this[`rupee_stock_${row}_${column}`].autowidth = true;
+            this[`rupee_zone_${row}_${column}`].setOverlap(30, 0);
+            this[`rupee_zone_${row}_${column}`].extraClasses='pp_rupee';
+        },
+
+        createArmyZone: function() 
+        {
+            this['transcaspia_armies'] = new ebg.zone();
+            this['transcaspia_armies'].create(this, 'transcaspia_armies', 25, 40);
+            this['transcaspia_armies'].item_margin = -5;
+            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
+        },
+
+        createRoadZone: function() 
+        {
+            this['herat_transcaspia_roads'] = new ebg.zone();
+            this['herat_transcaspia_roads'].create(this, 'herat_transcaspia_roads', 40, 27);
+            // this['herat_transcaspia_roads'].item_margin = -10;
+            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
+            this.herat_transcaspia_roads.setPattern( 'custom' );
+            console.log('roads', this['herat_transcaspia_roads'])    
+            this['herat_transcaspia_roads'].itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
+                console.log('numberOfItems', numberOfItems);
+                if( i%8==0 && numberOfItems === 1 )
+                {   return {  x:50,y:25, w:40, h:27 }; }
+                else if( i%8==0)
+                {   return {  x:90,y:-5, w:40, h:27 }; }
+                else if( i%8==1 )
+                {   return {  x:85,y:5, w:40, h:27 }; }
+                else if( i%8==2 )
+                {   return {  x:70 ,y:17, w:40, h:27 }; }
+                else if( i%8==3 )
+                {   return {  x:55,y:29, w:40, h:27 }; }
+                else if( i%8==4 )
+                {   return {  x:40,y:41, w:40, h:27 }; }
+                else if( i%8==5 )
+                {   return {  x:35,y:43, w:40, h:27 }; }
+                else if( i%8==6 )
+                {   return {  x:47,y:13, w:40, h:27 }; }
+                else if( i%8==7 )
+                {   return {  x:10,y:63, w:40, h:27 }; }
+            };
         },
 
         createPlayerCourt: function({numberOfPlayers, playerNumber}){
             console.log('createPlayerCourt', numberOfPlayers, playerNumber)
-            const isVerticalTableau = this.verticalTableauMapping[`players${numberOfPlayers}`][playerNumber - 1];
             this[`court_player_${playerNumber}`] = new ebg.zone();
-            this[`court_player_${playerNumber}`].create( this, `pp_court_player_${playerNumber}`,isVerticalTableau ? 155 : 213, isVerticalTableau ? 213 : 155 );
-            // dojo.style('pp_court_player_3', 'max-height', '760x');
-            this[`court_player_${playerNumber}`].setPattern( isVerticalTableau ? 'verticalfit' : 'horizontalfit' );
+            this[`court_player_${playerNumber}`].create( this, `pp_court_player_${playerNumber}`,179, 250 );
+            this[`court_player_${playerNumber}`].setPattern( 'horizontalfit' );
         },
 
         addCardToMarket: function( {location, card} )
@@ -286,15 +320,35 @@ function (dojo, declare) {
             this[`court_player_${playerNumber}`].placeInZone( `pp_card_${cardNumber}`, 1 );
         },
 
-        addCoinToMarket: function({row, column, number})
+        addArmyToLocation: function( {id, faction, location} )
+        {
+            dojo.place( this.format_block( 'jstpl_army', {
+                faction,
+                id,
+            } ) , 'cards' ); // Todo: create in which location?
+            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
+            this[`${location}_armies`].placeInZone( `pp_army_${id}`, 1 );
+        },
+
+        addRoadToLocation: function( {id, faction, location} )
+        {
+            dojo.place( this.format_block( 'jstpl_road', {
+                faction,
+                id,
+            } ) , 'cards' ); // Todo: create in which location?
+            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
+            this[`${location}_roads`].placeInZone( `pp_road_${id}`, 1 );
+        },
+
+        addRupeeToMarket: function({row, column, number})
         {
             // console.log('player', this.gamedatas.players[ player ]);
-            dojo.place( this.format_block( 'jstpl_coin', {
+            dojo.place( this.format_block( 'jstpl_rupee', {
                 number
-            } ) , 'coins' );
+            } ) , 'rupee' );
             
-            this.placeOnObject( 'pp_coin_' + number, `market_${row}_${column}_coin_zone` );
-            // this.slideToObject( 'pp_coin_' + number, 'square_'+x+'_'+y ).play();
+            this.placeOnObject( 'pp_rupee_' + number, `market_${row}_${column}_rupee_zone` );
+            // this.slideToObject( 'pp_rupee_' + number, 'square_'+x+'_'+y ).play();
             // this.placeOnObject( 'pp_card_'+cardNumber, 'overall_player_board_'+player );
             // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
         },

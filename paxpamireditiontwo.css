@@ -76,22 +76,120 @@ html {
 }
 
 #pp_play_area {
-    grid-gap: 10px;
+    grid-gap: 15px;
     display: grid;
     grid-auto-flow: dense;
-    grid-template-columns: 192px 250px 250px 250px 250px 192px;
-    grid-template-rows: 285px 285px 295px 295px 249px 249px 285px;
+    grid-template-columns: repeat(auto-fill, 1000px);
+    grid-template-rows: repeat(auto-fill, 581px 492px);
     justify-content: center;
     position: relative;
     text-align: center;
     top: 5px;
 }
 
-#pp_player_hand {
-    background-color: white;
-    grid-column: 1 / span 6;
-    grid-row-start: 1;
-    grid-row-end: 2;
+#pp_map {
+    background-image: url('img/temp/paxpamir_board.jpg');
+    background-size: 1000px 581px;
+    background-repeat: no-repeat;
+    grid-column: 1 / span 1;
+    grid-row: span 1;
+    height: 581px;
+    position: relative;
+    width: 1000px;
+    box-shadow: rgb(0 0 0) 2px 2px 8px;
+}
+
+#transcaspia_armies {
+    position: absolute;
+    top: 220px;
+    left: 100px;
+    /* border: 2px solid blue; */
+    height: 50px;
+    width: 190px;
+}
+
+.pp_army {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 25px;
+}
+
+.pp_army.pp_afghan {
+    background-image: url('img/army_afghan.svg');
+}
+
+.pp_army.pp_british {
+    background-image: url('img/army_british.svg');
+}
+
+.pp_army.pp_russian {
+    background-image: url('img/army_russian.svg');
+}
+
+.pp_road {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 27px;
+    width: 40px;
+}
+
+.pp_road.pp_afghan {
+    background-image: url('img/road_afghan.svg');
+}
+
+.pp_road.pp_british {
+    background-image: url('img/road_british.svg');
+}
+
+.pp_road.pp_russian {
+    background-image: url('img/road_russian.svg');
+}
+
+#herat_transcaspia_roads {
+    position: absolute;
+    top: 230px;
+    left: 280px;
+    /* border: 2px solid blue; */
+    height: 100px;
+    width: 130px;
+}
+
+#pp_market_board {
+    background-image: url('img/temp/paxpamir_market.jpg');
+    background-size: 1000px 492px;
+    background-repeat: no-repeat;
+    grid-column: 1 / span 1;
+    grid-row: span 1;
+    width: 1000px;
+    box-shadow: rgb(0 0 0) 2px 2px 8px;
+    height: 492px;
+    position: relative;
+}
+
+.pp_market {
+    width: 150px;
+    height: 209px;
+    /* background-color: red; */
+    position: absolute;
+    /* border: 1px blue solid; */
+}
+
+.pp_market_rupee_zone {
+    width: 130px;
+    height: 50px;
+    left: 8px;
+    top: 50px;
+    position: absolute;
+    /* border: 2px black solid; */
+    /* z-index: 10; */
+}
+
+#pp_player_tableaus {
+    grid-column: span 1;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
 }
 
 .pp_player_tableau {
@@ -99,6 +197,8 @@ html {
     /* position: relative; */
     display: flex;
     flex-direction: column;
+    min-height: 280px;
+    margin-bottom: 15px;
 }
 
 .pp_player_tableau_E8CAAA {
@@ -135,55 +235,12 @@ html {
 }
 */
 
-#pp_map {
-    background-image: url('img/temp/paxpamir_board.jpg');
-    background-size: 1030px 600px;
-    grid-column-start: 2;
-    grid-column-end: 6;
-    grid-row-start: 3;
-    grid-row-end: 5;
-    height: 600px;
-    position: relative;
-    width: 1030px;
-    box-shadow: rgb(0 0 0) 2px 2px 8px;
-}
 
-#pp_market_board {
-    background-image: url('img/temp/paxpamir_market.jpg');
-    background-size: 1030px 508px;
-    grid-column-start: 2;
-    grid-column-end: 6;
-    grid-row-start: 5;
-    grid-row-end: 7;
-    width: 1030px;
-    box-shadow: rgb(0 0 0) 2px 2px 8px;
-    height: 508px;
-    position: relative;
-    background-repeat: no-repeat;
-}
-
-.pp_market {
-    width: 151px;
-    height: 209px;
-    /* background-color: red; */
-    position: absolute;
-    /* border: 1px blue solid; */
-}
-
-.pp_market_coin_zone {
-    width: 130px;
-    height: 50px;
-    left: 8px;
-    top: 50px;
-    position: absolute;
-    /* border: 2px black solid; */
-    /* z-index: 10; */
-}
 
 .pp_card {
-    width: 151px;
+    width: 150px;
     height: 209px;
-    background-size: 151px 209px;
+    background-size: 150px 209px;
     position: absolute;
     box-shadow: 1px 1px 4px;
     border-radius: 10px;
@@ -194,7 +251,7 @@ html {
     /* border: 2px blue solid; */
 }
 
-.pp_coin {
+.pp_rupee {
     /* width: 50px; */
     /* height: 50px; */
     /* background-image: url('img/temp/tokens.png'); */
@@ -269,10 +326,10 @@ html {
     height: 44px;
 }
 
-.pp_player_board_coin {
+.pp_player_board_rupee {
     height: 44px;
     background-size: 44px;
-    background-image: url('img/temp/coin.png');
+    background-image: url('img/rupee.svg');
 }
 
 .pp_card_icon {
@@ -281,6 +338,7 @@ html {
     background-size: 32px 44px;
     background-image: url('img/temp/cards/back.jpg');
     margin-left: 16px;
+    border-radius: 3px;
 }
 
 /* ------- CARDS START ------- */

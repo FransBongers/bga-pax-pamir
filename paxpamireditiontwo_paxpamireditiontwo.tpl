@@ -26,27 +26,16 @@
 -->
 
 <div id="pp_play_area">
-
-    <div id="pp_player_hand">
-        Player hand
-    </div>
-
-    <!-- BEGIN player_tableau -->
-    <div id="player_tableau_{PLAYER_NUMBER}" class="pp_player_tableau" style="grid-column-start: {GRID_COLUMN_START}; grid-column-end: {GRID_COLUMN_END}; grid-row-start: {GRID_ROW_START}; grid-row-end: {GRID_ROW_END};">
-        <div id="pp_tableau_title_player_{PLAYER_NUMBER}" class="pp_tableau_title"></div>
-        <div id="pp_court_player_{PLAYER_NUMBER}" class="pp_court pp_court_player_{PLAYER_NUMBER}"></div>
-    </div>
-    <!-- END player_tableau -->
-
     <div id="pp_map">
-
+        <div id="transcaspia_armies"></div>
+        <div id="herat_transcaspia_roads"></div>
     </div>
     
 
     <div id="pp_market_board">
         <!-- BEGIN market -->
         <div id="market_{ROW}_{COLUMN}" class="pp_market" style="left: {LEFT}px; top: {TOP}px;">
-            <div id="market_{ROW}_{COLUMN}_coin_zone" class="pp_market_coin_zone"></div>
+            <div id="market_{ROW}_{COLUMN}_rupee_zone" class="pp_market_rupee_zone"></div>
         </div>
         <!-- END market -->
         <div id="cards">
@@ -54,10 +43,15 @@
     </div>
 
 
-    <!-- 
-    <div id="coins">
+
+    <div id="pp_player_tableaus">
+        <!-- BEGIN player_tableau -->
+        <div id="player_tableau_{PLAYER_NUMBER}" class="pp_player_tableau">
+            <div id="pp_tableau_title_player_{PLAYER_NUMBER}" class="pp_tableau_title"></div>
+            <div id="pp_court_player_{PLAYER_NUMBER}" class="pp_court pp_court_player_{PLAYER_NUMBER}"></div>
+        </div>
+    <!-- END player_tableau -->
     </div>
-    -->
  </div>
 
 <script type="text/javascript">
@@ -65,13 +59,15 @@
 // Javascript HTML templates
 
 var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
-var jstpl_coin='<div class="pp_coin" id="pp_coin_${number}"></div>';
+var jstpl_rupee='<div class="pp_rupee" id="pp_rupee_${number}"></div>';
+var jstpl_army='<div class="pp_army pp_${faction}" id="pp_army_${id}"></div>';
+var jstpl_road='<div class="pp_road pp_${faction}" id="pp_road_${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_{id}" class="pp_player_board">\
     <div class="pp_icon_container">\
         <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><span id="influence_${id}" class="pp_icon_count">0</span></div>\
         <div id="tokens_${id}" class="pp_icon pp_token_icon"><span id="token_count_${id}"  class="pp_icon_count">0</span></div>\
-        <div id="coins_${id}" class="pp_icon pp_player_board_coin"><span id="coin_count_${id}"  class="pp_icon_count">0</span></div>\
+        <div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><span id="rupee_count_${id}"  class="pp_icon_count">0</span></div>\
         <div id="cards_${id}" class="pp_icon pp_card_icon"><span id="card_count_${id}"  class="pp_icon_count">0</span></div>\
     </div>\
     <div id="suits_${id}" class="pp_icon_container">\

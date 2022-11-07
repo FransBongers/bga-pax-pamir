@@ -92,10 +92,6 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         
             $this->page->insert_block( "player_tableau", array(
                 'PLAYER_NUMBER' => $x,
-                'GRID_COLUMN_START' => $this->player_setup[$x]['grid_column_start'],
-                'GRID_COLUMN_END' => $this->player_setup[$x]['grid_column_end'],
-                'GRID_ROW_START' => $this->player_setup[$x]['grid_row_start'],
-                'GRID_ROW_END' => $this->player_setup[$x]['grid_row_end']
             ) );      
         }
 
@@ -103,7 +99,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
 
         $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "market" );
         
-        $hor_scale = 151;
+        $hor_scale = 150;
         $ver_scale = 209;
         for( $column=0; $column<=5; $column++ )
         {
@@ -112,8 +108,8 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
                 $this->page->insert_block( "market", array(
                     'ROW' => $row,
                     'COLUMN' => $column,
-                    'LEFT' => 20 + round( ($column)*($hor_scale+16.5) ),
-                    'TOP' => 60 + round( ($row)*($ver_scale+15) )
+                    'LEFT' => 18 + round( ($column)*($hor_scale+13) ),
+                    'TOP' => 54 + round( ($row)*($ver_scale+10) )
                 ) );
             }        
         }

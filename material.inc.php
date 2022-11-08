@@ -32,6 +32,22 @@ $this->card_types = array(
 
 */
 
-
+$this->loyalty = array(
+  'afghan' => array(
+      'name' => clienttranslate("Afghan"),
+      'icon' => 0,
+      'tooltip' => clienttranslate("Afghan")
+  ),
+  'russian' => array(
+      'name' => clienttranslate("Russian"),
+      'icon' => 1,
+      'tooltip' => clienttranslate("Russian")
+  ),
+  'british' => array(
+      'name' => clienttranslate("British"),
+      'icon' => 2,
+      'tooltip' => clienttranslate("British")
+  ),
+);
 
 

@@ -115,14 +115,21 @@ function (dojo, declare) {
             
             const players = gamedatas.players;
             const numberOfPlayers = gamedatas.playerorder.length;
-            console.log('players', players)
+            const colors = Object.keys(players).map((key) => players[key].color);
+            // console.log('players', players)
             // Setting up player boards
-            for( var player_id in gamedatas.players )
+            for( const player_id in gamedatas.players )
             {
-                var player = gamedatas.players[player_id];
+                const player = gamedatas.players[player_id];
+                console.log('player', player);
                 // TODO: Setting up players boards if needed
-                var player_board_div = $('player_board_'+player_id);
+                const player_board_div = $('player_board_'+player_id);
                 dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
+                if (player.loyalty !== 'null') {
+                    this.updatePlayerLoyalty({playerId: player_id, coalition: player.loyalty})
+                } else {
+                    this.updatePlayerLoyalty({playerId: player_id, coalition: this.afghan})
+                }
             }
             
             // Create court zones
@@ -188,10 +195,11 @@ function (dojo, declare) {
             // Create army zone for each region
             this.regions.forEach((region, index) => {
                 this.createTribeZone({region});
-                this.addTribeToRegion({id: index, player: 'red', region})
+                const color = colors[index % numberOfPlayers]
+                this.addTribeToRegion({id: index, playerColor: color, region})
             })
 
-            
+            // this.addTribeToRegion({id: 1, playerColor: colors[0], region: this.kabul});
 
             // Create border zones
             this.borders.forEach((border) => {
@@ -290,7 +298,7 @@ function (dojo, declare) {
 
         // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
         //                        action status bar (ie: the HTML links in the status bar).
-        //        
+        //     
         onUpdateActionButtons: function( stateName, args )
         {
             console.log( 'onUpdateActionButtons: '+stateName );
@@ -299,21 +307,113 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
-                    
-                    // Add 3 action buttons in the action status bar:
-                    
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
-                    break;
-*/
+                    case 'setup':
+                        console.log('add loyalty action buttons')
+                        this.addActionButton( 'afghan_button', _('Afghan'), 'onAfghan', null, false, 'blue' );
+                        this.addActionButton( 'russian_button', _('Russian'), 'onRussian', null, false, 'blue' );
+                        this.addActionButton( 'british_button', _('British'), 'onBritish', null, false, 'blue' );
+                        break;
+
+                    // case 'playerActions':
+                    //     var main = $('pagemaintitletext');
+                    //     if (args.remaining_actions > 0) {
+                    //         main.innerHTML += _(' may take ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                    //             + args.remaining_actions + '</span>' + _(' action(s): ');
+                    //         this.addActionButton( 'purchase_btn', _('Purchase'), 'onPurchase' );
+                    //         this.addActionButton( 'play_btn', _('Play'), 'onPlay' );
+                    //         this.addActionButton( 'card_action_btn', _('Card Action'), 'onCardAction' );
+                    //         this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'gray' ); 
+                    //     } else {
+                    //         main.innerHTML += _(' have ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                    //         + args.remaining_actions + '</span>' + _(' remaining actions: ');
+
+                    //         this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'blue' );
+                    //     }
+                    //     break;
+
+                    // case 'negotiateBribe':
+                    //     for ( var i = 0; i <= args.briber_max; i++ ) {
+                    //         this.addActionButton( i+'_btn', $i, 'onBribe', null, false, 'blue' );
+                    //     }
+                    //     break;
+
+                    // case 'discardCourt':
+                    //     this.num_discards = Object.keys(args.court).length - args.suits.political - 3;
+                    //     if (this.num_discards > 1) var cardmsg = _(' court cards '); else cardmsg = _(' court card');
+                    //     $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                    //             + this.num_discards + '</span>' + cardmsg;
+                    //     this.selectedAction = 'discard_court';
+                    //     this.updatePossibleCards();
+                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                    //     dojo.addClass('confirm_btn', 'disabled');
+                    //     break;
+
+                    // case 'discardHand':
+                    //     this.num_discards = Object.keys(args.hand).length - args.suits.intelligence - 2;
+                    //     if (this.num_discards > 1) var cardmsg = _(' hand cards '); else cardmsg = _(' hand card');
+                    //     $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                    //     + this.num_discards + '</span>' + cardmsg;
+                    //     this.selectedAction = 'discard_hand';
+                    //     this.updatePossibleCards();
+                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                    //     dojo.addClass('confirm_btn', 'disabled');
+                    //     break;
+
+                    // case 'client_confirmPurchase':
+                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                    //     break;
+
+                    // case 'client_confirmPlay':
+                    //     this.addActionButton( 'left_side_btn', _('<< LEFT'), 'onLeft', null, false, 'blue' );
+                    //     this.addActionButton( 'right_side_btn', _('RIGHT >>'), 'onRight', null, false, 'blue' );
+                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                    //     break;
+
+                    // case 'client_endTurn':
+                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
+                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
+                    //     break;
+
+                    // case 'client_selectPurchase':
+                    // case 'client_selectPlay':
+                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                    //     break;
+
+                    // case 'client_confirmDiscard':
+                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                    //     break;
+
+                    default:
+                        console.log('default')
+                        break;
                 }
             }
-        },        
+        },     
+//         onUpdateActionButtons: function( stateName, args )
+//         {
+//             console.log( 'onUpdateActionButtons: '+stateName );
+                      
+//             if( this.isCurrentPlayerActive() )
+//             {            
+//                 switch( stateName )
+//                 {
+// /*               
+//                  Example:
+ 
+//                  case 'myGameState':
+                    
+//                     // Add 3 action buttons in the action status bar:
+                    
+//                     this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
+//                     this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
+//                     this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
+//                     break;
+// */
+//                 }
+//             }
+//         },        
 
         ///////////////////////////////////////////////////
         //// Utility methods
@@ -466,10 +566,10 @@ function (dojo, declare) {
             this[`${border}_border`].placeInZone( `pp_road_${id}`, 1 );
         },
 
-        addTribeToRegion: function( {id, player, region} )
+        addTribeToRegion: function( {id, playerColor, region} )
         {
             dojo.place( this.format_block( 'jstpl_tribe', {
-                player,
+                color: playerColor,
                 id,
             } ) , 'cards' ); // Todo: create in which location?
             // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
@@ -490,6 +590,15 @@ function (dojo, declare) {
             // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
         },
 
+        updatePlayerLoyalty: function({playerId, coalition})
+        {
+            dojo.query( `#loyalty_icon_${playerId}` )
+                .removeClass( 'pp_loyalty_afghan' )
+                .removeClass('pp_loyalty_british')
+                .removeClass('pp_loyalty_russian')
+                .addClass(`pp_loyalty_${coalition}`);
+        },
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -504,6 +613,39 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+
+        onAfghan: function()
+        {
+            console.log( 'onAfghan' );
+
+            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html", { 
+                lock: true,
+                coalition: 'afghan',
+            }, this, function( result ) {} );  
+
+        },
+
+        onRussian: function()
+        {
+            console.log( 'onRussian' );
+
+            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html", { 
+                lock: true,
+                coalition: 'russian',
+            }, this, function( result ) {} );  
+
+        },
+
+        onBritish: function()
+        {
+            console.log( 'onBritish' );
+
+            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html", { 
+                lock: true,
+                coalition: 'british',
+            }, this, function( result ) {} );  
+
+        },
         
         /* Example:
         
@@ -555,6 +697,23 @@ function (dojo, declare) {
         setupNotifications: function()
         {
             console.log( 'notifications subscriptions setup' );
+
+            dojo.subscribe( 'chooseLoyalty', this, "notif_chooseLoyalty" );
+
+            // dojo.subscribe( 'purchaseCard', this, "notif_purchaseCard" );
+            // this.notifqueue.setSynchronous( 'purchaseCard', 2000 );
+
+            // dojo.subscribe( 'playCard', this, "notif_playCard" );
+            // this.notifqueue.setSynchronous( 'playCard', 2000 );
+
+            // dojo.subscribe( 'discardCard', this, "notif_discardCard" );
+            // this.notifqueue.setSynchronous( 'discardCard', 500 );
+
+            // dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
+            // this.notifqueue.setSynchronous( 'refreshMarket', 500 );
+            
+            // dojo.subscribe( 'updatePlayerCounts', this, "notif_updatePlayerCounts");
+            // dojo.subscribe( 'log', this, "notif_log");
             
             // TODO: here, associate your game notifications with local methods
             
@@ -568,6 +727,24 @@ function (dojo, declare) {
             // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
             // 
         },  
+
+        notif_chooseLoyalty: function( notif ) {
+            console.log( 'notif_chooseLoyalty' );
+            console.log( notif );
+
+            const coalition = notif.args.coalition;
+            const playerId = notif.args.player_id;
+
+            this.updatePlayerLoyalty({playerId, coalition})
+            // var x = this.gamedatas.loyalty[loyalty].icon * 44;
+            // dojo.place(this.format_block('jstpl_loyalty_icon', {
+            //     id: player_id,
+            //     x: x
+            // }), 'loyalty_icon_' + player_id, 'replace');
+            // dojo.query('#loyalty_wheel_' + player_id + ' .wheel').removeClass();
+            // dojo.addClass('loyalty_wheel_' + player_id, 'wheel ' + loyalty);
+
+        },
         
         // TODO: from this point and below, you can write your game notifications handling methods
         

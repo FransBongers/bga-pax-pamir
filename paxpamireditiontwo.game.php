@@ -32,7 +32,19 @@ class PaxPamirEditionTwo extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels( array( 
+        self::initGameStateLabels( array(
+            "setup" => 10,
+            "remaining_actions" => 11,
+            // "favored_suit" => 12,
+            // "dominance_checks" => 13,
+            // "ruler_transcaspia" => 14,
+            // "ruler_kabul" => 15,
+            // "ruler_persia" => 16,
+            // "ruler_herat" => 17,
+            // "ruler_kandahar" => 18,
+            // "ruler_punjab" => 19,
+            // "bribe_card_id" =>20,
+            // "bribe_amount" =>21,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -68,12 +80,16 @@ class PaxPamirEditionTwo extends Table
 
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, loyalty, rupees) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
         {
             $color = array_shift( $default_colors );
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+            $loyalty = "null";
+            $rupees = 4;
+            // $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."','$loyalty','$rupees')";
+            // $this->tokens->createTokensPack("token_".$player_id."_{INDEX}", "tokens_".$player_id, 10);
         }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
@@ -87,6 +103,22 @@ class PaxPamirEditionTwo extends Table
         $this->tokens->createTokensPack("card_{INDEX}", "event_cards", 12, 105);
         $this->tokens->shuffle("court_cards");
         $this->tokens->shuffle("event_cards");
+
+        // Init global values with their initial values
+        self::setGameStateInitialValue( 'setup', 1 );
+        self::setGameStateInitialValue( 'remaining_actions', 2 );
+        // self::setGameStateInitialValue( 'favored_suit', 0 );
+        // self::setGameStateInitialValue( 'dominance_checks', 0 );
+
+        // self::setGameStateInitialValue( 'ruler_transcaspia', 2320830 );
+        // self::setGameStateInitialValue( 'ruler_kabul', 2320830 );
+        // self::setGameStateInitialValue( 'ruler_persia', 2320830 );
+        // self::setGameStateInitialValue( 'ruler_herat', 2320830 );
+        // self::setGameStateInitialValue( 'ruler_kandahar', 2320830 );
+        // self::setGameStateInitialValue( 'ruler_punjab', 2320830 );
+
+        // self::setGameStateInitialValue( 'bribe_card_id', 0 );
+        // self::setGameStateInitialValue( 'bribe_amount', -1 );
 
         // build market deck based on number of players
         for ($i = 6; $i >=1; $i--) {
@@ -188,7 +220,16 @@ class PaxPamirEditionTwo extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getPlayerLoyalty($player_id) {
+        $sql = "SELECT loyalty FROM player WHERE  player_id='$player_id' ";
+        return $this->getUniqueValueFromDB($sql);
+    }
 
+    function setPlayerLoyalty($player_id, $coalition) {
+        $sql = "UPDATE player SET loyalty='$coalition' 
+        WHERE  player_id='$player_id' ";
+        self::DbQuery( $sql );
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
@@ -224,6 +265,31 @@ class PaxPamirEditionTwo extends Table
     }
     
     */
+
+    function chooseLoyalty( $coalition )
+    {
+        //
+        // select starting loyalty during game setup
+        //
+
+        self::checkAction( 'choose_loyalty' );
+
+        $player_id = self::getActivePlayerId();
+        $coalition_name = $this->loyalty[$coalition]['name'];
+
+        $this->setPlayerLoyalty($player_id, $coalition);
+
+        // Notify
+        self::notifyAllPlayers( "chooseLoyalty", clienttranslate( '${player_name} selected ${coalition_name}.' ), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'coalition' => $coalition,
+            'coalition_name' => $coalition_name
+        ) );
+
+        $this->gamestate->nextState( 'next' );
+
+    }
 
     
 //////////////////////////////////////////////////////////////////////////////
@@ -274,6 +340,44 @@ class PaxPamirEditionTwo extends Table
         $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
+
+    function stNextPlayer()
+    {
+        $setup = $this->getGameStateValue("setup");
+        self::dump( "setup in stNextPlayer", $setup );
+        // Active next player
+        if ($setup == 1) {
+            // setup
+            $player_id = self::activeNextPlayer();
+            $loyalty = $this->getPlayerLoyalty($player_id);
+            self::dump( "loyalty in stNextPlayer", $loyalty == "null" );
+            if ($this->getPlayerLoyalty($player_id) == "null") {
+                // choose next loyalty
+                $this->giveExtraTime($player_id);
+
+                $this->gamestate->nextState( 'setup' );
+            } else {
+                // setup complete, go to player actions
+                $player_id = self::activePrevPlayer();
+                $this->giveExtraTime($player_id);
+
+                $this->setGameStateValue("setup", 0);
+                $this->setGameStateValue("remaining_actions", 2);
+
+                $this->gamestate->nextState( 'next_turn' );
+            }
+
+        } else {
+            // player turn
+            $player_id = self::activeNextPlayer();
+
+            $this->setGameStateValue("remaining_actions", 2);
+            $this->giveExtraTime($player_id);
+
+            $this->gamestate->nextState( 'next_turn' );
+        }
+
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

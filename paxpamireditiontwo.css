@@ -67,6 +67,12 @@
     }
 */
 
+:root {
+    --afghan-color: #5fc89e;
+    --british-color: #eb97d1;
+    --russian-color: #f3f35a;
+  }
+
 html {
     background: url("") rgb(192, 192, 192);
 }
@@ -371,7 +377,27 @@ html {
     background-repeat: no-repeat;
     height: 25px;
     width: 25px;
+    
+}
+
+.pp_tribe.pp_player_color_7CAEC0 {
+    background-image: url('img/cylinder_blue.svg');
+}
+
+.pp_tribe.pp_player_color_B3ADAA {
+    background-image: url('img/cylinder_grey.svg');
+}
+
+.pp_tribe.pp_player_color_E8CAAA {
+    background-image: url('img/cylinder_yellow.svg');
+}
+
+.pp_tribe.pp_player_color_CD848A {
     background-image: url('img/cylinder_red.svg');
+}
+
+.pp_tribe.pp_player_color_5B5B5B {
+    background-image: url('img/cylinder_black.svg');
 }
 
 
@@ -421,23 +447,23 @@ html {
     margin-bottom: 15px;
 }
 
-.pp_player_color_7CAEC0 {
+.pp_player_tableau.pp_player_color_7CAEC0 {
     background-color: #7CAEC0;
 }
 
-.pp_player_color_B3ADAA {
+.pp_player_tableau.pp_player_color_B3ADAA {
     background-color: #B3ADAA;
 }
 
-.pp_player_color_E8CAAA {
+.pp_player_tableau.pp_player_color_E8CAAA {
     background-color: #E8CAAA;
 }
 
-.pp_player_color_CD848A {
+.pp_player_tableau.pp_player_color_CD848A {
     background-color: #CD848A;
 }
 
-.pp_player_color_5B5B5B {
+.pp_player_tableau.pp_player_color_5B5B5B {
     background-color: #5B5B5B;
 }
 
@@ -544,12 +570,32 @@ html {
     width: 44px;
 }
 
-.pp_loyalty_icon{
-    height: 30px;
-    background-image: url('img/temp/loyalty_icon.png');
-    background-size: 132px 30px; 
+.pp_loyalty_icon {
+    /* height: 30px; */
+    
+    /* background-size: 132px 30px;  */
     /* background-position: -250px 0px; */
+    background-size: contain;
+    /* background-repeat: no-repeat;
+    width: 44px; */
+}
+
+.pp_loyalty_icon.pp_loyalty_afghan {
+    background-image: url('img/loyalty_afghan.svg');
+    height: 25px;
     padding-bottom: 12px;
+}
+
+.pp_loyalty_icon.pp_loyalty_british {
+    background-image: url('img/loyalty_british.svg');
+    height: 16px;
+    padding-bottom: 22px;
+}
+
+.pp_loyalty_icon.pp_loyalty_russian {
+    background-image: url('img/loyalty_russian.svg');
+    height: 14px;
+    padding-bottom: 22px;
 }
 
 .pp_token_icon {
@@ -571,6 +617,21 @@ html {
     background-image: url('img/temp/cards/back.jpg');
     margin-left: 16px;
     border-radius: 3px;
+}
+
+/* BUTTONS */
+
+#afghan_button {
+    background-color: var(--afghan-color);
+}
+
+
+#british_button {
+    background-color: var(--british-color);
+}
+
+#russian_button {
+    background-color: var(--russian-color);
 }
 
 /* ------- CARDS START ------- */

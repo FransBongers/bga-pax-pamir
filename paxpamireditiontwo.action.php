@@ -41,6 +41,13 @@
   	
   	// TODO: defines your action entry points there
 
+    public function chooseLoyalty()
+    {
+        self::setAjaxMode();     
+        $coalition = self::getArg( "coalition", AT_alphanum, true );
+        $result = $this->game->chooseLoyalty($coalition);
+        self::ajaxResponse( );
+    }
 
     /*
     

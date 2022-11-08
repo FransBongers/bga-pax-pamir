@@ -48,7 +48,22 @@
 */
 
 //    !! It is not a good idea to modify this file when a game is running !!
-
+// define contants for state ids
+if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
+    define("STATE_SETUP", 2);
+    define("STATE_PLAYER_ACTIONS", 3);
+    // define("STATE_NEGOTIATE_BRIBE", 4);
+    // define("STATE_RESOLVE_IMPACT", 5);
+    // define("STATE_DISCARD_COURT", 10);
+    // define("STATE_DISCARD_HAND", 11);
+    // define("STATE_RESOLVE_EVENT", 20);
+    // define("STATE_REFRESH_MARKET", 21);
+    // define("STATE_DOMINANCE_CHECK", 30);
+    define("STATE_NEXT_PLAYER", 50);
+    // define("STATE_OVERTHROW", 60);
+    define("STATE_FINAL", 90);
+    define("STATE_END_GAME", 99);
+}
  
 $machinestates = array(
 
@@ -63,13 +78,27 @@ $machinestates = array(
     
     // Note: ID=2 => your first state
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
+    STATE_SETUP => array(
+        "name" => "setup",
+        "description" => clienttranslate('${actplayer} must choose a loyalty'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a loyalty'),
+        "type" => "activeplayer",
+        "possibleactions" => array( "choose_loyalty" ),
+        "transitions" => array( 
+            "next" => STATE_NEXT_PLAYER
+        )
+    ),
+
+    STATE_NEXT_PLAYER => array(
+        "name" => "nextPlayer",
+        "type" => "game",
+        "action" => "stNextPlayer",
+        "updateGameProgression" => true,
+        "transitions" => array( 
+            "next_turn" => STATE_PLAYER_ACTIONS,
+            "setup" => STATE_SETUP,
+            "final" => STATE_FINAL 
+        )
     ),
     
 /*
@@ -97,7 +126,7 @@ $machinestates = array(
    
     // Final state.
     // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    STATE_END_GAME => array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",

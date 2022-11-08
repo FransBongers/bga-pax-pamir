@@ -100,7 +100,7 @@ var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
 var jstpl_rupee='<div class="pp_rupee" id="pp_rupee_${number}"></div>';
 var jstpl_army='<div class="pp_army pp_${coalition}" id="pp_army_${id}"></div>';
 var jstpl_road='<div class="pp_road pp_${coalition}" id="pp_road_${id}"></div>';
-var jstpl_tribe='<div class="pp_tribe pp_${player}" id="pp_tribe_${id}"></div>';
+var jstpl_tribe='<div class="pp_tribe pp_player_color_${color}" id="pp_tribe_${id}"></div>';
 var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="pp_coalition_block_${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\

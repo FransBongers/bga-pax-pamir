@@ -80,7 +80,7 @@ html {
     display: grid;
     grid-auto-flow: dense;
     grid-template-columns: repeat(auto-fill, 1000px);
-    grid-template-rows: repeat(auto-fill, 581px 492px);
+    grid-template-rows: repeat(auto-fill, 581px 241px 492px);
     justify-content: center;
     position: relative;
     text-align: center;
@@ -258,6 +258,75 @@ html {
 
 
 /* ------- TOKENS ------- */
+
+#pp_tokens {
+    grid-column: 1 / span 1;
+    grid-row: span 1;
+    height: 241px;
+    background-color: ivory;
+    position: relative;
+    /* width: 1000px; */
+    box-shadow: rgb(0 0 0) 2px 2px 8px;
+    /* padding: 10px; */
+    display: flex;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+#pp_coalition_blocks_container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+#pp_market_deck_container {
+    display: flex;
+}
+
+#pp_discard_pile {
+    width: 150px;
+    height: 209px;
+    border-radius: 10px;
+    border: 4px dashed black;
+    box-sizing: border-box;
+    margin-right: 10px;
+}
+
+#pp_market_deck {
+    width: 150px;
+    height: 209px;
+    background-size: 150px 209px;
+    background-image: url('img/temp/cards/back.jpg');
+    box-shadow: 1px 1px 4px;
+    border-radius: 10px;
+}
+
+.pp_coalition_blocks {
+    box-sizing: border-box;
+    height: 40px;
+    width: 650px;
+    /* border: 2px solid blue; */
+}
+
+.pp_coalition_block {
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 40px;
+    width: 25px;
+}
+
+.pp_coalition_block.pp_afghan {
+    background-image: url('img/block_afghan.svg');
+}
+
+.pp_coalition_block.pp_british {
+    background-image: url('img/block_british.svg');
+}
+
+.pp_coalition_block.pp_russian {
+    background-image: url('img/block_russian.svg');
+}
 
 .pp_army {
     background-size: contain;

@@ -35,31 +35,63 @@ function (dojo, declare) {
             this.cardHeight = 209;
             this.armyHeight = 40;
             this.armyWidth = 25;
+            this.coalitionBlockHeight = 40;
+            this.coalitionBlockWidth = 25;
             this.roadHeight = 27;
             this.roadWidth = 40;
             this.tribeWidth = 25;
             this.tribeHeight = 25;
 
-            this.regions = [
-                'herat',
-                'kabul',
-                'kandahar',
-                'persia',
-                'punjab',
-                'transcaspia',
+            // coalitions
+            this.afghan = 'afghan';
+            this.british = 'british';
+            this.russian = 'russian';
+
+            this.coalitions = [
+                this.afghan,
+                this.british,
+                this.russian,
             ]
 
-            // for all borders regions are in alphabetical order
+            // regions
+            this.herat = 'herat';
+            this.kabul = 'kabul';
+            this.kandahar = 'kandahar';
+            this.persia = 'persia';
+            this.punjab = 'punjab';
+            this.transcaspia = 'transcaspia';
+
+            this.regions = [
+                this.herat,
+                this.kabul,
+                this.kandahar,
+                this.persia,
+                this.punjab,
+                this.transcaspia,
+            ]
+
+            // borders (for all borders regions are in alphabetical order)
+
+            this.herat_kabul = 'herat_kabul',
+            this.herat_kandahar = 'herat_kandahar',
+            this.herat_persia = 'herat_persia',
+            this.herat_transcaspia = 'herat_transcaspia',
+            this.kabul_transcaspia = 'kabul_transcaspia',
+            this.kabul_kandahar = 'kabul_kandahar',
+            this.kabul_punjab = 'kabul_punjab',
+            this.kandahar_punjab = 'kandahar_punjab',
+            this.persia_transcaspia = 'persia_transcaspia',
+
             this.borders = [
-                'herat_kabul',
-                'herat_kandahar',
-                'herat_persia',
-                'herat_transcaspia',
-                'kabul_transcaspia',
-                'kabul_kandahar',
-                'kabul_punjab',
-                'kandahar_punjab',
-                'persia_transcaspia',
+                this.herat_kabul,
+                this.herat_kandahar,
+                this.herat_persia,
+                this.herat_transcaspia,
+                this.kabul_transcaspia,
+                this.kabul_kandahar,
+                this.kabul_punjab,
+                this.kandahar_punjab,
+                this.persia_transcaspia,
             ]
         },
         
@@ -157,19 +189,19 @@ function (dojo, declare) {
             })
 
             
-            this.addArmyToRegion({id: 1, faction: 'british', region: 'transcaspia'})
-            this.addArmyToRegion({id: 2, faction: 'afghan', region: 'transcaspia'})
-            this.addArmyToRegion({id: 3, faction: 'russian', region: 'transcaspia'})
-            this.addArmyToRegion({id: 5, faction: 'russian', region: 'transcaspia'})
-            this.addArmyToRegion({id: 6, faction: 'russian', region: 'transcaspia'})
-            this.addArmyToRegion({id: 7, faction: 'russian', region: 'transcaspia'})
-            this.addArmyToRegion({id: 8, faction: 'russian', region: 'kabul'})
-            this.addArmyToRegion({id: 9, faction: 'russian', region: 'herat'})
-            this.addArmyToRegion({id: 10, faction: 'russian', region: 'kandahar'})
-            this.addArmyToRegion({id: 11, faction: 'russian', region: 'persia'})
-            this.addArmyToRegion({id: 12, faction: 'russian', region: 'punjab'})
-            this.addArmyToRegion({id: 13, faction: 'afghan', region: 'kabul'});
-            this.addArmyToRegion({id: 14, faction: 'british', region: 'kabul'});
+            this.addArmyToRegion({id: 1, coalition: this.british, region: this.transcaspia})
+            this.addArmyToRegion({id: 2, coalition: this.afghan, region: this.transcaspia})
+            this.addArmyToRegion({id: 3, coalition: this.russian, region: this.transcaspia})
+            this.addArmyToRegion({id: 5, coalition: this.russian, region: this.transcaspia})
+            this.addArmyToRegion({id: 6, coalition: this.russian, region: this.transcaspia})
+            this.addArmyToRegion({id: 7, coalition: this.russian, region: this.transcaspia})
+            this.addArmyToRegion({id: 8, coalition: this.russian, region: this.kabul})
+            this.addArmyToRegion({id: 9, coalition: this.russian, region: this.herat})
+            this.addArmyToRegion({id: 10, coalition: this.russian, region: this.kandahar})
+            this.addArmyToRegion({id: 11, coalition: this.russian, region: this.persia})
+            this.addArmyToRegion({id: 12, coalition: this.russian, region: this.punjab})
+            this.addArmyToRegion({id: 13, coalition: this.afghan, region: this.kabul});
+            this.addArmyToRegion({id: 14, coalition: this.british, region: this.kabul});
 
             // Create army zone for each region
             this.regions.forEach((region, index) => {
@@ -184,18 +216,33 @@ function (dojo, declare) {
                 this.createBorderZone({border});
             })
             
-            this.addRoadToBorder({id: 1, faction: 'russian', border: 'herat_transcaspia'});
-            this.addRoadToBorder({id: 2, faction: 'russian', border: 'herat_transcaspia'});
-            this.addRoadToBorder({id: 3, faction: 'british', border: 'herat_kabul'});
-            this.addRoadToBorder({id: 4, faction: 'afghan', border: 'herat_kandahar'});
-            this.addRoadToBorder({id: 5, faction: 'british', border: 'herat_persia'});
-            this.addRoadToBorder({id: 6, faction: 'afghan', border: 'herat_transcaspia'});
-            this.addRoadToBorder({id: 7, faction: 'british', border: 'kabul_transcaspia'});
-            this.addRoadToBorder({id: 8, faction: 'british', border: 'kabul_kandahar'});
-            this.addRoadToBorder({id: 9, faction: 'afghan', border: 'kabul_punjab'});
-            this.addRoadToBorder({id: 10, faction: 'afghan', border: 'kandahar_punjab'});
-            this.addRoadToBorder({id: 11, faction: 'russian', border: 'persia_transcaspia'});
+            this.addRoadToBorder({id: 1, coalition: this.russian, border: this.herat_transcaspia});
+            this.addRoadToBorder({id: 2, coalition: this.russian, border: this.herat_transcaspia});
+            this.addRoadToBorder({id: 3, coalition: this.british, border: this.herat_kabul});
+            this.addRoadToBorder({id: 4, coalition: this.afghan, border: this.herat_kandahar});
+            this.addRoadToBorder({id: 5, coalition: this.british, border: this.herat_persia});
+            this.addRoadToBorder({id: 6, coalition: this.afghan, border: this.herat_transcaspia});
+            this.addRoadToBorder({id: 7, coalition: this.british, border: this.kabul_transcaspia});
+            this.addRoadToBorder({id: 8, coalition: this.british, border: this.kabul_kandahar});
+            this.addRoadToBorder({id: 9, coalition: this.afghan, border: this.kabul_punjab});
+            this.addRoadToBorder({id: 10, coalition: this.afghan, border: this.kandahar_punjab});
+            this.addRoadToBorder({id: 11, coalition: this.russian, border: this.persia_transcaspia});
 
+            this.coalitions.forEach((coalition) => {
+                this.createCoalitionBlockZone({coalition})
+            })
+
+            for (let id = 0; id <= 35; id++) {
+                const coalitionId = id % 3;
+                const coalitionMap = {
+                    0: this.afghan,
+                    1: this.british,
+                    2: this.russian,
+                }
+                this.addCoalitionBlockToZone({id, coalition: coalitionMap[coalitionId]});
+            }  
+
+            
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -334,7 +381,6 @@ function (dojo, declare) {
 
             if (border === 'herat_transcaspia') {
                 this[`${border}_border`].itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
-                    console.log('numberOfItems', numberOfItems);
                     if( i%8==0 && numberOfItems === 1 )
                     {   return {  x:50,y:25, w:40, h:27 }; }
                     else if( i%8==0)
@@ -356,6 +402,16 @@ function (dojo, declare) {
                 };
             }
         },
+
+        createCoalitionBlockZone: function({coalition}) 
+        {
+            this[`${coalition}_coalition_blocks`] = new ebg.zone();
+            this[`${coalition}_coalition_blocks`].create(this, `pp_${coalition}_coalition_blocks`, this.coalitionBlockWidth, this.coalitionBlockHeight);
+            this[`${coalition}_coalition_blocks`].item_margin = 15;
+            this[`${coalition}_coalition_blocks`].instantaneous = true;
+            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
+        },
+
 
         createTribeZone: function({region}) 
         {
@@ -394,10 +450,10 @@ function (dojo, declare) {
             this[`court_player_${playerNumber}`].placeInZone( `pp_card_${cardNumber}`, 1 );
         },
 
-        addArmyToRegion: function( {id, faction, region} )
+        addArmyToRegion: function( {id, coalition, region} )
         {
             dojo.place( this.format_block( 'jstpl_army', {
-                faction,
+                coalition,
                 id,
             } ) , 'cards' ); // Todo: create in which location?
             // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
@@ -406,13 +462,23 @@ function (dojo, declare) {
                 british: 2,
                 russian: 3,
             }
-            this[`${region}_armies`].placeInZone( `pp_army_${id}`, weight[faction] );
+            this[`${region}_armies`].placeInZone( `pp_army_${id}`, weight[coalition] );
         },
 
-        addRoadToBorder: function( {id, faction, border} )
+        addCoalitionBlockToZone: function( {id, coalition} )
+        {
+            dojo.place( this.format_block( 'jstpl_coalition_block', {
+                coalition,
+                id,
+            } ) , 'cards' ); // Todo: create in which location?
+
+            this[`${coalition}_coalition_blocks`].placeInZone( `pp_coalition_block_${id}`, 1 );
+        },
+
+        addRoadToBorder: function( {id, coalition, border} )
         {
             dojo.place( this.format_block( 'jstpl_road', {
-                faction,
+                coalition,
                 id,
             } ) , 'cards' ); // Todo: create in which location?
             // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );

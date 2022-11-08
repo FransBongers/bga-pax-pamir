@@ -53,6 +53,22 @@
         <div id="pp_persia_transcaspia_border" class="pp_location"></div>
     </div>
     
+    <div id="pp_tokens">
+        <div id="pp_coalition_blocks_container">
+            <div id="pp_afghan_coalition_blocks" class="pp_coalition_blocks">
+            </div>
+            <div id="pp_british_coalition_blocks" class="pp_coalition_blocks">
+            </div>
+            <div id="pp_russian_coalition_blocks" class="pp_coalition_blocks">
+            </div>
+        </div>
+        <div id="pp_market_deck_container">
+            <div id="pp_discard_pile">
+                <span>Discard</span>
+            </div>
+            <div id="pp_market_deck"></div>
+        </div>
+    </div>
 
     <div id="pp_market_board">
         <!-- BEGIN market -->
@@ -82,9 +98,10 @@
 
 var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
 var jstpl_rupee='<div class="pp_rupee" id="pp_rupee_${number}"></div>';
-var jstpl_army='<div class="pp_army pp_${faction}" id="pp_army_${id}"></div>';
-var jstpl_road='<div class="pp_road pp_${faction}" id="pp_road_${id}"></div>';
+var jstpl_army='<div class="pp_army pp_${coalition}" id="pp_army_${id}"></div>';
+var jstpl_road='<div class="pp_road pp_${coalition}" id="pp_road_${id}"></div>';
 var jstpl_tribe='<div class="pp_tribe pp_${player}" id="pp_tribe_${id}"></div>';
+var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="pp_coalition_block_${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_{id}" class="pp_player_board">\
     <div class="pp_icon_container">\

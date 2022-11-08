@@ -421,12 +421,24 @@ html {
     margin-bottom: 15px;
 }
 
-.pp_player_tableau_E8CAAA {
+.pp_player_color_7CAEC0 {
+    background-color: #7CAEC0;
+}
+
+.pp_player_color_B3ADAA {
+    background-color: #B3ADAA;
+}
+
+.pp_player_color_E8CAAA {
     background-color: #E8CAAA;
 }
 
-.pp_player_tableau_E8CAAA {
-    background-color: #E8CAAA;
+.pp_player_color_CD848A {
+    background-color: #CD848A;
+}
+
+.pp_player_color_5B5B5B {
+    background-color: #5B5B5B;
 }
 
 .pp_court {

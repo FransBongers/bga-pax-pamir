@@ -84,9 +84,9 @@
 
     <div id="pp_player_tableaus">
         <!-- BEGIN player_tableau -->
-        <div id="player_tableau_{PLAYER_NUMBER}" class="pp_player_tableau">
-            <div id="pp_tableau_title_player_{PLAYER_NUMBER}" class="pp_tableau_title"></div>
-            <div id="pp_court_player_{PLAYER_NUMBER}" class="pp_court pp_court_player_{PLAYER_NUMBER}"></div>
+        <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
+            <div id="pp_tableau_title_player_{player_id}" class="pp_tableau_title"><span>{player_name}'s court</span></div>
+            <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
         </div>
     <!-- END player_tableau -->
     </div>
@@ -103,7 +103,7 @@ var jstpl_road='<div class="pp_road pp_${coalition}" id="pp_road_${id}"></div>';
 var jstpl_tribe='<div class="pp_tribe pp_${player}" id="pp_tribe_${id}"></div>';
 var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="pp_coalition_block_${id}"></div>';
 
-var jstpl_player_board = '\<div id="pp_player_board_{id}" class="pp_player_board">\
+var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\
         <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><span id="influence_${id}" class="pp_icon_count">0</span></div>\
         <div id="tokens_${id}" class="pp_icon pp_token_icon"><span id="token_count_${id}"  class="pp_icon_count">0</span></div>\

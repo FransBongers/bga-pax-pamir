@@ -41,59 +41,29 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         $players_nbr = count( $players );
         self::dump( "players", $players );
         /*********** Place your code below:  ************/
-
-        /*
-            Set up of player tableaus based on numer of players. Current player is always at the top,
-            with other players clockwise around the table.
-            2 players: 1 tableau at top, 1 tableau at bottom
-                player1: column 2-6 row 2-3 top
-                player2: column 2-6 row 7-8 bottom
-            3 players: 1 tableau at top, tableaus at both sided
-                player1: column 2-6 row 2-3 top
-            4 players: 1 tableau at top, tableaus at both sided, 1 tableau at bottom
-                player1: column 2-6 row 2-3 top
-                player2: column 6-7 row 2-8 top right
-                player3: column 2-6 row 7-8 bottom
-                player4: column 1-2 row 2-8 top left
-            5 players: 1 tableau at top, tableaus at both sided, 2 tableaus at bottom
-        */
-
-        $this->player_setup = array(
-            1 => array(
-                'grid_column_start' => 2,
-                'grid_column_end' => 6,
-                'grid_row_start' => 2,
-                'grid_row_end' => 3,
-            ),
-            2 => array(
-                'grid_column_start' => 6,
-                'grid_column_end' => 7,
-                'grid_row_start' => 2,
-                'grid_row_end' => 8,
-            ),
-            3 => array(
-                'grid_column_start' => 2,
-                'grid_column_end' => 6,
-                'grid_row_start' => 7,
-                'grid_row_end' => 8,
-            ),
-            4 => array(
-                'grid_column_start' => 1,
-                'grid_column_end' => 2,
-                'grid_row_start' => 2,
-                'grid_row_end' => 8,
-            ),
-          );
+        global $g_user;
+        $current_player_id = $g_user->get_id();
+        // self::dump( "current_player_id", $current_player_id );
 
         $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "player_tableau" );
         
-        for( $x=1; $x<=$players_nbr; $x++ )
-        {
-        
-            $this->page->insert_block( "player_tableau", array(
-                'PLAYER_NUMBER' => $x,
-            ) );      
+        // Make sure player tableaus are in order with current player at the top.
+        // If current player is spectator tableaus are in player order
+        if (isset($players [$current_player_id])) { // may be not set if spectator
+            $player_id = $current_player_id;
+        } else {
+            $player_id = $this->game->getNextPlayerTable()[0];
         }
+
+        for ($x = 0; $x < $players_nbr; $x++) {
+            $this->page->insert_block("player_tableau", array (
+                "player_id" => $player_id,
+                "player_name" => $players[$player_id]['player_name'],
+                "player_color" => $players[$player_id]['player_color']
+            ));            
+            $player_id = $this->game->getPlayerAfter($player_id);
+        }
+
 
 
 

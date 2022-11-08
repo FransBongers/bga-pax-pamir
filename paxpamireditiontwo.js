@@ -125,26 +125,9 @@ function (dojo, declare) {
                 dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
             }
             
-            // Create player tableaus
-            gamedatas.playerorder.forEach((playerId, index) => {
-                // if (index === 1) {
-                //     this.disablePlayerPanel( playerId )
-                // }
-                const playerNumber = index + 1;
-                
-                // set background color of tableay
-                const tableau = document.querySelector(`#player_tableau_${playerNumber}`);
-                console.log('typeof playerId', typeof playerId);
-                const color = players[playerId].color
-                tableau.style.backgroundColor = '#' + color;
-
-                const titleDiv = document.getElementById(`pp_tableau_title_player_${playerNumber}`);
-
-                titleDiv.innerHTML = `<span>${players[playerId].name}'s court</span>`;
-
-
-                // create court zone
-                this.createPlayerCourt({numberOfPlayers, playerNumber});
+            // Create court zones
+            Object.keys(players).forEach((key, index) => {
+                this.createPlayerCourtZone({playerId: players[key].id});
             })
 
             // Market stocks;
@@ -165,9 +148,9 @@ function (dojo, declare) {
             this.rupee_zone_0_3.addToStockWithId( 6, 8 );
             this.rupee_zone_0_3.addToStockWithId( 6, 9 );
 
-            // this.addCardToCourt({playerNumber: 1, cardNumber: 40} )
-            // this.addCardToCourt({playerNumber: 1, cardNumber: 41} )
-            // this.addCardToCourt({playerNumber: 1, cardNumber: 42} )
+            // this.addCardToCourt({playerId: '2371052', cardNumber: 40} )
+            // this.addCardToCourt({playerId: '2371052', cardNumber: 41} )
+            // this.addCardToCourt({playerId: '2371052', cardNumber: 42} )
 
             // TODO: Set up your game interface here, according to "gamedatas"
 
@@ -175,7 +158,6 @@ function (dojo, declare) {
             for (let row = 0; row <= 1; row++) {
                 for (let column = 0; column <= 5; column++) {
                     const cardInMarket = gamedatas.market[row][column];
-                    console.log(`cardInMarket_${row}_${column}`, cardInMarket);
                     if (cardInMarket) {
                         const {location, key} = cardInMarket;
                         this.addCardToMarket({location, card: key});
@@ -421,11 +403,10 @@ function (dojo, declare) {
             // this['transcaspia_armies'].setPattern( 'horizontalfit' );
         },
 
-        createPlayerCourt: function({numberOfPlayers, playerNumber}){
-            console.log('createPlayerCourt', numberOfPlayers, playerNumber)
-            this[`court_player_${playerNumber}`] = new ebg.zone();
-            this[`court_player_${playerNumber}`].create( this, `pp_court_player_${playerNumber}`,this.cardWidth, this.cardHeight );
-            this[`court_player_${playerNumber}`].setPattern( 'horizontalfit' );
+        createPlayerCourtZone: function({playerId}){
+            this[`court_player_${playerId}`] = new ebg.zone();
+            this[`court_player_${playerId}`].create( this, `pp_court_player_${playerId}`,this.cardWidth, this.cardHeight );
+            this[`court_player_${playerId}`].setPattern( 'horizontalfit' );
         },
 
         addCardToMarket: function( {location, card} )
@@ -441,13 +422,13 @@ function (dojo, declare) {
             // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
         },
 
-        addCardToCourt: function( {playerNumber, cardNumber} )
+        addCardToCourt: function( {playerId, cardNumber} )
         {
             dojo.place( this.format_block( 'jstpl_card', {
                 card: 'card_' + cardNumber,
             } ) , 'cards' );
             dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            this[`court_player_${playerNumber}`].placeInZone( `pp_card_${cardNumber}`, 1 );
+            this[`court_player_${playerId}`].placeInZone( `pp_card_${cardNumber}`, 1 );
         },
 
         addArmyToRegion: function( {id, coalition, region} )

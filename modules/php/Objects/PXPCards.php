@@ -39,8 +39,8 @@ class PXPCard implements \JsonSerializable
     
     private ?array $impactIcons;
     
-    private ?string $purchasedEffect;
     private ?string $discardedEffect;
+    private ?string $purchasedEffect;
 
     /**
      * Get the value of id
@@ -347,25 +347,6 @@ class PXPCard implements \JsonSerializable
     }
 
     /**
-     * Get the value of purchasedEffect
-     */ 
-    public function getPurchasedEffect()
-    {
-        return $this->purchasedEffect;
-    }
-
-    /**
-     * Set the value of purchasedEffect
-     *
-     * @return  self
-     */ 
-    public function setPurchasedEffect($purchasedEffect)
-    {
-        $this->purchasedEffect = $purchasedEffect;
-        return $this;
-    }
-
-    /**
      * Get the value of discardedEffect
      */ 
     public function getDiscardedEffect()
@@ -381,6 +362,25 @@ class PXPCard implements \JsonSerializable
     public function setDiscardedEffect($discardedEffect)
     {
         $this->discardedEffect = $discardedEffect;
+        return $this;
+    }
+
+    /**
+     * Get the value of purchasedEffect
+     */ 
+    public function getPurchasedEffect()
+    {
+        return $this->purchasedEffect;
+    }
+
+    /**
+     * Set the value of purchasedEffect
+     *
+     * @return  self
+     */ 
+    public function setPurchasedEffect($purchasedEffect)
+    {
+        $this->purchasedEffect = $purchasedEffect;
         return $this;
     }
 
@@ -401,7 +401,9 @@ class PXPCard implements \JsonSerializable
             "hasBattleAction" => $this->hasBattleAction(),
             "loyalty" => $this->getLoyalty(),
             "prize" => $this->getPrize(),
-            "impactIcons" => $this->getImpactIcons()
+            "impactIcons" => $this->getImpactIcons(),
+            "discardedEffect" => $this->getDiscardedEffect(),
+            "purchasedEffect" => $this->getPurchasedEffect(),
         ];
     }
 }

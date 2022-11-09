@@ -11,14 +11,14 @@
  * modules/php/includes/PXPCards.inc.php
  *
  */
+use PhobyJuan\PaxPamirEditionTwo\Factories\PXPCardFactory as CardFactory;
 
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCoalition;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumImpactIcon;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumRegion;
-use PhobyJuan\PaxPamirEditionTwo\Factories\PXPCardFactory as CardFactory;
-
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSpecialAbility;
+use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumEventCardEffect;
 
 
 $this->cards = [
@@ -626,4 +626,53 @@ $this->cards = [
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army]
     ),
 
+    /////////////////////////////
+    // Dominance check cards
+    /////////////////////////////
+    101 => CardFactory::createDominanceCheckCard(101),
+    102 => CardFactory::createDominanceCheckCard(102),
+    103 => CardFactory::createDominanceCheckCard(103),
+    104 => CardFactory::createDominanceCheckCard(104),
+
+    /////////////////////////////
+    // Event cards
+    /////////////////////////////
+    105 => CardFactory::createEventCard(
+        105, PXPEnumEventCardEffect::MilitarySuit, PXPEnumEventCardEffect::NewTactics
+    ),
+    106 => CardFactory::createEventCard(
+        106, PXPEnumEventCardEffect::EmbarrassementOfRiches, PXPEnumEventCardEffect::KohINoorRecovered
+    ),
+    107 => CardFactory::createEventCard(
+        107, PXPEnumEventCardEffect::DisregardForCustoms, PXPEnumEventCardEffect::CourtlyManners
+    ),
+    108 => CardFactory::createEventCard(
+        108, PXPEnumEventCardEffect::FailureToImpress, PXPEnumEventCardEffect::Rumor
+    ),
+    109 => CardFactory::createEventCard(
+        109, PXPEnumEventCardEffect::RiotsInPunjab, PXPEnumEventCardEffect::ConflictFatigue
+    ),
+    110 => CardFactory::createEventCard(
+        110, PXPEnumEventCardEffect::RiotsInHerat, PXPEnumEventCardEffect::Nationalism
+    ),
+    111 => CardFactory::createEventCard(
+        111, PXPEnumEventCardEffect::NoEffect, PXPEnumEventCardEffect::PublicWithdrawal
+    ),
+    112 => CardFactory::createEventCard(
+        112, PXPEnumEventCardEffect::RiotsInKabul, PXPEnumEventCardEffect::NationBuilding
+    ),
+    113 => CardFactory::createEventCard(
+        113, PXPEnumEventCardEffect::RiotsInPersia, PXPEnumEventCardEffect::BackingOfPersianAristocracy
+    ),
+    114 => CardFactory::createEventCard(
+        114, PXPEnumEventCardEffect::ConfidenceFailure, PXPEnumEventCardEffect::OtherPersuasiveMethods
+    ),
+    115 => CardFactory::createEventCard(
+        115, PXPEnumEventCardEffect::IntelligenceSuit, PXPEnumEventCardEffect::PashtunwaliValues
+    ),
+    116 => CardFactory::createEventCard(
+        116, PXPEnumEventCardEffect::PoliticalSuit, PXPEnumEventCardEffect::Rebuke
+    )
 ];
+
+    

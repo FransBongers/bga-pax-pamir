@@ -40,14 +40,14 @@ class PXPCardFactory
             ->setLoyalty(null)
             ->setPrize(null)
             ->setImpactIcons(null)
-            ->setPurchasedEffect(null)
-            ->setDiscardedEffect(null);
+            ->setDiscardedEffect(null)
+            ->setPurchasedEffect(null);
 
         return $card;
     }
 
     static public function createEventCard(
-        int $id, string $purchasedEffect, string $discardedEffect
+        int $id, string $discardedEffect, string $purchasedEffect
     ): PXPCard
     {
         $card = new PXPCard();
@@ -67,8 +67,8 @@ class PXPCardFactory
             ->setLoyalty(null)
             ->setPrize(null)
             ->setImpactIcons(null)
-            ->setPurchasedEffect($purchasedEffect)
-            ->setDiscardedEffect($discardedEffect);
+            ->setDiscardedEffect($discardedEffect)
+            ->setPurchasedEffect($purchasedEffect);
 
         return $card;
     }
@@ -96,8 +96,8 @@ class PXPCardFactory
             ->setLoyalty($loyalty)
             ->setPrize($prize)
             ->setImpactIcons($impactIcons)
-            ->setPurchasedEffect(null)
-            ->setDiscardedEffect(null);
+            ->setDiscardedEffect(null)
+            ->setPurchasedEffect(null);
 
         return $card;
     }

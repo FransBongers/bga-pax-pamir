@@ -8,15 +8,15 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumCardType.php
+ * modules/php/Objects/PXPEnumCoalition.php
  *
  */
 
 namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumCardType
+abstract class PXPEnumCoalition
 {
-    const Event = "Event";
-    const DominanceCheck = "DominanceCheck";
-    const Suit = "Suit";
+    const British = "British";
+    const Russian = "Russian";
+    const Afghan = "Afghan";
 }

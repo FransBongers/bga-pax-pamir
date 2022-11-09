@@ -14,32 +14,33 @@
 
 namespace PhobyJuan\PaxPamirEditionTwo\Objects;
 
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCardType;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumRegion;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumLoyalty;
-
 class PXPCard implements \JsonSerializable
 {
     private int $id;
-    private PXPEnumCardType $type;
+    private string $type;
 
     // Suit cards
     private ?string $suit;
     private ?int $rank;
-    private ?PXPEnumRegion $region;
+    private ?string $name;
+    private ?string $region;
     
-    private bool $hasTaxAction;
-    private bool $hasGiftAction;
-    private bool $hasBuildAction;
-    private bool $hasMoveAction;
-    private bool $hasBetrayAction;
-    private bool $hasBattleAction;
+    private ?string $specialAbility;
 
-    private ?PXPEnumLoyalty $loyalty;
+    private bool $taxAction;
+    private bool $giftAction;
+    private bool $buildAction;
+    private bool $moveAction;
+    private bool $betrayAction;
+    private bool $battleAction;
 
+    private ?string $loyalty;
+    private ?string $prize;
     
-
+    private ?array $impactIcons;
     
+    private ?string $purchasedEffect;
+    private ?string $discardedEffect;
 
     /**
      * Get the value of id
@@ -118,6 +119,25 @@ class PXPCard implements \JsonSerializable
     }
 
     /**
+     * Get the value of name
+     */ 
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set the value of name
+     *
+     * @return  self
+     */ 
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
      * Get the value of region
      */ 
     public function getRegion()
@@ -136,119 +156,136 @@ class PXPCard implements \JsonSerializable
         return $this;
     }
 
-
-
     /**
-     * Get the value of hasTaxAction
+     * Get the value of specialAbility
      */ 
-    public function getHasTaxAction()
+    public function getSpecialAbility()
     {
-        return $this->hasTaxAction;
+        return $this->specialAbility;
     }
 
     /**
-     * Set the value of hasTaxAction
+     * Set the value of specialAbility
      *
      * @return  self
      */ 
-    public function setHasTaxAction($hasTaxAction)
+    public function setSpecialAbility($specialAbility)
     {
-        $this->hasTaxAction = $hasTaxAction;
+        $this->specialAbility = $specialAbility;
         return $this;
     }
 
     /**
-     * Get the value of hasGiftAction
+     * Get the value of taxAction
      */ 
-    public function getHasGiftAction()
+    public function hasTaxAction()
     {
-        return $this->hasGiftAction;
+        return $this->taxAction;
     }
 
     /**
-     * Set the value of hasGiftAction
+     * Set the value of taxAction
      *
      * @return  self
      */ 
-    public function setHasGiftAction($hasGiftAction)
+    public function setTaxAction($taxAction)
     {
-        $this->hasGiftAction = $hasGiftAction;
+        $this->taxAction = $taxAction;
         return $this;
     }
 
     /**
-     * Get the value of hasBuildAction
+     * Get the value of giftAction
      */ 
-    public function getHasBuildAction()
+    public function hasGiftAction()
     {
-        return $this->hasBuildAction;
+        return $this->giftAction;
     }
 
     /**
-     * Set the value of hasBuildAction
+     * Set the value of giftAction
      *
      * @return  self
      */ 
-    public function setHasBuildAction($hasBuildAction)
+    public function setGiftAction($giftAction)
     {
-        $this->hasBuildAction = $hasBuildAction;
+        $this->giftAction = $giftAction;
         return $this;
     }
 
     /**
-     * Get the value of hasMoveAction
+     * Get the value of buildAction
      */ 
-    public function getHasMoveAction()
+    public function hasBuildAction()
     {
-        return $this->hasMoveAction;
+        return $this->buildAction;
     }
 
     /**
-     * Set the value of hasMoveAction
+     * Set the value of buildAction
      *
      * @return  self
      */ 
-    public function setHasMoveAction($hasMoveAction)
+    public function setbuildAction($buildAction)
     {
-        $this->hasMoveAction = $hasMoveAction;
+        $this->buildAction = $buildAction;
         return $this;
     }
 
     /**
-     * Get the value of hasBetrayAction
+     * Get the value of moveAction
      */ 
-    public function getHasBetrayAction()
+    public function hasMoveAction()
     {
-        return $this->hasBetrayAction;
+        return $this->moveAction;
     }
 
     /**
-     * Set the value of hasBetrayAction
+     * Set the value of moveAction
      *
      * @return  self
      */ 
-    public function setHasBetrayAction($hasBetrayAction)
+    public function setMoveAction($moveAction)
     {
-        $this->hasBetrayAction = $hasBetrayAction;
+        $this->moveAction = $moveAction;
         return $this;
     }
 
     /**
-     * Get the value of hasBattleAction
+     * Get the value of betrayAction
      */ 
-    public function getHasBattleAction()
+    public function hasBetrayAction()
     {
-        return $this->hasBattleAction;
+        return $this->betrayAction;
     }
 
     /**
-     * Set the value of hasBattleAction
+     * Set the value of betrayAction
      *
      * @return  self
      */ 
-    public function setHasBattleAction($hasBattleAction)
+    public function setBetrayAction($betrayAction)
     {
-        $this->hasBattleAction = $hasBattleAction;
+        $this->betrayAction = $betrayAction;
+        return $this;
+    }
+
+    /**
+     * Get the value of battleAction
+     */ 
+    public function hasBattleAction()
+    {
+        return $this->battleAction;
+    }
+
+    /**
+     * Set the value of battleAction
+     *
+     * @return  self
+     */ 
+    public function setBattleAction($battleAction)
+    {
+        $this->battleAction = $battleAction;
         return $this;
     }
 
@@ -271,23 +308,100 @@ class PXPCard implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * Get the value of prize
+     */ 
+    public function getPrize()
+    {
+        return $this->prize;
+    }
+
+    /**
+     * Set the value of prize
+     *
+     * @return  self
+     */ 
+    public function setPrize($prize)
+    {
+        $this->prize = $prize;
+        return $this;
+    }
+
+    /**
+     * Get the value of impactIcon
+     */ 
+    public function getImpactIcons()
+    {
+        return $this->impactIcons;
+    }
+
+    /**
+     * Set the value of impactIcon
+     *
+     * @return  self
+     */ 
+    public function setImpactIcons($impactIcons)
+    {
+        $this->impactIcons = $impactIcons;
+        return $this;
+    }
+
+    /**
+     * Get the value of purchasedEffect
+     */ 
+    public function getPurchasedEffect()
+    {
+        return $this->purchasedEffect;
+    }
+
+    /**
+     * Set the value of purchasedEffect
+     *
+     * @return  self
+     */ 
+    public function setPurchasedEffect($purchasedEffect)
+    {
+        $this->purchasedEffect = $purchasedEffect;
+        return $this;
+    }
+
+    /**
+     * Get the value of discardedEffect
+     */ 
+    public function getDiscardedEffect()
+    {
+        return $this->discardedEffect;
+    }
+
+    /**
+     * Set the value of discardedEffect
+     *
+     * @return  self
+     */ 
+    public function setDiscardedEffect($discardedEffect)
+    {
+        $this->discardedEffect = $discardedEffect;
+        return $this;
+    }
 
     public function jsonSerialize(): array
     {
-
         return [
             "id" => $this->getId(),
             "type" => $this->getType(),
             "suit" => $this->getSuit(),
             "rank" => $this->getRank(),
+            "name" => $this->getName(),
             "region" => $this->getRegion(),
-            "hasTaxAction" => $this->getHasTaxAction(),
-            "hasGiftAction" => $this->getHasGiftAction(),
-            "hasBuildAction" => $this->getHasBuildAction(),
-            "hasMoveAction" => $this->getHasMoveAction(),
-            "hasBetrayAction" => $this->getHasBetrayAction(),
-            "hasBattleAction" => $this->getHasBattleAction(),
-            "loyalty" => $this->getLoyalty()
+            "hasTaxAction" => $this->hastaxAction(),
+            "hasGiftAction" => $this->hasGiftAction(),
+            "hasBuildAction" => $this->hasBuildAction(),
+            "hasMoveAction" => $this->hasMoveAction(),
+            "hasBetrayAction" => $this->hasBetrayAction(),
+            "hasBattleAction" => $this->hasBattleAction(),
+            "loyalty" => $this->getLoyalty(),
+            "prize" => $this->getPrize(),
+            "impactIcons" => $this->getImpactIcons()
         ];
     }
 }

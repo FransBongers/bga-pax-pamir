@@ -8,15 +8,16 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumLoyalty.php
+ * modules/php/Objects/PXPEnumSuit.php
  *
  */
 
 namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumLoyalty
+abstract class PXPEnumSuit
 {
-    const British = "British";
-    const Russian = "Russian";
-    const Afghan = "Afghan";
+    const Economic = "Economic";
+    const Military = "Military";
+    const Political = "Political";
+    const Intelligence = "Intelligence";
 }

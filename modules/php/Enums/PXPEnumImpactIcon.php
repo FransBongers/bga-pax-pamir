@@ -8,15 +8,21 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumCardType.php
+ * modules/php/Objects/PXPEnumImpactIcon.php
  *
  */
 
 namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumCardType
+abstract class PXPEnumImpactIcon
 {
-    const Event = "Event";
-    const DominanceCheck = "DominanceCheck";
-    const Suit = "Suit";
+    const Road = "Road";
+    const Army = "Army";
+    const Leverage = "Leverage";
+    const Spy = "Spy";
+    const Tribe = "Tribe";
+    const EconomicSuit = "EconomicSuit";
+    const MilitarySuit = "MilitarySuit";
+    const PoliticalSuit = "PoliticalSuit";
+    const IntelligenceSuit = "IntelligenceSuit";
 }

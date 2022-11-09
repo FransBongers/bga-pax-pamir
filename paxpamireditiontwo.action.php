@@ -41,6 +41,30 @@
   	
   	// TODO: defines your action entry points there
 
+      public function purchaseCard()
+      {
+          self::setAjaxMode();     
+          $card_id = self::getArg( "card_id", AT_alphanum, true );
+          $result = $this->game->purchaseCard($card_id);
+          self::ajaxResponse( );
+      }
+  
+      public function playCard()
+      {
+          self::setAjaxMode();     
+          $card_id = self::getArg( "card_id", AT_alphanum, true );
+          $left_side = self::getArg( "left_side", AT_bool, true );
+          $result = $this->game->playCard($card_id, $left_side);
+          self::ajaxResponse( );
+      }
+  
+      public function passAction()
+      {
+          self::setAjaxMode();
+          $result = $this->game->passAction();
+          self::ajaxResponse( );
+      }
+
     public function chooseLoyalty()
     {
         self::setAjaxMode();     

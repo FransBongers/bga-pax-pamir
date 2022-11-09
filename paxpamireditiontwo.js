@@ -27,6 +27,7 @@ function (dojo, declare) {
         
         constructor: function(){
             console.log('paxpamireditiontwo constructor');
+            console.log('start')
             // Here, you can init the global variables of your user interface
             // Example:
             
@@ -93,6 +94,15 @@ function (dojo, declare) {
                 this.kandahar_punjab,
                 this.persia_transcaspia,
             ]
+
+            // TODO(Frans): do we use stock or zone?
+            this.player_hand = new ebg.stock();
+            this.market = [];
+
+            // TODO check what there are used for
+            this.card_tokens = [];
+            this.handles = [];
+            
         },
         
         /*
@@ -127,8 +137,6 @@ function (dojo, declare) {
                 dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
                 if (player.loyalty !== 'null') {
                     this.updatePlayerLoyalty({playerId: player_id, coalition: player.loyalty})
-                } else {
-                    this.updatePlayerLoyalty({playerId: player_id, coalition: this.afghan})
                 }
             }
             
@@ -314,22 +322,22 @@ function (dojo, declare) {
                         this.addActionButton( 'british_button', _('British'), 'onBritish', null, false, 'blue' );
                         break;
 
-                    // case 'playerActions':
-                    //     var main = $('pagemaintitletext');
-                    //     if (args.remaining_actions > 0) {
-                    //         main.innerHTML += _(' may take ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
-                    //             + args.remaining_actions + '</span>' + _(' action(s): ');
-                    //         this.addActionButton( 'purchase_btn', _('Purchase'), 'onPurchase' );
-                    //         this.addActionButton( 'play_btn', _('Play'), 'onPlay' );
-                    //         this.addActionButton( 'card_action_btn', _('Card Action'), 'onCardAction' );
-                    //         this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'gray' ); 
-                    //     } else {
-                    //         main.innerHTML += _(' have ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
-                    //         + args.remaining_actions + '</span>' + _(' remaining actions: ');
+                    case 'playerActions':
+                        var main = $('pagemaintitletext');
+                        if (args.remaining_actions > 0) {
+                            main.innerHTML += _(' may take ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                                + args.remaining_actions + '</span>' + _(' action(s): ');
+                            this.addActionButton( 'purchase_btn', _('Purchase'), 'onPurchase' );
+                            this.addActionButton( 'play_btn', _('Play'), 'onPlay' );
+                            this.addActionButton( 'card_action_btn', _('Card Action'), 'onCardAction' );
+                            this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'gray' ); 
+                        } else {
+                            main.innerHTML += _(' have ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                            + args.remaining_actions + '</span>' + _(' remaining actions: ');
 
-                    //         this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'blue' );
-                    //     }
-                    //     break;
+                            this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'blue' );
+                        }
+                        break;
 
                     // case 'negotiateBribe':
                     //     for ( var i = 0; i <= args.briber_max; i++ ) {
@@ -417,6 +425,42 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Utility methods
+
+        addCardToken : function(location, card_id, token_id) {
+            console.log( 'addCardToken', location, card_id, token_id );
+            // var node_id = location.control_name + '_item_'+ card_id + '_tokens';
+
+            // var card_tokens_list = this.card_tokens[card_id].getAllItems();
+
+            // if (!card_tokens_list.includes(token_id)) {
+            //     dojo.place(this.format_block('jstpl_coin', {
+            //         id : token_id,
+            //     }), node_id);
+            //     this.card_tokens[card_id].placeInZone(token_id);
+            //     this.addTooltip( token_id, token_id, '' );
+            // }
+
+        },
+
+        clearLastAction : function( )
+        {
+            console.log( 'clearLastAction, handles = ' + this.handles.length );
+
+            // TODO (Frans): add what is needed
+            // Remove current possible moves
+            // dojo.query( '.possibleMove' ).removeClass( 'possibleMove' );
+            // dojo.query( '.otherPlayer' ).removeClass( 'otherPlayer' );
+            // dojo.query( '.possibleCard' ).removeClass( 'possibleCard' );
+            // dojo.query( '.possiblePlayer' ).removeClass( 'possiblePlayer' );
+            // dojo.query( '.possiblePawn' ).removeClass( 'possiblePawn' );
+            // dojo.query( '.selected' ).removeClass( 'selected' );
+            // dojo.query( '.selectedPawn' ).removeClass( 'selectedPawn' );
+            // dojo.query( '.fadeTile' ).removeClass( 'fadeTile' );
+
+            dojo.forEach(this.handles, dojo.disconnect);
+            this.handles = [];
+
+        },
         
 
         createMarketSquareRupeeZone: function({row, column})
@@ -599,6 +643,84 @@ function (dojo, declare) {
                 .addClass(`pp_loyalty_${coalition}`);
         },
 
+        updatePossibleCards: function() {
+
+            this.clearLastAction();
+
+            switch (this.selectedAction) {
+                case 'purchase':
+                    dojo.query('.market_card').forEach(
+                        function (node, index) {
+                            var cost = node.id.split('_')[2];
+                            var card_id = node.id.split('_')[5];
+                            if ((cost <= this.player_counts[this.player_id].coins) && (! this.unavailable_cards.includes('card_'+card_id) )) {
+                                dojo.addClass(node, 'possibleCard');
+                                this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                            }
+                        }, this);
+                    break;
+                case 'play':
+                case 'discard_hand':
+                    dojo.query('.hand').forEach(
+                        function (node, index) {
+                            dojo.addClass(node, 'possibleCard');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                        }, this);
+                    break;
+                case 'discard_court':
+                    dojo.query('.court_' + this.player_id).forEach(
+                        function (node, index) {
+                            dojo.addClass(node, 'possibleCard');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                        }, this);
+                    break;
+                case 'card_action':
+                    break;
+                default:
+                    break;
+            }
+
+        },
+
+        moveCard : function(id, from_location, to_location, order = null) {
+            console.log( 'moveCard', 'from', from_location, 'to', to_location, 'order', order );
+            var card_tokens_list = this.card_tokens[id].getAllItems();
+
+            // if (from_location !== null) {
+            //     var from_div = from_location.getItemDivId(id);
+            // } else {
+            //     from_div = null;
+            // }
+            // if (to_location !== null) {
+            //     if (order != null) {
+            //         to_location.changeItemsWeight({ id: order });
+            //     }
+            //     var node_id = to_location.control_name + '_item_'+ id + '_tokens';
+            //     to_location.addToStockWithId(id, id, from_div);
+
+            //     this.card_tokens[id] = new ebg.zone();
+            //     this.card_tokens[id].create( this, node_id, this.tokenwidth, this.tokenheight );
+            //     this.card_tokens[id].setPattern('ellipticalfit');
+            //     this.card_tokens[id].item_margin = 2;
+
+            //     card_tokens_list.forEach (
+            //         function (token_id, index) { 
+            //             dojo.place(this.format_block('jstpl_coin', {
+            //                 id : token_id,
+            //             }), node_id);
+            //             this.card_tokens[id].placeInZone(token_id);
+            //             this.addTooltip( token_id, token_id, '' );
+            //     }, this);
+            //     this.addTooltip( to_location.getItemDivId(id), id, '' );
+            // }
+
+            // if (from_location !== null) {
+            //     // TODO(Frans): check if this needs to be stock or zone
+            //     from_location.removeFromStockById(id); 
+            // }
+
+        },
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -613,6 +735,221 @@ function (dojo, declare) {
             _ make a call to the game server
         
         */
+
+        onPurchase: function()
+        {
+            if (! this.checkAction('purchase'))
+            return;
+
+            if( this.isCurrentPlayerActive() )
+            {       
+                console.log( 'onPurchase' );
+                this.selectedAction = 'purchase';
+                this.updatePossibleCards();
+                this.setClientState("client_selectPurchase", { descriptionmyturn : _( "${you} must select a card to purchase") });
+            }
+        }, 
+        
+        onPlay: function()
+        {
+            if (! this.checkAction('play'))
+            return;
+
+            if( this.isCurrentPlayerActive() )
+            {       
+                console.log( 'onPlay' );
+                this.selectedAction = 'play';
+                this.updatePossibleCards();
+                this.setClientState("client_selectPlay", { descriptionmyturn : _( "${you} must select a card to play") });
+            }
+        }, 
+
+        onCardAction: function()
+        {
+            if (! this.checkAction('card_action'))
+            return;
+
+            if( this.isCurrentPlayerActive() )
+            {       
+                console.log( 'onCardAction' );
+                this.selectedAction = 'card_action';
+                // this.ajaxcall( "/forbiddenisland/forbiddenisland/captureTreasure.html", {
+                    // lock: true,
+                // }, this, function( result ) {} );
+            }
+        }, 
+
+        onPass: function()
+        {
+            if (! this.checkAction('pass'))
+            return;
+
+            if( this.isCurrentPlayerActive() )
+            {       
+                console.log( 'onPass' );
+                this.selectedAction = 'pass';
+                if (this.remaining_actions == 0) {
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/passAction.html", {
+                        lock: true
+                    }, this, function( result ) {} );
+                } else {
+                    this.setClientState("client_endTurn", { descriptionmyturn : _( "Confirm to your end turn ") });
+                }
+            }
+        }, 
+
+        onCard: function( evt )
+        {
+            var card_id = evt.currentTarget.id;
+            dojo.stopEvent( evt );
+            console.log( 'onCard ' + card_id );
+
+            this.selectedCard = card_id;
+
+            // if( this.isCurrentPlayerActive() )
+            // {   
+            //     switch (this.selectedAction) {
+            //         case 'purchase':    
+            //             this.clearLastAction();
+            //             var node = $( card_id );
+            //             dojo.addClass(node, 'selected');
+            //             var cost = card_id.split('_')[2];
+            //             this.setClientState("client_confirmPurchase", { descriptionmyturn : "Purchase this card for "+cost+" rupees?"});
+            //             break;
+
+            //         case 'play':    
+            //             this.clearLastAction();
+            //             var node = $( card_id );
+            //             dojo.addClass(node, 'selected');
+            //             var card_id = 'card_' + this.selectedCard.split('_')[4];
+            //             this.setClientState("client_confirmPlay", { descriptionmyturn : "Select which side of court to play card:"});
+            //             break;
+                    
+            //         case 'discard_hand':
+            //         case 'discard_court':
+            //             var node = $( card_id );
+            //             dojo.toggleClass(node, 'selected');
+            //             dojo.toggleClass(node, 'discard');
+            //             if (dojo.query('.selected').length == this.num_discards) {
+            //                 dojo.removeClass('confirm_btn', 'disabled');
+            //             } else {
+            //                 dojo.addClass('confirm_btn', 'disabled');
+            //             }
+            //             break;
+
+            //         default:
+            //             break;
+            //     }
+            // }
+        }, 
+
+        // onCancel: function()
+        // {
+        //     console.log( 'onCancel' );
+        //     this.clearLastAction();
+        //     this.selectedAction = '';
+        //     this.restoreServerGameState();
+        // }, 
+
+        // onConfirm: function()
+        // {
+        //     console.log( 'onConfirm' );
+
+        //     switch (this.selectedAction) {
+        //         case 'purchase':
+        //             var card_id = 'card_' + this.selectedCard.split('_')[5];
+        //             this.ajaxcall( "/paxpamir/paxpamir/purchaseCard.html", { 
+        //                 lock: true,
+        //                 card_id: card_id,
+        //             }, this, function( result ) {} );  
+        //             break;
+                    
+        //         case 'pass':
+        //             this.ajaxcall( "/paxpamir/paxpamir/passAction.html", { 
+        //                 lock: true,
+        //             }, this, function( result ) {} ); 
+        //             break;
+
+        //         case 'discard_hand':
+        //         case 'discard_court':
+        //             var cards = '';
+        //             dojo.query('.selected').forEach(
+        //                 function (item, index) {
+        //                     cards += ' card_' + item.id.split('_')[4];
+        //                 }, this);
+        //             this.ajaxcall( "/paxpamir/paxpamir/discardCards.html", { 
+        //                 lock: true,
+        //                 cards: cards,
+        //                 from_hand: (this.selectedAction == 'discard_hand')
+        //             }, this, function( result ) {} ); 
+        //             break;
+
+        //         default:
+        //             break;
+        //     }
+
+        // }, 
+
+        // onLeft: function()
+        // {
+        //     console.log( 'onLeft' );
+
+        //     switch (this.selectedAction) {
+        //         case 'play':    
+        //             this.clearLastAction();
+        //             // var node = $( card_id );
+        //             // dojo.addClass(node, 'selected');
+        //             var card_id = 'card_' + this.selectedCard.split('_')[4];
+        //             this.ajaxcall( "/paxpamir/paxpamir/playCard.html", { 
+        //                 lock: true,
+        //                 card_id: card_id,
+        //                 left_side: true,
+        //             }, this, function( result ) {} );  
+        //             break;
+
+        //         default:
+        //             break;
+        //     }
+
+        // }, 
+
+        // onRight: function()
+        // {
+        //     console.log( 'onRight' );
+
+        //     switch (this.selectedAction) {
+        //         case 'play':    
+        //             this.clearLastAction();
+        //             // var node = $( card_id );
+        //             // dojo.addClass(node, 'selected');
+        //             var card_id = 'card_' + this.selectedCard.split('_')[4];
+        //             this.ajaxcall( "/paxpamir/paxpamir/playCard.html", { 
+        //                 lock: true,
+        //                 card_id: card_id,
+        //                 left_side: false,
+        //             }, this, function( result ) {} );  
+        //             break;
+
+        //         default:
+        //             break;
+        //     }
+
+        // },
+
+        // onBribe: function()
+        // {
+        //     var btn_id = evt.currentTarget.id;
+        //     console.log( 'onBribe' );
+
+        //     var bribe_amount = btn_id.split('_')[1];
+
+        //     this.ajaxcall( "/paxpamir/paxpamir/setBribe.html", { 
+        //         lock: true,
+        //         bribe_amount: bribe_amount,
+        //         player_id: this.player_id,
+        //     }, this, function( result ) {} );  
+
+        // },
 
         onAfghan: function()
         {
@@ -700,8 +1037,8 @@ function (dojo, declare) {
 
             dojo.subscribe( 'chooseLoyalty', this, "notif_chooseLoyalty" );
 
-            // dojo.subscribe( 'purchaseCard', this, "notif_purchaseCard" );
-            // this.notifqueue.setSynchronous( 'purchaseCard', 2000 );
+            dojo.subscribe( 'purchaseCard', this, "notif_purchaseCard" );
+            this.notifqueue.setSynchronous( 'purchaseCard', 2000 );
 
             // dojo.subscribe( 'playCard', this, "notif_playCard" );
             // this.notifqueue.setSynchronous( 'playCard', 2000 );
@@ -743,6 +1080,33 @@ function (dojo, declare) {
             // }), 'loyalty_icon_' + player_id, 'replace');
             // dojo.query('#loyalty_wheel_' + player_id + ' .wheel').removeClass();
             // dojo.addClass('loyalty_wheel_' + player_id, 'wheel ' + loyalty);
+
+        },
+
+        notif_purchaseCard: function( notif )
+        {
+            console.log( 'notif_purchaseCard' );
+            console.log( notif );
+
+            this.clearLastAction();
+            var row = notif.args.market_location.split('_')[1];
+            var col = notif.args.market_location.split('_')[2];
+
+            this.card_tokens[notif.args.card.key].removeAll();
+
+            if (notif.args.player_id == this.player_id) {
+                this.moveCard(notif.args.card.key, this.market[row][col], this.player_hand);
+            } else {
+                this.moveCard(notif.args.card.key, this.market[row][col], null);
+            }
+
+            notif.args.updated_cards.forEach (
+                function (item, index) { this.addCardToken( 
+                    this.market[item.location.split('_')[1]][item.location.split('_')[2]],
+                    item.card_id, 
+                    item.coin_id 
+                ); 
+            }, this);
 
         },
         

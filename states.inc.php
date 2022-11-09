@@ -52,12 +52,12 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PLAYER_ACTIONS", 3);
-    // define("STATE_NEGOTIATE_BRIBE", 4);
+    define("STATE_NEGOTIATE_BRIBE", 4);
     // define("STATE_RESOLVE_IMPACT", 5);
-    // define("STATE_DISCARD_COURT", 10);
-    // define("STATE_DISCARD_HAND", 11);
+    define("STATE_DISCARD_COURT", 10);
+    define("STATE_DISCARD_HAND", 11);
     // define("STATE_RESOLVE_EVENT", 20);
-    // define("STATE_REFRESH_MARKET", 21);
+    define("STATE_REFRESH_MARKET", 21);
     // define("STATE_DOMINANCE_CHECK", 30);
     define("STATE_NEXT_PLAYER", 50);
     // define("STATE_OVERTHROW", 60);
@@ -100,6 +100,22 @@ $machinestates = array(
             "final" => STATE_FINAL 
         )
     ),
+
+    STATE_PLAYER_ACTIONS => array(
+        "name" => "playerActions",
+        "description" => clienttranslate('${actplayer} '),
+        "descriptionmyturn" => clienttranslate('${you} '),
+        "type" => "activeplayer",
+        "args" => "argPlayerActions",
+        "possibleactions" => array( "purchase", "play", "card_action", "pass" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS, 
+            "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
+            "discard_court" => STATE_DISCARD_COURT, 
+            "discard_hand" => STATE_DISCARD_HAND, 
+            "refresh_market" => STATE_REFRESH_MARKET, 
+        )
+),
     
 /*
     Examples:

@@ -37,12 +37,12 @@ class PaxPamirEditionTwo extends Table
             "remaining_actions" => 11,
             // "favored_suit" => 12,
             // "dominance_checks" => 13,
-            // "ruler_transcaspia" => 14,
-            // "ruler_kabul" => 15,
-            // "ruler_persia" => 16,
-            // "ruler_herat" => 17,
-            // "ruler_kandahar" => 18,
-            // "ruler_punjab" => 19,
+            "ruler_transcaspia" => 14,
+            "ruler_kabul" => 15,
+            "ruler_persia" => 16,
+            "ruler_herat" => 17,
+            "ruler_kandahar" => 18,
+            "ruler_punjab" => 19,
             // "bribe_card_id" =>20,
             // "bribe_amount" =>21,
             //    "my_first_global_variable" => 10,
@@ -110,12 +110,13 @@ class PaxPamirEditionTwo extends Table
         // self::setGameStateInitialValue( 'favored_suit', 0 );
         // self::setGameStateInitialValue( 'dominance_checks', 0 );
 
-        // self::setGameStateInitialValue( 'ruler_transcaspia', 2320830 );
-        // self::setGameStateInitialValue( 'ruler_kabul', 2320830 );
-        // self::setGameStateInitialValue( 'ruler_persia', 2320830 );
-        // self::setGameStateInitialValue( 'ruler_herat', 2320830 );
-        // self::setGameStateInitialValue( 'ruler_kandahar', 2320830 );
-        // self::setGameStateInitialValue( 'ruler_punjab', 2320830 );
+        // TODO (Frans): set to null initially
+        self::setGameStateInitialValue( 'ruler_transcaspia', 2371053 );
+        self::setGameStateInitialValue( 'ruler_kabul', 2371053 );
+        self::setGameStateInitialValue( 'ruler_persia', 2371053 );
+        self::setGameStateInitialValue( 'ruler_herat', 2371053 );
+        self::setGameStateInitialValue( 'ruler_kandahar', 2371053 );
+        self::setGameStateInitialValue( 'ruler_punjab', 2371053 );
 
         // self::setGameStateInitialValue( 'bribe_card_id', 0 );
         // self::setGameStateInitialValue( 'bribe_amount', -1 );
@@ -220,15 +221,126 @@ class PaxPamirEditionTwo extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function checkDiscards( $player_id )
+    {
+        //
+        // check for extra cards in hand and court
+        //
+        $result = array();
+        $suits = $this->getPlayerSuits($player_id);
+        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+        $hand = $this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id, null, 'state');
+        
+        $result['court'] = count($court_cards) - $suits['political'] - 3;
+        $result['court'] = max($result['court'], 0);
+
+        $result['hand'] = count($hand) - $suits['intelligence'] - 2;
+        $result['hand'] = max($result['hand'], 0);
+
+        return $result;
+
+    }
+
+    function getAllRegionRulers() {
+        
+        $result = array();
+
+        $result['ruler_transcaspia'] = $this->getGameStateValue( 'ruler_transcaspia' );
+        $result['ruler_kabul'] = $this->getGameStateValue( 'ruler_kabul' );
+        $result['ruler_persia'] = $this->getGameStateValue( 'ruler_persia' );
+        $result['ruler_herat'] = $this->getGameStateValue( 'ruler_herat' );
+        $result['ruler_kandahar'] = $this->getGameStateValue( 'ruler_kandahar' );
+        $result['ruler_punjab'] = $this->getGameStateValue( 'ruler_punjab' );
+
+        return $result;
+
+    }
+
+    // TODO (Frans): this probably needs prizes and gifts added?
+    function getPlayerInfluence($player_id) {
+        $influence = 1;
+        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+        for ($i = 0; $i < count($court_cards); $i++) {
+            // $card_info = $this->token_types[$court_cards[$i]['key']];
+            // $card_info['suit'] += $card_info['rank'];
+        }
+        return $influence;
+    }
+
     function getPlayerLoyalty($player_id) {
         $sql = "SELECT loyalty FROM player WHERE  player_id='$player_id' ";
         return $this->getUniqueValueFromDB($sql);
+    }
+
+    function getPlayerRupees($player_id) {
+        $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
+        return $this->getUniqueValueFromDB($sql);
+    }
+
+    function getPlayerSuits($player_id) {
+        $suits = array (
+            'political' => 0,
+            'military' => 0,
+            'economic' => 0,
+            'intelligence' => 0
+        );
+        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+        for ($i = 0; $i < count($court_cards); $i++) {
+            $card_info = $this->token_types[$court_cards[$i]['key']];
+            $suits[$card_info['suit']] += $card_info['rank'];
+        }
+        return $suits;
+    }
+
+    function getUnavailableCards() {
+
+        $result = array();
+        
+        for ($i = 0; $i < 2; $i++) {
+            for ($j = 0; $j < 6; $j++) {
+                $res = $this->tokens->getTokensOfTypeInLocation('card', 'market_'.$i.'_'.$j, 1 );
+                $card = array_shift( $res );
+                if (($card !== NULL) and ($card['state'] == 1)) {
+                    $result[] = $card['key'];
+                }
+            }
+        }
+
+        return $result;
+
+    }
+
+    function incPlayerRupees($player_id, $value) {
+        $rupees = $this->getPlayerRupees($player_id);
+        $rupees += $value;
+        $sql = "UPDATE player SET coins='$rupees' 
+                WHERE  player_id='$player_id' ";
+        self::DbQuery( $sql );
     }
 
     function setPlayerLoyalty($player_id, $coalition) {
         $sql = "UPDATE player SET loyalty='$coalition' 
         WHERE  player_id='$player_id' ";
         self::DbQuery( $sql );
+    }
+
+    function updatePlayerCounts() {
+        $counts = array();
+        $players = $this->loadPlayersBasicInfos();
+        // $sql = "SELECT player_id id, player_score score, loyalty, coins FROM player ";
+        // $result['players'] = self::getCollectionFromDb( $sql );
+        foreach ( $players as $player_id => $player_info ) {
+            $counts[$player_id] = array();
+            $counts[$player_id]['rupees'] = $this->getPlayerRupees($player_id );
+            $counts[$player_id]['tokens'] = count($this->tokens->getTokensOfTypeInLocation('token', 'tokens_'.$player_id ));
+            $counts[$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
+            $counts[$player_id]['suits'] = $this->getPlayerSuits($player_id);
+            $counts[$player_id]['influence'] = $this->getPlayerInfluence($player_id);
+        }
+
+        self::notifyAllPlayers( "updatePlayerCounts", '', array(
+            'counts' => $counts
+        ) );
     }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -291,6 +403,105 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    function cleanup( )
+    {
+        //
+        // go to the next state for cleanup:  either discard court, discard hand or refresh market
+        //
+
+        $player_id = self::getActivePlayerId();
+        $discards = $this->checkDiscards($player_id);
+
+        if ($discards['court'] > 0) {
+            $this->gamestate->nextState( 'discard_court' );
+        } elseif ($discards['hand'] > 0) {
+            $this->gamestate->nextState( 'discard_hand' );
+        } else {
+            $this->gamestate->nextState( 'refresh_market' );
+        }
+
+    }
+
+    function purchaseCard( $card_id )
+    {
+        self::checkAction( 'purchase' );
+
+        $player_id = self::getActivePlayerId();
+        $card = $this->tokens->getTokenInfo($card_id);
+        $card_name = $this->token_types[$card_id]['name'];
+        $market_location = $card['location'];
+        $row = explode("_", $market_location)[1];
+        $row_alt = ($row == 0) ? 1 : 0;
+        $col = $cost = explode("_", $market_location)[2];
+
+        if ($this->getGameStateValue("remaining_actions") > 0) {
+
+            if ($cost > $this->getPlayerRupees($player_id)) {
+                throw new feException( "Not enough rupees" );
+            } else {
+                $this->incPlayerRupees($player_id, -$cost);
+            };
+
+            $this->tokens->moveToken($card_id, 'hand_'.$player_id);
+            $this->incGameStateValue("remaining_actions", -1);
+
+            $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $card_id);
+            // $this->tokens->moveTokens($coins, 'pool');
+            $this->incPlayerRupees($player_id, count($rupees));
+            $this->tokens->moveAllTokensInLocation($card_id, 'pool');
+
+            // self::notifyAllPlayers( "log", "purchaseCard", array(
+            //     'card' => $card,
+            //     'col' => $col,
+            //     'row' => $row,
+            //     'market_location' => $market_location,
+            //     'coins' => $coins
+            // ) );
+
+            $updated_cards = array();
+
+            for ($i = $col-1; $i >= 0; $i--) {
+                $location = 'market_'.$row.'_'.$i;
+                $m_card = $this->tokens->getTokenOnLocation($location);
+                if ($m_card == NULL) {
+                    $location = 'market_'.$row_alt.'_'.$i;
+                    $m_card = $this->tokens->getTokenOnLocation($location);
+                }
+                if ($m_card !== NULL) {
+                    $c = $this->tokens->getTokenOnTop('pool');
+                    $this->tokens->moveToken($c['key'], $m_card["key"]); 
+                    $this->tokens->setTokenState($m_card["key"], 1);
+                    $updated_cards[] = array(
+                        'location' => $location,
+                        'card_id' => $m_card["key"],
+                        'coin_id' => $c['key']
+                    );
+                }
+            }
+
+            self::notifyAllPlayers( "purchaseCard", clienttranslate( '${player_name} purchased ${card_name}' ), array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                'card' => $card,
+                'card_name' => $card_name,
+                'market_location' => $market_location,
+                'updated_cards' => $updated_cards,
+                'i18n' => array( 'card_name' ),
+            ) );
+
+            $this->updatePlayerCounts();
+
+        }
+
+        if ($this->getGameStateValue("remaining_actions") > 0) {
+            $this->gamestate->nextState( 'action' );
+        } else {
+            $this->cleanup();
+        }
+
+    }
+
+
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -301,6 +512,20 @@ class PaxPamirEditionTwo extends Table
         These methods function is to return some additional information that is specific to the current
         game state.
     */
+
+    function argPlayerActions()
+    {
+        $player_id = self::getActivePlayerId();
+
+        return array(
+            'remaining_actions' => $this->getGameStateValue("remaining_actions"),
+            'unavailable_cards' => $this->getUnavailableCards(),
+            'hand' => $this->tokens->getTokensInLocation('hand_'.$player_id),
+            'court' => $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state'),
+            'suits' => $this->getPlayerSuits($player_id),
+            'rulers' => $this->getAllRegionRulers()
+        );
+    }
 
     /*
     

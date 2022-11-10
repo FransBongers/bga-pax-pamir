@@ -72,8 +72,8 @@
 
     <div id="pp_market_board">
         <!-- BEGIN market -->
-        <div id="market_{ROW}_{COLUMN}" class="pp_market" style="left: {LEFT}px; top: {TOP}px;">
-            <div id="market_{ROW}_{COLUMN}_rupee_zone" class="pp_market_rupee_zone"></div>
+        <div id="pp_market_{ROW}_{COLUMN}" class="pp_market" style="left: {LEFT}px; top: {TOP}px;">
+            <div id="pp_market_{ROW}_{COLUMN}_rupees" class="pp_market_rupees"></div>
         </div>
         <!-- END market -->
         <div id="cards">
@@ -83,6 +83,12 @@
 
 
     <div id="pp_player_tableaus">
+        <!-- BEGIN player_hand -->
+        <div id="pp_player_hand_{player_id}" class="pp_player_hand">
+            <div id="pp_player_hand_title" class="pp_tableau_title"><span>{player_name}'s hand</span></div>
+            <div id="pp_player_hand_cards" class="pp_player_hand_cards"></div>
+        </div>
+        <!-- END player_hand -->
         <!-- BEGIN player_tableau -->
         <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
             <div id="pp_tableau_title_player_{player_id}" class="pp_tableau_title"><span>{player_name}'s court</span></div>

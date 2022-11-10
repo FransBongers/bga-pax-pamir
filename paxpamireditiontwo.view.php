@@ -45,6 +45,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         $current_player_id = $g_user->get_id();
         // self::dump( "current_player_id", $current_player_id );
 
+        // Player tableas
         $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "player_tableau" );
         
         // Make sure player tableaus are in order with current player at the top.
@@ -64,9 +65,19 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
             $player_id = $this->game->getPlayerAfter($player_id);
         }
 
+        // Player hand
+        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "player_hand" );
+        
+        // only add if current player is playing and nog a spectator
+        if (isset($players [$current_player_id])) { // may be not set if spectator
+            $player_id = $current_player_id;
+            $this->page->insert_block("player_hand", array (
+                "player_id" => $player_id,
+                "player_name" => $players[$player_id]['player_name']
+            )); 
+        } 
 
-
-
+        // Market containers for stock component
         $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "market" );
         
         $hor_scale = 150;

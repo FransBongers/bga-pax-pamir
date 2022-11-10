@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © Julien Coignet <breddabasse@hotmail.com>
+ * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com> & Julien Coignet <breddabasse@hotmail.com>
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -19,7 +19,8 @@
  *
  */
 
-include 'modules/php/includes/PXPCards.inc.php';
+ // Note (Frans): commented this out for now as it led to some issues after syncing files with the game server.
+// include 'modules/php/includes/PXPCards.inc.php';
 
 
 /*

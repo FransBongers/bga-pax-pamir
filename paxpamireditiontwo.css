@@ -421,7 +421,7 @@ html {
     /* border: 1px blue solid; */
 }
 
-.pp_market_rupee_zone {
+.pp_market_rupees {
     width: 130px;
     height: 50px;
     left: 8px;
@@ -429,6 +429,19 @@ html {
     position: absolute;
     /* border: 2px black solid; */
     /* z-index: 10; */
+}
+
+.pp_player_hand {
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    margin-bottom: 15px;
+    background-color: ivory;
+}
+
+.pp_player_hand_cards {
+    flex-grow: 1;
+    margin: 10px 20px;
 }
 
 #pp_player_tableaus {
@@ -496,12 +509,25 @@ html {
 
 
 .pp_card {
-    width: 150px;
-    height: 209px;
-    background-size: 150px 209px;
-    position: absolute;
     box-shadow: 1px 1px 4px;
-    border-radius: 10px;
+
+    /* TODO: (Frans): check why setting border-radius leads to issues with stock component
+    border-radius: 10px; */
+}
+
+.pp_selectable_card {
+    /* border: 2px blue solid; */
+    cursor: pointer;
+    box-shadow: 0px 0px 4px 4px orangered !important;
+}
+
+.pp_selectable_card:hover {
+	box-shadow: 0px 0px 4px 4px blue !important;
+}
+
+.pp_selected {
+	cursor: pointer;
+	box-shadow: 0px 0px 4px 4px blue !important;
 }
 
 .pp_card_in_court:hover, .pp_card_in_court:active {

@@ -40,14 +40,17 @@ class PXPCardFactory
             ->setLoyalty(null)
             ->setPrize(null)
             ->setImpactIcons(null)
+            ->setDescription(null)
             ->setDiscardedEffect(null)
-            ->setPurchasedEffect(null);
+            ->setDiscardedDescription(null)
+            ->setPurchasedEffect(null)
+            ->setPurchasedDescription(null);
 
         return $card;
     }
 
     static public function createEventCard(
-        int $id, string $discardedEffect, string $purchasedEffect
+        int $id, string $discardedEffect, ?string $discardedDescription, string $purchasedEffect, string $purchasedDescription
     ): PXPCard
     {
         $card = new PXPCard();
@@ -67,8 +70,11 @@ class PXPCardFactory
             ->setLoyalty(null)
             ->setPrize(null)
             ->setImpactIcons(null)
+            ->setDescription(null)
             ->setDiscardedEffect($discardedEffect)
-            ->setPurchasedEffect($purchasedEffect);
+            ->setDiscardedDescription($discardedDescription)
+            ->setPurchasedEffect($purchasedEffect)
+            ->setPurchasedDescription($purchasedDescription);
 
         return $card;
     }
@@ -76,7 +82,7 @@ class PXPCardFactory
     static public function createSuitCard(
         int $id, ?string $suit, ?int $rank, ?string $name, ?string $region, ?string $specialAbility, bool $taxAction, bool $giftAction,
         bool $buildAction, bool $moveAction, bool $betrayAction, bool $battleAction, ?string $loyalty, ?string $prize,
-        ?array $impactIcons
+        ?array $impactIcons, ?String $description
     ): PXPCard
     {
         $card = new PXPCard();
@@ -96,8 +102,11 @@ class PXPCardFactory
             ->setLoyalty($loyalty)
             ->setPrize($prize)
             ->setImpactIcons($impactIcons)
+            ->setDescription($description)
             ->setDiscardedEffect(null)
-            ->setPurchasedEffect(null);
+            ->setDiscardedDescription(null)
+            ->setPurchasedEffect(null)
+            ->setPurchasedDescription(null);
 
         return $card;
     }

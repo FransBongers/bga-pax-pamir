@@ -127,6 +127,33 @@ $machinestates = array(
             "refresh_market" => STATE_REFRESH_MARKET,
         )
     ),
+
+    STATE_DISCARD_COURT => array(
+        "name" => "discardCourt",
+        "description" => clienttranslate('${actplayer} must discard court cards'),
+        "descriptionmyturn" => clienttranslate('${you} must discard '),
+        "type" => "activeplayer",
+        "args" => "argPlayerActions",
+        "possibleactions" => array( "discard" ),
+        "transitions" => array( 
+            "discard_court" => STATE_DISCARD_COURT, 
+            "discard_hand" => STATE_DISCARD_HAND, 
+            "refresh_market" => STATE_REFRESH_MARKET, 
+        )
+    ),
+
+    STATE_DISCARD_HAND => array(
+        "name" => "discardHand",
+        "description" => clienttranslate('${actplayer} must discard hand cards'),
+        "descriptionmyturn" => clienttranslate('${you} must discard '),
+        "type" => "activeplayer",
+        "args" => "argPlayerActions",
+        "possibleactions" => array( "discard" ),
+        "transitions" => array( 
+            "discard_hand" => STATE_DISCARD_HAND, 
+            "refresh_market" => STATE_REFRESH_MARKET, 
+        )
+    ),
     
 /*
     Examples:

@@ -95,10 +95,12 @@ function (dojo, declare) {
                 this.persia_transcaspia,
             ]
 
+            // global variables to keep stock components
             this.playerHand = new ebg.stock();
-            this.playerCounts = {}; // rename to playerTotals?
             this.market = [];
+            this.court = {};
 
+            this.playerCounts = {}; // rename to playerTotals?
             this.unavailableCards = [];
 
             // TODO check what there are used for
@@ -131,26 +133,33 @@ function (dojo, declare) {
             // console.log('players', players)
 
             // Setting up player boards
-            for( const player_id in gamedatas.players )
+            for( const playerId in gamedatas.players )
             {
-                const player = gamedatas.players[player_id];
-                // TODO: Setting up players boards if needed
-                const player_board_div = $('player_board_'+player_id);
+                const player = gamedatas.players[playerId];
+                this.court[playerId] = new ebg.stock();
+                this.setupCardsStock({stock: this.court[playerId], nodeId: `pp_court_player_${playerId}`, className: `pp_card_in_court_${playerId}`});
+
+                gamedatas.court[playerId].forEach((card) => {
+                    this.placeCard({location: this.court[playerId], id: card.key, order: card.state});
+                })
+
+                // Set up players board
+                const player_board_div = $('player_board_'+playerId);
                 dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
                 if (player.loyalty !== 'null') {
-                    this.updatePlayerLoyalty({playerId: player_id, coalition: player.loyalty})
+                    this.updatePlayerLoyalty({playerId, coalition: player.loyalty})
                 }
 
                 // apparently this is shorthand notions for accessing divs based on id
-                $('influence_'+ player_id).innerHTML = gamedatas.counts[player_id].influence;
-                $('token_count_' + player_id).innerHTML = gamedatas.counts[player_id].tokens; // TODO: rename to cylinders / tribes
-                $('rupee_count_' + player_id).innerHTML = gamedatas.players[player_id].rupees;
-                $('card_count_' + player_id).innerHTML = gamedatas.counts[player_id].cards;
+                $('influence_'+ playerId).innerHTML = gamedatas.counts[playerId].influence;
+                $('token_count_' + playerId).innerHTML = gamedatas.counts[playerId].tokens; // TODO: rename to cylinders / tribes
+                $('rupee_count_' + playerId).innerHTML = gamedatas.players[playerId].rupees;
+                $('card_count_' + playerId).innerHTML = gamedatas.counts[playerId].cards;
 
-                $('economic_'+ player_id).innerHTML = gamedatas.counts[player_id].suits.economic;
-                $('military_'+ player_id).innerHTML = gamedatas.counts[player_id].suits.military;
-                $('political_'+ player_id).innerHTML = gamedatas.counts[player_id].suits.political;
-                $('intelligence_'+ player_id).innerHTML = gamedatas.counts[player_id].suits.intelligence;
+                $('economic_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.economic;
+                $('military_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.military;
+                $('political_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.political;
+                $('intelligence_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.intelligence;
 
                 
             }
@@ -159,10 +168,10 @@ function (dojo, declare) {
 
 
             
-            // Create court zones
-            Object.keys(players).forEach((key, index) => {
-                this.createPlayerCourtZone({playerId: players[key].id});
-            })
+            // // Create court zones
+            // Object.keys(players).forEach((key, index) => {
+            //     this.createPlayerCourtZone({playerId: players[key].id});
+            // })
 
             // Place cards in market
             for (let row = 0; row <= 1; row++) {
@@ -184,6 +193,11 @@ function (dojo, declare) {
             } 
 
             this.setupCardsStock({stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
+
+            Object.keys(this.gamedatas.hand).forEach((cardId) => {
+                console.log('cardId', cardId, typeof cardId)
+                this.placeCard({location: this.playerHand, id: cardId});
+            })
 
             // this.market[0][1].addToStockWithId( , 1 );
             // Market stocks;
@@ -376,38 +390,38 @@ function (dojo, declare) {
                     //     }
                     //     break;
 
-                    // case 'discardCourt':
-                    //     this.num_discards = Object.keys(args.court).length - args.suits.political - 3;
-                    //     if (this.num_discards > 1) var cardmsg = _(' court cards '); else cardmsg = _(' court card');
-                    //     $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
-                    //             + this.num_discards + '</span>' + cardmsg;
-                    //     this.selectedAction = 'discard_court';
-                    //     this.updateSelectableCards();
-                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
-                    //     dojo.addClass('confirm_btn', 'disabled');
-                    //     break;
+                    case 'discardCourt':
+                        this.numberOfDiscards = Object.keys(args.court).length - args.suits.political - 3;
+                        if (this.numberOfDiscards > 1) var cardmsg = _(' court cards '); else cardmsg = _(' court card');
+                        $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                                + this.numberOfDiscards + '</span>' + cardmsg;
+                        this.selectedAction = 'discard_court';
+                        this.updateSelectableCards();
+                        this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                        dojo.addClass('confirm_btn', 'pp_disabled');
+                        break;
 
-                    // case 'discardHand':
-                    //     this.num_discards = Object.keys(args.hand).length - args.suits.intelligence - 2;
-                    //     if (this.num_discards > 1) var cardmsg = _(' hand cards '); else cardmsg = _(' hand card');
-                    //     $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
-                    //     + this.num_discards + '</span>' + cardmsg;
-                    //     this.selectedAction = 'discard_hand';
-                    //     this.updateSelectableCards();
-                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
-                    //     dojo.addClass('confirm_btn', 'disabled');
-                    //     break;
+                    case 'discardHand':
+                        this.numberOfDiscards = Object.keys(args.hand).length - args.suits.intelligence - 2;
+                        if (this.numberOfDiscards > 1) var cardmsg = _(' hand cards '); else cardmsg = _(' hand card');
+                        $('pagemaintitletext').innerHTML += '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
+                        + this.numberOfDiscards + '</span>' + cardmsg;
+                        this.selectedAction = 'discard_hand';
+                        this.updateSelectableCards();
+                        this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                        dojo.addClass('confirm_btn', 'pp_disabled');
+                        break;
 
                     case 'client_confirmPurchase':
                         this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
                         this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
                         break;
 
-                    // case 'client_confirmPlay':
-                    //     this.addActionButton( 'left_side_btn', _('<< LEFT'), 'onLeft', null, false, 'blue' );
-                    //     this.addActionButton( 'right_side_btn', _('RIGHT >>'), 'onRight', null, false, 'blue' );
-                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
-                    //     break;
+                    case 'client_confirmPlay':
+                        this.addActionButton( 'left_side_btn', _('<< LEFT'), 'onLeft', null, false, 'blue' );
+                        this.addActionButton( 'right_side_btn', _('RIGHT >>'), 'onRight', null, false, 'blue' );
+                        this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                        break;
 
                     // case 'client_endTurn':
                     //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
@@ -430,29 +444,7 @@ function (dojo, declare) {
                 }
             }
         },     
-//         onUpdateActionButtons: function( stateName, args )
-//         {
-//             console.log( 'onUpdateActionButtons: '+stateName );
-                      
-//             if( this.isCurrentPlayerActive() )
-//             {            
-//                 switch( stateName )
-//                 {
-// /*               
-//                  Example:
- 
-//                  case 'myGameState':
-                    
-//                     // Add 3 action buttons in the action status bar:
-                    
-//                     this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-//                     this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-//                     this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
-//                     break;
-// */
-//                 }
-//             }
-//         },        
+     
 
         ///////////////////////////////////////////////////
         //// Utility methods
@@ -493,13 +485,24 @@ function (dojo, declare) {
 
         },
 
+        discardCard : function({id, from, order = null}) {
+
+            console.log( 'discardCard' );
+
+            // if (this.card_tokens[id] !== null) 
+            //     this.card_tokens[id].removeAll();
+
+            from.removeFromStockById(id, 'pp_discard_pile');
+
+        },
+
         placeCard : function({location, id, order = null}) {
             console.log('placeCard');
 
-            // TODO (check where the order is used)
             if (order != null) {
-                x = {}; x[id] = order;
-                location.changeItemsWeight(x);
+                location.changeItemsWeight({
+                    [id]: order,
+                });
             }
 
             location.addToStockWithId(id, id, 'pp_market_deck');
@@ -510,12 +513,17 @@ function (dojo, declare) {
 
         },
 
+        // Updates weight of item in the stock component for ordering purposes
+        updateCard : function({location, id, order}) {
+            location.changeItemsWeight({[id]: order});
+        },
+
         // Function to implement functionality for card stock components
         setupCardsStock: function( {stock, nodeId, className} ) {
-
+            const useLargeCards = false;
             stock.create( this, $(nodeId), this.cardWidth, this.cardHeight );
-            stock.backgroundSize = '17550px 209px'
-            stock.image_items_per_row = 117;
+            stock.backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+            stock.image_items_per_row = useLargeCards ? 117 : 118;
             stock.item_margin = 10;
             // TODO: below is option to customize the created div (and add zones to card for example)
             // stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
@@ -523,8 +531,8 @@ function (dojo, declare) {
             //     background-image:url('${image}');\"><div id=\"${id}_tokens\" class=\"card_token_area\"></div></div>";
             
             this.gamedatas.cards.forEach((card) => {
-                const cardFileLocation = g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg';
-                stock.addItemType( card, 0, cardFileLocation, card.split('_')[1] -1 );
+                const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
+                stock.addItemType( card, 0, cardFileLocation, useLargeCards ? card.split('_')[1] -1 : card.split('_')[1] );
             });
             stock.extraClasses = `pp_card ${className}`;
         },
@@ -718,33 +726,30 @@ function (dojo, declare) {
                 case 'purchase':
                     dojo.query('.pp_market_card').forEach(
                         (node) => {
-                            console.log('node in select', node.id, node);
-                            console.log(node.id.split('_'));
-                            
                             const cost = node.id.split('_')[3]; // cost is equal to the column number
                             const cardId = node.id.split('_')[6];
-                            console.log('counts', this.playerCounts[this.player_id])
                             if ((cost <= this.playerCounts[this.player_id].rupees) && (! this.unavailableCards.includes('card_'+cardId) )) {
                                 dojo.addClass(node, 'pp_selectable_card');
                                 this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
                             }
                         }, this);
                     break;
-                // case 'play':
-                // case 'discard_hand':
-                //     dojo.query('.hand').forEach(
-                //         function (node, index) {
-                //             dojo.addClass(node, 'pp_selectable_card');
-                //             this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
-                //         }, this);
-                //     break;
-                // case 'discard_court':
-                //     dojo.query('.court_' + this.player_id).forEach(
-                //         function (node, index) {
-                //             dojo.addClass(node, 'pp_selectable_card');
-                //             this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
-                //         }, this);
-                //     break;
+                case 'play':
+                case 'discard_hand':
+                    dojo.query('.pp_card_in_hand').forEach(
+                        function (node, index) {
+                            dojo.addClass(node, 'pp_selectable_card');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                        }, this);
+                    break;
+                case 'discard_court':
+                    dojo.query(`.pp_card_in_court_${this.player_id}`).forEach(
+                        function (node, index) {
+                            console.log('node in for each', node)
+                            dojo.addClass(node, 'pp_selectable_card');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                        }, this);
+                    break;
                 // case 'card_action':
                 //     break;
                 default:
@@ -754,7 +759,8 @@ function (dojo, declare) {
         },
 
         moveCard : function({id, from, to, order = null}) {
-            console.log( 'moveCard', 'from', from, 'to', to, 'order', order );
+            console.log( 'moveCard' );
+            // console.log( 'moveCard', id, 'from', from, 'to', to, 'order', order );
             // var card_tokens_list = this.card_tokens[id].getAllItems();
 
             let fromDiv = null;
@@ -881,13 +887,13 @@ function (dojo, declare) {
             console.log( 'onCard ' + cardId );
 
             this.selectedCard = cardId;
-
+            let node;
             if( this.isCurrentPlayerActive() )
             {   
                 switch (this.selectedAction) {
                     case 'purchase':    
                         this.clearLastAction();
-                        const node = $( cardId );
+                        node = $( cardId );
                         console.log('node', node);
                         dojo.addClass(node, 'pp_selected');
                         const cost = cardId.split('_')[3];
@@ -895,25 +901,25 @@ function (dojo, declare) {
                         this.setClientState("client_confirmPurchase", { descriptionmyturn : "Purchase this card for "+cost+" rupees?"});
                         break;
 
-                    // case 'play':    
-                    //     this.clearLastAction();
-                    //     var node = $( card_id );
-                    //     dojo.addClass(node, 'selected');
-                    //     var card_id = 'card_' + this.selectedCard.split('_')[4];
-                    //     this.setClientState("client_confirmPlay", { descriptionmyturn : "Select which side of court to play card:"});
-                    //     break;
+                    case 'play':    
+                        this.clearLastAction();
+                        node = $( cardId );
+                        dojo.addClass(node, 'pp_selected');
+                        const card_id = 'card_' + this.selectedCard.split('_')[6];
+                        this.setClientState("client_confirmPlay", { descriptionmyturn : "Select which side of court to play card:"});
+                        break;
                     
-                    // case 'discard_hand':
-                    // case 'discard_court':
-                    //     var node = $( card_id );
-                    //     dojo.toggleClass(node, 'selected');
-                    //     dojo.toggleClass(node, 'discard');
-                    //     if (dojo.query('.selected').length == this.num_discards) {
-                    //         dojo.removeClass('confirm_btn', 'disabled');
-                    //     } else {
-                    //         dojo.addClass('confirm_btn', 'disabled');
-                    //     }
-                    //     break;
+                    case 'discard_hand':
+                    case 'discard_court':
+                        node = $( cardId );
+                        dojo.toggleClass(node, 'pp_selected');
+                        dojo.toggleClass(node, 'pp_discard');
+                        if (dojo.query('.pp_selected').length == this.numberOfDiscards) {
+                            dojo.removeClass('confirm_btn', 'pp_disabled');
+                        } else {
+                            dojo.addClass('confirm_btn', 'pp_disabled');
+                        }
+                        break;
 
                     default:
                         break;
@@ -949,19 +955,19 @@ function (dojo, declare) {
                 //     }, this, function( result ) {} ); 
                 //     break;
 
-                // case 'discard_hand':
-                // case 'discard_court':
-                //     var cards = '';
-                //     dojo.query('.selected').forEach(
-                //         function (item, index) {
-                //             cards += ' card_' + item.id.split('_')[4];
-                //         }, this);
-                //     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/discardCards.html", { 
-                //         lock: true,
-                //         cards: cards,
-                //         from_hand: (this.selectedAction == 'discard_hand')
-                //     }, this, function( result ) {} ); 
-                //     break;
+                case 'discard_hand':
+                case 'discard_court':
+                    let cards = '';
+                    dojo.query('.pp_selected').forEach(
+                        function (item, index) {
+                            cards += ' card_' + item.id.split('_')[6];
+                        }, this);
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/discardCards.html", { 
+                        lock: true,
+                        cards: cards,
+                        from_hand: (this.selectedAction == 'discard_hand')
+                    }, this, function( result ) {} ); 
+                    break;
 
                 default:
                     break;
@@ -969,51 +975,53 @@ function (dojo, declare) {
 
         }, 
 
-        // onLeft: function()
-        // {
-        //     console.log( 'onLeft' );
+        onLeft: function()
+        {
+            console.log( 'onLeft' );
 
-        //     switch (this.selectedAction) {
-        //         case 'play':    
-        //             this.clearLastAction();
-        //             // var node = $( card_id );
-        //             // dojo.addClass(node, 'selected');
-        //             var card_id = 'card_' + this.selectedCard.split('_')[4];
-        //             this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
-        //                 lock: true,
-        //                 card_id: card_id,
-        //                 left_side: true,
-        //             }, this, function( result ) {} );  
-        //             break;
+            switch (this.selectedAction) {
+                case 'play':    
+                    this.clearLastAction();
+                    // var node = $( card_id );
+                    // dojo.addClass(node, 'selected');
+                    var card_id = 'card_' + this.selectedCard.split('_')[6];
+                    console.log('cardId', card_id);
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
+                        lock: true,
+                        card_id: card_id,
+                        left_side: true,
+                    }, this, function( result ) {} );  
+                    break;
 
-        //         default:
-        //             break;
-        //     }
+                default:
+                    break;
+            }
 
-        // }, 
+        }, 
 
-        // onRight: function()
-        // {
-        //     console.log( 'onRight' );
+        onRight: function()
+        {
+            console.log( 'onRight' );
 
-        //     switch (this.selectedAction) {
-        //         case 'play':    
-        //             this.clearLastAction();
-        //             // var node = $( card_id );
-        //             // dojo.addClass(node, 'selected');
-        //             var card_id = 'card_' + this.selectedCard.split('_')[4];
-        //             this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
-        //                 lock: true,
-        //                 card_id: card_id,
-        //                 left_side: false,
-        //             }, this, function( result ) {} );  
-        //             break;
+            switch (this.selectedAction) {
+                case 'play':    
+                    this.clearLastAction();
+                    // var node = $( card_id );
+                    // dojo.addClass(node, 'selected');
+                    var card_id = 'card_' + this.selectedCard.split('_')[6];
+                    console.log('cardId', card_id);
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
+                        lock: true,
+                        card_id: card_id,
+                        left_side: false,
+                    }, this, function( result ) {} );  
+                    break;
 
-        //         default:
-        //             break;
-        //     }
+                default:
+                    break;
+            }
 
-        // },
+        },
 
         // onBribe: function()
         // {
@@ -1119,11 +1127,11 @@ function (dojo, declare) {
             dojo.subscribe( 'purchaseCard', this, "notif_purchaseCard" );
             this.notifqueue.setSynchronous( 'purchaseCard', 2000 );
 
-            // dojo.subscribe( 'playCard', this, "notif_playCard" );
-            // this.notifqueue.setSynchronous( 'playCard', 2000 );
+            dojo.subscribe( 'playCard', this, "notif_playCard" );
+            this.notifqueue.setSynchronous( 'playCard', 2000 );
 
-            // dojo.subscribe( 'discardCard', this, "notif_discardCard" );
-            // this.notifqueue.setSynchronous( 'discardCard', 500 );
+            dojo.subscribe( 'discardCard', this, "notif_discardCard" );
+            this.notifqueue.setSynchronous( 'discardCard', 500 );
 
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 500 );
@@ -1152,6 +1160,8 @@ function (dojo, declare) {
             const playerId = notif.args.player_id;
 
             this.updatePlayerLoyalty({playerId, coalition})
+
+            // TODO (Frans): edit if we want to show the loyalty wheel somewhere
             // var x = this.gamedatas.loyalty[loyalty].icon * 44;
             // dojo.place(this.format_block('jstpl_loyalty_icon', {
             //     id: player_id,
@@ -1159,6 +1169,82 @@ function (dojo, declare) {
             // }), 'loyalty_icon_' + player_id, 'replace');
             // dojo.query('#loyalty_wheel_' + player_id + ' .wheel').removeClass();
             // dojo.addClass('loyalty_wheel_' + player_id, 'wheel ' + loyalty);
+
+        },
+
+
+        notif_discardCard: function( notif )
+        {
+            console.log( 'notif_discardCard', notif );
+
+            this.clearLastAction();
+            const playerId = notif.args.player_id;
+
+            if (notif.args.from == 'hand') {
+                // TODO (Frans): check how this works for other players than the one whos card gets discarded
+                this.discardCard({id: notif.args.card_id, from: this.playerHand});
+
+            } else {
+
+                this.discardCard({id: notif.args.card_id, from: this.court[playerId]});
+
+                notif.args.court_cards.forEach (
+                    function (card, index) {
+                        this.updateCard({
+                            location: this.court[playerId], 
+                            id: card.key,
+                            order: card.state });
+                    }, this);
+    
+                // TODO (Frans): check removing tokens from cards
+                // if (this.card_tokens[notif.args.card_id] !== null) 
+                //     this.card_tokens[notif.args.card_id].removeAll();
+
+            }
+
+            // notif.args.court_cards.forEach (
+            //     function (card, index) {
+            //         this.updateCard(
+            //             this.court[player_id], 
+            //             card.key,
+            //             card.state );
+            //     }, this);
+
+            // this.card_tokens[notif.args.card.key].removeAll();
+
+            // this.court[player_id].updateDisplay();
+
+        },
+
+
+        notif_playCard: function( notif )
+        {
+            console.log( 'notif_playCard', notif );
+
+            this.clearLastAction();
+            var playerId = notif.args.player_id;
+
+            notif.args.court_cards.forEach (
+                function (card, index) {
+                    this.updateCard({
+                        location: this.court[playerId], 
+                        id: card.key,
+                        order: card.state });
+                }, this);
+
+            // // this.card_tokens[notif.args.card.key].removeAll();
+            // if (this.card_tokens[notif.args.card.key] !== null) 
+            //     this.card_tokens[notif.args.card.key].removeAll();
+
+            if (playerId == this.player_id) {
+                this.moveCard({id: notif.args.card.key, from: this.playerHand, to: this.court[playerId]});
+            } else {
+                // TODO (Frans): check why moveCard results in a UI error
+                // this.moveCard({id: notif.args.card.key, from: null, to: this.court[playerId]});
+                this.placeCard({location: this.court[playerId], id: notif.args.card.key});
+            }
+
+            this.court[playerId].updateDisplay();
 
         },
 

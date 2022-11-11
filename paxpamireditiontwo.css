@@ -530,6 +530,15 @@ html {
 	box-shadow: 0px 0px 4px 4px blue !important;
 }
 
+.pp_discard {
+    opacity: 0.5;
+}
+
+.pp_disabled {
+    opacity: 0.5;
+    cursor: none;
+}
+
 .pp_card_in_court:hover, .pp_card_in_court:active {
     z-index: 100 !important;
     /* border: 2px blue solid; */

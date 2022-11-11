@@ -43,8 +43,8 @@ class PaxPamirEditionTwo extends Table
             "ruler_herat" => 17,
             "ruler_kandahar" => 18,
             "ruler_punjab" => 19,
-            // "bribe_card_id" =>20,
-            // "bribe_amount" =>21,
+            "bribe_card_id" =>20,
+            "bribe_amount" =>21,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -131,20 +131,20 @@ class PaxPamirEditionTwo extends Table
 
         // Init global values with their initial values
         self::setGameStateInitialValue( 'setup', 1 );
-        self::setGameStateInitialValue( 'remaining_actions', 10 );
+        self::setGameStateInitialValue( 'remaining_actions', 2 );
         // self::setGameStateInitialValue( 'favored_suit', 0 );
         // self::setGameStateInitialValue( 'dominance_checks', 0 );
 
         // TODO (Frans): set to null initially
-        self::setGameStateInitialValue( 'ruler_transcaspia', 2371053 );
-        self::setGameStateInitialValue( 'ruler_kabul', 2371053 );
-        self::setGameStateInitialValue( 'ruler_persia', 2371053 );
-        self::setGameStateInitialValue( 'ruler_herat', 2371053 );
-        self::setGameStateInitialValue( 'ruler_kandahar', 2371053 );
-        self::setGameStateInitialValue( 'ruler_punjab', 2371053 );
+        self::setGameStateInitialValue( 'ruler_transcaspia', 0 );
+        self::setGameStateInitialValue( 'ruler_kabul', 0 );
+        self::setGameStateInitialValue( 'ruler_persia', 0 );
+        self::setGameStateInitialValue( 'ruler_herat', 0 );
+        self::setGameStateInitialValue( 'ruler_kandahar', 0 );
+        self::setGameStateInitialValue( 'ruler_punjab', 0 );
 
-        // self::setGameStateInitialValue( 'bribe_card_id', 0 );
-        // self::setGameStateInitialValue( 'bribe_amount', -1 );
+        self::setGameStateInitialValue( 'bribe_card_id', 0 );
+        self::setGameStateInitialValue( 'bribe_amount', -1 );
 
 
 
@@ -275,6 +275,25 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    function cleanup( )
+    {
+        //
+        // go to the next state for cleanup:  either discard court, discard hand or refresh market
+        //
+
+        $player_id = self::getActivePlayerId();
+        $discards = $this->checkDiscards($player_id);
+
+        if ($discards['court'] > 0) {
+            $this->gamestate->nextState( 'discard_court' );
+        } elseif ($discards['hand'] > 0) {
+            $this->gamestate->nextState( 'discard_hand' );
+        } else {
+            $this->gamestate->nextState( 'refresh_market' );
+        }
+
+    }
+
     function getAllRegionRulers() {
         
         $result = array();
@@ -324,6 +343,17 @@ class PaxPamirEditionTwo extends Table
             $suits[$card_info['suit']] += $card_info['rank'];
         }
         return $suits;
+    }
+
+    function getRegionRuler( $card_id ) {
+
+        if ($card_id == 0) return 0;
+        
+        $rulers = $this->getAllRegionRulers();
+        $region = $this->token_types[$card_id]['region'];
+
+        return $rulers[$region];
+
     }
 
     function getUnavailableCards() {
@@ -392,32 +422,6 @@ class PaxPamirEditionTwo extends Table
         (note: each method below must match an input method in paxpamireditiontwo.action.php)
     */
 
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
-
     function chooseLoyalty( $coalition )
     {
         //
@@ -443,21 +447,147 @@ class PaxPamirEditionTwo extends Table
 
     }
 
-    function cleanup( )
+    function discardCards($cards, $from_hand )
     {
-        //
-        // go to the next state for cleanup:  either discard court, discard hand or refresh market
-        //
+        self::checkAction( 'discard' );
 
         $player_id = self::getActivePlayerId();
         $discards = $this->checkDiscards($player_id);
 
-        if ($discards['court'] > 0) {
-            $this->gamestate->nextState( 'discard_court' );
-        } elseif ($discards['hand'] > 0) {
-            $this->gamestate->nextState( 'discard_hand' );
+        if ($from_hand) {
+            if (count($cards) !== $discards['hand'])
+                throw new feException( "Incorrect number of discards" );
+
+            foreach ($cards as $card_id) {
+                $this->tokens->moveToken($card_id, 'discard');
+                $card_name = $this->token_types[$card_id]['name'];
+                $removed_card = $this->tokens->getTokenInfo($card_id);
+                $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+
+                self::notifyAllPlayers( "discardCard", '${player_name} discarded ${card_name} from their hand.', array(
+                    'player_id' => $player_id,
+                    'player_name' => self::getActivePlayerName(),
+                    'card_name' => $card_name,
+                    'court_cards' => $court_cards,
+                    'card_id' => $card_id,
+                    'from' => 'hand'
+                ) );
+            }
+
         } else {
-            $this->gamestate->nextState( 'refresh_market' );
+            if (count($cards) != $discards['court'])
+                throw new feException( "Incorrect number of discards" );
+
+            foreach ($cards as $card_id) {
+                $this->tokens->moveToken($card_id, 'discard');
+                $card_name = $this->token_types[$card_id]['name'];
+                $removed_card = $this->tokens->getTokenInfo($card_id);
+                $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+                                
+                // slide card positions down to fill in gap
+                foreach ($court_cards as $c) {
+                    if ($c['state'] > $removed_card['state'])
+                        $this->tokens->setTokenState($c['key'], $c['state'] - 1);
+                }
+
+                $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+
+                self::notifyAllPlayers( "discardCard", '${player_name} discarded ${card_name} from their court.', array(
+                    'player_id' => $player_id,
+                    'player_name' => self::getActivePlayerName(),
+                    'card_name' => $card_name,
+                    'court_cards' => $court_cards,
+                    'card_id' => $card_id,
+                    'from' => 'court'
+                ) );
+            }
+        }
+
+        $this->updatePlayerCounts();
+
+        $this->cleanup();
+
+    }
+
+    function playCard( $card_id, $left_side = true, $bribe = null )
+    {
+        //
+        // play a card from hand into the court on either the left or right side
+        //
+
+        self::checkAction( 'play' );
+
+        $player_id = self::getActivePlayerId();
+        $card = $this->tokens->getTokenInfo($card_id);
+        $card_name = $this->token_types[$card_id]['name'];
+
+        $bribe_card_id = $this->getGameStateValue("bribe_card_id");
+        $bribe_ruler = $this->getRegionRuler($bribe_card_id);
+        $bribe_amount = $this->getGameStateValue("bribe_amount");
+
+        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+
+        // TODO (Frans): decide how we want to implement bribes
+        // if (($bribe_ruler != 0) and ($bribe_ruler != $player_id)) {
+        //     if ($bribe_amount == -1) {
+        //         $this->setGameStateValue("bribe_card_id", $card_id);
+        //         $this->gamestate->setPlayersMultiactive( [$bribe_ruler], 'negotiate_bribe', $bExclusive = true );
+        //         self::notifyAllPlayers( "playCard", $message, array(
+        //             'player_id' => $player_id,
+        //             'player_name' => self::getActivePlayerName(),
+        //             'card' => $card,
+        //             'card_name' => $card_name,
+        //             'court_cards' => $court_cards,
+        //             'bribe' => true,
+        //             'i18n' => array( 'card_name' ),
+        //         ) );
+        //         return;
+        //     } elseif ($bribe != $bribe_amount) {
+        //         throw new feException( "Bribe is incorrect value" );
+        //         return;
+        //     } else {
+        //         $this->incPlayerCoins($player_id, -$bribe);
+        //     }
+        // }
+
+        if ($this->getGameStateValue("remaining_actions") > 0) {
+            if ($left_side) {
+                for ($i = 0; $i < count($court_cards); $i++) {
+                    // $this->tokens->setTokenState($court_cards[$i].key, $court_cards[$i].state+1);
+                    $this->tokens->setTokenState($court_cards[$i]['key'], $i+2);
+                }
+                $this->tokens->moveToken($card_id, 'court_'.$player_id, 1);
+                $message = clienttranslate( '${player_name} played ${card_name} to the left side of their court' );
+            } else {
+                $this->tokens->moveToken($card_id, 'court_'.$player_id, count($court_cards) + 1);
+                $message = clienttranslate( '${player_name} played ${card_name} to the right side of their court' );
+            }
+            $this->incGameStateValue("remaining_actions", -1);
+            $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+
+            self::notifyAllPlayers( "playCard", $message, array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                'card' => $card,
+                'card_name' => $card_name,
+                'court_cards' => $court_cards,
+                'bribe' => false,
+                'i18n' => array( 'card_name' ),
+            ) );
+
+            $this->updatePlayerCounts();
+
+            $this->setGameStateValue("bribe_card_id", 0);
+            $this->setGameStateValue("bribe_amount", -1);
+
+            // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
+
+        }
+
+        if ($this->getGameStateValue("remaining_actions") > 0) {
+            $this->gamestate->nextState( 'action' );
+        } else {
+            $this->cleanup();
         }
 
     }

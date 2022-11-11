@@ -38,9 +38,13 @@ class PXPCard implements \JsonSerializable
     private ?string $prize;
     
     private ?array $impactIcons;
+
+    private ?string $description;
     
     private ?string $discardedEffect;
+    private ?string $discardedDescription;
     private ?string $purchasedEffect;
+    private ?string $purchasedDescription;
 
     /**
      * Get the value of id
@@ -347,6 +351,25 @@ class PXPCard implements \JsonSerializable
     }
 
     /**
+     * Get the value of description
+     */ 
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set the value of description
+     *
+     * @return  self
+     */ 
+    public function setDescription($description)
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    /**
      * Get the value of discardedEffect
      */ 
     public function getDiscardedEffect()
@@ -362,6 +385,25 @@ class PXPCard implements \JsonSerializable
     public function setDiscardedEffect($discardedEffect)
     {
         $this->discardedEffect = $discardedEffect;
+        return $this;
+    }
+
+    /**
+     * Get the value of discardedDescription
+     */ 
+    public function getDiscardedDescription()
+    {
+        return $this->discardedDescription;
+    }
+    
+    /**
+     * Set the value of discardedDescription
+     *
+     * @return  self
+     */ 
+    public function setDiscardedDescription($discardedDescription)
+    {
+        $this->discardedDescription = $discardedDescription;
         return $this;
     }
 
@@ -384,6 +426,25 @@ class PXPCard implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * Get the value of purchasedDescription
+     */ 
+    public function getPurchasedDescription()
+    {
+        return $this->purchasedDescription;
+    }
+
+    /**
+     * Set the value of purchasedDescription
+     *
+     * @return  self
+     */ 
+    public function setPurchasedDescription($purchasedDescription)
+    {
+        $this->purchasedDescription = $purchasedDescription;
+        return $this;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -402,8 +463,12 @@ class PXPCard implements \JsonSerializable
             "loyalty" => $this->getLoyalty(),
             "prize" => $this->getPrize(),
             "impactIcons" => $this->getImpactIcons(),
+            "description" => $this->getDescription(),
             "discardedEffect" => $this->getDiscardedEffect(),
+            "discardedDescription" => $this->getDiscardedDescription(),
             "purchasedEffect" => $this->getPurchasedEffect(),
+            "purchasedEffect" => $this->getPurchasedDescription(),
         ];
     }
+
 }

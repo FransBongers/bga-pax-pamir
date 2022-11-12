@@ -20,7 +20,7 @@ use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCardType;
 class PXPCardFactory
 {
     static public function createDominanceCheckCard(
-        int $id
+        string $id
     ): PXPCard
     {
         $card = new PXPCard();
@@ -50,7 +50,7 @@ class PXPCardFactory
     }
 
     static public function createEventCard(
-        int $id, string $discardedEffect, ?string $discardedDescription, string $purchasedEffect, string $purchasedDescription
+        string $id, string $discardedEffect, ?string $discardedDescription, string $purchasedEffect, string $purchasedDescription
     ): PXPCard
     {
         $card = new PXPCard();
@@ -79,15 +79,15 @@ class PXPCardFactory
         return $card;
     }
 
-    static public function createSuitCard(
-        int $id, ?string $suit, ?int $rank, ?string $name, ?string $region, ?string $specialAbility, bool $taxAction, bool $giftAction,
+    static public function createCourtCard(
+        string $id, ?string $suit, ?int $rank, ?string $name, ?string $region, ?string $specialAbility, bool $taxAction, bool $giftAction,
         bool $buildAction, bool $moveAction, bool $betrayAction, bool $battleAction, ?string $loyalty, ?string $prize,
         ?array $impactIcons, ?String $description
     ): PXPCard
     {
         $card = new PXPCard();
         $card->setId($id)
-            ->setType(PXPEnumCardType::Suit)
+            ->setType(PXPEnumCardType::Court)
             ->setSuit($suit)
             ->setRank($rank)
             ->setName($name)

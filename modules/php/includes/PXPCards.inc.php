@@ -25,8 +25,8 @@ $this->cards = [
     /////////////////////////////
     // Suit cards
     /////////////////////////////
-    1 => CardFactory::createSuitCard(
-        1, PXPEnumSuit::Intelligence, 3, clienttranslate("Mohan Lal"), PXPEnumRegion::Kabul, 
+    'card_1' => CardFactory::createCourtCard(
+        'card_1', PXPEnumSuit::Intelligence, 3, clienttranslate("Mohan Lal"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::IndispensableAdvisors, false, false, false, true, false, false, 
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
@@ -35,8 +35,8 @@ $this->cards = [
         want us to grow up… but [you came here] for one reason. To 
         surrender [our kingdom], to give it up. That is the only reason.\"")
     ),
-    2 => CardFactory::createSuitCard(
-        2, PXPEnumSuit::Intelligence, 2, clienttranslate("Jan-Fishan Khan"), PXPEnumRegion::Kabul, 
+    'card_2' => CardFactory::createCourtCard(
+        'card_2', PXPEnumSuit::Intelligence, 2, clienttranslate("Jan-Fishan Khan"), PXPEnumRegion::Kabul, 
         null, false, false, false, true, false, true, 
         null, PXPEnumCoalition::Russian,
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::MilitarySuit], 
@@ -46,8 +46,8 @@ $this->cards = [
         couplet: \"If I had a thousand lives I would 
         scatter them all at your blessed feet.\"")
     ),
-    3 => CardFactory::createSuitCard(
-        3, PXPEnumSuit::Intelligence, 2, clienttranslate("Prince Akbar Khan"), PXPEnumRegion::Kabul, 
+    'card_3' => CardFactory::createCourtCard(
+        'card_3', PXPEnumSuit::Intelligence, 2, clienttranslate("Prince Akbar Khan"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::Insurrection, false, false, false, false, false, true,
         PXPEnumCoalition::Afghan, null, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::MilitarySuit], 
@@ -56,8 +56,8 @@ $this->cards = [
         he helped defeat General Elphinstone’s force. He famously 
         captured and killed William Macnaghten")
     ),
-    4 => CardFactory::createSuitCard(
-        4, PXPEnumSuit::Intelligence, 1, clienttranslate("Charles Stoddart"), PXPEnumRegion::Kabul, 
+    'card_4' => CardFactory::createCourtCard(
+        'card_4', PXPEnumSuit::Intelligence, 1, clienttranslate("Charles Stoddart"), PXPEnumRegion::Kabul, 
         null, false, true, false, true, false, false, 
         null, PXPEnumCoalition::Afghan,
         [PXPEnumImpactIcon::Spy], 
@@ -67,8 +67,8 @@ $this->cards = [
         he was arrested and eventually beheaded. 
         His death caused a sensation in Britain.")
     ),
-    5 => CardFactory::createSuitCard(
-        5, PXPEnumSuit::Political, 1, clienttranslate("Shah Shujah Durrani"), PXPEnumRegion::Kabul, 
+    'card_5' => CardFactory::createCourtCard(
+        'card_5', PXPEnumSuit::Political, 1, clienttranslate("Shah Shujah Durrani"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::ClaimOfAncientLineage, false, false, true, false, false, false,
         null, PXPEnumCoalition::Afghan,
         [PXPEnumImpactIcon::Tribe], 
@@ -77,8 +77,8 @@ $this->cards = [
         British returned him to the throne in 1839, which he held 
         for just three years before his assassination.")
     ),
-    6 => CardFactory::createSuitCard(
-        6, PXPEnumSuit::Political, 1, clienttranslate("Aminullah Khan Logari"), PXPEnumRegion::Kabul,
+    'card_6' => CardFactory::createCourtCard(
+        'card_6', PXPEnumSuit::Political, 1, clienttranslate("Aminullah Khan Logari"), PXPEnumRegion::Kabul,
         null, false, false, true, false, false, true,
         PXPEnumCoalition::Afghan, null,
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
@@ -87,8 +87,8 @@ $this->cards = [
         Though initially open to Shah Sujah’s restoration, Logari became 
         dissatisfi ed with British participation in Afghan politics.")
     ),
-    7 => CardFactory::createSuitCard(
-        7, PXPEnumSuit::Political, 2, clienttranslate("Dost Mohammad"), PXPEnumRegion::Kabul,
+    'card_7' => CardFactory::createCourtCard(
+        'card_7', PXPEnumSuit::Political, 2, clienttranslate("Dost Mohammad"), PXPEnumRegion::Kabul,
         null, false, false, false, false, false, false,
         null, null,
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
@@ -99,8 +99,8 @@ $this->cards = [
         He later returned to Kabul and ruled until his 
         death in 1863.")
     ),
-    8 => CardFactory::createSuitCard(
-        8, PXPEnumSuit::Economic, 2, clienttranslate("Kabul Bazaar"), PXPEnumRegion::Kabul, 
+    'card_8' => CardFactory::createCourtCard(
+        'card_8', PXPEnumSuit::Economic, 2, clienttranslate("Kabul Bazaar"), PXPEnumRegion::Kabul, 
         null, true, false, false, false, false, false, 
         null, null,
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::PoliticalSuit], 
@@ -111,8 +111,8 @@ $this->cards = [
         country took place in seasonal markets 
         that capitalized on migration patterns.")
     ),
-    9 => CardFactory::createSuitCard(
-        9, PXPEnumSuit::Economic, 1, clienttranslate("Afghan Handicrafts"), PXPEnumRegion::Kabul, 
+    'card_9' => CardFactory::createCourtCard(
+        'card_9', PXPEnumSuit::Economic, 1, clienttranslate("Afghan Handicrafts"), PXPEnumRegion::Kabul, 
         null, true, false, false, true, false, false, 
         null, null, 
         [PXPEnumImpactIcon::Road], 
@@ -123,8 +123,8 @@ $this->cards = [
         were often produced at home and then taken to 
         market for sale during yearly migrations.")
     ),
-    10 => CardFactory::createSuitCard(
-        10, PXPEnumSuit::Economic, 1, clienttranslate("Balkh Arsenic Mine"), PXPEnumRegion::Kabul, 
+    'card_10' => CardFactory::createCourtCard(
+        'card_10', PXPEnumSuit::Economic, 1, clienttranslate("Balkh Arsenic Mine"), PXPEnumRegion::Kabul, 
         null, false, false, true, false, true, false, 
         null, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::MilitarySuit], 
@@ -132,8 +132,8 @@ $this->cards = [
         it was used in fabric dyes to brighten colors and could be combined with black pepper to 
         make a popular British anti-venom called the Tanjore pill.")
     ),
-    11 => CardFactory::createSuitCard(
-        11, PXPEnumSuit::Economic, 2, clienttranslate("Lapis Lazuli Mine"), PXPEnumRegion::Kabul, 
+    'card_11' => CardFactory::createCourtCard(
+        'card_11', PXPEnumSuit::Economic, 2, clienttranslate("Lapis Lazuli Mine"), PXPEnumRegion::Kabul, 
         null, true, true, false, false, false, false, 
         PXPEnumCoalition::Afghan, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -142,8 +142,8 @@ $this->cards = [
         for its intense blue color, the stone was used in high-end Afghan products, 
         and has been found in ancient Egyptian tombs and throughout Europe and Asia.")
     ),
-    12 => CardFactory::createSuitCard(
-        12, PXPEnumSuit::Economic, 3, clienttranslate("City of Ghazni"), PXPEnumRegion::Kabul,
+    'card_12' => CardFactory::createCourtCard(
+        'card_12', PXPEnumSuit::Economic, 3, clienttranslate("City of Ghazni"), PXPEnumRegion::Kabul,
         null, false, true, false, false, false, false, 
         null, null,
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Army], 
@@ -152,8 +152,8 @@ $this->cards = [
         in decline, though it still remained a center of trade and was critical to 
         the logistical challenges facing an Afghan state.")
     ),
-    13 => CardFactory::createSuitCard(
-        13, PXPEnumSuit::Economic, 2, clienttranslate("Ghilzai Nomads"), PXPEnumRegion::Kabul, 
+    'card_13' => CardFactory::createCourtCard(
+        'card_13', PXPEnumSuit::Economic, 2, clienttranslate("Ghilzai Nomads"), PXPEnumRegion::Kabul, 
         null, true, false, false, true, false, false, 
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -162,8 +162,8 @@ $this->cards = [
         group lived nomadically, and they formed an important element of the region’s cultural 
         and commercial foundation.")
     ),
-    14 => CardFactory::createSuitCard(
-        14, PXPEnumSuit::Economic, 2, clienttranslate("Money Landers"), PXPEnumRegion::Kabul, 
+    'card_14' => CardFactory::createCourtCard(
+        'card_14', PXPEnumSuit::Economic, 2, clienttranslate("Money Landers"), PXPEnumRegion::Kabul, 
         null, false, true, true, false, false, false, 
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Leverage], 
@@ -172,8 +172,8 @@ $this->cards = [
         class to stay liquid and respond to shortages that were endemic to the seasonal 
         nature of the Afghan economy.")
     ),
-    15 => CardFactory::createSuitCard(
-        15, PXPEnumSuit::Military, 1, clienttranslate("Durrani Royal Guards"), PXPEnumRegion::Kabul, 
+    'card_15' => CardFactory::createCourtCard(
+        'card_15', PXPEnumSuit::Military, 1, clienttranslate("Durrani Royal Guards"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::Bodyguards, false, false, false, false, true, false, 
         null, null, 
         [PXPEnumImpactIcon::Army], 
@@ -181,8 +181,8 @@ $this->cards = [
         to Kabul and recruited Qizilbash, Shia colonists from Persia, to form a Royal Guard which he 
         felt he could trust more than one made up of Pashtuns.")
     ),
-    16 => CardFactory::createSuitCard(
-        16, PXPEnumSuit::Military, 1, clienttranslate("Bala Hissar"), PXPEnumRegion::Kabul, 
+    'card_16' => CardFactory::createCourtCard(
+        'card_16', PXPEnumSuit::Military, 1, clienttranslate("Bala Hissar"), PXPEnumRegion::Kabul, 
         null, true, false, false, false, true, false, 
         null, null, 
         [PXPEnumImpactIcon::Army], 
@@ -191,16 +191,16 @@ $this->cards = [
         power in the region. The building was largely destroyed by an armory explosion during the British 
         occupation in 1879.")
     ),
-    17 => CardFactory::createSuitCard(
-        17, PXPEnumSuit::Military, 1, clienttranslate("Citadel of Ghazni"), PXPEnumRegion::Kabul, 
+    'card_17' => CardFactory::createCourtCard(
+        'card_17', PXPEnumSuit::Military, 1, clienttranslate("Citadel of Ghazni"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::Citadel, false, false, true, false, false, false, 
         null, null,
         [PXPEnumImpactIcon::Army], 
         clienttranslate("The \"key\" to Kabul, this citadel south of the Afghan capital overlooked vital 
         supply routes. It was captured by the British during the fi rst Anglo-Afghan war.")
     ),
-    18 => CardFactory::createSuitCard(
-        18, PXPEnumSuit::Intelligence, 1, clienttranslate("Harry Flashman"), PXPEnumRegion::Punjab, 
+    'card_18' => CardFactory::createCourtCard(
+        'card_18', PXPEnumSuit::Intelligence, 1, clienttranslate("Harry Flashman"), PXPEnumRegion::Punjab, 
         null, false, true, false, false, true, false, 
         null, null, 
         [PXPEnumImpactIcon::Spy], 
@@ -208,8 +208,8 @@ $this->cards = [
         a coward, and a brilliant, charming solider. His fi rst fi ctional adventure was set during the first 
         Anglo-Afghan War. While Flashman never existed, he embodied an ethos widespread in the British imagination.")
     ),
-    19 => CardFactory::createSuitCard(
-        19, PXPEnumSuit::Intelligence, 2, clienttranslate("Eldred Pottinger"), PXPEnumRegion::Punjab,
+    'card_19' => CardFactory::createCourtCard(
+        'card_19', PXPEnumSuit::Intelligence, 2, clienttranslate("Eldred Pottinger"), PXPEnumRegion::Punjab,
         null, false, false, false, true, true, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
@@ -217,16 +217,16 @@ $this->cards = [
         Persian forces. He revealed himself to the local commander and helped the Afghan forces defeat the Persians, 
         though Afghan histories dispute his role in lifting the siege.")
     ),
-    20 => CardFactory::createSuitCard(
-        20, PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Rawlinson"), PXPEnumRegion::Punjab,
+    'card_20' => CardFactory::createCourtCard(
+        'card_20', PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Rawlinson"), PXPEnumRegion::Punjab,
         null, false, true, false, true, false, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Army offi cer, politician, and orientalist, Rawlinson advocated for a larger role for Afghanistan in 
         Britain’s foreign policy. He served as a political agent in Kandahar and fought in the First Anglo-Afghan war.")
     ),
-    21 => CardFactory::createSuitCard(
-        21, PXPEnumSuit::Intelligence, 2, clienttranslate("Alexander Burnes"), PXPEnumRegion::Punjab, 
+    'card_21' => CardFactory::createCourtCard(
+        'card_21', PXPEnumSuit::Intelligence, 2, clienttranslate("Alexander Burnes"), PXPEnumRegion::Punjab, 
         PXPEnumSpecialAbility::StrangeBedfellows, false, false, false, true, false, false, 
         null, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -234,8 +234,8 @@ $this->cards = [
         senior operatives like Wade. He advised the British to support Dost Mohammad, but was rebuked by 
         Macnaghten. He nonetheless aided the British coup and was killed when a mob overtook his home in Kabul.")
     ),
-    22 => CardFactory::createSuitCard(
-        22, PXPEnumSuit::Intelligence, 1, clienttranslate("George Hayward"), PXPEnumRegion::Punjab, 
+    'card_22' => CardFactory::createCourtCard(
+        'card_22', PXPEnumSuit::Intelligence, 1, clienttranslate("George Hayward"), PXPEnumRegion::Punjab, 
         null, false, true, false, true, false, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::PoliticalSuit], 
@@ -244,8 +244,8 @@ $this->cards = [
         find the source of the Oxus River that proved fatal. His death was likely an act of political 
         retribution.")
     ),
-    23 => CardFactory::createSuitCard(
-        23, PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Pottinger"), PXPEnumRegion::Punjab, 
+    'card_23' => CardFactory::createCourtCard(
+        'card_23', PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Pottinger"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, false, true, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
@@ -253,16 +253,16 @@ $this->cards = [
         map Persia and western India. He would later replace Charles Elliot as the chief diplomat to China and 
         oversaw the Treaty of Nanking and the acquisition of Hong Kong.")
     ),
-    24 => CardFactory::createSuitCard(
-        24, PXPEnumSuit::Political, 2, clienttranslate("Ranjit Singh"), PXPEnumRegion::Punjab, 
+    'card_24' => CardFactory::createCourtCard(
+        'card_24', PXPEnumSuit::Political, 2, clienttranslate("Ranjit Singh"), PXPEnumRegion::Punjab, 
         PXPEnumSpecialAbility::CivilServiceReforms, false, false, false, false, true, false, 
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
         clienttranslate("Founder of the Sikh Empire, Ranjit Singh centralized power in the Punjab. Singh maintained 
         power in part through his empire’s religious tolerance and his military reforms.")
     ),
-    25 => CardFactory::createSuitCard(
-        25, PXPEnumSuit::Political, 1, clienttranslate("Josiah Harlan"), PXPEnumRegion::Punjab, 
+    'card_25' => CardFactory::createCourtCard(
+        'card_25', PXPEnumSuit::Political, 1, clienttranslate("Josiah Harlan"), PXPEnumRegion::Punjab, 
         null, true, false, false, false, false, false,
         PXPEnumCoalition::Afghan, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe], 
@@ -270,8 +270,8 @@ $this->cards = [
         with the East India Company and soon found himself in the service of Ranjit Singh. He later led an attack 
         against Murad Beg and became Prince of Ghor Province.")
     ),
-    26 => CardFactory::createSuitCard(
-        26, PXPEnumSuit::Political, 1, clienttranslate("Paolo Avitabile"), PXPEnumRegion::Punjab, 
+    'card_26' => CardFactory::createCourtCard(
+        'card_26', PXPEnumSuit::Political, 1, clienttranslate("Paolo Avitabile"), PXPEnumRegion::Punjab, 
         null, false, false, false,  false, true, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
@@ -280,8 +280,8 @@ $this->cards = [
         brutal ruler and was infamous for his unorthodox execution techniques, including throwing the condemned 
         from the top of the Mahabat Mosque.")
     ),
-    27 => CardFactory::createSuitCard(
-        27, PXPEnumSuit::Political, 1, clienttranslate("Maqpon Dynasty"), PXPEnumRegion::Punjab, 
+    'card_27' => CardFactory::createCourtCard(
+        'card_27', PXPEnumSuit::Political, 1, clienttranslate("Maqpon Dynasty"), PXPEnumRegion::Punjab, 
         null, false, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Leverage], 
@@ -289,8 +289,8 @@ $this->cards = [
         for nearly 700 years. The rulers maintained a cosmopolitan identity that fused elements of Buddhism and 
         Islam. In 1840 the Maqpon dynasty was conquered by Zorawar Singh Kahluria.")
     ),
-    28 => CardFactory::createSuitCard(
-        28, PXPEnumSuit::Economic, 1, clienttranslate("Anarkali Bazaar"), PXPEnumRegion::Punjab, 
+    'card_28' => CardFactory::createCourtCard(
+        'card_28', PXPEnumSuit::Economic, 1, clienttranslate("Anarkali Bazaar"), PXPEnumRegion::Punjab, 
         null, true, false, true, false, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy], 
@@ -298,8 +298,8 @@ $this->cards = [
         a nearby mausoleum built to honor the likely fi ctitious slave girl buried alive by order of the Mughal 
         Emperor Akbar.")
     ),
-    29 => CardFactory::createSuitCard(
-        29, PXPEnumSuit::Economic, 2, clienttranslate("Khyber Pass"), PXPEnumRegion::Punjab, 
+    'card_29' => CardFactory::createCourtCard(
+        'card_29', PXPEnumSuit::Economic, 2, clienttranslate("Khyber Pass"), PXPEnumRegion::Punjab, 
         PXPEnumSpecialAbility::CivilServiceReforms, false, false, false, false, false, false,
         null, null,  
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -307,8 +307,8 @@ $this->cards = [
         world’s most highly traffi cked mountain passes and has often been a part of the Silk Road’s northern 
         route. Hari Singh Nalwa controlled the pass under the authority of Ranjit Singh.")
     ),
-    30 => CardFactory::createSuitCard(
-        30, PXPEnumSuit::Economic, 1, clienttranslate("Sikh Merchants in Lahore"), PXPEnumRegion::Punjab, 
+    'card_30' => CardFactory::createCourtCard(
+        'card_30', PXPEnumSuit::Economic, 1, clienttranslate("Sikh Merchants in Lahore"), PXPEnumRegion::Punjab, 
         null, true, true, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -316,8 +316,8 @@ $this->cards = [
         Sikh gurus sought alliances with other minority religious groups. This coalition also facilitated 
         far-reaching commercial networks, centralized around Lahore.")
     ),
-    31 => CardFactory::createSuitCard(
-        31, PXPEnumSuit::Military, 1, clienttranslate("Company Weapons"), PXPEnumRegion::Punjab, 
+    'card_31' => CardFactory::createCourtCard(
+        'card_31', PXPEnumSuit::Military, 1, clienttranslate("Company Weapons"), PXPEnumRegion::Punjab, 
         null, true, false, false, false, true, false,
         null, null,  
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -325,8 +325,8 @@ $this->cards = [
         developed by the East India Company and was slightly lighter and more compact than the Short Land musket. 
         The weapon was used until 1850.")
     ),
-    32 => CardFactory::createSuitCard(
-        32, PXPEnumSuit::Military, 3, clienttranslate("Army of the Indus"), PXPEnumRegion::Punjab, 
+    'card_32' => CardFactory::createCourtCard(
+        'card_32', PXPEnumSuit::Military, 3, clienttranslate("Army of the Indus"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, false, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -335,8 +335,8 @@ $this->cards = [
         force of British and Indian troops was made infamous by its massive baggage train. One offi cer even took two 
         camels for the sole purpose of carrying his cigars.")
     ),
-    33 => CardFactory::createSuitCard(
-        33, PXPEnumSuit::Military, 2, clienttranslate("Zorawar Singh Kahluria"), PXPEnumRegion::Punjab, 
+    'card_33' => CardFactory::createCourtCard(
+        'card_33', PXPEnumSuit::Military, 2, clienttranslate("Zorawar Singh Kahluria"), PXPEnumRegion::Punjab, 
         null, false, true, false, false, false, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -344,16 +344,16 @@ $this->cards = [
         which enabled him to conduct successful campaigns in Ladakh and Baltistan. These conquests secured his 
         reputation as \"The Indian Napoleon.\" He was killed by a Tibetan lancer at To-yo in 1841.")
     ),
-    34 => CardFactory::createSuitCard(
-        34, PXPEnumSuit::Military, 1, clienttranslate("Sindhi Warriors"), PXPEnumRegion::Punjab, 
+    'card_34' => CardFactory::createCourtCard(
+        'card_34', PXPEnumSuit::Military, 1, clienttranslate("Sindhi Warriors"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, true, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Like the Sikhs to the north, the Sindhi people depended upon religious tolerance and 
         alliances for their survival. Their coalition was crushed by Charles Napier’s campaign in 1843.")
     ),
-    35 => CardFactory::createSuitCard(
-        35, PXPEnumSuit::Military, 2, clienttranslate("Hari Singh Nalwa"), PXPEnumRegion::Punjab, 
+    'card_35' => CardFactory::createCourtCard(
+        'card_35', PXPEnumSuit::Military, 2, clienttranslate("Hari Singh Nalwa"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, false, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::PoliticalSuit], 
@@ -361,8 +361,8 @@ $this->cards = [
         the regional stability of the Sikh Empire. He conquered the Kashmir and was later installed as its governor. 
         He was also known for his feats of military engineering.")
     ),
-    36 => CardFactory::createSuitCard(
-        36, PXPEnumSuit::Military, 1, clienttranslate("Bengal Native Infantry"), PXPEnumRegion::Punjab, 
+    'card_36' => CardFactory::createCourtCard(
+        'card_36', PXPEnumSuit::Military, 1, clienttranslate("Bengal Native Infantry"), PXPEnumRegion::Punjab, 
         null, false, false, false, false, true, true,
         PXPEnumCoalition::British, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -370,16 +370,16 @@ $this->cards = [
         the forces of the East India Company throughout the subcontinent. Many of these regiments were disbanded 
         after the 1857 Indian Mutiny.")
     ),
-    37 => CardFactory::createSuitCard(
-        37, PXPEnumSuit::Military, 1, clienttranslate("Seaforth, Highlanders"), PXPEnumRegion::Punjab, 
+    'card_37' => CardFactory::createCourtCard(
+        'card_37', PXPEnumSuit::Military, 1, clienttranslate("Seaforth, Highlanders"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, false, true,
         PXPEnumCoalition::British, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::PoliticalSuit], 
         clienttranslate("First raised in the late 18th century by Francis Mackenzie, 1st Baron Seaforth, this regiment 
         saw a variety of colonial action throughout the 19th century and was sent to Afghanistan in 1842.")
     ),
-    38 => CardFactory::createSuitCard(
-        38, PXPEnumSuit::Military, 2, clienttranslate("Akali Sikhs"), PXPEnumRegion::Punjab, 
+    'card_38' => CardFactory::createCourtCard(
+        'card_38', PXPEnumSuit::Military, 2, clienttranslate("Akali Sikhs"), PXPEnumRegion::Punjab, 
         null, false, false, false, false, false, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -387,8 +387,8 @@ $this->cards = [
         personal sovereignty and resistance to tyranny. Much of the success of the Sikhs in this period could be traced to 
         their capable military prowess.")
     ),
-    39 => CardFactory::createSuitCard(
-        39, PXPEnumSuit::Intelligence, 1, clienttranslate("William Moorcroft"), PXPEnumRegion::Kandahar, 
+    'card_39' => CardFactory::createCourtCard(
+        'card_39', PXPEnumSuit::Intelligence, 1, clienttranslate("William Moorcroft"), PXPEnumRegion::Kandahar, 
         null, false, false, false, true, false, true,
         null, null, 
         [PXPEnumImpactIcon::Tribe], 
@@ -396,8 +396,8 @@ $this->cards = [
         horses. He fell ill in Northern Afghanistan and likely died, though some speculate he continued to operate as an 
         informant for twelve more years before dying in an attempt to return to India.")
     ),
-    40 => CardFactory::createSuitCard(
-        40, PXPEnumSuit::Intelligence, 2, clienttranslate("William Hay Macnaghten"), PXPEnumRegion::Kandahar, 
+    'card_40' => CardFactory::createCourtCard(
+        'card_40', PXPEnumSuit::Intelligence, 2, clienttranslate("William Hay Macnaghten"), PXPEnumRegion::Kandahar, 
         null, true, false, false, true, false, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -405,8 +405,8 @@ $this->cards = [
         ranks of the EIC. He soon found himself managing a vast international intervention and intelligence network. 
         His administrative failures contributed to EIC's defeat in the First Anglo-Afghan war.")
     ),
-    41 => CardFactory::createSuitCard(
-        41, PXPEnumSuit::Intelligence, 2, clienttranslate("Charles Masson"), PXPEnumRegion::Kandahar, 
+    'card_41' => CardFactory::createCourtCard(
+        'card_41', PXPEnumSuit::Intelligence, 2, clienttranslate("Charles Masson"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::SafeHouse, false, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -414,24 +414,24 @@ $this->cards = [
         Afghanistan on foot, undertaking historical research on ancient Bactria. Much of this work was supported by Prince 
         Akbar Khan. When discovered, he was blackmailed into working as a British informant.")
     ),
-    42 => CardFactory::createSuitCard(
-        42, PXPEnumSuit::Political, 1, clienttranslate("Barakzai Sadars"), PXPEnumRegion::Kandahar, 
+    'card_42' => CardFactory::createCourtCard(
+        'card_42', PXPEnumSuit::Political, 1, clienttranslate("Barakzai Sadars"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::CharismaticCourtiers, false, false, true, false, false, false,
         PXPEnumCoalition::Afghan, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::PoliticalSuit], 
         clienttranslate("Dost Mohammad relied on an extensive network of family connections in order to maintain control of 
         Afghanistan. Five of his stepbrothers managed Kandahar and surrounding territories.")
     ),
-    43 => CardFactory::createSuitCard(
-        43, PXPEnumSuit::Political, 1, clienttranslate("Giljee Nobles"), PXPEnumRegion::Kandahar, 
+    'card_43' => CardFactory::createCourtCard(
+        'card_43', PXPEnumSuit::Political, 1, clienttranslate("Giljee Nobles"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::BlackMail, false, false, false, false, false, true,
         null, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
         clienttranslate("Once a prominent tribe in central Afghanistan, the Giljee were displaced by the Duranni. They were 
         among the first tribes to revolt against the Shah Sujah.")
     ),
-    44 => CardFactory::createSuitCard(
-        44, PXPEnumSuit::Political, 1, clienttranslate("Baluchi Chiefs"), PXPEnumRegion::Kandahar, 
+    'card_44' => CardFactory::createCourtCard(
+        'card_44', PXPEnumSuit::Political, 1, clienttranslate("Baluchi Chiefs"), PXPEnumRegion::Kandahar, 
         null, true, false, true, false, false, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
@@ -439,8 +439,8 @@ $this->cards = [
         payments for the security of mountain passes like the Bolan contributed directly to the outbreak of rebellion that 
         eventually destroyed the Army of the Indus.")
     ),
-    45 => CardFactory::createSuitCard(
-        45, PXPEnumSuit::Political, 1, clienttranslate("Haji Khan Kakar"), PXPEnumRegion::Kandahar, 
+    'card_45' => CardFactory::createCourtCard(
+        'card_45', PXPEnumSuit::Political, 1, clienttranslate("Haji Khan Kakar"), PXPEnumRegion::Kandahar, 
         null, false, true, false, false, true, false,
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
@@ -448,8 +448,8 @@ $this->cards = [
         first defectors to Shah Shuja. Afghan poet Maulana Hamid Kashmirir describes Kakar as \"the outsider, the traitor, 
         the master of betrayal… mixing poison in sugar.\"")
     ),
-    46 => CardFactory::createSuitCard(
-        46, PXPEnumSuit::Economic, 2, clienttranslate("Bank"), PXPEnumRegion::Kandahar, 
+    'card_46' => CardFactory::createCourtCard(
+        'card_46', PXPEnumSuit::Economic, 2, clienttranslate("Bank"), PXPEnumRegion::Kandahar, 
         null, false, true, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -457,24 +457,24 @@ $this->cards = [
         coming directly from raids into the Punjab. Because currency was rarely struck locally, banks in the major cities were 
         highly leveraged in order to keep coins in local circulation.")
     ),
-    47 => CardFactory::createSuitCard(
-        47, PXPEnumSuit::Economic, 2, clienttranslate("Bolan Pass"), PXPEnumRegion::Kandahar, 
+    'card_47' => CardFactory::createCourtCard(
+        'card_47', PXPEnumSuit::Economic, 2, clienttranslate("Bolan Pass"), PXPEnumRegion::Kandahar, 
         null, false, true, false, true, false, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Army], 
         clienttranslate("The Army of the Indus used the Bolan Pass to invade central Afghanistan. The dense ridges and maze-like 
         cliff walkways made it easy for the Baluchi to ambush British soldiers without fear of reprisal.")
     ),
-    48 => CardFactory::createSuitCard(
-        48, PXPEnumSuit::Economic, 1, clienttranslate("Fruits market"), PXPEnumRegion::Kandahar, 
+    'card_48' => CardFactory::createCourtCard(
+        'card_48', PXPEnumSuit::Economic, 1, clienttranslate("Fruits market"), PXPEnumRegion::Kandahar, 
         null, false, false, true, true, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::PoliticalSuit], 
         clienttranslate("Southern Afghanistan produces some of the highest quality pomegranates in the world. When British 
         troops fi rst entered Kandahar, they were amazed by the quality and variety of the produce at market.")
     ),
-    49 => CardFactory::createSuitCard(
-        49, PXPEnumSuit::Economic, 1, clienttranslate("Kandahari Markets"), PXPEnumRegion::Kandahar, 
+    'card_49' => CardFactory::createCourtCard(
+        'card_49', PXPEnumSuit::Economic, 1, clienttranslate("Kandahari Markets"), PXPEnumRegion::Kandahar, 
         null, true, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::PoliticalSuit], 
@@ -482,8 +482,8 @@ $this->cards = [
         nomadic tribes. Its location also provided easy access to the Punjab. For these reasons, Kandahar was designated the capital 
         of the Durrani Empire from 1747 till 1776.")
     ),
-    50 => CardFactory::createSuitCard(
-        50, PXPEnumSuit::Military, 2, clienttranslate("British Regulars"), PXPEnumRegion::Kandahar, 
+    'card_50' => CardFactory::createCourtCard(
+        'card_50', PXPEnumSuit::Military, 2, clienttranslate("British Regulars"), PXPEnumRegion::Kandahar, 
         null, false, false, false, true, false, true,
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -491,24 +491,24 @@ $this->cards = [
         However, the British Army also maintained some units. A few of these, including the 13th Light Infantry, were part of the 
         British invasion through the Bolan Pass.")
     ),
-    51 => CardFactory::createSuitCard(
-        51, PXPEnumSuit::Military, 1, clienttranslate("Sir Johns Keane"), PXPEnumRegion::Kandahar, 
+    'card_51' => CardFactory::createCourtCard(
+        'card_51', PXPEnumSuit::Military, 1, clienttranslate("Sir Johns Keane"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::IndianSupplies, false, false, false, false, false, true,
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Army], 
         clienttranslate("Keane's varied military career was typical of officers in this period. He fought in the Battle of New Orleans, 
         served in the West Indies, and, eventually, was stationed in India.")
     ),
-    52 => CardFactory::createSuitCard(
-        52, PXPEnumSuit::Military, 1, clienttranslate("Pashtun Mercenary"), PXPEnumRegion::Kandahar, 
+    'card_52' => CardFactory::createCourtCard(
+        'card_52', PXPEnumSuit::Military, 1, clienttranslate("Pashtun Mercenary"), PXPEnumRegion::Kandahar, 
         null, true, false, false, false, false, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::PoliticalSuit], 
         clienttranslate("Often mercenaries were hired to extract revenue from regions outside of a ruler’s traditional control. 
         Many of these mercenary forces were composed of politically ambitious Pashtuns or disenfranchised Giljee nobility.")
     ),
-    53 => CardFactory::createSuitCard(
-        53, PXPEnumSuit::Military, 2, clienttranslate("Jezail Sharpshooters"), PXPEnumRegion::Kandahar, 
+    'card_53' => CardFactory::createCourtCard(
+        'card_53', PXPEnumSuit::Military, 2, clienttranslate("Jezail Sharpshooters"), PXPEnumRegion::Kandahar, 
         null, false, false, false, false, true, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
@@ -516,8 +516,8 @@ $this->cards = [
         regular and irregular Afghan forces. Compared to the 150 yard accuracy of the British Brown Bess, experienced jezail 
         sharpshooters could be accurate at ranges up to 500 yards.")
     ),
-    54 => CardFactory::createSuitCard(
-        54, PXPEnumSuit::Intelligence, 1, clienttranslate("Herati Bandits"), PXPEnumRegion::Herat, 
+    'card_54' => CardFactory::createCourtCard(
+        'card_54', PXPEnumSuit::Intelligence, 1, clienttranslate("Herati Bandits"), PXPEnumRegion::Herat, 
         PXPEnumSpecialAbility::BlackMail, true, false, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -525,16 +525,16 @@ $this->cards = [
         Minor tribal rulers competed with bandits in hopes of extracting tolls. As a consequence, overland trade dried up 
         as merchants looked for safer routes.")
     ),
-    55 => CardFactory::createSuitCard(
-        55, PXPEnumSuit::Political, 1, clienttranslate("Hazara Chiefs"), PXPEnumRegion::Herat, 
+    'card_55' => CardFactory::createCourtCard(
+        'card_55', PXPEnumSuit::Political, 1, clienttranslate("Hazara Chiefs"), PXPEnumRegion::Herat, 
         null, true, false, false, true, false, true,
         null, null,  
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
         clienttranslate("The Persian-speaking Hazara people ruled a semi-autonomous region in western Afghanistan that remained 
         outside of both the Persian and Afghan emperors until the second reign of Dost Mohammad.")
     ),
-    56 => CardFactory::createSuitCard(
-        56, PXPEnumSuit::Political, 2, clienttranslate("Yar Mohammad Alikozai"), PXPEnumRegion::Herat, 
+    'card_56' => CardFactory::createCourtCard(
+        'card_56', PXPEnumSuit::Political, 2, clienttranslate("Yar Mohammad Alikozai"), PXPEnumRegion::Herat, 
         PXPEnumSpecialAbility::WellConnected, false, false, false, false, true, false,
         null, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::PoliticalSuit], 
@@ -542,8 +542,8 @@ $this->cards = [
         served as a high level advisor. In 1839 he betrayed Prince Kameran and expelled British agents in hopes of placing Herat 
         under Persian influence and protection.")
     ),
-    57 => CardFactory::createSuitCard(
-        57, PXPEnumSuit::Political, 1, clienttranslate("Exiled Durrani Nobility"), PXPEnumRegion::Herat, 
+    'card_57' => CardFactory::createCourtCard(
+        'card_57', PXPEnumSuit::Political, 1, clienttranslate("Exiled Durrani Nobility"), PXPEnumRegion::Herat, 
         null, false, false, false, true, true, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe], 
@@ -551,8 +551,8 @@ $this->cards = [
         underground courts in the region’s more independent cities such as Herat. Dost Mohammad was systematic in his persecution of 
         the former ruling class and made an example of those he caught, such as Shah Zaman whom he had blinded and imprisoned.")
     ),
-    58 => CardFactory::createSuitCard(
-        58, PXPEnumSuit::Political, 1, clienttranslate("Ishaqzai"), PXPEnumRegion::Herat, 
+    'card_58' => CardFactory::createCourtCard(
+        'card_58', PXPEnumSuit::Political, 1, clienttranslate("Ishaqzai"), PXPEnumRegion::Herat, 
         null, false, true, true, false, false, false,
         PXPEnumCoalition::Afghan, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
@@ -560,8 +560,8 @@ $this->cards = [
         Barakzai. In the later 19th century they were relentlessly persecuted and forced to abandon their nomadic lifestyle for 
         farming settlements.")
     ),
-    59 => CardFactory::createSuitCard(
-        59, PXPEnumSuit::Military, 2, clienttranslate("Tajik Warband"), PXPEnumRegion::Herat, 
+    'card_59' => CardFactory::createCourtCard(
+        'card_59', PXPEnumSuit::Military, 2, clienttranslate("Tajik Warband"), PXPEnumRegion::Herat, 
         null, false, false, false, false, true, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -569,24 +569,24 @@ $this->cards = [
         Because of the dominance of the Samanid Empire in the 9th and 10th centuries, Tajik people can be found throughout the 
         region, forming a considerable plurality in western Afghanistan.")
     ),
-    60 => CardFactory::createSuitCard(
-        60, PXPEnumSuit::Military, 1, clienttranslate("Nomadic Warlord"), PXPEnumRegion::Herat, 
+    'card_60' => CardFactory::createCourtCard(
+        'card_60', PXPEnumSuit::Military, 1, clienttranslate("Nomadic Warlord"), PXPEnumRegion::Herat, 
         null, true, true, false, false, false, true,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Army], 
         clienttranslate("Many tribes in Afghanistan were nomadic and herdsmen by trade. Still, they sometimes formed warbands 
         and used seasonal raids to supplement their income.")
     ),
-    61 => CardFactory::createSuitCard(
-        61, PXPEnumSuit::Economic, 2, clienttranslate("Karakul Sheep"), PXPEnumRegion::Herat, 
+    'card_61' => CardFactory::createCourtCard(
+        'card_61', PXPEnumSuit::Economic, 2, clienttranslate("Karakul Sheep"), PXPEnumRegion::Herat, 
         null, true, false, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
         clienttranslate("Karakul sheep had a coarse wool which was suitable only for rug-making. Their chief value was in their fat 
         tails, which were used in cuisine and in soap-making.")
     ),
-    62 => CardFactory::createSuitCard(
-        62, PXPEnumSuit::Economic, 1, clienttranslate("Qanat System"), PXPEnumRegion::Herat, 
+    'card_62' => CardFactory::createCourtCard(
+        'card_62', PXPEnumSuit::Economic, 1, clienttranslate("Qanat System"), PXPEnumRegion::Herat, 
         null, false, true, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::PoliticalSuit], 
@@ -594,8 +594,8 @@ $this->cards = [
         shafts and gently sloping tunnels to irrigate fi elds and regulate the fl ow of water while off ering protection from 
         evaporation.")
     ),
-    63 => CardFactory::createSuitCard(
-        63, PXPEnumSuit::Economic, 3, clienttranslate("Farah Road"), PXPEnumRegion::Herat, 
+    'card_63' => CardFactory::createCourtCard(
+        'card_63', PXPEnumSuit::Economic, 3, clienttranslate("Farah Road"), PXPEnumRegion::Herat, 
         null, false, false, false, true, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -603,16 +603,16 @@ $this->cards = [
         commercial traffi c was routed through Kandahar and then through Farah. Like most trade in Afghanistan, the goods on this route 
         would have been luxury items because of the expense of the trip.")
     ),
-    64 => CardFactory::createSuitCard(
-        64, PXPEnumSuit::Economic, 2, clienttranslate("Opium Fields"), PXPEnumRegion::Herat, 
+    'card_64' => CardFactory::createCourtCard(
+        'card_64', PXPEnumSuit::Economic, 2, clienttranslate("Opium Fields"), PXPEnumRegion::Herat, 
         null, true, false, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::MilitarySuit], 
         clienttranslate("Though opium would prove a lucrative cash crop for Afghan farmers in the 20th century, during the 19th 
         century production was subdued at best and was only traded regionally.")
     ),
-    65 => CardFactory::createSuitCard(
-        65, PXPEnumSuit::Economic, 1, clienttranslate("Minaret of Jam"), PXPEnumRegion::Herat, 
+    'card_65' => CardFactory::createCourtCard(
+        'card_65', PXPEnumSuit::Economic, 1, clienttranslate("Minaret of Jam"), PXPEnumRegion::Herat, 
         null, true, false, false, true, false, true,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Army], 
@@ -620,40 +620,40 @@ $this->cards = [
         some suggest that it was part of Firozkoh, the lost capital of the Ghorid dynasty which was destroyed by Ögedei Khan, the 
         son of Genghis Khan.")
     ),
-    66 => CardFactory::createSuitCard(
-        66, PXPEnumSuit::Economic, 2, clienttranslate("Baluchi Smugglers"), PXPEnumRegion::Herat, 
+    'card_66' => CardFactory::createCourtCard(
+        'card_66', PXPEnumSuit::Economic, 2, clienttranslate("Baluchi Smugglers"), PXPEnumRegion::Herat, 
         PXPEnumSpecialAbility::HeratInfluence, false, false, false, false, false, true,
         null, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Army], 
         clienttranslate("The Baluchi long controlled the Bolan Pass and participated in trade with the Indian subcontinent. Smugglers 
         even ran goods throughout southern Afghanistan and into Persia.")
     ),
-    67 => CardFactory::createSuitCard(
-        67, PXPEnumSuit::Economic, 2, clienttranslate("Wheat Fields"), PXPEnumRegion::Herat, 
+    'card_67' => CardFactory::createCourtCard(
+        'card_67', PXPEnumSuit::Economic, 2, clienttranslate("Wheat Fields"), PXPEnumRegion::Herat, 
         null, false, true, false, true, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road], 
         clienttranslate("Wheat has served as Afghanistan’s agricultural mainstay since antiquity. Though subsistence farming let 
         little for the market, wheat was still sometimes milled into fl our for sale to nomadic herdsmen.")
     ),
-    68 => CardFactory::createSuitCard(
-        68, PXPEnumSuit::Intelligence, 2, clienttranslate("Ghaem Magham Farahani"), PXPEnumRegion::Persia, 
+    'card_68' => CardFactory::createCourtCard(
+        'card_68', PXPEnumSuit::Intelligence, 2, clienttranslate("Ghaem Magham Farahani"), PXPEnumRegion::Persia, 
         PXPEnumSpecialAbility::PersianInfluence, true, false, false, false, false, false,
         null, null,  
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Army], 
         clienttranslate("Politician, scientist, and poet who briefl y served as prime minister of Iran. He was betrayed and murdered 
         on the orders of Mohammad Shah Qajar in 1835.")
     ),
-    69 => CardFactory::createSuitCard(
-        69, PXPEnumSuit::Intelligence, 2, clienttranslate("Count Ivan Simonich"), PXPEnumRegion::Persia, 
+    'card_69' => CardFactory::createCourtCard(
+        'card_69', PXPEnumSuit::Intelligence, 2, clienttranslate("Count Ivan Simonich"), PXPEnumRegion::Persia, 
         null, false, false, false, true, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("Russian diplomat and intelligence officer who helped coordinate information networks across central Asia. 
         He helped the Persians direct the unsuccessful siege of Herat in 1838.")
     ),
-    70 => CardFactory::createSuitCard(
-        70, PXPEnumSuit::Intelligence, 2, clienttranslate("Alexander Griboyedov"), PXPEnumRegion::Persia, 
+    'card_70' => CardFactory::createCourtCard(
+        'card_70', PXPEnumSuit::Intelligence, 2, clienttranslate("Alexander Griboyedov"), PXPEnumRegion::Persia, 
         PXPEnumSpecialAbility::RussianInfluence, false, false, false, true, false, false,
         PXPEnumCoalition::Russian, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
@@ -661,8 +661,8 @@ $this->cards = [
         to Persia. He attempted to provide asylum to three refugees who fled the royal harems and was killed when a mob stormed 
         the embassy.")
     ),
-    71 => CardFactory::createSuitCard(
-        71, PXPEnumSuit::Intelligence, 1, clienttranslate("Joseph Wolff"), PXPEnumRegion::Persia, 
+    'card_71' => CardFactory::createCourtCard(
+        'card_71', PXPEnumSuit::Intelligence, 1, clienttranslate("Joseph Wolff"), PXPEnumRegion::Persia, 
         null, true, false, false, true, false, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Spy], 
@@ -670,16 +670,16 @@ $this->cards = [
         on a previous journey to Asia, and, upon seeing the news of his imprisonment, embarked on a quixotic journey to Bukhara to 
         save his friend. He did not succeed.")
     ),
-    72 => CardFactory::createSuitCard(
-        72, PXPEnumSuit::Intelligence, 2, clienttranslate("Claude Wade"), PXPEnumRegion::Persia, 
+    'card_72' => CardFactory::createCourtCard(
+        'card_72', PXPEnumSuit::Intelligence, 2, clienttranslate("Claude Wade"), PXPEnumRegion::Persia, 
         PXPEnumSpecialAbility::SafeHouse, false, false, false, true, false, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("Bengal-born scholar of Persia who served as a diplomatic agent in Ludhiana, Wade distrusted Alexander 
         Burnes and helped make the case for deeper British involvement in the region.")
     ),
-    73 => CardFactory::createSuitCard(
-        73, PXPEnumSuit::Intelligence, 1, clienttranslate("Jean-François Allard"), PXPEnumRegion::Persia, 
+    'card_73' => CardFactory::createCourtCard(
+        'card_73', PXPEnumSuit::Intelligence, 1, clienttranslate("Jean-François Allard"), PXPEnumRegion::Persia, 
         null, false, false, true, false, false, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::MilitarySuit], 
@@ -687,8 +687,8 @@ $this->cards = [
         traveled throughout Persia and central Asia. He eventually came to serve Ranjit Singh and helped reform the 
         Sikh military.")
     ),
-    74 => CardFactory::createSuitCard(
-        74, PXPEnumSuit::Political, 1, clienttranslate("Hajj Mirza Aghasi"), PXPEnumRegion::Persia, 
+    'card_74' => CardFactory::createCourtCard(
+        'card_74', PXPEnumSuit::Political, 1, clienttranslate("Hajj Mirza Aghasi"), PXPEnumRegion::Persia, 
         null, false, false, false, false, true, true,
         PXPEnumCoalition::Afghan, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -696,8 +696,8 @@ $this->cards = [
         mullahs who sought to decentralize Persian political authority and attempted to modernize the country while maintaining 
         independence from the West.")
     ),
-    75 => CardFactory::createSuitCard(
-        75, PXPEnumSuit::Political, 1, clienttranslate("Abbas Mirza"), PXPEnumRegion::Persia, 
+    'card_75' => CardFactory::createCourtCard(
+        'card_75', PXPEnumSuit::Political, 1, clienttranslate("Abbas Mirza"), PXPEnumRegion::Persia, 
         null, true, false, false, false, false, true,
         true, true, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army], 
@@ -705,8 +705,8 @@ $this->cards = [
         Ottomans. He sent young commanders to Europe in hopes of integrating new military tactics into the Persian Army, but was 
         largely unable to modernize the Persian army.")
     ),
-    76 => CardFactory::createSuitCard(
-        76, PXPEnumSuit::Political, 2, clienttranslate("Fath-Ali Shah"), PXPEnumRegion::Persia, 
+    'card_76' => CardFactory::createCourtCard(
+        'card_76', PXPEnumSuit::Political, 2, clienttranslate("Fath-Ali Shah"), PXPEnumRegion::Persia, 
         null, false, false, false, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -714,8 +714,8 @@ $this->cards = [
         engaging in numerous wars with the Russians, Fath-Ali Shah maintained diplomatic and commercial contact with Russia 
         and other Western powers.")
     ),
-    77 => CardFactory::createSuitCard(
-        77, PXPEnumSuit::Political, 1, clienttranslate("Mohammad Shah"), PXPEnumRegion::Persia, 
+    'card_77' => CardFactory::createCourtCard(
+        'card_77', PXPEnumSuit::Political, 1, clienttranslate("Mohammad Shah"), PXPEnumRegion::Persia, 
         null, false, false, true, false, true, false,
         null, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -723,16 +723,16 @@ $this->cards = [
         British attempts to outlaw the slave trade and fell under Russian infl uence in his effort to modernize Iran. Though sickly 
         throughout his life, Mohammad Shah was a capable ruler.")
     ),
-    78 => CardFactory::createSuitCard(
-        78, PXPEnumSuit::Economic, 2, clienttranslate("Civic Improvements"), PXPEnumRegion::Persia, 
+    'card_78' => CardFactory::createCourtCard(
+        'card_78', PXPEnumSuit::Economic, 2, clienttranslate("Civic Improvements"), PXPEnumRegion::Persia, 
         PXPEnumSpecialAbility::CivilServiceReforms, false, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::IntelligenceSuit], 
         clienttranslate("The Qajar dynasty of Persia made large capital investments to expand the road network. This was largely a 
         measure to integrate the border tribes with city centers.")
     ),
-    79 => CardFactory::createSuitCard(
-        79, PXPEnumSuit::Economic, 1, clienttranslate("Persian Slave Markets"), PXPEnumRegion::Persia, 
+    'card_79' => CardFactory::createCourtCard(
+        'card_79', PXPEnumSuit::Economic, 1, clienttranslate("Persian Slave Markets"), PXPEnumRegion::Persia, 
         null, true, false, false, true, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -740,8 +740,8 @@ $this->cards = [
         populations that had been displaced by war or famine. Others came to market by way of the Indian Ocean and Africa's 
         eastern coast.")
     ),
-    80 => CardFactory::createSuitCard(
-        80, PXPEnumSuit::Economic, 1, clienttranslate("Anglo-Paersian Trade"), PXPEnumRegion::Persia, 
+    'card_80' => CardFactory::createCourtCard(
+        'card_80', PXPEnumSuit::Economic, 1, clienttranslate("Anglo-Paersian Trade"), PXPEnumRegion::Persia, 
         null, true, false, true, false, false, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Leverage], 
@@ -749,8 +749,8 @@ $this->cards = [
         a strategic alliance with the Persians in 1801 as a bulwark against French expansion in the East. However, the Persians 
         supported Napoleon in 1807 and joined analliance against Russia.")
     ),
-    81 => CardFactory::createSuitCard(
-        81, PXPEnumSuit::Economic, 2, clienttranslate("Russo-Persian Trade"), PXPEnumRegion::Persia, 
+    'card_81' => CardFactory::createCourtCard(
+        'card_81', PXPEnumSuit::Economic, 2, clienttranslate("Russo-Persian Trade"), PXPEnumRegion::Persia, 
         null, true, false, true, false, false, false,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Leverage], 
@@ -758,8 +758,8 @@ $this->cards = [
         territorial and economic concessions, including the right for Persian ships to navigate the Caspian Sea. The treaty 
         sparked outrage throughout Persia and led to the storming of the Russian embassy.")
     ),
-    82 => CardFactory::createSuitCard(
-        82, PXPEnumSuit::Military, 2, clienttranslate("Persian Army"), PXPEnumRegion::Persia, 
+    'card_82' => CardFactory::createCourtCard(
+        'card_82', PXPEnumSuit::Military, 2, clienttranslate("Persian Army"), PXPEnumRegion::Persia, 
         null, false, true, false, false, false, true,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -767,32 +767,32 @@ $this->cards = [
         training led to the growth of Persian regional power, especially in relation to their chief rivals in Russia and the 
         Ottoman Empire.")
     ),
-    83 => CardFactory::createSuitCard(
-        83, PXPEnumSuit::Military, 1, clienttranslate("Shah's Guard"), PXPEnumRegion::Persia, 
+    'card_83' => CardFactory::createCourtCard(
+        'card_83', PXPEnumSuit::Military, 1, clienttranslate("Shah's Guard"), PXPEnumRegion::Persia, 
         PXPEnumSpecialAbility::Bodyguards, true, false, false, false, false, false,
         true, true,  
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
         clienttranslate("One of the world's oldest military institutions with roots in the \"Immortal Guard\" of the Achaemenid Empire, 
         these elite guards were an important dimension of the civic power of the Qajar dynasty.")
     ),
-    84 => CardFactory::createSuitCard(
-        84, PXPEnumSuit::Military, 2, clienttranslate("Russian Regulars"), PXPEnumRegion::Persia, 
+    'card_84' => CardFactory::createCourtCard(
+        'card_84', PXPEnumSuit::Military, 2, clienttranslate("Russian Regulars"), PXPEnumRegion::Persia, 
         null, false, false, false, false, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Infantrymen were often stationed at Orenburg which served as a staging ground for Russian operations 
         across the Transcaspian Oblast.")
     ),
-    85 => CardFactory::createSuitCard(
-        85, PXPEnumSuit::Intelligence, 1, clienttranslate("Bukharan Jews"), PXPEnumRegion::Transcaspia, 
+    'card_85' => CardFactory::createCourtCard(
+        'card_85', PXPEnumSuit::Intelligence, 1, clienttranslate("Bukharan Jews"), PXPEnumRegion::Transcaspia, 
         null, false, true, true, false, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Jewish populations have lived in central Asia since the 7th century but routinely faced persecution. In the 
         early 19th century, many Jews fl ed Persia and settled in major cities across the region, including Bukhara, Herat, and Kabul.")
     ),
-    86 => CardFactory::createSuitCard(
-        86, PXPEnumSuit::Intelligence, 2, clienttranslate("Jan Prosper Witkiewicz"), PXPEnumRegion::Transcaspia, 
+    'card_86' => CardFactory::createCourtCard(
+        'card_86', PXPEnumSuit::Intelligence, 2, clienttranslate("Jan Prosper Witkiewicz"), PXPEnumRegion::Transcaspia, 
         null, false, false, true, true, false, false,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -800,8 +800,8 @@ $this->cards = [
         of his misfortune and found work within the Russian Foreign Service. He failed to deliver Kabul to his Russian masters. Disheartened, 
         he burned his personal papers and committed suicide.")
     ),
-    87 => CardFactory::createSuitCard(
-        87, PXPEnumSuit::Intelligence, 1, clienttranslate("Imperial Surveyors"), PXPEnumRegion::Transcaspia, 
+    'card_87' => CardFactory::createCourtCard(
+        'card_87', PXPEnumSuit::Intelligence, 1, clienttranslate("Imperial Surveyors"), PXPEnumRegion::Transcaspia, 
         null, false, true, true, true, false, false,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Spy], 
@@ -809,24 +809,24 @@ $this->cards = [
         their intelligence gathering. The most famous of these was the Great Trigonometrical Survey led by the British 
         to map the Indian subcontinent. ")
     ),
-    88 => CardFactory::createSuitCard(
-        88, PXPEnumSuit::Intelligence, 1, clienttranslate("Arthur Conolly"), PXPEnumRegion::Transcaspia, 
+    'card_88' => CardFactory::createCourtCard(
+        'card_88', PXPEnumSuit::Intelligence, 1, clienttranslate("Arthur Conolly"), PXPEnumRegion::Transcaspia, 
         null, false, true, false, true, false, false,
         PXPEnumCoalition::British, null, 
         [PXPEnumImpactIcon::Spy], 
         clienttranslate("A renowned explorer and travel writer, Conolly first coined the phrase \"The Great Game\". During a later 
         expedition, he was captured while attempting to rescue Charles Stoddart. The two were beheaded in Bukhara.")
     ),
-    89 => CardFactory::createSuitCard(
-        89, PXPEnumSuit::Intelligence, 1, clienttranslate("Aga Mehdi"), PXPEnumRegion::Transcaspia, 
+    'card_89' => CardFactory::createCourtCard(
+        'card_89', PXPEnumSuit::Intelligence, 1, clienttranslate("Aga Mehdi"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, true, true, true,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Spy], 
         clienttranslate("Disguised as a merchant from Yarkand, Mehdi was, in fact, a Russian agent who operated in and around Kashmir. 
         He attempted to open diplomatic channels with Ranjit Singh.")
     ),
-    90 => CardFactory::createSuitCard(
-        90, PXPEnumSuit::Political, 1, clienttranslate("Nasrullah Khan"), PXPEnumRegion::Transcaspia, 
+    'card_90' => CardFactory::createCourtCard(
+        'card_90', PXPEnumSuit::Political, 1, clienttranslate("Nasrullah Khan"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, false, true, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe], 
@@ -834,24 +834,24 @@ $this->cards = [
         execution of two British agents. In the 1830s Nasrullah organized several unsuccessful campaigns in the region against 
         other local Khans in a bid for regional supremacy.")
     ),
-    91 => CardFactory::createSuitCard(
-        91, PXPEnumSuit::Political, 1, clienttranslate("Allah Quli Bahadur"), PXPEnumRegion::Transcaspia, 
+    'card_91' => CardFactory::createCourtCard(
+        'card_91', PXPEnumSuit::Political, 1, clienttranslate("Allah Quli Bahadur"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::SavvyOperator, false, false, false, false, true, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
         clienttranslate("Bahadur ramped up the enslavement of Russian citizens in order to compensate for shortfalls in trade. 
         Fearing a Russian casus belli, British agents convinced the Khan to release the Russian slaves.")
     ),
-    92 => CardFactory::createSuitCard(
-        92, PXPEnumSuit::Political, 1, clienttranslate("Mir Murad Beg"), PXPEnumRegion::Transcaspia, 
+    'card_92' => CardFactory::createCourtCard(
+        'card_92', PXPEnumSuit::Political, 1, clienttranslate("Mir Murad Beg"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::MilitarySuit], 
         clienttranslate("Khan of Kunduz and later ruler of Bukhara, Mir Murad Beg's kingdom eventually extended to much of 
         modern day Uzbekistan.")
     ),
-    93 => CardFactory::createSuitCard(
-        93, PXPEnumSuit::Political, 2, clienttranslate("Madali Khan"), PXPEnumRegion::Transcaspia, 
+    'card_93' => CardFactory::createCourtCard(
+        'card_93', PXPEnumSuit::Political, 2, clienttranslate("Madali Khan"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, false, true, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -859,8 +859,8 @@ $this->cards = [
         Unlike his predecessor, Madali Khan opened diplomatic relationships with European powers. His removal from power led to decades 
         of political turmoil in the region.")
     ),
-    94 => CardFactory::createSuitCard(
-        94, PXPEnumSuit::Economic, 1, clienttranslate("Khivan Slave Markets"), PXPEnumRegion::Transcaspia, 
+    'card_94' => CardFactory::createCourtCard(
+        'card_94', PXPEnumSuit::Economic, 1, clienttranslate("Khivan Slave Markets"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, false, true, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -868,8 +868,8 @@ $this->cards = [
         populations that had been displaced by war or famine. Others came to market by way of the Indian Ocean and Africa's 
         eastern coast.")
     ),
-    95 => CardFactory::createSuitCard(
-        95, PXPEnumSuit::Economic, 1, clienttranslate("Supplies from Orenburg"), PXPEnumRegion::Transcaspia, 
+    'card_95' => CardFactory::createCourtCard(
+        'card_95', PXPEnumSuit::Economic, 1, clienttranslate("Supplies from Orenburg"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, false,
         PXPEnumCoalition::Russian, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Road], 
@@ -877,8 +877,8 @@ $this->cards = [
         enabling the Empire to project power across the steppe of central Asia. Virtually all diplomatic officers and military forces 
         operating in the region were supported through Orenburg.")
     ),
-    96 => CardFactory::createSuitCard(
-        96, PXPEnumSuit::Economic, 1, clienttranslate("Panjdeh Oasis"), PXPEnumRegion::Transcaspia, 
+    'card_96' => CardFactory::createCourtCard(
+        'card_96', PXPEnumSuit::Economic, 1, clienttranslate("Panjdeh Oasis"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -886,16 +886,16 @@ $this->cards = [
         route were dominated by the Lohanis who were often considered the richest and most stable of the nomadic merchants of 
         Afghanistan.")
     ),
-    97 => CardFactory::createSuitCard(
-        97, PXPEnumSuit::Military, 1, clienttranslate("The Ark of Bukhara"), PXPEnumRegion::Transcaspia, 
+    'card_97' => CardFactory::createCourtCard(
+        'card_97', PXPEnumSuit::Military, 1, clienttranslate("The Ark of Bukhara"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::Citadel, false, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
         clienttranslate("Built in the 5th century, the Ark is a massive fortress which legend says was constructed by the epic hero 
         Siyavusha. The Ark has undergone centuries of renovation and improvement. ")
     ),
-    98 => CardFactory::createSuitCard(
-        98, PXPEnumSuit::Military, 3, clienttranslate("European Cannons"), PXPEnumRegion::Transcaspia, 
+    'card_98' => CardFactory::createCourtCard(
+        'card_98', PXPEnumSuit::Military, 3, clienttranslate("European Cannons"), PXPEnumRegion::Transcaspia, 
         null, false, true, false, false, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -903,16 +903,16 @@ $this->cards = [
         gain the upper hand over numerically superior native forces. Such supplies enabled the successful seizure of Georgia 
         and Dagestan during the Russo-Persia war")
     ),
-    99 => CardFactory::createSuitCard(
-        99, PXPEnumSuit::Military, 1, clienttranslate("Cossacks"), PXPEnumRegion::Transcaspia, 
+    'card_99' => CardFactory::createCourtCard(
+        'card_99', PXPEnumSuit::Military, 1, clienttranslate("Cossacks"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::Irregulars, false, false, false, false, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
         clienttranslate("Cossacks formed an important component of the Russian strategy in central Asia. These irregular cavalry 
         served as scouts, police forces, and skirmishers.")
     ),
-    100 => CardFactory::createSuitCard(
-        100, PXPEnumSuit::Military, 2, clienttranslate("Count Perovsky"), PXPEnumRegion::Transcaspia, 
+    'card_100' => CardFactory::createCourtCard(
+        'card_100', PXPEnumSuit::Military, 2, clienttranslate("Count Perovsky"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, false, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -924,80 +924,80 @@ $this->cards = [
     /////////////////////////////
     // Dominance check cards
     /////////////////////////////
-    101 => CardFactory::createDominanceCheckCard(101),
-    102 => CardFactory::createDominanceCheckCard(102),
-    103 => CardFactory::createDominanceCheckCard(103),
-    104 => CardFactory::createDominanceCheckCard(104),
+    'card_101' => CardFactory::createDominanceCheckCard('card_101'),
+    'card_102' => CardFactory::createDominanceCheckCard('card_102'),
+    'card_103' => CardFactory::createDominanceCheckCard('card_103'),
+    'card_104' => CardFactory::createDominanceCheckCard('card_104'),
 
     /////////////////////////////
     // Event cards
     /////////////////////////////
-    105 => CardFactory::createEventCard(
-        105, PXPEnumEventCardEffect::MilitarySuit, clienttranslate(""), PXPEnumEventCardEffect::NewTactics, 
+    'card_105' => CardFactory::createEventCard(
+        'card_105', PXPEnumEventCardEffect::MilitarySuit, clienttranslate(""), PXPEnumEventCardEffect::NewTactics, 
         clienttranslate("Your military cards are always considered favored until the next Dominance Check.")
     ),
-    106 => CardFactory::createEventCard(
-        106, PXPEnumEventCardEffect::EmbarrassementOfRiches, 
+    'card_106' => CardFactory::createEventCard(
+        'card_106', PXPEnumEventCardEffect::EmbarrassementOfRiches, 
         clienttranslate("Gifts are not worth infl uence until after the next Dominance Check."), 
         PXPEnumEventCardEffect::KohINoorRecovered, 
         clienttranslate("Each of your gifts is worth an additional influence point until after the next Dominance Check.")
     ),
-    107 => CardFactory::createEventCard(
-        107, PXPEnumEventCardEffect::DisregardForCustoms, 
+    'card_107' => CardFactory::createEventCard(
+        'card_107', PXPEnumEventCardEffect::DisregardForCustoms, 
         clienttranslate("All ignore all bribes until the next Dominance Check."), 
         PXPEnumEventCardEffect::CourtlyManners, 
         clienttranslate("You may choose to not pay bribes until the next Dominance Check.")
     ),
-    108 => CardFactory::createEventCard(
-        108, PXPEnumEventCardEffect::FailureToImpress, 
+    'card_108' => CardFactory::createEventCard(
+        'card_108', PXPEnumEventCardEffect::FailureToImpress, 
         clienttranslate("All discard all loyalty prizes."), 
         PXPEnumEventCardEffect::Rumor, 
         clienttranslate("Choose a player. Their patriots do not count for infl uence until after the next Dominance Check.")
     ),
-    109 => CardFactory::createEventCard(
-        109, PXPEnumEventCardEffect::RiotsInPunjab, 
+    'card_109' => CardFactory::createEventCard(
+        'card_109', PXPEnumEventCardEffect::RiotsInPunjab, 
         clienttranslate("Remove all tribes and armies in Punjab."), 
         PXPEnumEventCardEffect::ConflictFatigue, 
         clienttranslate("Coalitions require only two more blocks in order to be dominant during the next Dominance Check.")
     ),
-    110 => CardFactory::createEventCard(
-        110, PXPEnumEventCardEffect::RiotsInHerat, 
+    'card_110' => CardFactory::createEventCard(
+        'card_110', PXPEnumEventCardEffect::RiotsInHerat, 
         clienttranslate("Remove all tribes and armies in Herat."), 
         PXPEnumEventCardEffect::Nationalism, 
         clienttranslate("Your tribes may move and battle as if they were armies until the next Dominance Check.")
     ),
-    111 => CardFactory::createEventCard(
-        111, PXPEnumEventCardEffect::NoEffect, 
+    'card_111' => CardFactory::createEventCard(
+        'card_111', PXPEnumEventCardEffect::NoEffect, 
         clienttranslate(""), 
         PXPEnumEventCardEffect::PublicWithdrawal, 
         clienttranslate("")
     ),
-    112 => CardFactory::createEventCard(
-        112, PXPEnumEventCardEffect::RiotsInKabul, 
+    'card_112' => CardFactory::createEventCard(
+        'card_112', PXPEnumEventCardEffect::RiotsInKabul, 
         clienttranslate("No effect."), 
         PXPEnumEventCardEffect::NationBuilding, 
         clienttranslate("This card cannot be purchased. Any money placed on this card in the market is instead removed from the game.")
     ),
-    113 => CardFactory::createEventCard(
-        113, PXPEnumEventCardEffect::RiotsInPersia, 
+    'card_113' => CardFactory::createEventCard(
+        'card_113', PXPEnumEventCardEffect::RiotsInPersia, 
         clienttranslate("Remove all tribes and armies in Kabul."), 
         PXPEnumEventCardEffect::BackingOfPersianAristocracy, 
         clienttranslate("Place twice as many blocks when you take the build action until the next Dominance Check.")
     ),
-    114 => CardFactory::createEventCard(
-        114, PXPEnumEventCardEffect::ConfidenceFailure, 
+    'card_114' => CardFactory::createEventCard(
+        'card_114', PXPEnumEventCardEffect::ConfidenceFailure, 
         clienttranslate("Remove all tribes and armies in Persia."), 
         PXPEnumEventCardEffect::OtherPersuasiveMethods, 
         clienttranslate("Take three rupees from the bank.")
     ),
-    115 => CardFactory::createEventCard(
-        115, PXPEnumEventCardEffect::IntelligenceSuit, 
+    'card_115' => CardFactory::createEventCard(
+        'card_115', PXPEnumEventCardEffect::IntelligenceSuit, 
         clienttranslate("All players must immediately discard a card from their hand."), 
         PXPEnumEventCardEffect::PashtunwaliValues, 
         clienttranslate("Exchange your hand with another player. You may exchange an empty hand.")
     ),
-    116 => CardFactory::createEventCard(
-        116, PXPEnumEventCardEffect::PoliticalSuit, 
+    'card_116' => CardFactory::createEventCard(
+        'card_116', PXPEnumEventCardEffect::PoliticalSuit, 
         clienttranslate("Choose a suit to favor. All favored suit change impact icons are ignored until the next Dominance Check."), 
         PXPEnumEventCardEffect::Rebuke, 
         clienttranslate("Remove all tribes and armies in a single region.")

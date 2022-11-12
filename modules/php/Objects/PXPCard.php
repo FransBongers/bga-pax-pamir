@@ -16,7 +16,7 @@ namespace PhobyJuan\PaxPamirEditionTwo\Objects;
 
 class PXPCard implements \JsonSerializable
 {
-    private int $id;
+    private string $id;
     private string $type;
 
     // Suit cards

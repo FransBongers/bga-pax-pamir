@@ -18,5 +18,5 @@ abstract class PXPEnumCardType
 {
     const Event = "event";
     const DominanceCheck = "dominance_check";
-    const Suit = "court";
+    const Court = "court";
 }

@@ -28,8 +28,7 @@ function (dojo, declare) {
         constructor: function(){
             console.log('paxpamireditiontwo constructor');
 
-            // Here, you can init the global variables of your user interface
-            // Example:
+            // Init global variables
             
             // size of tokens
             this.cardWidth = 150;
@@ -42,7 +41,10 @@ function (dojo, declare) {
             this.roadWidth = 40;
             this.tribeWidth = 25;
             this.tribeHeight = 25;
+            this.rupeeWidth = 50;
+            this.rupeeHeight = 50;
 
+            // NOTE (Frans): probably good idea to get all game specific data from below from the backend
             // coalitions
             this.afghan = 'afghan';
             this.british = 'british';
@@ -54,7 +56,6 @@ function (dojo, declare) {
                 this.russian,
             ]
             
-
             // regions
             this.herat = 'herat';
             this.kabul = 'kabul';
@@ -99,14 +100,24 @@ function (dojo, declare) {
             // global variables to keep stock components
             this.playerHand = new ebg.stock();
             this.market = [];
+            // armies per region
+            this.armies = {};
+            // tribes per region
+            this.tribes = {};
+            // court per player
             this.court = {};
+            // blocks per coalition (supply)
+            this.coalitionBlocks = {};
+            // token zones per card
+            this.cardTokens = {};
 
             this.playerCounts = {}; // rename to playerTotals?
             this.unavailableCards = [];
+            this.handles = []; // contains all onClick handlers
 
             // TODO check what there are used for
             this.card_tokens = [];
-            this.handles = [];
+            
             
         },
         
@@ -133,13 +144,16 @@ function (dojo, declare) {
             const colors = Object.keys(players).map((key) => players[key].color);
             // console.log('players', players)
 
-            // Setting up player boards
+            // Setup of all player specific components 
             for( const playerId in gamedatas.players )
             {
                 const player = gamedatas.players[playerId];
+
+                // Create player court stock
                 this.court[playerId] = new ebg.stock();
                 this.setupCardsStock({stock: this.court[playerId], nodeId: `pp_court_player_${playerId}`, className: `pp_card_in_court_${playerId}`});
 
+                // Add court cards played by player to court
                 gamedatas.court[playerId].forEach((card) => {
                     this.placeCard({location: this.court[playerId], id: card.key, order: card.state});
                 })
@@ -151,10 +165,9 @@ function (dojo, declare) {
                     this.updatePlayerLoyalty({playerId, coalition: player.loyalty})
                 }
 
-                // apparently this is shorthand notions for accessing divs based on id
+                // Set all values in player panels
                 $('influence_'+ playerId).innerHTML = gamedatas.counts[playerId].influence;
-                // Number of cylinders played is total number of cylinders minus cylinders still available to player 
-                $('cylinder_count_' + playerId).innerHTML = 10 - gamedatas.counts[playerId].cylinders;
+                $('cylinder_count_' + playerId).innerHTML = gamedatas.counts[playerId].cylinders;
                 $('rupee_count_' + playerId).innerHTML = gamedatas.players[playerId].rupees;
                 $('card_count_' + playerId).innerHTML = gamedatas.counts[playerId].cards;
 
@@ -162,20 +175,12 @@ function (dojo, declare) {
                 $('military_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.military;
                 $('political_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.political;
                 $('intelligence_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.intelligence;
-
-                
             }
 
             this.playerCounts = gamedatas.counts;
 
 
-            
-            // // Create court zones
-            // Object.keys(players).forEach((key, index) => {
-            //     this.createPlayerCourtZone({playerId: players[key].id});
-            // })
-
-            // Place cards in market
+            // Set up market
             for (let row = 0; row <= 1; row++) {
                 this.market[row] = [];
                 for (let column = 0; column <= 5; column++) {
@@ -188,16 +193,14 @@ function (dojo, declare) {
                     // add cards
                     const cardInMarket = gamedatas.market[row][column];
                     if (cardInMarket) {
-                        // this.addCardToMarket({location, card: key});
                         this.placeCard({location: this.market[row][column], id: cardInMarket.key});
                     }
                 }
             } 
 
+            // Setup player hand
             this.setupCardsStock({stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
-
             Object.keys(this.gamedatas.hand).forEach((cardId) => {
-                console.log('cardId', cardId, typeof cardId)
                 this.placeCard({location: this.playerHand, id: cardId});
             })
 
@@ -220,64 +223,97 @@ function (dojo, declare) {
             // this.rupee_zone_0_3.addToStockWithId( 6, 8 );
             // this.rupee_zone_0_3.addToStockWithId( 6, 9 );
 
-            // this.addCardToCourt({playerId: '2371052', cardNumber: 40} )
-            // this.addCardToCourt({playerId: '2371052', cardNumber: 41} )
-            // this.addCardToCourt({playerId: '2371052', cardNumber: 42} )
 
             // TODO: Set up your game interface here, according to "gamedatas"
 
 
 
-            // Create army zone for each region
-            this.regions.forEach((region) => {
-                this.createArmyZone({region});
-            })
-
-            
-            this.addArmyToRegion({id: 1, coalition: this.british, region: this.transcaspia})
-            this.addArmyToRegion({id: 2, coalition: this.afghan, region: this.transcaspia})
-            this.addArmyToRegion({id: 3, coalition: this.russian, region: this.transcaspia})
-            this.addArmyToRegion({id: 5, coalition: this.russian, region: this.transcaspia})
-            this.addArmyToRegion({id: 6, coalition: this.russian, region: this.transcaspia})
-            this.addArmyToRegion({id: 7, coalition: this.russian, region: this.transcaspia})
-            this.addArmyToRegion({id: 8, coalition: this.russian, region: this.kabul})
-            this.addArmyToRegion({id: 9, coalition: this.russian, region: this.herat})
-            this.addArmyToRegion({id: 10, coalition: this.russian, region: this.kandahar})
-            this.addArmyToRegion({id: 11, coalition: this.russian, region: this.persia})
-            this.addArmyToRegion({id: 12, coalition: this.russian, region: this.punjab})
-            this.addArmyToRegion({id: 13, coalition: this.afghan, region: this.kabul});
-            this.addArmyToRegion({id: 14, coalition: this.british, region: this.kabul});
-
-            // Create army zone for each region
+            // Create zones for each region
             this.regions.forEach((region, index) => {
-                this.createTribeZone({region});
-                const color = colors[index % numberOfPlayers]
-                this.addTribeToRegion({id: index, playerColor: color, region})
-            })
+                // armies
+                this.armies[region] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.armies[region],
+                    nodeId: `pp_${region}_armies`,
+                    tokenWidth: this.armyWidth,
+                    tokenHeight: this.armyHeight,
+                    itemMargin: -5,
+                });
 
-            // this.addTribeToRegion({id: 1, playerColor: colors[0], region: this.kabul});
+                // tribes
+                this.tribes[region] = new ebg.zone();
+                console.log(`tribes ${region}}`, this.tribes[region]);
+                this.setupTokenZone({
+                    zone: this.tribes[region],
+                    nodeId: `pp_${region}_tribes`,
+                    tokenWidth: this.tribeWidth,
+                    tokenHeight: this.tribeHeight,
+                });
+                // Temporary way yo add tribes to region
+                const color = colors[index % numberOfPlayers]
+                this.placeToken({
+                    location: this.tribes[region],
+                    id: `pp_tribe_${index}`,
+                    jstpl: 'jstpl_tribe',
+                    jstplProps: {
+                        id: `pp_tribe_${index}`,
+                        color
+                    },
+                    weight: 1,
+                });
+            });
+
+            // Temporary army just to show
+            const armyWeight = {
+                afghan: 1,
+                british: 2,
+                russian: 3,
+            }
+
+            this.placeToken({
+                location: this.armies[this.transcaspia],
+                id: 'pp_army_1',
+                jstpl: 'jstpl_army',
+                jstplProps: {
+                    id: 'pp_army_1',
+                    coalition: this.british
+                }, weight: armyWeight[this.coalition],
+            });
 
             // Create border zones
             this.borders.forEach((border) => {
                 this.createBorderZone({border});
             })
-            
-            this.addRoadToBorder({id: 1, coalition: this.russian, border: this.herat_transcaspia});
-            this.addRoadToBorder({id: 2, coalition: this.russian, border: this.herat_transcaspia});
-            this.addRoadToBorder({id: 3, coalition: this.british, border: this.herat_kabul});
-            this.addRoadToBorder({id: 4, coalition: this.afghan, border: this.herat_kandahar});
-            this.addRoadToBorder({id: 5, coalition: this.british, border: this.herat_persia});
-            this.addRoadToBorder({id: 6, coalition: this.afghan, border: this.herat_transcaspia});
-            this.addRoadToBorder({id: 7, coalition: this.british, border: this.kabul_transcaspia});
-            this.addRoadToBorder({id: 8, coalition: this.british, border: this.kabul_kandahar});
-            this.addRoadToBorder({id: 9, coalition: this.afghan, border: this.kabul_punjab});
-            this.addRoadToBorder({id: 10, coalition: this.afghan, border: this.kandahar_punjab});
-            this.addRoadToBorder({id: 11, coalition: this.russian, border: this.persia_transcaspia});
 
+            // Temp add road to each border
+            this.borders.forEach((border, index) => {
+                this.placeToken({
+                    location: this[`${border}_border`],
+                    id: `pp_road_${index}`,
+                    jstpl: 'jstpl_road',
+                    jstplProps: {
+                        id: `pp_road_${index}`,
+                        coalition: this.afghan,
+                    },
+                    weight: 1,
+                });
+            })
+            
+
+            // Setup supply of coalition blocks
             this.coalitions.forEach((coalition) => {
-                this.createCoalitionBlockZone({coalition})
+                this.coalitionBlocks[coalition] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.coalitionBlocks[coalition],
+                    nodeId: `pp_${coalition}_coalition_blocks`,
+                    tokenWidth: this.coalitionBlockWidth,
+                    tokenHeight: this.coalitionBlockHeight,
+                    itemMargin: 15,
+                    instantaneous: true,
+                });
             })
 
+            // Add coalition blocks. Todo: add based on backend date
             for (let id = 0; id <= 35; id++) {
                 const coalitionId = id % 3;
                 const coalitionMap = {
@@ -285,10 +321,17 @@ function (dojo, declare) {
                     1: this.british,
                     2: this.russian,
                 }
-                this.addCoalitionBlockToZone({id, coalition: coalitionMap[coalitionId]});
-            }  
-
-            
+                this.placeToken({
+                    location: this.coalitionBlocks[coalitionMap[coalitionId]],
+                    id: `pp_coalition_block_${id}`,
+                    jstpl: 'jstpl_coalition_block',
+                    jstplProps: {
+                        id: `pp_coalition_block_${id}`,
+                        coalition: coalitionMap[coalitionId]
+                    },
+                    weight: 0,
+                });
+            } 
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
@@ -449,21 +492,21 @@ function (dojo, declare) {
      
 
         ///////////////////////////////////////////////////
-        //// Utility methods
+        //// Utility methods - add in alphabetical order
 
-        addCardToken : function(location, card_id, token_id) {
-            console.log( 'addCardToken', location, card_id, token_id );
-            // var node_id = location.control_name + '_item_'+ card_id + '_tokens';
+        addCardToken : function({location, cardId, rupeeId}) {
+            console.log( 'addCardToken', location, cardId, rupeeId );
+            const nodeId = location.control_name + '_item_'+ cardId + '_rupees';
 
-            // var card_tokens_list = this.card_tokens[card_id].getAllItems();
+            const cardTokensList = this.cardTokens[cardId].getAllItems();
 
-            // if (!card_tokens_list.includes(token_id)) {
-            //     dojo.place(this.format_block('jstpl_coin', {
-            //         id : token_id,
-            //     }), node_id);
-            //     this.card_tokens[card_id].placeInZone(token_id);
-            //     this.addTooltip( token_id, token_id, '' );
-            // }
+            if (!cardTokensList.includes(rupeeId)) {
+                dojo.place(this.format_block('jstpl_rupee', {
+                    id : rupeeId,
+                }), nodeId);
+                this.cardTokens[cardId].placeInZone(rupeeId);
+                // this.addTooltip( token_id, token_id, '' );
+            }
 
         },
 
@@ -487,7 +530,7 @@ function (dojo, declare) {
 
         },
 
-        discardCard : function({id, from, order = null}) {
+        discardCard: function({id, from, order = null}) {
 
             console.log( 'discardCard' );
 
@@ -498,8 +541,8 @@ function (dojo, declare) {
 
         },
 
-        placeCard : function({location, id, order = null}) {
-            console.log('placeCard');
+        placeCard: function({location, id, order = null}) {
+            console.log('placeCard', location, id);
 
             if (order != null) {
                 location.changeItemsWeight({
@@ -509,10 +552,19 @@ function (dojo, declare) {
 
             location.addToStockWithId(id, id, 'pp_market_deck');
 
-            // this.placeCardTokens(location, id);
+            this.setupCardTokenZones({location, cardId: id});
                         
             // this.addTooltip( location.getItemDivId(id), id, '' );
 
+        },
+
+        // TODO(Frans): detereming jstpl based on id?
+        placeToken: function({location, id, jstpl, jstplProps, weight = 0, classes = []}) {
+            dojo.place( this.format_block( jstpl, jstplProps ) , 'pp_tokens' );
+            classes.forEach((className) => {
+                dojo.addClass( id, className ); 
+            })
+            location.placeInZone( id, weight );
         },
 
         // Updates weight of item in the stock component for ordering purposes
@@ -520,23 +572,62 @@ function (dojo, declare) {
             location.changeItemsWeight({[id]: order});
         },
 
-        // Function to implement functionality for card stock components
+        // Function to setup stock components for cards
         setupCardsStock: function( {stock, nodeId, className} ) {
             const useLargeCards = false;
             stock.create( this, $(nodeId), this.cardWidth, this.cardHeight );
-            stock.backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+            const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
             stock.image_items_per_row = useLargeCards ? 117 : 118;
             stock.item_margin = 10;
             // TODO: below is option to customize the created div (and add zones to card for example)
-            // stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
-            //     style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};\
-            //     background-image:url('${image}');\"><div id=\"${id}_tokens\" class=\"card_token_area\"></div></div>";
+            stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
+                style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:" + backgroundSize + ";\
+                background-image:url('${image}');\"><div id=\"${id}_rupees\" class=\"pp_rupee_zone\"></div></div>";
             
             Object.keys(this.gamedatas.cards).forEach((cardId) => {
                 const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
                 stock.addItemType( cardId, 0, cardFileLocation, useLargeCards ? cardId.split('_')[1] -1 : cardId.split('_')[1] );
             });
             stock.extraClasses = `pp_card ${className}`;
+        },
+
+        // Function to set up zones for tokens (armies, tribes, cylinders etc.)
+        setupTokenZone: function({zone, nodeId, tokenWidth, tokenHeight, itemMargin = null, instantaneous = false}) {
+            zone.create(this, nodeId, tokenWidth, tokenHeight);
+            if (itemMargin) {
+                zone.item_margin = itemMargin;
+            };
+            zone.instantaneous = instantaneous;
+        },
+
+        setupCardTokenZones: function({location, cardId}) {
+            console.log( 'setupCardTokens' );
+
+            if (!( cardId in this.cardTokens) ) {
+
+                var nodeId = location.control_name + '_item_'+ cardId + '_rupees';
+
+                // ** setup for zone
+                this.cardTokens[cardId] = new ebg.zone();
+                this.cardTokens[cardId].create( this, nodeId, this.rupeeWidth, this.rupeeHeight );
+                // this.cardTokens[id].setPattern('ellipticalfit');
+                this.cardTokens[cardId].item_margin = -30;
+
+                for (rupee in this.gamedatas.rupees) {
+                    if (this.gamedatas.rupees[rupee].location == cardId) {
+                        console.log('rupee', rupee, this.gamedatas.rupees[rupee]);
+                        const rupeeId = this.gamedatas.rupees[rupee].key;
+                        console.log('rupeeId', rupeeId, 'nodeId', nodeId)
+                        dojo.place(this.format_block('jstpl_rupee', {
+                            id: rupeeId,
+                        }), nodeId);
+                        this.cardTokens[cardId].placeInZone(rupeeId);
+                        // this.addTooltip( coin_id, coin_id, '' );
+                    }
+                }
+
+            }
+
         },
         
 
@@ -549,14 +640,6 @@ function (dojo, declare) {
             this[`rupee_zone_${row}_${column}`].setSelectionMode(1);
             this[`rupee_zone_${row}_${column}`].setOverlap(30, 0);
             this[`rupee_zone_${row}_${column}`].extraClasses='pp_rupee';
-        },
-
-        createArmyZone: function({region}) 
-        {
-            this[`${region}_armies`] = new ebg.zone();
-            this[`${region}_armies`].create(this, `pp_${region}_armies`, this.armyWidth, this.armyHeight);
-            this[`${region}_armies`].item_margin = -5;
-            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
         },
 
         createBorderZone: function({border}) 
@@ -606,110 +689,18 @@ function (dojo, declare) {
             }
         },
 
-        createCoalitionBlockZone: function({coalition}) 
-        {
-            this[`${coalition}_coalition_blocks`] = new ebg.zone();
-            this[`${coalition}_coalition_blocks`].create(this, `pp_${coalition}_coalition_blocks`, this.coalitionBlockWidth, this.coalitionBlockHeight);
-            this[`${coalition}_coalition_blocks`].item_margin = 15;
-            this[`${coalition}_coalition_blocks`].instantaneous = true;
-            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-        },
-
-
-        createTribeZone: function({region}) 
-        {
-            this[`${region}_tribes`] = new ebg.zone();
-            this[`${region}_tribes`].create(this, `pp_${region}_tribes`, this.tribeWidth, this.tribeHeight);
-            // this[`${region}_tribes`].item_margin = -5;
-            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-        },
-
-        createPlayerCourtZone: function({playerId}){
-            this[`court_player_${playerId}`] = new ebg.zone();
-            this[`court_player_${playerId}`].create( this, `pp_court_player_${playerId}`,this.cardWidth, this.cardHeight );
-            this[`court_player_${playerId}`].setPattern( 'horizontalfit' );
-        },
-
-        addCardToMarket: function( {location, card} )
-        {
-            // console.log('player', this.gamedatas.players[ player ]);
-            dojo.place( this.format_block( 'jstpl_card', {
-                card,
-            } ) , 'cards' );
-            dojo.addClass( `pp_${card}`, 'pp_market_card' );
-            this.placeOnObject( 'pp_'+card, location );
-            // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
-            // this.placeOnObject( 'pp_card_'+cardNumber, 'overall_player_board_'+player );
-            // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
-        },
-
-        addCardToCourt: function( {playerId, cardNumber} )
-        {
-            dojo.place( this.format_block( 'jstpl_card', {
-                card: 'card_' + cardNumber,
-            } ) , 'cards' );
-            dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            this[`court_player_${playerId}`].placeInZone( `pp_card_${cardNumber}`, 1 );
-        },
-
-        addArmyToRegion: function( {id, coalition, region} )
-        {
-            dojo.place( this.format_block( 'jstpl_army', {
-                coalition,
-                id,
-            } ) , 'cards' ); // Todo: create in which location?
-            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            const weight = {
-                afghan: 1,
-                british: 2,
-                russian: 3,
-            }
-            this[`${region}_armies`].placeInZone( `pp_army_${id}`, weight[coalition] );
-        },
-
-        addCoalitionBlockToZone: function( {id, coalition} )
-        {
-            dojo.place( this.format_block( 'jstpl_coalition_block', {
-                coalition,
-                id,
-            } ) , 'cards' ); // Todo: create in which location?
-
-            this[`${coalition}_coalition_blocks`].placeInZone( `pp_coalition_block_${id}`, 1 );
-        },
-
-        addRoadToBorder: function( {id, coalition, border} )
-        {
-            dojo.place( this.format_block( 'jstpl_road', {
-                coalition,
-                id,
-            } ) , 'cards' ); // Todo: create in which location?
-            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-            this[`${border}_border`].placeInZone( `pp_road_${id}`, 1 );
-        },
-
-        addTribeToRegion: function( {id, playerColor, region} )
-        {
-            dojo.place( this.format_block( 'jstpl_tribe', {
-                color: playerColor,
-                id,
-            } ) , 'cards' ); // Todo: create in which location?
-            // dojo.addClass( `pp_card_${cardNumber}`, 'pp_card_in_court' );
-
-            this[`${region}_tribes`].placeInZone( `pp_tribe_${id}`, 1 );
-        },
-
-        addRupeeToMarket: function({row, column, number})
-        {
-            // console.log('player', this.gamedatas.players[ player ]);
-            dojo.place( this.format_block( 'jstpl_rupee', {
-                number
-            } ) , 'rupee' );
+        // addRupeeToMarket: function({row, column, number})
+        // {
+        //     // console.log('player', this.gamedatas.players[ player ]);
+        //     dojo.place( this.format_block( 'jstpl_rupee', {
+        //         number
+        //     } ) , 'rupee' );
             
-            this.placeOnObject( 'pp_rupee_' + number, `market_${row}_${column}_rupee_zone` );
-            // this.slideToObject( 'pp_rupee_' + number, 'square_'+x+'_'+y ).play();
-            // this.placeOnObject( 'pp_card_'+cardNumber, 'overall_player_board_'+player );
-            // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
-        },
+        //     this.placeOnObject( 'pp_rupee_' + number, `market_${row}_${column}_rupee_zone` );
+        //     // this.slideToObject( 'pp_rupee_' + number, 'square_'+x+'_'+y ).play();
+        //     // this.placeOnObject( 'pp_card_'+cardNumber, 'overall_player_board_'+player );
+        //     // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
+        // },
 
         updatePlayerLoyalty: function({playerId, coalition})
         {
@@ -760,10 +751,10 @@ function (dojo, declare) {
 
         },
 
-        moveCard : function({id, from, to, order = null}) {
+        moveCard: function({id, from, to, order = null}) {
             console.log( 'moveCard' );
             // console.log( 'moveCard', id, 'from', from, 'to', to, 'order', order );
-            // var card_tokens_list = this.card_tokens[id].getAllItems();
+            const tokensCurrentlyOnCard = this.cardTokens[id].getAllItems();
 
             let fromDiv = null;
             if (from !== null) {
@@ -773,22 +764,24 @@ function (dojo, declare) {
                 if (order != null) {
                     to.changeItemsWeight({ id: order });
                 }
-                // const nodeId = to.control_name + '_item_'+ id + '_tokens';
+                const nodeId = to.control_name + '_item_'+ id + '_rupees';
                 to.addToStockWithId(id, id, fromDiv);
 
-                // this.card_tokens[id] = new ebg.zone();
-                // this.card_tokens[id].create( this, node_id, this.tokenwidth, this.tokenheight );
-                // this.card_tokens[id].setPattern('ellipticalfit');
-                // this.card_tokens[id].item_margin = 2;
+                // this.setupCardTokenZones({location: to, cardId: id, replaceCurrentZone});
 
-                // card_tokens_list.forEach (
-                //     function (token_id, index) { 
-                //         dojo.place(this.format_block('jstpl_coin', {
-                //             id : token_id,
-                //         }), node_id);
-                //         this.card_tokens[id].placeInZone(token_id);
-                //         this.addTooltip( token_id, token_id, '' );
-                // }, this);
+                // TODO(Frans): check if we can combine this somehow with setupCardTokenZones
+                this.cardTokens[id] = new ebg.zone();
+                this.cardTokens[id].create( this, nodeId, this.rupeeWidth, this.rupeeHeight );
+                // this.cardTokens[id].setPattern('ellipticalfit');
+                // this.cardTokens[id].item_margin = 2;
+
+                tokensCurrentlyOnCard.forEach ((rupeeId) => { 
+                        dojo.place(this.format_block('jstpl_rupee', {
+                            id : rupeeId,
+                        }), nodeId);
+                        this.cardTokens[id].placeInZone(rupeeId);
+                        // this.addTooltip( token_id, token_id, '' );
+                }, this);
                 // this.addTooltip( to_location.getItemDivId(id), id, '' );
             }
 
@@ -796,6 +789,12 @@ function (dojo, declare) {
                 from.removeFromStockById(id); 
             }
 
+        },
+
+        moveToken: function({id, to, from, weight}) {
+            console.log('move token');
+            to.placeInZone( id, weight );
+            from.removeFromZone(id, false)
         },
 
 
@@ -815,12 +814,6 @@ function (dojo, declare) {
 
         onPurchase: function()
         {
-            // Test with moving cards
-            // this.playerHand.addToStockWithId('card_12', 'card_12', 'pp_market_0_1_item_card_12');
-            // this.market[0][1].removeFromStockById('card_12')
-            // this.playerHand.addToStockWithId('card_73', 'card_73', 'pp_market_0_0_item_card_73');
-            // this.market[0][0].removeFromStockById('card_73');
-
             if (! this.checkAction('purchase'))
             return;
 
@@ -851,6 +844,10 @@ function (dojo, declare) {
         {
             if (! this.checkAction('card_action'))
             return;
+
+            // // Temp abuse of button to test movement
+            // this.moveToken({id: 'pp_army_1', from: this.armies[this.transcaspia], to: this.armies[this.kabul], weight: 0})
+            // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: 0})
 
             if( this.isCurrentPlayerActive() )
             {       
@@ -1252,15 +1249,13 @@ function (dojo, declare) {
 
         notif_purchaseCard: function( notif )
         {
-            console.log( 'notif_purchaseCard' );
-            console.log( notif );
+            console.log( 'notif_purchaseCard', notif );
 
             this.clearLastAction();
             const row = notif.args.market_location.split('_')[1];
             const col = notif.args.market_location.split('_')[2];
 
-            // TODO (Frans): implement card tokens
-            // this.card_tokens[notif.args.card.key].removeAll();
+            this.cardTokens[notif.args.card.key].removeAll();
 
             if (notif.args.player_id == this.player_id) {
                 this.moveCard({id: notif.args.card.key, from: this.market[row][col], to: this.playerHand});
@@ -1268,14 +1263,13 @@ function (dojo, declare) {
                 this.moveCard({id: notif.args.card.key, from: this.market[row][col], to: null});
             }
 
-            // Add coings to market
-            // notif.args.updated_cards.forEach (
-            //     function (item, index) { this.addCardToken( 
-            //         this.market[item.location.split('_')[1]][item.location.split('_')[2]],
-            //         item.card_id, 
-            //         item.coin_id 
-            //     ); 
-            // }, this);
+
+            notif.args.updated_cards.forEach ((item, index) => { this.addCardToken({
+                location: this.market[item.location.split('_')[1]][item.location.split('_')[2]],
+                cardId: item.card_id, 
+                rupeeId: item.rupee_id,
+            }); 
+            }, this);
 
         },
 
@@ -1311,7 +1305,7 @@ function (dojo, declare) {
 
             Object.keys(counts).forEach((playerId) => {
                 $('influence_'+ playerId).innerHTML = counts[playerId].influence;
-                $('token_count_' + playerId).innerHTML = counts[playerId].tokens;
+                $('cylinder_count_' + playerId).innerHTML = counts[playerId].cylinders;
                 $('rupee_count_' + playerId).innerHTML = counts[playerId].rupees;
                 $('card_count_' + playerId).innerHTML = counts[playerId].cards;
 

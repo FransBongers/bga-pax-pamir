@@ -421,7 +421,7 @@ html {
     /* border: 1px blue solid; */
 }
 
-.pp_market_rupees {
+.pp_rupee_zone {
     width: 130px;
     height: 50px;
     left: 8px;
@@ -545,12 +545,9 @@ html {
 }
 
 .pp_rupee {
-    /* width: 50px; */
-    /* height: 50px; */
-    /* background-image: url('img/temp/tokens.png'); */
-    /* background-size: 300px 50px; */
-    /* background-position: -250px 0px; */
-    /* position: absolute; */
+    width: 50px;
+    height: 50px;
+    background-image: url('img/temp/rupee.png');
     border-radius: 25px;
     box-shadow: 1px 1px 4px;
 }

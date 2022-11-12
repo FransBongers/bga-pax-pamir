@@ -119,10 +119,10 @@ class PaxPamirEditionTwo extends Table
         }
 
         // Add other tokens to token module
-        $this->tokens->createTokensPack("rupee_{INDEX}", "pool", 36);
-        $this->tokens->createTokensPack("block_afghan_{INDEX}", "pool", 12);
-        $this->tokens->createTokensPack("block_russian_{INDEX}", "pool", 12);
-        $this->tokens->createTokensPack("block_british_{INDEX}", "pool", 12);
+        $this->tokens->createTokensPack("rupee_{INDEX}", "rupee_pool", 36);
+        $this->tokens->createTokensPack("block_afghan_{INDEX}", "block_afghan_pool", 12);
+        $this->tokens->createTokensPack("block_russian_{INDEX}", "block_russian_pool", 12);
+        $this->tokens->createTokensPack("block_british_{INDEX}", "block_british_pool", 12);
 
         // Init global values with their initial values
         self::setGameStateInitialValue( 'setup', 1 ); // used to check if setup is done or not
@@ -187,7 +187,8 @@ class PaxPamirEditionTwo extends Table
             $result['court'][$player_id] = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
             $result['cylinders'][$player_id] = $this->tokens->getTokensInLocation('cylinders_'.$player_id);
             $result['counts'][$player_id]['rupees'] = $this->getPlayerRupees($player_id );
-            $result['counts'][$player_id]['cylinders'] = count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_'.$player_id ));
+            // Number of cylinders played is total number of cylinders minus cylinders still available to player 
+            $result['counts'][$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_'.$player_id ));
             $result['counts'][$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
             $result['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
             $result['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
@@ -208,6 +209,8 @@ class PaxPamirEditionTwo extends Table
             $result['market'][0][$i] = $this->tokens->getTokenOnLocation('market_0_'.$i);
             $result['market'][1][$i] = $this->tokens->getTokenOnLocation('market_1_'.$i);
         }
+
+        $result['rupees'] = $this->tokens->getTokensOfTypeInLocation('rupee', null);
 
         return $result;
     }
@@ -430,7 +433,7 @@ class PaxPamirEditionTwo extends Table
         foreach ( $players as $player_id => $player_info ) {
             $counts[$player_id] = array();
             $counts[$player_id]['rupees'] = $this->getPlayerRupees($player_id );
-            $counts[$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('token', 'tokens_'.$player_id ));
+            $counts[$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_'.$player_id ));
             $counts[$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
             $counts[$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
             $counts[$player_id]['influence'] = $this->getPlayerInfluence($player_id);
@@ -661,10 +664,10 @@ class PaxPamirEditionTwo extends Table
             $this->tokens->moveToken($card_id, 'hand_'.$player_id);
             $this->incGameStateValue("remaining_actions", -1);
 
-            // add rupees on card to player totals. Then put them in pool location
+            // add rupees on card to player totals. Then put them in rupee_pool location
             $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $card_id);
             $this->incPlayerRupees($player_id, count($rupees));
-            $this->tokens->moveAllTokensInLocation($card_id, 'pool');
+            $this->tokens->moveAllTokensInLocation($card_id, 'rupee_pool');
 
             // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
             $updated_cards = array();
@@ -677,9 +680,9 @@ class PaxPamirEditionTwo extends Table
                     $m_card = $this->tokens->getTokenOnLocation($location);
                 }
                 if ($m_card !== NULL) {
-                    $c = $this->tokens->getTokenOnTop('pool');
+                    $c = $this->tokens->getTokenOnTop('rupee_pool');
                     $this->tokens->moveToken($c['key'], $m_card["key"]); 
-                    $this->tokens->setTokenState($m_card["key"], 1);
+                    $this->tokens->setTokenState($m_card["key"], 1); // state for unavailable
                     $updated_cards[] = array(
                         'location' => $location,
                         'card_id' => $m_card["key"],

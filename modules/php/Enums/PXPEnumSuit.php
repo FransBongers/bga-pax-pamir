@@ -16,8 +16,8 @@ namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
 abstract class PXPEnumSuit
 {
-    const Economic = "Economic";
-    const Military = "Military";
-    const Political = "Political";
-    const Intelligence = "Intelligence";
+    const Economic = "economic";
+    const Military = "military";
+    const Political = "political";
+    const Intelligence = "intelligence";
 }

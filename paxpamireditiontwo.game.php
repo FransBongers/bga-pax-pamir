@@ -212,6 +212,7 @@ class PaxPamirEditionTwo extends Table
         $result['loyalty'] = $this->loyalty;
         $result['suits'] = $this->suits;
         $result['cards'] = array();
+        $result['cards_info'] = $this->cards;
 
         foreach ($this->token_types as $key => $value) {
             if ($this->startsWith($value['type'], 'card')) {

@@ -463,6 +463,7 @@ class PXPCard implements \JsonSerializable
             "loyalty" => $this->getLoyalty(),
             "prize" => $this->getPrize(),
             "impactIcons" => $this->getImpactIcons(),
+            "specialAbility" => $this->getSpecialAbility(),
             "description" => $this->getDescription(),
             "discardedEffect" => $this->getDiscardedEffect(),
             "discardedDescription" => $this->getDiscardedDescription(),

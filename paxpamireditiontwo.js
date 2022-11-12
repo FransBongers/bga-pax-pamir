@@ -53,6 +53,7 @@ function (dojo, declare) {
                 this.british,
                 this.russian,
             ]
+            
 
             // regions
             this.herat = 'herat';

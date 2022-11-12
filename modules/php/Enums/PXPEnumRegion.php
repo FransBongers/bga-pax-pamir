@@ -16,10 +16,10 @@ namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
 abstract class PXPEnumRegion
 {
-    const Transcapia = "Transcapia";
-    const Kabul = "Kabul";
-    const Persia = "Persia";
-    const Herat = "Herat";
-    const Kandahar = "Kandahar";
-    const Punjab = "Punjab";
+    const Transcaspia = "transcaspia";
+    const Kabul = "kabul";
+    const Persia = "persia";
+    const Herat = "herat";
+    const Kandahar = "kandahar";
+    const Punjab = "punjab";
 }

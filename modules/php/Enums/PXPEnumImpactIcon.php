@@ -16,13 +16,13 @@ namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
 abstract class PXPEnumImpactIcon
 {
-    const Road = "Road";
-    const Army = "Army";
-    const Leverage = "Leverage";
-    const Spy = "Spy";
-    const Tribe = "Tribe";
-    const EconomicSuit = "EconomicSuit";
-    const MilitarySuit = "MilitarySuit";
-    const PoliticalSuit = "PoliticalSuit";
-    const IntelligenceSuit = "IntelligenceSuit";
+    const Road = "road";
+    const Army = "army";
+    const Leverage = "leverage";
+    const Spy = "spy";
+    const Tribe = "tribe";
+    const EconomicSuit = "economic_suit";
+    const MilitarySuit = "military_suit";
+    const PoliticalSuit = "political_suit";
+    const IntelligenceSuit = "intelligence_suit";
 }

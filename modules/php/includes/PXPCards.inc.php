@@ -27,7 +27,7 @@ $this->cards = [
     /////////////////////////////
     1 => CardFactory::createSuitCard(
         1, PXPEnumSuit::Intelligence, 3, clienttranslate("Mohan Lal"), PXPEnumRegion::Kabul, 
-        PXPEnumSpecialAbility::IndispensableAdvisor, false, false, false, true, false, false, 
+        PXPEnumSpecialAbility::IndispensableAdvisors, false, false, false, true, false, false, 
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("\"You all tell yourselves all sorts of fairy stories: you are here to 
@@ -784,7 +784,7 @@ $this->cards = [
         across the Transcaspian Oblast.")
     ),
     85 => CardFactory::createSuitCard(
-        85, PXPEnumSuit::Intelligence, 1, clienttranslate("Bukharan Jews"), PXPEnumRegion::Transcapia, 
+        85, PXPEnumSuit::Intelligence, 1, clienttranslate("Bukharan Jews"), PXPEnumRegion::Transcaspia, 
         null, false, true, true, false, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::EconomicSuit], 
@@ -792,7 +792,7 @@ $this->cards = [
         early 19th century, many Jews fl ed Persia and settled in major cities across the region, including Bukhara, Herat, and Kabul.")
     ),
     86 => CardFactory::createSuitCard(
-        86, PXPEnumSuit::Intelligence, 2, clienttranslate("Jan Prosper Witkiewicz"), PXPEnumRegion::Transcapia, 
+        86, PXPEnumSuit::Intelligence, 2, clienttranslate("Jan Prosper Witkiewicz"), PXPEnumRegion::Transcaspia, 
         null, false, false, true, true, false, false,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -801,7 +801,7 @@ $this->cards = [
         he burned his personal papers and committed suicide.")
     ),
     87 => CardFactory::createSuitCard(
-        87, PXPEnumSuit::Intelligence, 1, clienttranslate("Imperial Surveyors"), PXPEnumRegion::Transcapia, 
+        87, PXPEnumSuit::Intelligence, 1, clienttranslate("Imperial Surveyors"), PXPEnumRegion::Transcaspia, 
         null, false, true, true, true, false, false,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Spy], 
@@ -810,7 +810,7 @@ $this->cards = [
         to map the Indian subcontinent. ")
     ),
     88 => CardFactory::createSuitCard(
-        88, PXPEnumSuit::Intelligence, 1, clienttranslate("Arthur Conolly"), PXPEnumRegion::Transcapia, 
+        88, PXPEnumSuit::Intelligence, 1, clienttranslate("Arthur Conolly"), PXPEnumRegion::Transcaspia, 
         null, false, true, false, true, false, false,
         PXPEnumCoalition::British, null, 
         [PXPEnumImpactIcon::Spy], 
@@ -818,7 +818,7 @@ $this->cards = [
         expedition, he was captured while attempting to rescue Charles Stoddart. The two were beheaded in Bukhara.")
     ),
     89 => CardFactory::createSuitCard(
-        89, PXPEnumSuit::Intelligence, 1, clienttranslate("Aga Mehdi"), PXPEnumRegion::Transcapia, 
+        89, PXPEnumSuit::Intelligence, 1, clienttranslate("Aga Mehdi"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, true, true, true,
         PXPEnumCoalition::Russian, null, 
         [PXPEnumImpactIcon::Spy], 
@@ -826,7 +826,7 @@ $this->cards = [
         He attempted to open diplomatic channels with Ranjit Singh.")
     ),
     90 => CardFactory::createSuitCard(
-        90, PXPEnumSuit::Political, 1, clienttranslate("Nasrullah Khan"), PXPEnumRegion::Transcapia, 
+        90, PXPEnumSuit::Political, 1, clienttranslate("Nasrullah Khan"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, false, true, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe], 
@@ -835,7 +835,7 @@ $this->cards = [
         other local Khans in a bid for regional supremacy.")
     ),
     91 => CardFactory::createSuitCard(
-        91, PXPEnumSuit::Political, 1, clienttranslate("Allah Quli Bahadur"), PXPEnumRegion::Transcapia, 
+        91, PXPEnumSuit::Political, 1, clienttranslate("Allah Quli Bahadur"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::SavvyOperator, false, false, false, false, true, false,
         null, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
@@ -843,7 +843,7 @@ $this->cards = [
         Fearing a Russian casus belli, British agents convinced the Khan to release the Russian slaves.")
     ),
     92 => CardFactory::createSuitCard(
-        92, PXPEnumSuit::Political, 1, clienttranslate("Mir Murad Beg"), PXPEnumRegion::Transcapia, 
+        92, PXPEnumSuit::Political, 1, clienttranslate("Mir Murad Beg"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::MilitarySuit], 
@@ -851,7 +851,7 @@ $this->cards = [
         modern day Uzbekistan.")
     ),
     93 => CardFactory::createSuitCard(
-        93, PXPEnumSuit::Political, 2, clienttranslate("Madali Khan"), PXPEnumRegion::Transcapia, 
+        93, PXPEnumSuit::Political, 2, clienttranslate("Madali Khan"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, false, true, true,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
@@ -860,7 +860,7 @@ $this->cards = [
         of political turmoil in the region.")
     ),
     94 => CardFactory::createSuitCard(
-        94, PXPEnumSuit::Economic, 1, clienttranslate("Khivan Slave Markets"), PXPEnumRegion::Transcapia, 
+        94, PXPEnumSuit::Economic, 1, clienttranslate("Khivan Slave Markets"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, false, true, false,
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Leverage], 
@@ -869,7 +869,7 @@ $this->cards = [
         eastern coast.")
     ),
     95 => CardFactory::createSuitCard(
-        95, PXPEnumSuit::Economic, 1, clienttranslate("Supplies from Orenburg"), PXPEnumRegion::Transcapia, 
+        95, PXPEnumSuit::Economic, 1, clienttranslate("Supplies from Orenburg"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, false,
         PXPEnumCoalition::Russian, PXPEnumCoalition::Afghan, 
         [PXPEnumImpactIcon::Road], 
@@ -878,7 +878,7 @@ $this->cards = [
         operating in the region were supported through Orenburg.")
     ),
     96 => CardFactory::createSuitCard(
-        96, PXPEnumSuit::Economic, 1, clienttranslate("Panjdeh Oasis"), PXPEnumRegion::Transcapia, 
+        96, PXPEnumSuit::Economic, 1, clienttranslate("Panjdeh Oasis"), PXPEnumRegion::Transcaspia, 
         null, true, false, false, true, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Road, PXPEnumImpactIcon::Road], 
@@ -887,7 +887,7 @@ $this->cards = [
         Afghanistan.")
     ),
     97 => CardFactory::createSuitCard(
-        97, PXPEnumSuit::Military, 1, clienttranslate("The Ark of Bukhara"), PXPEnumRegion::Transcapia, 
+        97, PXPEnumSuit::Military, 1, clienttranslate("The Ark of Bukhara"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::Citadel, false, false, true, false, false, false,
         null, null, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::IntelligenceSuit], 
@@ -895,7 +895,7 @@ $this->cards = [
         Siyavusha. The Ark has undergone centuries of renovation and improvement. ")
     ),
     98 => CardFactory::createSuitCard(
-        98, PXPEnumSuit::Military, 3, clienttranslate("European Cannons"), PXPEnumRegion::Transcapia, 
+        98, PXPEnumSuit::Military, 3, clienttranslate("European Cannons"), PXPEnumRegion::Transcaspia, 
         null, false, true, false, false, false, false,
         null, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 
@@ -904,7 +904,7 @@ $this->cards = [
         and Dagestan during the Russo-Persia war")
     ),
     99 => CardFactory::createSuitCard(
-        99, PXPEnumSuit::Military, 1, clienttranslate("Cossacks"), PXPEnumRegion::Transcapia, 
+        99, PXPEnumSuit::Military, 1, clienttranslate("Cossacks"), PXPEnumRegion::Transcaspia, 
         PXPEnumSpecialAbility::Irregulars, false, false, false, false, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Spy], 
@@ -912,7 +912,7 @@ $this->cards = [
         served as scouts, police forces, and skirmishers.")
     ),
     100 => CardFactory::createSuitCard(
-        100, PXPEnumSuit::Military, 2, clienttranslate("Count Perovsky"), PXPEnumRegion::Transcapia, 
+        100, PXPEnumSuit::Military, 2, clienttranslate("Count Perovsky"), PXPEnumRegion::Transcaspia, 
         null, false, false, false, false, false, true,
         PXPEnumCoalition::Russian, PXPEnumCoalition::British, 
         [PXPEnumImpactIcon::Army, PXPEnumImpactIcon::Army], 

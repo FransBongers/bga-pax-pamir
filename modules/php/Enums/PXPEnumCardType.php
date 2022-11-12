@@ -16,7 +16,7 @@ namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
 abstract class PXPEnumCardType
 {
-    const Event = "Event";
-    const DominanceCheck = "DominanceCheck";
-    const Suit = "Suit";
+    const Event = "event";
+    const DominanceCheck = "dominance_check";
+    const Suit = "court";
 }

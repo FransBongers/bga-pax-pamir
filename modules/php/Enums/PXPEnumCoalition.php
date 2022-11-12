@@ -16,7 +16,7 @@ namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
 abstract class PXPEnumCoalition
 {
-    const British = "British";
-    const Russian = "Russian";
-    const Afghan = "Afghan";
+    const British = "british";
+    const Russian = "russian";
+    const Afghan = "afghan";
 }

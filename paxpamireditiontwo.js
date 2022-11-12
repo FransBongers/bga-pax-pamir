@@ -153,7 +153,8 @@ function (dojo, declare) {
 
                 // apparently this is shorthand notions for accessing divs based on id
                 $('influence_'+ playerId).innerHTML = gamedatas.counts[playerId].influence;
-                $('token_count_' + playerId).innerHTML = gamedatas.counts[playerId].tokens; // TODO: rename to cylinders / tribes
+                // Number of cylinders played is total number of cylinders minus cylinders still available to player 
+                $('cylinder_count_' + playerId).innerHTML = 10 - gamedatas.counts[playerId].cylinders;
                 $('rupee_count_' + playerId).innerHTML = gamedatas.players[playerId].rupees;
                 $('card_count_' + playerId).innerHTML = gamedatas.counts[playerId].cards;
 
@@ -531,9 +532,9 @@ function (dojo, declare) {
             //     style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};\
             //     background-image:url('${image}');\"><div id=\"${id}_tokens\" class=\"card_token_area\"></div></div>";
             
-            this.gamedatas.cards.forEach((card) => {
+            Object.keys(this.gamedatas.cards).forEach((cardId) => {
                 const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
-                stock.addItemType( card, 0, cardFileLocation, useLargeCards ? card.split('_')[1] -1 : card.split('_')[1] );
+                stock.addItemType( cardId, 0, cardFileLocation, useLargeCards ? cardId.split('_')[1] -1 : cardId.split('_')[1] );
             });
             stock.extraClasses = `pp_card ${className}`;
         },

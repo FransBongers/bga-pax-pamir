@@ -36,7 +36,7 @@ class PaxPamirEditionTwo extends Table
         self::initGameStateLabels( array(
             "setup" => 10,
             "remaining_actions" => 11,
-            // "favored_suit" => 12,
+            "favored_suit" => 12,
             // "dominance_checks" => 13,
             "ruler_transcaspia" => 14,
             "ruler_kabul" => 15,
@@ -46,12 +46,6 @@ class PaxPamirEditionTwo extends Table
             "ruler_punjab" => 19,
             "bribe_card_id" =>20,
             "bribe_amount" =>21,
-            //    "my_first_global_variable" => 10,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
         ) );
 
         $this->tokens = new Tokens();
@@ -85,12 +79,13 @@ class PaxPamirEditionTwo extends Table
         $values = array();
         foreach( $players as $player_id => $player )
         {
+            // Add initial data to player table
             $color = array_shift( $default_colors );
             $loyalty = "null";
             $rupees = 4;
-            // $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."','$loyalty','$rupees')";
-            // $this->tokens->createTokensPack("token_".$player_id."_{INDEX}", "tokens_".$player_id, 10);
+            // Add player cylinders to token module
+            $this->tokens->createTokensPack("cylinder_".$player_id."_{INDEX}", "cylinders_".$player_id, 10);
         }
         $sql .= implode( ',', $values );
         self::DbQuery( $sql );
@@ -99,6 +94,7 @@ class PaxPamirEditionTwo extends Table
         
         /************ Start the game initialization *****/
 
+        // Add all cards to token module
         $this->tokens->createTokensPack("card_{INDEX}", "court_cards", 100);
         $this->tokens->createTokensPack("card_{INDEX}", "dom_cards", 4, 101);
         $this->tokens->createTokensPack("card_{INDEX}", "event_cards", 12, 105);
@@ -118,25 +114,23 @@ class PaxPamirEditionTwo extends Table
             $pile = $this->tokens->getTokensInLocation('pile');
             $n_cards = $this->tokens->countTokensInLocation('deck');
             foreach ( $pile as $id => $info) {
-                // $this->tokens->insertTokenOnExtremePosition($id, 'deck', true);
                 $this->tokens->moveToken($id, 'deck', $info['state'] + $n_cards);
             }
         }
 
+        // Add other tokens to token module
         $this->tokens->createTokensPack("rupee_{INDEX}", "pool", 36);
-        $this->tokens->createTokensPack("afghan_{INDEX}", "pool", 12);
-        $this->tokens->createTokensPack("russian_{INDEX}", "pool", 12);
-        $this->tokens->createTokensPack("british_{INDEX}", "pool", 12);
-
-        $this->tokens->createToken("impact_icons", "null");
+        $this->tokens->createTokensPack("block_afghan_{INDEX}", "pool", 12);
+        $this->tokens->createTokensPack("block_russian_{INDEX}", "pool", 12);
+        $this->tokens->createTokensPack("block_british_{INDEX}", "pool", 12);
 
         // Init global values with their initial values
-        self::setGameStateInitialValue( 'setup', 1 );
+        self::setGameStateInitialValue( 'setup', 1 ); // used to check if setup is done or not
         self::setGameStateInitialValue( 'remaining_actions', 2 );
-        // self::setGameStateInitialValue( 'favored_suit', 0 );
+        self::setGameStateInitialValue( 'favored_suit', 'political' );
         // self::setGameStateInitialValue( 'dominance_checks', 0 );
 
-        // TODO (Frans): set to null initially
+        // Rulers: value is 0 if no ruler, otherwise playerId of the ruling player
         self::setGameStateInitialValue( 'ruler_transcaspia', 0 );
         self::setGameStateInitialValue( 'ruler_kabul', 0 );
         self::setGameStateInitialValue( 'ruler_persia', 0 );
@@ -149,21 +143,17 @@ class PaxPamirEditionTwo extends Table
 
 
 
-        // Assign initial cards to
+        // Assign initial cards to market
         for ($i = 0; $i < 6; $i++) {
             $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_'.$i);
             $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_'.$i);
         }
 
-        // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
-
-        // TODO: setup the initial game situation here
        
 
         // Activate first player (which is in general a good idea :) )
@@ -187,43 +177,34 @@ class PaxPamirEditionTwo extends Table
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
-        // Get information about players
-        // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
+        // Get information about players from players table
         $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
-  
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
+        // Get counts for all players
         $players = $this->loadPlayersBasicInfos();
         foreach ( $players as $player_id => $player_info ) {
             $result['court'][$player_id] = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
-            // $result['court'][$player_id] = $this->tokens->getTokensInLocation('court_'.$player_id);
-            $result['tokens'][$player_id] = $this->tokens->getTokensInLocation('tokens_'.$player_id);
+            $result['cylinders'][$player_id] = $this->tokens->getTokensInLocation('cylinders_'.$player_id);
             $result['counts'][$player_id]['rupees'] = $this->getPlayerRupees($player_id );
-            $result['counts'][$player_id]['tokens'] = count($this->tokens->getTokensOfTypeInLocation('token', 'tokens_'.$player_id ));
+            $result['counts'][$player_id]['cylinders'] = count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_'.$player_id ));
             $result['counts'][$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
-            $result['counts'][$player_id]['suits'] = $this->getPlayerSuits($player_id);
+            $result['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
             $result['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
         }
 
+        // Only get hand cards for current player (we might implement option to play with open hands?)
         $result['hand'] = $this->tokens->getTokensInLocation('hand_'.$current_player_id);
 
-        $result['token_types'] = $this->token_types;
+        // TODO (Frans): data from material.inc.php. We might also replace this?
         $result['loyalty'] = $this->loyalty;
         $result['suits'] = $this->suits;
-        $result['cards'] = array();
-        $result['cards_info'] = $this->cards;
+        
+        // Add all card info
+        $result['cards'] = $this->cards;
 
-        foreach ($this->token_types as $key => $value) {
-            if ($this->startsWith($value['type'], 'card')) {
-                $result['cards'][] = $key;
-            }
-        }
-  
-        $result['deck'] = $this->tokens->getTokensOfTypeInLocation(null, 'deck', null, 'state');
-
+        // Add information about all cards in the market.
         for ($i = 0; $i < 6; $i++) {
-            // $result['market'][0][$i] = $this->tokens->getTokenOnTop('market_0_'.$i);
             $result['market'][0][$i] = $this->tokens->getTokenOnLocation('market_0_'.$i);
             $result['market'][1][$i] = $this->tokens->getTokenOnLocation('market_1_'.$i);
         }
@@ -254,16 +235,20 @@ class PaxPamirEditionTwo extends Table
 ////////////    
 
     /*
-        In this space, you can put any utility methods useful for your game logic
+        In this space, you can put any utility methods useful for your game logic.
+        NOTE: put them in alphabetical order
     */
 
-    function checkDiscards( $player_id )
+    /*
+        Returns the number of hand and court cards that need to be discarded by the player.
+    */
+    function checkDiscardsForPlayer( $player_id )
     {
         //
         // check for extra cards in hand and court
         //
         $result = array();
-        $suits = $this->getPlayerSuits($player_id);
+        $suits = $this->getPlayerSuitsTotals($player_id);
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         $hand = $this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id, null, 'state');
         
@@ -277,6 +262,9 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /*
+        Triggered at end of a players turn. Checks if player needs to discard any cards from court or hand.
+    */
     function cleanup( )
     {
         //
@@ -284,7 +272,7 @@ class PaxPamirEditionTwo extends Table
         //
 
         $player_id = self::getActivePlayerId();
-        $discards = $this->checkDiscards($player_id);
+        $discards = $this->checkDiscardsForPlayer($player_id);
 
         if ($discards['court'] > 0) {
             $this->gamestate->nextState( 'discard_court' );
@@ -296,6 +284,10 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /*
+        Returns rulers for all regions. Value will either be 0 (no ruler) or
+        the playerId of the player ruling the region
+    */
     function getAllRegionRulers() {
         
         $result = array();
@@ -311,28 +303,42 @@ class PaxPamirEditionTwo extends Table
 
     }
 
-    // TODO (Frans): this probably needs prizes and gifts added?
+    /**
+     *   Returns total influence for player
+     */
     function getPlayerInfluence($player_id) {
         $influence = 1;
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
-            // $card_info = $this->token_types[$court_cards[$i]['key']];
-            // $card_info['suit'] += $card_info['rank'];
+            // TODO (Frans): get information about courd cards and add influence if patriot
+            // Add number of prizes
+            // Add number of gifts
+            // $card_info = $this->cards[$court_cards[$i]['key']];
+            // $card_info->getLoyalty()
         }
         return $influence;
     }
 
+    /**
+     * Get loyalty for player
+     */
     function getPlayerLoyalty($player_id) {
         $sql = "SELECT loyalty FROM player WHERE  player_id='$player_id' ";
         return $this->getUniqueValueFromDB($sql);
     }
-
+    
+    /**
+     * Get total number of rupees owned by player
+     */
     function getPlayerRupees($player_id) {
         $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
         return $this->getUniqueValueFromDB($sql);
     }
 
-    function getPlayerSuits($player_id) {
+    /**
+     * Calculates total number of ranks for each suit for cards in a players court
+     */
+    function getPlayerSuitsTotals($player_id) {
         $suits = array (
             'political' => 0,
             'military' => 0,
@@ -341,22 +347,30 @@ class PaxPamirEditionTwo extends Table
         );
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
-            $card_info = $this->token_types[$court_cards[$i]['key']];
-            $suits[$card_info['suit']] += $card_info['rank'];
+            $card_info = $this->cards[$court_cards[$i]['key']];
+            $suits[$card_info->getSuit()] += $card_info->getRank();
         }
         return $suits;
     }
 
-    function getRegionRuler( $card_id ) {
+    /**
+     * Returns ruler of the region a card belongs to. 0 if no ruler, otherwise playerId.
+     */
+    function getRegionRulerForCard( $card_id ) {
 
         if ($card_id == 0) return 0;
         
         $rulers = $this->getAllRegionRulers();
-        $region = $this->token_types[$card_id]['region'];
+        $region = $this->cards[$card_id]->getRegion();
 
         return $rulers[$region];
 
     }
+
+    /**
+     * TODO (Frans): check if this function is already used somewhere?
+     * Should returns the cards that are not available for sale (because player already put rupee on it)
+     */
 
     function getUnavailableCards() {
 
@@ -376,6 +390,9 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * Update the number of rupees for a player in database
+     */
     function incPlayerRupees($player_id, $value) {
         $rupees = $this->getPlayerRupees($player_id);
         $rupees += $value;
@@ -384,18 +401,27 @@ class PaxPamirEditionTwo extends Table
         self::DbQuery( $sql );
     }
 
+    /**
+     * Set loyalty for player in database
+     */
     function setPlayerLoyalty($player_id, $coalition) {
         $sql = "UPDATE player SET loyalty='$coalition' 
         WHERE  player_id='$player_id' ";
         self::DbQuery( $sql );
     }
 
+    /**
+     * Check is string starts with a specific substring. Returns boolean
+     */
     function startsWith ($string, $startString) 
     { 
         $len = strlen($startString); 
         return (substr($string, 0, $len) === $startString); 
     } 
 
+    /**
+     * Calculates current totals for all player information and sends notification to all players
+     */
     function updatePlayerCounts() {
         $counts = array();
         $players = $this->loadPlayersBasicInfos();
@@ -404,9 +430,9 @@ class PaxPamirEditionTwo extends Table
         foreach ( $players as $player_id => $player_info ) {
             $counts[$player_id] = array();
             $counts[$player_id]['rupees'] = $this->getPlayerRupees($player_id );
-            $counts[$player_id]['tokens'] = count($this->tokens->getTokensOfTypeInLocation('token', 'tokens_'.$player_id ));
+            $counts[$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('token', 'tokens_'.$player_id ));
             $counts[$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
-            $counts[$player_id]['suits'] = $this->getPlayerSuits($player_id);
+            $counts[$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
             $counts[$player_id]['influence'] = $this->getPlayerInfluence($player_id);
         }
 
@@ -422,8 +448,12 @@ class PaxPamirEditionTwo extends Table
     /*
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in paxpamireditiontwo.action.php)
+        NOTE: put in alphabetical order.
     */
 
+    /**
+     * Part of set up when players need to select loyalty.
+     */
     function chooseLoyalty( $coalition )
     {
         //
@@ -449,12 +479,15 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * Discard cards action when needed at end of a players turn
+     */
     function discardCards($cards, $from_hand )
     {
         self::checkAction( 'discard' );
 
         $player_id = self::getActivePlayerId();
-        $discards = $this->checkDiscards($player_id);
+        $discards = $this->checkDiscardsForPlayer($player_id);
 
         if ($from_hand) {
             if (count($cards) !== $discards['hand'])
@@ -511,6 +544,9 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * Play card from hand to court
+     */
     function playCard( $card_id, $left_side = true, $bribe = null )
     {
         //
@@ -524,7 +560,7 @@ class PaxPamirEditionTwo extends Table
         $card_name = $this->token_types[$card_id]['name'];
 
         $bribe_card_id = $this->getGameStateValue("bribe_card_id");
-        $bribe_ruler = $this->getRegionRuler($bribe_card_id);
+        $bribe_ruler = $this->getRegionRulerForCard($bribe_card_id);
         $bribe_amount = $this->getGameStateValue("bribe_amount");
 
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
@@ -594,6 +630,9 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * purchase card from market
+     */
     function purchaseCard( $card_id )
     {
         self::dump( "purchaseCard", $card_id );
@@ -692,27 +731,11 @@ class PaxPamirEditionTwo extends Table
             'unavailable_cards' => $this->getUnavailableCards(),
             'hand' => $this->tokens->getTokensInLocation('hand_'.$player_id),
             'court' => $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state'),
-            'suits' => $this->getPlayerSuits($player_id),
+            'suits' => $this->getPlayerSuitsTotals($player_id),
             'rulers' => $this->getAllRegionRulers()
         );
     }
 
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
-        );
-    }    
-    */
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
@@ -723,18 +746,6 @@ class PaxPamirEditionTwo extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
 
     function stNextPlayer()
     {
@@ -774,6 +785,9 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * Refresh market at end of a players turn
+     */
     function stRefreshMarket()
     {
         $empty_top = array();

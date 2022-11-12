@@ -112,7 +112,7 @@ var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="p
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\
         <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><span id="influence_${id}" class="pp_icon_count">0</span></div>\
-        <div id="tokens_${id}" class="pp_icon pp_token_icon"><span id="token_count_${id}"  class="pp_icon_count">0</span></div>\
+        <div id="cylinders_${id}" class="pp_icon pp_cylinder_icon"><span id="cylinder_count_${id}"  class="pp_icon_count">0</span></div>\
         <div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><span id="rupee_count_${id}"  class="pp_icon_count">0</span></div>\
         <div id="cards_${id}" class="pp_icon pp_card_icon"><span id="card_count_${id}"  class="pp_icon_count">0</span></div>\
     </div>\

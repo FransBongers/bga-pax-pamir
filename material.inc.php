@@ -20,7 +20,7 @@
  */
 
  // Note (Frans): commented this out for now as it led to some issues after syncing files with the game server.
-// include 'modules/php/includes/PXPCards.inc.php';
+include 'modules/php/includes/PXPCards.inc.php';
 
 
 /*

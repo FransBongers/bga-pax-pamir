@@ -16,6 +16,7 @@
   *
   */
 
+require_once 'modules/php/includes/PXPAutoLoader.inc.php';
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/tokens.php');

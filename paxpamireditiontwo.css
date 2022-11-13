@@ -421,6 +421,16 @@ html {
     /* border: 1px blue solid; */
 }
 
+.pp_market_rupees {
+    width: 120px;
+    height: 50px;
+    left: 8px;
+    top: 52px;
+    position: absolute;
+    /* border: 2px black solid; */
+    /* z-index: 1; */
+}
+
 .pp_rupee_zone {
     width: 130px;
     height: 50px;
@@ -550,6 +560,7 @@ html {
     background-image: url('img/temp/rupee.png');
     border-radius: 25px;
     box-shadow: 1px 1px 4px;
+    z-index: 1;
 }
 
 /* ------- PLAYER BOARD ------- */

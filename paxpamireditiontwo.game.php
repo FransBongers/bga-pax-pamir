@@ -665,9 +665,9 @@ class PaxPamirEditionTwo extends Table
             $this->incGameStateValue("remaining_actions", -1);
 
             // add rupees on card to player totals. Then put them in rupee_pool location
-            $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $card_id);
+            $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $market_location.'_rupees');
             $this->incPlayerRupees($player_id, count($rupees));
-            $this->tokens->moveAllTokensInLocation($card_id, 'rupee_pool');
+            $this->tokens->moveAllTokensInLocation($market_location.'_rupees', 'rupee_pool');
 
             // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
             $updated_cards = array();
@@ -681,7 +681,8 @@ class PaxPamirEditionTwo extends Table
                 }
                 if ($m_card !== NULL) {
                     $c = $this->tokens->getTokenOnTop('rupee_pool');
-                    $this->tokens->moveToken($c['key'], $m_card["key"]); 
+                    // $this->tokens->moveToken($c['key'], $m_card["key"]); 
+                    $this->tokens->moveToken($c['key'], $location.'_rupees'); 
                     $this->tokens->setTokenState($m_card["key"], 1); // state for unavailable
                     $updated_cards[] = array(
                         'location' => $location,
@@ -804,10 +805,11 @@ class PaxPamirEditionTwo extends Table
             if ($card == null) {
                 $empty_top[] = $i;
             } else {
-                $this->tokens->setTokenState($card["key"], 0);
+                $this->tokens->setTokenState($card["key"], 0); // unavailable false
                 if (count($empty_top) > 0) {
                     $to_locaction = 'market_0_'.array_shift($empty_top);
                     $this->tokens->moveToken($card['key'], $to_locaction);
+                    $this->tokens->moveAllTokensInLocation($from_location.'_rupees', $to_locaction.'_rupees');
                     $empty_top[] = $i;
                     $card_moves[] = array(
                         'card_id' => $card['key'], 
@@ -834,6 +836,7 @@ class PaxPamirEditionTwo extends Table
                 if (count($empty_bottom) > 0) {
                     $to_locaction = 'market_1_'.array_shift($empty_bottom);
                     $this->tokens->moveToken($card['key'], $to_locaction );
+                    $this->tokens->moveAllTokensInLocation($from_location.'_rupees', $to_locaction.'_rupees');
                     $empty_bottom[] = $i;
                     $card_moves[] = array( 
                         'card_id' => $card['key'], 

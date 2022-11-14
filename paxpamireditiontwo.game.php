@@ -124,10 +124,11 @@ class PaxPamirEditionTwo extends Table
         $this->tokens->createTokensPack("block_russian_{INDEX}", "block_russian_pool", 12);
         $this->tokens->createTokensPack("block_british_{INDEX}", "block_british_pool", 12);
 
-        // Init global values with their initial values
+        // Init global values with their initial values 
+        // Note: values have to be integers
         self::setGameStateInitialValue( 'setup', 1 ); // used to check if setup is done or not
         self::setGameStateInitialValue( 'remaining_actions', 2 );
-        self::setGameStateInitialValue( 'favored_suit', 'political' );
+        self::setGameStateInitialValue( 'favored_suit', 0 );
         // self::setGameStateInitialValue( 'dominance_checks', 0 );
 
         // Rulers: value is 0 if no ruler, otherwise playerId of the ruling player
@@ -197,6 +198,20 @@ class PaxPamirEditionTwo extends Table
         // Only get hand cards for current player (we might implement option to play with open hands?)
         $result['hand'] = $this->tokens->getTokensInLocation('hand_'.$current_player_id);
 
+        foreach($this->loyalty as $coalitionId => $coalition) {
+            // $result['coalition_blocks'][$coalition['id']] = $this->tokens->getTokensInLocation('block_'.$coalition['id'].'_pool');
+            $result['coalition_blocks'][$coalitionId] = $this->tokens->getTokensInLocation('block_'.$coalitionId.'_pool');
+        }
+
+        foreach($this->regions as $region => $regionInfo) {
+            $result['armies'][$region] = $this->tokens->getTokensInLocation('armies_'.$region);
+            $result['tribes'][$region] = $this->tokens->getTokensInLocation('armies_'.$region);
+        }
+
+        foreach($this->borders as $border => $borderInfo) {
+            $result['roads'][$border] = $this->tokens->getTokensInLocation('roads_'.$border);
+        }
+
         // TODO (Frans): data from material.inc.php. We might also replace this?
         $result['loyalty'] = $this->loyalty;
         $result['suits'] = $this->suits;
@@ -211,7 +226,7 @@ class PaxPamirEditionTwo extends Table
         }
 
         $result['rupees'] = $this->tokens->getTokensOfTypeInLocation('rupee', null);
-
+        $result['favored_suit'] = $this->suits[$this->getGameStateValue( 'favored_suit' )];
         return $result;
     }
 

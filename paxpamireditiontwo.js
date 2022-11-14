@@ -43,6 +43,10 @@ function (dojo, declare) {
             this.tribeHeight = 25;
             this.rupeeWidth = 50;
             this.rupeeHeight = 50;
+            this.cylinderWidth = 25;
+            this.cylinderHeight = 25;
+            this.favoredSuitMarkerWidth = 22;
+            this.favoredSuitMarkerHeight = 50;
 
             this.defaultWeightZone = 0;
             // NOTE (Frans): probably good idea to get all game specific data from below from the backend
@@ -108,10 +112,14 @@ function (dojo, declare) {
             this.tribes = {};
             // court per player
             this.court = {};
+            // cylinders per player
+            this.cylinders = {};
             // blocks per coalition (supply)
             this.coalitionBlocks = {};
             // token zones per card
             this.cardTokens = {};
+            // zones for favored suit marker per suit
+            this.favoredSuit = {};
 
             this.playerCounts = {}; // rename to playerTotals?
             this.unavailableCards = [];
@@ -158,6 +166,30 @@ function (dojo, declare) {
                 // Add court cards played by player to court
                 gamedatas.court[playerId].forEach((card) => {
                     this.placeCard({location: this.court[playerId], id: card.key, order: card.state});
+                })
+
+                // Create cylinder zone
+                this.cylinders[playerId] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.cylinders[playerId],
+                    nodeId: `pp_cylinders_player_${playerId}`,
+                    tokenWidth: this.cylinderWidth,
+                    tokenHeight: this.cylinderHeight,
+                    itemMargin: 5,
+                });
+
+                // Add cylinders to zone
+                Object.keys(gamedatas.cylinders[playerId]).forEach((cylinderId) => {
+                    this.placeToken({
+                        location: this.cylinders[playerId],
+                        id: cylinderId,
+                        jstpl: 'jstpl_cylinder',
+                        jstplProps: {
+                            id: cylinderId,
+                            color: gamedatas.players[playerId].color,
+                        },
+                        weight: this.defaultWeightZone,
+                    });
                 })
 
                 // Set up players board
@@ -238,10 +270,6 @@ function (dojo, declare) {
                 this.placeCard({location: this.playerHand, id: cardId});
             })
 
-            // TODO: Set up your game interface here, according to "gamedatas"
-
-
-
             // Create zones for each region
             this.regions.forEach((region, index) => {
                 // armies
@@ -256,42 +284,12 @@ function (dojo, declare) {
 
                 // tribes
                 this.tribes[region] = new ebg.zone();
-                console.log(`tribes ${region}}`, this.tribes[region]);
                 this.setupTokenZone({
                     zone: this.tribes[region],
                     nodeId: `pp_${region}_tribes`,
                     tokenWidth: this.tribeWidth,
                     tokenHeight: this.tribeHeight,
                 });
-                // Temporary way yo add tribes to region
-                const color = colors[index % numberOfPlayers]
-                this.placeToken({
-                    location: this.tribes[region],
-                    id: `pp_tribe_${index}`,
-                    jstpl: 'jstpl_tribe',
-                    jstplProps: {
-                        id: `pp_tribe_${index}`,
-                        color
-                    },
-                    weight: this.defaultWeightZone,
-                });
-            });
-
-            // Temporary army just to show
-            const armyWeight = {
-                afghan: 1,
-                british: 2,
-                russian: 3,
-            }
-
-            this.placeToken({
-                location: this.armies[this.transcaspia],
-                id: 'pp_army_1',
-                jstpl: 'jstpl_army',
-                jstplProps: {
-                    id: 'pp_army_1',
-                    coalition: this.british
-                }, weight: armyWeight[this.coalition],
             });
 
             // Create border zones
@@ -299,19 +297,19 @@ function (dojo, declare) {
                 this.createBorderZone({border});
             })
 
-            // Temp add road to each border
-            this.borders.forEach((border, index) => {
-                this.placeToken({
-                    location: this[`${border}_border`],
-                    id: `pp_road_${index}`,
-                    jstpl: 'jstpl_road',
-                    jstplProps: {
-                        id: `pp_road_${index}`,
-                        coalition: this.afghan,
-                    },
-                    weight: this.defaultWeightZone,
-                });
-            })
+            // // Temp add road to each border
+            // this.borders.forEach((border, index) => {
+            //     this.placeToken({
+            //         location: this[`${border}_border`],
+            //         id: `pp_road_${index}`,
+            //         jstpl: 'jstpl_road',
+            //         jstplProps: {
+            //             id: `pp_road_${index}`,
+            //             coalition: this.afghan,
+            //         },
+            //         weight: this.defaultWeightZone,
+            //     });
+            // })
             
 
             // Setup supply of coalition blocks
@@ -325,28 +323,43 @@ function (dojo, declare) {
                     itemMargin: 15,
                     instantaneous: true,
                 });
+                Object.keys(this.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
+                    this.placeToken({
+                        location: this.coalitionBlocks[coalition],
+                        id: blockId,
+                        jstpl: 'jstpl_coalition_block',
+                        jstplProps: {
+                            id: blockId,
+                            coalition
+                        },
+                        weight: this.defaultWeightZone,
+                    });
+                })
+
             })
 
-            // Add coalition blocks. Todo: add based on backend date
-            for (let id = 0; id <= 35; id++) {
-                const coalitionId = id % 3;
-                const coalitionMap = {
-                    0: this.afghan,
-                    1: this.british,
-                    2: this.russian,
-                }
-                this.placeToken({
-                    location: this.coalitionBlocks[coalitionMap[coalitionId]],
-                    id: `pp_coalition_block_${id}`,
-                    jstpl: 'jstpl_coalition_block',
-                    jstplProps: {
-                        id: `pp_coalition_block_${id}`,
-                        coalition: coalitionMap[coalitionId]
-                    },
-                    weight: this.defaultWeightZone,
+            // Setup zones for favored suit marker
+            this.gamedatas.suits.forEach((suit, index) => {
+                this.favoredSuit[suit.suit] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.favoredSuit[suit.suit],
+                    nodeId: `pp_favored_suit_${suit.suit}`,
+                    tokenWidth: this.favoredSuitMarkerWidth,
+                    tokenHeight: this.favoredSuitMarkerHeight,
                 });
-            } 
+            })
 
+            const suitId = this.gamedatas.favored_suit.suit;
+            this.placeToken({
+                location: this.favoredSuit[suitId],
+                id: `favored_suit_marker`,
+                jstpl: 'jstpl_favored_suit_marker',
+                jstplProps: {
+                    id: `favored_suit_marker`,
+                },
+                weight: this.defaultWeightZone,
+            });
+            
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
@@ -557,7 +570,7 @@ function (dojo, declare) {
         },
 
         placeCard: function({location, id, order = null}) {
-            console.log('placeCard', location, id);
+            // console.log('placeCard', location, id);
 
             if (order != null) {
                 location.changeItemsWeight({
@@ -794,8 +807,18 @@ function (dojo, declare) {
 
         },
 
-        moveToken: function({id, to, from, weight = this.defaultWeightZone}) {
+        moveToken: function({id, to, from, weight = this.defaultWeightZone, addClass = undefined, removeClass = undefined}) {
             console.log('move token');
+      
+            if (addClass) {
+                // node = $( cardId );
+                // console.log('node', node);
+                dojo.addClass(id, addClass);
+            };
+            if (removeClass) {
+                dojo.removeClass(id, removeClass);
+            }
+            
             to.placeInZone( id, weight );
             from.removeFromZone(id, false)
         },
@@ -848,9 +871,14 @@ function (dojo, declare) {
             if (! this.checkAction('card_action'))
             return;
 
-            // // Temp abuse of button to test movement
-            // this.moveToken({id: 'pp_army_1', from: this.armies[this.transcaspia], to: this.armies[this.kabul], weight: this.defaultWeightZone})
+            // Temp abuse of button to test movement
+            this.moveToken({id: 'block_afghan_9', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
+            this.moveToken({id: 'block_russian_8', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
+            
             // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
+
+            this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
+            this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
 
             if( this.isCurrentPlayerActive() )
             {       

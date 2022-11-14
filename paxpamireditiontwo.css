@@ -112,6 +112,42 @@ html {
     /* border: 2px solid blue; */
 }
 
+.pp_favored_suit {
+    height: 54px;
+    width: 26px;
+    position: absolute;
+    /* border: 2px solid blue; */
+    box-sizing: border-box;
+}
+
+.pp_favored_suit_marker {
+    height: 50px;
+    width: 22px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-image: url('img/favoured_suit_marker.svg');
+}
+
+#pp_favored_suit_political {
+    top: 116px;
+    left: 42px;
+}
+
+#pp_favored_suit_intelligence {
+    top: 197px;
+    left: 42px;
+}
+
+#pp_favored_suit_economic {
+    top: 278px;
+    left: 42px;
+}
+
+#pp_favored_suit_military {
+    top: 361px;
+    left: 42px;
+}
+
 #pp_herat_armies {
     top: 380px;
     left: 320px;
@@ -372,7 +408,7 @@ html {
     background-image: url('img/road_russian.svg');
 }
 
-.pp_tribe {
+.pp_cylinder {
     background-size: contain;
     background-repeat: no-repeat;
     height: 25px;
@@ -380,23 +416,23 @@ html {
     
 }
 
-.pp_tribe.pp_player_color_7CAEC0 {
+.pp_cylinder.pp_player_color_7CAEC0 {
     background-image: url('img/cylinder_blue.svg');
 }
 
-.pp_tribe.pp_player_color_B3ADAA {
+.pp_cylinder.pp_player_color_B3ADAA {
     background-image: url('img/cylinder_grey.svg');
 }
 
-.pp_tribe.pp_player_color_E8CAAA {
+.pp_cylinder.pp_player_color_E8CAAA {
     background-image: url('img/cylinder_yellow.svg');
 }
 
-.pp_tribe.pp_player_color_CD848A {
+.pp_cylinder.pp_player_color_CD848A {
     background-image: url('img/cylinder_red.svg');
 }
 
-.pp_tribe.pp_player_color_5B5B5B {
+.pp_cylinder.pp_player_color_5B5B5B {
     background-image: url('img/cylinder_black.svg');
 }
 
@@ -490,10 +526,19 @@ html {
     background-color: #5B5B5B;
 }
 
+.pp_court_container {
+    display: flex;
+}
+
 .pp_court {
     margin: 10px 20px;
     flex-grow: 1;
     /* border: solid 2px white; */
+}
+
+.pp_cylinders {
+    width: 60px;
+    margin: 10px 0px 10px 20px;
 }
 
 .pp_tableau_title {

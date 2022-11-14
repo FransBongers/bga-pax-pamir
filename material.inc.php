@@ -37,16 +37,19 @@ $this->card_types = array(
 
 $this->loyalty = array(
   'afghan' => array(
+      'id' => 'afghan',
       'name' => clienttranslate("Afghan"),
       'icon' => 0,
       'tooltip' => clienttranslate("Afghan")
   ),
   'russian' => array(
+      'id' => 'russian',
       'name' => clienttranslate("Russian"),
       'icon' => 1,
       'tooltip' => clienttranslate("Russian")
   ),
   'british' => array(
+      'id' => 'british',
       'name' => clienttranslate("British"),
       'icon' => 2,
       'tooltip' => clienttranslate("British")
@@ -73,6 +76,74 @@ $this->suits = array(
     'suit' => 'military',
     'name' => clienttranslate("Military"),
     'tooltip' => clienttranslate("The favored suit is Military.  The cost to purchase in the market is doubled.")
+  ),
+);
+
+// TODO (Frans): make borders an array?
+$this->regions = array(
+  'herat' => array(
+    'name' => clienttranslate("Herat"),
+    'borders' => 'herat_persia, herat_transcaspia, herat_kabul, herat_kandahar',
+  ),
+  'kabul' => array(
+    'name' => clienttranslate("Kabul"),
+    'borders' => 'kabul_transcaspia, herat_kabul, kabul_kandahar, kabul_punjab',
+  ),
+  'kandahar' => array(
+    'name' => clienttranslate("Kandahar"),
+    'borders' => 'herat_kandahar, kabul_kandahar, kabul_punjab',
+  ),
+  'persia' => array(
+    'name' => clienttranslate("Persia"),
+    'borders' => 'persia_transcaspia, herat_persia',
+  ),
+  'punjab' => array(
+    'name' => clienttranslate("Punjab"),
+    'borders' => 'kabul_punjab, kankabul_kandahardahar',
+  ),
+  'transcaspia' => array(
+    'name' => clienttranslate("Transcaspia"),
+    'borders' => 'persia_transcaspia, herat_transcaspia, kabul_transcaspia',
+  ),
+);
+
+
+$this->borders = array (
+  'herat_kabul' => array(
+    'name' => clienttranslate("Herat-Kabul border"),
+    'regions' => 'kabul, herat',
+  ),
+  'herat_kandahar' => array(
+    'name' => clienttranslate("Herat-Kandahar border"),
+    'regions' => 'herat, kandahar',
+  ),
+  'herat_persia' => array(
+    'name' => clienttranslate("Persia-Herat border"),
+    'regions' => 'herat, persia',
+  ),
+  'herat_transcaspia' => array(
+    'name' => clienttranslate("Herat-Transcaspia border"),
+    'regions' => 'transcaspia, herat',
+  ),
+  'kabul_kandahar' => array(
+    'name' => clienttranslate("Kabul-Kandahar border"),
+    'regions' => 'kabul, kandahar',
+  ),
+  'kabul_punjab' => array(
+    'name' => clienttranslate("Kabul-Punjab border"),
+    'regions' => 'kabul, punjab',
+  ),
+  'kabul_transcaspia' => array(
+    'name' => clienttranslate("Kabul-Transcaspia border"),
+    'regions' => 'transcaspia, kabul',
+  ),
+  'kandahar_punjab' => array(
+    'name' => clienttranslate("Kandahar-Punjab border"),
+    'regions' => 'kandahar, punjab',
+  ),
+  'persia_transcaspia' => array(
+    'name' => clienttranslate("Persia-Transcaspia border"),
+    'regions' => 'transcaspia, persia',
   ),
 );
 

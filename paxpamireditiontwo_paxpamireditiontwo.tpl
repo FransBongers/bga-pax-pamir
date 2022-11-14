@@ -27,6 +27,11 @@
 
 <div id="pp_play_area">
     <div id="pp_map">
+        <!-- favored suit positions -->
+        <div id="pp_favored_suit_political" class="pp_favored_suit"></div>
+        <div id="pp_favored_suit_intelligence" class="pp_favored_suit"></div>
+        <div id="pp_favored_suit_economic" class="pp_favored_suit"></div>
+        <div id="pp_favored_suit_military" class="pp_favored_suit"></div>
         <!-- tribe locations -->
         <div id="pp_herat_tribes" class="pp_location"></div>
         <div id="pp_kabul_tribes" class="pp_location"></div>
@@ -92,7 +97,10 @@
         <!-- BEGIN player_tableau -->
         <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
             <div id="pp_tableau_title_player_{player_id}" class="pp_tableau_title"><span>{player_name}'s court</span></div>
-            <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
+            <div class="pp_court_container">
+                <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
+                <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
+            </div>
         </div>
     <!-- END player_tableau -->
     </div>
@@ -106,8 +114,9 @@ var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
 var jstpl_rupee='<div class="pp_rupee" id="${id}"></div>';
 var jstpl_army='<div class="pp_army pp_${coalition}" id="${id}"></div>';
 var jstpl_road='<div class="pp_road pp_${coalition}" id="${id}"></div>';
-var jstpl_tribe='<div class="pp_tribe pp_player_color_${color}" id="${id}"></div>';
+var jstpl_cylinder='<div class="pp_cylinder pp_player_color_${color}" id="${id}"></div>';
 var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="${id}"></div>';
+var jstpl_favored_suit_marker='<div class="pp_favored_suit_marker" id="${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\

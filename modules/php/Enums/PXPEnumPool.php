@@ -8,15 +8,16 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumCardType.php
+ * modules/php/Objects/PXPEnumPool.php
  *
  */
 
 namespace PhobyJuan\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumCardType
+abstract class PXPEnumPool
 {
-    const Event = "event_card";
-    const DominanceCheck = "dominance_check_card";
-    const Court = "court_card";
+    const Rupee = "rupee_pool";
+    const BlockAfghan = "block_afghan_pool";
+    const BlockRussian = "block_russian_pool";
+    const BlockBritish = "block_british_pool";
 }

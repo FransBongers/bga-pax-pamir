@@ -47,6 +47,8 @@ function (dojo, declare) {
             this.cylinderHeight = 25;
             this.favoredSuitMarkerWidth = 22;
             this.favoredSuitMarkerHeight = 50;
+            this.rulerTokenWidth = 50;
+            this.rulerTokenHeight = 50;
 
             this.defaultWeightZone = 0;
             // NOTE (Frans): probably good idea to get all game specific data from below from the backend
@@ -110,6 +112,8 @@ function (dojo, declare) {
             this.armies = {};
             // tribes per region
             this.tribes = {};
+            // rulers in region
+            this.rulers = {};
             // court per player
             this.court = {};
             // cylinders per player
@@ -120,6 +124,8 @@ function (dojo, declare) {
             this.cardTokens = {};
             // zones for favored suit marker per suit
             this.favoredSuit = {};
+            // vp track zones
+            this.vpTrack = {};
 
             this.playerCounts = {}; // rename to playerTotals?
             this.unavailableCards = [];
@@ -154,6 +160,20 @@ function (dojo, declare) {
             const colors = Object.keys(players).map((key) => players[key].color);
             // console.log('players', players)
 
+
+            // Create VP track
+            for ( let i = 0; i <= 23; i++ ) {
+                this.vpTrack[i] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.vpTrack[i],
+                    nodeId: `pp_vp_track_${i}`,
+                    tokenWidth: this.cylinderWidth,
+                    tokenHeight: this.cylinderHeight,
+                });
+                this.vpTrack[i].setPattern('ellipticalfit');
+            }
+            console.log('vpTrack', this.vpTrack);
+
             // Setup of all player specific components 
             for( const playerId in gamedatas.players )
             {
@@ -175,7 +195,7 @@ function (dojo, declare) {
                     nodeId: `pp_cylinders_player_${playerId}`,
                     tokenWidth: this.cylinderWidth,
                     tokenHeight: this.cylinderHeight,
-                    itemMargin: 5,
+                    itemMargin: 10,
                 });
 
                 // Add cylinders to zone
@@ -190,7 +210,19 @@ function (dojo, declare) {
                         },
                         weight: this.defaultWeightZone,
                     });
-                })
+                });
+
+                // Add cylinder to VP track
+                this.placeToken({
+                    location: this.vpTrack[player.score],
+                    id: `vp_cylinder_${playerId}`,
+                    jstpl: 'jstpl_cylinder',
+                    jstplProps: {
+                        id: `vp_cylinder_${playerId}`,
+                        color: gamedatas.players[playerId].color,
+                    },
+                    weight: this.defaultWeightZone,
+                });
 
                 // Set up players board
                 const player_board_div = $('player_board_'+playerId);
@@ -290,28 +322,39 @@ function (dojo, declare) {
                     tokenWidth: this.tribeWidth,
                     tokenHeight: this.tribeHeight,
                 });
+
+                // Setup ruler tokens
+                this.rulers[region] = new ebg.zone();
+                this.setupTokenZone({
+                    zone: this.rulers[region],
+                    nodeId: `pp_position_ruler_token_${region}`,
+                    tokenWidth: this.rulerTokenWidth,
+                    tokenHeight: this.rulerTokenHeight,
+                });
+            });
+
+            // Place ruler tokens
+            this.regions.forEach((region) => {
+                const ruler = this.gamedatas.rulers[region];
+                if (ruler == 0) {
+                    this.placeToken({
+                        location: this.rulers[region],
+                        id: `pp_ruler_token_${region}`,
+                        jstpl: 'jstpl_ruler_token',
+                        jstplProps: {
+                            id: `pp_ruler_token_${region}`,
+                            region
+                        },
+                        weight: this.defaultWeightZone,
+                    });
+                }
             });
 
             // Create border zones
             this.borders.forEach((border) => {
                 this.createBorderZone({border});
-            })
-
-            // // Temp add road to each border
-            // this.borders.forEach((border, index) => {
-            //     this.placeToken({
-            //         location: this[`${border}_border`],
-            //         id: `pp_road_${index}`,
-            //         jstpl: 'jstpl_road',
-            //         jstplProps: {
-            //             id: `pp_road_${index}`,
-            //             coalition: this.afghan,
-            //         },
-            //         weight: this.defaultWeightZone,
-            //     });
-            // })
+            });
             
-
             // Setup supply of coalition blocks
             this.coalitions.forEach((coalition) => {
                 this.coalitionBlocks[coalition] = new ebg.zone();
@@ -336,7 +379,7 @@ function (dojo, declare) {
                     });
                 })
 
-            })
+            });
 
             // Setup zones for favored suit marker
             this.gamedatas.suits.forEach((suit, index) => {
@@ -871,6 +914,18 @@ function (dojo, declare) {
             if (! this.checkAction('card_action'))
             return;
 
+            if (this.numberOfClicks && this.numberOfClicks == 1) {
+                this.moveToken({id: 'block_afghan_8', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
+                this.moveToken({id: 'block_russian_7', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
+                
+                // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
+    
+                this.moveToken({id: 'cylinder_2371053_9', from: this.cylinders['2371053'], to: this.tribes[this.herat], weight: this.defaultWeightZone});
+                this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
+                this.numberOfClicks += 1;
+            }
+
+            if (!this.numberOfClicks ) {
             // Temp abuse of button to test movement
             this.moveToken({id: 'block_afghan_9', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
             this.moveToken({id: 'block_russian_8', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
@@ -879,6 +934,9 @@ function (dojo, declare) {
 
             this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
             this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
+            this.numberOfClicks = 1;
+            }
+
 
             if( this.isCurrentPlayerActive() )
             {       

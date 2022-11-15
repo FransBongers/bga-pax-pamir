@@ -71,6 +71,8 @@
     --afghan-color: #5fc89e;
     --british-color: #eb97d1;
     --russian-color: #f3f35a;
+    --selectable-color: #DE9043;
+    --selected-color: #512D75;
   }
 
 html {
@@ -128,6 +130,7 @@ html {
     background-image: url('img/favoured_suit_marker.svg');
 }
 
+
 #pp_favored_suit_political {
     top: 116px;
     left: 42px;
@@ -147,6 +150,83 @@ html {
     top: 361px;
     left: 42px;
 }
+
+.pp_vp_track {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    /* box-shadow: 0px 0px 0px 4px blue !important; */
+}
+
+.pp_position_ruler_token {
+    height: 54px;
+    width: 50px;
+    position: absolute;
+    /* box-shadow: 0px 0px 0px 4px blue !important; */
+}
+
+#pp_position_ruler_token_herat {
+    top: 323px;
+    left: 394px;
+}
+
+#pp_position_ruler_token_kabul {
+    top: 120px;
+    left: 594px;
+}
+
+#pp_position_ruler_token_kandahar {
+    top: 373px;
+    left: 648px;
+}
+
+#pp_position_ruler_token_persia {
+    top: 363px;
+    left: 163px;
+}
+
+#pp_position_ruler_token_punjab {
+    top: 252px;
+    left: 831px;
+}
+
+#pp_position_ruler_token_transcaspia {
+    top: 110px;
+    left: 207px;
+}
+
+.pp_ruler_token {
+    height: 50px;
+    width: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    /* box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4); */
+}
+
+.pp_ruler_token.pp_herat {
+    background-image: url('img/ruler_token_herat.svg');
+}
+
+.pp_ruler_token.pp_kabul {
+    background-image: url('img/ruler_token_kabul.svg');
+}
+
+.pp_ruler_token.pp_kandahar {
+    background-image: url('img/ruler_token_kandahar.svg');
+}
+
+.pp_ruler_token.pp_persia {
+    background-image: url('img/ruler_token_persia.svg');
+}
+
+.pp_ruler_token.pp_punjab {
+    background-image: url('img/ruler_token_punjab.svg');
+}
+
+.pp_ruler_token.pp_transcaspia {
+    background-image: url('img/ruler_token_transcaspia.svg');
+}
+
 
 #pp_herat_armies {
     top: 380px;
@@ -375,6 +455,7 @@ html {
     background-repeat: no-repeat;
     height: 40px;
     width: 25px;
+    z-index: 1;
 }
 
 .pp_army.pp_afghan {
@@ -394,6 +475,7 @@ html {
     background-repeat: no-repeat;
     height: 27px;
     width: 40px;
+    z-index: 1;
 }
 
 .pp_road.pp_afghan {
@@ -413,26 +495,27 @@ html {
     background-repeat: no-repeat;
     height: 25px;
     width: 25px;
+    z-index: 1;
     
 }
 
-.pp_cylinder.pp_player_color_7CAEC0 {
+.pp_cylinder.pp_player_color_98B3C0 {
     background-image: url('img/cylinder_blue.svg');
 }
 
-.pp_cylinder.pp_player_color_B3ADAA {
+.pp_cylinder.pp_player_color_B9B6B1 {
     background-image: url('img/cylinder_grey.svg');
 }
 
-.pp_cylinder.pp_player_color_E8CAAA {
+.pp_cylinder.pp_player_color_DFCFB6 {
     background-image: url('img/cylinder_yellow.svg');
 }
 
-.pp_cylinder.pp_player_color_CD848A {
+.pp_cylinder.pp_player_color_C19B9E {
     background-image: url('img/cylinder_red.svg');
 }
 
-.pp_cylinder.pp_player_color_5B5B5B {
+.pp_cylinder.pp_player_color_807F7F {
     background-image: url('img/cylinder_black.svg');
 }
 
@@ -506,28 +589,34 @@ html {
     margin-bottom: 15px;
 }
 
-.pp_player_tableau.pp_player_color_7CAEC0 {
-    background-color: #7CAEC0;
+/* Blue */
+.pp_player_tableau.pp_player_color_98B3C0 {
+    background-color: #98B3C0;
 }
 
-.pp_player_tableau.pp_player_color_B3ADAA {
-    background-color: #B3ADAA;
+/* Gray */
+.pp_player_tableau.pp_player_color_B9B6B1 {
+    background-color: #B9B6B1;
 }
 
-.pp_player_tableau.pp_player_color_E8CAAA {
-    background-color: #E8CAAA;
+/* Yellow / tan */
+.pp_player_tableau.pp_player_color_DFCFB6 {
+    background-color: #DFCFB6;
 }
 
-.pp_player_tableau.pp_player_color_CD848A {
-    background-color: #CD848A;
+/* Red */
+.pp_player_tableau.pp_player_color_C19B9E {
+    background-color: #C19B9E;
 }
 
-.pp_player_tableau.pp_player_color_5B5B5B {
-    background-color: #5B5B5B;
+/* Black */
+.pp_player_tableau.pp_player_color_807F7F {
+    background-color: #807F7F;
 }
 
 .pp_court_container {
     display: flex;
+    flex-direction: column;
 }
 
 .pp_court {
@@ -537,8 +626,8 @@ html {
 }
 
 .pp_cylinders {
-    width: 60px;
-    margin: 10px 0px 10px 20px;
+    /* width: 60px; */
+    margin: 0px 20px 15px 20px;
 }
 
 .pp_tableau_title {
@@ -564,25 +653,28 @@ html {
 
 
 .pp_card {
-    box-shadow: 1px 1px 4px;
+    /* box-shadow: 1px 1px 4px; */
 
-    /* TODO: (Frans): check why setting border-radius leads to issues with stock component
-    border-radius: 10px; */
+    /* TODO: (Frans): check why setting border-radius leads to issues with stock component / some cards being 'invisible' */
+    /* border-radius: 10px; */
+    border-radius: 10px;
+    border: 1px black solid;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
 }
 
 .pp_selectable_card {
     /* border: 2px blue solid; */
     cursor: pointer;
-    box-shadow: 0px 0px 4px 4px orangered !important;
+    box-shadow: 0px 0px 0px 4px var(--selectable-color) !important;
 }
 
 .pp_selectable_card:hover {
-	box-shadow: 0px 0px 4px 4px blue !important;
+	box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
 }
 
 .pp_selected {
 	cursor: pointer;
-	box-shadow: 0px 0px 4px 4px blue !important;
+	box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
 }
 
 .pp_discard {

@@ -95,6 +95,45 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
             }        
         }
 
+        // VP track positions top
+        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_top" );
+    
+        $hor_scale = 50;
+        for( $vp=0; $vp<=10; $vp++ )
+        {
+            $this->page->insert_block( "vp_track_top", array(
+                'VP' => $vp,
+                'LEFT' => 58 + round( ($vp)*($hor_scale+33.5) ),
+                'TOP' => 25
+            ) );
+        }        
+
+        // VP track positions right
+        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_right" );
+
+        $ver_scale = 50;
+        for( $vp=11; $vp<=16; $vp++ )
+        {
+            $this->page->insert_block( "vp_track_right", array(
+                'VP' => $vp,
+                'LEFT' => 926,
+                'TOP' => 56 + round( ($vp - 11)*($ver_scale+33.5) ),
+            ) );
+        }
+
+        // VP track positions bottom
+        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_bottom" );
+
+        $hor_scale = 50;
+        for( $vp=17; $vp<=23; $vp++ )
+        {
+            $this->page->insert_block( "vp_track_bottom", array(
+                'VP' => $vp,
+                'LEFT' => 893 - round( ($vp - 17)*($hor_scale+33.5) ),
+                'TOP' => 506
+            ) );
+        } 
+
         /*
         
         // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}

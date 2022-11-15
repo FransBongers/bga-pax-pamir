@@ -231,6 +231,7 @@ class PaxPamirEditionTwo extends Table
 
         $result['rupees'] = $this->tokens->getTokensOfTypeInLocation('rupee', null);
         $result['favored_suit'] = $this->suits[$this->getGameStateValue( 'favored_suit' )];
+        $result['rulers'] = $this->getAllRegionRulers();
         return $result;
     }
 
@@ -314,12 +315,12 @@ class PaxPamirEditionTwo extends Table
         
         $result = array();
 
-        $result['ruler_transcaspia'] = $this->getGameStateValue( 'ruler_transcaspia' );
-        $result['ruler_kabul'] = $this->getGameStateValue( 'ruler_kabul' );
-        $result['ruler_persia'] = $this->getGameStateValue( 'ruler_persia' );
-        $result['ruler_herat'] = $this->getGameStateValue( 'ruler_herat' );
-        $result['ruler_kandahar'] = $this->getGameStateValue( 'ruler_kandahar' );
-        $result['ruler_punjab'] = $this->getGameStateValue( 'ruler_punjab' );
+        $result['transcaspia'] = $this->getGameStateValue( 'ruler_transcaspia' );
+        $result['kabul'] = $this->getGameStateValue( 'ruler_kabul' );
+        $result['persia'] = $this->getGameStateValue( 'ruler_persia' );
+        $result['herat'] = $this->getGameStateValue( 'ruler_herat' );
+        $result['kandahar'] = $this->getGameStateValue( 'ruler_kandahar' );
+        $result['punjab'] = $this->getGameStateValue( 'ruler_punjab' );
 
         return $result;
 

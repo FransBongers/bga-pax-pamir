@@ -27,6 +27,13 @@
 
 <div id="pp_play_area">
     <div id="pp_map">
+        <!-- ruler token positions -->
+        <div id="pp_position_ruler_token_herat" class="pp_position_ruler_token"></div>
+        <div id="pp_position_ruler_token_kabul" class="pp_position_ruler_token"></div>
+        <div id="pp_position_ruler_token_kandahar" class="pp_position_ruler_token"></div>
+        <div id="pp_position_ruler_token_persia" class="pp_position_ruler_token"></div>
+        <div id="pp_position_ruler_token_punjab" class="pp_position_ruler_token"></div>
+        <div id="pp_position_ruler_token_transcaspia" class="pp_position_ruler_token"></div>
         <!-- favored suit positions -->
         <div id="pp_favored_suit_political" class="pp_favored_suit"></div>
         <div id="pp_favored_suit_intelligence" class="pp_favored_suit"></div>
@@ -56,6 +63,18 @@
         <div id="pp_kabul_punjab_border" class="pp_location"></div>
         <div id="pp_kandahar_punjab_border" class="pp_location"></div>
         <div id="pp_persia_transcaspia_border" class="pp_location"></div>
+        <!-- BEGIN vp_track_top -->
+        <div id="pp_vp_track_{VP}" class="pp_vp_track" style="left: {LEFT}px; top: {TOP}px;">
+        </div>
+        <!-- END vp_track_top -->
+        <!-- BEGIN vp_track_right -->
+        <div id="pp_vp_track_{VP}" class="pp_vp_track" style="left: {LEFT}px; top: {TOP}px;">
+        </div>
+        <!-- END vp_track_right -->
+        <!-- BEGIN vp_track_bottom -->
+        <div id="pp_vp_track_{VP}" class="pp_vp_track" style="left: {LEFT}px; top: {TOP}px;">
+        </div>
+        <!-- END vp_track_bottom -->
     </div>
     
     <div id="pp_tokens">
@@ -98,8 +117,8 @@
         <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
             <div id="pp_tableau_title_player_{player_id}" class="pp_tableau_title"><span>{player_name}'s court</span></div>
             <div class="pp_court_container">
-                <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
                 <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
+                <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
             </div>
         </div>
     <!-- END player_tableau -->
@@ -117,6 +136,7 @@ var jstpl_road='<div class="pp_road pp_${coalition}" id="${id}"></div>';
 var jstpl_cylinder='<div class="pp_cylinder pp_player_color_${color}" id="${id}"></div>';
 var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="${id}"></div>';
 var jstpl_favored_suit_marker='<div class="pp_favored_suit_marker" id="${id}"></div>';
+var jstpl_ruler_token='<div class="pp_ruler_token pp_${region}" id="${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\

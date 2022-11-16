@@ -120,20 +120,18 @@ function (dojo, declare) {
             this.cylinders = {};
             // blocks per coalition (supply)
             this.coalitionBlocks = {};
-            // token zones per card
-            this.cardTokens = {};
+            // spies on cards
+            this.spiesOnCards = {};
             // zones for favored suit marker per suit
             this.favoredSuit = {};
             // vp track zones
             this.vpTrack = {};
 
+
             this.playerCounts = {}; // rename to playerTotals?
             this.unavailableCards = [];
             this.handles = []; // contains all onClick handlers
 
-            // TODO check what there are used for
-            this.card_tokens = [];
-            
             
         },
         
@@ -564,23 +562,6 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods - add in alphabetical order
 
-        // TODO (Frans): check if this is still used?
-        addCardToken : function({location, cardId, rupeeId}) {
-            console.log( 'addCardToken', location, cardId, rupeeId );
-            // const nodeId = location.control_name + '_item_'+ cardId + '_rupees';
-
-            // const cardTokensList = this.cardTokens[cardId].getAllItems();
-
-            // if (!cardTokensList.includes(rupeeId)) {
-            //     dojo.place(this.format_block('jstpl_rupee', {
-            //         id : rupeeId,
-            //     }), nodeId);
-            //     this.cardTokens[cardId].placeInZone(rupeeId);
-            //     // this.addTooltip( token_id, token_id, '' );
-            // }
-
-        },
-
         clearLastAction : function( )
         {
             console.log( 'clearLastAction, handles = ' + this.handles.length );
@@ -623,7 +604,7 @@ function (dojo, declare) {
 
             location.addToStockWithId(id, id, 'pp_market_deck');
 
-            this.setupCardTokenZones({location, cardId: id});
+            this.setupCardSpyZone({location, cardId: id});
                         
             // this.addTooltip( location.getItemDivId(id), id, '' );
 
@@ -653,7 +634,7 @@ function (dojo, declare) {
             // TODO: below is option to customize the created div (and add zones to card for example)
             stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
                 style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:" + backgroundSize + ";\
-                background-image:url('${image}');\"><div id=\"${id}_rupees\" class=\"pp_rupee_zone\"></div></div>";
+                background-image:url('${image}');\"><div id=\"${id}_spies\" class=\"pp_spy_zone\"></div></div>";
             
             Object.keys(this.gamedatas.cards).forEach((cardId) => {
                 const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
@@ -671,34 +652,21 @@ function (dojo, declare) {
             zone.instantaneous = instantaneous;
         },
 
-        setupCardTokenZones: function({location, cardId}) {
-            console.log( 'setupCardTokens' );
+        // Every time a card is move or placed this function will be called to set up zone.
+        setupCardSpyZone: function({location, cardId}) {
+            // console.log( 'setupCardSpyZone' );
 
-            // if (!( cardId in this.cardTokens) ) {
+            // Note (Frans): we probably need to remove spies before moving / placing card
+            if (this.spiesOnCards[cardId]) {
+                this.spiesOnCards[cardId].removeAll();
+            }
 
-            //     var nodeId = location.control_name + '_item_'+ cardId + '_rupees';
+            var nodeId = location.control_name + '_item_'+ cardId + '_spies';
 
-            //     // ** setup for zone
-            //     this.cardTokens[cardId] = new ebg.zone();
-            //     this.cardTokens[cardId].create( this, nodeId, this.rupeeWidth, this.rupeeHeight );
-            //     // this.cardTokens[id].setPattern('ellipticalfit');
-            //     this.cardTokens[cardId].item_margin = -30;
-
-            //     for (rupee in this.gamedatas.rupees) {
-            //         if (this.gamedatas.rupees[rupee].location == cardId) {
-            //             console.log('rupee', rupee, this.gamedatas.rupees[rupee]);
-            //             const rupeeId = this.gamedatas.rupees[rupee].key;
-            //             console.log('rupeeId', rupeeId, 'nodeId', nodeId)
-            //             dojo.place(this.format_block('jstpl_rupee', {
-            //                 id: rupeeId,
-            //             }), nodeId);
-            //             this.cardTokens[cardId].placeInZone(rupeeId);
-            //             // this.addTooltip( coin_id, coin_id, '' );
-            //         }
-            //     }
-
-            // }
-
+            // ** setup for zone
+            this.spiesOnCards[cardId] = new ebg.zone();
+            this.spiesOnCards[cardId].create( this, nodeId, this.cylinderWidth, this.cylinderHeight );
+            this.spiesOnCards[cardId].item_margin = 1;
         },
 
         createBorderZone: function({border}) 
@@ -812,8 +780,6 @@ function (dojo, declare) {
 
         moveCard: function({id, from, to, order = null}) {
             console.log( 'moveCard' );
-            // console.log( 'moveCard', id, 'from', from, 'to', to, 'order', order );
-            // const tokensCurrentlyOnCard = this.cardTokens[id].getAllItems();
 
             let fromDiv = null;
             if (from !== null) {
@@ -823,25 +789,12 @@ function (dojo, declare) {
                 if (order != null) {
                     to.changeItemsWeight({ id: order });
                 }
-                const nodeId = to.control_name + '_item_'+ id + '_rupees';
                 to.addToStockWithId(id, id, fromDiv);
 
-                // TODO (Frans): adjust code below if we need to do something here for spy zones
-                // // this.setupCardTokenZones({location: to, cardId: id, replaceCurrentZone});
-                // // TODO(Frans): check if we can combine this somehow with setupCardTokenZones
-                // this.cardTokens[id] = new ebg.zone();
-                // this.cardTokens[id].create( this, nodeId, this.rupeeWidth, this.rupeeHeight );
-                // // this.cardTokens[id].setPattern('ellipticalfit');
-                // // this.cardTokens[id].item_margin = 2;
+                // We need to set up new zone because id of div will change due to stock component
+                this.setupCardSpyZone({location: to, cardId: id});                
 
-                // tokensCurrentlyOnCard.forEach ((rupeeId) => { 
-                //         dojo.place(this.format_block('jstpl_rupee', {
-                //             id : rupeeId,
-                //         }), nodeId);
-                //         this.cardTokens[id].placeInZone(rupeeId);
-                //         // this.addTooltip( token_id, token_id, '' );
-                // }, this);
-                // // this.addTooltip( to_location.getItemDivId(id), id, '' );
+                // this.addTooltip( to_location.getItemDivId(id), id, '' );
             }
 
             if (from !== null) {
@@ -934,6 +887,15 @@ function (dojo, declare) {
 
             this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
             this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
+            
+            // Adjust based on the card in court
+            // this.moveToken({id: 'cylinder_2371053_8', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371053_7', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371052_8', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371052_7', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371052_6', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371052_5', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
+            
             this.numberOfClicks = 1;
             }
 
@@ -1320,14 +1282,10 @@ function (dojo, declare) {
                         order: card.state });
                 }, this);
 
-            // // this.card_tokens[notif.args.card.key].removeAll();
-            // if (this.card_tokens[notif.args.card.key] !== null) 
-            //     this.card_tokens[notif.args.card.key].removeAll();
-
             if (playerId == this.player_id) {
                 this.moveCard({id: notif.args.card.key, from: this.playerHand, to: this.court[playerId]});
             } else {
-                // TODO (Frans): check why moveCard results in a UI error
+                // TODO (Frans): check why moveCard results in a UI error => probably because other players don't have a playerHand?
                 // this.moveCard({id: notif.args.card.key, from: null, to: this.court[playerId]});
                 this.placeCard({location: this.court[playerId], id: notif.args.card.key});
             }

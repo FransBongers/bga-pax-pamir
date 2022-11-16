@@ -30,6 +30,7 @@ if (!defined('PXP_MODULES_DIR'))
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCoalition" => PXP_ENUM_DIR . "/PXPEnumCoalition.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumEventCardEffect" => PXP_ENUM_DIR . "/PXPEnumEventCardEffect.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumImpactIcon" => PXP_ENUM_DIR . "/PXPEnumImpactIcon.php",
+            "$baseNameSpacePhobyJuan\\Enums\\PXPEnumPool" => PXP_ENUM_DIR . "/PXPEnumPool.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumRegion" => PXP_ENUM_DIR . "/PXPEnumRegion.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumSpecialAbility" => PXP_ENUM_DIR . "/PXPEnumSpecialAbility.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumSuit" => PXP_ENUM_DIR . "/PXPEnumSuit.php",

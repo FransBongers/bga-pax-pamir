@@ -696,6 +696,12 @@ class PaxPamirEditionTwo extends Table
 
         $player_id = self::getActivePlayerId();
         $card = $this->tokens->getTokenInfo($card_id);
+
+        // Throw error if card is unavailble for purchase
+        if ($card['state'] == 1) {
+            throw new feException( "Card is unavailble" );
+        }
+
         $card_name = $this->token_types[$card_id]['name'];
         $market_location = $card['location'];
         self::dump( "purchaseCard", $card_id, $player_id, $card );

@@ -656,13 +656,13 @@ class PaxPamirEditionTwo extends Table
 
                         break;
                     case PXPEnumImpactIcon::Spy :
-
+                        // user needed to select the card
                         break;
                     case PXPEnumImpactIcon::Tribe :
 
                         break;
                     case PXPEnumImpactIcon::EconomicSuit :
-
+                        
                         break;
                     case PXPEnumImpactIcon::MilitarySuit :
 

@@ -170,7 +170,6 @@ function (dojo, declare) {
                 });
                 this.vpTrack[i].setPattern('ellipticalfit');
             }
-            console.log('vpTrack', this.vpTrack);
 
             // Setup of all player specific components 
             for( const playerId in gamedatas.players )
@@ -420,6 +419,9 @@ function (dojo, declare) {
             
             switch( stateName )
             {
+                case 'playerActions':
+                    this.unavailableCards = args.args.unavailable_cards;
+                    break;
             
             /* Example:
             
@@ -432,8 +434,11 @@ function (dojo, declare) {
            */
            
            
-            case 'dummmy':
-                break;
+                case 'dummmy':
+                    break;
+                default:
+                    console.log('onEnteringState default')
+                    break;
             }
         },
 
@@ -666,7 +671,7 @@ function (dojo, declare) {
             // ** setup for zone
             this.spiesOnCards[cardId] = new ebg.zone();
             this.spiesOnCards[cardId].create( this, nodeId, this.cylinderWidth, this.cylinderHeight );
-            this.spiesOnCards[cardId].item_margin = 1;
+            this.spiesOnCards[cardId].item_margin = 4;
         },
 
         createBorderZone: function({border}) 

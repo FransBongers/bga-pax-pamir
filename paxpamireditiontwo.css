@@ -550,11 +550,11 @@ html {
     /* z-index: 1; */
 }
 
-.pp_rupee_zone {
-    width: 130px;
-    height: 50px;
+.pp_spy_zone {
+    width: 132px;
+    height: 25px;
     left: 8px;
-    top: 50px;
+    top: 83px;
     position: absolute;
     /* border: 2px black solid; */
     /* z-index: 10; */

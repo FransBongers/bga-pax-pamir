@@ -24,6 +24,7 @@ require_once('modules/tokens.php');
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCardType;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumImpactIcon;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumPool;
+use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
 
 class PaxPamirEditionTwo extends Table
 {
@@ -363,10 +364,10 @@ class PaxPamirEditionTwo extends Table
      */
     function getPlayerSuitsTotals($player_id) {
         $suits = array (
-            'political' => 0,
-            'military' => 0,
-            'economic' => 0,
-            'intelligence' => 0
+            PXPEnumSuit::Political => 0,
+            PXPEnumSuit::Military => 0,
+            PXPEnumSuit::Economic => 0,
+            PXPEnumSuit::Intelligence => 0
         );
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
@@ -642,6 +643,8 @@ class PaxPamirEditionTwo extends Table
             $this->setGameStateValue("bribe_amount", -1);
 
             // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
+            // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
+            // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
             $impact_icons = $this->cards[$card_id]->getImpactIcons();
             $this->dump('********** Impact Icons : ', $impact_icons);
             foreach ($impact_icons as $impact_icon) {
@@ -656,21 +659,30 @@ class PaxPamirEditionTwo extends Table
 
                         break;
                     case PXPEnumImpactIcon::Spy :
-                        // user needed to select the card
+                        // user needed to select the destination card
                         break;
                     case PXPEnumImpactIcon::Tribe :
 
                         break;
                     case PXPEnumImpactIcon::EconomicSuit :
-                        
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'new_suit' => explode('_', PXPEnumImpactIcon::EconomicSuit)[0],
+                        ) );
                         break;
                     case PXPEnumImpactIcon::MilitarySuit :
-
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'new_suit' => explode('_', PXPEnumImpactIcon::MilitarySuit)[0],
+                        ) );
                         break;
                     case PXPEnumImpactIcon::PoliticalSuit :
-                        
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'new_suit' => explode('_', PXPEnumImpactIcon::PoliticalSuit)[0],
+                        ) );
                         break;
                     case PXPEnumImpactIcon::IntelligenceSuit :
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'new_suit' => explode('_', PXPEnumImpactIcon::IntelligenceSuit)[0],
+                        ) );
                         break;
                     default :
                         break;
@@ -696,12 +708,6 @@ class PaxPamirEditionTwo extends Table
 
         $player_id = self::getActivePlayerId();
         $card = $this->tokens->getTokenInfo($card_id);
-
-        // Throw error if card is unavailble for purchase
-        if ($card['state'] == 1) {
-            throw new feException( "Card is unavailble" );
-        }
-
         $card_name = $this->token_types[$card_id]['name'];
         $market_location = $card['location'];
         self::dump( "purchaseCard", $card_id, $player_id, $card );

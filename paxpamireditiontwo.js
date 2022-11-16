@@ -392,6 +392,7 @@ function (dojo, declare) {
             const suitId = this.gamedatas.favored_suit.suit;
             this.placeToken({
                 location: this.favoredSuit[suitId],
+                //location: this.favoredSuit['intelligence'], // for testing change of favored suit
                 id: `favored_suit_marker`,
                 jstpl: 'jstpl_favored_suit_marker',
                 jstplProps: {
@@ -1190,6 +1191,8 @@ function (dojo, declare) {
 
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 500 );
+
+            dojo.subscribe( 'updateSuit', this, "notif_updateSuit");
             
             dojo.subscribe( 'updatePlayerCounts', this, "notif_updatePlayerCounts");
             dojo.subscribe( 'log', this, "notif_log");
@@ -1391,6 +1394,14 @@ function (dojo, declare) {
                 $('political_'+ playerId).innerHTML = counts[playerId].suits.political;
                 $('intelligence_'+ playerId).innerHTML = counts[playerId].suits.intelligence;
             }) 
+        },
+
+        notif_updateSuit: function( notif )
+        {
+            console.log('notif_updateSuit', notif);
+            let newSuit = notif.args.new_suit;
+            
+            this.slideToObject( $('favored_suit_marker'), $('pp_favored_suit_'+newSuit) ).play();
         },
 
         notif_log : function(notif) {

@@ -86,6 +86,9 @@
             <div id="pp_russian_coalition_blocks" class="pp_coalition_blocks">
             </div>
         </div>
+        <div id="pp_active_events">
+            <span>Events</span>
+        </div>
         <div id="pp_market_deck_container">
             <div id="pp_discard_pile">
                 <span>Discard</span>

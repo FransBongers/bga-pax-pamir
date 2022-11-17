@@ -777,6 +777,8 @@ class PaxPamirEditionTwo extends Table
                 $this->incPlayerRupees($player_id, -$cost);
             };
 
+            // TODO (Frans): check if this is an event card or court card
+
             // move card to player hand location and reduce number of remaining actions
             $this->tokens->moveToken($card_id, 'hand_'.$player_id);
             $this->incGameStateValue("remaining_actions", -1);

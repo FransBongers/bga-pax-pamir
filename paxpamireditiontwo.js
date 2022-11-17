@@ -118,6 +118,10 @@ function (dojo, declare) {
             this.court = {};
             // cylinders per player
             this.cylinders = {};
+            // events per player
+            this.playerEvents = {};
+            // active events
+            this.activeEvents = new ebg.stock();
             // blocks per coalition (supply)
             this.coalitionBlocks = {};
             // spies on cards
@@ -158,6 +162,12 @@ function (dojo, declare) {
             const colors = Object.keys(players).map((key) => players[key].color);
             // console.log('players', players)
 
+            // Events
+            this.setupCardsStock({
+                stock: this.activeEvents,
+                nodeId: 'pp_active_events',
+                // className: `pp_card_in_court_${playerId}`
+            });
 
             // Create VP track
             for ( let i = 0; i <= 23; i++ ) {
@@ -360,7 +370,7 @@ function (dojo, declare) {
                     nodeId: `pp_${coalition}_coalition_blocks`,
                     tokenWidth: this.coalitionBlockWidth,
                     tokenHeight: this.coalitionBlockHeight,
-                    itemMargin: 15,
+                    itemMargin: 4,
                     instantaneous: true,
                 });
                 Object.keys(this.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
@@ -894,6 +904,9 @@ function (dojo, declare) {
             this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
             this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
             
+            // console.log('market_1_5', this.marketCards);
+            // console.log('activeEvents', this.activeEvents);
+            // this.moveCard({id: 'card_116', from: this.marketCards[1][5], to: this.activeEvents});
             // Adjust based on the card in court
             // this.moveToken({id: 'cylinder_2371053_8', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
             // this.moveToken({id: 'cylinder_2371053_7', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});

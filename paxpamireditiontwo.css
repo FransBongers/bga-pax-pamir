@@ -396,10 +396,11 @@ html {
 }
 
 #pp_coalition_blocks_container {
-    flex-grow: 1;
+    /* flex-grow: 1; */
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    width: 360px;
 }
 
 #pp_market_deck_container {
@@ -422,6 +423,14 @@ html {
     background-image: url('img/temp/cards/back.jpg');
     box-shadow: 1px 1px 4px;
     border-radius: 10px;
+}
+
+#pp_active_events {
+    flex-grow: 1;
+    border-radius: 10px;
+    border: 4px dashed black;
+    box-sizing: border-box;
+    margin-right: 10px;
 }
 
 .pp_coalition_blocks {

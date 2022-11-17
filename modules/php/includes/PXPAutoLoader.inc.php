@@ -17,6 +17,7 @@ if (!defined('PXP_MODULES_DIR'))
 {
     define('PXP_MODULES_DIR', __DIR__ . "/..");
     define('PXP_FACTORY_DIR', PXP_MODULES_DIR . "/Factories");
+    define('PXP_MANAGER_DIR', PXP_MODULES_DIR . "/Managers");
     define('PXP_OBJECT_DIR', PXP_MODULES_DIR . "/Objects");
     define('PXP_ENUM_DIR', PXP_MODULES_DIR . "/Enums");
 
@@ -25,7 +26,10 @@ if (!defined('PXP_MODULES_DIR'))
         $baseNameSpacePhobyJuan = "PhobyJuan\\PaxPamirEditionTwo";
         $classMap = [
             "$baseNameSpacePhobyJuan\\Factories\\PXPCardFactory" => PXP_FACTORY_DIR . "/PXPCardFactory.php",
+            "$baseNameSpacePhobyJuan\\Factories\\PXPPlayerFactory" => PXP_FACTORY_DIR . "/PXPPlayerFactory.php",
+            "$baseNameSpacePhobyJuan\\Managers\\PXPPlayerManager" => PXP_MANAGER_DIR . "/PXPPlayerManager.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPCard" => PXP_OBJECT_DIR . "/PXPCard.php",
+            "$baseNameSpacePhobyJuan\\Objects\\PXPPlayer" => PXP_OBJECT_DIR . "/PXPPlayer.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCardType" => PXP_ENUM_DIR . "/PXPEnumCardType.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCoalition" => PXP_ENUM_DIR . "/PXPEnumCoalition.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumEventCardEffect" => PXP_ENUM_DIR . "/PXPEnumEventCardEffect.php",

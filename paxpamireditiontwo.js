@@ -1192,6 +1192,8 @@ function (dojo, declare) {
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 500 );
 
+            dojo.subscribe( 'moveArmy', this, "notif_moveArmy");
+
             dojo.subscribe( 'updateSuit', this, "notif_updateSuit");
             
             dojo.subscribe( 'updatePlayerCounts', this, "notif_updatePlayerCounts");
@@ -1396,12 +1398,20 @@ function (dojo, declare) {
             }) 
         },
 
+        notif_moveArmy: function( notif )
+        {
+            let coalition = notif.args.coalition;
+            'pp_'+coalition+'_coalition_blocks';
+            //this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
+        },
+
         notif_updateSuit: function( notif )
         {
             console.log('notif_updateSuit', notif);
+            let previousSuit = notif.args.previous_suit;
             let newSuit = notif.args.new_suit;
             
-            this.slideToObject( $('favored_suit_marker'), $('pp_favored_suit_'+newSuit) ).play();
+            this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit[previousSuit], to: this.favoredSuit[newSuit], weight: this.defaultWeightZone});
         },
 
         notif_log : function(notif) {

@@ -26,6 +26,10 @@ use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumImpactIcon;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumPool;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
 
+use PhobyJuan\PaxPamirEditionTwo\Managers\PXPPlayerManager;
+
+use PhobyJuan\PaxPamirEditionTwo\Objects\PXPPlayer;
+
 class PaxPamirEditionTwo extends Table
 {
 	function __construct( )
@@ -54,6 +58,8 @@ class PaxPamirEditionTwo extends Table
         ) );
 
         $this->tokens = new Tokens();
+
+        $this->playerManager = new PXPPlayerManager();
 	}
 	
     protected function getGameName( )
@@ -645,15 +651,25 @@ class PaxPamirEditionTwo extends Table
             // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
             // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
             // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
+            $player = $this->playerManager->getPlayerFromId( $player_id );
+            self::dump('------------ player', $player);
+
             $impact_icons = $this->cards[$card_id]->getImpactIcons();
             $this->dump('********** Impact Icons : ', $impact_icons);
+
+            $previous_suit = self::getGameStateValue( 'favored_suit' );
+
             foreach ($impact_icons as $impact_icon) {
                 switch ($impact_icon) {
                     case PXPEnumImpactIcon::Road :
                         // user needed to select the border
                         break;
                     case PXPEnumImpactIcon::Army :
-
+                        // $card_region = $this->cards[$card_id]->getRegion();
+                        // self::notifyAllPlayers( "updateSuit", $message, array(
+                        //     'coalition' => $player->getLoyalty(),
+                        //     'to' => $card_region,
+                        // ) );
                         break;
                     case PXPEnumImpactIcon::Leverage :
 
@@ -664,24 +680,60 @@ class PaxPamirEditionTwo extends Table
                     case PXPEnumImpactIcon::Tribe :
 
                         break;
-                    case PXPEnumImpactIcon::EconomicSuit :
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'new_suit' => explode('_', PXPEnumImpactIcon::EconomicSuit)[0],
-                        ) );
-                        break;
-                    case PXPEnumImpactIcon::MilitarySuit :
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'new_suit' => explode('_', PXPEnumImpactIcon::MilitarySuit)[0],
-                        ) );
-                        break;
                     case PXPEnumImpactIcon::PoliticalSuit :
+                        if ($previous_suit == 0 ) {
+                            break;
+                        }
+                        // Update favored suit
+                        self::setGameStateValue( 'favored_suit', 0 );
+
+                        // Suit change notification
+                        $message = $this->suits[0]['change'];
                         self::notifyAllPlayers( "updateSuit", $message, array(
-                            'new_suit' => explode('_', PXPEnumImpactIcon::PoliticalSuit)[0],
+                            'previous_suit' => $this->suits[$previous_suit]['suit'],
+                            'new_suit' => PXPEnumSuit::Political,
                         ) );
                         break;
                     case PXPEnumImpactIcon::IntelligenceSuit :
+                        if ($previous_suit == 1 ) {
+                            break;
+                        }
+                        // Update favored suit
+                        self::setGameStateValue( 'favored_suit', 1 );
+
+                        // Suit change notification
+                        $message = $this->suits[1]['change'];
                         self::notifyAllPlayers( "updateSuit", $message, array(
-                            'new_suit' => explode('_', PXPEnumImpactIcon::IntelligenceSuit)[0],
+                            'previous_suit' => $this->suits[$previous_suit]['suit'],
+                            'new_suit' => PXPEnumSuit::Intelligence,
+                        ) );
+                        break;
+                    case PXPEnumImpactIcon::EconomicSuit :
+                        if ($previous_suit == 2 ) {
+                            break;
+                        }
+                        // Update favored suit
+                        self::setGameStateValue( 'favored_suit', 2 );
+
+                        // Suit change notification
+                        $message = $this->suits[2]['change'];
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'previous_suit' => $this->suits[$previous_suit]['suit'],
+                            'new_suit' => PXPEnumSuit::Economic,
+                        ) );
+                        break;
+                    case PXPEnumImpactIcon::MilitarySuit :
+                        if ($previous_suit == 3 ) {
+                            break;
+                        }
+                        // Update favored suit
+                        self::setGameStateValue( 'favored_suit', 3 );
+
+                        // Suit change notification
+                        $message = $this->suits[3]['change'];
+                        self::notifyAllPlayers( "updateSuit", $message, array(
+                            'previous_suit' => $this->suits[$previous_suit]['suit'],
+                            'new_suit' => PXPEnumSuit::Military,
                         ) );
                         break;
                     default :

@@ -60,22 +60,26 @@ $this->suits = array(
   0 => array(
       'suit' => 'political',
       'name' => clienttranslate("Political"),
-      'tooltip' => clienttranslate("The favored suit is Political")
+      'tooltip' => clienttranslate("The favored suit is Political"),
+      'change' => clienttranslate("The favored suit changed to Political")
   ),
   1 => array(
       'suit' => 'intelligence',
       'name' => clienttranslate("Intelligence"),
-      'tooltip' => clienttranslate("The favored suit is Intelligence")
+      'tooltip' => clienttranslate("The favored suit is Intelligence"),
+      'change' => clienttranslate("The favored suit changed to Intelligence")
   ),
   2 => array(
       'suit' => 'economic',
       'name' => clienttranslate("Economic"),
-      'tooltip' => clienttranslate("The favored suit is Economic")
+      'tooltip' => clienttranslate("The favored suit is Economic"),
+      'change' => clienttranslate("The favored suit changed to Economic")
   ),
   3 => array(
     'suit' => 'military',
     'name' => clienttranslate("Military"),
-    'tooltip' => clienttranslate("The favored suit is Military.  The cost to purchase in the market is doubled.")
+    'tooltip' => clienttranslate("The favored suit is Military.  The cost to purchase in the market is doubled."),
+    'change' => clienttranslate("The favored suit changed to Military")
   ),
 );
 

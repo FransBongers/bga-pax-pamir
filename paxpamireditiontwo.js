@@ -1205,7 +1205,9 @@ function (dojo, declare) {
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 500 );
 
-            dojo.subscribe( 'moveArmy', this, "notif_moveArmy");
+            dojo.subscribe( 'moveArmyFromPool', this, "notif_moveArmyFromPool");
+
+            dojo.subscribe( 'moveCynlinderToTribe', this, "notif_moveCynlinderToTribe");
 
             dojo.subscribe( 'updateSuit', this, "notif_updateSuit");
             
@@ -1411,16 +1413,36 @@ function (dojo, declare) {
             }) 
         },
 
-        notif_moveArmy: function( notif )
+        notif_moveArmyFromPool: function( notif )
         {
+            console.log('notif_moveArmyFromPool', notif);
+
             let coalition = notif.args.coalition;
-            'pp_'+coalition+'_coalition_blocks';
-            //this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
+            let token_number = notif.args.token_number;
+            let region = notif.args.region;
+
+            let token_id = 'block_' + coalition + '_' + token_number;
+
+            this.moveToken({id: token_id, from: this.coalitionBlocks[coalition], to: this.armies[this[region]], weight: this.defaultWeightZone});
+        },
+
+        notif_moveCynlinderToTribe: function( notif )
+        {
+            console.log('notif_moveCynlinderToTribe', notif);
+
+            let player_id = notif.args.player_id;
+            let token_number = notif.args.token_number;
+            let region = notif.args.region;
+
+            let token_id = 'cylinder_' + player_id + '_' + token_number;
+
+            this.moveToken({id: token_id, from: this.cylinders[player_id], to: this.tribes[this[region]], weight: this.defaultWeightZone});
         },
 
         notif_updateSuit: function( notif )
         {
             console.log('notif_updateSuit', notif);
+
             let previousSuit = notif.args.previous_suit;
             let newSuit = notif.args.new_suit;
             

@@ -27,9 +27,12 @@ if (!defined('PXP_MODULES_DIR'))
         $classMap = [
             "$baseNameSpacePhobyJuan\\Factories\\PXPCardFactory" => PXP_FACTORY_DIR . "/PXPCardFactory.php",
             "$baseNameSpacePhobyJuan\\Factories\\PXPPlayerFactory" => PXP_FACTORY_DIR . "/PXPPlayerFactory.php",
+            "$baseNameSpacePhobyJuan\\Factories\\PXPTokenFactory" => PXP_FACTORY_DIR . "/PXPTokenFactory.php",
             "$baseNameSpacePhobyJuan\\Managers\\PXPPlayerManager" => PXP_MANAGER_DIR . "/PXPPlayerManager.php",
+            "$baseNameSpacePhobyJuan\\Managers\\PXPTokenManager" => PXP_MANAGER_DIR . "/PXPTokenManager.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPCard" => PXP_OBJECT_DIR . "/PXPCard.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPPlayer" => PXP_OBJECT_DIR . "/PXPPlayer.php",
+            "$baseNameSpacePhobyJuan\\Objects\\PXPToken" => PXP_OBJECT_DIR . "/PXPToken.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCardType" => PXP_ENUM_DIR . "/PXPEnumCardType.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCoalition" => PXP_ENUM_DIR . "/PXPEnumCoalition.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumEventCardEffect" => PXP_ENUM_DIR . "/PXPEnumEventCardEffect.php",

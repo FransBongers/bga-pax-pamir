@@ -27,8 +27,12 @@ use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumPool;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
 
 use PhobyJuan\PaxPamirEditionTwo\Managers\PXPPlayerManager;
+use PhobyJuan\PaxPamirEditionTwo\Managers\PXPTokenManager;
+
+use PhobyJuan\PaxPamirEditionTwo\Factories\PXPTokenFactory;
 
 use PhobyJuan\PaxPamirEditionTwo\Objects\PXPPlayer;
+use PhobyJuan\PaxPamirEditionTwo\Objects\PXPToken;
 
 class PaxPamirEditionTwo extends Table
 {
@@ -60,6 +64,7 @@ class PaxPamirEditionTwo extends Table
         $this->tokens = new Tokens();
 
         $this->playerManager = new PXPPlayerManager();
+        $this->tokenManager = new PXPTokenManager();
 	}
 	
     protected function getGameName( )
@@ -651,7 +656,7 @@ class PaxPamirEditionTwo extends Table
             // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
             // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
             // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
-            $player = $this->playerManager->getPlayerFromId( $player_id );
+            $player = $this->playerManager->getPlayerById( $player_id );
             self::dump('------------ player', $player);
 
             $impact_icons = $this->cards[$card_id]->getImpactIcons();
@@ -665,11 +670,29 @@ class PaxPamirEditionTwo extends Table
                         // user needed to select the border
                         break;
                     case PXPEnumImpactIcon::Army :
-                        // $card_region = $this->cards[$card_id]->getRegion();
-                        // self::notifyAllPlayers( "updateSuit", $message, array(
-                        //     'coalition' => $player->getLoyalty(),
-                        //     'to' => $card_region,
-                        // ) );
+                        $player_loyalty = $player->getLoyalty();
+
+                        // Armies available in pool
+                        $location = $this->locations['pools'][$player_loyalty];
+                        $pool_armies = $this->tokenManager->getByLocation($location, "token_key DESC");
+                        $this->dump('//////////// Pool armies : ', $pool_armies);
+
+                        $card_region = $this->cards[$card_id]->getRegion();
+
+                        if (count($pool_armies) > 0) {
+                            $token = $pool_armies[0];
+                            $token->setLocation($this->locations["armies"][$card_region]);
+                            $this->tokenManager->persist($token);
+
+                            self::notifyAllPlayers( "moveArmyFromPool", "", array(
+                                'coalition' => $player->getLoyalty(),
+                                'token_number' => explode('_', $token->getKey())[2],
+                                'region' => $card_region,
+                            ) );
+                        } else {
+                            // (Julien) Can't remember : may player select an army on the map to move it ?
+                        }
+
                         break;
                     case PXPEnumImpactIcon::Leverage :
 
@@ -678,7 +701,22 @@ class PaxPamirEditionTwo extends Table
                         // user needed to select the destination card
                         break;
                     case PXPEnumImpactIcon::Tribe :
+                        // Cylinders available
+                        $cylinders = $this->tokenManager->getCylindersAvailableByPlayerId($player_id, 'token_key DESC');
 
+                        $card_region = $this->cards[$card_id]->getRegion();
+
+                        if (count($cylinders) > 0) {
+                            $token = $cylinders[0];
+                            $token->setLocation($this->locations["tribes"][$card_region]);
+                            $this->tokenManager->persist($token);
+
+                            self::notifyAllPlayers( "moveCynlinderToTribe", "", array(
+                                'player_id' => $player_id,
+                                'token_number' => explode('_', $token->getKey())[2],
+                                'region' => $card_region,
+                            ) );
+                        }
                         break;
                     case PXPEnumImpactIcon::PoliticalSuit :
                         if ($previous_suit == 0 ) {

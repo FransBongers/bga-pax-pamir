@@ -22,6 +22,8 @@
  // Note (Frans): commented this out for now as it led to some issues after syncing files with the game server.
 include 'modules/php/includes/PXPCards.inc.php';
 
+use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCoalition;
+use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumRegion;
 
 /*
 
@@ -34,6 +36,33 @@ $this->card_types = array(
 );
 
 */
+
+$this->locations = array (
+  'pools' => array(
+    PXPEnumCoalition::Afghan => 'block_afghan_pool',
+    PXPEnumCoalition::British => 'block_british_pool',
+    PXPEnumCoalition::Russian => 'block_russian_pool'
+  ),
+
+  'armies' => array (
+    PXPEnumRegion::Transcaspia => "armies_".PXPEnumRegion::Transcaspia,
+    PXPEnumRegion::Kabul => "armies_".PXPEnumRegion::Kabul,
+    PXPEnumRegion::Persia => "armies_".PXPEnumRegion::Persia,
+    PXPEnumRegion::Herat => "armies_".PXPEnumRegion::Herat,
+    PXPEnumRegion::Kandahar => "armies_".PXPEnumRegion::Kandahar,
+    PXPEnumRegion::Punjab => "armies_".PXPEnumRegion::Punjab,
+  ),
+
+  'tribes' => array (
+    PXPEnumRegion::Transcaspia => "tribes_".PXPEnumRegion::Transcaspia,
+    PXPEnumRegion::Kabul => "tribes_".PXPEnumRegion::Kabul,
+    PXPEnumRegion::Persia => "tribes_".PXPEnumRegion::Persia,
+    PXPEnumRegion::Herat => "tribes_".PXPEnumRegion::Herat,
+    PXPEnumRegion::Kandahar => "tribes_".PXPEnumRegion::Kandahar,
+    PXPEnumRegion::Punjab => "tribes_".PXPEnumRegion::Punjab,
+  )
+);
+
 
 $this->loyalty = array(
   'afghan' => array(

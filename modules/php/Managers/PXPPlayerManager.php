@@ -18,7 +18,7 @@ use PhobyJuan\PaxPamirEditionTwo\Objects\PXPPlayer;
 
 class PXPPlayerManager extends \APP_DbObject
 {
-    public function getPlayerFromId(
+    public function getPlayerById(
         int $id
     ): ?PXPPlayer
     {
@@ -62,7 +62,7 @@ class PXPPlayerManager extends \APP_DbObject
         return $player;
     }
 
-    public function persist(PXPPlayer $player): bool
+    public function persist(PXPPlayer $player): void
     {
         $player_id = $player->getId();
         $rupees = $player->getRupees();
@@ -76,6 +76,6 @@ class PXPPlayerManager extends \APP_DbObject
                 WHERE 
                     player_id = '$player_id'";
 
-        return self::DbQuery( $sql );
+        self::DbQuery( $sql );
     }
 }

@@ -244,6 +244,8 @@ class PaxPamirEditionTwo extends Table
         $result['rupees'] = $this->tokens->getTokensOfTypeInLocation('rupee', null);
         $result['favored_suit'] = $this->suits[$this->getGameStateValue( 'favored_suit' )];
         $result['rulers'] = $this->getAllRegionRulers();
+        $result['active_events'] = $this->tokens->getTokensInLocation('active_events');
+
         return $result;
     }
 
@@ -807,6 +809,19 @@ class PaxPamirEditionTwo extends Table
 
         $player_id = self::getActivePlayerId();
         $card = $this->tokens->getTokenInfo($card_id);
+
+        $card_info = $this->cards[$card_id];
+        // $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+        // for ($i = 0; $i < count($court_cards); $i++) {
+            
+        //     $suits[$card_info->getSuit()] += $card_info->getRank();
+        // }
+
+        // Throw error if card is unavailble for purchase
+        if ($card['state'] == 1) {
+            throw new feException( "Card is unavailble" );
+        }
+
         $card_name = $this->token_types[$card_id]['name'];
         $market_location = $card['location'];
         self::dump( "purchaseCard", $card_id, $player_id, $card );
@@ -825,9 +840,12 @@ class PaxPamirEditionTwo extends Table
             };
 
             // TODO (Frans): check if this is an event card or court card
-
             // move card to player hand location and reduce number of remaining actions
-            $this->tokens->moveToken($card_id, 'hand_'.$player_id);
+            $new_location = 'hand_'.$player_id;
+            if ($card_info->getType() == PXPEnumCardType::Event) {
+                $new_location = 'active_events';
+            } 
+            $this->tokens->moveToken($card_id, $new_location);
             $this->incGameStateValue("remaining_actions", -1);
 
             // add rupees on card to player totals. Then put them in rupee_pool location
@@ -864,6 +882,7 @@ class PaxPamirEditionTwo extends Table
                 'card' => $card,
                 'card_name' => $card_name,
                 'market_location' => $market_location,
+                'new_location' => $new_location,
                 'updated_cards' => $updated_cards,
                 'i18n' => array( 'card_name' ),
             ) );

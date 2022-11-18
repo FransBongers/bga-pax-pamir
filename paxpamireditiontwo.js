@@ -169,6 +169,10 @@ function (dojo, declare) {
                 // className: `pp_card_in_court_${playerId}`
             });
 
+            Object.keys(gamedatas.active_events).forEach((key) => {
+                this.placeCard({location: this.activeEvents, id: gamedatas.active_events[key].key});
+            })
+
             // Create VP track
             for ( let i = 0; i <= 23; i++ ) {
                 this.vpTrack[i] = new ebg.zone();
@@ -370,7 +374,7 @@ function (dojo, declare) {
                     nodeId: `pp_${coalition}_coalition_blocks`,
                     tokenWidth: this.coalitionBlockWidth,
                     tokenHeight: this.coalitionBlockHeight,
-                    itemMargin: 4,
+                    itemMargin: 15,
                     instantaneous: true,
                 });
                 Object.keys(this.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
@@ -884,29 +888,30 @@ function (dojo, declare) {
             return;
 
             if (this.numberOfClicks && this.numberOfClicks == 1) {
-                this.moveToken({id: 'block_afghan_8', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
-                this.moveToken({id: 'block_russian_7', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
+                // this.moveToken({id: 'block_afghan_8', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
+                // this.moveToken({id: 'block_russian_7', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
                 
-                // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
+                // // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
     
-                this.moveToken({id: 'cylinder_2371053_9', from: this.cylinders['2371053'], to: this.tribes[this.herat], weight: this.defaultWeightZone});
-                this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
+                // this.moveToken({id: 'cylinder_2371053_9', from: this.cylinders['2371053'], to: this.tribes[this.herat], weight: this.defaultWeightZone});
+                // this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
                 this.numberOfClicks += 1;
             }
 
             if (!this.numberOfClicks ) {
             // Temp abuse of button to test movement
-            this.moveToken({id: 'block_afghan_9', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
-            this.moveToken({id: 'block_russian_8', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
+            // this.moveToken({id: 'block_afghan_9', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
+            // this.moveToken({id: 'block_russian_8', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
             
-            // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
+            // // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
 
-            this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
-            this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
+            // this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
             
             // console.log('market_1_5', this.marketCards);
             // console.log('activeEvents', this.activeEvents);
-            // this.moveCard({id: 'card_116', from: this.marketCards[1][5], to: this.activeEvents});
+            // this.moveCard({id: 'card_116', from: this.marketCards[1][1], to: this.activeEvents});
+            // this.moveCard({id: 'card_111', from: this.marketCards[1][3], to: this.activeEvents});
             // Adjust based on the card in court
             // this.moveToken({id: 'cylinder_2371053_8', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
             // this.moveToken({id: 'cylinder_2371053_7', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
@@ -1334,7 +1339,9 @@ function (dojo, declare) {
 
             // Move card from markt
             const cardId = notif.args.card.key;
-            if (notif.args.player_id == this.player_id) {
+            if (notif.args.new_location == 'active_events') {
+                this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.activeEvents});
+            } else if (notif.args.player_id == this.player_id) {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.playerHand});
             } else {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: null});

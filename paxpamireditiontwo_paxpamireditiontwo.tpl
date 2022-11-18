@@ -86,9 +86,6 @@
             <div id="pp_russian_coalition_blocks" class="pp_coalition_blocks">
             </div>
         </div>
-        <div id="pp_active_events">
-            <span>Events</span>
-        </div>
         <div id="pp_market_deck_container">
             <div id="pp_discard_pile">
                 <span>Discard</span>
@@ -110,6 +107,10 @@
 
 
     <div id="pp_player_tableaus">
+        <div id="pp_active_events_container">
+              <div id="pp_active_events_title" class="pp_tableau_title"><span>Active events</span></div>
+            <div id="pp_active_events" class="pp_active_events"></div>
+        </div>
         <!-- BEGIN player_hand -->
         <div id="pp_player_hand_{player_id}" class="pp_player_hand">
             <div id="pp_player_hand_title" class="pp_tableau_title"><span>{player_name}'s hand</span></div>

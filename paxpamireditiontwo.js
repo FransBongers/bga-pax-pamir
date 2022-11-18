@@ -610,7 +610,7 @@ function (dojo, declare) {
         },
 
         placeCard: function({location, id, order = null}) {
-            // console.log('placeCard', location, id);
+            // console.log('placeCard', location, id, order);
 
             if (order != null) {
                 location.changeItemsWeight({
@@ -621,7 +621,7 @@ function (dojo, declare) {
             location.addToStockWithId(id, id, 'pp_market_deck');
 
             this.setupCardSpyZone({location, cardId: id});
-                        
+
             // this.addTooltip( location.getItemDivId(id), id, '' );
 
         },
@@ -1332,11 +1332,13 @@ function (dojo, declare) {
                 this.marketRupees[row][col].removeFromZone( rupeeId, true, `rupees_${notif.args.player_id}` );
             });
 
-            // Move card from markt 
+            // Move card from markt
+            const cardId = notif.args.card.key;
             if (notif.args.player_id == this.player_id) {
-                this.moveCard({id: notif.args.card.key, from: this.marketCards[row][col], to: this.playerHand});
+                this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.playerHand});
             } else {
-                this.moveCard({id: notif.args.card.key, from: this.marketCards[row][col], to: null});
+                this.moveCard({id: cardId, from: this.marketCards[row][col], to: null});
+                this.spiesOnCards[cardId] = undefined;
             }
 
             // Place paid rupees on market cards

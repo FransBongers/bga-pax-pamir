@@ -648,11 +648,6 @@ class PaxPamirEditionTwo extends Table
                 'i18n' => array( 'card_name' ),
             ) );
 
-            $this->updatePlayerCounts();
-
-            $this->setGameStateValue("bribe_card_id", 0);
-            $this->setGameStateValue("bribe_amount", -1);
-
             // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
             // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
             // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
@@ -669,6 +664,7 @@ class PaxPamirEditionTwo extends Table
                     case PXPEnumImpactIcon::Road :
                         // user needed to select the border
                         break;
+
                     case PXPEnumImpactIcon::Army :
                         $player_loyalty = $player->getLoyalty();
 
@@ -692,14 +688,17 @@ class PaxPamirEditionTwo extends Table
                         } else {
                             // (Julien) Can't remember : may player select an army on the map to move it ?
                         }
-
                         break;
+
                     case PXPEnumImpactIcon::Leverage :
-
+                        $player->setRupees($player->getRupees() + 2);
+                        $this->playerManager->persist($player);
                         break;
+
                     case PXPEnumImpactIcon::Spy :
                         // user needed to select the destination card
                         break;
+
                     case PXPEnumImpactIcon::Tribe :
                         // Cylinders available
                         $cylinders = $this->tokenManager->getCylindersAvailableByPlayerId($player_id, 'token_key DESC');
@@ -718,6 +717,7 @@ class PaxPamirEditionTwo extends Table
                             ) );
                         }
                         break;
+
                     case PXPEnumImpactIcon::PoliticalSuit :
                         if ($previous_suit == 0 ) {
                             break;
@@ -732,6 +732,7 @@ class PaxPamirEditionTwo extends Table
                             'new_suit' => PXPEnumSuit::Political,
                         ) );
                         break;
+
                     case PXPEnumImpactIcon::IntelligenceSuit :
                         if ($previous_suit == 1 ) {
                             break;
@@ -746,6 +747,7 @@ class PaxPamirEditionTwo extends Table
                             'new_suit' => PXPEnumSuit::Intelligence,
                         ) );
                         break;
+
                     case PXPEnumImpactIcon::EconomicSuit :
                         if ($previous_suit == 2 ) {
                             break;
@@ -760,6 +762,7 @@ class PaxPamirEditionTwo extends Table
                             'new_suit' => PXPEnumSuit::Economic,
                         ) );
                         break;
+
                     case PXPEnumImpactIcon::MilitarySuit :
                         if ($previous_suit == 3 ) {
                             break;
@@ -774,11 +777,17 @@ class PaxPamirEditionTwo extends Table
                             'new_suit' => PXPEnumSuit::Military,
                         ) );
                         break;
+
                     default :
                         break;
                 }
             }
         }
+
+        $this->updatePlayerCounts();
+
+        $this->setGameStateValue("bribe_card_id", 0);
+        $this->setGameStateValue("bribe_amount", -1);
 
         if ($this->getGameStateValue("remaining_actions") > 0) {
             $this->gamestate->nextState( 'action' );

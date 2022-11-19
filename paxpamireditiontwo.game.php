@@ -26,10 +26,12 @@ use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumImpactIcon;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumPool;
 use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
 
+use PhobyJuan\PaxPamirEditionTwo\Managers\PXPImpactActionManager;
 use PhobyJuan\PaxPamirEditionTwo\Managers\PXPPlayerManager;
 use PhobyJuan\PaxPamirEditionTwo\Managers\PXPTokenManager;
 
 use PhobyJuan\PaxPamirEditionTwo\Factories\PXPTokenFactory;
+use PhobyJuan\PaxPamirEditionTwo\Factories\PXPImpactActionFactory;
 
 use PhobyJuan\PaxPamirEditionTwo\Objects\PXPPlayer;
 use PhobyJuan\PaxPamirEditionTwo\Objects\PXPToken;
@@ -63,6 +65,7 @@ class PaxPamirEditionTwo extends Table
 
         $this->tokens = new Tokens();
 
+        $this->impactActionManager = new PXPImpactActionManager();
         $this->playerManager = new PXPPlayerManager();
         $this->tokenManager = new PXPTokenManager();
 	}
@@ -688,146 +691,32 @@ class PaxPamirEditionTwo extends Table
                 'i18n' => array( 'card_name' ),
             ) );
 
+            $this->updatePlayerCounts();
+
+            $this->setGameStateValue("bribe_card_id", 0);
+            $this->setGameStateValue("bribe_amount", -1);
+
             // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
             // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
             // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
-            $player = $this->playerManager->getPlayerById( $player_id );
-            self::dump('------------ player', $player);
 
             $impact_icons = $this->cards[$card_id]->getImpactIcons();
-            $this->dump('********** Impact Icons : ', $impact_icons);
 
-            $previous_suit = self::getGameStateValue( 'favored_suit' );
+            if (count($impact_icons) > 0 ) {
+                foreach ($impact_icons as $impact_icon) {
+                    $impactAction = PXPImpactActionFactory::create(null, $player_id, $impact_icon, false, $card_id);
+                    $this->impactActionManager->persist($impactAction);
+                }
 
-            foreach ($impact_icons as $impact_icon) {
-                switch ($impact_icon) {
-                    case PXPEnumImpactIcon::Road :
-                        // user needed to select the border
-                        break;
-
-                    case PXPEnumImpactIcon::Army :
-                        $player_loyalty = $player->getLoyalty();
-
-                        // Armies available in pool
-                        $location = $this->locations['pools'][$player_loyalty];
-                        $pool_armies = $this->tokenManager->getByLocation($location, "token_key DESC");
-                        $this->dump('//////////// Pool armies : ', $pool_armies);
-
-                        $card_region = $this->cards[$card_id]->getRegion();
-
-                        if (count($pool_armies) > 0) {
-                            $token = $pool_armies[0];
-                            $token->setLocation($this->locations["armies"][$card_region]);
-                            $this->tokenManager->persist($token);
-
-                            self::notifyAllPlayers( "moveArmyFromPool", "", array(
-                                'coalition' => $player->getLoyalty(),
-                                'token_number' => explode('_', $token->getKey())[2],
-                                'region' => $card_region,
-                            ) );
-                        } else {
-                            // (Julien) Can't remember : may player select an army on the map to move it ?
-                        }
-                        break;
-
-                    case PXPEnumImpactIcon::Leverage :
-                        $player->setRupees($player->getRupees() + 2);
-                        $this->playerManager->persist($player);
-                        break;
-
-                    case PXPEnumImpactIcon::Spy :
-                        // user needed to select the destination card
-                        break;
-
-                    case PXPEnumImpactIcon::Tribe :
-                        // Cylinders available
-                        $cylinders = $this->tokenManager->getCylindersAvailableByPlayerId($player_id, 'token_key DESC');
-
-                        $card_region = $this->cards[$card_id]->getRegion();
-
-                        if (count($cylinders) > 0) {
-                            $token = $cylinders[0];
-                            $token->setLocation($this->locations["tribes"][$card_region]);
-                            $this->tokenManager->persist($token);
-
-                            self::notifyAllPlayers( "moveCynlinderToTribe", "", array(
-                                'player_id' => $player_id,
-                                'token_number' => explode('_', $token->getKey())[2],
-                                'region' => $card_region,
-                            ) );
-                        }
-                        break;
-
-                    case PXPEnumImpactIcon::PoliticalSuit :
-                        if ($previous_suit == 0 ) {
-                            break;
-                        }
-                        // Update favored suit
-                        self::setGameStateValue( 'favored_suit', 0 );
-
-                        // Suit change notification
-                        $message = $this->suits[0]['change'];
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'previous_suit' => $this->suits[$previous_suit]['suit'],
-                            'new_suit' => PXPEnumSuit::Political,
-                        ) );
-                        break;
-
-                    case PXPEnumImpactIcon::IntelligenceSuit :
-                        if ($previous_suit == 1 ) {
-                            break;
-                        }
-                        // Update favored suit
-                        self::setGameStateValue( 'favored_suit', 1 );
-
-                        // Suit change notification
-                        $message = $this->suits[1]['change'];
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'previous_suit' => $this->suits[$previous_suit]['suit'],
-                            'new_suit' => PXPEnumSuit::Intelligence,
-                        ) );
-                        break;
-
-                    case PXPEnumImpactIcon::EconomicSuit :
-                        if ($previous_suit == 2 ) {
-                            break;
-                        }
-                        // Update favored suit
-                        self::setGameStateValue( 'favored_suit', 2 );
-
-                        // Suit change notification
-                        $message = $this->suits[2]['change'];
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'previous_suit' => $this->suits[$previous_suit]['suit'],
-                            'new_suit' => PXPEnumSuit::Economic,
-                        ) );
-                        break;
-
-                    case PXPEnumImpactIcon::MilitarySuit :
-                        if ($previous_suit == 3 ) {
-                            break;
-                        }
-                        // Update favored suit
-                        self::setGameStateValue( 'favored_suit', 3 );
-
-                        // Suit change notification
-                        $message = $this->suits[3]['change'];
-                        self::notifyAllPlayers( "updateSuit", $message, array(
-                            'previous_suit' => $this->suits[$previous_suit]['suit'],
-                            'new_suit' => PXPEnumSuit::Military,
-                        ) );
-                        break;
-
-                    default :
-                        break;
+                $this->gamestate->nextState( 'impact_icons' );
+            } else {
+                if ($this->getGameStateValue("remaining_actions") > 0) {
+                    $this->gamestate->nextState( 'action' );
+                } else {
+                    $this->cleanup();
                 }
             }
         }
-
-        $this->updatePlayerCounts();
-
-        $this->setGameStateValue("bribe_card_id", 0);
-        $this->setGameStateValue("bribe_amount", -1);
 
         if ($this->getGameStateValue("remaining_actions") > 0) {
             $this->gamestate->nextState( 'action' );
@@ -973,6 +862,198 @@ class PaxPamirEditionTwo extends Table
         The action method of state X is called everytime the current game state is set to X.
     */
     
+    function stImpactIcons() {
+
+        $player_id = self::getActivePlayerId();
+
+        $player = $this->playerManager->getPlayerById( $player_id );
+
+        $impact_actions = $this->impactActionManager->getToBeDoneByPlayerId($player_id);
+        $remaining_impact_icons = count($impact_actions);
+        $is_last_impast_icon = ($remaining_impact_icons == 1);
+
+        if ( $remaining_impact_icons > 0 ) {
+            $impact_action = $impact_actions[0];
+            $card_id = $impact_action->getCard_id();
+            
+            switch ($impact_action->getName()) {
+                case PXPEnumImpactIcon::Road :
+
+                    // user needed to select the border
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::Army :
+                    $player_loyalty = $player->getLoyalty();
+
+                    // Armies available in pool
+                    $location = $this->locations['pools'][$player_loyalty];
+                    $pool_armies = $this->tokenManager->getByLocation($location, "token_key DESC");
+                    $this->dump('//////////// Pool armies : ', $pool_armies);
+
+                    $card_region = $this->cards[$card_id]->getRegion();
+
+                    if (count($pool_armies) > 0) {
+                        $token = $pool_armies[0];
+                        $token->setLocation($this->locations["armies"][$card_region]);
+                        $this->tokenManager->persist($token);
+
+                        self::notifyAllPlayers( "moveArmyFromPool", "", array(
+                            'coalition' => $player->getLoyalty(),
+                            'token_number' => explode('_', $token->getKey())[2],
+                            'region' => $card_region,
+                        ) );
+                    }
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::Leverage :
+                    $player->setRupees($player->getRupees() + 2);
+                    $this->playerManager->persist($player);
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::Spy :
+                    // user needed to select the destination card
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::Tribe :
+                    // Cylinders available
+                    $cylinders = $this->tokenManager->getCylindersAvailableByPlayerId($player_id, 'token_key DESC');
+
+                    $card_region = $this->cards[$card_id]->getRegion();
+
+                    if (count($cylinders) > 0) {
+                        $token = $cylinders[0];
+                        $token->setLocation($this->locations["tribes"][$card_region]);
+                        $this->tokenManager->persist($token);
+
+                        self::notifyAllPlayers( "moveCynlinderToTribe", "", array(
+                            'player_id' => $player_id,
+                            'token_number' => explode('_', $token->getKey())[2],
+                            'region' => $card_region,
+                        ) );
+                    }
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::PoliticalSuit :
+                    $previous_suit = self::getGameStateValue( 'favored_suit' );
+                    if ( $previous_suit == 0 ) {
+                        break;
+                    }
+                    // Update favored suit
+                    self::setGameStateValue( 'favored_suit', 0 );
+
+                    // Suit change notification
+                    $message = $this->suits[0]['change'];
+                    self::notifyAllPlayers( "updateSuit", $message, array(
+                        'previous_suit' => $this->suits[$previous_suit]['suit'],
+                        'new_suit' => PXPEnumSuit::Political,
+                    ) );
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::IntelligenceSuit :
+                    $previous_suit = self::getGameStateValue( 'favored_suit' );
+                    if ( $previous_suit == 1 ) {
+                        break;
+                    }
+                    // Update favored suit
+                    self::setGameStateValue( 'favored_suit', 1 );
+
+                    // Suit change notification
+                    $message = $this->suits[1]['change'];
+                    self::notifyAllPlayers( "updateSuit", $message, array(
+                        'previous_suit' => $this->suits[$previous_suit]['suit'],
+                        'new_suit' => PXPEnumSuit::Intelligence,
+                    ) );
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::EconomicSuit :
+                    $previous_suit = self::getGameStateValue( 'favored_suit' );
+                    if ( $previous_suit == 2 ) {
+                        break;
+                    }
+                    // Update favored suit
+                    self::setGameStateValue( 'favored_suit', 2 );
+
+                    // Suit change notification
+                    $message = $this->suits[2]['change'];
+                    self::notifyAllPlayers( "updateSuit", $message, array(
+                        'previous_suit' => $this->suits[$previous_suit]['suit'],
+                        'new_suit' => PXPEnumSuit::Economic,
+                    ) );
+                    
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                case PXPEnumImpactIcon::MilitarySuit :
+                    $previous_suit = self::getGameStateValue( 'favored_suit' );
+                    if ($previous_suit == 3 ) {
+                        break;
+                    }
+                    // Update favored suit
+                    self::setGameStateValue( 'favored_suit', 3 );
+
+                    // Suit change notification
+                    $message = $this->suits[3]['change'];
+                    self::notifyAllPlayers( "updateSuit", $message, array(
+                        'previous_suit' => $this->suits[$previous_suit]['suit'],
+                        'new_suit' => PXPEnumSuit::Military,
+                    ) );
+
+                    $impact_action->setDone(true);
+                    $this->impactActionManager->persist($impact_action);
+
+                    break;
+
+                default :
+                    break;
+            }
+
+            if ($is_last_impast_icon) {
+                $this->impactActionManager->deleteAll();
+                if ($this->getGameStateValue("remaining_actions") > 0) {
+                    $this->gamestate->nextState( 'player_next_action' );
+                } else {
+                    $this->cleanup();
+                }
+            } else {
+                $this->gamestate->nextState( 'next_impact_icon' );
+            }
+        } else {
+            if ($this->getGameStateValue("remaining_actions") > 0) {
+                $this->gamestate->nextState( 'player_next_action' );
+            } else {
+                $this->cleanup();
+            }
+        }
+    }
 
     function stNextPlayer()
     {

@@ -785,7 +785,6 @@ function (dojo, declare) {
                 case 'discard_court':
                     dojo.query(`.pp_card_in_court_${this.player_id}`).forEach(
                         function (node, index) {
-                            console.log('node in for each', node)
                             dojo.addClass(node, 'pp_selectable_card');
                             this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
                         }, this);

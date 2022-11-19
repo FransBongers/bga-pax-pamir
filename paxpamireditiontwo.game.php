@@ -276,6 +276,38 @@ class PaxPamirEditionTwo extends Table
         NOTE: put them in alphabetical order
     */
 
+
+    /**
+     * checks if coalition is different from current loyalty.
+     * Handles any changes it it is.
+     */
+    function checkAndHandleLoyaltyChange ( $coalition ) {
+
+        $player_id = self::getActivePlayerId();
+        $current_loyaly = $this->getPlayerLoyalty($player_id);
+        // check of loyalty needs to change. If it does not return
+        if ($current_loyaly == $coalition) {
+            return;
+        }
+        
+
+        // TODO:
+        // 1. Return gifts
+        // 2. Discard prizes and patriots
+        // 3. Update loyalty
+        $this->setPlayerLoyalty($player_id, $coalition);
+
+        // Notify
+        $coalition_name = $this->loyalty[$coalition]['name'];
+        self::notifyAllPlayers( "chooseLoyalty", clienttranslate( '${player_name} changed loyalty to ${coalition_name}.' ), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'coalition' => $coalition,
+            'coalition_name' => $coalition_name
+        ) );
+    }
+
+
     /*
         Returns the number of hand and court cards that need to be discarded by the player.
     */
@@ -626,6 +658,12 @@ class PaxPamirEditionTwo extends Table
         // }
 
         if ($this->getGameStateValue("remaining_actions") > 0) {
+            // check if loyaly change
+            $card_loyalty = $this->cards[$card_id]->getLoyalty();
+            if ($card_loyalty != null) {
+                $this->checkAndHandleLoyaltyChange( $card_loyalty );
+            }
+
             if ($left_side) {
                 for ($i = 0; $i < count($court_cards); $i++) {
                     // $this->tokens->setTokenState($court_cards[$i].key, $court_cards[$i].state+1);

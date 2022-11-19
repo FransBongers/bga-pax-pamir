@@ -52,13 +52,11 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PLAYER_ACTIONS", 3);
-
     define("STATE_IMPACT_ICONS", 4);
-
-    define("STATE_NEGOTIATE_BRIBE", 4);
+    define("STATE_NEGOTIATE_BRIBE", 5);
     // define("STATE_RESOLVE_IMPACT", 5);
-    define("STATE_DISCARD_COURT", 10);
-    define("STATE_DISCARD_HAND", 11);
+    define("STATE_DISCARD_COURT", 6);
+    define("STATE_DISCARD_HAND", 7);
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     // define("STATE_DOMINANCE_CHECK", 30);

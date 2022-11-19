@@ -52,6 +52,9 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PLAYER_ACTIONS", 3);
+
+    define("STATE_IMPACT_ICONS", 4);
+
     define("STATE_NEGOTIATE_BRIBE", 4);
     // define("STATE_RESOLVE_IMPACT", 5);
     define("STATE_DISCARD_COURT", 10);
@@ -112,10 +115,24 @@ $machinestates = array(
         "possibleactions" => array( "purchase", "play", "card_action", "pass" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS, 
+            "impact_icons" => STATE_IMPACT_ICONS,
             "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
             "discard_court" => STATE_DISCARD_COURT, 
             "discard_hand" => STATE_DISCARD_HAND, 
             "refresh_market" => STATE_REFRESH_MARKET, 
+        )
+    ),
+
+    STATE_IMPACT_ICONS => array(
+        "name" => "impactIcons",
+        "type" => "game",
+        "action" => "stImpactIcons",
+        "transitions" => array( 
+            "next_impact_icon" => STATE_IMPACT_ICONS,
+            "player_next_action" => STATE_PLAYER_ACTIONS,
+            "discard_court" => STATE_DISCARD_COURT, 
+            "discard_hand" => STATE_DISCARD_HAND, 
+            "refresh_market" => STATE_REFRESH_MARKET,
         )
     ),
 

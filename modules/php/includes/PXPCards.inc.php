@@ -212,7 +212,7 @@ $this->cards = [
         'card_19', PXPEnumSuit::Intelligence, 2, clienttranslate("Eldred Pottinger"), PXPEnumRegion::Punjab,
         null, false, false, false, true, true, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("While traveling through Asia in disguise, Pottinger found the city of Herat besieged by 
         Persian forces. He revealed himself to the local commander and helped the Afghan forces defeat the Persians, 
         though Afghan histories dispute his role in lifting the siege.")
@@ -221,7 +221,7 @@ $this->cards = [
         'card_20', PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Rawlinson"), PXPEnumRegion::Punjab,
         null, false, true, false, true, false, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Army offi cer, politician, and orientalist, Rawlinson advocated for a larger role for Afghanistan in 
         Britain’s foreign policy. He served as a political agent in Kandahar and fought in the First Anglo-Afghan war.")
     ),

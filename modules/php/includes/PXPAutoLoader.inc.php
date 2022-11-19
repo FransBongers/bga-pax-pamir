@@ -26,11 +26,14 @@ if (!defined('PXP_MODULES_DIR'))
         $baseNameSpacePhobyJuan = "PhobyJuan\\PaxPamirEditionTwo";
         $classMap = [
             "$baseNameSpacePhobyJuan\\Factories\\PXPCardFactory" => PXP_FACTORY_DIR . "/PXPCardFactory.php",
+            "$baseNameSpacePhobyJuan\\Factories\\PXPImpactActionFactory" => PXP_FACTORY_DIR . "/PXPImpactActionFactory.php",
             "$baseNameSpacePhobyJuan\\Factories\\PXPPlayerFactory" => PXP_FACTORY_DIR . "/PXPPlayerFactory.php",
             "$baseNameSpacePhobyJuan\\Factories\\PXPTokenFactory" => PXP_FACTORY_DIR . "/PXPTokenFactory.php",
+            "$baseNameSpacePhobyJuan\\Managers\\PXPImpactActionManager" => PXP_MANAGER_DIR . "/PXPImpactActionManager.php",
             "$baseNameSpacePhobyJuan\\Managers\\PXPPlayerManager" => PXP_MANAGER_DIR . "/PXPPlayerManager.php",
             "$baseNameSpacePhobyJuan\\Managers\\PXPTokenManager" => PXP_MANAGER_DIR . "/PXPTokenManager.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPCard" => PXP_OBJECT_DIR . "/PXPCard.php",
+            "$baseNameSpacePhobyJuan\\Objects\\PXPImpactAction" => PXP_OBJECT_DIR . "/PXPImpactAction.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPPlayer" => PXP_OBJECT_DIR . "/PXPPlayer.php",
             "$baseNameSpacePhobyJuan\\Objects\\PXPToken" => PXP_OBJECT_DIR . "/PXPToken.php",
             "$baseNameSpacePhobyJuan\\Enums\\PXPEnumCardType" => PXP_ENUM_DIR . "/PXPEnumCardType.php",

@@ -173,7 +173,7 @@ $this->cards = [
         nature of the Afghan economy.")
     ),
     'card_15' => CardFactory::createCourtCard(
-        'card_15', PXPEnumSuit::Military, 1, clienttranslate("Durrani Royal Guards"), PXPEnumRegion::Kabul, 
+        'card_15', PXPEnumSuit::Military, 1, clienttranslate("Durrani Royal Guard"), PXPEnumRegion::Kabul, 
         PXPEnumSpecialAbility::Bodyguards, false, false, false, false, true, false, 
         null, null, 
         [PXPEnumImpactIcon::Army], 
@@ -229,7 +229,7 @@ $this->cards = [
         'card_21', PXPEnumSuit::Intelligence, 2, clienttranslate("Alexander Burnes"), PXPEnumRegion::Punjab, 
         PXPEnumSpecialAbility::StrangeBedfellows, false, false, false, true, false, false, 
         null, PXPEnumCoalition::Afghan, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("Burns joined the East India Company at 16 and quickly rose through the ranks, aggravating 
         senior operatives like Wade. He advised the British to support Dost Mohammad, but was rebuked by 
         Macnaghten. He nonetheless aided the British coup and was killed when a mob overtook his home in Kabul.")
@@ -238,7 +238,7 @@ $this->cards = [
         'card_22', PXPEnumSuit::Intelligence, 1, clienttranslate("George Hayward"), PXPEnumRegion::Punjab, 
         null, false, true, false, true, false, false, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::PoliticalSuit], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::PoliticalSuit], 
         clienttranslate(" e Royal Geographical Society was primarily apolitical, but, under the leadership of 
         Rawlinson (then its vice president), Hayward was sent on a politically-motivated mission to 
         find the source of the Oxus River that proved fatal. His death was likely an act of political 
@@ -248,7 +248,7 @@ $this->cards = [
         'card_23', PXPEnumSuit::Intelligence, 1, clienttranslate("Henry Pottinger"), PXPEnumRegion::Punjab, 
         null, false, false, false, true, false, true, 
         PXPEnumCoalition::British, PXPEnumCoalition::Russian, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::EconomicSuit], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Uncle of Eldred Pottinger, Henry Pottinger led an expedition to Baluchistan and helped 
         map Persia and western India. He would later replace Charles Elliot as the chief diplomat to China and 
         oversaw the Treaty of Nanking and the acquisition of Hong Kong.")
@@ -409,7 +409,7 @@ $this->cards = [
         'card_41', PXPEnumSuit::Intelligence, 2, clienttranslate("Charles Masson"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::SafeHouse, false, false, true, false, false, false,
         null, null, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("Once enlisted in the EIC, Masson faked his death and took on a new name in order to explore 
         Afghanistan on foot, undertaking historical research on ancient Bactria. Much of this work was supported by Prince 
         Akbar Khan. When discovered, he was blackmailed into working as a British informant.")
@@ -418,7 +418,7 @@ $this->cards = [
         'card_42', PXPEnumSuit::Political, 1, clienttranslate("Barakzai Sadars"), PXPEnumRegion::Kandahar, 
         PXPEnumSpecialAbility::CharismaticCourtiers, false, false, true, false, false, false,
         PXPEnumCoalition::Afghan, PXPEnumCoalition::Afghan, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::PoliticalSuit], 
+        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Leverage, PXPEnumImpactIcon::EconomicSuit], 
         clienttranslate("Dost Mohammad relied on an extensive network of family connections in order to maintain control of 
         Afghanistan. Five of his stepbrothers managed Kandahar and surrounding territories.")
     ),

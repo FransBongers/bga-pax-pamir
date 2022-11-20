@@ -374,14 +374,20 @@ class PaxPamirEditionTwo extends Table
      */
     function getPlayerInfluence($player_id) {
         $influence = 1;
+        $player_loyalty = $this->getPlayerLoyalty($player_id);
+
+        // Patriots
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
-            // TODO (Frans): get information about courd cards and add influence if patriot
-            // Add number of prizes
-            // Add number of gifts
-            // $card_info = $this->cards[$court_cards[$i]['key']];
-            // $card_info->getLoyalty()
+            $card_loyalty = $this->cards[$court_cards[$i]['key']]->getLoyalty();
+            if ($card_loyalty == $player_loyalty) {
+                $influence += 1;
+            }
         }
+        // TODO (Frans): get information about courd cards and add influence if patriot
+        // Add number of prizes
+        // Add number of gifts
+
         return $influence;
     }
 
@@ -398,6 +404,14 @@ class PaxPamirEditionTwo extends Table
      */
     function getPlayerRupees($player_id) {
         $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
+        return $this->getUniqueValueFromDB($sql);
+    }
+
+    /**
+     * Get current score for player
+     */
+    function getPlayerScore($player_id) {
+        $sql = "SELECT player_score FROM player WHERE  player_id='$player_id' ";
         return $this->getUniqueValueFromDB($sql);
     }
 
@@ -457,6 +471,17 @@ class PaxPamirEditionTwo extends Table
         $rupees = $this->getPlayerRupees($player_id);
         $rupees += $value;
         $sql = "UPDATE player SET rupees='$rupees' 
+                WHERE  player_id='$player_id' ";
+        self::DbQuery( $sql );
+    }
+
+    /**
+     * Update a players score
+     */
+    function incPlayerScore($player_id, $value) {
+        $score = $this->getPlayerScore($player_id);
+        $score += $value;
+        $sql = "UPDATE player SET player_score='$score' 
                 WHERE  player_id='$player_id' ";
         self::DbQuery( $sql );
     }
@@ -569,6 +594,16 @@ class PaxPamirEditionTwo extends Table
                 throw new feException( "Incorrect number of discards" );
 
             foreach ($cards as $card_id) {
+
+                // Move all spies back to players cylinder pool
+                $spiesOnCard = $this->tokens->getTokensOfTypeInLocation('cylinder', 'spies_'.$card_id, null, 'state');
+                self::dump( "spiesOnCard", $spiesOnCard);
+                foreach ($spiesOnCard as $spy) {
+                    $spyOwner = explode("_", $spy['key'])[1];
+                    $this->tokens->moveToken($spy['key'], 'cylinders_'.$spyOwner);
+                }
+
+                // move card to discard location
                 $this->tokens->moveToken($card_id, 'discard');
                 $card_name = $this->token_types[$card_id]['name'];
                 $removed_card = $this->tokens->getTokenInfo($card_id);
@@ -597,6 +632,34 @@ class PaxPamirEditionTwo extends Table
 
         $this->cleanup();
 
+    }
+
+    function passAction( )
+    {
+        //
+        // pass remaining player actions
+        //
+
+        self::checkAction( 'pass' );
+
+        $player_id = self::getActivePlayerId();
+
+        $remaining_actions = $this->getGameStateValue("remaining_actions");
+        $state = $this->gamestate->state();
+
+        if (($remaining_actions > 0) and ($state['name'] == 'playerActions')) {
+            // self::incStat($remaining_actions, "skip", $player_id);
+            $this->setGameStateValue("remaining_actions", 0);
+
+            // Notify
+            self::notifyAllPlayers( "passAction", clienttranslate( '${player_name} ended their turn.' ), array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+            ) );
+        } 
+
+        $this->cleanup();
+        
     }
 
     /**
@@ -741,13 +804,6 @@ class PaxPamirEditionTwo extends Table
             $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
             $this->gamestate->nextState( 'resolve_impact_icons' );
         }
-
-        // if ($this->getGameStateValue("remaining_actions") > 0) {
-        //     $this->gamestate->nextState( 'action' );
-        // } else {
-        //     $this->cleanup();
-        // }
-
     }
 
     /**
@@ -760,13 +816,7 @@ class PaxPamirEditionTwo extends Table
 
         $player_id = self::getActivePlayerId();
         $card = $this->tokens->getTokenInfo($card_id);
-
         $card_info = $this->cards[$card_id];
-        // $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
-        // for ($i = 0; $i < count($court_cards); $i++) {
-            
-        //     $suits[$card_info->getSuit()] += $card_info->getRank();
-        // }
 
         // Throw error if card is unavailble for purchase
         if ($card['state'] == 1) {
@@ -780,6 +830,8 @@ class PaxPamirEditionTwo extends Table
         $row_alt = ($row == 0) ? 1 : 0;
         $col = $cost = explode("_", $market_location)[2];
         self::dump( "row", $row );
+
+        $next_state = 'action';
         if ($this->getGameStateValue("remaining_actions") > 0) {
 
             // check cost
@@ -795,7 +847,10 @@ class PaxPamirEditionTwo extends Table
             $new_location = 'hand_'.$player_id;
             if ($card_info->getType() == PPEnumCardType::Event) {
                 $new_location = 'active_events';
-            } 
+            } else if ($card_info->getType() == PPEnumCardType::DominanceCheck) {
+                $new_location = 'discard';
+                $next_state = 'dominance_check';
+            }
             $this->tokens->moveToken($card_id, $new_location);
             $this->incGameStateValue("remaining_actions", -1);
 
@@ -842,12 +897,7 @@ class PaxPamirEditionTwo extends Table
 
         }
 
-        if ($this->getGameStateValue("remaining_actions") > 0) {
-            $this->gamestate->nextState( 'action' );
-        } else {
-            $this->cleanup();
-        }
-
+        $this->gamestate->nextState( $next_state );
     }
 
 
@@ -907,6 +957,119 @@ class PaxPamirEditionTwo extends Table
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
     */
+
+    function stDominanceCheck() {
+        self::dump( '----------- resolving dominance check', '----------');
+
+        /*
+            Determine if there is a dominant coalition:
+            1. Get count of blocks in block pools
+            2. Order from highest to lowest
+            3. Check if number 1 has 4 or less than number 2
+        
+        */
+        
+        // Determine if check is successful
+        // Get counts of all blocks left in pool
+        $coalition_block_counts = array();
+        $i = 0;
+        foreach ($this->locations['pools'] as $coalitionId => $coalitionPool) {
+            $coalition_block_counts[$i] = array (
+                'count' => $this->tokens->countTokensInLocation($coalitionPool),
+                'coalition' => $coalitionId,
+            );
+            $i += 1;
+        }
+        // sort array lowest to highest
+        usort($coalition_block_counts, function($a, $b) {return $a['count'] - $b['count'];});
+        $check_successful = $coalition_block_counts[1]['count'] - $coalition_block_counts[0]['count'] >= 4;
+        $scores = array();
+        if ($check_successful) {
+            $dominant_coalition =  $coalition_block_counts[0]['coalition'];
+        } else {
+            $cylinder_counts = $this->getCylindersInPlayPerPlayer();
+            self::dump( '----------- resolving dominance check - cylinder counts', $cylinder_counts);
+            usort($cylinder_counts, function($a, $b) {return $b['count'] - $a['count'];});
+            self::dump( '----------- resolving dominance check - cylinder counts sorted', $cylinder_counts);
+            $compare = $cylinder_counts[0]['count'];
+            $first_place = array_filter($cylinder_counts, function ($element) use ($compare) {
+                if ($element['count'] == $compare) {
+                  return true;
+                }
+                return false;
+              });
+            self::dump( '----------- resolving dominance check - cylinder counts after filter', $cylinder_counts);
+            self::dump( '----------- resolving dominance check - cylinder counts filtered', $first_place);
+            
+            if (count($first_place) == 1) {
+                $player_id = $first_place[0]['player_id'];
+                $current_score = $this->getPlayerScore($player_id);
+                // first player gets 3 points
+                $this->incPlayerScore($player_id, 3);
+                $scores[$player_id] = array (
+                    'player_id' => $player_id,
+                    'current_score' => $current_score,
+                    'new_score' => $current_score + 3,
+                );
+                // = 3;
+                // check second place
+                $compare = $cylinder_counts[1]['count'];
+                $second_place = array_values(array_filter($cylinder_counts, function ($element) use ($compare) {
+                    if ($element['count'] == $compare) {
+                      return true;
+                    }
+                    return false;
+                  }));
+                  self::dump( '----------- resolving dominance check - cylinder counts second place', $second_place);
+                if(count($second_place) == 1) {
+                    $player_id = $second_place[0]['player_id'];
+                    $current_score = $this->getPlayerScore($player_id);
+                    $this->incPlayerScore($second_place[0]['player_id'], 1);
+                    $scores[$player_id] = array (
+                        'player_id' => $player_id,
+                        'current_score' => $current_score,
+                        'new_score' => $current_score + 1,
+                    );
+                }
+  
+            } else {
+                // 4 divided by count rounded down
+                $points_earned = floor(4 / count($first_place));
+                foreach($first_place as $player) {
+                    $player_id = $player['player_id'];
+                    $current_score = $this->getPlayerScore($player_id);
+                    $this->incPlayerScore($player['player_id'], $points_earned);
+                    $scores[$player_id] = array (
+                        'player_id' => $player_id,
+                        'current_score' => $current_score,
+                        'new_score' => $current_score + $points_earned,
+                    );
+                }
+            }
+
+        }
+        self::notifyAllPlayers( "dominanceCheck", clienttranslate( 'A Dominance Check has been resolved.' ), array(
+            'scores' => $scores,
+            'successful' => $check_successful,
+        ) );
+
+        $this->gamestate->nextState( 'action' );
+    }
+
+    function getCylindersInPlayPerPlayer() {
+        $counts = array();
+        $players = $this->loadPlayersBasicInfos();
+        $i = 0;
+        foreach ( $players as $player_id => $player_info ) {
+            $counts[$i] = array (
+                'count' => 10 - $this->tokens->countTokensInLocation('cylinders_'.$player_id),
+                'player_id' => $player_id,
+            );
+            $i += 1;
+        }
+
+        return $counts;
+    }
     
     function stResolveImpactIcons() {
         $player_id = self::getActivePlayerId();
@@ -922,13 +1085,8 @@ class PaxPamirEditionTwo extends Table
         if ($current_impact_icon_index >= count($impact_icons)) {
             // $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);
             // $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
-            if ($this->getGameStateValue("remaining_actions") > 0) {
-                $this->gamestate->nextState( 'action' );
-                return;
-            } else {
-                $this->cleanup();
-                return;
-            }
+            $this->gamestate->nextState( 'action' );
+            return;
         }
 
         $current_icon = $impact_icons[$current_impact_icon_index];

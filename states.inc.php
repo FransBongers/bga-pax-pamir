@@ -60,7 +60,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_PLACE_SPY", 9);
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
-    // define("STATE_DOMINANCE_CHECK", 30);
+    define("STATE_DOMINANCE_CHECK", 30);
     define("STATE_NEXT_PLAYER", 50);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
@@ -113,12 +113,13 @@ $machinestates = array(
         "args" => "argPlayerActions",
         "possibleactions" => array( "purchase", "play", "card_action", "pass" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS, 
+            "action" => STATE_PLAYER_ACTIONS,
+            "dominance_check" => STATE_DOMINANCE_CHECK,
             "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
             "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
             "discard_court" => STATE_DISCARD_COURT, 
             "discard_hand" => STATE_DISCARD_HAND, 
-            "refresh_market" => STATE_REFRESH_MARKET, 
+            "refresh_market" => STATE_REFRESH_MARKET,
         )
     ),
 
@@ -146,6 +147,18 @@ $machinestates = array(
         "transitions" => array( 
             "next_turn" => STATE_NEXT_PLAYER,
             "refresh_market" => STATE_REFRESH_MARKET,
+        )
+    ),
+
+    STATE_DOMINANCE_CHECK => array(
+        "name" => "dominanceCheck",
+        "type" => "game",
+        "action" => "stDominanceCheck",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "action" => STATE_PLAYER_ACTIONS,
+            // "next_turn" => STATE_NEXT_PLAYER,
+            // "refresh_market" => STATE_REFRESH_MARKET,
         )
     ),
 

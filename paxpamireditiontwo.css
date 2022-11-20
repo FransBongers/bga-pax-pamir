@@ -559,6 +559,7 @@ html {
     left: 8px;
     top: 83px;
     position: absolute;
+    /* background-color: purple; */
     /* border: 2px black solid; */
     /* z-index: 10; */
 }
@@ -680,7 +681,7 @@ html {
 
 .pp_selectable_card {
     /* border: 2px blue solid; */
-    cursor: pointer;
+    cursor: pointer !important;
     box-shadow: 0px 0px 0px 4px var(--selectable-color) !important;
 }
 

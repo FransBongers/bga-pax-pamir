@@ -495,7 +495,7 @@ function (dojo, declare) {
         //
         onEnteringState: function( stateName, args )
         {
-            console.log( 'Entering state: '+stateName );
+            console.log( 'Entering state: '+stateName, args );
 
             // UI changes for active player
             if(this.isCurrentPlayerActive()) {
@@ -503,6 +503,7 @@ function (dojo, declare) {
                 {
                     case 'playerActions':
                         this.unavailableCards = args.args.unavailable_cards;
+                        this.remainingActions = args.args.remaining_actions;
                         break;
                     case 'placeSpy':
                         this.selectedAction = 'placeSpy';
@@ -636,10 +637,10 @@ function (dojo, declare) {
                         })
                         break;
 
-                    // case 'client_endTurn':
-                    //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
-                    //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
-                    //     break;
+                    case 'client_endTurn':
+                        this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
+                        this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
+                        break;
 
                     // case 'client_selectPurchase':
                     // case 'client_selectPlay':
@@ -729,11 +730,18 @@ function (dojo, declare) {
         },
 
         discardCard: function({id, from, order = null}) {
+            console.log( 'discardCard', id, this.spies[id] );
 
-            console.log( 'discardCard' );
-
-            // if (this.card_tokens[id] !== null) 
-            //     this.card_tokens[id].removeAll();
+            // Move all spies back to cylinder pools
+            if (this.spies[id]) {
+                ['cylinder_2371052_3']
+                const items = this.spies[id].getAllItems();
+                console.log('items', items);
+                items.forEach((cylinderId) => {
+                    const playerId = cylinderId.split('_')[1];
+                    this.moveToken({id: cylinderId, to: this.cylinders[playerId], from: this.spies[id]});
+                })
+            }
 
             from.removeFromStockById(id, 'pp_discard_pile');
 
@@ -788,7 +796,7 @@ function (dojo, declare) {
                 to.addToStockWithId(id, id, fromDiv);
 
                 // We need to set up new zone because id of div will change due to stock component
-                this.setupCardSpyZone({location: to, cardId: id});                
+                // this.setupCardSpyZone({location: to, cardId: id});                
 
                 // this.addTooltip( to_location.getItemDivId(id), id, '' );
             }
@@ -826,7 +834,7 @@ function (dojo, declare) {
 
             location.addToStockWithId(id, id, 'pp_market_deck');
 
-            this.setupCardSpyZone({location, cardId: id});
+            // this.setupCardSpyZone({location, cardId: id});
 
             // this.addTooltip( location.getItemDivId(id), id, '' );
 
@@ -853,24 +861,28 @@ function (dojo, declare) {
             // TODO: below is option to customize the created div (and add zones to card for example)
             stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
                 style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:" + backgroundSize + ";\
-                background-image:url('${image}');\"><div id=\"${id}_spies\" class=\"pp_spy_zone\"></div></div>";
+                background-image:url('${image}');\"></div>";
             
             Object.keys(this.gamedatas.cards).forEach((cardId) => {
                 const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
                 stock.addItemType( cardId, 0, cardFileLocation, useLargeCards ? cardId.split('_')[1] -1 : cardId.split('_')[1] );
             });
             stock.extraClasses = `pp_card ${className}`;
+            stock.setSelectionMode(0);
             stock.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
         },
 
-        // Function that gets called every tome a card is added to a stock component
+        // Function that gets called every time a card is added to a stock component
         setupNewCard: function( cardDiv, cardId, divId ) {
             // if card is played to a court
             if (divId.startsWith('pp_court_player')) {
                 // add region class for selectable functions
                 const region = this.gamedatas.cards[cardId].region;
                 dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
-
+                
+                const spyZoneId = 'spies_' + cardId;
+                dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
+                this.setupCardSpyZone({nodeId: spyZoneId, cardId })
                 // TODO (add spy zone here)
                 // TODO (add card actions)
             }
@@ -885,16 +897,12 @@ function (dojo, declare) {
             zone.instantaneous = instantaneous;
         },
 
-        // Every time a card is move or placed this function will be called to set up zone.
-        setupCardSpyZone: function({location, cardId}) {
-            // console.log( 'setupCardSpyZone' );
-
+        // Every time a card is moved or placed in court this function will be called to set up zone.
+        setupCardSpyZone: function({nodeId, cardId}) {
             // Note (Frans): we probably need to remove spies before moving / placing card
             if (this.spies[cardId]) {
                 this.spies[cardId].removeAll();
             }
-
-            var nodeId = location.control_name + '_item_'+ cardId + '_spies';
 
             // ** setup for zone
             this.spies[cardId] = new ebg.zone();
@@ -1054,12 +1062,12 @@ function (dojo, declare) {
         {
             if (! this.checkAction('pass'))
             return;
-
+            console.log('remaining', this.remainingActions)
             if( this.isCurrentPlayerActive() )
             {       
                 console.log( 'onPass' );
                 this.selectedAction = 'pass';
-                if (this.remaining_actions == 0) {
+                if (this.remainingActions == 0) {
                     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/passAction.html", {
                         lock: true
                     }, this, function( result ) {} );
@@ -1159,11 +1167,11 @@ function (dojo, declare) {
                     }, this, function( result ) {} );  
                     break;
                     
-                // case 'pass':
-                //     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/passAction.html", { 
-                //         lock: true,
-                //     }, this, function( result ) {} ); 
-                //     break;
+                case 'pass':
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/passAction.html", { 
+                        lock: true,
+                    }, this, function( result ) {} ); 
+                    break;
 
                 case 'discard_hand':
                 case 'discard_court':
@@ -1343,6 +1351,8 @@ function (dojo, declare) {
 
             dojo.subscribe( 'chooseLoyalty', this, "notif_chooseLoyalty" );
 
+            dojo.subscribe( 'dominanceCheck', this, "notif_dominanceCheck" );
+
             dojo.subscribe( 'purchaseCard', this, "notif_purchaseCard" );
             this.notifqueue.setSynchronous( 'purchaseCard', 2000 );
 
@@ -1438,6 +1448,16 @@ function (dojo, declare) {
 
         },
 
+        notif_dominanceCheck: function ( notif ) {
+            console.log( 'notif_dominanceCheck', notif );
+            const scores = notif.args.scores;
+            Object.keys(scores).forEach((playerId) => {
+                this.scoreCtrl[ playerId ].toValue( scores[ playerId ].new_score );
+                this.moveToken({id: `vp_cylinder_${playerId}`, from: this.vpTrack[scores[ playerId ].current_score], to: this.vpTrack[scores[ playerId ].new_score]});
+            });
+
+        },
+
 
         notif_playCard: function( notif )
         {
@@ -1483,6 +1503,8 @@ function (dojo, declare) {
             const cardId = notif.args.card.key;
             if (notif.args.new_location == 'active_events') {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.activeEvents});
+            } else if (notif.args.new_location == 'discard') {
+                this.marketCards[row][col].removeFromStockById(cardId, 'pp_discard_pile');
             } else if (notif.args.player_id == this.player_id) {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.playerHand});
             } else {

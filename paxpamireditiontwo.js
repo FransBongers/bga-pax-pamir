@@ -361,6 +361,22 @@ function (dojo, declare) {
                 }
             });
 
+            // Place armies
+            this.regions.forEach((region) => {
+                Object.keys(this.gamedatas.armies[region]).forEach((id) => {
+                    this.placeToken({
+                        location: this.armies[region],
+                        id,
+                        jstpl: 'jstpl_army',
+                        jstplProps: {
+                            id,
+                            coalition: id.split('_')[1],
+                        },
+                        weight: this.defaultWeightZone,
+                    });
+                });
+            });
+
             // Create border zones
             this.borders.forEach((border) => {
                 this.createBorderZone({border});
@@ -390,6 +406,24 @@ function (dojo, declare) {
                     });
                 })
 
+            });
+
+            // Place spies on cards
+            Object.keys(gamedatas.spies || {}).forEach((cardId) => {
+                Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
+                    const playerId = cylinderId.split('_')[1];
+                    this.placeToken({
+                        location: this.spiesOnCards[cardId],
+                        id: cylinderId,
+                        jstpl: 'jstpl_cylinder',
+                        jstplProps: {
+                            id: cylinderId,
+                            color: gamedatas.players[playerId].color,
+                        },
+                        weight: this.defaultWeightZone,
+                    });
+                })
+         
             });
 
             // Setup zones for favored suit marker
@@ -431,23 +465,28 @@ function (dojo, declare) {
         onEnteringState: function( stateName, args )
         {
             console.log( 'Entering state: '+stateName );
-            
+
+            // UI changes for active player
+            if(this.isCurrentPlayerActive()) {
+                switch( stateName )
+                {
+                    case 'playerActions':
+                        this.unavailableCards = args.args.unavailable_cards;
+                        break;
+                    case 'placeSpy':
+                        this.selectedAction = 'placeSpy';
+                        this.updateSelectableCards(args.args);
+                        console.log('placeSpy', args.args)
+                        break;                        
+                    default:
+                        console.log('onEnteringState default')
+                        break;
+                }
+            }
+
+            // UI changes for all players
             switch( stateName )
             {
-                case 'playerActions':
-                    this.unavailableCards = args.args.unavailable_cards;
-                    break;
-            
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Show some HTML block at this game state
-                dojo.style( 'my_html_block_id', 'display', 'block' );
-                
-                break;
-           */
-           
            
                 case 'dummmy':
                     break;
@@ -555,6 +594,16 @@ function (dojo, declare) {
                         this.addActionButton( 'right_side_btn', _('RIGHT >>'), 'onRight', null, false, 'blue' );
                         this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
                         break;
+                    case 'client_confirmPlaceSpy':
+                        this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+                        this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+                        break;
+                    case 'placeRoad':
+                        console.log('args', args);
+                        args.region.borders.forEach((border) => {
+                            this.addActionButton( `${border}_btn`, _(this.gamedatas.borders[border].name), 'onBorder', null, false, 'blue' );
+                        })
+                        break;
 
                     // case 'client_endTurn':
                     //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
@@ -661,6 +710,20 @@ function (dojo, declare) {
                 stock.addItemType( cardId, 0, cardFileLocation, useLargeCards ? cardId.split('_')[1] -1 : cardId.split('_')[1] );
             });
             stock.extraClasses = `pp_card ${className}`;
+            stock.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
+        },
+
+        // Function that gets called every tome a card is added to a stock component
+        setupNewCard: function( cardDiv, cardId, divId ) {
+            // if card is played to a court
+            if (divId.startsWith('pp_court_player')) {
+                // add region class for selectable functions
+                const region = this.gamedatas.cards[cardId].region;
+                dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
+
+                // TODO (add spy zone here)
+                // TODO (add card actions)
+            }
         },
 
         // Function to set up zones for tokens (armies, tribes, cylinders etc.)
@@ -758,7 +821,7 @@ function (dojo, declare) {
                 .addClass(`pp_loyalty_${coalition}`);
         },
 
-        updateSelectableCards: function() {
+        updateSelectableCards: function(args = null) {
             console.log('updateSelectableCards', this.selectedAction);
             this.clearLastAction();
 
@@ -784,6 +847,14 @@ function (dojo, declare) {
                     break;
                 case 'discard_court':
                     dojo.query(`.pp_card_in_court_${this.player_id}`).forEach(
+                        function (node, index) {
+                            dojo.addClass(node, 'pp_selectable_card');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
+                        }, this);
+                    break;
+                case 'placeSpy':
+                    console.log('place spy selectable')
+                    dojo.query(`.pp_card_in_court_${args?.region ? args.region : ''}`).forEach(
                         function (node, index) {
                             dojo.addClass(node, 'pp_selectable_card');
                             this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
@@ -950,41 +1021,54 @@ function (dojo, declare) {
                     this.setClientState("client_endTurn", { descriptionmyturn : _( "Confirm to your end turn ") });
                 }
             }
+        },
+
+        onBorder: function( arg )
+        {
+            console.log( 'onBorder', arg );
+            const splitId = arg.target.id.split('_');
+            const border = `${splitId[0]}_${splitId[1]}`
+            console.log('selected border', border);
+            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/placeRoad.html", { 
+                lock: true,
+                border: border,
+            }, this, function( result ) {} );
         }, 
 
         onCard: function( evt )
         {
-            const cardId = evt.currentTarget.id;
+            const cardDivId = evt.currentTarget.id;
 
             dojo.stopEvent( evt );
-            console.log( 'onCard ' + cardId );
+            console.log( 'onCard ' + cardDivId );
 
+            const cardId = 'card_' + cardDivId.split('_')[6];
             this.selectedCard = cardId;
+            console.log('cardId', cardId);
             let node;
             if( this.isCurrentPlayerActive() )
             {   
                 switch (this.selectedAction) {
                     case 'purchase':    
                         this.clearLastAction();
-                        node = $( cardId );
+                        node = $( cardDivId );
                         console.log('node', node);
                         dojo.addClass(node, 'pp_selected');
-                        const cost = cardId.split('_')[3];
+                        const cost = cardDivId.split('_')[3];
                         console.log('cost', cost)
                         this.setClientState("client_confirmPurchase", { descriptionmyturn : "Purchase this card for "+cost+" rupees?"});
                         break;
 
                     case 'play':    
                         this.clearLastAction();
-                        node = $( cardId );
+                        node = $( cardDivId );
                         dojo.addClass(node, 'pp_selected');
-                        const card_id = 'card_' + this.selectedCard.split('_')[6];
                         this.setClientState("client_confirmPlay", { descriptionmyturn : "Select which side of court to play card:"});
                         break;
                     
                     case 'discard_hand':
                     case 'discard_court':
-                        node = $( cardId );
+                        node = $( cardDivId );
                         dojo.toggleClass(node, 'pp_selected');
                         dojo.toggleClass(node, 'pp_discard');
                         if (dojo.query('.pp_selected').length == this.numberOfDiscards) {
@@ -993,7 +1077,14 @@ function (dojo, declare) {
                             dojo.addClass('confirm_btn', 'pp_disabled');
                         }
                         break;
-
+                    case 'placeSpy':
+                        console.log('placeSpy onCard');
+                        this.clearLastAction();
+                        node = $( cardDivId );
+                        dojo.addClass(node, 'pp_selected');
+                        const cardName = this.gamedatas.cards[cardId].name;
+                        this.setClientState("client_confirmPlaceSpy", { descriptionmyturn : `Place a spy on ${cardName}`});
+                        break;
                     default:
                         break;
                 }
@@ -1014,7 +1105,7 @@ function (dojo, declare) {
 
             switch (this.selectedAction) {
                 case 'purchase':
-                    var cardId = 'card_' + this.selectedCard.split('_')[6];
+                    var cardId = this.selectedCard;
                     console.log('cardIdConfirm', cardId)
                     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/purchaseCard.html", { 
                         lock: true,
@@ -1041,7 +1132,16 @@ function (dojo, declare) {
                         from_hand: (this.selectedAction == 'discard_hand')
                     }, this, function( result ) {} ); 
                     break;
-
+                case 'placeSpy':
+                    console.log('placeSpy confirm');
+                    this.clearLastAction();
+                    const card_id = this.selectedCard;
+                    console.log('cardId', card_id);
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/placeSpy.html", { 
+                        lock: true,
+                        card_id: card_id,
+                    }, this, function( result ) {} );  
+                    break;
                 default:
                     break;
             }
@@ -1057,7 +1157,7 @@ function (dojo, declare) {
                     this.clearLastAction();
                     // var node = $( card_id );
                     // dojo.addClass(node, 'selected');
-                    var card_id = 'card_' + this.selectedCard.split('_')[6];
+                    var card_id = this.selectedCard;
                     console.log('cardId', card_id);
                     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
                         lock: true,
@@ -1081,7 +1181,7 @@ function (dojo, declare) {
                     this.clearLastAction();
                     // var node = $( card_id );
                     // dojo.addClass(node, 'selected');
-                    var card_id = 'card_' + this.selectedCard.split('_')[6];
+                    var card_id = this.selectedCard;
                     console.log('cardId', card_id);
                     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/playCard.html", { 
                         lock: true,
@@ -1207,12 +1307,17 @@ function (dojo, declare) {
             this.notifqueue.setSynchronous( 'discardCard', 500 );
 
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
-            this.notifqueue.setSynchronous( 'refreshMarket', 500 );
+            this.notifqueue.setSynchronous( 'refreshMarket', 250 );
 
             dojo.subscribe( 'moveArmyFromPool', this, "notif_moveArmyFromPool");
+            this.notifqueue.setSynchronous( 'refreshMarket', 250 );
 
             dojo.subscribe( 'moveCynlinderToTribe', this, "notif_moveCynlinderToTribe");
 
+            dojo.subscribe( 'placeRoad', this, "notif_placeRoad");
+
+            dojo.subscribe( 'placeSpy', this, "notif_placeSpy");
+            
             dojo.subscribe( 'updateSuit', this, "notif_updateSuit");
             
             dojo.subscribe( 'updatePlayerCounts', this, "notif_updatePlayerCounts");
@@ -1426,12 +1531,10 @@ function (dojo, declare) {
             console.log('notif_moveArmyFromPool', notif);
 
             let coalition = notif.args.coalition;
-            let token_number = notif.args.token_number;
+            let id = notif.args.token_id;
             let region = notif.args.region;
 
-            let token_id = 'block_' + coalition + '_' + token_number;
-
-            this.moveToken({id: token_id, from: this.coalitionBlocks[coalition], to: this.armies[this[region]], weight: this.defaultWeightZone});
+            this.moveToken({id, from: this.coalitionBlocks[coalition], to: this.armies[region], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'});
         },
 
         notif_moveCynlinderToTribe: function( notif )
@@ -1439,12 +1542,34 @@ function (dojo, declare) {
             console.log('notif_moveCynlinderToTribe', notif);
 
             let player_id = notif.args.player_id;
-            let token_number = notif.args.token_number;
+            let id = notif.args.token_id;
             let region = notif.args.region;
 
-            let token_id = 'cylinder_' + player_id + '_' + token_number;
+            this.moveToken({id, from: this.cylinders[player_id], to: this.tribes[region], weight: this.defaultWeightZone});
+        },
 
-            this.moveToken({id: token_id, from: this.cylinders[player_id], to: this.tribes[this[region]], weight: this.defaultWeightZone});
+        notif_placeRoad: function( notif )
+        {
+            console.log('notif_placeRoad', notif);
+
+            let coalition = notif.args.coalition;
+            let id = notif.args.token_id;
+            let border = notif.args.border;
+
+            this.moveToken({id, from: this.coalitionBlocks[coalition], to: this[`${border}_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'});
+        },
+
+        notif_placeSpy: function( notif )
+        {
+            console.log('notif_placeSpy', notif);
+
+            const playerId = notif.args.player_id;
+            const id = notif.args.token_id;
+            const cardId = notif.args.card_id;
+            // let border = notif.args.border;
+
+            // this.moveToken({id, from: this.coalitionBlocks[coalition], to: this[`${border}_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'});
+            this.moveToken({id, from: this.cylinders[playerId], to: this.spiesOnCards[cardId], weight: this.defaultWeightZone});
         },
 
         notif_updateSuit: function( notif )

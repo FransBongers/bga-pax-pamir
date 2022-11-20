@@ -391,7 +391,7 @@ $this->cards = [
         'card_39', PXPEnumSuit::Intelligence, 1, clienttranslate("William Moorcroft"), PXPEnumRegion::Kandahar, 
         null, false, false, false, true, false, true,
         null, null, 
-        [PXPEnumImpactIcon::Tribe], 
+        [PXPEnumImpactIcon::Spy], 
         clienttranslate("Moorcroft led an expedition to central Asia in search of Marco Polo's legendary \"Turcoman\" 
         horses. He fell ill in Northern Afghanistan and likely died, though some speculate he continued to operate as an 
         informant for twelve more years before dying in an attempt to return to India.")
@@ -795,7 +795,7 @@ $this->cards = [
         'card_86', PXPEnumSuit::Intelligence, 2, clienttranslate("Jan Prosper Witkiewicz"), PXPEnumRegion::Transcaspia, 
         null, false, false, true, true, false, false,
         PXPEnumCoalition::Russian, null, 
-        [PXPEnumImpactIcon::Tribe, PXPEnumImpactIcon::Tribe], 
+        [PXPEnumImpactIcon::Spy, PXPEnumImpactIcon::Spy], 
         clienttranslate("Exiled to central Asia at 14 for attempting to organize a resistance against Russia in Poland, he made the most 
         of his misfortune and found work within the Russian Foreign Service. He failed to deliver Kabul to his Russian masters. Disheartened, 
         he burned his personal papers and committed suicide.")

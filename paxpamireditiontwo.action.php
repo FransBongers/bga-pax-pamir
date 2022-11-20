@@ -75,6 +75,22 @@
         self::ajaxResponse( );
     }
 
+    public function placeRoad()
+    {
+        self::setAjaxMode();     
+        $border = self::getArg( "border", AT_alphanum, true );
+        $result = $this->game->placeRoad($border);
+        self::ajaxResponse( );
+    }
+
+    public function placeSpy()
+    {
+        self::setAjaxMode();     
+        $card_id = self::getArg( "card_id", AT_alphanum, true );
+        $result = $this->game->placeSpy($card_id);
+        self::ajaxResponse( );
+    }
+
     public function playCard()
     {
         self::setAjaxMode();     

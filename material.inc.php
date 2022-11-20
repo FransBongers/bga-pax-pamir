@@ -60,6 +60,18 @@ $this->locations = array (
     PXPEnumRegion::Herat => "tribes_".PXPEnumRegion::Herat,
     PXPEnumRegion::Kandahar => "tribes_".PXPEnumRegion::Kandahar,
     PXPEnumRegion::Punjab => "tribes_".PXPEnumRegion::Punjab,
+  ),
+
+  'roads' => array (
+    'herat_kabul' => "roads_herat_kabul",
+    'herat_kandahar' => "roads_herat_kandahar",
+    'herat_persia' => "roads_herat_persia",
+    'herat_transcaspia' => "roads_herat_transcaspia",
+    'kabul_kandahar' => "roads_kabul_kandahar",
+    'kabul_punjab' => "roads_kabul_punjab",
+    'kabul_transcaspia' => "roads_kabul_transcaspia",
+    'kandahar_punjab' => "roads_kandahar_punjab",
+    'persia_transcaspia' => "roads_persia_transcaspia",
   )
 );
 
@@ -115,28 +127,34 @@ $this->suits = array(
 // TODO (Frans): make borders an array?
 $this->regions = array(
   'herat' => array(
+    'id' => 'herat',
     'name' => clienttranslate("Herat"),
-    'borders' => 'herat_persia, herat_transcaspia, herat_kabul, herat_kandahar',
+    'borders' => ['herat_persia', 'herat_transcaspia', 'herat_kabul', 'herat_kandahar'],
   ),
   'kabul' => array(
+    'id' => 'kabul',
     'name' => clienttranslate("Kabul"),
-    'borders' => 'kabul_transcaspia, herat_kabul, kabul_kandahar, kabul_punjab',
+    'borders' => ['kabul_transcaspia', 'herat_kabul', 'kabul_kandahar', 'kabul_punjab'],
   ),
   'kandahar' => array(
+    'id' => 'kandahar',
     'name' => clienttranslate("Kandahar"),
-    'borders' => 'herat_kandahar, kabul_kandahar, kabul_punjab',
+    'borders' => ['herat_kandahar', 'kabul_kandahar', 'kandahar_punjab'],
   ),
   'persia' => array(
+    'id' => 'persia',
     'name' => clienttranslate("Persia"),
-    'borders' => 'persia_transcaspia, herat_persia',
+    'borders' => ['persia_transcaspia', 'herat_persia'],
   ),
   'punjab' => array(
+    'id' => 'punjab',
     'name' => clienttranslate("Punjab"),
-    'borders' => 'kabul_punjab, kankabul_kandahardahar',
+    'borders' => ['kabul_punjab', 'kandahar_punjab'],
   ),
   'transcaspia' => array(
+    'id' => 'transcaspia',
     'name' => clienttranslate("Transcaspia"),
-    'borders' => 'persia_transcaspia, herat_transcaspia, kabul_transcaspia',
+    'borders' => ['persia_transcaspia', 'herat_transcaspia', 'kabul_transcaspia'],
   ),
 );
 

@@ -52,11 +52,12 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PLAYER_ACTIONS", 3);
-    define("STATE_IMPACT_ICONS", 4);
-    define("STATE_NEGOTIATE_BRIBE", 5);
-    // define("STATE_RESOLVE_IMPACT", 5);
+    define("STATE_NEGOTIATE_BRIBE", 4);
+    define("STATE_RESOLVE_IMPACT_ICONS", 5);
     define("STATE_DISCARD_COURT", 6);
     define("STATE_DISCARD_HAND", 7);
+    define("STATE_PLACE_ROAD", 8);
+    define("STATE_PLACE_SPY", 9);
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     // define("STATE_DOMINANCE_CHECK", 30);
@@ -113,7 +114,7 @@ $machinestates = array(
         "possibleactions" => array( "purchase", "play", "card_action", "pass" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS, 
-            "impact_icons" => STATE_IMPACT_ICONS,
+            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
             "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
             "discard_court" => STATE_DISCARD_COURT, 
             "discard_hand" => STATE_DISCARD_HAND, 
@@ -121,16 +122,19 @@ $machinestates = array(
         )
     ),
 
-    STATE_IMPACT_ICONS => array(
-        "name" => "impactIcons",
+    STATE_RESOLVE_IMPACT_ICONS => array(
+        "name" => "resolveImpactIcons",
         "type" => "game",
-        "action" => "stImpactIcons",
+        "action" => "stResolveImpactIcons",
+        "updateGameProgression" => false,
         "transitions" => array( 
-            "next_impact_icon" => STATE_IMPACT_ICONS,
-            "player_next_action" => STATE_PLAYER_ACTIONS,
-            "discard_court" => STATE_DISCARD_COURT, 
-            "discard_hand" => STATE_DISCARD_HAND, 
+            "action" => STATE_PLAYER_ACTIONS,
+            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
             "refresh_market" => STATE_REFRESH_MARKET,
+            "place_road" => STATE_PLACE_ROAD,
+            "place_spy" => STATE_PLACE_SPY,
+            "discard_court" => STATE_DISCARD_COURT, 
+            "discard_hand" => STATE_DISCARD_HAND,
         )
     ),
 
@@ -171,6 +175,31 @@ $machinestates = array(
             "refresh_market" => STATE_REFRESH_MARKET, 
         )
     ),
+
+    STATE_PLACE_ROAD => array(
+        "name" => "placeRoad",
+        "description" => clienttranslate('${actplayer} must place a road'),
+        "descriptionmyturn" => clienttranslate('${you} must place a road'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "placeRoad" ),
+        "transitions" => array( 
+            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
+        )
+    ),
+
+    STATE_PLACE_SPY => array(
+        "name" => "placeSpy",
+        "description" => clienttranslate('${actplayer} must place a spy'),
+        "descriptionmyturn" => clienttranslate('${you} must place a spy'),
+        "type" => "activeplayer",
+        "args" => "argPlaceSpy",
+        "possibleactions" => array( "placeSpy" ),
+        "transitions" => array( 
+            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
+        )
+    ),
+    
     
 /*
     Examples:

@@ -128,9 +128,9 @@ class PaxPamirEditionTwo extends Table
 
         // Add other tokens to token module
         $this->tokens->createTokensPack("rupee_{INDEX}", PPEnumPool::Rupee, 36);
-        $this->tokens->createTokensPack("block_afghan_{INDEX}", PPEnumPool::BlockAfghan, 12);
-        $this->tokens->createTokensPack("block_russian_{INDEX}", PPEnumPool::BlockRussian, 12);
-        $this->tokens->createTokensPack("block_british_{INDEX}", PPEnumPool::BlockBritish, 12);
+        $this->tokens->createTokensPack("block_afghan_{INDEX}", PPEnumPool::BlocksAfghan, 12);
+        $this->tokens->createTokensPack("block_russian_{INDEX}", PPEnumPool::BlocksRussian, 12);
+        $this->tokens->createTokensPack("block_british_{INDEX}", PPEnumPool::BlocksBritish, 12);
 
         // Init global values with their initial values 
         // Note: values have to be integers
@@ -212,7 +212,7 @@ class PaxPamirEditionTwo extends Table
 
         foreach($this->loyalty as $coalitionId => $coalition) {
             // $result['coalition_blocks'][$coalition['id']] = $this->tokens->getTokensInLocation('block_'.$coalition['id'].'_pool');
-            $result['coalition_blocks'][$coalitionId] = $this->tokens->getTokensInLocation('block_'.$coalitionId.'_pool');
+            $result['coalition_blocks'][$coalitionId] = $this->tokens->getTokensInLocation('blocks_'.$coalitionId);
         }
 
         foreach($this->regions as $region => $regionInfo) {
@@ -423,23 +423,18 @@ class PaxPamirEditionTwo extends Table
      * Returns ruler of the region a card belongs to. 0 if no ruler, otherwise playerId.
      */
     function getRegionRulerForCard( $card_id ) {
-
         if ($card_id == 0) return 0;
         
         $rulers = $this->getAllRegionRulers();
         $region = $this->cards[$card_id]->getRegion();
 
         return $rulers[$region];
-
     }
 
     /**
-     * TODO (Frans): check if this function is already used somewhere?
      * Should returns the cards that are not available for sale (because player already put rupee on it)
      */
-
     function getUnavailableCards() {
-
         $result = array();
         
         for ($i = 0; $i < 2; $i++) {
@@ -453,7 +448,6 @@ class PaxPamirEditionTwo extends Table
         }
 
         return $result;
-
     }
 
     /**
@@ -522,10 +516,6 @@ class PaxPamirEditionTwo extends Table
      */
     function chooseLoyalty( $coalition )
     {
-        //
-        // select starting loyalty during game setup
-        //
-
         self::checkAction( 'choose_loyalty' );
 
         $player_id = self::getActivePlayerId();
@@ -542,7 +532,6 @@ class PaxPamirEditionTwo extends Table
         ) );
 
         $this->gamestate->nextState( 'next' );
-
     }
 
     /**
@@ -623,12 +612,17 @@ class PaxPamirEditionTwo extends Table
         $location = $this->locations['pools'][$loyalty];
         $road = $this->tokens->getTokenOnTop($location);
         if ($road != null) {
-            $this->tokens->moveToken($road['key'], $this->locations['roads'][$border]);
-            self::notifyAllPlayers( "placeRoad", "", array(
-                'coalition' => $loyalty,
-                'token_id' => $road['key'],
-                'border' => $border,
-            ) );
+            $to = $this->locations['roads'][$border];
+            $this->tokens->moveToken($road['key'], $to);
+            self::notifyAllPlayers( "moveToken", "", array(
+                'moves' => array(
+                    0 => array (
+                        'from' => $location,
+                        'to' => $to,
+                        'token_id' => $road['key'],
+                    )
+                )
+            ));
         }
         $this->incGameStateValue("resolve_impact_icons_current_icon", 1);
         $this->gamestate->nextState( 'resolve_impact_icons' );
@@ -643,15 +637,21 @@ class PaxPamirEditionTwo extends Table
         self::dump( "placeSpy on ", $card_id);
 
         $player_id = self::getActivePlayerId();
-        $cylinder = $this->tokens->getTokenOnTop("cylinders_".$player_id);
+        $from = "cylinders_".$player_id;
+        $cylinder = $this->tokens->getTokenOnTop($from);
         
         if ($cylinder != null) {
-            $this->tokens->moveToken($cylinder['key'], 'spies_'.$card_id);
-            self::notifyAllPlayers( "placeSpy", "", array(
-                'player_id' => $player_id,
-                'token_id' => $cylinder['key'],
-                'card_id' => $card_id,
-            ) );
+            $to = 'spies_'.$card_id;
+            $this->tokens->moveToken($cylinder['key'], $to);
+            self::notifyAllPlayers( "moveToken", "", array(
+                'moves' => array(
+                    0 => array (
+                        'from' => $from,
+                        'to' => $to,
+                        'token_id' => $cylinder['key'],
+                    )
+                )
+            ));
         }
         $this->incGameStateValue("resolve_impact_icons_current_icon", 1);
         $this->gamestate->nextState( 'resolve_impact_icons' );
@@ -940,11 +940,16 @@ class PaxPamirEditionTwo extends Table
                 $location = $this->locations['pools'][$loyalty];
                 $army = $this->tokens->getTokenOnTop($location);
                 if ($army != null) {
+                    $to = $this->locations['armies'][$card_region];
                     $this->tokens->moveToken($army['key'], $this->locations['armies'][$card_region]);
-                    self::notifyAllPlayers( "moveArmyFromPool", "", array(
-                        'coalition' => $loyalty,
-                        'token_id' => $army['key'],
-                        'region' => $card_region,
+                    self::notifyAllPlayers( "moveToken", "", array(
+                        'moves' => array(
+                            0 => array (
+                                'from' => $location,
+                                'to' => $to,
+                                'token_id' => $army['key'],
+                            )
+                        )
                     ) );
                 }
                 break;
@@ -958,9 +963,15 @@ class PaxPamirEditionTwo extends Table
 
                 // Suit change notification
                 $message = $this->suits[2]['change'];
-                self::notifyAllPlayers( "updateSuit", $message, array(
-                    'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PPEnumSuit::Economic,
+                $previous_suit_id = $this->suits[$previous_suit]['suit'];
+                self::notifyAllPlayers( "moveToken", $message, array(
+                    'moves' => array(
+                        0 => array (
+                            'from' => 'favored_suit_'.$previous_suit_id,
+                            'to' => 'favored_suit_'.PPEnumSuit::Economic,
+                            'token_id' => 'favored_suit_marker',
+                        )
+                    )
                 ) );
                 break;
             case PPEnumImpactIcon::IntelligenceSuit :
@@ -973,10 +984,16 @@ class PaxPamirEditionTwo extends Table
 
                 // Suit change notification
                 $message = $this->suits[1]['change'];
-                self::notifyAllPlayers( "updateSuit", $message, array(
-                    'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PPEnumSuit::Intelligence,
-                ) );
+                $previous_suit_id = $this->suits[$previous_suit]['suit'];
+                self::notifyAllPlayers( "moveToken", $message, array(
+                    'moves' => array(
+                        0 => array (
+                            'from' => 'favored_suit_'.$previous_suit_id,
+                            'to' => 'favored_suit_'.PPEnumSuit::Intelligence,
+                            'token_id' => 'favored_suit_marker',
+                        )
+                    )
+                ));
                 break;
             case PPEnumImpactIcon::MilitarySuit :
                 $previous_suit = self::getGameStateValue( 'favored_suit' );
@@ -988,10 +1005,16 @@ class PaxPamirEditionTwo extends Table
 
                 // Suit change notification
                 $message = $this->suits[3]['change'];
-                self::notifyAllPlayers( "updateSuit", $message, array(
-                    'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PPEnumSuit::Military,
-                ) );
+                $previous_suit_id = $this->suits[$previous_suit]['suit'];
+                self::notifyAllPlayers( "moveToken", $message, array(
+                    'moves' => array(
+                        0 => array (
+                            'from' => 'favored_suit_'.$previous_suit_id,
+                            'to' => 'favored_suit_'.PPEnumSuit::Military,
+                            'token_id' => 'favored_suit_marker',
+                        )
+                    )
+                ));
                 break;
             case PPEnumImpactIcon::Leverage :
                 $this->incPlayerRupees($player_id, 2);
@@ -1007,10 +1030,16 @@ class PaxPamirEditionTwo extends Table
 
                 // Suit change notification
                 $message = $this->suits[0]['change'];
-                self::notifyAllPlayers( "updateSuit", $message, array(
-                    'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PPEnumSuit::Political,
-                ) );
+                $previous_suit_id = $this->suits[$previous_suit]['suit'];
+                self::notifyAllPlayers( "moveToken", $message, array(
+                    'moves' => array(
+                        0 => array (
+                            'from' => 'favored_suit_'.$previous_suit_id,
+                            'to' => 'favored_suit_'.PPEnumSuit::Political,
+                            'token_id' => 'favored_suit_marker',
+                        )
+                    )
+                ));
                 break;
             case PPEnumImpactIcon::Road :
                 $next_state = "place_road";
@@ -1019,15 +1048,20 @@ class PaxPamirEditionTwo extends Table
                 $next_state = "place_spy";
                 break;
             case PPEnumImpactIcon::Tribe :
-                $cylinder = $this->tokens->getTokenOnTop("cylinders_".$player_id);
-                $new_location = $this->locations["tribes"][$card_region];
+                $from = "cylinders_".$player_id;
+                $cylinder = $this->tokens->getTokenOnTop($from);
+                $to = $this->locations["tribes"][$card_region];
                 if ($cylinder != null) {
-                    $this->tokens->moveToken($cylinder['key'], $new_location);
-                    self::notifyAllPlayers( "moveCynlinderToTribe", "", array(
-                        'player_id' => $player_id,
-                        'token_id' => $cylinder['key'],
-                        'region' => $card_region,
-                    ) );
+                    $this->tokens->moveToken($cylinder['key'], $to);
+                    self::notifyAllPlayers( "moveToken", "", array(
+                        'moves' => array(
+                            0 => array (
+                                'from' => $from,
+                                'to' => $to,
+                                'token_id' => $cylinder['key'],
+                            )
+                        )
+                    ));
                 }
                 break;                
             default :

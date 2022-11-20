@@ -17,7 +17,7 @@ namespace PPModules\PaxPamirEditionTwo\Enums;
 abstract class PPEnumPool
 {
     const Rupee = "rupee_pool";
-    const BlockAfghan = "block_afghan_pool";
-    const BlockRussian = "block_russian_pool";
-    const BlockBritish = "block_british_pool";
+    const BlocksAfghan = "blocks_afghan";
+    const BlocksRussian = "blocks_russian";
+    const BlocksBritish = "blocks_british";
 }

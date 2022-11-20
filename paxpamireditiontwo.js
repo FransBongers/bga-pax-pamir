@@ -110,6 +110,8 @@ function (dojo, declare) {
             this.marketRupees = [];
             // armies per region
             this.armies = {};
+            // roads per border
+            this.roads = {};
             // tribes per region
             this.tribes = {};
             // rulers in region
@@ -124,8 +126,8 @@ function (dojo, declare) {
             this.activeEvents = new ebg.stock();
             // blocks per coalition (supply)
             this.coalitionBlocks = {};
-            // spies on cards
-            this.spiesOnCards = {};
+            // spies per cards
+            this.spies = {};
             // zones for favored suit marker per suit
             this.favoredSuit = {};
             // vp track zones
@@ -361,8 +363,9 @@ function (dojo, declare) {
                 }
             });
 
-            // Place armies
+            // Place armies and tribes
             this.regions.forEach((region) => {
+                // armies
                 Object.keys(this.gamedatas.armies[region]).forEach((id) => {
                     this.placeToken({
                         location: this.armies[region],
@@ -375,11 +378,39 @@ function (dojo, declare) {
                         weight: this.defaultWeightZone,
                     });
                 });
+
+                // tribes
+                Object.keys(this.gamedatas.tribes[region]).forEach((id) => {
+                    console.log('place tribe', id)
+                    this.placeToken({
+                        location: this.tribes[region],
+                        id,
+                        jstpl: 'jstpl_cylinder',
+                        jstplProps: {
+                            id,
+                            color: gamedatas.players[id.split('_')[1]].color,
+                        },
+                    });
+                });
             });
 
-            // Create border zones
+            // Create zones for roads
             this.borders.forEach((border) => {
-                this.createBorderZone({border});
+                this.roads[border] = new ebg.zone();
+                this.createBorderZone({border, zone: this.roads[border]});
+
+                Object.keys(this.gamedatas.roads[border]).forEach((id) => {
+                    this.placeToken({
+                        location: this.roads[border],
+                        id,
+                        jstpl: 'jstpl_road',
+                        jstplProps: {
+                            id,
+                            coalition: id.split('_')[1],
+                        },
+                        weight: this.defaultWeightZone,
+                    });
+                });
             });
             
             // Setup supply of coalition blocks
@@ -413,7 +444,7 @@ function (dojo, declare) {
                 Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
                     const playerId = cylinderId.split('_')[1];
                     this.placeToken({
-                        location: this.spiesOnCards[cardId],
+                        location: this.spies[cardId],
                         id: cylinderId,
                         jstpl: 'jstpl_cylinder',
                         jstplProps: {
@@ -651,6 +682,52 @@ function (dojo, declare) {
 
         },
 
+        createBorderZone: function({border, zone}) 
+        {
+            zone.create(this, `pp_${border}_border`, this.roadWidth, this.roadHeight);
+            // this[`${border}_border`].item_margin = -10;
+            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
+
+            // TODO (Frans): at some point we need to update this so it looks nice,
+            // probably do a lot more custom
+            const borderPattern = {
+                herat_kabul: 'horizontalfit',
+                herat_kandahar: 'verticalfit',
+                herat_persia: 'verticalfit',
+                herat_transcaspia: 'custom',
+                kabul_transcaspia: 'verticalfit',
+                kabul_kandahar: 'horizontalfit',
+                kabul_punjab: 'verticalfit',
+                kandahar_punjab: 'verticalfit',
+                persia_transcaspia: 'horizontalfit',
+            }
+
+            zone.setPattern( borderPattern[border] );
+
+            if (border === 'herat_transcaspia') {
+                zone.itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
+                    if( i%8==0 && numberOfItems === 1 )
+                    {   return {  x:50,y:25, w:40, h:27 }; }
+                    else if( i%8==0)
+                    {   return {  x:90,y:-5, w:40, h:27 }; }
+                    else if( i%8==1 )
+                    {   return {  x:85,y:5, w:40, h:27 }; }
+                    else if( i%8==2 )
+                    {   return {  x:70 ,y:17, w:40, h:27 }; }
+                    else if( i%8==3 )
+                    {   return {  x:55,y:29, w:40, h:27 }; }
+                    else if( i%8==4 )
+                    {   return {  x:40,y:41, w:40, h:27 }; }
+                    else if( i%8==5 )
+                    {   return {  x:35,y:43, w:40, h:27 }; }
+                    else if( i%8==6 )
+                    {   return {  x:47,y:13, w:40, h:27 }; }
+                    else if( i%8==7 )
+                    {   return {  x:10,y:63, w:40, h:27 }; }
+                };
+            }
+        },
+
         discardCard: function({id, from, order = null}) {
 
             console.log( 'discardCard' );
@@ -660,6 +737,82 @@ function (dojo, declare) {
 
             from.removeFromStockById(id, 'pp_discard_pile');
 
+        },
+
+        // returns zone object for given backend location in token database
+        getZoneForLocation: function({location}) {
+            console.log('location', location)
+            const splitLocation = location.split('_');
+            console.log('splitLocation', splitLocation);
+            switch (splitLocation[0]) {
+                case 'armies':
+                    // armies_kabul
+                    return this.armies[splitLocation[1]];
+                case 'blocks':
+                    // blocks_russian
+                    return this.coalitionBlocks[splitLocation[1]];
+                case 'cylinders':
+                    // cylinders_playerId
+                    return this.cylinders[splitLocation[1]];
+                case 'favored':
+                    // favored_suit_economic
+                    return this.favoredSuit[splitLocation[2]];
+                case 'roads':
+                    // roads_herat_kabul
+                    return this.roads[`${splitLocation[1]}_${splitLocation[2]}`];
+                case 'spies':
+                    // spies_card_38
+                    const cardId = `${splitLocation[1]}_${splitLocation[2]}`
+                    console.log('this.spies', cardId, this.spies);
+                    return this.spies[cardId];
+                case 'tribes':
+                    // tribes_kabul
+                    return this.tribes[splitLocation[1]];
+                default:
+                    console.log('no zone determined');
+                    break;
+            }
+        },
+
+        moveCard: function({id, from, to, order = null}) {
+            console.log( 'moveCard' );
+
+            let fromDiv = null;
+            if (from !== null) {
+                fromDiv = from.getItemDivId(id);
+            }
+            if (to !== null) {
+                if (order != null) {
+                    to.changeItemsWeight({ id: order });
+                }
+                to.addToStockWithId(id, id, fromDiv);
+
+                // We need to set up new zone because id of div will change due to stock component
+                this.setupCardSpyZone({location: to, cardId: id});                
+
+                // this.addTooltip( to_location.getItemDivId(id), id, '' );
+            }
+
+            if (from !== null) {
+                from.removeFromStockById(id); 
+            }
+
+        },
+
+        moveToken: function({id, to, from, weight = this.defaultWeightZone, addClass = undefined, removeClass = undefined}) {
+            console.log('move token');
+      
+            if (addClass) {
+                // node = $( cardId );
+                // console.log('node', node);
+                dojo.addClass(id, addClass);
+            };
+            if (removeClass) {
+                dojo.removeClass(id, removeClass);
+            }
+            
+            to.placeInZone( id, weight );
+            from.removeFromZone(id, false)
         },
 
         placeCard: function({location, id, order = null}) {
@@ -688,10 +841,7 @@ function (dojo, declare) {
             location.placeInZone( id, weight );
         },
 
-        // Updates weight of item in the stock component for ordering purposes
-        updateCard : function({location, id, order}) {
-            location.changeItemsWeight({[id]: order});
-        },
+
 
         // Function to setup stock components for cards
         setupCardsStock: function( {stock, nodeId, className} ) {
@@ -740,77 +890,22 @@ function (dojo, declare) {
             // console.log( 'setupCardSpyZone' );
 
             // Note (Frans): we probably need to remove spies before moving / placing card
-            if (this.spiesOnCards[cardId]) {
-                this.spiesOnCards[cardId].removeAll();
+            if (this.spies[cardId]) {
+                this.spies[cardId].removeAll();
             }
 
             var nodeId = location.control_name + '_item_'+ cardId + '_spies';
 
             // ** setup for zone
-            this.spiesOnCards[cardId] = new ebg.zone();
-            this.spiesOnCards[cardId].create( this, nodeId, this.cylinderWidth, this.cylinderHeight );
-            this.spiesOnCards[cardId].item_margin = 4;
+            this.spies[cardId] = new ebg.zone();
+            this.spies[cardId].create( this, nodeId, this.cylinderWidth, this.cylinderHeight );
+            this.spies[cardId].item_margin = 4;
         },
 
-        createBorderZone: function({border}) 
-        {
-            this[`${border}_border`] = new ebg.zone();
-            this[`${border}_border`].create(this, `pp_${border}_border`, this.roadWidth, this.roadHeight);
-            // this[`${border}_border`].item_margin = -10;
-            // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-
-            // TODO (Frans): at some point we need to update this so it looks nice,
-            // probably do a lot more custom
-            const borderPattern = {
-                herat_kabul: 'horizontalfit',
-                herat_kandahar: 'verticalfit',
-                herat_persia: 'verticalfit',
-                herat_transcaspia: 'custom',
-                kabul_transcaspia: 'verticalfit',
-                kabul_kandahar: 'horizontalfit',
-                kabul_punjab: 'verticalfit',
-                kandahar_punjab: 'verticalfit',
-                persia_transcaspia: 'horizontalfit',
-            }
-
-            this[`${border}_border`].setPattern( borderPattern[border] );
-
-            if (border === 'herat_transcaspia') {
-                this[`${border}_border`].itemIdToCoords = function( i, control_width, no_idea_what_this_is, numberOfItems ) {
-                    if( i%8==0 && numberOfItems === 1 )
-                    {   return {  x:50,y:25, w:40, h:27 }; }
-                    else if( i%8==0)
-                    {   return {  x:90,y:-5, w:40, h:27 }; }
-                    else if( i%8==1 )
-                    {   return {  x:85,y:5, w:40, h:27 }; }
-                    else if( i%8==2 )
-                    {   return {  x:70 ,y:17, w:40, h:27 }; }
-                    else if( i%8==3 )
-                    {   return {  x:55,y:29, w:40, h:27 }; }
-                    else if( i%8==4 )
-                    {   return {  x:40,y:41, w:40, h:27 }; }
-                    else if( i%8==5 )
-                    {   return {  x:35,y:43, w:40, h:27 }; }
-                    else if( i%8==6 )
-                    {   return {  x:47,y:13, w:40, h:27 }; }
-                    else if( i%8==7 )
-                    {   return {  x:10,y:63, w:40, h:27 }; }
-                };
-            }
+        // Updates weight of item in the stock component for ordering purposes
+        updateCard : function({location, id, order}) {
+            location.changeItemsWeight({[id]: order});
         },
-
-        // addRupeeToMarket: function({row, column, number})
-        // {
-        //     // console.log('player', this.gamedatas.players[ player ]);
-        //     dojo.place( this.format_block( 'jstpl_rupee', {
-        //         number
-        //     } ) , 'rupee' );
-            
-        //     this.placeOnObject( 'pp_rupee_' + number, `market_${row}_${column}_rupee_zone` );
-        //     // this.slideToObject( 'pp_rupee_' + number, 'square_'+x+'_'+y ).play();
-        //     // this.placeOnObject( 'pp_card_'+cardNumber, 'overall_player_board_'+player );
-        //     // this.slideToObject( 'pp_card_'+cardNumber, 'square_'+x+'_'+y ).play();
-        // },
 
         updatePlayerLoyalty: function({playerId, coalition})
         {
@@ -867,48 +962,6 @@ function (dojo, declare) {
             }
 
         },
-
-        moveCard: function({id, from, to, order = null}) {
-            console.log( 'moveCard' );
-
-            let fromDiv = null;
-            if (from !== null) {
-                fromDiv = from.getItemDivId(id);
-            }
-            if (to !== null) {
-                if (order != null) {
-                    to.changeItemsWeight({ id: order });
-                }
-                to.addToStockWithId(id, id, fromDiv);
-
-                // We need to set up new zone because id of div will change due to stock component
-                this.setupCardSpyZone({location: to, cardId: id});                
-
-                // this.addTooltip( to_location.getItemDivId(id), id, '' );
-            }
-
-            if (from !== null) {
-                from.removeFromStockById(id); 
-            }
-
-        },
-
-        moveToken: function({id, to, from, weight = this.defaultWeightZone, addClass = undefined, removeClass = undefined}) {
-            console.log('move token');
-      
-            if (addClass) {
-                // node = $( cardId );
-                // console.log('node', node);
-                dojo.addClass(id, addClass);
-            };
-            if (removeClass) {
-                dojo.removeClass(id, removeClass);
-            }
-            
-            to.placeInZone( id, weight );
-            from.removeFromZone(id, false)
-        },
-
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -982,14 +1035,7 @@ function (dojo, declare) {
             // console.log('activeEvents', this.activeEvents);
             // this.moveCard({id: 'card_116', from: this.marketCards[1][1], to: this.activeEvents});
             // this.moveCard({id: 'card_111', from: this.marketCards[1][3], to: this.activeEvents});
-            // Adjust based on the card in court
-            // this.moveToken({id: 'cylinder_2371053_8', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'cylinder_2371053_7', from: this.cylinders['2371053'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'cylinder_2371052_8', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'cylinder_2371052_7', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'cylinder_2371052_6', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'cylinder_2371052_5', from: this.cylinders['2371052'], to: this.spiesOnCards['card_17'], weight: this.defaultWeightZone});
-            
+           
             this.numberOfClicks = 1;
             }
 
@@ -1309,16 +1355,8 @@ function (dojo, declare) {
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 250 );
 
-            dojo.subscribe( 'moveArmyFromPool', this, "notif_moveArmyFromPool");
-            this.notifqueue.setSynchronous( 'refreshMarket', 250 );
-
-            dojo.subscribe( 'moveCynlinderToTribe', this, "notif_moveCynlinderToTribe");
-
-            dojo.subscribe( 'placeRoad', this, "notif_placeRoad");
-
-            dojo.subscribe( 'placeSpy', this, "notif_placeSpy");
-            
-            dojo.subscribe( 'updateSuit', this, "notif_updateSuit");
+            dojo.subscribe( 'moveToken', this, "notif_moveToken");
+            this.notifqueue.setSynchronous( 'moveToken', 250 );
             
             dojo.subscribe( 'updatePlayerCounts', this, "notif_updatePlayerCounts");
             dojo.subscribe( 'log', this, "notif_log");
@@ -1449,7 +1487,7 @@ function (dojo, declare) {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: this.playerHand});
             } else {
                 this.moveCard({id: cardId, from: this.marketCards[row][col], to: null});
-                this.spiesOnCards[cardId] = undefined;
+                this.spies[cardId] = undefined;
             }
 
             // Place paid rupees on market cards
@@ -1526,60 +1564,19 @@ function (dojo, declare) {
             }) 
         },
 
-        notif_moveArmyFromPool: function( notif )
-        {
-            console.log('notif_moveArmyFromPool', notif);
-
-            let coalition = notif.args.coalition;
-            let id = notif.args.token_id;
-            let region = notif.args.region;
-
-            this.moveToken({id, from: this.coalitionBlocks[coalition], to: this.armies[region], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'});
-        },
-
-        notif_moveCynlinderToTribe: function( notif )
-        {
-            console.log('notif_moveCynlinderToTribe', notif);
-
-            let player_id = notif.args.player_id;
-            let id = notif.args.token_id;
-            let region = notif.args.region;
-
-            this.moveToken({id, from: this.cylinders[player_id], to: this.tribes[region], weight: this.defaultWeightZone});
-        },
-
-        notif_placeRoad: function( notif )
-        {
-            console.log('notif_placeRoad', notif);
-
-            let coalition = notif.args.coalition;
-            let id = notif.args.token_id;
-            let border = notif.args.border;
-
-            this.moveToken({id, from: this.coalitionBlocks[coalition], to: this[`${border}_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'});
-        },
-
-        notif_placeSpy: function( notif )
-        {
-            console.log('notif_placeSpy', notif);
-
-            const playerId = notif.args.player_id;
-            const id = notif.args.token_id;
-            const cardId = notif.args.card_id;
-            // let border = notif.args.border;
-
-            // this.moveToken({id, from: this.coalitionBlocks[coalition], to: this[`${border}_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'});
-            this.moveToken({id, from: this.cylinders[playerId], to: this.spiesOnCards[cardId], weight: this.defaultWeightZone});
-        },
-
-        notif_updateSuit: function( notif )
-        {
-            console.log('notif_updateSuit', notif);
-
-            let previousSuit = notif.args.previous_suit;
-            let newSuit = notif.args.new_suit;
-            
-            this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit[previousSuit], to: this.favoredSuit[newSuit], weight: this.defaultWeightZone});
+        notif_moveToken: function(notif) {
+            console.log('notif_moveToken', notif);
+            notif.args.moves.forEach((move) => {
+                const { token_id, from, to, updates } = move;
+                const fromZone = this.getZoneForLocation({location: from});
+                const toZone = this.getZoneForLocation({location: to});
+                
+                // TODO: perhaps create separate function for this
+                const addClass = to.startsWith('armies') ? 'pp_army' : to.startsWith('roads') ? 'pp_road' : undefined;
+                const removeClass = from.startsWith('blocks') ? 'pp_coalition_block' : undefined;
+                console.log('fromZone', fromZone, 'toZone', toZone, 'addClass', addClass, 'removeClass', removeClass);
+                this.moveToken({id: token_id, from: fromZone, to: toZone, addClass, removeClass});
+            })
         },
 
         notif_log : function(notif) {

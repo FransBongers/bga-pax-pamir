@@ -24,6 +24,7 @@ include 'modules/php/includes/PPCards.inc.php';
 
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumCoalition;
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumRegion;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumPool;
 
 /*
 
@@ -39,9 +40,9 @@ $this->card_types = array(
 
 $this->locations = array (
   'pools' => array(
-    PPEnumCoalition::Afghan => 'block_afghan_pool',
-    PPEnumCoalition::British => 'block_british_pool',
-    PPEnumCoalition::Russian => 'block_russian_pool'
+    PPEnumCoalition::Afghan => PPEnumPool::BlocksAfghan,
+    PPEnumCoalition::British => PPEnumPool::BlocksBritish,
+    PPEnumCoalition::Russian => PPEnumPool::BlocksRussian
   ),
 
   'armies' => array (

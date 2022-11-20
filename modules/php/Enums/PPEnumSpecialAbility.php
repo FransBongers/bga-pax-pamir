@@ -8,13 +8,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumSpecialAbility.php
+ * modules/php/Objects/PPEnumSpecialAbility.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumSpecialAbility
+abstract class PPEnumSpecialAbility
 {
     const IndispensableAdvisors = "indispensable_advisors"; // Card #1      Your spies cannot be removed in battles with other spies.
     const Insurrection = "insurrection"; // Card #3                         After resolving a Dominance Check, place two Afghan armies in Kabul.

@@ -20,10 +20,10 @@
  */
 
  // Note (Frans): commented this out for now as it led to some issues after syncing files with the game server.
-include 'modules/php/includes/PXPCards.inc.php';
+include 'modules/php/includes/PPCards.inc.php';
 
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCoalition;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumRegion;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumCoalition;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumRegion;
 
 /*
 
@@ -39,27 +39,27 @@ $this->card_types = array(
 
 $this->locations = array (
   'pools' => array(
-    PXPEnumCoalition::Afghan => 'block_afghan_pool',
-    PXPEnumCoalition::British => 'block_british_pool',
-    PXPEnumCoalition::Russian => 'block_russian_pool'
+    PPEnumCoalition::Afghan => 'block_afghan_pool',
+    PPEnumCoalition::British => 'block_british_pool',
+    PPEnumCoalition::Russian => 'block_russian_pool'
   ),
 
   'armies' => array (
-    PXPEnumRegion::Transcaspia => "armies_".PXPEnumRegion::Transcaspia,
-    PXPEnumRegion::Kabul => "armies_".PXPEnumRegion::Kabul,
-    PXPEnumRegion::Persia => "armies_".PXPEnumRegion::Persia,
-    PXPEnumRegion::Herat => "armies_".PXPEnumRegion::Herat,
-    PXPEnumRegion::Kandahar => "armies_".PXPEnumRegion::Kandahar,
-    PXPEnumRegion::Punjab => "armies_".PXPEnumRegion::Punjab,
+    PPEnumRegion::Transcaspia => "armies_".PPEnumRegion::Transcaspia,
+    PPEnumRegion::Kabul => "armies_".PPEnumRegion::Kabul,
+    PPEnumRegion::Persia => "armies_".PPEnumRegion::Persia,
+    PPEnumRegion::Herat => "armies_".PPEnumRegion::Herat,
+    PPEnumRegion::Kandahar => "armies_".PPEnumRegion::Kandahar,
+    PPEnumRegion::Punjab => "armies_".PPEnumRegion::Punjab,
   ),
 
   'tribes' => array (
-    PXPEnumRegion::Transcaspia => "tribes_".PXPEnumRegion::Transcaspia,
-    PXPEnumRegion::Kabul => "tribes_".PXPEnumRegion::Kabul,
-    PXPEnumRegion::Persia => "tribes_".PXPEnumRegion::Persia,
-    PXPEnumRegion::Herat => "tribes_".PXPEnumRegion::Herat,
-    PXPEnumRegion::Kandahar => "tribes_".PXPEnumRegion::Kandahar,
-    PXPEnumRegion::Punjab => "tribes_".PXPEnumRegion::Punjab,
+    PPEnumRegion::Transcaspia => "tribes_".PPEnumRegion::Transcaspia,
+    PPEnumRegion::Kabul => "tribes_".PPEnumRegion::Kabul,
+    PPEnumRegion::Persia => "tribes_".PPEnumRegion::Persia,
+    PPEnumRegion::Herat => "tribes_".PPEnumRegion::Herat,
+    PPEnumRegion::Kandahar => "tribes_".PPEnumRegion::Kandahar,
+    PPEnumRegion::Punjab => "tribes_".PPEnumRegion::Punjab,
   ),
 
   'roads' => array (

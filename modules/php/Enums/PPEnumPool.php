@@ -8,18 +8,16 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumRegion.php
+ * modules/php/Objects/PPEnumPool.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumRegion
+abstract class PPEnumPool
 {
-    const Transcaspia = "transcaspia";
-    const Kabul = "kabul";
-    const Persia = "persia";
-    const Herat = "herat";
-    const Kandahar = "kandahar";
-    const Punjab = "punjab";
+    const Rupee = "rupee_pool";
+    const BlockAfghan = "block_afghan_pool";
+    const BlockRussian = "block_russian_pool";
+    const BlockBritish = "block_british_pool";
 }

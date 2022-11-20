@@ -8,13 +8,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumCoalition.php
+ * modules/php/Objects/PPEnumCoalition.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumCoalition
+abstract class PPEnumCoalition
 {
     const British = "british";
     const Russian = "russian";

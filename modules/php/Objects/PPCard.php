@@ -8,13 +8,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPCard.php
+ * modules/php/Objects/PPCard.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Objects;
+namespace PPModules\PaxPamirEditionTwo\Objects;
 
-class PXPCard implements \JsonSerializable
+class PPCard implements \JsonSerializable
 {
     private string $id;
     private string $type;

@@ -8,24 +8,24 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPCardFactory.php
+ * modules/php/Objects/PPCardFactory.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Factories;
+namespace PPModules\PaxPamirEditionTwo\Factories;
 
-use PhobyJuan\PaxPamirEditionTwo\Objects\PXPCard;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCardType;
+use PPModules\PaxPamirEditionTwo\Objects\PPCard;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardType;
 
-class PXPCardFactory
+class PPCardFactory
 {
     static public function createDominanceCheckCard(
         string $id
-    ): PXPCard
+    ): PPCard
     {
-        $card = new PXPCard();
+        $card = new PPCard();
         $card->setId($id)
-            ->setType(PXPEnumCardType::DominanceCheck)
+            ->setType(PPEnumCardType::DominanceCheck)
             ->setSuit(null)
             ->setRank(null)
             ->setName(null)
@@ -51,11 +51,11 @@ class PXPCardFactory
 
     static public function createEventCard(
         string $id, string $discardedEffect, ?string $discardedDescription, string $purchasedEffect, string $purchasedDescription
-    ): PXPCard
+    ): PPCard
     {
-        $card = new PXPCard();
+        $card = new PPCard();
         $card->setId($id)
-            ->setType(PXPEnumCardType::Event)
+            ->setType(PPEnumCardType::Event)
             ->setSuit(null)
             ->setRank(null)
             ->setName(null)
@@ -83,11 +83,11 @@ class PXPCardFactory
         string $id, ?string $suit, ?int $rank, ?string $name, ?string $region, ?string $specialAbility, bool $taxAction, bool $giftAction,
         bool $buildAction, bool $moveAction, bool $betrayAction, bool $battleAction, ?string $loyalty, ?string $prize,
         ?array $impactIcons, ?String $description
-    ): PXPCard
+    ): PPCard
     {
-        $card = new PXPCard();
+        $card = new PPCard();
         $card->setId($id)
-            ->setType(PXPEnumCardType::Court)
+            ->setType(PPEnumCardType::Court)
             ->setSuit($suit)
             ->setRank($rank)
             ->setName($name)

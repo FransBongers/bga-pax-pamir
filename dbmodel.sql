@@ -42,12 +42,3 @@ CREATE TABLE IF NOT EXISTS `token` (
   `token_state` int(10),
   PRIMARY KEY (`token_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS `impact_action` (
-  `impact_action_id` int(10) NOT NULL AUTO_INCREMENT,
-  `player_id` int(10) NOT NULL,
-  `name` varchar(24) NOT NULL,
-  `is_done` boolean NOT NULL DEFAULT FALSE,
-  `card_id` varchar(10) NOT NULL,
-  PRIMARY KEY (`impact_action_id`)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8;

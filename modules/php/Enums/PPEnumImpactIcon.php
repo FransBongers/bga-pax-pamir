@@ -8,13 +8,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumImpactIcon.php
+ * modules/php/Objects/PPEnumImpactIcon.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumImpactIcon
+abstract class PPEnumImpactIcon
 {
     const Road = "road";
     const Army = "army";

@@ -8,15 +8,16 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumCardType.php
+ * modules/php/Objects/PPEnumSuit.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumCardType
+abstract class PPEnumSuit
 {
-    const Event = "event_card";
-    const DominanceCheck = "dominance_check_card";
-    const Court = "court_card";
+    const Economic = "economic";
+    const Military = "military";
+    const Political = "political";
+    const Intelligence = "intelligence";
 }

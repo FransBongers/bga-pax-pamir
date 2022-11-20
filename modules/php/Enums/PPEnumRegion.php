@@ -8,16 +8,18 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumSuit.php
+ * modules/php/Objects/PPEnumRegion.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumSuit
+abstract class PPEnumRegion
 {
-    const Economic = "economic";
-    const Military = "military";
-    const Political = "political";
-    const Intelligence = "intelligence";
+    const Transcaspia = "transcaspia";
+    const Kabul = "kabul";
+    const Persia = "persia";
+    const Herat = "herat";
+    const Kandahar = "kandahar";
+    const Punjab = "punjab";
 }

@@ -16,25 +16,16 @@
   *
   */
 
-require_once 'modules/php/includes/PXPAutoLoader.inc.php';
+require_once 'modules/php/includes/PPAutoLoader.inc.php';
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/tokens.php');
 
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumCardType;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumImpactIcon;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumPool;
-use PhobyJuan\PaxPamirEditionTwo\Enums\PXPEnumSuit;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardType;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumImpactIcon;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumPool;
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumSuit;
 
-use PhobyJuan\PaxPamirEditionTwo\Managers\PXPImpactActionManager;
-use PhobyJuan\PaxPamirEditionTwo\Managers\PXPPlayerManager;
-use PhobyJuan\PaxPamirEditionTwo\Managers\PXPTokenManager;
-
-use PhobyJuan\PaxPamirEditionTwo\Factories\PXPTokenFactory;
-use PhobyJuan\PaxPamirEditionTwo\Factories\PXPImpactActionFactory;
-
-use PhobyJuan\PaxPamirEditionTwo\Objects\PXPPlayer;
-use PhobyJuan\PaxPamirEditionTwo\Objects\PXPToken;
 
 class PaxPamirEditionTwo extends Table
 {
@@ -66,10 +57,6 @@ class PaxPamirEditionTwo extends Table
         ) );
 
         $this->tokens = new Tokens();
-
-        $this->impactActionManager = new PXPImpactActionManager();
-        $this->playerManager = new PXPPlayerManager();
-        $this->tokenManager = new PXPTokenManager();
 	}
 	
     protected function getGameName( )
@@ -116,20 +103,20 @@ class PaxPamirEditionTwo extends Table
         /************ Start the game initialization *****/
 
         // Add all cards to token module
-        $this->tokens->createTokensPack("card_{INDEX}", PXPEnumCardType::Court, 100);
-        $this->tokens->createTokensPack("card_{INDEX}", PXPEnumCardType::DominanceCheck, 4, 101);
-        $this->tokens->createTokensPack("card_{INDEX}", PXPEnumCardType::Event, 12, 105);
-        $this->tokens->shuffle(PXPEnumCardType::Court);
-        $this->tokens->shuffle(PXPEnumCardType::Event);
+        $this->tokens->createTokensPack("card_{INDEX}", PPEnumCardType::Court, 100);
+        $this->tokens->createTokensPack("card_{INDEX}", PPEnumCardType::DominanceCheck, 4, 101);
+        $this->tokens->createTokensPack("card_{INDEX}", PPEnumCardType::Event, 12, 105);
+        $this->tokens->shuffle(PPEnumCardType::Court);
+        $this->tokens->shuffle(PPEnumCardType::Event);
 
         // build market deck based on number of players
         for ($i = 6; $i >=1; $i--) {
-            $this->tokens->pickTokensForLocation($number_of_players+5, PXPEnumCardType::Court, 'pile');
+            $this->tokens->pickTokensForLocation($number_of_players+5, PPEnumCardType::Court, 'pile');
             if ($i == 2) {
-                $this->tokens->pickTokensForLocation(2, PXPEnumCardType::Event, 'pile');
+                $this->tokens->pickTokensForLocation(2, PPEnumCardType::Event, 'pile');
             } elseif ($i > 2) {
-                $this->tokens->pickTokensForLocation(1, PXPEnumCardType::Event, 'pile');
-                $this->tokens->pickTokensForLocation(1, PXPEnumCardType::DominanceCheck, 'pile');
+                $this->tokens->pickTokensForLocation(1, PPEnumCardType::Event, 'pile');
+                $this->tokens->pickTokensForLocation(1, PPEnumCardType::DominanceCheck, 'pile');
             }
             $this->tokens->shuffle('pile');
             $pile = $this->tokens->getTokensInLocation('pile');
@@ -140,10 +127,10 @@ class PaxPamirEditionTwo extends Table
         }
 
         // Add other tokens to token module
-        $this->tokens->createTokensPack("rupee_{INDEX}", PXPEnumPool::Rupee, 36);
-        $this->tokens->createTokensPack("block_afghan_{INDEX}", PXPEnumPool::BlockAfghan, 12);
-        $this->tokens->createTokensPack("block_russian_{INDEX}", PXPEnumPool::BlockRussian, 12);
-        $this->tokens->createTokensPack("block_british_{INDEX}", PXPEnumPool::BlockBritish, 12);
+        $this->tokens->createTokensPack("rupee_{INDEX}", PPEnumPool::Rupee, 36);
+        $this->tokens->createTokensPack("block_afghan_{INDEX}", PPEnumPool::BlockAfghan, 12);
+        $this->tokens->createTokensPack("block_russian_{INDEX}", PPEnumPool::BlockRussian, 12);
+        $this->tokens->createTokensPack("block_british_{INDEX}", PPEnumPool::BlockBritish, 12);
 
         // Init global values with their initial values 
         // Note: values have to be integers
@@ -419,10 +406,10 @@ class PaxPamirEditionTwo extends Table
      */
     function getPlayerSuitsTotals($player_id) {
         $suits = array (
-            PXPEnumSuit::Political => 0,
-            PXPEnumSuit::Military => 0,
-            PXPEnumSuit::Economic => 0,
-            PXPEnumSuit::Intelligence => 0
+            PPEnumSuit::Political => 0,
+            PPEnumSuit::Military => 0,
+            PPEnumSuit::Economic => 0,
+            PPEnumSuit::Intelligence => 0
         );
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
@@ -750,27 +737,6 @@ class PaxPamirEditionTwo extends Table
             $this->setGameStateValue("bribe_card_id", 0);
             $this->setGameStateValue("bribe_amount", -1);
 
-            // TODO (Frans): check impact icons and send notification / adjust state in case of choices?
-            // TODO (Julien): before, if the loyalty of the card is different of the player's one, we should ask confirmation.
-            // If he confirms, we may have tomake some clean up. Once it's done, we can resolve the impact icons
-
-            // $impact_icons = $this->cards[$card_id]->getImpactIcons();
-
-            // if (count($impact_icons) > 0 ) {
-            //     foreach ($impact_icons as $impact_icon) {
-            //         $impactAction = PXPImpactActionFactory::create(null, $player_id, $impact_icon, false, $card_id);
-            //         $this->impactActionManager->persist($impactAction);
-            //     }
-
-            //     $this->gamestate->nextState( 'impact_icons' );
-            // } else {
-            //     if ($this->getGameStateValue("remaining_actions") > 0) {
-            //         $this->gamestate->nextState( 'action' );
-            //     } else {
-            //         $this->cleanup();
-            //     }
-            // }
-
             $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);
             $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
             $this->gamestate->nextState( 'resolve_impact_icons' );
@@ -827,7 +793,7 @@ class PaxPamirEditionTwo extends Table
             // TODO (Frans): check if this is an event card or court card
             // move card to player hand location and reduce number of remaining actions
             $new_location = 'hand_'.$player_id;
-            if ($card_info->getType() == PXPEnumCardType::Event) {
+            if ($card_info->getType() == PPEnumCardType::Event) {
                 $new_location = 'active_events';
             } 
             $this->tokens->moveToken($card_id, $new_location);
@@ -836,7 +802,7 @@ class PaxPamirEditionTwo extends Table
             // add rupees on card to player totals. Then put them in rupee_pool location
             $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $market_location.'_rupees');
             $this->incPlayerRupees($player_id, count($rupees));
-            $this->tokens->moveAllTokensInLocation($market_location.'_rupees', PXPEnumPool::Rupee);
+            $this->tokens->moveAllTokensInLocation($market_location.'_rupees', PPEnumPool::Rupee);
 
             // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
             $updated_cards = array();
@@ -849,7 +815,7 @@ class PaxPamirEditionTwo extends Table
                     $m_card = $this->tokens->getTokenOnLocation($location);
                 }
                 if ($m_card !== NULL) {
-                    $c = $this->tokens->getTokenOnTop(PXPEnumPool::Rupee);
+                    $c = $this->tokens->getTokenOnTop(PPEnumPool::Rupee);
                     // $this->tokens->moveToken($c['key'], $m_card["key"]); 
                     $this->tokens->moveToken($c['key'], $location.'_rupees'); 
                     $this->tokens->setTokenState($m_card["key"], 1); // state for unavailable
@@ -969,7 +935,7 @@ class PaxPamirEditionTwo extends Table
         $next_state = null;
 
         switch ($current_icon) {
-            case PXPEnumImpactIcon::Army :
+            case PPEnumImpactIcon::Army :
                 $loyalty = $this->getPlayerLoyalty($player_id);
                 $location = $this->locations['pools'][$loyalty];
                 $army = $this->tokens->getTokenOnTop($location);
@@ -982,7 +948,7 @@ class PaxPamirEditionTwo extends Table
                     ) );
                 }
                 break;
-            case PXPEnumImpactIcon::EconomicSuit :
+            case PPEnumImpactIcon::EconomicSuit :
                 $previous_suit = self::getGameStateValue( 'favored_suit' );
                 if ( $previous_suit == 2 ) {
                     break;
@@ -994,10 +960,10 @@ class PaxPamirEditionTwo extends Table
                 $message = $this->suits[2]['change'];
                 self::notifyAllPlayers( "updateSuit", $message, array(
                     'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PXPEnumSuit::Economic,
+                    'new_suit' => PPEnumSuit::Economic,
                 ) );
                 break;
-            case PXPEnumImpactIcon::IntelligenceSuit :
+            case PPEnumImpactIcon::IntelligenceSuit :
                 $previous_suit = self::getGameStateValue( 'favored_suit' );
                 if ( $previous_suit == 1 ) {
                     break;
@@ -1009,10 +975,10 @@ class PaxPamirEditionTwo extends Table
                 $message = $this->suits[1]['change'];
                 self::notifyAllPlayers( "updateSuit", $message, array(
                     'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PXPEnumSuit::Intelligence,
+                    'new_suit' => PPEnumSuit::Intelligence,
                 ) );
                 break;
-            case PXPEnumImpactIcon::MilitarySuit :
+            case PPEnumImpactIcon::MilitarySuit :
                 $previous_suit = self::getGameStateValue( 'favored_suit' );
                 if ($previous_suit == 3 ) {
                     break;
@@ -1024,14 +990,14 @@ class PaxPamirEditionTwo extends Table
                 $message = $this->suits[3]['change'];
                 self::notifyAllPlayers( "updateSuit", $message, array(
                     'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PXPEnumSuit::Military,
+                    'new_suit' => PPEnumSuit::Military,
                 ) );
                 break;
-            case PXPEnumImpactIcon::Leverage :
+            case PPEnumImpactIcon::Leverage :
                 $this->incPlayerRupees($player_id, 2);
                 $this->updatePlayerCounts();
                 break;
-            case PXPEnumImpactIcon::PoliticalSuit :
+            case PPEnumImpactIcon::PoliticalSuit :
                 $previous_suit = self::getGameStateValue( 'favored_suit' );
                 if ( $previous_suit == 0 ) {
                     break;
@@ -1043,16 +1009,16 @@ class PaxPamirEditionTwo extends Table
                 $message = $this->suits[0]['change'];
                 self::notifyAllPlayers( "updateSuit", $message, array(
                     'previous_suit' => $this->suits[$previous_suit]['suit'],
-                    'new_suit' => PXPEnumSuit::Political,
+                    'new_suit' => PPEnumSuit::Political,
                 ) );
                 break;
-            case PXPEnumImpactIcon::Road :
+            case PPEnumImpactIcon::Road :
                 $next_state = "place_road";
                 break;
-            case PXPEnumImpactIcon::Spy :
+            case PPEnumImpactIcon::Spy :
                 $next_state = "place_spy";
                 break;
-            case PXPEnumImpactIcon::Tribe :
+            case PPEnumImpactIcon::Tribe :
                 $cylinder = $this->tokens->getTokenOnTop("cylinders_".$player_id);
                 $new_location = $this->locations["tribes"][$card_region];
                 if ($cylinder != null) {

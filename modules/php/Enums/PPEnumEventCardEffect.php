@@ -8,13 +8,13 @@
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * modules/php/Objects/PXPEnumEventCardEffect.php
+ * modules/php/Objects/PPEnumEventCardEffect.php
  *
  */
 
-namespace PhobyJuan\PaxPamirEditionTwo\Enums;
+namespace PPModules\PaxPamirEditionTwo\Enums;
 
-abstract class PXPEnumEventCardEffect 
+abstract class PPEnumEventCardEffect 
 {
     const MilitarySuit = "military_suit";
     const NewTactics = "new_tactics";

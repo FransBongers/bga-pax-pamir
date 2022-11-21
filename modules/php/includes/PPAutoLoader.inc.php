@@ -26,6 +26,7 @@ if (!defined('PP_MODULES_DIR'))
         $classMap = [
             "$baseNameSpacePPModules\\Factories\\PPCardFactory" => PP_FACTORY_DIR . "/PPCardFactory.php",
             "$baseNameSpacePPModules\\Objects\\PPCard" => PP_OBJECT_DIR . "/PPCard.php",
+            "$baseNameSpacePPModules\\Enums\\PPEnumCardAction" => PP_ENUM_DIR . "/PPEnumCardAction.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumCardType" => PP_ENUM_DIR . "/PPEnumCardType.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumCoalition" => PP_ENUM_DIR . "/PPEnumCoalition.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumEventCardEffect" => PP_ENUM_DIR . "/PPEnumEventCardEffect.php",

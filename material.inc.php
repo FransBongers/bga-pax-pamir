@@ -204,7 +204,7 @@ $this->borders = array (
   ),
 );
 
-$this->new_cards = array(
+$this->cards = array(
   'card_1' => array(
     'id' => 'card_1',
     'actions' => [PPEnumCardAction::Move],

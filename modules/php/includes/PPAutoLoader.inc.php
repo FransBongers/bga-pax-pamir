@@ -16,16 +16,12 @@
 if (!defined('PP_MODULES_DIR'))
 {
     define('PP_MODULES_DIR', __DIR__ . "/..");
-    define('PP_FACTORY_DIR', PP_MODULES_DIR . "/Factories");
-    define('PP_OBJECT_DIR', PP_MODULES_DIR . "/Objects");
     define('PP_ENUM_DIR', PP_MODULES_DIR . "/Enums");
 
     function PPClassMapAutoloader(string $className)
     {
         $baseNameSpacePPModules = "PPModules\\PaxPamirEditionTwo";
         $classMap = [
-            "$baseNameSpacePPModules\\Factories\\PPCardFactory" => PP_FACTORY_DIR . "/PPCardFactory.php",
-            "$baseNameSpacePPModules\\Objects\\PPCard" => PP_OBJECT_DIR . "/PPCard.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumCardAction" => PP_ENUM_DIR . "/PPEnumCardAction.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumCardType" => PP_ENUM_DIR . "/PPEnumCardType.php",
             "$baseNameSpacePPModules\\Enums\\PPEnumCoalition" => PP_ENUM_DIR . "/PPEnumCoalition.php",

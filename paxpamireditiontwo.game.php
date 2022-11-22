@@ -379,7 +379,7 @@ class PaxPamirEditionTwo extends Table
         // Patriots
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
-            $card_loyalty = $this->cards[$court_cards[$i]['key']]->getLoyalty();
+            $card_loyalty = $this->cards[$court_cards[$i]['key']]['loyalty'];
             if ($card_loyalty == $player_loyalty) {
                 $influence += 1;
             }
@@ -428,7 +428,7 @@ class PaxPamirEditionTwo extends Table
         $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
         for ($i = 0; $i < count($court_cards); $i++) {
             $card_info = $this->cards[$court_cards[$i]['key']];
-            $suits[$card_info->getSuit()] += $card_info->getRank();
+            $suits[$card_info['suit']] += $card_info['rank'];
         }
         return $suits;
     }
@@ -440,7 +440,7 @@ class PaxPamirEditionTwo extends Table
         if ($card_id == 0) return 0;
         
         $rulers = $this->getAllRegionRulers();
-        $region = $this->cards[$card_id]->getRegion();
+        $region = $this->cards[$card_id]['region'];
 
         return $rulers[$region];
     }
@@ -766,7 +766,7 @@ class PaxPamirEditionTwo extends Table
 
         if ($this->getGameStateValue("remaining_actions") > 0) {
             // check if loyaly change
-            $card_loyalty = $this->cards[$card_id]->getLoyalty();
+            $card_loyalty = $this->cards[$card_id]['loyalty'];
             if ($card_loyalty != null) {
                 $this->checkAndHandleLoyaltyChange( $card_loyalty );
             }
@@ -845,9 +845,9 @@ class PaxPamirEditionTwo extends Table
             // TODO (Frans): check if this is an event card or court card
             // move card to player hand location and reduce number of remaining actions
             $new_location = 'hand_'.$player_id;
-            if ($card_info->getType() == PPEnumCardType::Event) {
+            if ($card_info['type'] == PPEnumCardType::Event) {
                 $new_location = 'active_events';
-            } else if ($card_info->getType() == PPEnumCardType::DominanceCheck) {
+            } else if ($card_info['type'] == PPEnumCardType::DominanceCheck) {
                 $new_location = 'discard';
                 $next_state = 'dominance_check';
             }
@@ -917,7 +917,7 @@ class PaxPamirEditionTwo extends Table
         $player_id = self::getActivePlayerId();
         $card_id = 'card_'.$this->getGameStateValue("resolve_impact_icons_card_id");
         $card_info = $this->cards[$card_id];
-        $card_region = $card_info->getRegion();
+        $card_region = $card_info['region'];
         return array(
             'region' => $this->regions[$card_region],
         );
@@ -928,7 +928,7 @@ class PaxPamirEditionTwo extends Table
         $player_id = self::getActivePlayerId();
         $card_id = 'card_'.$this->getGameStateValue("resolve_impact_icons_card_id");
         $card_info = $this->cards[$card_id];
-        $card_region = $card_info->getRegion();
+        $card_region = $card_info['region'];
         return array(
             'region' => $card_region,
         );
@@ -1076,11 +1076,11 @@ class PaxPamirEditionTwo extends Table
         $card_id = 'card_'.$this->getGameStateValue("resolve_impact_icons_card_id");
         $current_impact_icon_index = $this->getGameStateValue("resolve_impact_icons_current_icon");
         $card_info = $this->cards[$card_id];
-        $impact_icons = $card_info->getImpactIcons();
+        $impact_icons = $card_info['impact_icons'];
         self::dump( '----------- resolving impact icons for card', $card_id );
         self::dump( '----------- resolving impact icons current icon', $current_impact_icon_index );
         self::dump( '----------- resolving impact icons number of icons', count($impact_icons) );
-        $card_region = $card_info->getRegion();
+        $card_region = $card_info['region'];
 
         if ($current_impact_icon_index >= count($impact_icons)) {
             // $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);

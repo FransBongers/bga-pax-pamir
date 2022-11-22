@@ -1450,11 +1450,25 @@ function (dojo, declare) {
 
         notif_dominanceCheck: function ( notif ) {
             console.log( 'notif_dominanceCheck', notif );
-            const scores = notif.args.scores;
+            const {scores, moves} = notif.args;
             Object.keys(scores).forEach((playerId) => {
                 this.scoreCtrl[ playerId ].toValue( scores[ playerId ].new_score );
                 this.moveToken({id: `vp_cylinder_${playerId}`, from: this.vpTrack[scores[ playerId ].current_score], to: this.vpTrack[scores[ playerId ].new_score]});
             });
+
+            (moves || []).forEach((move) => {
+                const {token_id, from, to} = move;
+                const coalition = to.split('_')[1];
+                const splitFrom = from.split('_');
+                const isArmy = splitFrom[0] == 'armies';
+                this.moveToken({
+                    id: token_id,
+                    to: this.coalitionBlocks[coalition],
+                    from: isArmy ? this.armies[splitFrom[1]] : this.roads[`${splitFrom[1]}_${splitFrom[2]}`],
+                    addClass: 'pp_coalition_block',
+                    removeClass: isArmy ? 'pp_army' : 'pp_road',
+                });
+            })
 
         },
 

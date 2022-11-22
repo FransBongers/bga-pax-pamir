@@ -43,7 +43,7 @@ class PaxPamirEditionTwo extends Table
             "setup" => 10,
             "remaining_actions" => 11,
             "favored_suit" => 12,
-            // "dominance_checks" => 13,
+            "dominance_checks_resolved" => 13,
             "ruler_transcaspia" => 14,
             "ruler_kabul" => 15,
             "ruler_persia" => 16,
@@ -137,7 +137,7 @@ class PaxPamirEditionTwo extends Table
         self::setGameStateInitialValue( 'setup', 1 ); // used to check if setup is done or not
         self::setGameStateInitialValue( 'remaining_actions', 2 );
         self::setGameStateInitialValue( 'favored_suit', 0 );
-        // self::setGameStateInitialValue( 'dominance_checks', 0 );
+        self::setGameStateInitialValue( 'dominance_checks_resolved', 0 );
 
         // Rulers: value is 0 if no ruler, otherwise playerId of the ruling player
         self::setGameStateInitialValue( 'ruler_transcaspia', 0 );
@@ -464,6 +464,49 @@ class PaxPamirEditionTwo extends Table
         return $result;
     }
 
+
+    function handleSuccessfulDominanceCheck() {
+        $moves = array();
+        // return all coalition blocks to their pools
+        $afghan_blocks = $this->tokens->getTokensOfTypeInLocation('block_afghan');
+        foreach($afghan_blocks as $token_id => $token_info) {
+            if(!$this->startsWith($token_info['location'], "blocks")) {
+                $moves[] = array(
+                    'token_id' => $token_id,
+                    'from' => $token_info['location'],
+                    'to' => PPEnumPool::BlocksAfghan
+                );
+                $this->tokens->moveToken($token_id, PPEnumPool::BlocksAfghan);
+            };
+        };
+
+        $russian_blocks = $this->tokens->getTokensOfTypeInLocation('block_russian');
+        foreach($russian_blocks as $token_id => $token_info) {
+            if(!$this->startsWith($token_info['location'], "blocks")) {
+                $moves[] = array(
+                    'token_id' => $token_id,
+                    'from' => $token_info['location'],
+                    'to' => PPEnumPool::BlocksRussian
+                );
+                $this->tokens->moveToken($token_id, PPEnumPool::BlocksRussian);
+            };
+        };
+
+        $british_blocks = $this->tokens->getTokensOfTypeInLocation('block_british');
+        foreach($british_blocks as $token_id => $token_info) {
+            if(!$this->startsWith($token_info['location'], "blocks")) {
+                $moves[] = array(
+                    'token_id' => $token_id,
+                    'from' => $token_info['location'],
+                    'to' => PPEnumPool::BlocksBritish
+                );
+                $this->tokens->moveToken($token_id, PPEnumPool::BlocksBritish);
+            };
+        };
+
+        return $moves;
+    }
+
     /**
      * Update the number of rupees for a player in database
      */
@@ -557,6 +600,47 @@ class PaxPamirEditionTwo extends Table
         ) );
 
         $this->gamestate->nextState( 'next' );
+    }
+
+    /**
+     * Calculates VPs based on an array with available point [5,3,1] and 
+     * a ranking of players and count with first player on position 0.
+     */
+    function determineVictoryPoints($player_ranking, $available_points) {
+        $scores = array();
+        while (count($available_points) > 0 && count($player_ranking) > 0) {
+            $current_highest_influence = $player_ranking[0]['count'];
+
+            // Filter to get all players with the same score as the leading player
+            $same_score = array_filter($player_ranking, function ($element) use ($current_highest_influence) {
+                            return $element['count'] == $current_highest_influence;
+                        });
+            $count_same_score = count($same_score);
+
+            // Calculate points earned per player based on numer of players
+            $total_points = 0;
+            for ($i = 0; $i < $count_same_score; $i++) {
+                $total_points += $available_points[$i];
+            }
+            $points_per_player = floor($total_points / $count_same_score);
+
+            // Update database and add data to scores object for notifictation
+            for ($i = 0; $i < $count_same_score; $i++) {
+                $player_id = $player_ranking[$i]['player_id'];
+                $current_score = $this->getPlayerScore($player_id);
+                $scores[$player_id] = array (
+                    'player_id' => $player_id,
+                    'current_score' => $current_score,
+                    'new_score' => $current_score + $points_per_player,
+                );
+                $this->incPlayerScore($player_id, $points_per_player);
+            }
+            
+            // Slice data that was just used from arrays
+            $available_points = array_slice($available_points, $count_same_score);
+            $player_ranking = array_slice($player_ranking, $count_same_score);
+        };
+        return $scores;
     }
 
     /**
@@ -959,16 +1043,8 @@ class PaxPamirEditionTwo extends Table
     */
 
     function stDominanceCheck() {
-        self::dump( '----------- resolving dominance check', '----------');
-
-        /*
-            Determine if there is a dominant coalition:
-            1. Get count of blocks in block pools
-            2. Order from highest to lowest
-            3. Check if number 1 has 4 or less than number 2
-        
-        */
-        
+        // TODO: increase by 2 in case of instability
+        $this->incGameStateValue("dominance_checks_resolved", 1);
         // Determine if check is successful
         // Get counts of all blocks left in pool
         $coalition_block_counts = array();
@@ -980,79 +1056,59 @@ class PaxPamirEditionTwo extends Table
             );
             $i += 1;
         }
-        // sort array lowest to highest
+        // sort array lowest to highest. Since we count remaining blocks the coalition with the lowest
+        // number has the most blocks in play
         usort($coalition_block_counts, function($a, $b) {return $a['count'] - $b['count'];});
         $check_successful = $coalition_block_counts[1]['count'] - $coalition_block_counts[0]['count'] >= 4;
+
+        // scores object which will be returned with notification
         $scores = array();
+        $moves = array();
         if ($check_successful) {
             $dominant_coalition =  $coalition_block_counts[0]['coalition'];
-        } else {
-            $cylinder_counts = $this->getCylindersInPlayPerPlayer();
-            self::dump( '----------- resolving dominance check - cylinder counts', $cylinder_counts);
-            usort($cylinder_counts, function($a, $b) {return $b['count'] - $a['count'];});
-            self::dump( '----------- resolving dominance check - cylinder counts sorted', $cylinder_counts);
-            $compare = $cylinder_counts[0]['count'];
-            $first_place = array_filter($cylinder_counts, function ($element) use ($compare) {
-                if ($element['count'] == $compare) {
-                  return true;
-                }
-                return false;
-              });
-            self::dump( '----------- resolving dominance check - cylinder counts after filter', $cylinder_counts);
-            self::dump( '----------- resolving dominance check - cylinder counts filtered', $first_place);
-            
-            if (count($first_place) == 1) {
-                $player_id = $first_place[0]['player_id'];
-                $current_score = $this->getPlayerScore($player_id);
-                // first player gets 3 points
-                $this->incPlayerScore($player_id, 3);
-                $scores[$player_id] = array (
-                    'player_id' => $player_id,
-                    'current_score' => $current_score,
-                    'new_score' => $current_score + 3,
-                );
-                // = 3;
-                // check second place
-                $compare = $cylinder_counts[1]['count'];
-                $second_place = array_values(array_filter($cylinder_counts, function ($element) use ($compare) {
-                    if ($element['count'] == $compare) {
-                      return true;
-                    }
-                    return false;
-                  }));
-                  self::dump( '----------- resolving dominance check - cylinder counts second place', $second_place);
-                if(count($second_place) == 1) {
-                    $player_id = $second_place[0]['player_id'];
-                    $current_score = $this->getPlayerScore($player_id);
-                    $this->incPlayerScore($second_place[0]['player_id'], 1);
-                    $scores[$player_id] = array (
-                        'player_id' => $player_id,
-                        'current_score' => $current_score,
-                        'new_score' => $current_score + 1,
-                    );
-                }
-  
-            } else {
-                // 4 divided by count rounded down
-                $points_earned = floor(4 / count($first_place));
-                foreach($first_place as $player) {
-                    $player_id = $player['player_id'];
-                    $current_score = $this->getPlayerScore($player_id);
-                    $this->incPlayerScore($player['player_id'], $points_earned);
-                    $scores[$player_id] = array (
-                        'player_id' => $player_id,
-                        'current_score' => $current_score,
-                        'new_score' => $current_score + $points_earned,
-                    );
-                }
-            }
+            $players = $this->loadPlayersBasicInfos();
 
+            // Create array of players loyal to dominant coalition and their total influence
+            $loyal_players = array();
+            foreach ( $players as $player_id => $player_info ) {
+                if ($this->getPlayerLoyalty($player_id) == $dominant_coalition) {
+                    $loyal_players[] = array(
+                        'player_id' => $player_id,
+                        'count' => $this->getPlayerInfluence($player_id),
+                    );
+                }
+            };
+
+            // Sort array so leader is at position 0
+            usort($loyal_players, function($a, $b) {return $b['count'] - $a['count'];});
+
+            $available_points = [5, 3, 1];
+            if ($this->getGameStateValue('dominance_checks_resolved') == 4) {
+                $available_points = [10, 6, 2];
+            }
+            $scores = $this->determineVictoryPoints($loyal_players, $available_points);
+            $moves = $this->handleSuccessfulDominanceCheck();
+        } else {
+            // Determine numer of cylinders in play by each player
+            $cylinder_counts = $this->getCylindersInPlayPerPlayer();
+
+            // Sort array so player with highest number is at 0.
+            usort($cylinder_counts, function($a, $b) {return $b['count'] - $a['count'];});
+
+            // Determine VPs
+            $available_points = [3, 1];
+            if ($this->getGameStateValue('dominance_checks_resolved') == 4) {
+                $available_points = [6, 2];
+            }
+            $scores = $this->determineVictoryPoints($cylinder_counts, $available_points);
         }
         self::notifyAllPlayers( "dominanceCheck", clienttranslate( 'A Dominance Check has been resolved.' ), array(
             'scores' => $scores,
             'successful' => $check_successful,
+            'moves' => $moves,
         ) );
 
+        // TODO: Frans: if one player leads by 4 or more end the game
         $this->gamestate->nextState( 'action' );
     }
 

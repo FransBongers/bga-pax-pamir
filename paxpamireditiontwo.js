@@ -313,7 +313,7 @@ function (dojo, declare) {
             this.setupCardsStock({stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
             Object.keys(this.gamedatas.hand).forEach((cardId) => {
                 this.placeCard({location: this.playerHand, id: cardId});
-            })
+            });
 
             // Create zones for each region
             this.regions.forEach((region, index) => {
@@ -855,7 +855,8 @@ function (dojo, declare) {
         setupCardsStock: function( {stock, nodeId, className} ) {
             const useLargeCards = false;
             stock.create( this, $(nodeId), this.cardWidth, this.cardHeight );
-            const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+            // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+            const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
             stock.image_items_per_row = useLargeCards ? 117 : 118;
             stock.item_margin = 10;
             // TODO: below is option to customize the created div (and add zones to card for example)
@@ -876,15 +877,20 @@ function (dojo, declare) {
         setupNewCard: function( cardDiv, cardId, divId ) {
             // if card is played to a court
             if (divId.startsWith('pp_court_player')) {
+                const {actions, region} = this.gamedatas.cards[cardId];
                 // add region class for selectable functions
-                const region = this.gamedatas.cards[cardId].region;
+                // const region = this.gamedatas.cards[cardId].region;
                 dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
                 
                 const spyZoneId = 'spies_' + cardId;
                 dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
-                this.setupCardSpyZone({nodeId: spyZoneId, cardId })
+                this.setupCardSpyZone({nodeId: spyZoneId, cardId });
                 // TODO (add spy zone here)
                 // TODO (add card actions)
+                (actions || []).forEach((action, index) => {
+                    const actionId = action.type + '_' + cardId;
+                    dojo.place(`<div id="${actionId}" class="pp_card_action" style="left: ${action.left}px; top: ${action.top}px"></div>`, divId);
+                })
             }
         },
 

@@ -20,7 +20,7 @@
  */
 
  // Note (Frans): commented this out for now as it led to some issues after syncing files with the game server.
-include 'modules/php/includes/PPCards.inc.php';
+// include 'modules/php/includes/PPCards.inc.php';
 
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardAction;
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardType;

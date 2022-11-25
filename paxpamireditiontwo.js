@@ -43,8 +43,8 @@ function (dojo, declare) {
             this.tribeHeight = 25;
             this.rupeeWidth = 50;
             this.rupeeHeight = 50;
-            this.cylinderWidth = 25;
-            this.cylinderHeight = 25;
+            this.cylinderWidth = 30;
+            this.cylinderHeight = 30;
             this.favoredSuitMarkerWidth = 22;
             this.favoredSuitMarkerHeight = 50;
             this.rulerTokenWidth = 50;
@@ -120,6 +120,8 @@ function (dojo, declare) {
             this.court = {};
             // cylinders per player
             this.cylinders = {};
+            // gifts per player / value
+            this.gifts = {};
             // events per player
             this.playerEvents = {};
             // active events
@@ -236,6 +238,26 @@ function (dojo, declare) {
                     },
                     weight: this.defaultWeightZone,
                 });
+
+                this.gifts[playerId] = {};
+                // Set up gift zones
+                ['2', '4', '6'].forEach((value) => {
+                    console.log('value', value)
+                    this.gifts[playerId][value] = new ebg.zone();
+                    this.setupTokenZone({
+                        zone: this.gifts[playerId][value],
+                        nodeId: `pp_gift_${value}_zone_${playerId}`,
+                        tokenWidth: 40,
+                        tokenHeight: 40,
+                        // itemMargin: 10,
+                        pattern: 'custom',
+                        customPattern: () => {
+                            return {x: 5, y:5, w: 30, h: 30}
+                        }
+                    });
+                    console.log('this.gits', this.gifts);
+                });
+                
 
                 // Set up players board
                 const player_board_div = $('player_board_'+playerId);
@@ -889,18 +911,24 @@ function (dojo, declare) {
                 // TODO (add card actions)
                 (actions || []).forEach((action, index) => {
                     const actionId = action.type + '_' + cardId;
-                    dojo.place(`<div id="${actionId}" class="pp_card_action" style="left: ${action.left}px; top: ${action.top}px"></div>`, divId);
+                    dojo.place(`<div id="${actionId}" class="pp_card_action pp_card_action_${action.type}" style="left: ${action.left}px; top: ${action.top}px"></div>`, divId);
                 })
             }
         },
 
         // Function to set up zones for tokens (armies, tribes, cylinders etc.)
-        setupTokenZone: function({zone, nodeId, tokenWidth, tokenHeight, itemMargin = null, instantaneous = false}) {
+        setupTokenZone: function({zone, nodeId, tokenWidth, tokenHeight, itemMargin = null, instantaneous = false, pattern = null, customPattern = null}) {
             zone.create(this, nodeId, tokenWidth, tokenHeight);
             if (itemMargin) {
                 zone.item_margin = itemMargin;
             };
             zone.instantaneous = instantaneous;
+            if (pattern) {
+                zone.setPattern(pattern);
+            }
+            if (pattern == 'custom' && customPattern) {
+                zone.itemIdToCoords = customPattern;
+            }
         },
 
         // Every time a card is moved or placed in court this function will be called to set up zone.
@@ -924,6 +952,12 @@ function (dojo, declare) {
         updatePlayerLoyalty: function({playerId, coalition})
         {
             dojo.query( `#loyalty_icon_${playerId}` )
+                .removeClass( 'pp_loyalty_afghan' )
+                .removeClass('pp_loyalty_british')
+                .removeClass('pp_loyalty_russian')
+                .addClass(`pp_loyalty_${coalition}`);
+
+            dojo.query( `#pp_loyalty_dial_${playerId}` )
                 .removeClass( 'pp_loyalty_afghan' )
                 .removeClass('pp_loyalty_british')
                 .removeClass('pp_loyalty_russian')
@@ -1042,7 +1076,7 @@ function (dojo, declare) {
             
             // // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
 
-            // this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.tribes[this.kabul], weight: this.defaultWeightZone});
+            this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.gifts['2371053']['2'], weight: this.defaultWeightZone});
             // this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
             
             // console.log('market_1_5', this.marketCards);

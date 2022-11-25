@@ -90,7 +90,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
                     'ROW' => $row,
                     'COLUMN' => $column,
                     'LEFT' => 18 + round( ($column)*($hor_scale+13) ),
-                    'TOP' => 54 + round( ($row)*($ver_scale+10) )
+                    'TOP' => 54 + round( ($row)*($ver_scale+12) )
                 ) );
             }        
         }

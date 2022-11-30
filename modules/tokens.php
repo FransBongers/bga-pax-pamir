@@ -90,11 +90,11 @@ class Tokens extends APP_GameClass {
                     throw new feException("createTokens: location cannot be null (set per token location or location_global");
                 self::checkLocation($location);
                 self::checkKey($key);
-                $values [] = "( '$key', '$location', '$token_state' )";
+                $values [] = "( '$key', '$location', '$token_state', '0' )";
                 $keys [] = $key;
             }
         }
-        $sql = "INSERT INTO " . $this->table . " (token_key,token_location,token_state)";
+        $sql = "INSERT INTO " . $this->table . " (token_key,token_location,token_state,token_used)";
         $sql .= " VALUES " . implode(",", $values);
         $this->DbQuery($sql);
         return $keys;
@@ -349,7 +349,7 @@ class Tokens extends APP_GameClass {
      *
      * @return array mixed
      */
-    function getTokensOfTypeInLocation($type, $location = null, $state = null, $order_by = null) {
+    function getTokensOfTypeInLocation($type, $location = null, $state = null, $order_by = null, $used = null) {
         $sql = $this->getSelectQuery();
         $sql .= " WHERE true ";
         if ($type !== null) {
@@ -370,6 +370,10 @@ class Tokens extends APP_GameClass {
         if ($state !== null) {
             self::checkState($state, true);
             $sql .= " AND token_state = '$state'";
+        }
+        if ($used !== null) {
+            self::checkState($used, true);
+            $sql .= " AND token_used = '$used'";
         }
         if ($order_by !== null)
             $sql .= " ORDER BY $order_by";
@@ -554,7 +558,7 @@ class Tokens extends APP_GameClass {
     }
 
     final function getSelectQuery() {
-        $sql = "SELECT token_key AS \"key\", token_location AS \"location\", token_state AS \"state\"";
+        $sql = "SELECT token_key AS \"key\", token_location AS \"location\", token_state AS \"state\", token_used AS \"used\"";
         if (count($this->custom_fields)) {
             $sql .= ", ";
             $sql .= implode(', ', $this->custom_fields);
@@ -614,5 +618,21 @@ class Tokens extends APP_GameClass {
         }
         $this->setGlobalIndex($key, $this->g_index [$key]);
         return $this->g_index [$key];
+    }
+
+    /**
+     * All functions below are added specifically for Pax Pamir
+     * All have to do with using token_used parameter, because both a card order
+     * and used state needs to be kept
+     */
+    // Set token used
+    function setTokenUsed($token_key, $used) {
+        self::checkState($used); 
+        self::checkKey($token_key);
+        $sql = "UPDATE " . $this->table;
+        $sql .= " SET token_used='$used'";
+        $sql .= " WHERE token_key='$token_key'";
+        self::DbQuery($sql);
+        return $used;
     }
 }

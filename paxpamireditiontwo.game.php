@@ -21,6 +21,7 @@ require_once 'modules/php/includes/PPAutoLoader.inc.php';
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/tokens.php');
 
+use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardAction;
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumCardType;
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumImpactIcon;
 use PPModules\PaxPamirEditionTwo\Enums\PPEnumPool;
@@ -350,6 +351,47 @@ class PaxPamirEditionTwo extends Table
 
     }
 
+    /**
+     * Calculates VPs based on an array with available point [5,3,1] and 
+     * a ranking of players and count with first player on position 0.
+     */
+    function determineVictoryPoints($player_ranking, $available_points) {
+        $scores = array();
+        while (count($available_points) > 0 && count($player_ranking) > 0) {
+            $current_highest_influence = $player_ranking[0]['count'];
+
+            // Filter to get all players with the same score as the leading player
+            $same_score = array_filter($player_ranking, function ($element) use ($current_highest_influence) {
+                            return $element['count'] == $current_highest_influence;
+                        });
+            $count_same_score = count($same_score);
+
+            // Calculate points earned per player based on numer of players
+            $total_points = 0;
+            for ($i = 0; $i < $count_same_score; $i++) {
+                $total_points += $available_points[$i];
+            }
+            $points_per_player = floor($total_points / $count_same_score);
+
+            // Update database and add data to scores object for notifictation
+            for ($i = 0; $i < $count_same_score; $i++) {
+                $player_id = $player_ranking[$i]['player_id'];
+                $current_score = $this->getPlayerScore($player_id);
+                $scores[$player_id] = array (
+                    'player_id' => $player_id,
+                    'current_score' => $current_score,
+                    'new_score' => $current_score + $points_per_player,
+                );
+                $this->incPlayerScore($player_id, $points_per_player);
+            }
+            
+            // Slice data that was just used from arrays
+            $available_points = array_slice($available_points, $count_same_score);
+            $player_ranking = array_slice($player_ranking, $count_same_score);
+        };
+        return $scores;
+    }
+
     /*
         Returns rulers for all regions. Value will either be 0 (no ruler) or
         the playerId of the player ruling the region
@@ -453,9 +495,10 @@ class PaxPamirEditionTwo extends Table
         
         for ($i = 0; $i < 2; $i++) {
             for ($j = 0; $j < 6; $j++) {
-                $res = $this->tokens->getTokensOfTypeInLocation('card', 'market_'.$i.'_'.$j, 1 );
+                $res = $this->tokens->getTokensOfTypeInLocation('card', 'market_'.$i.'_'.$j, null, null, 1 );
+                self::dump( "unavailableCards getTokensOfType", $res);
                 $card = array_shift( $res );
-                if (($card !== NULL) and ($card['state'] == 1)) {
+                if (($card !== NULL) and ($card['used'] == 1)) {
                     $result[] = $card['key'];
                 }
             }
@@ -580,6 +623,65 @@ class PaxPamirEditionTwo extends Table
     */
 
     /**
+     * Play card from hand to court
+     */
+    function cardAction( $card_id, $card_action )
+    {
+        self::checkAction( 'card_action' );
+        self::dump( "cardAction: card_id", $card_id );
+        self::dump( "cardAction: card_action", $card_action );
+        /**
+         * TODO
+         * Check of player owns card, card has not been used yet and card has the action
+         * Transition to specific action state
+         */
+        $token_info = $this->tokens->getTokenInfo($card_id);
+        self::dump( "cardAction: token_info", $token_info );
+        // $card_info = $this->cards[$card_id];
+        $player_id = self::getActivePlayerId();
+        $location_info = explode("_", $token_info['location']);
+
+        // Checks to determine if it is a valid action
+        if ($location_info[0] != 'court' || $location_info[1] != $player_id ) {
+            throw new feException( "Not a valid card action for player." );
+        }
+        if ($token_info['used'] != 0 ) {
+            throw new feException( "Card has already been used this turn." );
+        }
+
+        // $this->tokens->setTokenUsed($card_id, 1); // set unavailable
+            // Notify
+  
+        $next_state = 'action';
+
+        switch ($card_action) {
+            case PPEnumCardAction::Battle:
+                break;
+            case PPEnumCardAction::Betray:
+                break;
+            case PPEnumCardAction::Build:
+                break;
+            case PPEnumCardAction::Gift:
+                $next_state = 'card_action_gift';
+                break;
+            case PPEnumCardAction::Move:
+                break;
+            case PPEnumCardAction::Tax:
+                break;                
+            default:
+                break;
+        };
+
+        self::notifyAllPlayers( "cardAction", clienttranslate( '${player_name} uses ${card_name} to ${card_action}.' ), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'card_action' => $card_action,
+            'card_name' => $this->cards[$card_id]['name'],
+        ) );
+        $this->gamestate->nextState( $next_state );
+    }
+
+    /**
      * Part of set up when players need to select loyalty.
      */
     function chooseLoyalty( $coalition )
@@ -602,46 +704,7 @@ class PaxPamirEditionTwo extends Table
         $this->gamestate->nextState( 'next' );
     }
 
-    /**
-     * Calculates VPs based on an array with available point [5,3,1] and 
-     * a ranking of players and count with first player on position 0.
-     */
-    function determineVictoryPoints($player_ranking, $available_points) {
-        $scores = array();
-        while (count($available_points) > 0 && count($player_ranking) > 0) {
-            $current_highest_influence = $player_ranking[0]['count'];
 
-            // Filter to get all players with the same score as the leading player
-            $same_score = array_filter($player_ranking, function ($element) use ($current_highest_influence) {
-                            return $element['count'] == $current_highest_influence;
-                        });
-            $count_same_score = count($same_score);
-
-            // Calculate points earned per player based on numer of players
-            $total_points = 0;
-            for ($i = 0; $i < $count_same_score; $i++) {
-                $total_points += $available_points[$i];
-            }
-            $points_per_player = floor($total_points / $count_same_score);
-
-            // Update database and add data to scores object for notifictation
-            for ($i = 0; $i < $count_same_score; $i++) {
-                $player_id = $player_ranking[$i]['player_id'];
-                $current_score = $this->getPlayerScore($player_id);
-                $scores[$player_id] = array (
-                    'player_id' => $player_id,
-                    'current_score' => $current_score,
-                    'new_score' => $current_score + $points_per_player,
-                );
-                $this->incPlayerScore($player_id, $points_per_player);
-            }
-            
-            // Slice data that was just used from arrays
-            $available_points = array_slice($available_points, $count_same_score);
-            $player_ranking = array_slice($player_ranking, $count_same_score);
-        };
-        return $scores;
-    }
 
     /**
      * Discard cards action when needed at end of a players turn
@@ -903,7 +966,7 @@ class PaxPamirEditionTwo extends Table
         $card_info = $this->cards[$card_id];
 
         // Throw error if card is unavailble for purchase
-        if ($card['state'] == 1) {
+        if ($card['used'] == 1) {
             throw new feException( "Card is unavailble" );
         }
 
@@ -957,7 +1020,7 @@ class PaxPamirEditionTwo extends Table
                     $c = $this->tokens->getTokenOnTop(PPEnumPool::Rupee);
                     // $this->tokens->moveToken($c['key'], $m_card["key"]); 
                     $this->tokens->moveToken($c['key'], $location.'_rupees'); 
-                    $this->tokens->setTokenState($m_card["key"], 1); // state for unavailable
+                    $this->tokens->setTokenUsed($m_card["key"], 1); // set unavailable
                     $updated_cards[] = array(
                         'location' => $location,
                         'card_id' => $m_card["key"],
@@ -1347,7 +1410,7 @@ class PaxPamirEditionTwo extends Table
             if ($card == null) {
                 $empty_top[] = $i;
             } else {
-                $this->tokens->setTokenState($card["key"], 0); // unavailable false
+                $this->tokens->setTokenUsed($card["key"], 0); // unavailable false
                 if (count($empty_top) > 0) {
                     $to_locaction = 'market_0_'.array_shift($empty_top);
                     $this->tokens->moveToken($card['key'], $to_locaction);
@@ -1374,7 +1437,7 @@ class PaxPamirEditionTwo extends Table
             if ($card == null) {
                 $empty_bottom[] = $i;
             } else {
-                $this->tokens->setTokenState($card["key"], 0);
+                $this->tokens->setTokenUsed($card["key"], 0);
                 if (count($empty_bottom) > 0) {
                     $to_locaction = 'market_1_'.array_shift($empty_bottom);
                     $this->tokens->moveToken($card['key'], $to_locaction );

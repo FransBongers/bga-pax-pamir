@@ -40,6 +40,14 @@
   	} 
   	
   	// TODO: defines your action entry points there
+    public function cardAction()
+    {
+        self::setAjaxMode();     
+        $card_id = self::getArg( "card_id", AT_alphanum, true );
+        $card_action = self::getArg( "card_action", AT_alphanum, true );
+        $result = $this->game->cardAction($card_id, $card_action);
+        self::ajaxResponse( );
+    }
 
     public function chooseLoyalty()
     {

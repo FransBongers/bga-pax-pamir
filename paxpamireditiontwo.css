@@ -602,7 +602,7 @@ html {
     /* position: relative; */
     display: flex;
     flex-direction: column;
-    min-height: 280px;
+    min-height: 330px;
     margin-bottom: 15px;
 }
 
@@ -784,11 +784,16 @@ html {
 }
 
 .pp_card_action {
-    box-shadow: 0px 0px 0px 2px blue !important;
+    /* box-shadow: 0px 0px 0px 2px blue !important; */
     border-radius: 4px;
     position: absolute;
     width: 32px;
     height: 32px;
+}
+
+.pp_card_action.pp_selectable {
+    box-shadow: 0px 0px 0px 2px blue !important;
+    cursor: pointer !important;
 }
 
 .pp_selectable_card {

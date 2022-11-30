@@ -61,6 +61,12 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("STATE_DOMINANCE_CHECK", 30);
+    define("STATE_CARD_ACTION_BATTLE", 40);
+    define("STATE_CARD_ACTION_BETRAY", 41);
+    define("STATE_CARD_ACTION_BUILD", 42);
+    define("STATE_CARD_ACTION_GIFT", 43);
+    define("STATE_CARD_ACTION_MOVE", 44);
+    define("STATE_CARD_ACTION_TAX", 45);
     define("STATE_NEXT_PLAYER", 50);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
@@ -120,6 +126,12 @@ $machinestates = array(
             "discard_court" => STATE_DISCARD_COURT, 
             "discard_hand" => STATE_DISCARD_HAND, 
             "refresh_market" => STATE_REFRESH_MARKET,
+            "card_action_battle" => STATE_CARD_ACTION_BATTLE,
+            "card_action_betray" => STATE_CARD_ACTION_BETRAY,
+            "card_action_build" => STATE_CARD_ACTION_BUILD,
+            "card_action_gift" => STATE_CARD_ACTION_GIFT,
+            "card_action_move" => STATE_CARD_ACTION_MOVE,
+            "card_action_tax" => STATE_CARD_ACTION_TAX, 
         )
     ),
 
@@ -210,6 +222,78 @@ $machinestates = array(
         "possibleactions" => array( "placeSpy" ),
         "transitions" => array( 
             "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_BATTLE => array(
+        "name" => "cardActionBattle",
+        "description" => clienttranslate('${actplayer} must select a place to battle'),
+        "descriptionmyturn" => clienttranslate('${you} must select a place to battle'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionBattle" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_BETRAY => array(
+        "name" => "cardActionBetray",
+        "description" => clienttranslate('${actplayer} must select a card'),
+        "descriptionmyturn" => clienttranslate('${you} must select a card'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionBetray" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_BUILD => array(
+        "name" => "cardActionBuild",
+        "description" => clienttranslate('${actplayer} must build'),
+        "descriptionmyturn" => clienttranslate('${you} must build'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionBuild" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_GIFT => array(
+        "name" => "cardActionGift",
+        "description" => clienttranslate('${actplayer} must buy a gift'),
+        "descriptionmyturn" => clienttranslate('${you} must buy a gift'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionGift" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_MOVE => array(
+        "name" => "cardActionMove",
+        "description" => clienttranslate('${actplayer} must move an army or a spy'),
+        "descriptionmyturn" => clienttranslate('${you} must move an army or a spy'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionMove" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
+        )
+    ),
+
+    STATE_CARD_ACTION_TAX => array(
+        "name" => "cardActionTax",
+        "description" => clienttranslate('${actplayer} must tax market or player'),
+        "descriptionmyturn" => clienttranslate('${you} must tax market or player'),
+        "type" => "activeplayer",
+        "args" => "argPlaceRoad",
+        "possibleactions" => array( "cardActionTax" ),
+        "transitions" => array( 
+            "action" => STATE_PLAYER_ACTIONS,
         )
     ),
     

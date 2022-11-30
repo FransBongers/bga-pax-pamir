@@ -242,7 +242,6 @@ function (dojo, declare) {
                 this.gifts[playerId] = {};
                 // Set up gift zones
                 ['2', '4', '6'].forEach((value) => {
-                    console.log('value', value)
                     this.gifts[playerId][value] = new ebg.zone();
                     this.setupTokenZone({
                         zone: this.gifts[playerId][value],
@@ -255,7 +254,6 @@ function (dojo, declare) {
                             return {x: 5, y:5, w: 30, h: 30}
                         }
                     });
-                    console.log('this.gits', this.gifts);
                 });
                 
 
@@ -697,6 +695,7 @@ function (dojo, declare) {
             // dojo.query( '.possiblePlayer' ).removeClass( 'possiblePlayer' );
             // dojo.query( '.possiblePawn' ).removeClass( 'possiblePawn' );
             dojo.query( '.pp_selected' ).removeClass( 'pp_selected' );
+            dojo.query( '.pp_selectable' ).removeClass( 'pp_selectable' );
             // dojo.query( '.selectedPawn' ).removeClass( 'selectedPawn' );
             // dojo.query( '.fadeTile' ).removeClass( 'fadeTile' );
 
@@ -964,6 +963,42 @@ function (dojo, declare) {
                 .addClass(`pp_loyalty_${coalition}`);
         },
 
+        updateSelectableActions: function() {
+            console.log('updateSelectableActions', this.selectedAction);
+            this.clearLastAction();
+
+            switch (this.selectedAction) {
+                case 'cardAction':
+                    const playerId = this.player_id;
+                    console.log('dojo', dojo);
+                    // Note Frans: perhaps there is a better way to get the court cards for the player
+                    // based on backend data
+                    dojo.query(`.pp_card_in_court_${playerId}`).forEach((node) => {
+                        console.log('court card', node.id);
+                        const splitNodeId = node.id.split('_');
+                        const cardId = `${splitNodeId[5]}_${splitNodeId[6]}`
+                        dojo.map(node.children, (child) => {
+                            if (dojo.hasClass(child, 'pp_card_action')) {
+                                dojo.addClass(child, 'pp_selectable');
+                                this.handles.push(dojo.connect(child,'onclick', this, 'onCardActionClick'));
+                            }
+                        })
+                        // console.log('children', node.children)
+                        // for (let i = 0; i < node.children.length; i += 1) {
+                        //     const child = node.children[i];
+                        //     console.log('child', child.item());
+                        // }
+                        // node.children.forEach((child) => {
+                        //     console.log('child', cardId, child);
+                        // })
+                        
+                    }) 
+                    break;
+                default:
+                    break;
+            }
+        },
+
         updateSelectableCards: function(args = null) {
             console.log('updateSelectableCards', this.selectedAction);
             this.clearLastAction();
@@ -1058,43 +1093,12 @@ function (dojo, declare) {
             if (! this.checkAction('card_action'))
             return;
 
-            if (this.numberOfClicks && this.numberOfClicks == 1) {
-                // this.moveToken({id: 'block_afghan_8', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
-                // this.moveToken({id: 'block_russian_7', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
-                
-                // // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
-    
-                // this.moveToken({id: 'cylinder_2371053_9', from: this.cylinders['2371053'], to: this.tribes[this.herat], weight: this.defaultWeightZone});
-                // this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['military'], to: this.favoredSuit['intelligence'], weight: this.defaultWeightZone});
-                this.numberOfClicks += 1;
-            }
-
-            if (!this.numberOfClicks ) {
-            // Temp abuse of button to test movement
-            // this.moveToken({id: 'block_afghan_9', from: this.coalitionBlocks['afghan'], to: this.armies[this.kabul], weight: this.defaultWeightZone, addClass: 'pp_army', removeClass: 'pp_coalition_block'})
-            // this.moveToken({id: 'block_russian_8', from: this.coalitionBlocks['russian'], to: this[`herat_transcaspia_border`], weight: this.defaultWeightZone, addClass: 'pp_road', removeClass: 'pp_coalition_block'})
-            
-            // // this.moveToken({id: 'pp_tribe_1', from: this.tribes[this.kabul], to: this.tribes[this.kandahar], weight: this.defaultWeightZone})
-
-            this.moveToken({id: 'cylinder_2371053_10', from: this.cylinders['2371053'], to: this.gifts['2371053']['2'], weight: this.defaultWeightZone});
-            // this.moveToken({id: 'favored_suit_marker', from: this.favoredSuit['political'], to: this.favoredSuit['military'], weight: this.defaultWeightZone});
-            
-            // console.log('market_1_5', this.marketCards);
-            // console.log('activeEvents', this.activeEvents);
-            // this.moveCard({id: 'card_116', from: this.marketCards[1][1], to: this.activeEvents});
-            // this.moveCard({id: 'card_111', from: this.marketCards[1][3], to: this.activeEvents});
-           
-            this.numberOfClicks = 1;
-            }
-
-
             if( this.isCurrentPlayerActive() )
             {       
                 console.log( 'onCardAction' );
-                this.selectedAction = 'card_action';
-                // this.ajaxcall( "/forbiddenisland/forbiddenisland/captureTreasure.html", {
-                    // lock: true,
-                // }, this, function( result ) {} );
+                this.selectedAction = 'cardAction';
+                this.updateSelectableActions();
+                this.setClientState("client_selectCardAction", { descriptionmyturn : _( "${you} must select a card action") });
             }
         }, 
 
@@ -1183,7 +1187,23 @@ function (dojo, declare) {
                         break;
                 }
             }
-        }, 
+        },
+
+        onCardActionClick: function( evt ) {
+            const divId = evt.currentTarget.id;
+            dojo.stopEvent( evt );
+            this.clearLastAction();
+            // console.log( 'onCardActionClick divId ' + divId );
+            const splitId = divId.split('_');
+            const card_action = splitId[0];
+            const card_id = `${splitId[1]}_${splitId[2]}`;
+            console.log('action', card_action, 'cardId', card_id);
+            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/cardAction.html", { 
+                lock: true,
+                card_id,
+                card_action,
+            }, this, function( result ) {} );  
+        },
 
         onCancel: function()
         {
@@ -1389,6 +1409,8 @@ function (dojo, declare) {
         {
             console.log( 'notifications subscriptions setup' );
 
+            dojo.subscribe( 'cardAction', this, "notif_cardAction" );
+
             dojo.subscribe( 'chooseLoyalty', this, "notif_chooseLoyalty" );
 
             dojo.subscribe( 'dominanceCheck', this, "notif_dominanceCheck" );
@@ -1424,6 +1446,11 @@ function (dojo, declare) {
             // 
         },  
 
+
+        notif_cardAction: function( notif ) {
+            console.log( 'notif_cardAction', notif );
+        },
+
         notif_chooseLoyalty: function( notif ) {
             console.log( 'notif_chooseLoyalty' );
             console.log( notif );
@@ -1432,16 +1459,6 @@ function (dojo, declare) {
             const playerId = notif.args.player_id;
 
             this.updatePlayerLoyalty({playerId, coalition})
-
-            // TODO (Frans): edit if we want to show the loyalty wheel somewhere
-            // var x = this.gamedatas.loyalty[loyalty].icon * 44;
-            // dojo.place(this.format_block('jstpl_loyalty_icon', {
-            //     id: player_id,
-            //     x: x
-            // }), 'loyalty_icon_' + player_id, 'replace');
-            // dojo.query('#loyalty_wheel_' + player_id + ' .wheel').removeClass();
-            // dojo.addClass('loyalty_wheel_' + player_id, 'wheel ' + loyalty);
-
         },
 
 

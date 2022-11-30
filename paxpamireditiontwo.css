@@ -71,8 +71,10 @@
     --afghan-color: #5fc89e;
     --british-color: #eb97d1;
     --russian-color: #f3f35a;
-    --selectable-color: #DE9043;
-    --selected-color: #512D75;
+    /* --selectable-color: #DE9043; */
+    --selectable-color: yellow;
+    /* --selected-color: #512D75; */
+    --selected-color: blue;
   }
 
 html {
@@ -688,12 +690,20 @@ html {
 }
 
 .pp_gift {
-    box-shadow: 0px 0px 0px 2px blue !important;
     border-radius: 50%;
     position: absolute;
     width: 40px;
     height: 40px;
     z-index: 1;
+}
+
+.pp_gift.pp_selectable {
+    box-shadow: 0px 0px 0px 3px var(--selectable-color) !important;
+    cursor: pointer !important;
+}
+
+.pp_gift.pp_selected {
+    box-shadow: 0px 0px 0px 3px var(--selected-color) !important;
 }
 
 .pp_gift_zone {

@@ -117,6 +117,14 @@
         self::ajaxResponse( );
     }
 
+    public function selectGift()
+    {
+        self::setAjaxMode();     
+        $selected_gift = self::getArg( "selected_gift", AT_alphanum, true );
+        $result = $this->game->selectGift($selected_gift);
+        self::ajaxResponse( );
+    }
+
     /*
     
     Example:

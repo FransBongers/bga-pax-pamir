@@ -267,7 +267,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must buy a gift'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionGift" ),
+        "possibleactions" => array( "selectGift" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS,
         )

@@ -55,6 +55,7 @@ class PaxPamirEditionTwo extends Table
             "bribe_amount" =>21,
             "resolve_impact_icons_card_id" => 22,
             "resolve_impact_icons_current_icon" => 23,
+            "card_action_card_id" => 24,
         ) );
 
         $this->tokens = new Tokens();
@@ -152,6 +153,8 @@ class PaxPamirEditionTwo extends Table
         self::setGameStateInitialValue( 'bribe_amount', -1 );
         self::setGameStateInitialValue( 'resolve_impact_icons_card_id', 0 );
         self::setGameStateInitialValue( 'resolve_impact_icons_current_icon', -1 );
+        self::setGameStateInitialValue( 'card_action_card_id', 0 );
+        
 
         // Assign initial cards to market
         for ($i = 0; $i < 6; $i++) {
@@ -206,6 +209,10 @@ class PaxPamirEditionTwo extends Table
             $result['counts'][$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_'.$player_id ));
             $result['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
             $result['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
+
+            foreach(['2', '4', '6'] as $gift_value) {
+                $result['gifts'][$player_id][$gift_value] = $this->tokens->getTokensInLocation('gift_'.$gift_value.'_'.$player_id);
+            }
         }
 
         // Only get hand cards for current player (we might implement option to play with open hands?)
@@ -637,7 +644,7 @@ class PaxPamirEditionTwo extends Table
          */
         $token_info = $this->tokens->getTokenInfo($card_id);
         self::dump( "cardAction: token_info", $token_info );
-        // $card_info = $this->cards[$card_id];
+        $card_info = $this->cards[$card_id];
         $player_id = self::getActivePlayerId();
         $location_info = explode("_", $token_info['location']);
 
@@ -649,35 +656,37 @@ class PaxPamirEditionTwo extends Table
             throw new feException( "Card has already been used this turn." );
         }
 
-        // $this->tokens->setTokenUsed($card_id, 1); // set unavailable
-            // Notify
-  
         $next_state = 'action';
+        if ($this->getGameStateValue("remaining_actions") > 0 || $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit']) {
+            
+            $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
 
-        switch ($card_action) {
-            case PPEnumCardAction::Battle:
-                break;
-            case PPEnumCardAction::Betray:
-                break;
-            case PPEnumCardAction::Build:
-                break;
-            case PPEnumCardAction::Gift:
-                $next_state = 'card_action_gift';
-                break;
-            case PPEnumCardAction::Move:
-                break;
-            case PPEnumCardAction::Tax:
-                break;                
-            default:
-                break;
+            switch ($card_action) {
+                case PPEnumCardAction::Battle:
+                    break;
+                case PPEnumCardAction::Betray:
+                    break;
+                case PPEnumCardAction::Build:
+                    break;
+                case PPEnumCardAction::Gift:
+                    $next_state = 'card_action_gift';
+                    break;
+                case PPEnumCardAction::Move:
+                    break;
+                case PPEnumCardAction::Tax:
+                        break;                
+                default:
+                    break;
+            };
+
+            self::notifyAllPlayers( "cardAction", clienttranslate( '${player_name} uses ${card_name} to ${card_action}.' ), array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                'card_action' => $card_action,
+                'card_name' => $this->cards[$card_id]['name'],
+            ) );
         };
 
-        self::notifyAllPlayers( "cardAction", clienttranslate( '${player_name} uses ${card_name} to ${card_action}.' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_action' => $card_action,
-            'card_name' => $this->cards[$card_id]['name'],
-        ) );
         $this->gamestate->nextState( $next_state );
     }
 
@@ -1047,6 +1056,44 @@ class PaxPamirEditionTwo extends Table
         $this->gamestate->nextState( $next_state );
     }
 
+        /**
+     * Play card from hand to court
+     */
+    function selectGift( $selected_gift )
+    {
+        self::checkAction( 'selectGift' );
+        self::dump( "selected_gift", $selected_gift );
+
+        $player_id = self::getActivePlayerId();
+        $from = "cylinders_".$player_id;
+        $cylinder = $this->tokens->getTokenOnTop($from);
+        
+        // If null player needs to select cylinder from somewhere else
+        if ($cylinder != null) {
+            $to = 'gift_'.$selected_gift.'_'.$player_id;
+            $this->tokens->moveToken($cylinder['key'], $to);
+            $card_id = 'card_'.$this->getGameStateValue("card_action_card_id");
+            $this->tokens->setTokenUsed($card_id, 1); // unavailable false
+            self::notifyAllPlayers( "moveToken", "", array(
+                'moves' => array(
+                    0 => array (
+                        'from' => $from,
+                        'to' => $to,
+                        'token_id' => $cylinder['key'],
+                    )
+                )
+            ));
+        }
+
+        self::notifyAllPlayers( "selectGift", clienttranslate( '${player_name} purchased a gift for ${value} rupees' ), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'value' => $selected_gift,
+        ) );
+
+        $this->gamestate->nextState( 'action' );
+    }
+
 
     
 //////////////////////////////////////////////////////////////////////////////
@@ -1091,7 +1138,8 @@ class PaxPamirEditionTwo extends Table
             'hand' => $this->tokens->getTokensInLocation('hand_'.$player_id),
             'court' => $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state'),
             'suits' => $this->getPlayerSuitsTotals($player_id),
-            'rulers' => $this->getAllRegionRulers()
+            'rulers' => $this->getAllRegionRulers(),
+            'favored_suit' => $this->suits[$this->getGameStateValue( 'favored_suit' )],
         );
     }
 

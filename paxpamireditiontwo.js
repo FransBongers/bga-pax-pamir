@@ -255,6 +255,23 @@ function (dojo, declare) {
                         }
                     });
                 });
+
+                // Add gifts to zones
+                const playerGifts = gamedatas.gifts[playerId]
+                Object.keys(playerGifts).forEach((giftValue) => {
+                    Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
+                        this.placeToken({
+                            location: this.gifts[playerId][giftValue],
+                            id: cylinderId,
+                            jstpl: 'jstpl_cylinder',
+                            jstplProps: {
+                                id: cylinderId,
+                                color: gamedatas.players[playerId].color,
+                            },
+                            weight: this.defaultWeightZone,
+                        });
+                    });
+                })
                 
 
                 // Set up players board
@@ -524,12 +541,13 @@ function (dojo, declare) {
                     case 'playerActions':
                         this.unavailableCards = args.args.unavailable_cards;
                         this.remainingActions = args.args.remaining_actions;
+                        this.favoredSuit = args.args.favored_suit.suit;
                         break;
                     case 'placeSpy':
                         this.selectedAction = 'placeSpy';
                         this.updateSelectableCards(args.args);
                         console.log('placeSpy', args.args)
-                        break;                        
+                        break;
                     default:
                         console.log('onEnteringState default')
                         break;
@@ -603,7 +621,10 @@ function (dojo, declare) {
                         } else {
                             main.innerHTML += _(' have ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
                             + args.remaining_actions + '</span>' + _(' remaining actions: ');
-
+                            // If player has court cards with free actions
+                            if (args.court.some(({key, used}) => used == '0' && this.gamedatas.cards[key].suit == args.favored_suit.suit)) {
+                                this.addActionButton( 'card_action_btn', _('Card Action'), 'onCardAction' );
+                            }
                             this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'blue' );
                         }
                         break;
@@ -650,18 +671,25 @@ function (dojo, declare) {
                         this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
                         this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
                         break;
+                    case 'client_confirmSelectGift':
+                        this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
+                        this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
+                        break;
                     case 'placeRoad':
                         console.log('args', args);
                         args.region.borders.forEach((border) => {
                             this.addActionButton( `${border}_btn`, _(this.gamedatas.borders[border].name), 'onBorder', null, false, 'blue' );
                         })
                         break;
-
                     case 'client_endTurn':
                         this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red' );
                         this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
                         break;
-
+                    case 'cardActionGift':
+                        this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
+                        this.selectedAction = 'cardActionGift';
+                        this.updateSelectableActions();
+                        break;
                     // case 'client_selectPurchase':
                     // case 'client_selectPlay':
                     //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
@@ -783,6 +811,9 @@ function (dojo, declare) {
                 case 'cylinders':
                     // cylinders_playerId
                     return this.cylinders[splitLocation[1]];
+                case 'gift':
+                    // gift_2_playerId
+                    return this.gifts[splitLocation[2]][splitLocation[1]]
                 case 'favored':
                     // favored_suit_economic
                     return this.favoredSuit[splitLocation[2]];
@@ -966,10 +997,9 @@ function (dojo, declare) {
         updateSelectableActions: function() {
             console.log('updateSelectableActions', this.selectedAction);
             this.clearLastAction();
-
+            const playerId = this.player_id;
             switch (this.selectedAction) {
                 case 'cardAction':
-                    const playerId = this.player_id;
                     console.log('dojo', dojo);
                     // Note Frans: perhaps there is a better way to get the court cards for the player
                     // based on backend data
@@ -977,6 +1007,7 @@ function (dojo, declare) {
                         console.log('court card', node.id);
                         const splitNodeId = node.id.split('_');
                         const cardId = `${splitNodeId[5]}_${splitNodeId[6]}`
+                        if (this.remainingActions > 0 || this.favoredSuit == this.gamedatas.cards[cardId].suit)
                         dojo.map(node.children, (child) => {
                             if (dojo.hasClass(child, 'pp_card_action')) {
                                 dojo.addClass(child, 'pp_selectable');
@@ -993,6 +1024,18 @@ function (dojo, declare) {
                         // })
                         
                     }) 
+                    break;
+                case 'cardActionGift':
+                    ['2', '4', '6'].forEach((giftValue) => {
+                        const hasGift = this.gifts[playerId][giftValue].getAllItems().length > 0;
+                        if (!hasGift) {
+                            dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
+                                dojo.addClass(node, 'pp_selectable');
+                                this.handles.push(dojo.connect(node,'onclick', this, 'onSelectGift'));
+                            })
+                        };
+                    });
+                    console.log('gifts', this.gifts);
                     break;
                 default:
                     break;
@@ -1087,6 +1130,26 @@ function (dojo, declare) {
                 this.setClientState("client_selectPlay", { descriptionmyturn : _( "${you} must select a card to play") });
             }
         }, 
+
+        onSelectGift: function( evt ) 
+        {
+            const divId = evt.currentTarget.id;
+            dojo.stopEvent( evt );
+            console.log('divId', divId);
+            if (! this.checkAction('selectGift'))
+            return;
+
+            if( this.isCurrentPlayerActive() )
+            {       
+                console.log('after checkAction');
+                const value = divId.split('_')[2];
+                this.selectedAction = 'confirmSelectGift';
+                this.clearLastAction();
+                this.selectedGift = value;
+                dojo.query(`#pp_gift_${value}_${this.player_id}`).addClass('pp_selected');
+                this.setClientState("client_confirmSelectGift", { descriptionmyturn : _( `Purchase gift for ${value} rupees?`) });
+            }
+        },
 
         onCardAction: function()
         {
@@ -1232,7 +1295,12 @@ function (dojo, declare) {
                         lock: true,
                     }, this, function( result ) {} ); 
                     break;
-
+                case 'confirmSelectGift':
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/selectGift.html", { 
+                        lock: true,
+                        selected_gift: this.selectedGift,
+                    }, this, function( result ) {} );
+                    break;
                 case 'discard_hand':
                 case 'discard_court':
                     let cards = '';
@@ -1426,6 +1494,8 @@ function (dojo, declare) {
 
             dojo.subscribe( 'refreshMarket', this, "notif_refreshMarket" );
             this.notifqueue.setSynchronous( 'refreshMarket', 250 );
+
+            dojo.subscribe( 'selectGift', this, "notif_selectGift" );
 
             dojo.subscribe( 'moveToken', this, "notif_moveToken");
             this.notifqueue.setSynchronous( 'moveToken', 250 );
@@ -1636,6 +1706,12 @@ function (dojo, declare) {
                         id: move.card_id });
                 }, this);
 
+        },
+
+        notif_selectGift: function (notif) 
+        {
+            console.log('notif_selectGift', notif);
+            this.clearLastAction();
         },
 
         notif_updatePlayerCounts: function( notif )

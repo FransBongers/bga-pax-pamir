@@ -111,6 +111,22 @@ html {
     box-shadow: rgb(0 0 0) 2px 2px 8px;
 }
 
+#pp_map_areas {
+    position: absolute;
+    left: 91px;
+    top: 89px;
+    width: 819px;
+    height: 402px;
+    /* background-color: blue; */
+}
+
+.pp_region {
+    fill: green;
+    fill-opacity: 25%;
+    stroke: green;
+    stroke-width: 4;
+}
+
 .pp_location {
     position: absolute;
     /* border: 2px solid blue; */

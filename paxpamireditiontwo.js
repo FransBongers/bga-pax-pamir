@@ -939,9 +939,9 @@ function (dojo, declare) {
                 this.setupCardSpyZone({nodeId: spyZoneId, cardId });
                 // TODO (add spy zone here)
                 // TODO (add card actions)
-                (actions || []).forEach((action, index) => {
-                    const actionId = action.type + '_' + cardId;
-                    dojo.place(`<div id="${actionId}" class="pp_card_action pp_card_action_${action.type}" style="left: ${action.left}px; top: ${action.top}px"></div>`, divId);
+                Object.keys(actions).forEach((action, index) => {
+                    const actionId = action + '_' + cardId;
+                    dojo.place(`<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`, divId);
                 })
             }
         },

@@ -137,7 +137,8 @@ function (dojo, declare) {
 
 
             this.playerCounts = {}; // rename to playerTotals?
-            this.unavailableCards = [];
+            // Will store all data for active player and gets refreshed with entering player actions state
+            this.activePlayer = {};
             this.handles = []; // contains all onClick handlers
 
             
@@ -535,10 +536,25 @@ function (dojo, declare) {
             if(this.isCurrentPlayerActive()) {
                 switch( stateName )
                 {
+                    case 'cardActionGift':
+                        this.activePlayer.rupees = args.args.rupees;
+                        console.log('activePlayer', this.activePlayer);
+                        this.selectedAction = 'cardActionGift';
+                        this.updateSelectableActions();
+                        break;
                     case 'playerActions':
-                        this.unavailableCards = args.args.unavailable_cards;
-                        this.remainingActions = args.args.remaining_actions;
-                        this.favoredSuit = args.args.favored_suit.suit;
+                        
+                        const {court, favored_suit, remaining_actions,  rupees, unavailable_cards} = args.args;
+                        this.activePlayer = {
+                            court,
+                            favoredSuit: favored_suit,
+                            remainingActions: remaining_actions,
+                            rupees: rupees,
+                            unavailableCards: unavailable_cards,
+                        };
+                        // this.unavailableCards = args.args.unavailable_cards;
+                        // this.remainingActions = args.args.remaining_actions;
+                        // this.favoredSuit = args.args.favored_suit;
                         break;
                     case 'placeSpy':
                         this.selectedAction = 'placeSpy';
@@ -617,7 +633,7 @@ function (dojo, declare) {
                             main.innerHTML += _(' have ') + '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' 
                             + args.remaining_actions + '</span>' + _(' remaining actions: ');
                             // If player has court cards with free actions
-                            if (args.court.some(({key, used}) => used == '0' && this.gamedatas.cards[key].suit == args.favored_suit.suit)) {
+                            if (args.court.some(({key, used}) => used == '0' && this.gamedatas.cards[key].suit == args.favored_suit)) {
                                 this.addActionButton( 'card_action_btn', _('Card Action'), 'onCardAction' );
                             }
                             this.addActionButton( 'pass_btn', _('End Turn'), 'onPass', null, false, 'blue' );
@@ -681,8 +697,6 @@ function (dojo, declare) {
                         break;
                     case 'cardActionGift':
                         this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray' );
-                        this.selectedAction = 'cardActionGift';
-                        this.updateSelectableActions();
                         break;
                     // case 'client_selectPurchase':
                     // case 'client_selectPlay':
@@ -875,8 +889,9 @@ function (dojo, declare) {
         },
 
         // TODO(Frans): detereming jstpl based on id?
-        placeToken: function({location, id, jstpl, jstplProps, weight = 0, classes = []}) {
-            dojo.place( this.format_block( jstpl, jstplProps ) , 'pp_tokens' );
+        placeToken: function({location, id, jstpl, jstplProps, weight = 0, classes = [], from = null}) {
+            // console.log('from', from)
+            dojo.place( this.format_block( jstpl, jstplProps ) , from || 'pp_tokens' );
             classes.forEach((className) => {
                 dojo.addClass( id, className ); 
             })
@@ -987,7 +1002,8 @@ function (dojo, declare) {
                     dojo.query(`.pp_card_in_court_${playerId}`).forEach((node) => {
                         const splitNodeId = node.id.split('_');
                         const cardId = `${splitNodeId[5]}_${splitNodeId[6]}`
-                        if (this.remainingActions > 0 || this.favoredSuit == this.gamedatas.cards[cardId].suit)
+                        const used = this.activePlayer.court.find((card) => card.key == cardId)?.used == 1;
+                        if (!used && (this.activePlayer.remainingActions > 0 || this.activePlayer.favoredSuit == this.gamedatas.cards[cardId].suit))
                         dojo.map(node.children, (child) => {
                             if (dojo.hasClass(child, 'pp_card_action')) {
                                 dojo.addClass(child, 'pp_selectable');
@@ -999,7 +1015,8 @@ function (dojo, declare) {
                 case 'cardActionGift':
                     ['2', '4', '6'].forEach((giftValue) => {
                         const hasGift = this.gifts[playerId][giftValue].getAllItems().length > 0;
-                        if (!hasGift) {
+                        console.log('giftValue', giftValue, 'rupees', this.activePlayer.rupees, giftValue <= this.activePlayer.rupees);
+                        if (!hasGift && giftValue <= this.activePlayer.rupees) {
                             dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
                                 dojo.addClass(node, 'pp_selectable');
                                 this.handles.push(dojo.connect(node,'onclick', this, 'onSelectGift'));
@@ -1022,7 +1039,7 @@ function (dojo, declare) {
                         (node) => {
                             const cost = node.id.split('_')[3]; // cost is equal to the column number
                             const cardId = node.id.split('_')[6];
-                            if ((cost <= this.playerCounts[this.player_id].rupees) && (! this.unavailableCards.includes('card_'+cardId) )) {
+                            if ((cost <= this.playerCounts[this.player_id].rupees) && (! this.activePlayer.unavailableCards.includes('card_'+cardId) )) {
                                 dojo.addClass(node, 'pp_selectable_card');
                                 this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
                             }
@@ -1136,7 +1153,7 @@ function (dojo, declare) {
             if( this.isCurrentPlayerActive() )
             {       
                 this.selectedAction = 'pass';
-                if (this.remainingActions == 0) {
+                if (this.activePlayer.remainingActions == 0) {
                     this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/passAction.html", {
                         lock: true
                     }, this, function( result ) {} );
@@ -1634,6 +1651,22 @@ function (dojo, declare) {
         {
             console.log('notif_selectGift', notif);
             this.clearLastAction();
+            const {updated_cards, player_id, rupee_count} = notif.args;
+             // Place paid rupees on market cards
+             updated_cards.forEach ((item, index) => {
+                const marketRow = item.location.split('_')[1];
+                const marketColumn = item.location.split('_')[2];
+                this.placeToken({
+                    location: this.marketRupees[marketRow][marketColumn],
+                    id: item.rupee_id,
+                    jstpl: 'jstpl_rupee',
+                    jstplProps: {
+                        id: item.rupee_id,
+                    },
+                    from: `rupees_${player_id}`
+                });
+            }, this);
+            $('rupee_count_' + player_id).innerHTML = rupee_count;
         },
 
         notif_updatePlayerCounts: function( notif )

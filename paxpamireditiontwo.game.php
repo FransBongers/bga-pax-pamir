@@ -637,23 +637,24 @@ class PaxPamirEditionTwo extends Table
         self::checkAction( 'card_action' );
         self::dump( "cardAction: card_id", $card_id );
         self::dump( "cardAction: card_action", $card_action );
-        /**
-         * TODO
-         * Check of player owns card, card has not been used yet and card has the action
-         * Transition to specific action state
-         */
+
         $token_info = $this->tokens->getTokenInfo($card_id);
-        self::dump( "cardAction: token_info", $token_info );
         $card_info = $this->cards[$card_id];
         $player_id = self::getActivePlayerId();
         $location_info = explode("_", $token_info['location']);
 
         // Checks to determine if it is a valid action
+        // Card should be in players court
         if ($location_info[0] != 'court' || $location_info[1] != $player_id ) {
             throw new feException( "Not a valid card action for player." );
         }
+        // Card should not have been used yet
         if ($token_info['used'] != 0 ) {
             throw new feException( "Card has already been used this turn." );
+        }
+        // Card should have the card action
+        if (!isset($card_info['actions'][$card_action])) {
+            throw new feException( "Action does not exist on selected card." );
         }
 
         $next_state = 'action';
@@ -1056,7 +1057,31 @@ class PaxPamirEditionTwo extends Table
         $this->gamestate->nextState( $next_state );
     }
 
-        /**
+    function placeRupeesInMarketRow ($row, $remaining_rupees) {
+        $updated_cards = [];
+        // $remaining_rupees = $number_rupees;
+        for ($i = 5; $i >=0; $i --) {
+            if ($remaining_rupees <= 0) {
+                break;
+            }
+            $location = 'market_'.$row.'_'.$i;
+            $market_card = $this->tokens->getTokenOnLocation($location);
+            if ($market_card !== NULL) {
+                $rupee = $this->tokens->getTokenOnTop(PPEnumPool::Rupee);
+                $this->tokens->moveToken($rupee['key'], $location.'_rupees'); 
+                $this->tokens->setTokenUsed($market_card["key"], 1); // set unavailable
+                $updated_cards[] = array(
+                    'location' => $location,
+                    'card_id' => $market_card["key"],
+                    'rupee_id' => $rupee['key']
+                );
+                $remaining_rupees --;
+            }
+        }
+        return $updated_cards;
+    }
+
+    /**
      * Play card from hand to court
      */
     function selectGift( $selected_gift )
@@ -1065,6 +1090,12 @@ class PaxPamirEditionTwo extends Table
         self::dump( "selected_gift", $selected_gift );
 
         $player_id = self::getActivePlayerId();
+        $rupees = $this->getPlayerRupees($player_id);
+        // Card should have the card action
+        if ($rupees < $selected_gift) {
+            throw new feException( "Not enough rupees to pay for the gift." );
+        }
+
         $from = "cylinders_".$player_id;
         $cylinder = $this->tokens->getTokenOnTop($from);
         
@@ -1085,10 +1116,18 @@ class PaxPamirEditionTwo extends Table
             ));
         }
 
+        $number_rupees_per_row = $selected_gift / 2;
+        $updated_cards = [];
+        $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(0, $number_rupees_per_row));
+        $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(1, $number_rupees_per_row));
+        $this->incPlayerRupees($player_id, -$selected_gift);
+
         self::notifyAllPlayers( "selectGift", clienttranslate( '${player_name} purchased a gift for ${value} rupees' ), array(
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $selected_gift,
+            'updated_cards' => $updated_cards,
+            'rupee_count' => $rupees - $selected_gift,
         ) );
 
         $this->gamestate->nextState( 'action' );
@@ -1105,6 +1144,15 @@ class PaxPamirEditionTwo extends Table
         These methods function is to return some additional information that is specific to the current
         game state.
     */
+
+    function argCardActionGift()
+    {
+        $player_id = self::getActivePlayerId();
+
+        return array(
+            'rupees' => $this->getPlayerRupees($player_id),
+        );
+    }
 
     function argPlaceRoad()
     {
@@ -1139,7 +1187,8 @@ class PaxPamirEditionTwo extends Table
             'court' => $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state'),
             'suits' => $this->getPlayerSuitsTotals($player_id),
             'rulers' => $this->getAllRegionRulers(),
-            'favored_suit' => $this->suits[$this->getGameStateValue( 'favored_suit' )],
+            'favored_suit' => $this->suits[$this->getGameStateValue( 'favored_suit' )]['suit'],
+            'rupees' => $this->getPlayerRupees($player_id),
         );
     }
 

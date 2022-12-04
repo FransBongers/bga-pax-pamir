@@ -536,6 +536,9 @@ function (dojo, declare) {
             if(this.isCurrentPlayerActive()) {
                 switch( stateName )
                 {
+                    case 'client_cardActionBattle':
+                        this.updateSelectableActions();
+                        break;
                     case 'cardActionGift':
                         this.activePlayer.rupees = args.args.rupees;
                         console.log('activePlayer', this.activePlayer);
@@ -719,7 +722,7 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods - add in alphabetical order
 
-        clearLastAction : function( )
+        clearLastAction: function( )
         {
             console.log( 'clearLastAction, handles = ' + this.handles.length );
 
@@ -737,7 +740,11 @@ function (dojo, declare) {
 
             dojo.forEach(this.handles, dojo.disconnect);
             this.handles = [];
-
+            this.regions.forEach((region) => {
+                console.log('region', region);
+                const element = document.getElementById(`pp_region_${region}`);
+                element.classList.remove('pp_selectable');
+            });
         },
 
         createBorderZone: function({border, zone}) 
@@ -996,6 +1003,23 @@ function (dojo, declare) {
             this.clearLastAction();
             const playerId = this.player_id;
             switch (this.selectedAction) {
+                case 'cardActionBattle':
+                    console.log('battle');
+                    console.log('dojo', dojo);
+                    this.regions.forEach((region) => {
+                        console.log('region', region);
+                        const element = document.getElementById(`pp_region_${region}`);
+                        // console.log(node);
+                        element.classList.add('pp_selectable');
+                        this.handles.push(dojo.connect(element,'onclick', this, 'onSelectRegion'));
+                        // dojo.query(`#pp_region_${region}`).forEach((node) => {
+                        // dojo.query(`.pp_region`).forEach((node) => {
+                        dojo.query('#pp_map_areas').forEach((node) => {
+                            dojo.addClass(node, 'pp_selectable');
+                            this.handles.push(dojo.connect(node,'onclick', this, 'onSelectRegion'));
+                        })
+                    })
+                    break;
                 case 'cardAction':
                     // Note Frans: perhaps there is a better way to get the court cards for the player
                     // based on backend data
@@ -1039,7 +1063,7 @@ function (dojo, declare) {
                         (node) => {
                             const cost = node.id.split('_')[3]; // cost is equal to the column number
                             const cardId = node.id.split('_')[6];
-                            if ((cost <= this.playerCounts[this.player_id].rupees) && (! this.activePlayer.unavailableCards.includes('card_'+cardId) )) {
+                            if ((cost <= this.activePlayer.rupees) && (! this.activePlayer.unavailableCards.includes('card_'+cardId) )) {
                                 dojo.addClass(node, 'pp_selectable_card');
                                 this.handles.push(dojo.connect(node,'onclick', this, 'onCard'));
                             }
@@ -1131,6 +1155,12 @@ function (dojo, declare) {
                 dojo.query(`#pp_gift_${value}_${this.player_id}`).addClass('pp_selected');
                 this.setClientState("client_confirmSelectGift", { descriptionmyturn : _( `Purchase gift for ${value} rupees?`) });
             }
+        },
+
+        onSelectRegion: function( evt ) {
+            const divId = evt.currentTarget.id;
+            dojo.stopEvent( evt );
+            console.log('onSelectRegion', divId, evt);
         },
 
         onCardAction: function()
@@ -1231,11 +1261,24 @@ function (dojo, declare) {
             const splitId = divId.split('_');
             const card_action = splitId[0];
             const card_id = `${splitId[1]}_${splitId[2]}`;
-            this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/cardAction.html", { 
-                lock: true,
-                card_id,
-                card_action,
-            }, this, function( result ) {} );  
+            switch (card_action) {
+                case 'gift':
+                    this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/cardAction.html", { 
+                        lock: true,
+                        card_id,
+                        card_action,
+                    }, this, function( result ) {} ); 
+                    break;
+                case 'battle':
+                    this.selectedAction = 'cardActionBattle';
+                    // this.updateSelectableActions();
+                    this.setClientState("client_cardActionBattle", { descriptionmyturn : _( "${you} must select a card or region") });
+                    break;
+                case 'default':
+                    console.log('default gift');
+                    break;
+            }
+ 
         },
 
         onCancel: function()
@@ -1651,7 +1694,7 @@ function (dojo, declare) {
         {
             console.log('notif_selectGift', notif);
             this.clearLastAction();
-            const {updated_cards, player_id, rupee_count} = notif.args;
+            const {updated_cards, player_id, rupee_count, updated_counts} = notif.args;
              // Place paid rupees on market cards
              updated_cards.forEach ((item, index) => {
                 const marketRow = item.location.split('_')[1];
@@ -1666,7 +1709,8 @@ function (dojo, declare) {
                     from: `rupees_${player_id}`
                 });
             }, this);
-            $('rupee_count_' + player_id).innerHTML = rupee_count;
+            $('rupee_count_' + player_id).innerHTML = updated_counts.rupees;
+            $('influence_'+ player_id).innerHTML = updated_counts.influence;
         },
 
         notif_updatePlayerCounts: function( notif )

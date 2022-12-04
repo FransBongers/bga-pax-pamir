@@ -121,10 +121,16 @@ html {
 }
 
 .pp_region {
+    fill: transparent;
+}
+
+.pp_region.pp_selectable {
     fill: green;
     fill-opacity: 25%;
     stroke: green;
     stroke-width: 4;
+    z-index: 50;
+    cursor: pointer;
 }
 
 .pp_location {

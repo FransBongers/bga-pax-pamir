@@ -433,9 +433,18 @@ class PaxPamirEditionTwo extends Table
                 $influence += 1;
             }
         }
+        for ($i = 1; $i <= 3; $i ++) {
+            $value = $i * 2;
+            $tokens_in_location = $this->tokens->getTokensInLocation('gift_'.$value.'_'.$player_id);
+            if (count($tokens_in_location) > 0) {
+                $influence += 1;
+            }
+        }
+
+        
+        // $this->tokens->getTokensOfTypeInLocation('cylinder', 'court_'.$player_id, null, 'state');
         // TODO (Frans): get information about courd cards and add influence if patriot
         // Add number of prizes
-        // Add number of gifts
 
         return $influence;
     }
@@ -1081,6 +1090,11 @@ class PaxPamirEditionTwo extends Table
         return $updated_cards;
     }
 
+    function isCardFavoredSuit ($card_id) {
+        $card_info = $this->cards[$card_id];
+        $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'];
+    }
+
     /**
      * Play card from hand to court
      */
@@ -1088,12 +1102,18 @@ class PaxPamirEditionTwo extends Table
     {
         self::checkAction( 'selectGift' );
         self::dump( "selected_gift", $selected_gift );
+        
 
         $player_id = self::getActivePlayerId();
         $rupees = $this->getPlayerRupees($player_id);
-        // Card should have the card action
+        // Player should have enough rupees
         if ($rupees < $selected_gift) {
             throw new feException( "Not enough rupees to pay for the gift." );
+        }
+        $location = 'gift_'.$selected_gift.'_'.$player_id;
+        $tokens_in_location = $this->tokens->getTokensInLocation($location);
+        if (count($tokens_in_location) > 0) {
+            throw new feException( "Already a cylinder in selected location." );
         }
 
         $from = "cylinders_".$player_id;
@@ -1101,19 +1121,24 @@ class PaxPamirEditionTwo extends Table
         
         // If null player needs to select cylinder from somewhere else
         if ($cylinder != null) {
-            $to = 'gift_'.$selected_gift.'_'.$player_id;
-            $this->tokens->moveToken($cylinder['key'], $to);
+            $this->tokens->moveToken($cylinder['key'], $location);
             $card_id = 'card_'.$this->getGameStateValue("card_action_card_id");
             $this->tokens->setTokenUsed($card_id, 1); // unavailable false
             self::notifyAllPlayers( "moveToken", "", array(
                 'moves' => array(
                     0 => array (
                         'from' => $from,
-                        'to' => $to,
+                        'to' => $location,
                         'token_id' => $cylinder['key'],
                     )
                 )
             ));
+        }
+
+        // if not free action reduce remaining actions.
+        $card_id = 'card_'.$this->getGameStateValue("card_action_card_id");
+        if (!$this->isCardFavoredSuit($card_id)) {
+            $this->incGameStateValue("remaining_actions", -1);
         }
 
         $number_rupees_per_row = $selected_gift / 2;
@@ -1122,12 +1147,18 @@ class PaxPamirEditionTwo extends Table
         $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(1, $number_rupees_per_row));
         $this->incPlayerRupees($player_id, -$selected_gift);
 
+        $updated_counts = array(
+            'rupees' => $rupees - $selected_gift,
+            'influence' => $this->getPlayerInfluence($player_id),
+        );
+
         self::notifyAllPlayers( "selectGift", clienttranslate( '${player_name} purchased a gift for ${value} rupees' ), array(
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
             'value' => $selected_gift,
             'updated_cards' => $updated_cards,
             'rupee_count' => $rupees - $selected_gift,
+            'updated_counts' => $updated_counts,
         ) );
 
         $this->gamestate->nextState( 'action' );

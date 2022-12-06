@@ -336,28 +336,6 @@ class PaxPamirEditionTwo extends Table
 
     }
 
-    /*
-        Triggered at end of a players turn. Checks if player needs to discard any cards from court or hand.
-    */
-    function cleanup( )
-    {
-        //
-        // go to the next state for cleanup:  either discard court, discard hand or refresh market
-        //
-
-        $player_id = self::getActivePlayerId();
-        $discards = $this->checkDiscardsForPlayer($player_id);
-
-        if ($discards['court'] > 0) {
-            $this->gamestate->nextState( 'discard_court' );
-        } elseif ($discards['hand'] > 0) {
-            $this->gamestate->nextState( 'discard_hand' );
-        } else {
-            $this->gamestate->nextState( 'refresh_market' );
-        }
-
-    }
-
     /**
      * Calculates VPs based on an array with available point [5,3,1] and 
      * a ranking of players and count with first player on position 0.
@@ -741,7 +719,7 @@ class PaxPamirEditionTwo extends Table
 
             foreach ($cards as $card_id) {
                 $this->tokens->moveToken($card_id, 'discard');
-                $card_name = $this->token_types[$card_id]['name'];
+                $card_name = $this->cards[$card_id]['name'];
                 $removed_card = $this->tokens->getTokenInfo($card_id);
                 $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
 
@@ -771,7 +749,7 @@ class PaxPamirEditionTwo extends Table
 
                 // move card to discard location
                 $this->tokens->moveToken($card_id, 'discard');
-                $card_name = $this->token_types[$card_id]['name'];
+                $card_name = $this->cards[$card_id]['name'];
                 $removed_card = $this->tokens->getTokenInfo($card_id);
                 $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
                                 
@@ -796,8 +774,7 @@ class PaxPamirEditionTwo extends Table
 
         $this->updatePlayerCounts();
 
-        $this->cleanup();
-
+        $this->gamestate->nextState( 'cleanup' );
     }
 
     function passAction( )
@@ -824,8 +801,7 @@ class PaxPamirEditionTwo extends Table
             ) );
         } 
 
-        $this->cleanup();
-        
+        $this->gamestate->nextState( 'cleanup' );
     }
 
     /**
@@ -899,7 +875,7 @@ class PaxPamirEditionTwo extends Table
 
         $player_id = self::getActivePlayerId();
         $card = $this->tokens->getTokenInfo($card_id);
-        $card_name = $this->token_types[$card_id]['name'];
+        $card_name = $this->cards[$card_id]['name'];
 
         $bribe_card_id = $this->getGameStateValue("bribe_card_id");
         $bribe_ruler = $this->getRegionRulerForCard($bribe_card_id);
@@ -989,7 +965,7 @@ class PaxPamirEditionTwo extends Table
             throw new feException( "Card is unavailble" );
         }
 
-        $card_name = $this->token_types[$card_id]['name'];
+        $card_name = $this->cards[$card_id]['name'];
         $market_location = $card['location'];
         self::dump( "purchaseCard", $card_id, $player_id, $card );
         $row = explode("_", $market_location)[1];
@@ -1092,7 +1068,7 @@ class PaxPamirEditionTwo extends Table
 
     function isCardFavoredSuit ($card_id) {
         $card_info = $this->cards[$card_id];
-        $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'];
+        return $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'];
     }
 
     /**
@@ -1232,6 +1208,67 @@ class PaxPamirEditionTwo extends Table
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
     */
+
+    /*
+        Triggered at end of a players turn. Checks if player needs to discard any cards from court or hand.
+    */
+    function stCleanup( )
+    {
+        /**
+         * 0. Set cards back to unused
+         * 1. discard court cards if needed
+         * 2. discard hand cards if needed
+         * 3. discard events in leftmost column (TODO)
+         * 4. refreshMarket
+         */
+
+        $player_id = self::getActivePlayerId();
+
+        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, null, 1);
+        foreach($court_cards as $card ) {
+            $this->tokens->setTokenUsed($card["key"], 0);
+        }
+
+        $discards = $this->checkDiscardsForPlayer($player_id);
+
+        if ($discards['court'] > 0) {
+            $this->gamestate->nextState( 'discard_court' );
+        } elseif ($discards['hand'] > 0) {
+            $this->gamestate->nextState( 'discard_hand' );
+        } else {
+            $this->gamestate->nextState( 'discard_events' );
+        }
+
+    }
+
+    function stCleanupDiscardEvents( )
+    {
+ 
+        // Discard events at front of market
+        // NOTE: perhaps move this to separate state for handling execution of the event
+        $top_card = $this->tokens->getTokenOnLocation('market_0_0');
+        $bottom_card = $this->tokens->getTokenOnLocation('market_1_0');
+        if ($top_card != null && $this->cards[$top_card['key']]['type'] == PPEnumCardType::Event) {
+            $this->tokens->moveToken($top_card['key'], 'discard');
+            // $card_name = $this->cards[$top_card['key']]['name'];
+            self::notifyAllPlayers( "discardCard", 'event is discarded from the market.', array(
+                // 'card_name' => $card_name,
+                'card_id' => $top_card['key'],
+                'from' => 'market_0_0'
+            ) );
+        };
+        if ($bottom_card != null && $this->cards[$bottom_card['key']]['type'] == PPEnumCardType::Event) {
+            $this->tokens->moveToken($bottom_card['key'], 'discard');
+            // $card_name = $this->cards[$bottom_card['key']]['name'];
+            self::notifyAllPlayers( "discardCard", 'event is discarded from the market.', array(
+                // 'card_name' => $card_name,
+                'card_id' => $bottom_card['key'],
+                'from' => 'market_1_0'
+            ) );
+        };
+
+        $this->gamestate->nextState( 'refresh_market' );
+    }
 
     function stDominanceCheck() {
         // TODO: increase by 2 in case of instability
@@ -1527,6 +1564,9 @@ class PaxPamirEditionTwo extends Table
      */
     function stRefreshMarket()
     {
+  
+        // Refill market
+
         $empty_top = array();
         $empty_bottom = array();
         $card_moves = array();

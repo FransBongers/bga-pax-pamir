@@ -58,6 +58,8 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_DISCARD_HAND", 7);
     define("STATE_PLACE_ROAD", 8);
     define("STATE_PLACE_SPY", 9);
+    define("STATE_CLEANUP", 10);
+    define("STATE_CLEANUP_DISCARD_EVENTS", 11);
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("STATE_DOMINANCE_CHECK", 30);
@@ -123,15 +125,35 @@ $machinestates = array(
             "dominance_check" => STATE_DOMINANCE_CHECK,
             "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
             "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
-            "discard_court" => STATE_DISCARD_COURT, 
-            "discard_hand" => STATE_DISCARD_HAND, 
-            "refresh_market" => STATE_REFRESH_MARKET,
             "card_action_battle" => STATE_CARD_ACTION_BATTLE,
             "card_action_betray" => STATE_CARD_ACTION_BETRAY,
             "card_action_build" => STATE_CARD_ACTION_BUILD,
             "card_action_gift" => STATE_CARD_ACTION_GIFT,
             "card_action_move" => STATE_CARD_ACTION_MOVE,
-            "card_action_tax" => STATE_CARD_ACTION_TAX, 
+            "card_action_tax" => STATE_CARD_ACTION_TAX,
+            "cleanup" => STATE_CLEANUP,
+        )
+    ),
+
+    STATE_CLEANUP => array(
+        "name" => "cleanup",
+        "type" => "game",
+        "action" => "stCleanup",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "discard_court" => STATE_DISCARD_COURT, 
+            "discard_hand" => STATE_DISCARD_HAND, 
+            "discard_events" => STATE_CLEANUP_DISCARD_EVENTS,
+        )
+    ),
+
+    STATE_CLEANUP_DISCARD_EVENTS => array(
+        "name" => "cleanupDiscardEvents",
+        "type" => "game",
+        "action" => "stCleanupDiscardEvents",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "refresh_market" => STATE_REFRESH_MARKET,
         )
     ),
 
@@ -181,10 +203,8 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argPlayerActions",
         "possibleactions" => array( "discard" ),
-        "transitions" => array( 
-            "discard_court" => STATE_DISCARD_COURT, 
-            "discard_hand" => STATE_DISCARD_HAND, 
-            "refresh_market" => STATE_REFRESH_MARKET, 
+        "transitions" => array(
+            "cleanup" => STATE_CLEANUP,
         )
     ),
 
@@ -196,8 +216,7 @@ $machinestates = array(
         "args" => "argPlayerActions",
         "possibleactions" => array( "discard" ),
         "transitions" => array( 
-            "discard_hand" => STATE_DISCARD_HAND, 
-            "refresh_market" => STATE_REFRESH_MARKET, 
+            "cleanup" => STATE_CLEANUP,
         )
     ),
 

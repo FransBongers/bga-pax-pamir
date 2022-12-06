@@ -741,7 +741,6 @@ function (dojo, declare) {
             dojo.forEach(this.handles, dojo.disconnect);
             this.handles = [];
             this.regions.forEach((region) => {
-                console.log('region', region);
                 const element = document.getElementById(`pp_region_${region}`);
                 element.classList.remove('pp_selectable');
             });
@@ -795,8 +794,8 @@ function (dojo, declare) {
 
         discardCard: function({id, from, order = null}) {
             // Move all spies back to cylinder pools
-            if (this.spies[id]) {
-                ['cylinder_2371052_3']
+            if (this.spies?.[id]) {
+                // ['cylinder_2371052_3']
                 const items = this.spies[id].getAllItems();
                 items.forEach((cylinderId) => {
                     const playerId = cylinderId.split('_')[1];
@@ -1039,7 +1038,6 @@ function (dojo, declare) {
                 case 'cardActionGift':
                     ['2', '4', '6'].forEach((giftValue) => {
                         const hasGift = this.gifts[playerId][giftValue].getAllItems().length > 0;
-                        console.log('giftValue', giftValue, 'rupees', this.activePlayer.rupees, giftValue <= this.activePlayer.rupees);
                         if (!hasGift && giftValue <= this.activePlayer.rupees) {
                             dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
                                 dojo.addClass(node, 'pp_selectable');
@@ -1520,11 +1518,16 @@ function (dojo, declare) {
 
             this.clearLastAction();
             const playerId = notif.args.player_id;
-
-            if (notif.args.from == 'hand') {
+            const from = notif.args.from;
+            if (from == 'hand') {
                 // TODO (Frans): check how this works for other players than the one whos card gets discarded
                 this.discardCard({id: notif.args.card_id, from: this.playerHand});
 
+            } else if (from == 'market_0_0' || from == 'market_1_0') {
+                console.log(this.marketCards)
+                const splitFrom = from.split('_');
+                console.log('discard marlet', splitFrom);
+                this.discardCard({id: notif.args.card_id, from: this.marketCards[splitFrom[1]][splitFrom[2]]});
             } else {
 
                 this.discardCard({id: notif.args.card_id, from: this.court[playerId]});
@@ -1536,25 +1539,7 @@ function (dojo, declare) {
                             id: card.key,
                             order: card.state });
                     }, this);
-    
-                // TODO (Frans): check removing tokens from cards
-                // if (this.card_tokens[notif.args.card_id] !== null) 
-                //     this.card_tokens[notif.args.card_id].removeAll();
-
             }
-
-            // notif.args.court_cards.forEach (
-            //     function (card, index) {
-            //         this.updateCard(
-            //             this.court[player_id], 
-            //             card.key,
-            //             card.state );
-            //     }, this);
-
-            // this.card_tokens[notif.args.card.key].removeAll();
-
-            // this.court[player_id].updateDisplay();
-
         },
 
         notif_dominanceCheck: function ( notif ) {

@@ -120,6 +120,10 @@ html {
     /* background-color: blue; */
 }
 
+#pp_map_areas.pp_selectable {
+    z-index: 50;
+}
+
 .pp_region {
     fill: transparent;
 }
@@ -129,7 +133,6 @@ html {
     fill-opacity: 25%;
     stroke: green;
     stroke-width: 4;
-    z-index: 50;
     cursor: pointer;
 }
 

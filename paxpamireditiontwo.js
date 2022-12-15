@@ -22,6 +22,8 @@ define([
     "ebg/stock",
     "ebg/zone",
     g_gamethemeurl + "modules/js/NotificationManager.js",
+    g_gamethemeurl + "modules/js/PlayerManager.js",
+    g_gamethemeurl + "modules/js/Utils.js",
 ],
 function (dojo, declare) {
     return declare("bgagame.paxpamireditiontwo", ebg.core.gamegui, {
@@ -161,6 +163,7 @@ function (dojo, declare) {
         setup: function( gamedatas )
         {
             console.log('gamedatas', gamedatas);
+            this.playerManager = new PlayerManager(this);
 
             const players = gamedatas.players;
             const numberOfPlayers = gamedatas.playerorder.length;
@@ -752,6 +755,7 @@ function (dojo, declare) {
                 const element = document.getElementById(`pp_region_${region}`);
                 element.classList.remove('pp_selectable');
             });
+            document.getElementById('pp_map_areas').classList.remove('pp_selectable');
         },
 
         createBorderZone: function({border, zone}) 
@@ -1013,6 +1017,8 @@ function (dojo, declare) {
                 case 'cardActionBattle':
                     console.log('battle');
                     console.log('dojo', dojo);
+                    const container = document.getElementById(`pp_map_areas`);
+                    container.classList.add('pp_selectable');
                     this.regions.forEach((region) => {
                         console.log('region', region);
                         const element = document.getElementById(`pp_region_${region}`);
@@ -1021,10 +1027,10 @@ function (dojo, declare) {
                         this.handles.push(dojo.connect(element,'onclick', this, 'onSelectRegion'));
                         // dojo.query(`#pp_region_${region}`).forEach((node) => {
                         // dojo.query(`.pp_region`).forEach((node) => {
-                        dojo.query('#pp_map_areas').forEach((node) => {
-                            dojo.addClass(node, 'pp_selectable');
-                            this.handles.push(dojo.connect(node,'onclick', this, 'onSelectRegion'));
-                        })
+                        // dojo.query('#pp_map_areas').forEach((node) => {
+                        //     dojo.addClass(node, 'pp_selectable');
+                        //     this.handles.push(dojo.connect(node,'onclick', this, 'onSelectRegion'));
+                        // })
                     })
                     break;
                 case 'cardAction':

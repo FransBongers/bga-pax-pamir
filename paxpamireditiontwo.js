@@ -21,6 +21,7 @@ define([
     "ebg/counter",
     "ebg/stock",
     "ebg/zone",
+    g_gamethemeurl + "modules/js/Constants.js",
     g_gamethemeurl + "modules/js/NotificationManager.js",
     g_gamethemeurl + "modules/js/PlayerManager.js",
     g_gamethemeurl + "modules/js/Utils.js",
@@ -34,78 +35,10 @@ function (dojo, declare) {
             // Init global variables
             
             // size of tokens
-            this.cardWidth = 150;
-            this.cardHeight = 209;
-            this.armyHeight = 40;
-            this.armyWidth = 25;
-            this.coalitionBlockHeight = 40;
-            this.coalitionBlockWidth = 25;
-            this.roadHeight = 27;
-            this.roadWidth = 40;
-            this.tribeWidth = 25;
-            this.tribeHeight = 25;
-            this.rupeeWidth = 50;
-            this.rupeeHeight = 50;
-            this.cylinderWidth = 30;
-            this.cylinderHeight = 30;
-            this.favoredSuitMarkerWidth = 22;
-            this.favoredSuitMarkerHeight = 50;
-            this.rulerTokenWidth = 50;
-            this.rulerTokenHeight = 50;
+
 
             this.defaultWeightZone = 0;
             // NOTE (Frans): probably good idea to get all game specific data from below from the backend
-            // coalitions
-            this.afghan = 'afghan';
-            this.british = 'british';
-            this.russian = 'russian';
-
-            this.coalitions = [
-                this.afghan,
-                this.british,
-                this.russian,
-            ]
-            
-            // regions
-            this.herat = 'herat';
-            this.kabul = 'kabul';
-            this.kandahar = 'kandahar';
-            this.persia = 'persia';
-            this.punjab = 'punjab';
-            this.transcaspia = 'transcaspia';
-
-            this.regions = [
-                this.herat,
-                this.kabul,
-                this.kandahar,
-                this.persia,
-                this.punjab,
-                this.transcaspia,
-            ]
-
-            // borders (for all borders regions are in alphabetical order)
-
-            this.herat_kabul = 'herat_kabul',
-            this.herat_kandahar = 'herat_kandahar',
-            this.herat_persia = 'herat_persia',
-            this.herat_transcaspia = 'herat_transcaspia',
-            this.kabul_transcaspia = 'kabul_transcaspia',
-            this.kabul_kandahar = 'kabul_kandahar',
-            this.kabul_punjab = 'kabul_punjab',
-            this.kandahar_punjab = 'kandahar_punjab',
-            this.persia_transcaspia = 'persia_transcaspia',
-
-            this.borders = [
-                this.herat_kabul,
-                this.herat_kandahar,
-                this.herat_persia,
-                this.herat_transcaspia,
-                this.kabul_transcaspia,
-                this.kabul_kandahar,
-                this.kabul_punjab,
-                this.kandahar_punjab,
-                this.persia_transcaspia,
-            ]
 
             // global variables to keep stock components
             this.playerHand = new ebg.stock();
@@ -184,11 +117,12 @@ function (dojo, declare) {
             // Create VP track
             for ( let i = 0; i <= 23; i++ ) {
                 this.vpTrack[i] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.vpTrack[i],
                     nodeId: `pp_vp_track_${i}`,
-                    tokenWidth: this.cylinderWidth,
-                    tokenHeight: this.cylinderHeight,
+                    tokenWidth: CYLINDER_WIDTH,
+                    tokenHeight: CYLINDER_HEIGHT,
                 });
                 this.vpTrack[i].setPattern('ellipticalfit');
             }
@@ -209,17 +143,19 @@ function (dojo, declare) {
 
                 // Create cylinder zone
                 this.cylinders[playerId] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.cylinders[playerId],
                     nodeId: `pp_cylinders_player_${playerId}`,
-                    tokenWidth: this.cylinderWidth,
-                    tokenHeight: this.cylinderHeight,
+                    tokenWidth: CYLINDER_WIDTH,
+                    tokenHeight: CYLINDER_HEIGHT,
                     itemMargin: 10,
                 });
 
                 // Add cylinders to zone
                 Object.keys(gamedatas.cylinders[playerId]).forEach((cylinderId) => {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.cylinders[playerId],
                         id: cylinderId,
                         jstpl: 'jstpl_cylinder',
@@ -232,7 +168,8 @@ function (dojo, declare) {
                 });
 
                 // Add cylinder to VP track
-                this.placeToken({
+                placeToken({
+                    game: this,
                     location: this.vpTrack[player.score],
                     id: `vp_cylinder_${playerId}`,
                     jstpl: 'jstpl_cylinder',
@@ -247,7 +184,8 @@ function (dojo, declare) {
                 // Set up gift zones
                 ['2', '4', '6'].forEach((value) => {
                     this.gifts[playerId][value] = new ebg.zone();
-                    this.setupTokenZone({
+                    setupTokenZone({
+                        game: this,
                         zone: this.gifts[playerId][value],
                         nodeId: `pp_gift_${value}_zone_${playerId}`,
                         tokenWidth: 40,
@@ -264,7 +202,8 @@ function (dojo, declare) {
                 const playerGifts = gamedatas.gifts[playerId]
                 Object.keys(playerGifts).forEach((giftValue) => {
                     Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
-                        this.placeToken({
+                        placeToken({
+                            game: this,
                             location: this.gifts[playerId][giftValue],
                             id: cylinderId,
                             jstpl: 'jstpl_cylinder',
@@ -314,11 +253,12 @@ function (dojo, declare) {
                     // Set up zone for all rupees in the market
                     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
                     this.marketRupees[row][column] = new ebg.zone();
-                    this.setupTokenZone({
+                    setupTokenZone({
+                        game: this,
                         zone: this.marketRupees[row][column],
                         nodeId: rupeeContainerId,
-                        tokenWidth: this.rupeeWidth,
-                        tokenHeight: this.rupeeHeight,
+                        tokenWidth: RUPEE_WIDTH,
+                        tokenHeight: RUPEE_HEIGHT,
                         itemMargin: -30,
                     });
                     
@@ -337,7 +277,8 @@ function (dojo, declare) {
                 if (rupee.location.startsWith('market')) {
                     const row = rupee.location.split('_')[1];
                     const column = rupee.location.split('_')[2];
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.marketRupees[row][column],
                         id: rupeeId,
                         jstpl: 'jstpl_rupee',
@@ -356,41 +297,45 @@ function (dojo, declare) {
             });
 
             // Create zones for each region
-            this.regions.forEach((region, index) => {
+            REGIONS.forEach((region, index) => {
                 // armies
                 this.armies[region] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.armies[region],
                     nodeId: `pp_${region}_armies`,
-                    tokenWidth: this.armyWidth,
-                    tokenHeight: this.armyHeight,
+                    tokenWidth: ARMY_WIDTH,
+                    tokenHeight: ARMY_HEIGHT,
                     itemMargin: -5,
                 });
 
                 // tribes
                 this.tribes[region] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.tribes[region],
                     nodeId: `pp_${region}_tribes`,
-                    tokenWidth: this.tribeWidth,
-                    tokenHeight: this.tribeHeight,
+                    tokenWidth: TRIBE_WIDTH,
+                    tokenHeight: TRIBE_HEIGHT,
                 });
 
                 // Setup ruler tokens
                 this.rulers[region] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.rulers[region],
                     nodeId: `pp_position_ruler_token_${region}`,
-                    tokenWidth: this.rulerTokenWidth,
-                    tokenHeight: this.rulerTokenHeight,
+                    tokenWidth: RULER_TOKEN_WIDTH,
+                    tokenHeight: RULER_TOKEN_HEIGHT,
                 });
             });
 
             // Place ruler tokens
-            this.regions.forEach((region) => {
+            REGIONS.forEach((region) => {
                 const ruler = this.gamedatas.rulers[region];
                 if (ruler == 0) {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.rulers[region],
                         id: `pp_ruler_token_${region}`,
                         jstpl: 'jstpl_ruler_token',
@@ -404,10 +349,11 @@ function (dojo, declare) {
             });
 
             // Place armies and tribes
-            this.regions.forEach((region) => {
+            REGIONS.forEach((region) => {
                 // armies
                 Object.keys(this.gamedatas.armies[region]).forEach((id) => {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.armies[region],
                         id,
                         jstpl: 'jstpl_army',
@@ -421,7 +367,8 @@ function (dojo, declare) {
 
                 // tribes
                 Object.keys(this.gamedatas.tribes[region]).forEach((id) => {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.tribes[region],
                         id,
                         jstpl: 'jstpl_cylinder',
@@ -434,12 +381,13 @@ function (dojo, declare) {
             });
 
             // Create zones for roads
-            this.borders.forEach((border) => {
+            BORDERS.forEach((border) => {
                 this.roads[border] = new ebg.zone();
                 this.createBorderZone({border, zone: this.roads[border]});
 
                 Object.keys(this.gamedatas.roads[border]).forEach((id) => {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.roads[border],
                         id,
                         jstpl: 'jstpl_road',
@@ -453,18 +401,20 @@ function (dojo, declare) {
             });
             
             // Setup supply of coalition blocks
-            this.coalitions.forEach((coalition) => {
+            COALITIONS.forEach((coalition) => {
                 this.coalitionBlocks[coalition] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.coalitionBlocks[coalition],
                     nodeId: `pp_${coalition}_coalition_blocks`,
-                    tokenWidth: this.coalitionBlockWidth,
-                    tokenHeight: this.coalitionBlockHeight,
+                    tokenWidth: COALITION_BLOCK_WIDTH,
+                    tokenHeight: COALITION_BLOCK_HEIGHT,
                     itemMargin: 15,
                     instantaneous: true,
                 });
                 Object.keys(this.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.coalitionBlocks[coalition],
                         id: blockId,
                         jstpl: 'jstpl_coalition_block',
@@ -482,7 +432,8 @@ function (dojo, declare) {
             Object.keys(gamedatas.spies || {}).forEach((cardId) => {
                 Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
                     const playerId = cylinderId.split('_')[1];
-                    this.placeToken({
+                    placeToken({
+                        game: this,
                         location: this.spies[cardId],
                         id: cylinderId,
                         jstpl: 'jstpl_cylinder',
@@ -499,16 +450,18 @@ function (dojo, declare) {
             // Setup zones for favored suit marker
             this.gamedatas.suits.forEach((suit, index) => {
                 this.favoredSuit[suit.suit] = new ebg.zone();
-                this.setupTokenZone({
+                setupTokenZone({
+                    game: this,
                     zone: this.favoredSuit[suit.suit],
                     nodeId: `pp_favored_suit_${suit.suit}`,
-                    tokenWidth: this.favoredSuitMarkerWidth,
-                    tokenHeight: this.favoredSuitMarkerHeight,
+                    tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
+                    tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
                 });
             })
 
             const suitId = this.gamedatas.favored_suit.suit;
-            this.placeToken({
+            placeToken({
+                game: this,
                 location: this.favoredSuit[suitId],
                 //location: this.favoredSuit['intelligence'], // for testing change of favored suit
                 id: `favored_suit_marker`,
@@ -751,7 +704,7 @@ function (dojo, declare) {
 
             dojo.forEach(this.handles, dojo.disconnect);
             this.handles = [];
-            this.regions.forEach((region) => {
+            REGIONS.forEach((region) => {
                 const element = document.getElementById(`pp_region_${region}`);
                 element.classList.remove('pp_selectable');
             });
@@ -760,7 +713,7 @@ function (dojo, declare) {
 
         createBorderZone: function({border, zone}) 
         {
-            zone.create(this, `pp_${border}_border`, this.roadWidth, this.roadHeight);
+            zone.create(this, `pp_${border}_border`, ROAD_WIDTH, ROAD_HEIGHT);
             // this[`${border}_border`].item_margin = -10;
             // this['transcaspia_armies'].setPattern( 'horizontalfit' );
 
@@ -906,22 +859,11 @@ function (dojo, declare) {
 
         },
 
-        // TODO(Frans): detereming jstpl based on id?
-        placeToken: function({location, id, jstpl, jstplProps, weight = 0, classes = [], from = null}) {
-            // console.log('from', from)
-            dojo.place( this.format_block( jstpl, jstplProps ) , from || 'pp_tokens' );
-            classes.forEach((className) => {
-                dojo.addClass( id, className ); 
-            })
-            location.placeInZone( id, weight );
-        },
-
-
 
         // Function to setup stock components for cards
         setupCardsStock: function( {stock, nodeId, className} ) {
             const useLargeCards = false;
-            stock.create( this, $(nodeId), this.cardWidth, this.cardHeight );
+            stock.create( this, $(nodeId), CARD_WIDTH, CARD_HEIGHT );
             // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
             const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
             stock.image_items_per_row = useLargeCards ? 117 : 118;
@@ -961,21 +903,6 @@ function (dojo, declare) {
             }
         },
 
-        // Function to set up zones for tokens (armies, tribes, cylinders etc.)
-        setupTokenZone: function({zone, nodeId, tokenWidth, tokenHeight, itemMargin = null, instantaneous = false, pattern = null, customPattern = null}) {
-            zone.create(this, nodeId, tokenWidth, tokenHeight);
-            if (itemMargin) {
-                zone.item_margin = itemMargin;
-            };
-            zone.instantaneous = instantaneous;
-            if (pattern) {
-                zone.setPattern(pattern);
-            }
-            if (pattern == 'custom' && customPattern) {
-                zone.itemIdToCoords = customPattern;
-            }
-        },
-
         // Every time a card is moved or placed in court this function will be called to set up zone.
         setupCardSpyZone: function({nodeId, cardId}) {
             // Note (Frans): we probably need to remove spies before moving / placing card
@@ -985,7 +912,7 @@ function (dojo, declare) {
 
             // ** setup for zone
             this.spies[cardId] = new ebg.zone();
-            this.spies[cardId].create( this, nodeId, this.cylinderWidth, this.cylinderHeight );
+            this.spies[cardId].create( this, nodeId, CYLINDER_WIDTH, CYLINDER_HEIGHT );
             this.spies[cardId].item_margin = 4;
         },
 
@@ -1019,7 +946,7 @@ function (dojo, declare) {
                     console.log('dojo', dojo);
                     const container = document.getElementById(`pp_map_areas`);
                     container.classList.add('pp_selectable');
-                    this.regions.forEach((region) => {
+                    REGIONS.forEach((region) => {
                         console.log('region', region);
                         const element = document.getElementById(`pp_region_${region}`);
                         // console.log(node);

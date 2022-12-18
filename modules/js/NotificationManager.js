@@ -214,7 +214,8 @@ class NotificationManager {
     notif.args.updated_cards.forEach((item, index) => {
       const marketRow = item.location.split("_")[1];
       const marketColumn = item.location.split("_")[2];
-      this.game.placeToken({
+      placeToken({
+        game: this.game,
         location: this.game.marketRupees[marketRow][marketColumn],
         id: item.rupee_id,
         jstpl: "jstpl_rupee",
@@ -271,7 +272,8 @@ class NotificationManager {
     updated_cards.forEach((item, index) => {
       const marketRow = item.location.split("_")[1];
       const marketColumn = item.location.split("_")[2];
-      this.game.placeToken({
+      placeToken({
+        game: this.game,
         location: this.game.marketRupees[marketRow][marketColumn],
         id: item.rupee_id,
         jstpl: "jstpl_rupee",

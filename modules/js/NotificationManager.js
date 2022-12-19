@@ -79,7 +79,7 @@ class NotificationManager {
     const coalition = notif.args.coalition;
     const playerId = notif.args.player_id;
 
-    this.game.updatePlayerLoyalty({ playerId, coalition });
+    updatePlayerLoyalty({ playerId, coalition });
   }
 
   notif_discardCard(notif) {
@@ -100,11 +100,11 @@ class NotificationManager {
         from: this.game.marketCards[splitFrom[1]][splitFrom[2]],
       });
     } else {
-      this.game.discardCard({ id: notif.args.card_id, from: this.game.court[playerId] });
+      this.game.discardCard({ id: notif.args.card_id, from: this.game.playerManager.players[playerId].court });
 
       notif.args.court_cards.forEach(function (card, index) {
         this.game.updateCard({
-          location: this.game.court[playerId],
+          location: this.game.playerManager.players[playerId].court,
           id: card.key,
           order: card.state,
         });
@@ -149,7 +149,7 @@ class NotificationManager {
 
     notif.args.court_cards.forEach(function (card, index) {
       this.game.updateCard({
-        location: this.game.court[playerId],
+        location: this.game.playerManager.players[playerId].court,
         id: card.key,
         order: card.state,
       });
@@ -159,18 +159,18 @@ class NotificationManager {
       this.game.moveCard({
         id: notif.args.card.key,
         from: this.game.playerHand,
-        to: this.game.court[playerId],
+        to: this.game.playerManager.players[playerId].court,
       });
     } else {
       // TODO (Frans): check why moveCard results in a UI error => probably because other players don't have a playerHand?
-      // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.court[playerId]});
-      this.game.placeCard({
-        location: this.game.court[playerId],
+      // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.playerManager.players[playerId].court});
+      placeCard({
+        location: this.game.playerManager.players[playerId].court,
         id: notif.args.card.key,
       });
     }
 
-    this.game.court[playerId].updateDisplay();
+    this.game.playerManager.players[playerId].court.updateDisplay();
   }
 
   notif_purchaseCard(notif) {
@@ -255,7 +255,7 @@ class NotificationManager {
     }, this);
 
     notif.args.new_cards.forEach(function (move, index) {
-      this.game.placeCard({
+      placeCard({
         location:
           this.game.marketCards[move.to.split("_")[1]][move.to.split("_")[2]],
         id: move.card_id,

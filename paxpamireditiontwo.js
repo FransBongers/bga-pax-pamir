@@ -52,12 +52,6 @@ function (dojo, declare) {
             this.tribes = {};
             // rulers in region
             this.rulers = {};
-            // court per player
-            this.court = {};
-            // cylinders per player
-            this.cylinders = {};
-            // gifts per player / value
-            this.gifts = {};
             // events per player
             this.playerEvents = {};
             // active events
@@ -96,22 +90,17 @@ function (dojo, declare) {
         setup: function( gamedatas )
         {
             console.log('gamedatas', gamedatas);
-            this.playerManager = new PlayerManager(this);
-
-            const players = gamedatas.players;
-            const numberOfPlayers = gamedatas.playerorder.length;
-            const colors = Object.keys(players).map((key) => players[key].color);
-            // console.log('players', players)
 
             // Events
-            this.setupCardsStock({
+            setupCardsStock({
+                game: this,
                 stock: this.activeEvents,
                 nodeId: 'pp_active_events',
                 // className: `pp_card_in_court_${playerId}`
             });
 
             Object.keys(gamedatas.active_events).forEach((key) => {
-                this.placeCard({location: this.activeEvents, id: gamedatas.active_events[key].key});
+                placeCard({location: this.activeEvents, id: gamedatas.active_events[key].key});
             })
 
             // Create VP track
@@ -127,114 +116,12 @@ function (dojo, declare) {
                 this.vpTrack[i].setPattern('ellipticalfit');
             }
 
-            // Setup of all player specific components 
-            for( const playerId in gamedatas.players )
-            {
-                const player = gamedatas.players[playerId];
 
-                // Create player court stock
-                this.court[playerId] = new ebg.stock();
-                this.setupCardsStock({stock: this.court[playerId], nodeId: `pp_court_player_${playerId}`, className: `pp_card_in_court_${playerId}`});
-
-                // Add court cards played by player to court
-                gamedatas.court[playerId].forEach((card) => {
-                    this.placeCard({location: this.court[playerId], id: card.key, order: card.state});
-                })
-
-                // Create cylinder zone
-                this.cylinders[playerId] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.cylinders[playerId],
-                    nodeId: `pp_cylinders_player_${playerId}`,
-                    tokenWidth: CYLINDER_WIDTH,
-                    tokenHeight: CYLINDER_HEIGHT,
-                    itemMargin: 10,
-                });
-
-                // Add cylinders to zone
-                Object.keys(gamedatas.cylinders[playerId]).forEach((cylinderId) => {
-                    placeToken({
-                        game: this,
-                        location: this.cylinders[playerId],
-                        id: cylinderId,
-                        jstpl: 'jstpl_cylinder',
-                        jstplProps: {
-                            id: cylinderId,
-                            color: gamedatas.players[playerId].color,
-                        },
-                        weight: this.defaultWeightZone,
-                    });
-                });
-
-                // Add cylinder to VP track
-                placeToken({
-                    game: this,
-                    location: this.vpTrack[player.score],
-                    id: `vp_cylinder_${playerId}`,
-                    jstpl: 'jstpl_cylinder',
-                    jstplProps: {
-                        id: `vp_cylinder_${playerId}`,
-                        color: gamedatas.players[playerId].color,
-                    },
-                    weight: this.defaultWeightZone,
-                });
-
-                this.gifts[playerId] = {};
-                // Set up gift zones
-                ['2', '4', '6'].forEach((value) => {
-                    this.gifts[playerId][value] = new ebg.zone();
-                    setupTokenZone({
-                        game: this,
-                        zone: this.gifts[playerId][value],
-                        nodeId: `pp_gift_${value}_zone_${playerId}`,
-                        tokenWidth: 40,
-                        tokenHeight: 40,
-                        // itemMargin: 10,
-                        pattern: 'custom',
-                        customPattern: () => {
-                            return {x: 5, y:5, w: 30, h: 30}
-                        }
-                    });
-                });
-
-                // Add gifts to zones
-                const playerGifts = gamedatas.gifts[playerId]
-                Object.keys(playerGifts).forEach((giftValue) => {
-                    Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
-                        placeToken({
-                            game: this,
-                            location: this.gifts[playerId][giftValue],
-                            id: cylinderId,
-                            jstpl: 'jstpl_cylinder',
-                            jstplProps: {
-                                id: cylinderId,
-                                color: gamedatas.players[playerId].color,
-                            },
-                            weight: this.defaultWeightZone,
-                        });
-                    });
-                })
-                
-
-                // Set up players board
-                const player_board_div = $('player_board_'+playerId);
-                dojo.place( this.format_block('jstpl_player_board', player ), player_board_div );
-                if (player.loyalty !== 'null') {
-                    this.updatePlayerLoyalty({playerId, coalition: player.loyalty})
-                }
-
-                // Set all values in player panels
-                $('influence_'+ playerId).innerHTML = gamedatas.counts[playerId].influence;
-                $('cylinder_count_' + playerId).innerHTML = gamedatas.counts[playerId].cylinders;
-                $('rupee_count_' + playerId).innerHTML = gamedatas.players[playerId].rupees;
-                $('card_count_' + playerId).innerHTML = gamedatas.counts[playerId].cards;
-
-                $('economic_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.economic;
-                $('military_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.military;
-                $('political_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.political;
-                $('intelligence_'+ playerId).innerHTML = gamedatas.counts[playerId].suits.intelligence;
-            }
+            this.playerManager = new PlayerManager(this);
+            // const players = gamedatas.players;
+            // const numberOfPlayers = gamedatas.playerorder.length;
+            // const colors = Object.keys(players).map((key) => players[key].color);
+            // console.log('players', players)
 
             this.playerCounts = gamedatas.counts;
 
@@ -248,7 +135,7 @@ function (dojo, declare) {
                     // Set up stock component for each card in the market
                     const containerId = `pp_market_${row}_${column}`;
                     this.marketCards[row][column] = new ebg.stock();
-                    this.setupCardsStock({stock: this.marketCards[row][column], nodeId: containerId, className: 'pp_market_card'});
+                    setupCardsStock({game: this, stock: this.marketCards[row][column], nodeId: containerId, className: 'pp_market_card'});
                     
                     // Set up zone for all rupees in the market
                     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
@@ -266,7 +153,7 @@ function (dojo, declare) {
                     // add cards
                     const cardInMarket = gamedatas.market[row][column];
                     if (cardInMarket) {
-                        this.placeCard({location: this.marketCards[row][column], id: cardInMarket.key});
+                        placeCard({location: this.marketCards[row][column], id: cardInMarket.key});
                     }
                 }
             }
@@ -291,9 +178,9 @@ function (dojo, declare) {
             })
 
             // Setup player hand
-            this.setupCardsStock({stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
+            setupCardsStock({game: this, stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
             Object.keys(this.gamedatas.hand).forEach((cardId) => {
-                this.placeCard({location: this.playerHand, id: cardId});
+                placeCard({location: this.playerHand, id: cardId});
             });
 
             // Create zones for each region
@@ -764,7 +651,7 @@ function (dojo, declare) {
                 const items = this.spies[id].getAllItems();
                 items.forEach((cylinderId) => {
                     const playerId = cylinderId.split('_')[1];
-                    this.moveToken({id: cylinderId, to: this.cylinders[playerId], from: this.spies[id]});
+                    this.moveToken({id: cylinderId, to: this.playerManager.players[playerId].cylinders, from: this.spies[id]});
                 })
             }
 
@@ -784,10 +671,10 @@ function (dojo, declare) {
                     return this.coalitionBlocks[splitLocation[1]];
                 case 'cylinders':
                     // cylinders_playerId
-                    return this.cylinders[splitLocation[1]];
+                    return this.playerManager.players[splitLocation[1]].cylinders;
                 case 'gift':
                     // gift_2_playerId
-                    return this.gifts[splitLocation[2]][splitLocation[1]]
+                    return this.playerManager.players[splitLocation[2]].gifts[splitLocation[1]]
                 case 'favored':
                     // favored_suit_economic
                     return this.favoredSuit[splitLocation[2]];
@@ -844,44 +731,6 @@ function (dojo, declare) {
             from.removeFromZone(id, false)
         },
 
-        placeCard: function({location, id, order = null}) {
-            if (order != null) {
-                location.changeItemsWeight({
-                    [id]: order,
-                });
-            }
-
-            location.addToStockWithId(id, id, 'pp_market_deck');
-
-            // this.setupCardSpyZone({location, cardId: id});
-
-            // this.addTooltip( location.getItemDivId(id), id, '' );
-
-        },
-
-
-        // Function to setup stock components for cards
-        setupCardsStock: function( {stock, nodeId, className} ) {
-            const useLargeCards = false;
-            stock.create( this, $(nodeId), CARD_WIDTH, CARD_HEIGHT );
-            // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
-            const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
-            stock.image_items_per_row = useLargeCards ? 117 : 118;
-            stock.item_margin = 10;
-            // TODO: below is option to customize the created div (and add zones to card for example)
-            stock.jstpl_stock_item= "<div id=\"${id}\" class=\"stockitem pp_card " + className + "\" \
-                style=\"top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:" + backgroundSize + ";\
-                background-image:url('${image}');\"></div>";
-            
-            Object.keys(this.gamedatas.cards).forEach((cardId) => {
-                const cardFileLocation = useLargeCards ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg' : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
-                stock.addItemType( cardId, 0, cardFileLocation, useLargeCards ? cardId.split('_')[1] -1 : cardId.split('_')[1] );
-            });
-            stock.extraClasses = `pp_card ${className}`;
-            stock.setSelectionMode(0);
-            stock.onItemCreate = dojo.hitch( this, 'setupNewCard' ); 
-        },
-
         // Function that gets called every time a card is added to a stock component
         setupNewCard: function( cardDiv, cardId, divId ) {
             // if card is played to a court
@@ -919,21 +768,6 @@ function (dojo, declare) {
         // Updates weight of item in the stock component for ordering purposes
         updateCard : function({location, id, order}) {
             location.changeItemsWeight({[id]: order});
-        },
-
-        updatePlayerLoyalty: function({playerId, coalition})
-        {
-            dojo.query( `#loyalty_icon_${playerId}` )
-                .removeClass( 'pp_loyalty_afghan' )
-                .removeClass('pp_loyalty_british')
-                .removeClass('pp_loyalty_russian')
-                .addClass(`pp_loyalty_${coalition}`);
-
-            dojo.query( `#pp_loyalty_dial_${playerId}` )
-                .removeClass( 'pp_loyalty_afghan' )
-                .removeClass('pp_loyalty_british')
-                .removeClass('pp_loyalty_russian')
-                .addClass(`pp_loyalty_${coalition}`);
         },
 
         updateSelectableActions: function() {
@@ -978,7 +812,7 @@ function (dojo, declare) {
                     break;
                 case 'cardActionGift':
                     ['2', '4', '6'].forEach((giftValue) => {
-                        const hasGift = this.gifts[playerId][giftValue].getAllItems().length > 0;
+                        const hasGift = this.playerManager.players[playerId].gifts[giftValue].getAllItems().length > 0;
                         if (!hasGift && giftValue <= this.activePlayer.rupees) {
                             dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
                                 dojo.addClass(node, 'pp_selectable');

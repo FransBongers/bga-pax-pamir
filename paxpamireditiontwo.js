@@ -23,6 +23,7 @@ define([
     "ebg/zone",
     g_gamethemeurl + "modules/js/Constants.js",
     g_gamethemeurl + "modules/js/NotificationManager.js",
+    g_gamethemeurl + "modules/js/ObjectManager.js",
     g_gamethemeurl + "modules/js/PlayerManager.js",
     g_gamethemeurl + "modules/js/Utils.js",
 ],
@@ -62,8 +63,6 @@ function (dojo, declare) {
             this.spies = {};
             // zones for favored suit marker per suit
             this.favoredSuit = {};
-            // vp track zones
-            this.vpTrack = {};
 
 
             this.playerCounts = {}; // rename to playerTotals?
@@ -103,20 +102,7 @@ function (dojo, declare) {
                 placeCard({location: this.activeEvents, id: gamedatas.active_events[key].key});
             })
 
-            // Create VP track
-            for ( let i = 0; i <= 23; i++ ) {
-                this.vpTrack[i] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.vpTrack[i],
-                    nodeId: `pp_vp_track_${i}`,
-                    tokenWidth: CYLINDER_WIDTH,
-                    tokenHeight: CYLINDER_HEIGHT,
-                });
-                this.vpTrack[i].setPattern('ellipticalfit');
-            }
-
-
+            this.objectManager = new ObjectManager(this);
             this.playerManager = new PlayerManager(this);
             // const players = gamedatas.players;
             // const numberOfPlayers = gamedatas.playerorder.length;

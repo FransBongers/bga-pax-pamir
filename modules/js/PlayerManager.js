@@ -113,13 +113,14 @@ class Player {
     // Set up players board
     const player_board_div = $("player_board_" + playerId);
     dojo.place(
-      this.game.format_block("jstpl_player_board", player),
+      this.game.format_block("jstpl_player_board", {...player, p_color: player.color}),
       player_board_div
     );
+
     if (player.loyalty !== "null") {
       updatePlayerLoyalty({ playerId, coalition: player.loyalty });
     }
-
+    $("cylinders_" + playerId).classList.add(`pp_player_color_${player.color}`);
     // Set all values in player panels
     $("influence_" + playerId).innerHTML = gamedatas.counts[playerId].influence;
     $("cylinder_count_" + playerId).innerHTML =

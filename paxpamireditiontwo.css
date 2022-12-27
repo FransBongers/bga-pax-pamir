@@ -406,9 +406,9 @@ html {
 
 
 
-/* ------- TOKENS ------- */
+/* ------- SUPPLY ------- */
 
-#pp_tokens {
+#pp_supply {
     grid-column: 1 / span 1;
     grid-row: span 1;
     height: 241px;

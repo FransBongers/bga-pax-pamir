@@ -24,7 +24,7 @@ const placeToken = ({
   from = null,
 }) => {
   // console.log('from', from)
-  dojo.place(game.format_block(jstpl, jstplProps), from || "pp_tokens");
+  dojo.place(game.format_block(jstpl, jstplProps), from || "pp_supply");
   classes.forEach((className) => {
     dojo.addClass(id, className);
   });

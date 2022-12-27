@@ -85,7 +85,7 @@
         <!-- END vp_track_bottom -->
     </div>
     
-    <div id="pp_tokens">
+    <div id="pp_supply">
         <div id="pp_coalition_blocks_container">
             <div id="pp_afghan_coalition_blocks" class="pp_coalition_blocks">
             </div>

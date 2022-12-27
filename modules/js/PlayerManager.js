@@ -120,6 +120,7 @@ class Player {
     if (player.loyalty !== "null") {
       updatePlayerLoyalty({ playerId, coalition: player.loyalty });
     }
+    // TODO (Frans): check use of counter component for all counts
     $("cylinders_" + playerId).classList.add(`pp_player_color_${player.color}`);
     // Set all values in player panels
     $("influence_" + playerId).innerHTML = gamedatas.counts[playerId].influence;
@@ -136,6 +137,10 @@ class Player {
       gamedatas.counts[playerId].suits.political;
     $("intelligence_" + playerId).innerHTML =
       gamedatas.counts[playerId].suits.intelligence;
+  }
+
+  getPlayerColor() {
+    return this.playerColor;
   }
 }
 
@@ -156,7 +161,7 @@ class Player {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class PlayerManager {
-  constructor(game) {
+  constructor({game}) {
     console.log('Constructor PlayerManager');
     this.game = game;
     this.players = {};
@@ -167,5 +172,9 @@ class PlayerManager {
       this.players[playerId] = new Player({ player, playerManager: this });
     }
     // console.log("players", this.players);
+  }
+
+  getPlayer({playerId}) {
+    return this.players[playerId];
   }
 }

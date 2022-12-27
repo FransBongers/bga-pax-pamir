@@ -23,6 +23,7 @@ define([
     "ebg/zone",
     g_gamethemeurl + "modules/js/Constants.js",
     g_gamethemeurl + "modules/js/MapManager.js",
+    g_gamethemeurl + "modules/js/MarketManager.js",
     g_gamethemeurl + "modules/js/NotificationManager.js",
     g_gamethemeurl + "modules/js/ObjectManager.js",
     g_gamethemeurl + "modules/js/PlayerManager.js",
@@ -47,13 +48,9 @@ function (dojo, declare) {
             this.playerEvents = {};
             // active events
             this.activeEvents = new ebg.stock();
-            // blocks per coalition (supply)
-            this.coalitionBlocks = {};
+ 
             // spies per cards
             this.spies = {};
-            // zones for favored suit marker per suit
-            this.favoredSuit = {};
-
 
             this.playerCounts = {}; // rename to playerTotals?
             // Will store all data for active player and gets refreshed with entering player actions state
@@ -92,14 +89,10 @@ function (dojo, declare) {
                 placeCard({location: this.activeEvents, id: gamedatas.active_events[key].key});
             })
 
-            this.objectManager = new ObjectManager(this);
-            this.playerManager = new PlayerManager(this);
-            this.mapManager = new MapManager(this);
-            // const players = gamedatas.players;
-            // const numberOfPlayers = gamedatas.playerorder.length;
-            // const colors = Object.keys(players).map((key) => players[key].color);
-            // console.log('players', players)
-
+            this.objectManager = new ObjectManager({game: this});
+            this.playerManager = new PlayerManager({game: this});
+            this.mapManager = new MapManager({game: this});
+            this.marketManager = new MarketManager({game: this});
             this.playerCounts = gamedatas.counts;
 
 
@@ -160,33 +153,7 @@ function (dojo, declare) {
                 placeCard({location: this.playerHand, id: cardId});
             });
 
-            // Setup supply of coalition blocks
-            COALITIONS.forEach((coalition) => {
-                this.coalitionBlocks[coalition] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.coalitionBlocks[coalition],
-                    nodeId: `pp_${coalition}_coalition_blocks`,
-                    tokenWidth: COALITION_BLOCK_WIDTH,
-                    tokenHeight: COALITION_BLOCK_HEIGHT,
-                    itemMargin: 15,
-                    instantaneous: true,
-                });
-                Object.keys(this.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
-                    placeToken({
-                        game: this,
-                        location: this.coalitionBlocks[coalition],
-                        id: blockId,
-                        jstpl: 'jstpl_coalition_block',
-                        jstplProps: {
-                            id: blockId,
-                            coalition
-                        },
-                        weight: this.defaultWeightZone,
-                    });
-                })
-
-            });
+  
 
             // Place spies on cards
             Object.keys(gamedatas.spies || {}).forEach((cardId) => {
@@ -207,30 +174,7 @@ function (dojo, declare) {
          
             });
 
-            // Setup zones for favored suit marker
-            this.gamedatas.suits.forEach((suit, index) => {
-                this.favoredSuit[suit.suit] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.favoredSuit[suit.suit],
-                    nodeId: `pp_favored_suit_${suit.suit}`,
-                    tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
-                    tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
-                });
-            })
 
-            const suitId = this.gamedatas.favored_suit.suit;
-            placeToken({
-                game: this,
-                location: this.favoredSuit[suitId],
-                //location: this.favoredSuit['intelligence'], // for testing change of favored suit
-                id: `favored_suit_marker`,
-                jstpl: 'jstpl_favored_suit_marker',
-                jstplProps: {
-                    id: `favored_suit_marker`,
-                },
-                weight: this.defaultWeightZone,
-            });
 
             if( this.notification_manager != undefined ) {
                 this.notification_manager.destroy();
@@ -281,7 +225,6 @@ function (dojo, declare) {
                         };
                         // this.unavailableCards = args.args.unavailable_cards;
                         // this.remainingActions = args.args.remaining_actions;
-                        // this.favoredSuit = args.args.favored_suit;
                         break;
                     case 'placeSpy':
                         this.selectedAction = 'placeSpy';
@@ -495,7 +438,7 @@ function (dojo, declare) {
                     return this.mapManager.getRegion({region: splitLocation[1]}).getArmyZone();
                 case 'blocks':
                     // blocks_russian
-                    return this.coalitionBlocks[splitLocation[1]];
+                    return this.objectManager.supply.getCoalitionBlocksZone({coalition: splitLocation[1]});
                 case 'cylinders':
                     // cylinders_playerId
                     return this.playerManager.players[splitLocation[1]].cylinders;
@@ -504,7 +447,7 @@ function (dojo, declare) {
                     return this.playerManager.players[splitLocation[2]].gifts[splitLocation[1]]
                 case 'favored':
                     // favored_suit_economic
-                    return this.favoredSuit[splitLocation[2]];
+                    return this.objectManager.favoredSuit.getFavoredSuitZone({suit: splitLocation[2]});
                 case 'roads':
                     // roads_herat_kabul
                     const border = `${splitLocation[1]}_${splitLocation[2]}`;

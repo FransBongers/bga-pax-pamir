@@ -1,3 +1,55 @@
+// .########....###....##.....##..#######..########..########.########.
+// .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
+// .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
+// .######...##.....##.##.....##.##.....##.########..######...##.....##
+// .##.......#########..##...##..##.....##.##...##...##.......##.....##
+// .##.......##.....##...##.##...##.....##.##....##..##.......##.....##
+// .##.......##.....##....###.....#######..##.....##.########.########.
+
+// ..######..##.....##.####.########
+// .##....##.##.....##..##.....##...
+// .##.......##.....##..##.....##...
+// ..######..##.....##..##.....##...
+// .......##.##.....##..##.....##...
+// .##....##.##.....##..##.....##...
+// ..######...#######..####....##...
+
+class FavoredSuit {
+  constructor({ game }) {
+    console.log("Constructor Favored Suit");
+    this.game = game;
+    this.favoredSuitZones = {};
+
+    // Setup zones for favored suit marker
+    game.gamedatas.suits.forEach((suit) => {
+      this.favoredSuitZones[suit.suit] = new ebg.zone();
+      setupTokenZone({
+        game,
+        zone: this.favoredSuitZones[suit.suit],
+        nodeId: `pp_favored_suit_${suit.suit}`,
+        tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
+        tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
+      });
+    });
+
+    const suitId = game.gamedatas.favored_suit.suit;
+    placeToken({
+      game,
+      location: this.favoredSuitZones[suitId],
+      //location: this.favoredSuit['intelligence'], // for testing change of favored suit
+      id: `favored_suit_marker`,
+      jstpl: "jstpl_favored_suit_marker",
+      jstplProps: {
+        id: `favored_suit_marker`,
+      },
+    });
+  }
+
+  getFavoredSuitZone({suit}) {
+    return this.favoredSuitZones[suit];
+  }
+}
+
 // ..######..##.....##.########..########..##.......##....##
 // .##....##.##.....##.##.....##.##.....##.##........##..##.
 // .##.......##.....##.##.....##.##.....##.##.........####..
@@ -7,9 +59,42 @@
 // ..######...#######..##........##........########....##...
 
 class Supply {
-  constructor({game}) {
-    console.log('Constructor Supply')
+  constructor({ game }) {
+    console.log("Constructor Supply");
     this.game = game;
+    // blocks per coalition (supply)
+    this.coalitionBlocks = {};
+    // Setup supply of coalition blocks
+    COALITIONS.forEach((coalition) => {
+      this.coalitionBlocks[coalition] = new ebg.zone();
+      setupTokenZone({
+        game,
+        zone: this.coalitionBlocks[coalition],
+        nodeId: `pp_${coalition}_coalition_blocks`,
+        tokenWidth: COALITION_BLOCK_WIDTH,
+        tokenHeight: COALITION_BLOCK_HEIGHT,
+        itemMargin: 15,
+        instantaneous: true,
+      });
+      Object.keys(game.gamedatas.coalition_blocks[coalition]).forEach(
+        (blockId) => {
+          placeToken({
+            game,
+            location: this.coalitionBlocks[coalition],
+            id: blockId,
+            jstpl: "jstpl_coalition_block",
+            jstplProps: {
+              id: blockId,
+              coalition,
+            },
+          });
+        }
+      );
+    });
+  }
+
+  getCoalitionBlocksZone({ coalition }) {
+    return this.coalitionBlocks[coalition];
   }
 }
 
@@ -60,11 +145,12 @@ class VpTrack {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class ObjectManager {
-  constructor(game) {
+  constructor({game}) {
     console.log("ObjectManager");
     this.game = game;
 
-    this.supply = new Supply({game});
+    this.favoredSuit = new FavoredSuit({ game });
+    this.supply = new Supply({ game });
     this.vpTrack = new VpTrack(this);
   }
 }

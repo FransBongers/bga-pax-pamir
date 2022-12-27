@@ -192,7 +192,7 @@ class Region {
 // .##.....##.##.....##.##...........##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class MapManager {
-  constructor(game) {
+  constructor({game}) {
     console.log("Constructor Map");
     this.game = game;
     this.borders = {};

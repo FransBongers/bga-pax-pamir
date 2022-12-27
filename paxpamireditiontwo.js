@@ -22,6 +22,7 @@ define([
     "ebg/stock",
     "ebg/zone",
     g_gamethemeurl + "modules/js/Constants.js",
+    g_gamethemeurl + "modules/js/MapManager.js",
     g_gamethemeurl + "modules/js/NotificationManager.js",
     g_gamethemeurl + "modules/js/ObjectManager.js",
     g_gamethemeurl + "modules/js/PlayerManager.js",
@@ -45,14 +46,8 @@ function (dojo, declare) {
             this.playerHand = new ebg.stock();
             this.marketCards = [];
             this.marketRupees = [];
-            // armies per region
-            this.armies = {};
             // roads per border
             this.roads = {};
-            // tribes per region
-            this.tribes = {};
-            // rulers in region
-            this.rulers = {};
             // events per player
             this.playerEvents = {};
             // active events
@@ -104,6 +99,7 @@ function (dojo, declare) {
 
             this.objectManager = new ObjectManager(this);
             this.playerManager = new PlayerManager(this);
+            this.mapManager = new MapManager(this);
             // const players = gamedatas.players;
             // const numberOfPlayers = gamedatas.playerorder.length;
             // const colors = Object.keys(players).map((key) => players[key].color);
@@ -167,90 +163,6 @@ function (dojo, declare) {
             setupCardsStock({game: this, stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
             Object.keys(this.gamedatas.hand).forEach((cardId) => {
                 placeCard({location: this.playerHand, id: cardId});
-            });
-
-            // Create zones for each region
-            REGIONS.forEach((region, index) => {
-                // armies
-                this.armies[region] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.armies[region],
-                    nodeId: `pp_${region}_armies`,
-                    tokenWidth: ARMY_WIDTH,
-                    tokenHeight: ARMY_HEIGHT,
-                    itemMargin: -5,
-                });
-
-                // tribes
-                this.tribes[region] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.tribes[region],
-                    nodeId: `pp_${region}_tribes`,
-                    tokenWidth: TRIBE_WIDTH,
-                    tokenHeight: TRIBE_HEIGHT,
-                });
-
-                // Setup ruler tokens
-                this.rulers[region] = new ebg.zone();
-                setupTokenZone({
-                    game: this,
-                    zone: this.rulers[region],
-                    nodeId: `pp_position_ruler_token_${region}`,
-                    tokenWidth: RULER_TOKEN_WIDTH,
-                    tokenHeight: RULER_TOKEN_HEIGHT,
-                });
-            });
-
-            // Place ruler tokens
-            REGIONS.forEach((region) => {
-                const ruler = this.gamedatas.rulers[region];
-                if (ruler == 0) {
-                    placeToken({
-                        game: this,
-                        location: this.rulers[region],
-                        id: `pp_ruler_token_${region}`,
-                        jstpl: 'jstpl_ruler_token',
-                        jstplProps: {
-                            id: `pp_ruler_token_${region}`,
-                            region
-                        },
-                        weight: this.defaultWeightZone,
-                    });
-                }
-            });
-
-            // Place armies and tribes
-            REGIONS.forEach((region) => {
-                // armies
-                Object.keys(this.gamedatas.armies[region]).forEach((id) => {
-                    placeToken({
-                        game: this,
-                        location: this.armies[region],
-                        id,
-                        jstpl: 'jstpl_army',
-                        jstplProps: {
-                            id,
-                            coalition: id.split('_')[1],
-                        },
-                        weight: this.defaultWeightZone,
-                    });
-                });
-
-                // tribes
-                Object.keys(this.gamedatas.tribes[region]).forEach((id) => {
-                    placeToken({
-                        game: this,
-                        location: this.tribes[region],
-                        id,
-                        jstpl: 'jstpl_cylinder',
-                        jstplProps: {
-                            id,
-                            color: gamedatas.players[id.split('_')[1]].color,
-                        },
-                    });
-                });
             });
 
             // Create zones for roads
@@ -651,7 +563,7 @@ function (dojo, declare) {
             switch (splitLocation[0]) {
                 case 'armies':
                     // armies_kabul
-                    return this.armies[splitLocation[1]];
+                    return this.mapManager.getRegion({region: splitLocation[1]}).getArmyZone();
                 case 'blocks':
                     // blocks_russian
                     return this.coalitionBlocks[splitLocation[1]];
@@ -673,7 +585,7 @@ function (dojo, declare) {
                     return this.spies[cardId];
                 case 'tribes':
                     // tribes_kabul
-                    return this.tribes[splitLocation[1]];
+                    return this.mapManager.getRegion({region: splitLocation[1]}).getTribeZone();
                 default:
                     console.log('no zone determined');
                     break;

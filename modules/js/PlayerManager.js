@@ -8,7 +8,7 @@
 
 class Player {
   constructor({ player, playerManager }) {
-    console.log("Player", player);
+    // console.log("Player", player);
     this.playerManager = playerManager;
     this.game = playerManager.game;
     const playerId = player.id;
@@ -157,14 +157,15 @@ class Player {
 
 class PlayerManager {
   constructor(game) {
+    console.log('Constructor PlayerManager');
     this.game = game;
     this.players = {};
 
     for (const playerId in game.gamedatas.players) {
       const player = game.gamedatas.players[playerId];
-      console.log("playerManager", playerId, player);
+      // console.log("playerManager", playerId, player);
       this.players[playerId] = new Player({ player, playerManager: this });
     }
-    console.log("players", this.players);
+    // console.log("players", this.players);
   }
 }

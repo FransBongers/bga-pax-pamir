@@ -42,8 +42,6 @@ function (dojo, declare) {
 
             // global variables to keep stock components
             this.playerHand = new ebg.stock();
-            this.marketCards = [];
-            this.marketRupees = [];
             // events per player
             this.playerEvents = {};
             // active events
@@ -96,64 +94,11 @@ function (dojo, declare) {
             this.playerCounts = gamedatas.counts;
 
 
-            // Set up market
-            for (let row = 0; row <= 1; row++) {
-                this.marketCards[row] = [];
-                this.marketRupees[row] = [];
-                for (let column = 0; column <= 5; column++) {
-
-                    // Set up stock component for each card in the market
-                    const containerId = `pp_market_${row}_${column}`;
-                    this.marketCards[row][column] = new ebg.stock();
-                    setupCardsStock({game: this, stock: this.marketCards[row][column], nodeId: containerId, className: 'pp_market_card'});
-                    
-                    // Set up zone for all rupees in the market
-                    const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
-                    this.marketRupees[row][column] = new ebg.zone();
-                    setupTokenZone({
-                        game: this,
-                        zone: this.marketRupees[row][column],
-                        nodeId: rupeeContainerId,
-                        tokenWidth: RUPEE_WIDTH,
-                        tokenHeight: RUPEE_HEIGHT,
-                        itemMargin: -30,
-                    });
-                    
-
-                    // add cards
-                    const cardInMarket = gamedatas.market[row][column];
-                    if (cardInMarket) {
-                        placeCard({location: this.marketCards[row][column], id: cardInMarket.key});
-                    }
-                }
-            }
-
-            // Put all rupees in market locations
-            Object.keys(this.gamedatas.rupees).forEach((rupeeId) => {
-                const rupee = this.gamedatas.rupees[rupeeId];
-                if (rupee.location.startsWith('market')) {
-                    const row = rupee.location.split('_')[1];
-                    const column = rupee.location.split('_')[2];
-                    placeToken({
-                        game: this,
-                        location: this.marketRupees[row][column],
-                        id: rupeeId,
-                        jstpl: 'jstpl_rupee',
-                        jstplProps: {
-                            id: rupeeId,
-                        },
-                        weight: this.defaultWeightZone,
-                    });
-                }
-            })
-
             // Setup player hand
             setupCardsStock({game: this, stock: this.playerHand, nodeId: 'pp_player_hand_cards', className: 'pp_card_in_hand'});
             Object.keys(this.gamedatas.hand).forEach((cardId) => {
                 placeCard({location: this.playerHand, id: cardId});
             });
-
-  
 
             // Place spies on cards
             Object.keys(gamedatas.spies || {}).forEach((cardId) => {

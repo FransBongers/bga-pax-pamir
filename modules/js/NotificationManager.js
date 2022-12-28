@@ -109,11 +109,11 @@ class NotificationManager {
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
       this.game.discardCard({ id: notif.args.card_id, from: this.game.playerHand });
     } else if (from == "market_0_0" || from == "market_1_0") {
-      console.log(this.game.marketCards);
+      console.log(this.game.marketManager.marketCards);
       const splitFrom = from.split("_");
       this.game.discardCard({
         id: notif.args.card_id,
-        from: this.game.marketCards[splitFrom[1]][splitFrom[2]],
+        from: this.game.marketManager.marketCards[splitFrom[1]][splitFrom[2]],
       });
     } else {
       this.game.discardCard({ id: notif.args.card_id, from: this.game.playerManager.players[playerId].court });
@@ -197,8 +197,8 @@ class NotificationManager {
     const col = notif.args.market_location.split("_")[2];
 
     // Remove all rupees that were on the purchased card
-    this.game.marketRupees[row][col].getAllItems().forEach((rupeeId) => {
-      this.game.marketRupees[row][col].removeFromZone(
+    this.game.marketManager.marketRupees[row][col].getAllItems().forEach((rupeeId) => {
+      this.game.marketManager.marketRupees[row][col].removeFromZone(
         rupeeId,
         true,
         `rupees_${notif.args.player_id}`
@@ -210,19 +210,19 @@ class NotificationManager {
     if (notif.args.new_location == "active_events") {
       this.game.moveCard({
         id: cardId,
-        from: this.game.marketCards[row][col],
+        from: this.game.marketManager.marketCards[row][col],
         to: this.game.activeEvents,
       });
     } else if (notif.args.new_location == "discard") {
-      this.game.marketCards[row][col].removeFromStockById(cardId, "pp_discard_pile");
+      this.game.marketManager.marketCards[row][col].removeFromStockById(cardId, "pp_discard_pile");
     } else if (notif.args.player_id == this.game.player_id) {
       this.game.moveCard({
         id: cardId,
-        from: this.game.marketCards[row][col],
+        from: this.game.marketManager.marketCards[row][col],
         to: this.game.playerHand,
       });
     } else {
-      this.game.moveCard({ id: cardId, from: this.game.marketCards[row][col], to: null });
+      this.game.moveCard({ id: cardId, from: this.game.marketManager.marketCards[row][col], to: null });
       this.game.spies[cardId] = undefined;
     }
 
@@ -232,7 +232,7 @@ class NotificationManager {
       const marketColumn = item.location.split("_")[2];
       placeToken({
         game: this.game,
-        location: this.game.marketRupees[marketRow][marketColumn],
+        location: this.game.marketManager.marketRupees[marketRow][marketColumn],
         id: item.rupee_id,
         jstpl: "jstpl_rupee",
         jstplProps: {
@@ -255,16 +255,16 @@ class NotificationManager {
       const toCol = move.to.split("_")[2];
       this.game.moveCard({
         id: move.card_id,
-        from: this.game.marketCards[fromRow][fromCol],
-        to: this.game.marketCards[toRow][toCol],
+        from: this.game.marketManager.marketCards[fromRow][fromCol],
+        to: this.game.marketManager.marketCards[toRow][toCol],
       });
       // TODO (Frans): check why in case of moving multiple rupees at the same time
       // they overlap
-      this.game.marketRupees[fromRow][fromCol].getAllItems().forEach((rupeeId) => {
+      this.game.marketManager.marketRupees[fromRow][fromCol].getAllItems().forEach((rupeeId) => {
         this.game.moveToken({
           id: rupeeId,
-          to: this.game.marketRupees[toRow][toCol],
-          from: this.game.marketRupees[fromRow][toRow],
+          to: this.game.marketManager.marketRupees[toRow][toCol],
+          from: this.game.marketManager.marketRupees[fromRow][toRow],
           weight: this.game.defaultWeightZone,
         });
       });
@@ -273,7 +273,7 @@ class NotificationManager {
     notif.args.new_cards.forEach(function (move, index) {
       placeCard({
         location:
-          this.game.marketCards[move.to.split("_")[1]][move.to.split("_")[2]],
+          this.game.marketManager.marketCards[move.to.split("_")[1]][move.to.split("_")[2]],
         id: move.card_id,
       });
     }, this);
@@ -290,7 +290,7 @@ class NotificationManager {
       const marketColumn = item.location.split("_")[2];
       placeToken({
         game: this.game,
-        location: this.game.marketRupees[marketRow][marketColumn],
+        location: this.game.marketManager.marketRupees[marketRow][marketColumn],
         id: item.rupee_id,
         jstpl: "jstpl_rupee",
         jstplProps: {

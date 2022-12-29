@@ -101,7 +101,7 @@ class NotificationManager {
   notif_discardCard(notif) {
     console.log("notif_discardCard", notif);
 
-    this.game.clearLastAction();
+    this.game.interactionManager.resetActionArgs();
     const playerId = notif.args.player_id;
     const from = notif.args.from;
     
@@ -160,7 +160,7 @@ class NotificationManager {
   notif_playCard(notif) {
     console.log("notif_playCard", notif);
 
-    this.game.clearLastAction();
+    this.game.interactionManager.resetActionArgs();
     var playerId = notif.args.player_id;
 
     notif.args.court_cards.forEach(function (card, index) {
@@ -192,7 +192,7 @@ class NotificationManager {
   notif_purchaseCard(notif) {
     console.log("notif_purchaseCard", notif);
 
-    this.game.clearLastAction();
+    this.game.interactionManager.resetActionArgs();
     const row = notif.args.market_location.split("_")[1];
     const col = notif.args.market_location.split("_")[2];
 
@@ -246,7 +246,7 @@ class NotificationManager {
   notif_refreshMarket(notif) {
     console.log("notif_refreshMarket", notif);
 
-    this.game.clearLastAction();
+    this.game.interactionManager.resetActionArgs();
 
     notif.args.card_moves.forEach(function (move, index) {
       const fromRow = move.from.split("_")[1];
@@ -281,7 +281,7 @@ class NotificationManager {
 
   notif_selectGift(notif) {
     console.log("notif_selectGift", notif);
-    this.game.clearLastAction();
+    this.game.interactionManager.resetActionArgs();
     const { updated_cards, player_id, rupee_count, updated_counts } =
       notif.args;
     // Place paid rupees on market cards

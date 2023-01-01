@@ -287,282 +287,284 @@ class InteractionManager {
   //  .########...#######.....##.......##.....#######..##....##..######.
 
   onUpdateActionButtons(stateName, args) {
-    if (this.game.isCurrentPlayerActive()) {
-      switch (stateName) {
-        case "setup":
-          this.game.addActionButton(
-            "afghan_button",
-            _("Afghan"),
-            "onAfghan",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "british_button",
-            _("British"),
-            "onBritish",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "russian_button",
-            _("Russian"),
-            "onRussian",
-            null,
-            false,
-            "blue"
-          );
-          break;
+    if (!this.game.isCurrentPlayerActive()) {
+      return;
+    }
 
-        case "playerActions":
-          var main = $("pagemaintitletext");
-          if (args.remaining_actions > 0) {
-            main.innerHTML +=
-              _(" may take ") +
-              '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-              args.remaining_actions +
-              "</span>" +
-              _(" action(s): ");
-            this.game.addActionButton(
-              "purchase_btn",
-              _("Purchase"),
-              "onPurchase"
-            );
-            this.game.addActionButton("play_btn", _("Play"), "onPlay");
+    switch (stateName) {
+      case "setup":
+        this.game.addActionButton(
+          "afghan_button",
+          _("Afghan"),
+          "onActionButtonClick",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "british_button",
+          _("British"),
+          "onActionButtonClick",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "russian_button",
+          _("Russian"),
+          "onActionButtonClick",
+          null,
+          false,
+          "blue"
+        );
+        break;
+
+      case "playerActions":
+        var main = $("pagemaintitletext");
+        if (args.remaining_actions > 0) {
+          main.innerHTML +=
+            _(" may take ") +
+            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+            args.remaining_actions +
+            "</span>" +
+            _(" action(s): ");
+          this.game.addActionButton(
+            "purchase_btn",
+            _("Purchase"),
+            "onPurchase"
+          );
+          this.game.addActionButton("play_btn", _("Play"), "onPlay");
+          this.game.addActionButton(
+            "card_action_btn",
+            _("Card Action"),
+            "onCardAction"
+          );
+          this.game.addActionButton(
+            "pass_btn",
+            _("End Turn"),
+            "onPass",
+            null,
+            false,
+            "gray"
+          );
+        } else {
+          main.innerHTML +=
+            _(" have ") +
+            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+            args.remaining_actions +
+            "</span>" +
+            _(" remaining actions: ");
+          // If player has court cards with free actions
+          if (
+            args.court.some(
+              ({ key, used }) =>
+                used == "0" &&
+                this.game.gamedatas.cards[key].suit == args.favored_suit
+            )
+          ) {
             this.game.addActionButton(
               "card_action_btn",
               _("Card Action"),
               "onCardAction"
             );
-            this.game.addActionButton(
-              "pass_btn",
-              _("End Turn"),
-              "onPass",
-              null,
-              false,
-              "gray"
-            );
-          } else {
-            main.innerHTML +=
-              _(" have ") +
-              '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-              args.remaining_actions +
-              "</span>" +
-              _(" remaining actions: ");
-            // If player has court cards with free actions
-            if (
-              args.court.some(
-                ({ key, used }) =>
-                  used == "0" &&
-                  this.game.gamedatas.cards[key].suit == args.favored_suit
-              )
-            ) {
-              this.game.addActionButton(
-                "card_action_btn",
-                _("Card Action"),
-                "onCardAction"
-              );
-            }
-            this.game.addActionButton(
-              "pass_btn",
-              _("End Turn"),
-              "onPass",
-              null,
-              false,
-              "blue"
-            );
           }
-          break;
-
-        // case 'negotiateBribe':
-        //     for ( var i = 0; i <= args.briber_max; i++ ) {
-        //         this.game.addActionButton( i+'_btn', $i, 'onBribe', null, false, 'blue' );
-        //     }
-        //     break;
-
-        case "discardCourt":
-          this.numberOfDiscards =
-            Object.keys(args.court).length - args.suits.political - 3;
-          if (this.numberOfDiscards > 1) var cardmsg = _(" court cards ");
-          else cardmsg = _(" court card");
-          $("pagemaintitletext").innerHTML +=
-            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-            this.numberOfDiscards +
-            "</span>" +
-            cardmsg;
-          this.selectedAction = "discard_court";
-          this.updateSelectableCards();
           this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
+            "pass_btn",
+            _("End Turn"),
+            "onPass",
             null,
             false,
             "blue"
           );
-          dojo.addClass("confirm_btn", "pp_disabled");
-          break;
+        }
+        break;
 
-        case "discardHand":
-          this.numberOfDiscards =
-            Object.keys(args.hand).length - args.suits.intelligence - 2;
-          if (this.numberOfDiscards > 1) var cardmsg = _(" hand cards ");
-          else cardmsg = _(" hand card");
-          $("pagemaintitletext").innerHTML +=
-            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-            this.numberOfDiscards +
-            "</span>" +
-            cardmsg;
-          this.selectedAction = "discard_hand";
-          this.updateSelectableCards();
+      // case 'negotiateBribe':
+      //     for ( var i = 0; i <= args.briber_max; i++ ) {
+      //         this.game.addActionButton( i+'_btn', $i, 'onBribe', null, false, 'blue' );
+      //     }
+      //     break;
+
+      case "discardCourt":
+        this.numberOfDiscards =
+          Object.keys(args.court).length - args.suits.political - 3;
+        if (this.numberOfDiscards > 1) var cardmsg = _(" court cards ");
+        else cardmsg = _(" court card");
+        $("pagemaintitletext").innerHTML +=
+          '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+          this.numberOfDiscards +
+          "</span>" +
+          cardmsg;
+        this.selectedAction = "discard_court";
+        this.updateSelectableCards();
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "blue"
+        );
+        dojo.addClass("confirm_btn", "pp_disabled");
+        break;
+
+      case "discardHand":
+        this.numberOfDiscards =
+          Object.keys(args.hand).length - args.suits.intelligence - 2;
+        if (this.numberOfDiscards > 1) var cardmsg = _(" hand cards ");
+        else cardmsg = _(" hand card");
+        $("pagemaintitletext").innerHTML +=
+          '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+          this.numberOfDiscards +
+          "</span>" +
+          cardmsg;
+        this.selectedAction = "discard_hand";
+        this.updateSelectableCards();
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "blue"
+        );
+        dojo.addClass("confirm_btn", "pp_disabled");
+        break;
+
+      case "client_confirmPurchase":
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "red"
+        );
+        break;
+
+      case "client_confirmPlay":
+        this.game.addActionButton(
+          "left_side_btn",
+          _("<< LEFT"),
+          "onLeft",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "right_side_btn",
+          _("RIGHT >>"),
+          "onRight",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "red"
+        );
+        break;
+      case "client_confirmPlaceSpy":
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "blue"
+        );
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "red"
+        );
+        break;
+      case "client_confirmSelectGift":
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "red"
+        );
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "gray"
+        );
+        break;
+      case "placeRoad":
+        args.region.borders.forEach((border) => {
           this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
+            `${border}_btn`,
+            _(this.game.gamedatas.borders[border].name),
+            "onBorder",
             null,
             false,
             "blue"
           );
-          dojo.addClass("confirm_btn", "pp_disabled");
-          break;
+        });
+        break;
+      case "client_endTurn":
+        this.game.addActionButton(
+          "confirm_btn",
+          _("Confirm"),
+          "onConfirm",
+          null,
+          false,
+          "red"
+        );
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "gray"
+        );
+        break;
+      case "cardActionGift":
+        this.game.addActionButton(
+          "cancel_btn",
+          _("Cancel"),
+          "onCancel",
+          null,
+          false,
+          "gray"
+        );
+        break;
+      // case 'client_selectPurchase':
+      // case 'client_selectPlay':
+      //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+      //     break;
 
-        case "client_confirmPurchase":
-          this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "red"
-          );
-          break;
+      // case 'client_confirmDiscard':
+      //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
+      //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
+      //     break;
 
-        case "client_confirmPlay":
-          this.game.addActionButton(
-            "left_side_btn",
-            _("<< LEFT"),
-            "onLeft",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "right_side_btn",
-            _("RIGHT >>"),
-            "onRight",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "red"
-          );
-          break;
-        case "client_confirmPlaceSpy":
-          this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
-            null,
-            false,
-            "blue"
-          );
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "red"
-          );
-          break;
-        case "client_confirmSelectGift":
-          this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
-            null,
-            false,
-            "red"
-          );
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "gray"
-          );
-          break;
-        case "placeRoad":
-          args.region.borders.forEach((border) => {
-            this.game.addActionButton(
-              `${border}_btn`,
-              _(this.game.gamedatas.borders[border].name),
-              "onBorder",
-              null,
-              false,
-              "blue"
-            );
-          });
-          break;
-        case "client_endTurn":
-          this.game.addActionButton(
-            "confirm_btn",
-            _("Confirm"),
-            "onConfirm",
-            null,
-            false,
-            "red"
-          );
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "gray"
-          );
-          break;
-        case "cardActionGift":
-          this.game.addActionButton(
-            "cancel_btn",
-            _("Cancel"),
-            "onCancel",
-            null,
-            false,
-            "gray"
-          );
-          break;
-        // case 'client_selectPurchase':
-        // case 'client_selectPlay':
-        //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
-        //     break;
-
-        // case 'client_confirmDiscard':
-        //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
-        //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
-        //     break;
-
-        default:
-          console.log("default");
-          break;
-      }
+      default:
+        console.log("default");
+        break;
     }
   }
 
@@ -581,6 +583,32 @@ class InteractionManager {
   // .##.....##.#########.##..####.##.....##.##.......##.............##
   // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
   // .##.....##.##.....##.##....##.########..########.########..######.
+
+  onActionButtonClick(evt) {
+    dojo.stopEvent(evt);
+    const buttonId = evt.target.id;
+    console.log("onActionButtonClick", buttonId);
+    const gamestateName = this.game.gamedatas.gamestate.name;
+    console.log("gamestateName", gamestateName);
+    switch (gamestateName) {
+      case 'setup':
+        switch(buttonId) {
+          case 'afghan_button':
+            this.game.chooseLoyalty({ coalition: "afghan" });
+            break;
+          case 'british_button':
+            this.game.chooseLoyalty({ coalition: "british" });
+            break;
+          case 'russian_button':
+            this.game.chooseLoyalty({ coalition: "russian" });
+            break;
+        }
+        break;
+      default:
+        console.log('no handler for button click');
+        break;
+    }
+  }
 
   onPurchase(evt) {
     dojo.stopEvent(evt);
@@ -816,20 +844,5 @@ class InteractionManager {
       default:
         break;
     }
-  }
-
-  onAfghan(evt) {
-    dojo.stopEvent(evt);
-    this.game.chooseLoyalty({ coalition: "afghan" });
-  }
-
-  onRussian(evt) {
-    dojo.stopEvent(evt);
-    this.game.chooseLoyalty({ coalition: "russian" });
-  }
-
-  onBritish(evt) {
-    dojo.stopEvent(evt);
-    this.game.chooseLoyalty({ coalition: "british" });
   }
 }

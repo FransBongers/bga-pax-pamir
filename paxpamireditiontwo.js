@@ -168,22 +168,10 @@ define([
       this.interactionManager.onUpdateActionButtons(stateName, args);
     },
 
-    // actionButton: function( evt ) {
-    //     this.interaction_manager.actionButton( evt );
-    // },
+    onActionButtonClick: function(evt) {
+        this.interactionManager.onActionButtonClick(evt);
+    },
     // TODO (Frans): replace below with single actionButton
-    onAfghan: function( evt ) {
-        this.interactionManager.onAfghan( evt );
-    },
-
-    onBritish: function( evt ) {
-        this.interactionManager.onBritish( evt );
-    },
-
-    onRussian: function( evt ) {
-        this.interactionManager.onRussian( evt );
-    },
-
     onPurchase: function( evt ) {
         this.interactionManager.onPurchase( evt );
     },

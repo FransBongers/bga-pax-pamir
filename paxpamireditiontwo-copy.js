@@ -33,7 +33,7 @@ define([
 ], function (dojo, declare) {
   return declare("bgagame.paxpamireditiontwo", ebg.core.gamegui, {
     constructor: function () {
-      console.log("paxpamireditiontwo constructor.");
+      console.log("paxpamireditiontwo constructor");
 
       // Init global variables
 

@@ -162,7 +162,7 @@ class ObjectManager {
   public supply: Supply;
   public vpTrack: VpTrack
 
-  constructor({game}: {game: PaxPamirGame}) {
+  constructor(game: PaxPamirGame) {
     console.log("ObjectManager");
     this.game = game;
 

@@ -22,9 +22,18 @@ const placeToken = ({
   weight = 0,
   classes = [],
   from = null,
+}: {
+  game: PaxPamirGame;
+  location: Zone;
+  id: string;
+  jstpl: string;
+  jstplProps: Record<string, unknown>;
+  weight?: number;
+  classes?: string[];
+  from?: string | null; // TODO (Frans): this is defined as action. Check what this actually does
 }) => {
   // console.log('from', from)
-  dojo.place(game.format_block(jstpl, jstplProps), from || "pp_supply");
+  dojo.place(game.formatBlockWrapper(jstpl, jstplProps), from || "pp_supply");
   classes.forEach((className) => {
     dojo.addClass(id, className);
   });

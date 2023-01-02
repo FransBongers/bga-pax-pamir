@@ -122,7 +122,7 @@ class Player {
     // Set up players board
     const player_board_div = $("player_board_" + playerId);
     dojo.place(
-      this.game.formatBlockWrapper("jstpl_player_board", {...player, p_color: player.color}),
+      (this.game as unknown as FrameworkFunctions).format_block("jstpl_player_board", {...player, p_color: player.color}),
       player_board_div
     );
 
@@ -173,7 +173,7 @@ class PlayerManager {
   private game: PaxPamirGame;
   private players: Record<string, Player>;
 
-  constructor({game}: {game: PaxPamirGame}) {
+  constructor(game: PaxPamirGame) {
     console.log('Constructor PlayerManager');
     this.game = game;
     this.players = {};

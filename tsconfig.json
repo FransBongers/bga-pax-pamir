@@ -1,0 +1,23 @@
+{
+  "rootDir": ".", 
+  "compilerOptions": {
+    "target": "es5",
+    "module": "none",
+    "lib": ["dom", "esnext"],  
+    "sourceMap": false,
+    "outFile": "paxpamireditiontwo.js",
+  },
+  "files": [
+    "src/framework.d.ts",
+    "src/counter.d.ts",
+    "src/stock.d.ts",
+    "src/zone.d.ts",
+    "src/paxpamireditiontwo.d.ts",
+    "src/constants.ts",
+    "src/utility.ts",
+    "src/ObjectManager/ObjectManager.ts",
+    "src/PlayerManager/PlayerManager.ts",
+    "src/paxpamireditiontwo.ts",
+    "src/define.ts"
+  ]
+}

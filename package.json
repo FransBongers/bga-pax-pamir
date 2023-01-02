@@ -1,0 +1,17 @@
+{
+  "name": "paxpamireditiontwo",
+  "version": "1.0.0",
+  "description": "Pax Pamir 2nd edition for BGA",
+  "main": "paxpamireditiontwo.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "watch:ts": "tsc --watch",
+    "watch": "npm run watch:ts",
+    "build": "npm run build:ts"
+  },
+  "author": "yourname",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  }
+}

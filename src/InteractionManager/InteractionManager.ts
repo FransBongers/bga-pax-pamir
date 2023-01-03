@@ -205,7 +205,7 @@ class InteractionManager {
 
   onEnteringState(stateName, args) {
     // UI changes for active player
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       switch (stateName) {
         case "client_cardActionBattle":
           this.updateSelectableActions();
@@ -303,13 +303,13 @@ class InteractionManager {
   //  .########...#######.....##.......##.....#######..##....##..######.
 
   onUpdateActionButtons(stateName, args) {
-    if (!(this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if (!(this.game as unknown as Framework).isCurrentPlayerActive()) {
       return;
     }
 
     switch (stateName) {
       case "setup":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "afghan_button",
           _("Afghan"),
           "onActionButtonClick",
@@ -317,7 +317,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "british_button",
           _("British"),
           "onActionButtonClick",
@@ -325,7 +325,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "russian_button",
           _("Russian"),
           "onActionButtonClick",
@@ -344,18 +344,18 @@ class InteractionManager {
             args.remaining_actions +
             "</span>" +
             _(" action(s): ");
-            (this.game as unknown as FrameworkFunctions).addActionButton(
+            (this.game as unknown as Framework).addActionButton(
             "purchase_btn",
             _("Purchase"),
             "onPurchase"
           );
-          (this.game as unknown as FrameworkFunctions).addActionButton("play_btn", _("Play"), "onPlay");
-          (this.game as unknown as FrameworkFunctions).addActionButton(
+          (this.game as unknown as Framework).addActionButton("play_btn", _("Play"), "onPlay");
+          (this.game as unknown as Framework).addActionButton(
             "card_action_btn",
             _("Card Action"),
             "onCardAction"
           );
-          (this.game as unknown as FrameworkFunctions).addActionButton(
+          (this.game as unknown as Framework).addActionButton(
             "pass_btn",
             _("End Turn"),
             "onPass",
@@ -378,13 +378,13 @@ class InteractionManager {
                 (this.game.gamedatas.cards[key] as CourtCard).suit == args.favored_suit
             )
           ) {
-            (this.game as unknown as FrameworkFunctions).addActionButton(
+            (this.game as unknown as Framework).addActionButton(
               "card_action_btn",
               _("Card Action"),
               "onCardAction"
             );
           }
-          (this.game as unknown as FrameworkFunctions).addActionButton(
+          (this.game as unknown as Framework).addActionButton(
             "pass_btn",
             _("End Turn"),
             "onPass",
@@ -413,7 +413,7 @@ class InteractionManager {
           cardmsg;
         this.selectedAction = "discard_court";
         this.updateSelectableCards();
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -436,7 +436,7 @@ class InteractionManager {
           cardmsg;
         this.selectedAction = "discard_hand";
         this.updateSelectableCards();
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -448,7 +448,7 @@ class InteractionManager {
         break;
 
       case "client_confirmPurchase":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -456,7 +456,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -467,7 +467,7 @@ class InteractionManager {
         break;
 
       case "client_confirmPlay":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "left_side_btn",
           _("<< LEFT"),
           "onLeft",
@@ -475,7 +475,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "right_side_btn",
           _("RIGHT >>"),
           "onRight",
@@ -483,7 +483,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -493,7 +493,7 @@ class InteractionManager {
         );
         break;
       case "client_confirmPlaceSpy":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -501,7 +501,7 @@ class InteractionManager {
           false,
           "blue"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -511,7 +511,7 @@ class InteractionManager {
         );
         break;
       case "client_confirmSelectGift":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -519,7 +519,7 @@ class InteractionManager {
           false,
           "red"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -530,7 +530,7 @@ class InteractionManager {
         break;
       case "placeRoad":
         args.region.borders.forEach((border) => {
-          (this.game as unknown as FrameworkFunctions).addActionButton(
+          (this.game as unknown as Framework).addActionButton(
             `${border}_btn`,
             _(this.game.gamedatas.borders[border].name),
             "onBorder",
@@ -541,7 +541,7 @@ class InteractionManager {
         });
         break;
       case "client_endTurn":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "confirm_btn",
           _("Confirm"),
           "onConfirm",
@@ -549,7 +549,7 @@ class InteractionManager {
           false,
           "red"
         );
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -559,7 +559,7 @@ class InteractionManager {
         );
         break;
       case "cardActionGift":
-        (this.game as unknown as FrameworkFunctions).addActionButton(
+        (this.game as unknown as Framework).addActionButton(
           "cancel_btn",
           _("Cancel"),
           "onCancel",
@@ -628,12 +628,12 @@ class InteractionManager {
 
   onPurchase(evt) {
     dojo.stopEvent(evt);
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("purchase")) return;
+    if (!(this.game as unknown as Framework).checkAction("purchase")) return;
 
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "purchase";
       this.updateSelectableCards();
-      (this.game as unknown as FrameworkFunctions).setClientState("client_selectPurchase", {
+      (this.game as unknown as Framework).setClientState("client_selectPurchase", {
         descriptionmyturn: _("${you} must select a card to purchase"),
       });
     }
@@ -641,12 +641,12 @@ class InteractionManager {
 
   onPlay(evt) {
     dojo.stopEvent(evt);
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("play")) return;
+    if (!(this.game as unknown as Framework).checkAction("play")) return;
 
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "play";
       this.updateSelectableCards();
-      (this.game as unknown as FrameworkFunctions).setClientState("client_selectPlay", {
+      (this.game as unknown as Framework).setClientState("client_selectPlay", {
         descriptionmyturn: _("${you} must select a card to play"),
       });
     }
@@ -655,9 +655,9 @@ class InteractionManager {
   onSelectGift(evt) {
     const divId = evt.currentTarget.id;
     dojo.stopEvent(evt);
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("selectGift")) return;
+    if (!(this.game as unknown as Framework).checkAction("selectGift")) return;
 
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       const value: string = divId.split("_")[2];
       this.selectedAction = "confirmSelectGift";
       this.resetActionArgs();
@@ -665,7 +665,7 @@ class InteractionManager {
       dojo
         .query(`#pp_gift_${value}_${this.game.getPlayerId()}`)
         .addClass("pp_selected");
-      (this.game as unknown as FrameworkFunctions).setClientState("client_confirmSelectGift", {
+      (this.game as unknown as Framework).setClientState("client_confirmSelectGift", {
         descriptionmyturn: _(`Purchase gift for ${value} rupees?`),
       });
     }
@@ -677,13 +677,13 @@ class InteractionManager {
     console.log("onSelectRegion", divId, evt);
   }
 
-  onCardAction() {
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("card_action")) return;
+  onCardAction(evt) {
+    if (!(this.game as unknown as Framework).checkAction("card_action")) return;
 
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "cardAction";
       this.updateSelectableActions();
-      (this.game as unknown as FrameworkFunctions).setClientState("client_selectCardAction", {
+      (this.game as unknown as Framework).setClientState("client_selectCardAction", {
         descriptionmyturn: _("${you} must select a card action"),
       });
     }
@@ -691,13 +691,13 @@ class InteractionManager {
 
   onPass(evt) {
     dojo.stopEvent(evt);
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("pass")) return;
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if (!(this.game as unknown as Framework).checkAction("pass")) return;
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "pass";
       if (this.activePlayer.remainingActions == 0) {
         this.game.pass();
       } else {
-        (this.game as unknown as FrameworkFunctions).setClientState("client_endTurn", {
+        (this.game as unknown as Framework).setClientState("client_endTurn", {
           descriptionmyturn: _("Confirm to your end turn "),
         });
       }
@@ -706,7 +706,7 @@ class InteractionManager {
 
   onBorder(evt) {
     dojo.stopEvent(evt);
-    if (!(this.game as unknown as FrameworkFunctions).checkAction("placeRoad")) return;
+    if (!(this.game as unknown as Framework).checkAction("placeRoad")) return;
     const splitId = evt.target.id.split("_");
     const border = `${splitId[0]}_${splitId[1]}`;
     this.game.placeRoad({ border });
@@ -720,14 +720,14 @@ class InteractionManager {
     const cardId = "card_" + cardDivId.split("_")[6];
     this.selectedCard = cardId;
     let node;
-    if ((this.game as unknown as FrameworkFunctions).isCurrentPlayerActive()) {
+    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       switch (this.selectedAction) {
         case "purchase":
           this.resetActionArgs();
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
           const cost = cardDivId.split("_")[3];
-          (this.game as unknown as FrameworkFunctions).setClientState("client_confirmPurchase", {
+          (this.game as unknown as Framework).setClientState("client_confirmPurchase", {
             descriptionmyturn: "Purchase this card for " + cost + " rupees?",
           });
           break;
@@ -736,7 +736,7 @@ class InteractionManager {
           this.resetActionArgs();
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
-          (this.game as unknown as FrameworkFunctions).setClientState("client_confirmPlay", {
+          (this.game as unknown as Framework).setClientState("client_confirmPlay", {
             descriptionmyturn: "Select which side of court to play card:",
           });
           break;
@@ -757,7 +757,7 @@ class InteractionManager {
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
           const cardName = this.game.gamedatas.cards[cardId].name;
-          (this.game as unknown as FrameworkFunctions).setClientState("client_confirmPlaceSpy", {
+          (this.game as unknown as Framework).setClientState("client_confirmPlaceSpy", {
             descriptionmyturn: `Place a spy on ${cardName}`,
           });
           break;
@@ -781,7 +781,7 @@ class InteractionManager {
       case "battle":
         this.selectedAction = "cardActionBattle";
         // this.updateSelectableActions();
-        (this.game as unknown as FrameworkFunctions).setClientState("client_cardActionBattle", {
+        (this.game as unknown as Framework).setClientState("client_cardActionBattle", {
           descriptionmyturn: _("${you} must select a card or region"),
         });
         break;
@@ -795,7 +795,7 @@ class InteractionManager {
     dojo.stopEvent(evt);
     this.resetActionArgs();
     this.selectedAction = "";
-    (this.game as unknown as FrameworkFunctions).restoreServerGameState();
+    (this.game as unknown as Framework).restoreServerGameState();
   }
 
   onConfirm(evt) {

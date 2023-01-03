@@ -122,7 +122,7 @@ class Player {
     // Set up players board
     const player_board_div = $("player_board_" + playerId);
     dojo.place(
-      (this.game as unknown as FrameworkFunctions).format_block("jstpl_player_board", {...player, p_color: player.color}),
+      (this.game as unknown as Framework).format_block("jstpl_player_board", {...player, p_color: player.color}),
       player_board_div
     );
 
@@ -148,9 +148,22 @@ class Player {
       gamedatas.counts[playerId].suits.intelligence;
   }
 
-  getPlayerColor() {
+  getCourtZone(): Stock {
+    return this.court;
+  }
+
+  getCylinderZone(): Zone {
+    return this.cylinders;
+  }
+
+  getGiftZone({value}: {value: string}) {
+    return this.gifts[value];
+  }
+
+  getPlayerColor(): string {
     return this.playerColor;
   }
+
 }
 
 //  .########..##..........###....##....##.########.########.           

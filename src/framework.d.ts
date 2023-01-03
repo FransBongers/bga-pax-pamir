@@ -8,12 +8,13 @@ interface Game {
   onEnteringState: (stateName: string, args: any) => void;
   onLeavingState: (stateName: string) => void;
   onUpdateActionButtons: (stateName: string, args: any) => void;
-  setupNotifications: () => void;
+  // setupNotifications: () => void;
   //format_string_recursive: (log: string, args: any) => void;
+  framework: () => Framework; // Function just to have TS casting in one place, should return this
 }
 
 // TODO (Frans): check if thre is a better way to define these so we don't need to cast.
-interface FrameworkFunctions {
+interface Framework {
   addActionButton: (
     id: string,
     label: string,
@@ -33,7 +34,16 @@ interface FrameworkFunctions {
   checkAction: (action: string) => boolean;
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
   isCurrentPlayerActive: () => boolean;
+  notifqueue: {
+    setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
+  };
+  player_id: string;
   restoreServerGameState: () => void;
+  scoreCtrl: {
+    [playerId: number | string]: {
+      toValue: (newScore: number) => void;
+    }
+  };
   setClientState: (newState: string, args: Record<string, unknown>) => void;
   showMessage: (msg: string, type: string) => void;
 }
@@ -66,6 +76,7 @@ interface Dojo {
   query: (query: string) => any; //HTMLElement[]; with some more functions
   forEach: Function;
   subscribe: Function;
+  unsubscribe: Function;
   string: any;
   fx: {
     slideTo: (params: {

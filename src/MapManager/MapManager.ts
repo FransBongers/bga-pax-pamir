@@ -221,11 +221,11 @@ class MapManager {
     });
   }
 
-  getBorder({ border }): Border {
+  getBorder({ border }: {border: string;}): Border {
     return this.borders[border];
   }
 
-  getRegion({ region }): Region {
+  getRegion({ region }: {region: string;}): Region {
     return this.regions[region];
   }
 }

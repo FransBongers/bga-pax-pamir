@@ -19,7 +19,8 @@
     "src/PlayerManager/PlayerManager.ts",
     "src/MapManager/MapManager.ts",
     "src/MarketManager/MarketManager.ts",
-    "src/InteractionManager/index.ts",
+    "src/InteractionManager/InteractionManager.ts",
+    "src/NotificationManager/NotificationManager.ts",
     "src/paxpamireditiontwo.ts",
     "src/define.ts"
   ]

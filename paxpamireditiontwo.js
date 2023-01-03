@@ -34,7 +34,7 @@ define([
   return declare("bgagame.paxpamireditiontwo", ebg.core.gamegui, {
     constructor: function () {
       console.log("paxpamireditiontwo constructor.");
-
+      
       // Init global variables
 
       this.defaultWeightZone = 0;
@@ -126,7 +126,7 @@ define([
       this.notificationManager = new NotificationManager(this);
       // Setup game notifications to handle (see "setupNotifications" method below)
       this.notificationManager.setupNotifications();
-
+      console.log('this', this);
       // // Setup game notifications to handle (see "setupNotifications" method below)
       // this.setupNotifications();
 

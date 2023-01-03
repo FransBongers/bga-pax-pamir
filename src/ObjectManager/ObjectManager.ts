@@ -63,7 +63,7 @@ class FavoredSuit {
 
 class Supply {
   private game: PaxPamirGame;
-  private coalitionBlocks: Record<string, any>;
+  private coalitionBlocks: Record<string, Zone>;
 
   constructor({ game }: {game: PaxPamirGame}) {
     console.log("Constructor Supply");
@@ -99,7 +99,7 @@ class Supply {
     });
   }
 
-  getCoalitionBlocksZone({ coalition }) {
+  getCoalitionBlocksZone({ coalition }: {coalition: string;}) {
     return this.coalitionBlocks[coalition];
   }
 }

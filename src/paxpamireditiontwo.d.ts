@@ -93,6 +93,9 @@ interface PaxPamirGamedatas extends Gamedatas {
       [cylinderId: string]: Token;
     };
   };
+  hand: {
+    [cardId: string]: Token;
+  };
   // current_player_id: string;
   favored_suit: Suit;
   gifts: {
@@ -116,6 +119,11 @@ interface PaxPamirGamedatas extends Gamedatas {
   rupees: {
     [rupeeId: string]: Token;
   };
+  spies: {
+    [cardId: string]: {
+      [cylinderId: string]: Token;
+    };
+  };
   suits: Suit[];
   tribes: {
     [region: string]: {
@@ -125,10 +133,35 @@ interface PaxPamirGamedatas extends Gamedatas {
 }
 
 interface PaxPamirGame extends Game {
+  activeEvents: Stock;
   gamedatas: PaxPamirGamedatas;
+  interactionManager: InteractionManager;
+  mapManager: MapManager;
+  marketManager: MarketManager;
   objectManager: ObjectManager;
   playerManager: PlayerManager;
+  playerCounts: Record<string, number>;
+  playerHand: Stock;
+  spies: {
+    [cardId: string]: Zone;
+  };
   getPlayerId: () => string;
+  getZoneForLocation: ({ location }: {location: string}) => Zone;
+  discardCard: (props: { id: string; from: Stock; order?: null }) => void;
+  moveCard: (props: {
+    id: string;
+    from: Stock;
+    to?: Stock | null;
+    order?: number | null;
+  }) => void;
+  moveToken: (props: {
+    id: string;
+    to: Zone;
+    from: Zone;
+    weight?: number;
+    addClass?: string;
+    removeClass?: string;
+  }) => void;
   // AJAX calls
   cardAction: (props: { cardAction: string; cardId: string }) => void;
   chooseLoyalty: (props: { coalition: COALITION }) => void;
@@ -136,7 +169,7 @@ interface PaxPamirGame extends Game {
   pass: () => void;
   placeRoad: (props: { border: string }) => void;
   placeSpy: (props: { cardId: string }) => void;
-  playCard: (props: { cardId: string; leftSide: boolean; }) => void;
+  playCard: (props: { cardId: string; leftSide: boolean }) => void;
   purchaseCard: (props: { cardId: string }) => void;
   selectGift: (props: { selectedGift: string }) => void;
 }

@@ -81,4 +81,12 @@ class MarketManager {
       }
     });
   }
+
+  getMarketCardsStock({row, column}: {row: number; column: number;}) {
+    return this.marketCards[row][column];
+  }
+
+  getMarketRupeesZone({row, column}: {row: number; column: number;}) {
+    return this.marketRupees[row][column];
+  }
 }

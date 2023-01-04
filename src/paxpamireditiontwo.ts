@@ -1,3 +1,20 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * PaxPamirEditionTwo implementation : © <Your name here> <Your email address here>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * paxpamireditiontwo.js
+ *
+ * PaxPamirEditionTwo user interface script
+ *
+ * In this file, you are describing the logic of your user interface, in Javascript language.
+ *
+ */
+
 declare const define;
 declare const ebg;
 declare const $;
@@ -39,6 +56,7 @@ class PaxPamir implements PaxPamirGame {
     "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
   */
   public setup(gamedatas: PaxPamirGamedatas) {
+    console.log('typescript version');
     console.log("gamedatas", gamedatas);
     this.gamedatas = gamedatas;
     console.log("this.gamedatas", this.gamedatas);
@@ -224,7 +242,7 @@ class PaxPamir implements PaxPamirGame {
         const playerId = cylinderId.split("_")[1];
         this.moveToken({
           id: cylinderId,
-          to: this.playerManager.getPlayer[playerId].cylinders,
+          to: this.playerManager.getPlayer({playerId}).getCylinderZone(),
           from: this.spies[id],
         });
       });
@@ -411,7 +429,7 @@ class PaxPamir implements PaxPamirGame {
     );
   }
 
-  public chooseLoyalty({ coalition }: { coalition: COALITION }) {
+  public chooseLoyalty({ coalition }: { coalition: string; }) {
     (this as unknown as Framework).ajaxcall(
       "/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html",
       {

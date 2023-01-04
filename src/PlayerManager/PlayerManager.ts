@@ -72,10 +72,9 @@ class Player {
 
     // Add cylinder to VP track
     // Note (Frans): should probably move this to objectManager
-    // console.log("before error", this.playerManager.game);
     placeToken({
       game: this.game,
-      location: this.game.objectManager.vpTrack.getZone[player.score],
+      location: this.game.objectManager.vpTrack.getZone(player.score),
       id: `vp_cylinder_${playerId}`,
       jstpl: "jstpl_cylinder",
       jstplProps: {

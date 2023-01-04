@@ -33,7 +33,7 @@ const placeToken = ({
   from?: string | null; // TODO (Frans): this is defined as action. Check what this actually does
 }) => {
   // console.log('from', from)
-  dojo.place(game.formatBlockWrapper(jstpl, jstplProps), from || "pp_supply");
+  dojo.place(game.framework().format_block(jstpl, jstplProps), from || "pp_supply");
   classes.forEach((className) => {
     dojo.addClass(id, className);
   });

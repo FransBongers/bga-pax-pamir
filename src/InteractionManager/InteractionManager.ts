@@ -121,9 +121,12 @@ class InteractionManager {
       case "cardActionGift":
         ["2", "4", "6"].forEach((giftValue) => {
           const hasGift =
-            this.game.playerManager.getPlayer[playerId].gifts[
-              giftValue
-            ].getAllItems().length > 0;
+            this.game.playerManager
+              .getPlayer({ playerId })
+              .getGiftZone({
+                value: giftValue,
+              })
+              .getAllItems().length > 0;
           if (!hasGift && giftValue <= this.activePlayer.rupees) {
             dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
               dojo.addClass(node, "pp_selectable");
@@ -166,7 +169,7 @@ class InteractionManager {
         break;
       case "discard_court":
         dojo
-          .query(`.pp_card_in_court_${this.game.getPlayerId}`)
+          .query(`.pp_card_in_court_${this.game.getPlayerId()}`)
           .forEach(function (node, index) {
             dojo.addClass(node, "pp_selectable_card");
             this.handles.push(dojo.connect(node, "onclick", this, "onCard"));
@@ -344,12 +347,16 @@ class InteractionManager {
             args.remaining_actions +
             "</span>" +
             _(" action(s): ");
-            (this.game as unknown as Framework).addActionButton(
+          (this.game as unknown as Framework).addActionButton(
             "purchase_btn",
             _("Purchase"),
             "onPurchase"
           );
-          (this.game as unknown as Framework).addActionButton("play_btn", _("Play"), "onPlay");
+          (this.game as unknown as Framework).addActionButton(
+            "play_btn",
+            _("Play"),
+            "onPlay"
+          );
           (this.game as unknown as Framework).addActionButton(
             "card_action_btn",
             _("Card Action"),
@@ -375,7 +382,8 @@ class InteractionManager {
             args.court.some(
               ({ key, used }) =>
                 used == "0" &&
-                (this.game.gamedatas.cards[key] as CourtCard).suit == args.favored_suit
+                (this.game.gamedatas.cards[key] as CourtCard).suit ==
+                  args.favored_suit
             )
           ) {
             (this.game as unknown as Framework).addActionButton(
@@ -413,14 +421,16 @@ class InteractionManager {
           cardmsg;
         this.selectedAction = "discard_court";
         this.updateSelectableCards();
-        (this.game as unknown as Framework).addActionButton(
-          "confirm_btn",
-          _("Confirm"),
-          "onConfirm",
-          null,
-          false,
-          "blue"
-        );
+        this.game
+          .framework()
+          .addActionButton(
+            "confirm_btn",
+            _("Confirm"),
+            "onConfirm",
+            null,
+            false,
+            "blue"
+          );
         dojo.addClass("confirm_btn", "pp_disabled");
         break;
 
@@ -610,13 +620,13 @@ class InteractionManager {
       case "setup":
         switch (buttonId) {
           case "afghan_button":
-            this.game.chooseLoyalty({ coalition: COALITION.AFGHAN });
+            this.game.chooseLoyalty({ coalition: AFGHAN });
             break;
           case "british_button":
-            this.game.chooseLoyalty({ coalition: COALITION.BRITISH });
+            this.game.chooseLoyalty({ coalition: BRITISH });
             break;
           case "russian_button":
-            this.game.chooseLoyalty({ coalition: COALITION.RUSSIAN });
+            this.game.chooseLoyalty({ coalition: RUSSIAN });
             break;
         }
         break;
@@ -633,9 +643,12 @@ class InteractionManager {
     if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "purchase";
       this.updateSelectableCards();
-      (this.game as unknown as Framework).setClientState("client_selectPurchase", {
-        descriptionmyturn: _("${you} must select a card to purchase"),
-      });
+      (this.game as unknown as Framework).setClientState(
+        "client_selectPurchase",
+        {
+          descriptionmyturn: _("${you} must select a card to purchase"),
+        }
+      );
     }
   }
 
@@ -665,9 +678,12 @@ class InteractionManager {
       dojo
         .query(`#pp_gift_${value}_${this.game.getPlayerId()}`)
         .addClass("pp_selected");
-      (this.game as unknown as Framework).setClientState("client_confirmSelectGift", {
-        descriptionmyturn: _(`Purchase gift for ${value} rupees?`),
-      });
+      (this.game as unknown as Framework).setClientState(
+        "client_confirmSelectGift",
+        {
+          descriptionmyturn: _(`Purchase gift for ${value} rupees?`),
+        }
+      );
     }
   }
 
@@ -683,9 +699,12 @@ class InteractionManager {
     if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       this.selectedAction = "cardAction";
       this.updateSelectableActions();
-      (this.game as unknown as Framework).setClientState("client_selectCardAction", {
-        descriptionmyturn: _("${you} must select a card action"),
-      });
+      (this.game as unknown as Framework).setClientState(
+        "client_selectCardAction",
+        {
+          descriptionmyturn: _("${you} must select a card action"),
+        }
+      );
     }
   }
 
@@ -727,18 +746,24 @@ class InteractionManager {
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
           const cost = cardDivId.split("_")[3];
-          (this.game as unknown as Framework).setClientState("client_confirmPurchase", {
-            descriptionmyturn: "Purchase this card for " + cost + " rupees?",
-          });
+          (this.game as unknown as Framework).setClientState(
+            "client_confirmPurchase",
+            {
+              descriptionmyturn: "Purchase this card for " + cost + " rupees?",
+            }
+          );
           break;
 
         case "play":
           this.resetActionArgs();
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
-          (this.game as unknown as Framework).setClientState("client_confirmPlay", {
-            descriptionmyturn: "Select which side of court to play card:",
-          });
+          (this.game as unknown as Framework).setClientState(
+            "client_confirmPlay",
+            {
+              descriptionmyturn: "Select which side of court to play card:",
+            }
+          );
           break;
 
         case "discard_hand":
@@ -757,9 +782,12 @@ class InteractionManager {
           node = $(cardDivId);
           dojo.addClass(node, "pp_selected");
           const cardName = this.game.gamedatas.cards[cardId].name;
-          (this.game as unknown as Framework).setClientState("client_confirmPlaceSpy", {
-            descriptionmyturn: `Place a spy on ${cardName}`,
-          });
+          (this.game as unknown as Framework).setClientState(
+            "client_confirmPlaceSpy",
+            {
+              descriptionmyturn: `Place a spy on ${cardName}`,
+            }
+          );
           break;
         default:
           break;
@@ -781,9 +809,12 @@ class InteractionManager {
       case "battle":
         this.selectedAction = "cardActionBattle";
         // this.updateSelectableActions();
-        (this.game as unknown as Framework).setClientState("client_cardActionBattle", {
-          descriptionmyturn: _("${you} must select a card or region"),
-        });
+        (this.game as unknown as Framework).setClientState(
+          "client_cardActionBattle",
+          {
+            descriptionmyturn: _("${you} must select a card or region"),
+          }
+        );
         break;
       case "default":
         console.log("default gift");

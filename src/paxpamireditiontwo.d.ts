@@ -12,9 +12,9 @@ interface CourtCard {
   flavor_text: string;
   id: string;
   impact_icons: string[];
-  loyalty: COALITION | null;
+  loyalty: string | null;
   name: string;
-  prize: COALITION;
+  prize: string;
   rank: number;
   region: string;
   special_ability: string;
@@ -52,12 +52,6 @@ interface Token {
   used: string; // TODO: cast to number in php
 }
 
-declare enum COALITION {
-  AFGHAN = "afghan",
-  BRITISH = "british",
-  RUSSIAN = "russian",
-}
-
 /**
  * TODO (Frans):
  * - some objects are returned as array by php if there is no data and object if there is data. Check how to handle this.
@@ -80,7 +74,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     [cardId: string]: Card;
   };
   coalition_blocks: {
-    [coalitionId in COALITION]: {
+    [coalition: string]: {
       [coalitionBlockId: string]: Token;
     };
   };
@@ -164,7 +158,7 @@ interface PaxPamirGame extends Game {
   }) => void;
   // AJAX calls
   cardAction: (props: { cardAction: string; cardId: string }) => void;
-  chooseLoyalty: (props: { coalition: COALITION }) => void;
+  chooseLoyalty: (props: { coalition: string }) => void;
   discardCards: (props: { cards: string; fromHand: boolean }) => void;
   pass: () => void;
   placeRoad: (props: { border: string }) => void;

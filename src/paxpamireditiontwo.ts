@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © <Your name here> <Your email address here>
+ * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -40,7 +40,7 @@ class PaxPamir implements PaxPamirGame {
   public playerCounts = {}; // rename to playerTotals?
 
   constructor() {
-    console.log("paxpamireditiontwo constructor");
+    console.log('paxpamireditiontwo constructor');
   }
 
   /*
@@ -57,15 +57,15 @@ class PaxPamir implements PaxPamirGame {
   */
   public setup(gamedatas: PaxPamirGamedatas) {
     console.log('typescript version');
-    console.log("gamedatas", gamedatas);
+    console.log('gamedatas', gamedatas);
     this.gamedatas = gamedatas;
-    console.log("this.gamedatas", this.gamedatas);
+    console.log('this.gamedatas', this.gamedatas);
 
     // Events
     setupCardsStock({
       game: this,
       stock: this.activeEvents,
-      nodeId: "pp_active_events",
+      nodeId: 'pp_active_events',
       // className: `pp_card_in_court_${playerId}`
     });
 
@@ -88,8 +88,8 @@ class PaxPamir implements PaxPamirGame {
     setupCardsStock({
       game: this,
       stock: this.playerHand,
-      nodeId: "pp_player_hand_cards",
-      className: "pp_card_in_hand",
+      nodeId: 'pp_player_hand_cards',
+      className: 'pp_card_in_hand',
     });
     Object.keys(this.gamedatas.hand).forEach((cardId) => {
       placeCard({ location: this.playerHand, id: cardId });
@@ -98,12 +98,12 @@ class PaxPamir implements PaxPamirGame {
     // Place spies on cards
     Object.keys(gamedatas.spies || {}).forEach((cardId) => {
       Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
-        const playerId = cylinderId.split("_")[1];
+        const playerId = cylinderId.split('_')[1];
         placeToken({
           game: this,
           location: this.spies[cardId],
           id: cylinderId,
-          jstpl: "jstpl_cylinder",
+          jstpl: 'jstpl_cylinder',
           jstplProps: {
             id: cylinderId,
             color: gamedatas.players[playerId].color,
@@ -121,7 +121,7 @@ class PaxPamir implements PaxPamirGame {
     this.notificationManager.setupNotifications();
 
     // this.setupNotifications();
-    console.log("Ending game setup");
+    console.log('Ending game setup');
   }
 
   //  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##
@@ -138,7 +138,7 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
-    console.log("Entering state: " + stateName, args);
+    console.log('Entering state: ' + stateName, args);
     this.interactionManager.onEnteringState(stateName, args);
   }
 
@@ -146,7 +146,7 @@ class PaxPamir implements PaxPamirGame {
   //                 You can use this method to perform some user interface changes at this moment.
   //
   public onLeavingState(stateName: string) {
-    console.log("Leaving state: " + stateName);
+    console.log('Leaving state: ' + stateName);
     this.interactionManager.onLeavingState(stateName);
   }
 
@@ -154,7 +154,7 @@ class PaxPamir implements PaxPamirGame {
   //                        action status bar (ie: the HTML links in the status bar).
   //
   public onUpdateActionButtons(stateName: string, args: any) {
-    console.log("onUpdateActionButtons: " + stateName);
+    console.log('onUpdateActionButtons: ' + stateName);
     this.interactionManager.onUpdateActionButtons(stateName, args);
   }
 
@@ -225,30 +225,22 @@ class PaxPamir implements PaxPamirGame {
   ///////////////////////////////////////////////////
   //// Utility methods - add in alphabetical order
 
-  public discardCard({
-    id,
-    from,
-    order = null,
-  }: {
-    id: string;
-    from: Stock;
-    order?: null;
-  }) {
+  public discardCard({ id, from, order = null }: { id: string; from: Stock; order?: null }) {
     // Move all spies back to cylinder pools
     if (this.spies?.[id]) {
       // ['cylinder_2371052_3']
       const items = this.spies[id].getAllItems();
       items.forEach((cylinderId) => {
-        const playerId = cylinderId.split("_")[1];
+        const playerId = cylinderId.split('_')[1];
         this.moveToken({
           id: cylinderId,
-          to: this.playerManager.getPlayer({playerId}).getCylinderZone(),
+          to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
           from: this.spies[id],
         });
       });
     }
 
-    from.removeFromStockById(id, "pp_discard_pile");
+    from.removeFromStockById(id, 'pp_discard_pile');
   }
 
   public framework(): Framework {
@@ -261,54 +253,46 @@ class PaxPamir implements PaxPamirGame {
   }
 
   // returns zone object for given backend location in token database
-  getZoneForLocation({ location }: {location: string}): Zone {
-    const splitLocation = location.split("_");
+  getZoneForLocation({ location }: { location: string }): Zone {
+    const splitLocation = location.split('_');
     switch (splitLocation[0]) {
-      case "armies":
+      case 'armies':
         // armies_kabul
-        return this.mapManager
-          .getRegion({ region: splitLocation[1] })
-          .getArmyZone();
-      case "blocks":
+        return this.mapManager.getRegion({ region: splitLocation[1] }).getArmyZone();
+      case 'blocks':
         // blocks_russian
         return this.objectManager.supply.getCoalitionBlocksZone({
           coalition: splitLocation[1],
         });
-      case "cylinders":
+      case 'cylinders':
         // cylinders_playerId
-        return this.playerManager
-          .getPlayer({ playerId: splitLocation[1] })
-          .getCylinderZone();
-      case "gift":
+        return this.playerManager.getPlayer({ playerId: splitLocation[1] }).getCylinderZone();
+      case 'gift':
         // gift_2_playerId
-        return this.playerManager
-          .getPlayer({ playerId: splitLocation[2] })
-          .getGiftZone({ value: splitLocation[1] });
-      case "favored":
+        return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: splitLocation[1] });
+      case 'favored':
         // favored_suit_economic
         return this.objectManager.favoredSuit.getFavoredSuitZone({
           suit: splitLocation[2],
         });
-      case "roads":
+      case 'roads':
         // roads_herat_kabul
         const border = `${splitLocation[1]}_${splitLocation[2]}`;
         return this.mapManager.getBorder({ border }).getRoadZone();
-      case "spies":
+      case 'spies':
         // spies_card_38
         const cardId = `${splitLocation[1]}_${splitLocation[2]}`;
         return this.spies[cardId];
-      case "tribes":
+      case 'tribes':
         // tribes_kabul
-        return this.mapManager
-          .getRegion({ region: splitLocation[1] })
-          .getTribeZone();
+        return this.mapManager.getRegion({ region: splitLocation[1] }).getTribeZone();
       default:
-        console.log("no zone determined");
+        console.log('no zone determined');
         break;
     }
   }
 
-  public moveCard({ id, from, to = null, order = null }: {id: string; from: Stock; to?: Stock | null; order?: number | null}) {
+  public moveCard({ id, from, to = null, order = null }: { id: string; from: Stock; to?: Stock | null; order?: number | null }) {
     let fromDiv = null;
     if (from !== null) {
       fromDiv = from.getItemDivId(id);
@@ -359,19 +343,19 @@ class PaxPamir implements PaxPamirGame {
   // Function that gets called every time a card is added to a stock component
   setupNewCard(cardDiv, cardId, divId) {
     // if card is played to a court
-    if (divId.startsWith("pp_court_player")) {
+    if (divId.startsWith('pp_court_player')) {
       const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
       // add region class for selectable functions
       // const region = this.gamedatas.cards[cardId].region;
       dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
 
-      const spyZoneId = "spies_" + cardId;
+      const spyZoneId = 'spies_' + cardId;
       dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
       this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
       // TODO (add spy zone here)
       // TODO (add card actions)
       Object.keys(actions).forEach((action, index) => {
-        const actionId = action + "_" + cardId;
+        const actionId = action + '_' + cardId;
         dojo.place(
           `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
           divId
@@ -409,16 +393,13 @@ class PaxPamir implements PaxPamirGame {
   //.##.....##..######..##.....##.##.....##
 
   actionError(actionName: string) {
-    (this as unknown as Framework).showMessage(
-      `cannot take ${actionName} action`,
-      "error"
-    );
+    (this as unknown as Framework).showMessage(`cannot take ${actionName} action`, 'error');
   }
 
   public cardAction({ cardId, cardAction }): void {
     // TODO: do we need to add checkAction?
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/cardAction.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/cardAction.html',
       {
         lock: true,
         card_id: cardId,
@@ -429,9 +410,9 @@ class PaxPamir implements PaxPamirGame {
     );
   }
 
-  public chooseLoyalty({ coalition }: { coalition: string; }) {
+  public chooseLoyalty({ coalition }: { coalition: string }) {
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/chooseLoyalty.html',
       {
         lock: true,
         coalition,
@@ -444,7 +425,7 @@ class PaxPamir implements PaxPamirGame {
   public discardCards({ cards, fromHand }) {
     // TODO: do we need to add checkAction?
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/discardCards.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/discardCards.html',
       {
         lock: true,
         cards,
@@ -456,12 +437,12 @@ class PaxPamir implements PaxPamirGame {
   }
 
   public pass() {
-    if (!(this as unknown as Framework).checkAction("pass")) {
-      this.actionError("pass");
+    if (!(this as unknown as Framework).checkAction('pass')) {
+      this.actionError('pass');
       return;
     }
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/passAction.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/passAction.html',
       {
         lock: true,
       },
@@ -471,12 +452,12 @@ class PaxPamir implements PaxPamirGame {
   }
 
   placeRoad({ border }) {
-    if (!(this as unknown as Framework).checkAction("placeRoad")) {
-      this.actionError("placeRoad");
+    if (!(this as unknown as Framework).checkAction('placeRoad')) {
+      this.actionError('placeRoad');
       return;
     }
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/placeRoad.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/placeRoad.html',
       {
         lock: true,
         border,
@@ -488,7 +469,7 @@ class PaxPamir implements PaxPamirGame {
 
   placeSpy({ cardId }) {
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/placeSpy.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/placeSpy.html',
       {
         lock: true,
         card_id: cardId,
@@ -500,7 +481,7 @@ class PaxPamir implements PaxPamirGame {
 
   playCard({ cardId, leftSide }) {
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/playCard.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/playCard.html',
       {
         lock: true,
         card_id: cardId,
@@ -514,7 +495,7 @@ class PaxPamir implements PaxPamirGame {
   purchaseCard({ cardId }) {
     // TODO: do we need to add checkAction?
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/purchaseCard.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/purchaseCard.html',
       {
         lock: true,
         card_id: cardId,
@@ -526,7 +507,7 @@ class PaxPamir implements PaxPamirGame {
 
   selectGift({ selectedGift }) {
     (this as unknown as Framework).ajaxcall(
-      "/paxpamireditiontwo/paxpamireditiontwo/selectGift.html",
+      '/paxpamireditiontwo/paxpamireditiontwo/selectGift.html',
       {
         lock: true,
         selected_gift: selectedGift,

@@ -21,32 +21,32 @@ const RULER_TOKEN_HEIGHT = 50;
 // names etc.
 
 // coalitions
-const AFGHAN = "afghan";
-const BRITISH = "british";
-const RUSSIAN = "russian";
+const AFGHAN = 'afghan';
+const BRITISH = 'british';
+const RUSSIAN = 'russian';
 
 const COALITIONS = [AFGHAN, BRITISH, RUSSIAN];
 
 // regions
-const HERAT = "herat";
-const KABUL = "kabul";
-const KANDAHAR = "kandahar";
-const PERSIA = "persia";
-const PUNJAB = "punjab";
-const TRANSCASPIA = "transcaspia";
+const HERAT = 'herat';
+const KABUL = 'kabul';
+const KANDAHAR = 'kandahar';
+const PERSIA = 'persia';
+const PUNJAB = 'punjab';
+const TRANSCASPIA = 'transcaspia';
 
 const REGIONS = [HERAT, KABUL, KANDAHAR, PERSIA, PUNJAB, TRANSCASPIA];
 
 // borders (for all borders regions are in alphabetical order)
-const HERAT_KABUL = "herat_kabul";
-const HERAT_KANDAHAR = "herat_kandahar";
-const HERAT_PERSIA = "herat_persia";
-const HERAT_TRANSCASPIA = "herat_transcaspia";
-const KABUL_KANDAHAR = "kabul_kandahar";
-const KABUL_PUNJAB = "kabul_punjab";
-const KABUL_TRANSCASPIA = "kabul_transcaspia";
-const KANDAHAR_PUNJAB = "kandahar_punjab";
-const PERSIA_TRANSCASPIA = "persia_transcaspia";
+const HERAT_KABUL = 'herat_kabul';
+const HERAT_KANDAHAR = 'herat_kandahar';
+const HERAT_PERSIA = 'herat_persia';
+const HERAT_TRANSCASPIA = 'herat_transcaspia';
+const KABUL_KANDAHAR = 'kabul_kandahar';
+const KABUL_PUNJAB = 'kabul_punjab';
+const KABUL_TRANSCASPIA = 'kabul_transcaspia';
+const KANDAHAR_PUNJAB = 'kandahar_punjab';
+const PERSIA_TRANSCASPIA = 'persia_transcaspia';
 
 const BORDERS = [
   HERAT_KABUL,

@@ -11,27 +11,27 @@ class Border {
   private border: string;
   private roadZone: Zone;
 
-  constructor({ game, border }: {game: PaxPamirGame; border: string;}) {
+  constructor({ game, border }: { game: PaxPamirGame; border: string }) {
     this.game = game;
     this.border = border;
     this.roadZone = new ebg.zone();
-    
+
     this.createBorderZone({ border, zone: this.roadZone });
     Object.keys(game.gamedatas.roads[border]).forEach((id) => {
       placeToken({
         game,
         location: this.roadZone,
         id,
-        jstpl: "jstpl_road",
+        jstpl: 'jstpl_road',
         jstplProps: {
           id,
-          coalition: id.split("_")[1],
+          coalition: id.split('_')[1],
         },
       });
     });
   }
 
-  createBorderZone({ border, zone }: {border: string; zone: Zone;}) {
+  createBorderZone({ border, zone }: { border: string; zone: Zone }) {
     zone.create(this.game, `pp_${border}_border`, ROAD_WIDTH, ROAD_HEIGHT);
     // this[`${border}_border`].item_margin = -10;
     // this['transcaspia_armies'].setPattern( 'horizontalfit' );
@@ -39,26 +39,21 @@ class Border {
     // TODO (Frans): at some point we need to update this so it looks nice,
     // probably do a lot more custom
     const borderPattern = {
-      herat_kabul: "horizontalfit",
-      herat_kandahar: "verticalfit",
-      herat_persia: "verticalfit",
-      herat_transcaspia: "custom",
-      kabul_transcaspia: "verticalfit",
-      kabul_kandahar: "horizontalfit",
-      kabul_punjab: "verticalfit",
-      kandahar_punjab: "verticalfit",
-      persia_transcaspia: "horizontalfit",
+      herat_kabul: 'horizontalfit',
+      herat_kandahar: 'verticalfit',
+      herat_persia: 'verticalfit',
+      herat_transcaspia: 'custom',
+      kabul_transcaspia: 'verticalfit',
+      kabul_kandahar: 'horizontalfit',
+      kabul_punjab: 'verticalfit',
+      kandahar_punjab: 'verticalfit',
+      persia_transcaspia: 'horizontalfit',
     };
 
     zone.setPattern(borderPattern[border]);
 
-    if (border === "herat_transcaspia") {
-      zone.itemIdToCoords = function (
-        i,
-        control_width,
-        no_idea_what_this_is,
-        numberOfItems
-      ) {
+    if (border === 'herat_transcaspia') {
+      zone.itemIdToCoords = function (i, control_width, no_idea_what_this_is, numberOfItems) {
         if (i % 8 == 0 && numberOfItems === 1) {
           return { x: 50, y: 25, w: 40, h: 27 };
         } else if (i % 8 == 0) {
@@ -103,7 +98,7 @@ class Region {
   private tribeZone: Zone;
   private rulerZone: Zone;
 
-  constructor({ game, region }: {game: PaxPamirGame; region: string;}) {
+  constructor({ game, region }: { game: PaxPamirGame; region: string }) {
     // console.log('constructor Region ', region);
     this.game = game;
     this.region = region;
@@ -126,10 +121,10 @@ class Region {
         game,
         location: this.armyZone,
         id,
-        jstpl: "jstpl_army",
+        jstpl: 'jstpl_army',
         jstplProps: {
           id,
-          coalition: id.split("_")[1],
+          coalition: id.split('_')[1],
         },
       });
     });
@@ -149,10 +144,10 @@ class Region {
         game,
         location: this.tribeZone,
         id,
-        jstpl: "jstpl_cylinder",
+        jstpl: 'jstpl_cylinder',
         jstplProps: {
           id,
-          color: game.gamedatas.players[id.split("_")[1]].color,
+          color: game.gamedatas.players[id.split('_')[1]].color,
         },
       });
     });
@@ -172,7 +167,7 @@ class Region {
         game,
         location: this.rulerZone,
         id: `pp_ruler_token_${region}`,
-        jstpl: "jstpl_ruler_token",
+        jstpl: 'jstpl_ruler_token',
         jstplProps: {
           id: `pp_ruler_token_${region}`,
           region,
@@ -208,7 +203,7 @@ class MapManager {
   private regions: Record<string, Region>;
 
   constructor(game: PaxPamirGame) {
-    console.log("Constructor Map");
+    console.log('Constructor Map');
     this.game = game;
     this.borders = {};
     this.regions = {};
@@ -221,11 +216,11 @@ class MapManager {
     });
   }
 
-  getBorder({ border }: {border: string;}): Border {
+  getBorder({ border }: { border: string }): Border {
     return this.borders[border];
   }
 
-  getRegion({ region }: {region: string;}): Region {
+  getRegion({ region }: { region: string }): Region {
     return this.regions[region];
   }
 }

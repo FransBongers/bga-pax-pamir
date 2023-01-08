@@ -20,7 +20,7 @@ class MarketManager {
   private marketRupees: Zone[][];
 
   constructor(game: PaxPamirGame) {
-    console.log("MarketManager");
+    console.log('MarketManager');
     this.game = game;
     this.marketCards = [];
     this.marketRupees = [];
@@ -37,7 +37,7 @@ class MarketManager {
           game,
           stock: this.marketCards[row][column],
           nodeId: containerId,
-          className: "pp_market_card",
+          className: 'pp_market_card',
         });
 
         // Set up zone for all rupees in the market
@@ -61,19 +61,19 @@ class MarketManager {
           });
         }
       }
-    };
+    }
 
     // Put all rupees in market locations
     Object.keys(game.gamedatas.rupees).forEach((rupeeId) => {
       const rupee = game.gamedatas.rupees[rupeeId];
-      if (rupee.location.startsWith("market")) {
-        const row = rupee.location.split("_")[1];
-        const column = rupee.location.split("_")[2];
+      if (rupee.location.startsWith('market')) {
+        const row = rupee.location.split('_')[1];
+        const column = rupee.location.split('_')[2];
         placeToken({
           game,
           location: this.marketRupees[row][column],
           id: rupeeId,
-          jstpl: "jstpl_rupee",
+          jstpl: 'jstpl_rupee',
           jstplProps: {
             id: rupeeId,
           },
@@ -82,11 +82,11 @@ class MarketManager {
     });
   }
 
-  getMarketCardsStock({row, column}: {row: number; column: number;}) {
+  getMarketCardsStock({ row, column }: { row: number; column: number }) {
     return this.marketCards[row][column];
   }
 
-  getMarketRupeesZone({row, column}: {row: number; column: number;}) {
+  getMarketRupeesZone({ row, column }: { row: number; column: number }) {
     return this.marketRupees[row][column];
   }
 }

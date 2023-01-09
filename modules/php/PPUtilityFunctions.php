@@ -7,11 +7,118 @@ trait PPUtilityFunctionsTrait
   //////////// Utility functions
   ////////////    
 
-  /*
-        In this space, you can put any utility methods useful for your game logic.
-        NOTE: put them in alphabetical order
-    */
+  /**
+   * Generic functions
+   */
 
+  function array_find(array $array, callable $fn)
+  {
+    foreach ($array as $value) {
+      if ($fn($value)) {
+        return $value;
+      }
+    }
+    return null;
+  }
+
+  function array_find_index(array $array, callable $fn)
+  {
+    foreach ($array as $index => $value) {
+      if ($fn($value)) {
+        return $index;
+      }
+    }
+    return null;
+  }
+
+  function array_some(array $array, callable $fn)
+  {
+    foreach ($array as $value) {
+      if ($fn($value)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function array_every(array $array, callable $fn)
+  {
+    foreach ($array as $value) {
+      if (!$fn($value)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Save (insert or update) any object/array as variable.
+   */
+  function setGlobalVariable(string $name, /*object|array*/ $obj)
+  {
+    $jsonObj = json_encode($obj);
+    $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+  }
+
+  /**
+   * Return a variable object/array.
+   * To force object/array type, set $asArray to false/true.
+   */
+  function getGlobalVariable(string $name, $asArray = null)
+  {
+    $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+    if ($json_obj) {
+      $object = json_decode($json_obj, $asArray);
+      return $object;
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Delete a variable object/array.
+   */
+  function deleteGlobalVariable(string $name)
+  {
+    $this->DbQuery("DELETE FROM `global_variables` where `name` = '$name'");
+  }
+
+  function getPlayersIds()
+  {
+    return array_keys($this->loadPlayersBasicInfos());
+  }
+
+  function getPlayerCount()
+  {
+    return count($this->getPlayersIds());
+  }
+
+  function getPlayerName(int $playerId)
+  {
+    return self::getUniqueValueFromDb("SELECT player_name FROM player WHERE player_id = $playerId");
+  }
+
+  function getPlayerScore(int $playerId)
+  {
+    return $this->getUniqueIntValueFromDB("SELECT player_score FROM player where `player_id` = $playerId");
+  }
+
+  function incScore(int $playerId, int $delta, $message = null, $messageArgs = [])
+  {
+    self::DbQuery("UPDATE player SET `player_score` = `player_score` + $delta where `player_id` = $playerId");
+
+    self::notifyAllPlayers('points', $message !== null ? $message : '', [
+      'playerId' => $playerId,
+      'player_name' => $this->getPlayerName($playerId),
+      'points' => $this->getPlayerScore($playerId),
+      'delta' => $delta,
+    ] + $messageArgs);
+  }
+
+  function getUniqueIntValueFromDB(string $sql)
+  {
+    return intval(self::getUniqueValueFromDB($sql));
+  }
 
   /**
    * checks if coalition is different from current loyalty.
@@ -44,28 +151,6 @@ trait PPUtilityFunctionsTrait
     ));
   }
 
-
-  /*
-      Returns the number of hand and court cards that need to be discarded by the player.
-  */
-  function checkDiscardsForPlayer($player_id)
-  {
-    //
-    // check for extra cards in hand and court
-    //
-    $result = array();
-    $suits = $this->getPlayerSuitsTotals($player_id);
-    $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
-    $hand = $this->tokens->getTokensOfTypeInLocation('card', 'hand_' . $player_id, null, 'state');
-
-    $result['court'] = count($court_cards) - $suits['political'] - 3;
-    $result['court'] = max($result['court'], 0);
-
-    $result['hand'] = count($hand) - $suits['intelligence'] - 2;
-    $result['hand'] = max($result['hand'], 0);
-
-    return $result;
-  }
 
   /**
    * Calculates VPs based on an array with available point [5,3,1] and 
@@ -109,102 +194,25 @@ trait PPUtilityFunctionsTrait
     return $scores;
   }
 
-  /*
-      Returns rulers for all regions. Value will either be 0 (no ruler) or
-      the playerId of the player ruling the region
-  */
-  function getAllRegionRulers()
-  {
-
-    $result = array();
-
-    $result['transcaspia'] = $this->getGameStateValue('ruler_transcaspia');
-    $result['kabul'] = $this->getGameStateValue('ruler_kabul');
-    $result['persia'] = $this->getGameStateValue('ruler_persia');
-    $result['herat'] = $this->getGameStateValue('ruler_herat');
-    $result['kandahar'] = $this->getGameStateValue('ruler_kandahar');
-    $result['punjab'] = $this->getGameStateValue('ruler_punjab');
-
-    return $result;
-  }
-
   /**
-   *   Returns total influence for player
+   * Returns card info from material.inc.php file.
+   * Input is row from token table
    */
-  function getPlayerInfluence($player_id)
-  {
-    $influence = 1;
-    $player_loyalty = $this->getPlayerLoyalty($player_id);
-
-    // Patriots
-    $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
-    for ($i = 0; $i < count($court_cards); $i++) {
-      $card_loyalty = $this->cards[$court_cards[$i]['key']]['loyalty'];
-      if ($card_loyalty == $player_loyalty) {
-        $influence += 1;
-      }
-    }
-    for ($i = 1; $i <= 3; $i++) {
-      $value = $i * 2;
-      $tokens_in_location = $this->tokens->getTokensInLocation('gift_' . $value . '_' . $player_id);
-      if (count($tokens_in_location) > 0) {
-        $influence += 1;
-      }
-    }
-
-
-    // $this->tokens->getTokensOfTypeInLocation('cylinder', 'court_'.$player_id, null, 'state');
-    // TODO (Frans): get information about courd cards and add influence if patriot
-    // Add number of prizes
-
-    return $influence;
+  function getCardInfo($token) {
+    return $this->cards[$token['key']];
   }
 
-  /**
-   * Get loyalty for player
-   */
-  function getPlayerLoyalty($player_id)
-  {
-    $sql = "SELECT loyalty FROM player WHERE  player_id='$player_id' ";
-    return $this->getUniqueValueFromDB($sql);
-  }
 
-  /**
-   * Get total number of rupees owned by player
-   */
-  function getPlayerRupees($player_id)
-  {
-    $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
-    return $this->getUniqueValueFromDB($sql);
-  }
+  // /**
+  //  * Get current score for player
+  //  */
+  // function getPlayerScore($player_id)
+  // {
+  //   $sql = "SELECT player_score FROM player WHERE  player_id='$player_id' ";
+  //   return $this->getUniqueValueFromDB($sql);
+  // }
 
-  /**
-   * Get current score for player
-   */
-  function getPlayerScore($player_id)
-  {
-    $sql = "SELECT player_score FROM player WHERE  player_id='$player_id' ";
-    return $this->getUniqueValueFromDB($sql);
-  }
 
-  /**
-   * Calculates total number of ranks for each suit for cards in a players court
-   */
-  function getPlayerSuitsTotals($player_id)
-  {
-    $suits = array(
-      POLITICAL => 0,
-      MILITARY => 0,
-      ECONOMIC => 0,
-      INTELLIGENCE => 0
-    );
-    $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
-    for ($i = 0; $i < count($court_cards); $i++) {
-      $card_info = $this->cards[$court_cards[$i]['key']];
-      $suits[$card_info['suit']] += $card_info['rank'];
-    }
-    return $suits;
-  }
 
   /**
    * Returns ruler of the region a card belongs to. 0 if no ruler, otherwise playerId.

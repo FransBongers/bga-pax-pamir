@@ -43,3 +43,9 @@ CREATE TABLE IF NOT EXISTS `token` (
   `token_used` int(10),
   PRIMARY KEY (`token_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `global_variables` (
+  `name` varchar(50) NOT NULL,
+  `value` json,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

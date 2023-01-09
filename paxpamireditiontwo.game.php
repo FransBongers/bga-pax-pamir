@@ -19,9 +19,13 @@
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
 require_once('modules/php/PPConstants.php');
+require_once('modules/php/PPMap.php');
+require_once('modules/php/PPMarket.php');
+require_once('modules/php/PPPlayer.php');
 require_once('modules/php/PPPlayerActions.php');
 require_once('modules/php/PPStateActions.php');
 require_once('modules/php/PPStateArgs.php');
+require_once('modules/php/PPSupply.php');
 require_once('modules/php/PPUtilityFunctions.php');
 require_once('modules/php/tokens.php');
 
@@ -32,9 +36,13 @@ require_once('modules/php/tokens.php');
  */
 class PaxPamirEditionTwo extends Table
 {
+    use PPMapTrait;
+    use PPMarketTrait;
+    use PPPlayerTrait;
     use PPPlayerActionsTrait;
     use PPStateActionsTrait;
     use PPStateArgsTrait;
+    use PPSupplyTrait;
     use PPUtilityFunctionsTrait;
 
 	function __construct( )
@@ -111,36 +119,12 @@ class PaxPamirEditionTwo extends Table
         
         /************ Start the game initialization *****/
 
-        // Add all cards to token module
-        $this->tokens->createTokensPack("card_{INDEX}", COURT_CARD, 100);
-        $this->tokens->createTokensPack("card_{INDEX}", DOMINANCE_CHECK_CARD, 4, 101);
-        $this->tokens->createTokensPack("card_{INDEX}", EVENT_CARD, 12, 105);
-        $this->tokens->shuffle(COURT_CARD);
-        $this->tokens->shuffle(EVENT_CARD);
+        $this->createMarketDeck($number_of_players);
+        $this->drawInitialMarketCards();
 
-        // build market deck based on number of players
-        for ($i = 6; $i >=1; $i--) {
-            $this->tokens->pickTokensForLocation($number_of_players+5, COURT_CARD, 'pile');
-            if ($i == 2) {
-                $this->tokens->pickTokensForLocation(2, EVENT_CARD, 'pile');
-            } elseif ($i > 2) {
-                $this->tokens->pickTokensForLocation(1, EVENT_CARD, 'pile');
-                $this->tokens->pickTokensForLocation(1, DOMINANCE_CHECK_CARD, 'pile');
-            }
-            $this->tokens->shuffle('pile');
-            $pile = $this->tokens->getTokensInLocation('pile');
-            $n_cards = $this->tokens->countTokensInLocation('deck');
-            foreach ( $pile as $id => $info) {
-                $this->tokens->moveToken($id, 'deck', $info['state'] + $n_cards);
-            }
-        }
-
-        // Add other tokens to token module
-        $this->tokens->createTokensPack("rupee_{INDEX}", RUPEE_SUPPLY, 36);
-        $this->tokens->createTokensPack("block_afghan_{INDEX}", BLOCKS_AFGHAN_SUPPLY, 12);
-        $this->tokens->createTokensPack("block_british_{INDEX}", BLOCKS_BRITISH_SUPPLY, 12);
-        $this->tokens->createTokensPack("block_russian_{INDEX}", BLOCKS_RUSSIAN_SUPPLY, 12);
+        $this->createSupply();
         
+        $this->setInitialRulers();
 
         // Init global values with their initial values 
         // Note: values have to be integers
@@ -149,13 +133,6 @@ class PaxPamirEditionTwo extends Table
         self::setGameStateInitialValue( 'favored_suit', 0 );
         self::setGameStateInitialValue( 'dominance_checks_resolved', 0 );
 
-        // Rulers: value is 0 if no ruler, otherwise playerId of the ruling player
-        self::setGameStateInitialValue( 'ruler_transcaspia', 0 );
-        self::setGameStateInitialValue( 'ruler_kabul', 0 );
-        self::setGameStateInitialValue( 'ruler_persia', 0 );
-        self::setGameStateInitialValue( 'ruler_herat', 0 );
-        self::setGameStateInitialValue( 'ruler_kandahar', 0 );
-        self::setGameStateInitialValue( 'ruler_punjab', 0 );
 
         self::setGameStateInitialValue( 'bribe_card_id', 0 );
         self::setGameStateInitialValue( 'bribe_amount', -1 );
@@ -164,11 +141,7 @@ class PaxPamirEditionTwo extends Table
         self::setGameStateInitialValue( 'card_action_card_id', 0 );
         
 
-        // Assign initial cards to market
-        for ($i = 0; $i < 6; $i++) {
-            $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_'.$i);
-            $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_'.$i);
-        }
+
 
         
         // Init game statistics
@@ -205,7 +178,7 @@ class PaxPamirEditionTwo extends Table
         // Get counts for all players
         $players = $this->loadPlayersBasicInfos();
         foreach ( $players as $player_id => $player_info ) {
-            $result['court'][$player_id] = $this->tokens->getTokensOfTypeInLocation('card', 'court_'.$player_id, null, 'state');
+            $result['court'][$player_id] = $this->getPlayerCourtCards($player_id);
             foreach($result['court'][$player_id] as $card ) {
                 $result['spies'][$card['key']] = $this->tokens->getTokensInLocation('spies_'.$card['key']);
             }

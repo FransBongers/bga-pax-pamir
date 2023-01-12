@@ -773,10 +773,16 @@ var InteractionManager = /** @class */ (function () {
         console.log('Interaction Manager');
         this.game = game;
         this.handles = [];
-        this.selectedAction = undefined;
+        this._connections = [];
         // Will store all data for active player and gets refreshed with entering player actions state
         this.activePlayer = {};
     }
+    InteractionManager.prototype.clearPossible = function () {
+        this.game.framework().removeActionButtons();
+        dojo.empty('customActions');
+        dojo.forEach(this._connections, dojo.disconnect);
+        this._connections = [];
+    };
     InteractionManager.prototype.resetActionArgs = function () {
         console.log('resetActionArgs');
         // Remove all selectable / selected classes
@@ -793,6 +799,105 @@ var InteractionManager = /** @class */ (function () {
         dojo.forEach(this.handles, dojo.disconnect);
         this.handles = [];
     };
+    // .##.....##.########..########.....###....########.########
+    // .##.....##.##.....##.##.....##...##.##......##....##......
+    // .##.....##.##.....##.##.....##..##...##.....##....##......
+    // .##.....##.########..##.....##.##.....##....##....######..
+    // .##.....##.##........##.....##.#########....##....##......
+    // .##.....##.##........##.....##.##.....##....##....##......
+    // ..#######..##........########..##.....##....##....########
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    InteractionManager.prototype.updateInterface = function (_a) {
+        var _this = this;
+        var nextStep = _a.nextStep;
+        console.log("updateInterface ".concat(nextStep));
+        switch (nextStep) {
+            case 'chooseLoyalty':
+                this.addPrimaryActionButton({
+                    id: 'afghan_button',
+                    text: _('Afghan'),
+                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: AFGHAN } }); },
+                });
+                this.addPrimaryActionButton({
+                    id: 'british_button',
+                    text: _('British'),
+                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: BRITISH } }); },
+                });
+                this.addPrimaryActionButton({
+                    id: 'russian_button',
+                    text: _('Russian'),
+                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }); },
+                });
+                break;
+            case 'playerActions':
+                this.updateMainTitleTextActions();
+                if (this.activePlayerHasActions()) {
+                    this.addPrimaryActionButton({ id: 'purchase_btn', text: _('Purchase'), callback: function () { return _this.onPurchase(); } });
+                    this.addPrimaryActionButton({ id: 'play_btn', text: _('Play'), callback: function () { return _this.onPlay(); } });
+                    this.addPrimaryActionButton({ id: 'card_action_btn', text: _('Card Action'), callback: function () { return _this.onCardAction(); } });
+                    this.addSecondaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: function () { return _this.onPass(); } });
+                    this.setMarketCardsSelectable();
+                    this.setHandCardsSelectable({ action: 'play' });
+                    this.setCardActionsSelectable();
+                }
+                else {
+                    if (this.activePlayerHasFreeActions()) {
+                        this.addPrimaryActionButton({ id: 'card_action_btn', text: _('Card Action'), callback: function () { return _this.onCardAction(); } });
+                        this.setCardActionsSelectable();
+                    }
+                    this.addPrimaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: function () { return _this.onPass(); } });
+                }
+                break;
+            case 'client_confirmPlaceSpy':
+                this.addPrimaryActionButton({ id: 'confirm_btn', text: _('Confirm'), callback: function () { return _this.onConfirm({ action: 'placeSpy' }); } });
+                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case 'client_confirmPlay':
+                this.addPrimaryActionButton({ id: 'left_side_btn', text: _('<< LEFT'), callback: function () { return _this.onLeft(); } });
+                this.addPrimaryActionButton({ id: 'right_side_btn', text: _('RIGHT >>'), callback: function () { return _this.onRight(); } });
+                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case 'client_confirmPurchase':
+                this.addPrimaryActionButton({
+                    id: 'confirm_btn',
+                    text: _('Confirm'),
+                    callback: function () { return _this.onConfirm({ action: 'purchase' }); },
+                });
+                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case 'client_confirmSelectGift':
+                this.addDangerActionButton({
+                    id: 'confirm_btn',
+                    text: _('Confirm'),
+                    callback: function () { return _this.onConfirm({ action: 'confirmSelectGift' }); },
+                });
+                this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case 'client_endTurn':
+                this.addDangerActionButton({
+                    id: 'confirm_btn',
+                    text: _('Confirm'),
+                    callback: function () { return _this.onConfirm({ action: 'pass' }); },
+                });
+                this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case 'client_selectCardAction':
+                this.updateSelectableActions({ action: 'cardAction' });
+                break;
+            case 'client_selectPurchase':
+                this.setMarketCardsSelectable();
+                break;
+            default:
+                console.log("No changes for step ".concat(nextStep));
+                break;
+        }
+    };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
     //  .##.....##....##.....##..##........##.....##......####..
@@ -800,12 +905,68 @@ var InteractionManager = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    InteractionManager.prototype.updateSelectableActions = function () {
+    InteractionManager.prototype.activePlayerHasActions = function () {
+        return this.activePlayer.remainingActions > 0 || false;
+    };
+    InteractionManager.prototype.activePlayerHasFreeActions = function () {
         var _this = this;
-        console.log('updateSelectableActions', this.selectedAction);
+        return this.activePlayer.court.some(function (_a) {
+            var key = _a.key, used = _a.used;
+            return used == '0' && _this.game.gamedatas.cards[key].suit == _this.activePlayer.favoredSuit;
+        });
+    };
+    /*
+     * Add a blue/grey button if it doesn't already exists
+     */
+    InteractionManager.prototype.addPrimaryActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback;
+        if (!$(id))
+            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+    };
+    InteractionManager.prototype.addSecondaryActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback;
+        if (!$(id))
+            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+    };
+    InteractionManager.prototype.addDangerActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback;
+        if (!$(id))
+            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+    };
+    InteractionManager.prototype.updateMainTitleTextActions = function () {
+        var main = $('pagemaintitletext');
+        main.innerHTML +=
+            _(' may take ') +
+                '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+                this.activePlayer.remainingActions +
+                '</span>' +
+                _(' action(s): ');
+    };
+    InteractionManager.prototype.setCardActionsSelectable = function () {
+        var _this = this;
+        var playerId = this.game.getPlayerId();
+        dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node) {
+            var _a, _b;
+            var splitNodeId = node.id.split('_');
+            var cardId = "".concat(splitNodeId[5], "_").concat(splitNodeId[6]);
+            var used = ((_b = (_a = _this.activePlayer.court) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.key === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === '1';
+            if (!used &&
+                (_this.activePlayer.remainingActions > 0 || _this.game.gamedatas.cards[cardId].suit === _this.activePlayer.favoredSuit))
+                dojo.map(node.children, function (child) {
+                    if (dojo.hasClass(child, 'pp_card_action')) {
+                        dojo.addClass(child, 'pp_selectable');
+                        _this.handles.push(dojo.connect(child, 'onclick', _this, 'onCardActionClick'));
+                    }
+                });
+        });
+    };
+    InteractionManager.prototype.updateSelectableActions = function (_a) {
+        var _this = this;
+        var action = _a.action;
+        console.log('updateSelectableActions', action);
         this.resetActionArgs();
         var playerId = this.game.getPlayerId();
-        switch (this.selectedAction) {
+        switch (action) {
             case 'cardActionBattle':
                 console.log('battle');
                 console.log('dojo', dojo);
@@ -864,46 +1025,43 @@ var InteractionManager = /** @class */ (function () {
                 break;
         }
     };
-    InteractionManager.prototype.updateSelectableCards = function (args) {
+    InteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;
-        if (args === void 0) { args = null; }
-        console.log('updateSelectableCards', this.selectedAction);
-        this.resetActionArgs();
-        switch (this.selectedAction) {
-            case 'purchase':
-                dojo.query('.pp_market_card').forEach(function (node) {
-                    var cost = node.id.split('_')[3]; // cost is equal to the column number
-                    var cardId = node.id.split('_')[6];
-                    if (cost <= _this.activePlayer.rupees && !_this.activePlayer.unavailableCards.includes('card_' + cardId)) {
-                        dojo.addClass(node, 'pp_selectable_card');
-                        _this.handles.push(dojo.connect(node, 'onclick', _this, 'onCard'));
-                    }
-                }, this);
-                break;
-            case 'play':
-            case 'discard_hand':
-                dojo.query('.pp_card_in_hand').forEach(function (node, index) {
-                    dojo.addClass(node, 'pp_selectable_card');
-                    this.handles.push(dojo.connect(node, 'onclick', this, 'onCard'));
-                }, this);
-                break;
-            case 'discard_court':
-                dojo.query(".pp_card_in_court_".concat(this.game.getPlayerId())).forEach(function (node, index) {
-                    dojo.addClass(node, 'pp_selectable_card');
-                    this.handles.push(dojo.connect(node, 'onclick', this, 'onCard'));
-                }, this);
-                break;
-            case 'placeSpy':
-                dojo.query(".pp_card_in_court_".concat((args === null || args === void 0 ? void 0 : args.region) ? args.region : '')).forEach(function (node, index) {
-                    dojo.addClass(node, 'pp_selectable_card');
-                    this.handles.push(dojo.connect(node, 'onclick', this, 'onCard'));
-                }, this);
-                break;
-            // case 'card_action':
-            //     break;
-            default:
-                break;
-        }
+        dojo.query('.pp_market_card').forEach(function (node) {
+            var cost = node.id.split('_')[3]; // cost is equal to the column number
+            var cardId = node.id.split('_')[6];
+            console.log('cardId', cardId, 'node', node);
+            if (cost <= _this.activePlayer.rupees && !_this.activePlayer.unavailableCards.includes('card_' + cardId)) {
+                dojo.addClass(node, 'pp_selectable_card');
+                _this.handles.push(dojo.connect(node, 'onclick', _this, function (evt) { return _this.onCard({ action: 'purchase', evt: evt }); }));
+            }
+        }, this);
+    };
+    InteractionManager.prototype.setHandCardsSelectable = function (_a) {
+        var action = _a.action;
+        dojo.query('.pp_card_in_hand').forEach(function (node, index) {
+            var _this = this;
+            dojo.addClass(node, 'pp_selectable_card');
+            this.handles.push(dojo.connect(node, 'onclick', this, function (evt) { return _this.onCard({ action: action, evt: evt }); }));
+        }, this);
+    };
+    InteractionManager.prototype.setCourtCardsSelectable = function (_a) {
+        var playerId = _a.playerId, action = _a.action;
+        // dojo.query(`.pp_card_in_court_${this.game.getPlayerId()}`).forEach(function (node, index) {
+        dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node, index) {
+            var _this = this;
+            dojo.addClass(node, 'pp_selectable_card');
+            this.handles.push(dojo.connect(node, 'onclick', this, function (evt) { return _this.onCard({ action: action, evt: evt }); }));
+        }, this);
+    };
+    InteractionManager.prototype.setPlaceSpyCardsSelectable = function (_a) {
+        var region = _a.region;
+        // dojo.query(`.pp_card_in_court_${args?.region ? args.region : ''}`).forEach(function (node, index) {
+        dojo.query(".pp_card_in_court_".concat(region)).forEach(function (node, index) {
+            var _this = this;
+            dojo.addClass(node, 'pp_selectable_card');
+            this.handles.push(dojo.connect(node, 'onclick', this, function (evt) { return _this.onCard({ action: 'placeSpy', evt: evt }); }));
+        }, this);
     };
     //  .########.##....##.########.########.########..####.##....##..######..
     //  .##.......###...##....##....##.......##.....##..##..###...##.##....##.
@@ -923,14 +1081,16 @@ var InteractionManager = /** @class */ (function () {
         // UI changes for active player
         if (this.game.isCurrentPlayerActive()) {
             switch (stateName) {
+                case 'setup':
+                    this.updateInterface({ nextStep: 'chooseLoyalty' });
+                    break;
                 case 'client_cardActionBattle':
-                    this.updateSelectableActions();
+                    this.updateSelectableActions({ action: 'cardActionBattle' });
                     break;
                 case 'cardActionGift':
                     this.activePlayer.rupees = args.args.rupees;
                     console.log('activePlayer', this.activePlayer);
-                    this.selectedAction = 'cardActionGift';
-                    this.updateSelectableActions();
+                    this.updateSelectableActions({ action: 'cardActionGift' });
                     break;
                 case 'playerActions':
                     var _a = args.args, court = _a.court, favored_suit = _a.favored_suit, remaining_actions = _a.remaining_actions, rupees = _a.rupees, unavailable_cards = _a.unavailable_cards;
@@ -941,12 +1101,40 @@ var InteractionManager = /** @class */ (function () {
                         rupees: rupees,
                         unavailableCards: unavailable_cards,
                     };
+                    this.updateInterface({ nextStep: 'playerActions' });
                     // this.unavailableCards = args.args.unavailable_cards;
                     // this.remainingActions = args.args.remaining_actions;
                     break;
                 case 'placeSpy':
-                    this.selectedAction = 'placeSpy';
-                    this.updateSelectableCards(args.args);
+                    this.setPlaceSpyCardsSelectable({ region: args.args.region });
+                    // this.updateSelectableCards({ action: 'placeSpy', args: args.args });
+                    break;
+                case 'client_cardActionBattle':
+                    this.updateInterface({ nextStep: 'client_cardActionBattle' });
+                    break;
+                case 'client_confirmPlaceSpy':
+                    this.updateInterface({ nextStep: 'client_confirmPlaceSpy' });
+                    break;
+                case 'client_confirmPlay':
+                    this.updateInterface({ nextStep: 'client_confirmPlay' });
+                    break;
+                case 'client_confirmPurchase':
+                    this.updateInterface({ nextStep: 'client_confirmPurchase' });
+                    break;
+                case 'client_confirmSelectGift':
+                    this.updateInterface({ nextStep: 'client_confirmSelectGift' });
+                    break;
+                case 'client_endTurn':
+                    this.updateInterface({ nextStep: 'client_endTurn' });
+                    break;
+                case 'client_selectCardAction':
+                    this.updateInterface({ nextStep: 'client_selectCardAction' });
+                    break;
+                case 'client_selectPlay':
+                    this.setCourtCardsSelectable({ action: 'play', playerId: this.game.getPlayerId() });
+                    break;
+                case 'client_selectPurchase':
+                    this.updateInterface({ nextStep: 'client_selectPurchase' });
                     break;
                 default:
                     break;
@@ -976,6 +1164,8 @@ var InteractionManager = /** @class */ (function () {
     //  .##....##....##....##.....##....##....##......
     //  ..######.....##....##.....##....##....########
     InteractionManager.prototype.onLeavingState = function (stateName) {
+        console.log("onLeavingState ".concat(stateName));
+        this.clearPossible();
         switch (stateName) {
             /* Example:
             
@@ -1010,42 +1200,6 @@ var InteractionManager = /** @class */ (function () {
             return;
         }
         switch (stateName) {
-            case 'setup':
-                this.game.addActionButton('afghan_button', _('Afghan'), 'onActionButtonClick', null, false, 'blue');
-                this.game.addActionButton('british_button', _('British'), 'onActionButtonClick', null, false, 'blue');
-                this.game.addActionButton('russian_button', _('Russian'), 'onActionButtonClick', null, false, 'blue');
-                break;
-            case 'playerActions':
-                var main = $('pagemaintitletext');
-                if (args.remaining_actions > 0) {
-                    main.innerHTML +=
-                        _(' may take ') +
-                            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-                            args.remaining_actions +
-                            '</span>' +
-                            _(' action(s): ');
-                    this.game.addActionButton('purchase_btn', _('Purchase'), 'onPurchase');
-                    this.game.addActionButton('play_btn', _('Play'), 'onPlay');
-                    this.game.addActionButton('card_action_btn', _('Card Action'), 'onCardAction');
-                    this.game.addActionButton('pass_btn', _('End Turn'), 'onPass', null, false, 'gray');
-                }
-                else {
-                    main.innerHTML +=
-                        _(' have ') +
-                            '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-                            args.remaining_actions +
-                            '</span>' +
-                            _(' remaining actions: ');
-                    // If player has court cards with free actions
-                    if (args.court.some(function (_a) {
-                        var key = _a.key, used = _a.used;
-                        return used == '0' && _this.game.gamedatas.cards[key].suit == args.favored_suit;
-                    })) {
-                        this.game.addActionButton('card_action_btn', _('Card Action'), 'onCardAction');
-                    }
-                    this.game.addActionButton('pass_btn', _('End Turn'), 'onPass', null, false, 'blue');
-                }
-                break;
             // case 'negotiateBribe':
             //     for ( var i = 0; i <= args.briber_max; i++ ) {
             //         this.game.addActionButton( i+'_btn', $i, 'onBribe', null, false, 'blue' );
@@ -1059,8 +1213,7 @@ var InteractionManager = /** @class */ (function () {
                     cardmsg = _(' court card');
                 $('pagemaintitletext').innerHTML +=
                     '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' + this.numberOfDiscards + '</span>' + cardmsg;
-                this.selectedAction = 'discard_court';
-                this.updateSelectableCards();
+                this.setCourtCardsSelectable({ action: 'discard_court', playerId: this.game.getPlayerId() });
                 this.game.framework().addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
                 dojo.addClass('confirm_btn', 'pp_disabled');
                 break;
@@ -1072,41 +1225,18 @@ var InteractionManager = /** @class */ (function () {
                     cardmsg = _(' hand card');
                 $('pagemaintitletext').innerHTML +=
                     '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' + this.numberOfDiscards + '</span>' + cardmsg;
-                this.selectedAction = 'discard_hand';
-                this.updateSelectableCards();
+                this.setHandCardsSelectable({ action: 'discard_hand' });
                 this.game.addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
                 dojo.addClass('confirm_btn', 'pp_disabled');
-                break;
-            case 'client_confirmPurchase':
-                this.game.addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
-                this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'red');
-                break;
-            case 'client_confirmPlay':
-                this.game.addActionButton('left_side_btn', _('<< LEFT'), 'onLeft', null, false, 'blue');
-                this.game.addActionButton('right_side_btn', _('RIGHT >>'), 'onRight', null, false, 'blue');
-                this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'red');
-                break;
-            case 'client_confirmPlaceSpy':
-                this.game.addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
-                this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'red');
-                break;
-            case 'client_confirmSelectGift':
-                this.game.addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red');
-                this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray');
                 break;
             case 'placeRoad':
                 args.region.borders.forEach(function (border) {
                     _this.game.addActionButton("".concat(border, "_btn"), _(_this.game.gamedatas.borders[border].name), 'onBorder', null, false, 'blue');
                 });
                 break;
-            case 'client_endTurn':
-                this.game.addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'red');
-                this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray');
-                break;
             case 'cardActionGift':
                 this.game.addActionButton('cancel_btn', _('Cancel'), 'onCancel', null, false, 'gray');
                 break;
-            // case 'client_selectPurchase':
             // case 'client_selectPlay':
             //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
             //     break;
@@ -1133,51 +1263,20 @@ var InteractionManager = /** @class */ (function () {
     // .##.....##.#########.##..####.##.....##.##.......##.............##
     // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
     // .##.....##.##.....##.##....##.########..########.########..######.
-    InteractionManager.prototype.onActionButtonClick = function (evt) {
-        dojo.stopEvent(evt);
-        var buttonId = evt.target.id;
-        console.log('onActionButtonClick', buttonId);
-        var gamestateName = this.game.gamedatas.gamestate.name;
-        console.log('gamestateName', gamestateName);
-        switch (gamestateName) {
-            case 'setup':
-                switch (buttonId) {
-                    case 'afghan_button':
-                        this.game.chooseLoyalty({ coalition: AFGHAN });
-                        break;
-                    case 'british_button':
-                        this.game.chooseLoyalty({ coalition: BRITISH });
-                        break;
-                    case 'russian_button':
-                        this.game.chooseLoyalty({ coalition: RUSSIAN });
-                        break;
-                }
-                break;
-            default:
-                console.log('no handler for button click');
-                break;
-        }
-    };
-    InteractionManager.prototype.onPurchase = function (evt) {
-        dojo.stopEvent(evt);
-        if (!this.game.checkAction('purchase'))
+    InteractionManager.prototype.onPurchase = function () {
+        if (!this.game.framework().checkAction('purchase'))
             return;
-        if (this.game.isCurrentPlayerActive()) {
-            this.selectedAction = 'purchase';
-            this.updateSelectableCards();
-            this.game.setClientState('client_selectPurchase', {
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.game.framework().setClientState('client_selectPurchase', {
                 descriptionmyturn: _('${you} must select a card to purchase'),
             });
         }
     };
-    InteractionManager.prototype.onPlay = function (evt) {
-        dojo.stopEvent(evt);
-        if (!this.game.checkAction('play'))
+    InteractionManager.prototype.onPlay = function () {
+        if (!this.game.framework().checkAction('play'))
             return;
         if (this.game.isCurrentPlayerActive()) {
-            this.selectedAction = 'play';
-            this.updateSelectableCards();
-            this.game.setClientState('client_selectPlay', {
+            this.game.framework().setClientState('client_selectPlay', {
                 descriptionmyturn: _('${you} must select a card to play'),
             });
         }
@@ -1189,11 +1288,10 @@ var InteractionManager = /** @class */ (function () {
             return;
         if (this.game.isCurrentPlayerActive()) {
             var value = divId.split('_')[2];
-            this.selectedAction = 'confirmSelectGift';
             this.resetActionArgs();
             this.selectedGift = value;
             dojo.query("#pp_gift_".concat(value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
-            this.game.setClientState('client_confirmSelectGift', {
+            this.game.framework().setClientState('client_confirmSelectGift', {
                 descriptionmyturn: _("Purchase gift for ".concat(value, " rupees?")),
             });
         }
@@ -1203,23 +1301,19 @@ var InteractionManager = /** @class */ (function () {
         dojo.stopEvent(evt);
         console.log('onSelectRegion', divId, evt);
     };
-    InteractionManager.prototype.onCardAction = function (evt) {
+    InteractionManager.prototype.onCardAction = function () {
         if (!this.game.checkAction('card_action'))
             return;
         if (this.game.isCurrentPlayerActive()) {
-            this.selectedAction = 'cardAction';
-            this.updateSelectableActions();
             this.game.setClientState('client_selectCardAction', {
                 descriptionmyturn: _('${you} must select a card action'),
             });
         }
     };
-    InteractionManager.prototype.onPass = function (evt) {
-        dojo.stopEvent(evt);
+    InteractionManager.prototype.onPass = function () {
         if (!this.game.checkAction('pass'))
             return;
         if (this.game.isCurrentPlayerActive()) {
-            this.selectedAction = 'pass';
             if (this.activePlayer.remainingActions == 0) {
                 this.game.pass();
             }
@@ -1238,14 +1332,16 @@ var InteractionManager = /** @class */ (function () {
         var border = "".concat(splitId[0], "_").concat(splitId[1]);
         this.game.placeRoad({ border: border });
     };
-    InteractionManager.prototype.onCard = function (evt) {
+    InteractionManager.prototype.onCard = function (_a) {
+        var action = _a.action, evt = _a.evt;
         var cardDivId = evt.currentTarget.id;
+        console.log('action', action, 'evt', evt);
         dojo.stopEvent(evt);
         var cardId = 'card_' + cardDivId.split('_')[6];
         this.selectedCard = cardId;
         var node;
         if (this.game.isCurrentPlayerActive()) {
-            switch (this.selectedAction) {
+            switch (action) {
                 case 'purchase':
                     this.resetActionArgs();
                     node = $(cardDivId);
@@ -1301,7 +1397,6 @@ var InteractionManager = /** @class */ (function () {
                 this.game.cardAction({ cardAction: cardAction, cardId: cardId });
                 break;
             case 'battle':
-                this.selectedAction = 'cardActionBattle';
                 // this.updateSelectableActions();
                 this.game.setClientState('client_cardActionBattle', {
                     descriptionmyturn: _('${you} must select a card or region'),
@@ -1312,15 +1407,13 @@ var InteractionManager = /** @class */ (function () {
                 break;
         }
     };
-    InteractionManager.prototype.onCancel = function (evt) {
-        dojo.stopEvent(evt);
+    InteractionManager.prototype.onCancel = function () {
         this.resetActionArgs();
-        this.selectedAction = '';
-        this.game.restoreServerGameState();
+        this.game.framework().restoreServerGameState();
     };
-    InteractionManager.prototype.onConfirm = function (evt) {
-        dojo.stopEvent(evt);
-        switch (this.selectedAction) {
+    InteractionManager.prototype.onConfirm = function (_a) {
+        var action = _a.action;
+        switch (action) {
             case 'purchase':
                 var cardId = this.selectedCard;
                 this.game.purchaseCard({ cardId: cardId });
@@ -1339,7 +1432,7 @@ var InteractionManager = /** @class */ (function () {
                 }, this);
                 this.game.discardCards({
                     cards: cards_1,
-                    fromHand: this.selectedAction == 'discard_hand',
+                    fromHand: action == 'discard_hand',
                 });
                 break;
             case 'placeSpy':
@@ -1350,31 +1443,15 @@ var InteractionManager = /** @class */ (function () {
                 break;
         }
     };
-    InteractionManager.prototype.onLeft = function (evt) {
-        dojo.stopEvent(evt);
-        switch (this.selectedAction) {
-            case 'play':
-                this.resetActionArgs();
-                // var node = $( card_id );
-                // dojo.addClass(node, 'selected');
-                this.game.playCard({ cardId: this.selectedCard, leftSide: true });
-                break;
-            default:
-                break;
-        }
+    InteractionManager.prototype.onLeft = function () {
+        this.resetActionArgs();
+        // var node = $( card_id );
+        // dojo.addClass(node, 'selected');
+        this.game.playCard({ cardId: this.selectedCard, leftSide: true });
     };
-    InteractionManager.prototype.onRight = function (evt) {
-        dojo.stopEvent(evt);
-        switch (this.selectedAction) {
-            case 'play':
-                this.resetActionArgs();
-                // var node = $( card_id );
-                // dojo.addClass(node, 'selected');
-                this.game.playCard({ cardId: this.selectedCard, leftSide: false });
-                break;
-            default:
-                break;
-        }
+    InteractionManager.prototype.onRight = function () {
+        this.resetActionArgs();
+        this.game.playCard({ cardId: this.selectedCard, leftSide: false });
     };
     return InteractionManager;
 }());
@@ -1744,6 +1821,9 @@ var PaxPamir = /** @class */ (function () {
     */
     PaxPamir.prototype.setup = function (gamedatas) {
         var _this = this;
+        console.log('game_name', this.framework().game_name);
+        // Create a new div for buttons to avoid BGA auto clearing it
+        dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
         console.log('typescript version');
         console.log('gamedatas', gamedatas);
         this.gamedatas = gamedatas;
@@ -1833,48 +1913,21 @@ var PaxPamir = /** @class */ (function () {
         console.log('onUpdateActionButtons: ' + stateName);
         this.interactionManager.onUpdateActionButtons(stateName, args);
     };
-    PaxPamir.prototype.onActionButtonClick = function (evt) {
-        this.interactionManager.onActionButtonClick(evt);
-    };
     // TODO (Frans): replace below with single actionButton
-    PaxPamir.prototype.onPurchase = function (evt) {
-        this.interactionManager.onPurchase(evt);
-    };
-    PaxPamir.prototype.onPlay = function (evt) {
-        this.interactionManager.onPlay(evt);
-    };
     PaxPamir.prototype.onSelectGift = function (evt) {
         this.interactionManager.onSelectGift(evt);
     };
     PaxPamir.prototype.onSelectRegion = function (evt) {
         this.interactionManager.onSelectRegion(evt);
     };
-    PaxPamir.prototype.onCardAction = function (evt) {
-        this.interactionManager.onCardAction(evt);
-    };
-    PaxPamir.prototype.onPass = function (evt) {
-        this.interactionManager.onPass(evt);
-    };
     PaxPamir.prototype.onBorder = function (evt) {
         this.interactionManager.onBorder(evt);
-    };
-    PaxPamir.prototype.onCard = function (evt) {
-        this.interactionManager.onCard(evt);
     };
     PaxPamir.prototype.onCardActionClick = function (evt) {
         this.interactionManager.onCardActionClick(evt);
     };
-    PaxPamir.prototype.onCancel = function (evt) {
-        this.interactionManager.onCancel(evt);
-    };
     PaxPamir.prototype.onConfirm = function (evt) {
         this.interactionManager.onConfirm(evt);
-    };
-    PaxPamir.prototype.onLeft = function (evt) {
-        this.interactionManager.onLeft(evt);
-    };
-    PaxPamir.prototype.onRight = function (evt) {
-        this.interactionManager.onRight(evt);
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -2027,7 +2080,21 @@ var PaxPamir = /** @class */ (function () {
     //.##.....##.##....##.##.....##..##...##.
     //.##.....##..######..##.....##.##.....##
     PaxPamir.prototype.actionError = function (actionName) {
-        this.showMessage("cannot take ".concat(actionName, " action"), 'error');
+        this.framework().showMessage("cannot take ".concat(actionName, " action"), 'error');
+    };
+    /*
+     * Make an AJAX call with automatic lock
+     */
+    PaxPamir.prototype.takeAction = function (_a) {
+        var action = _a.action, _b = _a.data, data = _b === void 0 ? {} : _b;
+        console.log("takeAction ".concat(action), data);
+        if (!this.framework().checkAction(action)) {
+            this.actionError(action);
+            return;
+        }
+        data.lock = true;
+        var gameName = this.framework().game_name;
+        this.framework().ajaxcall("/".concat(gameName, "/").concat(gameName, "/").concat(action, ".html"), data, this, function () { });
     };
     PaxPamir.prototype.cardAction = function (_a) {
         var cardId = _a.cardId, cardAction = _a.cardAction;

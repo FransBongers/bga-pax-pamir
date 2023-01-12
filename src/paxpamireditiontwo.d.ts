@@ -20,13 +20,13 @@ interface CourtCard {
   special_ability: string;
   suit: string;
   tooltip_action: string;
-  type: "court_card";
+  type: 'court_card';
 }
 
 interface DominanceCheckCard {
   id: string;
   name: string;
-  type: "dominance_check_card";
+  type: 'dominance_check_card';
 }
 
 interface EventCard {
@@ -34,7 +34,7 @@ interface EventCard {
   id: string;
   name: string;
   purchased: string;
-  type: "event_card";
+  type: 'event_card';
 }
 
 // TODO(Frans): check what we need
@@ -94,7 +94,7 @@ interface PaxPamirGamedatas extends Gamedatas {
   favored_suit: Suit;
   gifts: {
     [playerId: number]: Record<
-      "2" | "4" | "6",
+      '2' | '4' | '6',
       {
         [cylinderId: string]: Token;
       }
@@ -140,23 +140,12 @@ interface PaxPamirGame extends Game {
     [cardId: string]: Zone;
   };
   getPlayerId: () => string;
-  getZoneForLocation: ({ location }: {location: string}) => Zone;
+  getZoneForLocation: ({ location }: { location: string }) => Zone;
   discardCard: (props: { id: string; from: Stock; order?: null }) => void;
-  moveCard: (props: {
-    id: string;
-    from: Stock;
-    to?: Stock | null;
-    order?: number | null;
-  }) => void;
-  moveToken: (props: {
-    id: string;
-    to: Zone;
-    from: Zone;
-    weight?: number;
-    addClass?: string;
-    removeClass?: string;
-  }) => void;
+  moveCard: (props: { id: string; from: Stock; to?: Stock | null; order?: number | null }) => void;
+  moveToken: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string; removeClass?: string }) => void;
   // AJAX calls
+  takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
   cardAction: (props: { cardAction: string; cardId: string }) => void;
   chooseLoyalty: (props: { coalition: string }) => void;
   discardCards: (props: { cards: string; fromHand: boolean }) => void;

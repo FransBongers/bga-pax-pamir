@@ -18,7 +18,7 @@ interface Framework {
   addActionButton: (
     id: string,
     label: string,
-    method: string,
+    method: string | Function,
     destination?: string,
     blinking?: boolean,
     color?: string
@@ -33,11 +33,13 @@ interface Framework {
   ) => void;
   checkAction: (action: string) => boolean;
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
+  game_name: string;
   isCurrentPlayerActive: () => boolean;
   notifqueue: {
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
   };
   player_id: string;
+  removeActionButtons: () => void;
   restoreServerGameState: () => void;
   scoreCtrl: {
     [playerId: number | string]: {
@@ -60,24 +62,14 @@ interface Notif<T> {
 
 /* TODO repace Function by (..params) => void */
 interface Dojo {
-  place: (html: string, node: string | HTMLElement, action?: string) => void;
-  style: Function;
-  hitch: Function;
-  hasClass: (node: string | HTMLElement, className: string) => boolean;
   addClass: (node: string | HTMLElement, className: string) => void;
-  removeClass: (node: string | HTMLElement, className?: string) => void;
-  toggleClass: (
-    node: string | HTMLElement,
-    className: string,
-    forceValue?: boolean
-  ) => void;
+  animateProperty: (params: { node: string; properties: any }) => any;
   connect: Function;
+  destroy: (node: string | HTMLElement) => void;
   disconnect: Function;
-  query: (query: string) => any; //HTMLElement[]; with some more functions
+  empty: (node: string | HTMLElement) => void;
+  fadeIn: Function;
   forEach: Function;
-  subscribe: Function;
-  unsubscribe: Function;
-  string: any;
   fx: {
     slideTo: (params: {
       node: HTMLElement;
@@ -88,17 +80,28 @@ interface Dojo {
       unit: string;
     }) => any;
   };
-  animateProperty: (params: { node: string; properties: any }) => any;
+  hasClass: (node: string | HTMLElement, className: string) => boolean;
+  hitch: Function;
+  map: Function;
   marginBox: Function;
-  fadeIn: Function;
-  trim: Function;
-  stopEvent: (evt) => void;
-  destroy: (node: string | HTMLElement) => void;
+  place: (html: string, node: string | HTMLElement, action?: string) => void;
   position: (
     obj: HTMLElement,
     includeScroll?: boolean
   ) => { w: number; h: number; x: number; y: number };
-  map: Function;
+  query: (query: string) => any; //HTMLElement[]; with some more functions
+  removeClass: (node: string | HTMLElement, className?: string) => void;
+  stopEvent: (evt) => void;
+  string: any;
+  style: Function;
+  subscribe: Function;
+  toggleClass: (
+    node: string | HTMLElement,
+    className: string,
+    forceValue?: boolean
+  ) => void;
+  trim: Function;
+  unsubscribe: Function;
 }
 
 // TODO (Frans) check typing for different types.

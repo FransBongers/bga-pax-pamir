@@ -80,7 +80,7 @@ trait PPPlayerActionsTrait
    */
   function chooseLoyalty($coalition)
   {
-    self::checkAction('choose_loyalty');
+    self::checkAction('chooseLoyalty');
 
     $player_id = self::getActivePlayerId();
     $coalition_name = $this->loyalty[$coalition]['name'];

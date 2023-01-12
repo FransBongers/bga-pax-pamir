@@ -56,6 +56,10 @@ class PaxPamir implements PaxPamirGame {
     "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
   */
   public setup(gamedatas: PaxPamirGamedatas) {
+    console.log('game_name', this.framework().game_name);
+    // Create a new div for buttons to avoid BGA auto clearing it
+    dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
+
     console.log('typescript version');
     console.log('gamedatas', gamedatas);
     this.gamedatas = gamedatas;
@@ -158,18 +162,8 @@ class PaxPamir implements PaxPamirGame {
     this.interactionManager.onUpdateActionButtons(stateName, args);
   }
 
-  onActionButtonClick(evt) {
-    this.interactionManager.onActionButtonClick(evt);
-  }
+
   // TODO (Frans): replace below with single actionButton
-  onPurchase(evt) {
-    this.interactionManager.onPurchase(evt);
-  }
-
-  onPlay(evt) {
-    this.interactionManager.onPlay(evt);
-  }
-
   onSelectGift(evt) {
     this.interactionManager.onSelectGift(evt);
   }
@@ -177,42 +171,19 @@ class PaxPamir implements PaxPamirGame {
   onSelectRegion(evt) {
     this.interactionManager.onSelectRegion(evt);
   }
-
-  onCardAction(evt) {
-    this.interactionManager.onCardAction(evt);
-  }
-
-  onPass(evt) {
-    this.interactionManager.onPass(evt);
-  }
-
+  
   onBorder(evt) {
     this.interactionManager.onBorder(evt);
-  }
-
-  onCard(evt) {
-    this.interactionManager.onCard(evt);
   }
 
   onCardActionClick(evt) {
     this.interactionManager.onCardActionClick(evt);
   }
 
-  onCancel(evt) {
-    this.interactionManager.onCancel(evt);
-  }
-
   onConfirm(evt) {
     this.interactionManager.onConfirm(evt);
   }
 
-  onLeft(evt) {
-    this.interactionManager.onLeft(evt);
-  }
-
-  onRight(evt) {
-    this.interactionManager.onRight(evt);
-  }
 
   //  .##.....##.########.####.##.......####.########.##....##
   //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -393,7 +364,27 @@ class PaxPamir implements PaxPamirGame {
   //.##.....##..######..##.....##.##.....##
 
   actionError(actionName: string) {
-    (this as unknown as Framework).showMessage(`cannot take ${actionName} action`, 'error');
+    this.framework().showMessage(`cannot take ${actionName} action`, 'error');
+  }
+
+  /*
+   * Make an AJAX call with automatic lock
+   */
+  takeAction({
+    action,
+    data = {},
+  }: {
+    action: string;
+    data?: Record<string, unknown>;
+  }) {
+    console.log(`takeAction ${action}`, data);
+    if (!this.framework().checkAction(action)) {
+      this.actionError(action);
+      return;
+    }
+    data.lock = true;
+    const gameName = this.framework().game_name;
+    this.framework().ajaxcall(`/${gameName}/${gameName}/${action}.html`, data, this, () => {});
   }
 
   public cardAction({ cardId, cardAction }): void {

@@ -95,7 +95,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must choose a loyalty'),
         "descriptionmyturn" => clienttranslate('${you} must choose a loyalty'),
         "type" => "activeplayer",
-        "possibleactions" => array( "choose_loyalty" ),
+        "possibleactions" => array( "chooseLoyalty" ),
         "transitions" => array( 
             "next" => STATE_NEXT_PLAYER
         )

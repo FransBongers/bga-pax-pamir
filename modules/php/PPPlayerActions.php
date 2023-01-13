@@ -18,7 +18,7 @@ trait PPPlayerActionsTrait
    */
   function cardAction($card_id, $card_action)
   {
-    self::checkAction('card_action');
+    self::checkAction('cardAction');
     self::dump("cardAction: card_id", $card_id);
     self::dump("cardAction: card_action", $card_action);
 
@@ -173,7 +173,7 @@ trait PPPlayerActionsTrait
     $this->gamestate->nextState('cleanup');
   }
 
-  function passAction()
+  function pass()
   {
     //
     // pass remaining player actions
@@ -191,7 +191,7 @@ trait PPPlayerActionsTrait
       $this->setGameStateValue("remaining_actions", 0);
 
       // Notify
-      self::notifyAllPlayers("passAction", clienttranslate('${player_name} ended their turn.'), array(
+      self::notifyAllPlayers("pass", clienttranslate('${player_name} ended their turn.'), array(
         'player_id' => $player_id,
         'player_name' => self::getActivePlayerName(),
       ));
@@ -267,7 +267,7 @@ trait PPPlayerActionsTrait
     // play a card from hand into the court on either the left or right side
     //
 
-    self::checkAction('play');
+    self::checkAction('playCard');
 
     $player_id = self::getActivePlayerId();
     $card = $this->tokens->getTokenInfo($card_id);
@@ -350,7 +350,7 @@ trait PPPlayerActionsTrait
   function purchaseCard($card_id)
   {
     self::dump("purchaseCard", $card_id);
-    self::checkAction('purchase');
+    self::checkAction('purchaseCard');
 
     $player_id = self::getActivePlayerId();
     $card = $this->tokens->getTokenInfo($card_id);

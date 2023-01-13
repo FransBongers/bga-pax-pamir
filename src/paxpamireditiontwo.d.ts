@@ -146,15 +146,6 @@ interface PaxPamirGame extends Game {
   moveToken: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string; removeClass?: string }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
-  cardAction: (props: { cardAction: string; cardId: string }) => void;
-  chooseLoyalty: (props: { coalition: string }) => void;
-  discardCards: (props: { cards: string; fromHand: boolean }) => void;
-  pass: () => void;
-  placeRoad: (props: { border: string }) => void;
-  placeSpy: (props: { cardId: string }) => void;
-  playCard: (props: { cardId: string; leftSide: boolean }) => void;
-  purchaseCard: (props: { cardId: string }) => void;
-  selectGift: (props: { selectedGift: string }) => void;
 }
 
 interface PaxPamirPlayer extends BgaPlayer {

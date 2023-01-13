@@ -47,11 +47,12 @@ trait PPStateArgsTrait
   function argPlayerActions()
   {
     $player_id = self::getActivePlayerId();
+    $current_player_id = self::getCurrentPlayerId();
 
     return array(
       'remaining_actions' => $this->getGameStateValue("remaining_actions"),
       'unavailable_cards' => $this->getUnavailableCards(),
-      'hand' => $this->tokens->getTokensInLocation('hand_' . $player_id),
+      'hand' => $this->tokens->getTokensInLocation('hand_' . $current_player_id),
       'court' => $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state'),
       'suits' => $this->getPlayerSuitsTotals($player_id),
       'rulers' => $this->getAllRegionRulers(),

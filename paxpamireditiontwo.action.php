@@ -43,8 +43,8 @@
     public function cardAction()
     {
         self::setAjaxMode();     
-        $card_id = self::getArg( "card_id", AT_alphanum, true );
-        $card_action = self::getArg( "card_action", AT_alphanum, true );
+        $card_id = self::getArg( "cardId", AT_alphanum, true );
+        $card_action = self::getArg( "cardAction", AT_alphanum, true );
         $result = $this->game->cardAction($card_id, $card_action);
         self::ajaxResponse( );
     }
@@ -62,7 +62,7 @@
     {
         self::setAjaxMode();     
         $cards_raw = self::getArg( "cards", AT_alphanum, true );
-        $from_hand = self::getArg( "from_hand", AT_bool, true );
+        $from_hand = self::getArg( "fromHand", AT_bool, true );
 
         $cards_raw = trim($cards_raw);
 
@@ -76,10 +76,10 @@
     }
 
 
-    public function passAction()
+    public function pass()
     {
         self::setAjaxMode();
-        $result = $this->game->passAction();
+        $result = $this->game->pass();
         self::ajaxResponse( );
     }
 
@@ -94,7 +94,7 @@
     public function placeSpy()
     {
         self::setAjaxMode();     
-        $card_id = self::getArg( "card_id", AT_alphanum, true );
+        $card_id = self::getArg( "cardId", AT_alphanum, true );
         $result = $this->game->placeSpy($card_id);
         self::ajaxResponse( );
     }
@@ -102,8 +102,8 @@
     public function playCard()
     {
         self::setAjaxMode();     
-        $card_id = self::getArg( "card_id", AT_alphanum, true );
-        $left_side = self::getArg( "left_side", AT_bool, true );
+        $card_id = self::getArg( "cardId", AT_alphanum, true );
+        $left_side = self::getArg( "leftSide", AT_bool, true );
         $result = $this->game->playCard($card_id, $left_side);
         self::ajaxResponse( );
     }
@@ -112,7 +112,7 @@
     public function purchaseCard()
     {
         self::setAjaxMode();     
-        $card_id = self::getArg( "card_id", AT_alphanum, true );
+        $card_id = self::getArg( "cardId", AT_alphanum, true );
         $result = $this->game->purchaseCard($card_id);
         self::ajaxResponse( );
     }
@@ -120,7 +120,7 @@
     public function selectGift()
     {
         self::setAjaxMode();     
-        $selected_gift = self::getArg( "selected_gift", AT_alphanum, true );
+        $selected_gift = self::getArg( "selectedGift", AT_alphanum, true );
         $result = $this->game->selectGift($selected_gift);
         self::ajaxResponse( );
     }

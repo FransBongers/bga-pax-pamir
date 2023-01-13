@@ -831,13 +831,13 @@ html {
     cursor: pointer !important;
 }
 
-.pp_selectable_card {
+.pp_card.pp_selectable {
     /* border: 2px blue solid; */
     cursor: pointer !important;
     box-shadow: 0px 0px 0px 4px var(--selectable-color) !important;
 }
 
-.pp_selectable_card:hover {
+.pp_card.pp_selectable:hover {
 	box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
 }
 

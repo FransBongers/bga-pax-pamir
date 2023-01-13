@@ -48,6 +48,7 @@ interface Framework {
   };
   setClientState: (newState: string, args: Record<string, unknown>) => void;
   showMessage: (msg: string, type: string) => void;
+  updatePageTitle: () => void;
 }
 
 interface Notif<T> {

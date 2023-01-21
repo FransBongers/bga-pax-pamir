@@ -108,18 +108,3 @@ const setupTokenZone = ({
   }
 };
 
-const updatePlayerLoyalty = ({ playerId, coalition }) => {
-  dojo
-    .query(`#loyalty_icon_${playerId}`)
-    .removeClass('pp_loyalty_afghan')
-    .removeClass('pp_loyalty_british')
-    .removeClass('pp_loyalty_russian')
-    .addClass(`pp_loyalty_${coalition}`);
-
-  dojo
-    .query(`#pp_loyalty_dial_${playerId}`)
-    .removeClass('pp_loyalty_afghan')
-    .removeClass('pp_loyalty_british')
-    .removeClass('pp_loyalty_russian')
-    .addClass(`pp_loyalty_${coalition}`);
-};

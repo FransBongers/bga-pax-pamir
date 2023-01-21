@@ -138,21 +138,6 @@ var setupTokenZone = function (_a) {
         zone.itemIdToCoords = customPattern;
     }
 };
-var updatePlayerLoyalty = function (_a) {
-    var playerId = _a.playerId, coalition = _a.coalition;
-    dojo
-        .query("#loyalty_icon_".concat(playerId))
-        .removeClass('pp_loyalty_afghan')
-        .removeClass('pp_loyalty_british')
-        .removeClass('pp_loyalty_russian')
-        .addClass("pp_loyalty_".concat(coalition));
-    dojo
-        .query("#pp_loyalty_dial_".concat(playerId))
-        .removeClass('pp_loyalty_afghan')
-        .removeClass('pp_loyalty_british')
-        .removeClass('pp_loyalty_russian')
-        .addClass("pp_loyalty_".concat(coalition));
-};
 // .########....###....##.....##..#######..########..########.########.
 // .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
 // .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
@@ -295,15 +280,15 @@ var VpTrack = /** @class */ (function () {
 //  .##.....##.#########.##..####.#########.##....##..##.......##...##..
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var ObjectManager = /** @class */ (function () {
-    function ObjectManager(game) {
+var PPObjectManager = /** @class */ (function () {
+    function PPObjectManager(game) {
         console.log('ObjectManager');
         this.game = game;
         this.favoredSuit = new FavoredSuit({ game: game });
         this.supply = new Supply({ game: game });
         this.vpTrack = new VpTrack({ game: game });
     }
-    return ObjectManager;
+    return PPObjectManager;
 }());
 //  .########..##..........###....##....##.########.########.
 //  .##.....##.##.........##.##....##..##..##.......##.....##
@@ -422,7 +407,7 @@ var Player = /** @class */ (function () {
         var player_board_div = $('player_board_' + playerId);
         dojo.place(this.game.format_block('jstpl_player_board', __assign(__assign({}, player), { p_color: player.color })), player_board_div);
         if (player.loyalty !== 'null') {
-            updatePlayerLoyalty({ playerId: playerId, coalition: player.loyalty });
+            this.updatePlayerLoyalty({ coalition: player.loyalty });
         }
         // TODO (Frans): check use of counter component for all counts
         $('cylinders_' + playerId).classList.add("pp_player_color_".concat(player.color));
@@ -449,6 +434,23 @@ var Player = /** @class */ (function () {
     Player.prototype.getPlayerColor = function () {
         return this.playerColor;
     };
+    // TODO (remove cards of other loyalties, remove gifts, remove prizes)
+    Player.prototype.updatePlayerLoyalty = function (_a) {
+        var coalition = _a.coalition;
+        dojo
+            .query("#loyalty_icon_".concat(this.playerId))
+            .removeClass('pp_loyalty_afghan')
+            .removeClass('pp_loyalty_british')
+            .removeClass('pp_loyalty_russian')
+            .addClass("pp_loyalty_".concat(coalition));
+        dojo
+            .query("#pp_loyalty_dial_".concat(this.playerId))
+            .removeClass('pp_loyalty_afghan')
+            .removeClass('pp_loyalty_british')
+            .removeClass('pp_loyalty_russian')
+            .addClass("pp_loyalty_".concat(coalition));
+    };
+    ;
     return Player;
 }());
 //  .########..##..........###....##....##.########.########.
@@ -465,8 +467,8 @@ var Player = /** @class */ (function () {
 //  .##.....##.#########.##..####.#########.##....##..##.......##...##..
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var PlayerManager = /** @class */ (function () {
-    function PlayerManager(game) {
+var PPPlayerManager = /** @class */ (function () {
+    function PPPlayerManager(game) {
         console.log('Constructor PlayerManager');
         this.game = game;
         this.players = {};
@@ -477,11 +479,11 @@ var PlayerManager = /** @class */ (function () {
         }
         // console.log("players", this.players);
     }
-    PlayerManager.prototype.getPlayer = function (_a) {
+    PPPlayerManager.prototype.getPlayer = function (_a) {
         var playerId = _a.playerId;
         return this.players[playerId];
     };
-    return PlayerManager;
+    return PPPlayerManager;
 }());
 // .########...#######..########..########..########.########.
 // .##.....##.##.....##.##.....##.##.....##.##.......##.....##
@@ -667,8 +669,8 @@ var Region = /** @class */ (function () {
 // .##.....##.#########.##...........##.....##.#########.##..####.#########.##....##..##.......##...##..
 // .##.....##.##.....##.##...........##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 // .##.....##.##.....##.##...........##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var MapManager = /** @class */ (function () {
-    function MapManager(game) {
+var PPMap = /** @class */ (function () {
+    function PPMap(game) {
         var _this = this;
         console.log('Constructor Map');
         this.game = game;
@@ -681,15 +683,15 @@ var MapManager = /** @class */ (function () {
             _this.borders[border] = new Border({ border: border, game: game });
         });
     }
-    MapManager.prototype.getBorder = function (_a) {
+    PPMap.prototype.getBorder = function (_a) {
         var border = _a.border;
         return this.borders[border];
     };
-    MapManager.prototype.getRegion = function (_a) {
+    PPMap.prototype.getRegion = function (_a) {
         var region = _a.region;
         return this.regions[region];
     };
-    return MapManager;
+    return PPMap;
 }());
 //  .##.....##....###....########..##....##.########.########
 //  .###...###...##.##...##.....##.##...##..##..........##...
@@ -705,8 +707,8 @@ var MapManager = /** @class */ (function () {
 //  .##.....##.#########.##..####.#########.##....##..##.......##...##..
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var MarketManager = /** @class */ (function () {
-    function MarketManager(game) {
+var PPMarket = /** @class */ (function () {
+    function PPMarket(game) {
         var _this = this;
         console.log('MarketManager');
         this.game = game;
@@ -765,15 +767,15 @@ var MarketManager = /** @class */ (function () {
             }
         });
     }
-    MarketManager.prototype.getMarketCardsStock = function (_a) {
+    PPMarket.prototype.getMarketCardsStock = function (_a) {
         var row = _a.row, column = _a.column;
         return this.marketCards[row][column];
     };
-    MarketManager.prototype.getMarketRupeesZone = function (_a) {
+    PPMarket.prototype.getMarketRupeesZone = function (_a) {
         var row = _a.row, column = _a.column;
         return this.marketRupees[row][column];
     };
-    return MarketManager;
+    return PPMarket;
 }());
 //  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##
 //  ..##..###...##....##....##.......##.....##...##.##...##....##....##.....##..##.....##.###...##
@@ -782,15 +784,22 @@ var MarketManager = /** @class */ (function () {
 //  ..##..##..####....##....##.......##...##...#########.##..........##.....##..##.....##.##..####
 //  ..##..##...###....##....##.......##....##..##.....##.##....##....##.....##..##.....##.##...###
 //  .####.##....##....##....########.##.....##.##.....##..######.....##....####..#######..##....##
-var InteractionManager = /** @class */ (function () {
-    function InteractionManager(game) {
+//  .##.....##....###....##....##....###.....######...########.########.
+//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
+//  .####.####..##...##..####..##..##...##..##........##.......##.....##
+//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
+//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
+//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
+//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
+var PPInteractionManager = /** @class */ (function () {
+    function PPInteractionManager(game) {
         console.log('Interaction Manager');
         this.game = game;
         this._connections = [];
         // Will store all data for active player and gets refreshed with entering player actions state
         this.activePlayer = {};
     }
-    InteractionManager.prototype.clearPossible = function () {
+    PPInteractionManager.prototype.clearPossible = function () {
         this.game.framework().removeActionButtons();
         dojo.empty('customActions');
         dojo.forEach(this._connections, dojo.disconnect);
@@ -798,7 +807,7 @@ var InteractionManager = /** @class */ (function () {
         dojo.query('.pp_selectable').removeClass('pp_selectable');
         dojo.query('.pp_selected').removeClass('pp_selected');
     };
-    InteractionManager.prototype.resetActionArgs = function () {
+    PPInteractionManager.prototype.resetActionArgs = function () {
         console.log('resetActionArgs');
         // Remove all selectable / selected classes
         dojo.query('.pp_selectable').removeClass('pp_selectable');
@@ -827,7 +836,7 @@ var InteractionManager = /** @class */ (function () {
     //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
     //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
     //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    InteractionManager.prototype.updateInterface = function (_a) {
+    PPInteractionManager.prototype.updateInterface = function (_a) {
         var _this = this;
         var _b;
         var nextStep = _a.nextStep, args = _a.args;
@@ -1043,10 +1052,10 @@ var InteractionManager = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    InteractionManager.prototype.activePlayerHasActions = function () {
+    PPInteractionManager.prototype.activePlayerHasActions = function () {
         return this.activePlayer.remainingActions > 0 || false;
     };
-    InteractionManager.prototype.activePlayerHasCardActions = function () {
+    PPInteractionManager.prototype.activePlayerHasCardActions = function () {
         var _this = this;
         return this.activePlayer.court.some(function (_a) {
             var key = _a.key, used = _a.used;
@@ -1054,7 +1063,7 @@ var InteractionManager = /** @class */ (function () {
             return used == '0' && Object.keys(cardInfo.actions).length > 0;
         });
     };
-    InteractionManager.prototype.activePlayerHasFreeCardActions = function () {
+    PPInteractionManager.prototype.activePlayerHasFreeCardActions = function () {
         var _this = this;
         return this.activePlayer.court.some(function (_a) {
             var key = _a.key, used = _a.used;
@@ -1062,31 +1071,31 @@ var InteractionManager = /** @class */ (function () {
             return used == '0' && cardInfo.suit == _this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
         });
     };
-    InteractionManager.prototype.activePlayerHasHandCards = function () {
+    PPInteractionManager.prototype.activePlayerHasHandCards = function () {
         return Object.keys(this.activePlayer.hand).length > 0;
     };
-    InteractionManager.prototype.activePlayerHasCourtCards = function () {
+    PPInteractionManager.prototype.activePlayerHasCourtCards = function () {
         return this.activePlayer.court.length > 0;
     };
     /*
      * Add a blue/grey button if it doesn't already exists
      */
-    InteractionManager.prototype.addPrimaryActionButton = function (_a) {
+    PPInteractionManager.prototype.addPrimaryActionButton = function (_a) {
         var id = _a.id, text = _a.text, callback = _a.callback;
         if (!$(id))
             this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
     };
-    InteractionManager.prototype.addSecondaryActionButton = function (_a) {
+    PPInteractionManager.prototype.addSecondaryActionButton = function (_a) {
         var id = _a.id, text = _a.text, callback = _a.callback;
         if (!$(id))
             this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
     };
-    InteractionManager.prototype.addDangerActionButton = function (_a) {
+    PPInteractionManager.prototype.addDangerActionButton = function (_a) {
         var id = _a.id, text = _a.text, callback = _a.callback;
         if (!$(id))
             this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
     };
-    InteractionManager.prototype.getCardInfo = function (_a) {
+    PPInteractionManager.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;
         return this.game.gamedatas.cards[cardId];
     };
@@ -1105,7 +1114,7 @@ var InteractionManager = /** @class */ (function () {
      *    You may perform free card actions
      * 6. Player does not have free actions
      */
-    InteractionManager.prototype.updateMainTitleTextActions = function () {
+    PPInteractionManager.prototype.updateMainTitleTextActions = function () {
         var remainingActions = this.activePlayer.remainingActions;
         var hasCardActions = this.activePlayerHasCardActions();
         var hasHandCards = this.activePlayerHasHandCards();
@@ -1148,7 +1157,7 @@ var InteractionManager = /** @class */ (function () {
         //   _(' action(s): ');
         // this.game.framework().updatePageTitle();
     };
-    InteractionManager.prototype.handleDiscardSelect = function (_a) {
+    PPInteractionManager.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
         console.log('handleSelect', this.numberOfDiscards);
         dojo.query(".pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
@@ -1160,7 +1169,7 @@ var InteractionManager = /** @class */ (function () {
             dojo.addClass('confirm_btn', 'pp_disabled');
         }
     };
-    InteractionManager.prototype.handleDiscardConfirm = function (_a) {
+    PPInteractionManager.prototype.handleDiscardConfirm = function (_a) {
         var fromHand = _a.fromHand;
         var cards = '';
         dojo.query('.pp_selected').forEach(function (item, index) {
@@ -1174,7 +1183,7 @@ var InteractionManager = /** @class */ (function () {
             },
         });
     };
-    InteractionManager.prototype.setCardActionsSelectable = function () {
+    PPInteractionManager.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node) {
@@ -1194,7 +1203,7 @@ var InteractionManager = /** @class */ (function () {
                 });
         });
     };
-    InteractionManager.prototype.setRegionsSelectable = function () {
+    PPInteractionManager.prototype.setRegionsSelectable = function () {
         var _this = this;
         var container = document.getElementById("pp_map_areas");
         container.classList.add('pp_selectable');
@@ -1206,7 +1215,7 @@ var InteractionManager = /** @class */ (function () {
             _this._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
         });
     };
-    InteractionManager.prototype.setGiftsSelectable = function (_a) {
+    PPInteractionManager.prototype.setGiftsSelectable = function (_a) {
         var _this = this;
         var cardId = _a.cardId;
         var playerId = this.game.getPlayerId();
@@ -1235,7 +1244,7 @@ var InteractionManager = /** @class */ (function () {
             }
         });
     };
-    InteractionManager.prototype.setMarketCardsSelectable = function () {
+    PPInteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;
         dojo.query('.pp_market_card').forEach(function (node) {
             var cost = node.id.split('_')[3]; // cost is equal to the column number
@@ -1248,7 +1257,7 @@ var InteractionManager = /** @class */ (function () {
             }
         }, this);
     };
-    InteractionManager.prototype.setHandCardsSelectable = function (_a) {
+    PPInteractionManager.prototype.setHandCardsSelectable = function (_a) {
         var _this = this;
         var callback = _a.callback;
         dojo.query('.pp_card_in_hand').forEach(function (node, index) {
@@ -1258,7 +1267,7 @@ var InteractionManager = /** @class */ (function () {
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
         }, this);
     };
-    InteractionManager.prototype.setCourtCardsSelectableForDiscard = function () {
+    PPInteractionManager.prototype.setCourtCardsSelectableForDiscard = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node, index) {
@@ -1268,7 +1277,7 @@ var InteractionManager = /** @class */ (function () {
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
         }, this);
     };
-    InteractionManager.prototype.setPlaceSpyCardsSelectable = function (_a) {
+    PPInteractionManager.prototype.setPlaceSpyCardsSelectable = function (_a) {
         var _this = this;
         var region = _a.region;
         dojo.query(".pp_card_in_court_".concat(region)).forEach(function (node, index) {
@@ -1280,7 +1289,7 @@ var InteractionManager = /** @class */ (function () {
             }));
         }, this);
     };
-    InteractionManager.prototype.updatePageTitle = function (_a) {
+    PPInteractionManager.prototype.updatePageTitle = function (_a) {
         var text = _a.text, args = _a.args;
         this.game.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
         this.game.framework().updatePageTitle();
@@ -1299,7 +1308,7 @@ var InteractionManager = /** @class */ (function () {
     //  .......##....##....#########....##....##......
     //  .##....##....##....##.....##....##....##......
     //  ..######.....##....##.....##....##....########
-    InteractionManager.prototype.onEnteringState = function (stateName, args) {
+    PPInteractionManager.prototype.onEnteringState = function (stateName, args) {
         // UI changes for active player
         if (this.game.isCurrentPlayerActive()) {
             switch (stateName) {
@@ -1365,7 +1374,7 @@ var InteractionManager = /** @class */ (function () {
     //  .......##....##....#########....##....##......
     //  .##....##....##....##.....##....##....##......
     //  ..######.....##....##.....##....##....########
-    InteractionManager.prototype.onLeavingState = function (stateName) {
+    PPInteractionManager.prototype.onLeavingState = function (stateName) {
         console.log("onLeavingState ".concat(stateName));
         this.clearPossible();
         switch (stateName) {
@@ -1396,7 +1405,7 @@ var InteractionManager = /** @class */ (function () {
     //  .##.....##.##.....##....##.......##....##.....##.##..####.......##
     //  .##.....##.##.....##....##.......##....##.....##.##...###.##....##
     //  .########...#######.....##.......##.....#######..##....##..######.
-    InteractionManager.prototype.onUpdateActionButtons = function (stateName, args) { };
+    PPInteractionManager.prototype.onUpdateActionButtons = function (stateName, args) { };
     //  ..######..##.......####..######..##....##
     //  .##....##.##........##..##....##.##...##.
     //  .##.......##........##..##.......##..##..
@@ -1411,7 +1420,7 @@ var InteractionManager = /** @class */ (function () {
     // .##.....##.#########.##..####.##.....##.##.......##.............##
     // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
     // .##.....##.##.....##.##....##.########..########.########..######.
-    InteractionManager.prototype.onPass = function () {
+    PPInteractionManager.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())
             return;
         if (Number(this.activePlayer.remainingActions) > 0) {
@@ -1420,11 +1429,11 @@ var InteractionManager = /** @class */ (function () {
         }
         this.game.takeAction({ action: 'pass' });
     };
-    InteractionManager.prototype.onCancel = function () {
+    PPInteractionManager.prototype.onCancel = function () {
         this.resetActionArgs();
         this.game.framework().restoreServerGameState();
     };
-    return InteractionManager;
+    return PPInteractionManager;
 }());
 //  .##....##..#######..########.####.########
 //  .###...##.##.....##....##.....##..##......
@@ -1440,15 +1449,15 @@ var InteractionManager = /** @class */ (function () {
 //  .##.....##.#########.##..####.#########.##....##..##.......##...##..
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var NotificationManager = /** @class */ (function () {
-    function NotificationManager(game) {
+var PPNotificationManager = /** @class */ (function () {
+    function PPNotificationManager(game) {
         this.game = game;
         this.subscriptions = [];
     }
-    NotificationManager.prototype.destroy = function () {
+    PPNotificationManager.prototype.destroy = function () {
         dojo.forEach(this.subscriptions, dojo.unsubscribe);
     };
-    NotificationManager.prototype.setupNotifications = function () {
+    PPNotificationManager.prototype.setupNotifications = function () {
         var _this = this;
         console.log('notifications subscriptions setup');
         var notifs = [
@@ -1468,59 +1477,18 @@ var NotificationManager = /** @class */ (function () {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, "notif_".concat(notif[0])));
             _this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
         });
-        // this.subscriptions.push(
-        //   dojo.subscribe("cardAction", this, "notif_cardAction")
-        // );
-        // this.subscriptions.push(
-        //   dojo.subscribe("chooseLoyalty", this, "notif_chooseLoyalty")
-        // );
-        // this.subscriptions.push(
-        //   dojo.subscribe("dominanceCheck", this, "notif_dominanceCheck")
-        // );
-        // this.subscriptions.push(
-        //   dojo.subscribe("purchaseCard", this, "notif_purchaseCard")
-        // );
-        // (this.game as unknown as Framework).notifqueue.setSynchronous("purchaseCard", 2000);
-        // this.subscriptions.push(dojo.subscribe("playCard", this, "notif_playCard"));
-        // this.game.notifqueue.setSynchronous("playCard", 2000);
-        // this.subscriptions.push(
-        //   dojo.subscribe("discardCard", this, "notif_discardCard")
-        // );
-        // this.game.notifqueue.setSynchronous("discardCard", 500);
-        // this.subscriptions.push(
-        //   dojo.subscribe("refreshMarket", this, "notif_refreshMarket")
-        // );
-        // this.game.notifqueue.setSynchronous("refreshMarket", 250);
-        // this.subscriptions.push(
-        //   dojo.subscribe("selectGift", this, "notif_selectGift")
-        // );
-        // this.subscriptions.push(
-        //   dojo.subscribe("moveToken", this, "notif_moveToken")
-        // );
-        // this.game.notifqueue.setSynchronous("moveToken", 250);
-        this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
-        this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
-        // TODO: here, associate your game notifications with local methods
-        // Example 1: standard notification handling
-        // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-        // Example 2: standard notification handling + tell the user interface to wait
-        //            during 3 seconds after calling the method in order to let the players
-        //            see what is happening in the game.
-        // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-        // this.game.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-        //
+        // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
+        // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
     };
-    NotificationManager.prototype.notif_cardAction = function (notif) {
+    PPNotificationManager.prototype.notif_cardAction = function (notif) {
         console.log('notif_cardAction', notif);
     };
-    NotificationManager.prototype.notif_chooseLoyalty = function (notif) {
-        console.log('notif_chooseLoyalty');
-        console.log(notif);
-        var coalition = notif.args.coalition;
-        var playerId = notif.args.player_id;
-        updatePlayerLoyalty({ playerId: playerId, coalition: coalition });
+    PPNotificationManager.prototype.notif_chooseLoyalty = function (_a) {
+        var args = _a.args;
+        console.log('notif_chooseLoyalty', args);
+        this.game.playerManager.getPlayer({ playerId: args.player_id }).updatePlayerLoyalty({ coalition: args.coalition });
     };
-    NotificationManager.prototype.notif_discardCard = function (notif) {
+    PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
         this.game.interactionManager.resetActionArgs();
         var playerId = notif.args.player_id;
@@ -1533,7 +1501,7 @@ var NotificationManager = /** @class */ (function () {
             var splitFrom = from.split('_');
             this.game.discardCard({
                 id: notif.args.card_id,
-                from: this.game.marketManager.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
+                from: this.game.market.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
             });
         }
         else {
@@ -1547,7 +1515,7 @@ var NotificationManager = /** @class */ (function () {
             }, this);
         }
     };
-    NotificationManager.prototype.notif_dominanceCheck = function (notif) {
+    PPNotificationManager.prototype.notif_dominanceCheck = function (notif) {
         var _this = this;
         console.log('notif_dominanceCheck', notif);
         var _a = notif.args, scores = _a.scores, moves = _a.moves;
@@ -1568,14 +1536,14 @@ var NotificationManager = /** @class */ (function () {
                 id: token_id,
                 to: _this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: coalition }),
                 from: isArmy
-                    ? _this.game.mapManager.getRegion({ region: splitFrom[1] }).getArmyZone()
-                    : _this.game.mapManager.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone(),
+                    ? _this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
+                    : _this.game.map.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone(),
                 addClass: 'pp_coalition_block',
                 removeClass: isArmy ? 'pp_army' : 'pp_road',
             });
         });
     };
-    NotificationManager.prototype.notif_playCard = function (notif) {
+    PPNotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
         this.game.interactionManager.resetActionArgs();
         var playerId = notif.args.player_id;
@@ -1603,40 +1571,40 @@ var NotificationManager = /** @class */ (function () {
         }
         this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
-    NotificationManager.prototype.notif_purchaseCard = function (notif) {
+    PPNotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
         console.log('notif_purchaseCard', notif);
         this.game.interactionManager.resetActionArgs();
         var row = notif.args.market_location.split('_')[1];
         var col = notif.args.market_location.split('_')[2];
         // Remove all rupees that were on the purchased card
-        this.game.marketManager
+        this.game.market
             .getMarketRupeesZone({ row: row, column: col })
             .getAllItems()
             .forEach(function (rupeeId) {
-            _this.game.marketManager.getMarketRupeesZone({ row: row, column: col }).removeFromZone(rupeeId, true, "rupees_".concat(notif.args.player_id));
+            _this.game.market.getMarketRupeesZone({ row: row, column: col }).removeFromZone(rupeeId, true, "rupees_".concat(notif.args.player_id));
         });
         // Move card from markt
         var cardId = notif.args.card.key;
         if (notif.args.new_location == 'active_events') {
             this.game.moveCard({
                 id: cardId,
-                from: this.game.marketManager.getMarketCardsStock({ row: row, column: col }),
+                from: this.game.market.getMarketCardsStock({ row: row, column: col }),
                 to: this.game.activeEvents,
             });
         }
         else if (notif.args.new_location == 'discard') {
-            this.game.marketManager.getMarketCardsStock({ row: row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
+            this.game.market.getMarketCardsStock({ row: row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
         }
         else if (notif.args.player_id == this.game.getPlayerId()) {
             this.game.moveCard({
                 id: cardId,
-                from: this.game.marketManager.getMarketCardsStock({ row: row, column: col }),
+                from: this.game.market.getMarketCardsStock({ row: row, column: col }),
                 to: this.game.playerHand,
             });
         }
         else {
-            this.game.moveCard({ id: cardId, from: this.game.marketManager.getMarketCardsStock({ row: row, column: col }), to: null });
+            this.game.moveCard({ id: cardId, from: this.game.market.getMarketCardsStock({ row: row, column: col }), to: null });
             this.game.spies[cardId] = undefined;
         }
         // Place paid rupees on market cards
@@ -1645,7 +1613,7 @@ var NotificationManager = /** @class */ (function () {
             var marketColumn = Number(item.location.split('_')[2]);
             placeToken({
                 game: _this.game,
-                location: _this.game.marketManager.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
+                location: _this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
                 id: item.rupee_id,
                 jstpl: 'jstpl_rupee',
                 jstplProps: {
@@ -1654,7 +1622,7 @@ var NotificationManager = /** @class */ (function () {
             });
         }, this);
     };
-    NotificationManager.prototype.notif_refreshMarket = function (notif) {
+    PPNotificationManager.prototype.notif_refreshMarket = function (notif) {
         console.log('notif_refreshMarket', notif);
         this.game.interactionManager.resetActionArgs();
         notif.args.card_moves.forEach(function (move, index) {
@@ -1665,28 +1633,28 @@ var NotificationManager = /** @class */ (function () {
             var toCol = move.to.split('_')[2];
             this.game.moveCard({
                 id: move.card_id,
-                from: this.game.marketManager.marketCards[fromRow][fromCol],
-                to: this.game.marketManager.marketCards[toRow][toCol],
+                from: this.game.market.marketCards[fromRow][fromCol],
+                to: this.game.market.marketCards[toRow][toCol],
             });
             // TODO (Frans): check why in case of moving multiple rupees at the same time
             // they overlap
-            this.game.marketManager.marketRupees[fromRow][fromCol].getAllItems().forEach(function (rupeeId) {
+            this.game.market.marketRupees[fromRow][fromCol].getAllItems().forEach(function (rupeeId) {
                 _this.game.moveToken({
                     id: rupeeId,
-                    to: _this.game.marketManager.marketRupees[toRow][toCol],
-                    from: _this.game.marketManager.marketRupees[fromRow][toRow],
+                    to: _this.game.market.marketRupees[toRow][toCol],
+                    from: _this.game.market.marketRupees[fromRow][toRow],
                     weight: _this.game.defaultWeightZone,
                 });
             });
         }, this);
         notif.args.new_cards.forEach(function (move, index) {
             placeCard({
-                location: this.game.marketManager.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
+                location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
                 id: move.card_id,
             });
         }, this);
     };
-    NotificationManager.prototype.notif_selectGift = function (notif) {
+    PPNotificationManager.prototype.notif_selectGift = function (notif) {
         var _this = this;
         console.log('notif_selectGift', notif);
         this.game.interactionManager.resetActionArgs();
@@ -1697,7 +1665,7 @@ var NotificationManager = /** @class */ (function () {
             var marketColumn = item.location.split('_')[2];
             placeToken({
                 game: _this.game,
-                location: _this.game.marketManager.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
+                location: _this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
                 id: item.rupee_id,
                 jstpl: 'jstpl_rupee',
                 jstplProps: {
@@ -1709,7 +1677,7 @@ var NotificationManager = /** @class */ (function () {
         $('rupee_count_' + player_id).innerHTML = updated_counts.rupees;
         $('influence_' + player_id).innerHTML = updated_counts.influence;
     };
-    NotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
+    PPNotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
         console.log('notif_updatePlayerCounts', notif);
         this.game.playerCounts = notif.args.counts;
         var counts = notif.args.counts;
@@ -1724,7 +1692,7 @@ var NotificationManager = /** @class */ (function () {
             $('intelligence_' + playerId).innerHTML = counts[playerId].suits.intelligence;
         });
     };
-    NotificationManager.prototype.notif_moveToken = function (notif) {
+    PPNotificationManager.prototype.notif_moveToken = function (notif) {
         var _this = this;
         console.log('notif_moveToken', notif);
         notif.args.moves.forEach(function (move) {
@@ -1743,13 +1711,13 @@ var NotificationManager = /** @class */ (function () {
             });
         });
     };
-    NotificationManager.prototype.notif_log = function (notif) {
+    PPNotificationManager.prototype.notif_log = function (notif) {
         // this is for debugging php side
         console.log('notif_log', notif);
         console.log(notif.log);
         console.log(notif.args);
     };
-    return NotificationManager;
+    return PPNotificationManager;
 }());
 /**
  *------
@@ -1813,11 +1781,11 @@ var PaxPamir = /** @class */ (function () {
                 id: gamedatas.active_events[key].key,
             });
         });
-        this.objectManager = new ObjectManager(this);
-        this.playerManager = new PlayerManager(this);
-        this.mapManager = new MapManager(this);
-        this.marketManager = new MarketManager(this);
-        this.interactionManager = new InteractionManager(this);
+        this.objectManager = new PPObjectManager(this);
+        this.playerManager = new PPPlayerManager(this);
+        this.map = new PPMap(this);
+        this.market = new PPMarket(this);
+        this.interactionManager = new PPInteractionManager(this);
         this.playerCounts = gamedatas.counts;
         // Setup player hand
         setupCardsStock({
@@ -1849,7 +1817,7 @@ var PaxPamir = /** @class */ (function () {
         if (this.notificationManager != undefined) {
             this.notificationManager.destroy();
         }
-        this.notificationManager = new NotificationManager(this);
+        this.notificationManager = new PPNotificationManager(this);
         // Setup game notifications to handle (see "setupNotifications" method below)
         this.notificationManager.setupNotifications();
         // this.setupNotifications();
@@ -1926,7 +1894,7 @@ var PaxPamir = /** @class */ (function () {
         switch (splitLocation[0]) {
             case 'armies':
                 // armies_kabul
-                return this.mapManager.getRegion({ region: splitLocation[1] }).getArmyZone();
+                return this.map.getRegion({ region: splitLocation[1] }).getArmyZone();
             case 'blocks':
                 // blocks_russian
                 return this.objectManager.supply.getCoalitionBlocksZone({
@@ -1946,14 +1914,14 @@ var PaxPamir = /** @class */ (function () {
             case 'roads':
                 // roads_herat_kabul
                 var border = "".concat(splitLocation[1], "_").concat(splitLocation[2]);
-                return this.mapManager.getBorder({ border: border }).getRoadZone();
+                return this.map.getBorder({ border: border }).getRoadZone();
             case 'spies':
                 // spies_card_38
                 var cardId = "".concat(splitLocation[1], "_").concat(splitLocation[2]);
                 return this.spies[cardId];
             case 'tribes':
                 // tribes_kabul
-                return this.mapManager.getRegion({ region: splitLocation[1] }).getTribeZone();
+                return this.map.getRegion({ region: splitLocation[1] }).getTribeZone();
             default:
                 console.log('no zone determined');
                 break;

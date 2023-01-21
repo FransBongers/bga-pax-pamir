@@ -14,7 +14,7 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class MarketManager {
+class PPMarket {
   private game: PaxPamirGame;
   private marketCards: Stock[][];
   private marketRupees: Zone[][];

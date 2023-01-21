@@ -124,7 +124,7 @@ class Player {
     );
 
     if (player.loyalty !== 'null') {
-      updatePlayerLoyalty({ playerId, coalition: player.loyalty });
+      this.updatePlayerLoyalty({ coalition: player.loyalty });
     }
     // TODO (Frans): check use of counter component for all counts
     $('cylinders_' + playerId).classList.add(`pp_player_color_${player.color}`);
@@ -155,6 +155,23 @@ class Player {
   getPlayerColor(): string {
     return this.playerColor;
   }
+
+  // TODO (remove cards of other loyalties, remove gifts, remove prizes)
+  updatePlayerLoyalty({ coalition }) {
+    dojo
+      .query(`#loyalty_icon_${this.playerId}`)
+      .removeClass('pp_loyalty_afghan')
+      .removeClass('pp_loyalty_british')
+      .removeClass('pp_loyalty_russian')
+      .addClass(`pp_loyalty_${coalition}`);
+  
+    dojo
+      .query(`#pp_loyalty_dial_${this.playerId}`)
+      .removeClass('pp_loyalty_afghan')
+      .removeClass('pp_loyalty_british')
+      .removeClass('pp_loyalty_russian')
+      .addClass(`pp_loyalty_${coalition}`);
+  };
 }
 
 //  .########..##..........###....##....##.########.########.
@@ -173,7 +190,7 @@ class Player {
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class PlayerManager {
+class PPPlayerManager {
   private game: PaxPamirGame;
   private players: Record<string, Player>;
 
@@ -190,7 +207,7 @@ class PlayerManager {
     // console.log("players", this.players);
   }
 
-  getPlayer({ playerId }) {
+  getPlayer({ playerId }: {playerId: string;}) {
     return this.players[playerId];
   }
 }

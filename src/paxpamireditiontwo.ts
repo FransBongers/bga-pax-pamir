@@ -25,12 +25,12 @@ declare const playSound;
 
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
-  public interactionManager: InteractionManager;
-  public mapManager: MapManager;
-  public marketManager: MarketManager;
-  private notificationManager: NotificationManager;
-  public objectManager: ObjectManager;
-  public playerManager: PlayerManager;
+  public interactionManager: PPInteractionManager;
+  public map: PPMap;
+  public market: PPMarket;
+  private notificationManager: PPNotificationManager;
+  public objectManager: PPObjectManager;
+  public playerManager: PPPlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
   public playerHand = new ebg.stock();
@@ -81,11 +81,11 @@ class PaxPamir implements PaxPamirGame {
       });
     });
 
-    this.objectManager = new ObjectManager(this);
-    this.playerManager = new PlayerManager(this);
-    this.mapManager = new MapManager(this);
-    this.marketManager = new MarketManager(this);
-    this.interactionManager = new InteractionManager(this);
+    this.objectManager = new PPObjectManager(this);
+    this.playerManager = new PPPlayerManager(this);
+    this.map = new PPMap(this);
+    this.market = new PPMarket(this);
+    this.interactionManager = new PPInteractionManager(this);
     this.playerCounts = gamedatas.counts;
 
     // Setup player hand
@@ -120,7 +120,7 @@ class PaxPamir implements PaxPamirGame {
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
     }
-    this.notificationManager = new NotificationManager(this);
+    this.notificationManager = new PPNotificationManager(this);
     // Setup game notifications to handle (see "setupNotifications" method below)
     this.notificationManager.setupNotifications();
 
@@ -206,7 +206,7 @@ class PaxPamir implements PaxPamirGame {
     switch (splitLocation[0]) {
       case 'armies':
         // armies_kabul
-        return this.mapManager.getRegion({ region: splitLocation[1] }).getArmyZone();
+        return this.map.getRegion({ region: splitLocation[1] }).getArmyZone();
       case 'blocks':
         // blocks_russian
         return this.objectManager.supply.getCoalitionBlocksZone({
@@ -226,14 +226,14 @@ class PaxPamir implements PaxPamirGame {
       case 'roads':
         // roads_herat_kabul
         const border = `${splitLocation[1]}_${splitLocation[2]}`;
-        return this.mapManager.getBorder({ border }).getRoadZone();
+        return this.map.getBorder({ border }).getRoadZone();
       case 'spies':
         // spies_card_38
         const cardId = `${splitLocation[1]}_${splitLocation[2]}`;
         return this.spies[cardId];
       case 'tribes':
         // tribes_kabul
-        return this.mapManager.getRegion({ region: splitLocation[1] }).getTribeZone();
+        return this.map.getRegion({ region: splitLocation[1] }).getTribeZone();
       default:
         console.log('no zone determined');
         break;

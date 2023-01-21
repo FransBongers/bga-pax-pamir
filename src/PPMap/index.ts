@@ -197,7 +197,7 @@ class Region {
 // .##.....##.##.....##.##...........##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 // .##.....##.##.....##.##...........##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class MapManager {
+class PPMap {
   private game: PaxPamirGame;
   private borders: Record<string, Border>;
   private regions: Record<string, Region>;

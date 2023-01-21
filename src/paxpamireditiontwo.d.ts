@@ -129,11 +129,11 @@ interface PaxPamirGamedatas extends Gamedatas {
 interface PaxPamirGame extends Game {
   activeEvents: Stock;
   gamedatas: PaxPamirGamedatas;
-  interactionManager: InteractionManager;
-  mapManager: MapManager;
-  marketManager: MarketManager;
-  objectManager: ObjectManager;
-  playerManager: PlayerManager;
+  interactionManager: PPInteractionManager;
+  map: PPMap;
+  market: PPMarket;
+  objectManager: PPObjectManager;
+  playerManager: PPPlayerManager;
   playerCounts: Record<string, number>;
   playerHand: Stock;
   spies: {
@@ -159,4 +159,11 @@ interface EnteringDiscardCourtArgs {
 
 interface EnteringDiscardHandArgs {
   numberOfDiscards: number;
+}
+
+interface NotifChooseLoyaltyArgs {
+  player_id: string;
+  player_name: string;
+  coalition: string;
+  coalition_name: string;
 }

@@ -14,7 +14,7 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class NotificationManager {
+class PPNotificationManager {
   private game: PaxPamirGame;
   private subscriptions: unknown[];
 
@@ -48,73 +48,17 @@ class NotificationManager {
       this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
     });
 
-    // this.subscriptions.push(
-    //   dojo.subscribe("cardAction", this, "notif_cardAction")
-    // );
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("chooseLoyalty", this, "notif_chooseLoyalty")
-    // );
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("dominanceCheck", this, "notif_dominanceCheck")
-    // );
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("purchaseCard", this, "notif_purchaseCard")
-    // );
-    // (this.game as unknown as Framework).notifqueue.setSynchronous("purchaseCard", 2000);
-
-    // this.subscriptions.push(dojo.subscribe("playCard", this, "notif_playCard"));
-    // this.game.notifqueue.setSynchronous("playCard", 2000);
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("discardCard", this, "notif_discardCard")
-    // );
-    // this.game.notifqueue.setSynchronous("discardCard", 500);
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("refreshMarket", this, "notif_refreshMarket")
-    // );
-    // this.game.notifqueue.setSynchronous("refreshMarket", 250);
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("selectGift", this, "notif_selectGift")
-    // );
-
-    // this.subscriptions.push(
-    //   dojo.subscribe("moveToken", this, "notif_moveToken")
-    // );
-    // this.game.notifqueue.setSynchronous("moveToken", 250);
-
-    this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
-    this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
-
-    // TODO: here, associate your game notifications with local methods
-
-    // Example 1: standard notification handling
-    // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-
-    // Example 2: standard notification handling + tell the user interface to wait
-    //            during 3 seconds after calling the method in order to let the players
-    //            see what is happening in the game.
-    // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-    // this.game.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-    //
+    // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
+    // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
   }
 
   notif_cardAction(notif) {
     console.log('notif_cardAction', notif);
   }
 
-  notif_chooseLoyalty(notif) {
-    console.log('notif_chooseLoyalty');
-    console.log(notif);
-
-    const coalition = notif.args.coalition;
-    const playerId = notif.args.player_id;
-
-    updatePlayerLoyalty({ playerId, coalition });
+  notif_chooseLoyalty({ args }: Notif<NotifChooseLoyaltyArgs>) {
+    console.log('notif_chooseLoyalty', args);
+    this.game.playerManager.getPlayer({ playerId: args.player_id }).updatePlayerLoyalty({ coalition: args.coalition });
   }
 
   notif_discardCard(notif) {
@@ -131,7 +75,7 @@ class NotificationManager {
       const splitFrom = from.split('_');
       this.game.discardCard({
         id: notif.args.card_id,
-        from: this.game.marketManager.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
+        from: this.game.market.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
       });
     } else {
       this.game.discardCard({ id: notif.args.card_id, from: this.game.playerManager.getPlayer({ playerId }).getCourtZone() });
@@ -167,8 +111,8 @@ class NotificationManager {
         id: token_id,
         to: this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }),
         from: isArmy
-          ? this.game.mapManager.getRegion({ region: splitFrom[1] }).getArmyZone()
-          : this.game.mapManager.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
+          ? this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
+          : this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
         addClass: 'pp_coalition_block',
         removeClass: isArmy ? 'pp_army' : 'pp_road',
       });
@@ -215,11 +159,11 @@ class NotificationManager {
     const col = notif.args.market_location.split('_')[2];
 
     // Remove all rupees that were on the purchased card
-    this.game.marketManager
+    this.game.market
       .getMarketRupeesZone({ row, column: col })
       .getAllItems()
       .forEach((rupeeId) => {
-        this.game.marketManager.getMarketRupeesZone({ row, column: col }).removeFromZone(rupeeId, true, `rupees_${notif.args.player_id}`);
+        this.game.market.getMarketRupeesZone({ row, column: col }).removeFromZone(rupeeId, true, `rupees_${notif.args.player_id}`);
       });
 
     // Move card from markt
@@ -227,19 +171,19 @@ class NotificationManager {
     if (notif.args.new_location == 'active_events') {
       this.game.moveCard({
         id: cardId,
-        from: this.game.marketManager.getMarketCardsStock({ row, column: col }),
+        from: this.game.market.getMarketCardsStock({ row, column: col }),
         to: this.game.activeEvents,
       });
     } else if (notif.args.new_location == 'discard') {
-      this.game.marketManager.getMarketCardsStock({ row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
+      this.game.market.getMarketCardsStock({ row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
     } else if (notif.args.player_id == this.game.getPlayerId()) {
       this.game.moveCard({
         id: cardId,
-        from: this.game.marketManager.getMarketCardsStock({ row, column: col }),
+        from: this.game.market.getMarketCardsStock({ row, column: col }),
         to: this.game.playerHand,
       });
     } else {
-      this.game.moveCard({ id: cardId, from: this.game.marketManager.getMarketCardsStock({ row, column: col }), to: null });
+      this.game.moveCard({ id: cardId, from: this.game.market.getMarketCardsStock({ row, column: col }), to: null });
       this.game.spies[cardId] = undefined;
     }
 
@@ -249,7 +193,7 @@ class NotificationManager {
       const marketColumn = Number(item.location.split('_')[2]);
       placeToken({
         game: this.game,
-        location: this.game.marketManager.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
+        location: this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
         id: item.rupee_id,
         jstpl: 'jstpl_rupee',
         jstplProps: {
@@ -271,16 +215,16 @@ class NotificationManager {
       const toCol = move.to.split('_')[2];
       this.game.moveCard({
         id: move.card_id,
-        from: this.game.marketManager.marketCards[fromRow][fromCol],
-        to: this.game.marketManager.marketCards[toRow][toCol],
+        from: this.game.market.marketCards[fromRow][fromCol],
+        to: this.game.market.marketCards[toRow][toCol],
       });
       // TODO (Frans): check why in case of moving multiple rupees at the same time
       // they overlap
-      this.game.marketManager.marketRupees[fromRow][fromCol].getAllItems().forEach((rupeeId) => {
+      this.game.market.marketRupees[fromRow][fromCol].getAllItems().forEach((rupeeId) => {
         this.game.moveToken({
           id: rupeeId,
-          to: this.game.marketManager.marketRupees[toRow][toCol],
-          from: this.game.marketManager.marketRupees[fromRow][toRow],
+          to: this.game.market.marketRupees[toRow][toCol],
+          from: this.game.market.marketRupees[fromRow][toRow],
           weight: this.game.defaultWeightZone,
         });
       });
@@ -288,7 +232,7 @@ class NotificationManager {
 
     notif.args.new_cards.forEach(function (move, index) {
       placeCard({
-        location: this.game.marketManager.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
+        location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
         id: move.card_id,
       });
     }, this);
@@ -304,7 +248,7 @@ class NotificationManager {
       const marketColumn = item.location.split('_')[2];
       placeToken({
         game: this.game,
-        location: this.game.marketManager.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
+        location: this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
         id: item.rupee_id,
         jstpl: 'jstpl_rupee',
         jstplProps: {

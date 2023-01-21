@@ -154,7 +154,7 @@ class VpTrack {
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class ObjectManager {
+class PPObjectManager {
   private game: PaxPamirGame;
   public favoredSuit: FavoredSuit;
   public supply: Supply;

@@ -66,7 +66,6 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CARD_ACTION_BATTLE", 40);
     define("STATE_CARD_ACTION_BETRAY", 41);
     define("STATE_CARD_ACTION_BUILD", 42);
-    define("STATE_CARD_ACTION_GIFT", 43);
     define("STATE_CARD_ACTION_MOVE", 44);
     define("STATE_CARD_ACTION_TAX", 45);
     define("STATE_NEXT_PLAYER", 50);
@@ -122,7 +121,7 @@ $machinestates = array(
         "descriptionmyturnselectpurchase" => clienttranslate('${you} must select a card to purchase'),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array( "purchaseCard", "playCard", "cardAction", "pass" ),
+        "possibleactions" => array( "purchaseCard", "playCard", "selectGift", "pass" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS,
             "dominance_check" => STATE_DOMINANCE_CHECK,
@@ -131,7 +130,6 @@ $machinestates = array(
             "card_action_battle" => STATE_CARD_ACTION_BATTLE,
             "card_action_betray" => STATE_CARD_ACTION_BETRAY,
             "card_action_build" => STATE_CARD_ACTION_BUILD,
-            "card_action_gift" => STATE_CARD_ACTION_GIFT,
             "card_action_move" => STATE_CARD_ACTION_MOVE,
             "card_action_tax" => STATE_CARD_ACTION_TAX,
             "cleanup" => STATE_CLEANUP,
@@ -204,8 +202,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must discard court cards'),
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
-        "args" => "argPlayerActions",
-        "possibleactions" => array( "discard" ),
+        "args" => "argDiscardCourt",
+        "possibleactions" => array( "discardCards" ),
         "transitions" => array(
             "cleanup" => STATE_CLEANUP,
         )
@@ -216,8 +214,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must discard hand cards'),
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
-        "args" => "argPlayerActions",
-        "possibleactions" => array( "discard" ),
+        "args" => "argDiscardHand",
+        "possibleactions" => array( "discardCards" ),
         "transitions" => array( 
             "cleanup" => STATE_CLEANUP,
         )
@@ -278,18 +276,6 @@ $machinestates = array(
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionBuild" ),
-        "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
-        )
-    ),
-
-    STATE_CARD_ACTION_GIFT => array(
-        "name" => "cardActionGift",
-        "description" => clienttranslate('${actplayer} must buy a gift'),
-        "descriptionmyturn" => clienttranslate('${you} must buy a gift'),
-        "type" => "activeplayer",
-        "args" => "argCardActionGift",
-        "possibleactions" => array( "selectGift" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS,
         )

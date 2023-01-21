@@ -11,69 +11,7 @@ trait PPPlayerActionsTrait
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in paxpamireditiontwo.action.php)
         NOTE: put in alphabetical order.
-    */
-
-  /**
-   * Play card from hand to court
-   */
-  function cardAction($card_id, $card_action)
-  {
-    self::checkAction('cardAction');
-    self::dump("cardAction: card_id", $card_id);
-    self::dump("cardAction: card_action", $card_action);
-
-    $token_info = $this->tokens->getTokenInfo($card_id);
-    $card_info = $this->cards[$card_id];
-    $player_id = self::getActivePlayerId();
-    $location_info = explode("_", $token_info['location']);
-
-    // Checks to determine if it is a valid action
-    // Card should be in players court
-    if ($location_info[0] != 'court' || $location_info[1] != $player_id) {
-      throw new feException("Not a valid card action for player.");
-    }
-    // Card should not have been used yet
-    if ($token_info['used'] != 0) {
-      throw new feException("Card has already been used this turn.");
-    }
-    // Card should have the card action
-    if (!isset($card_info['actions'][$card_action])) {
-      throw new feException("Action does not exist on selected card.");
-    }
-
-    $next_state = 'action';
-    if ($this->getGameStateValue("remaining_actions") > 0 || $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit']) {
-
-      $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
-
-      switch ($card_action) {
-        case BATTLE:
-          break;
-        case BETRAY:
-          break;
-        case BUILD:
-          break;
-        case GIFT:
-          $next_state = 'card_action_gift';
-          break;
-        case MOVE:
-          break;
-        case TAX:
-          break;
-        default:
-          break;
-      };
-
-      self::notifyAllPlayers("cardAction", clienttranslate('${player_name} uses ${card_name} to ${card_action}.'), array(
-        'player_id' => $player_id,
-        'player_name' => self::getActivePlayerName(),
-        'card_action' => $card_action,
-        'card_name' => $this->cards[$card_id]['name'],
-      ));
-    };
-
-    $this->gamestate->nextState($next_state);
-  }
+    *
 
   /**
    * Part of set up when players need to select loyalty.
@@ -105,7 +43,7 @@ trait PPPlayerActionsTrait
    */
   function discardCards($cards, $from_hand)
   {
-    self::checkAction('discard');
+    self::checkAction('discardCards');
 
     $player_id = self::getActivePlayerId();
     $discards = $this->checkDiscardsForPlayer($player_id);
@@ -471,11 +409,13 @@ trait PPPlayerActionsTrait
   /**
    * Play card from hand to court
    */
-  function selectGift($selected_gift)
+  function selectGift($selected_gift, $card_id)
   {
     self::checkAction('selectGift');
     self::dump("selected_gift", $selected_gift);
-
+    if (!$this->isValidCardAction($card_id, 'gift')) {
+      return;
+    }
 
     $player_id = self::getActivePlayerId();
     $rupees = $this->getPlayerRupees($player_id);
@@ -495,7 +435,6 @@ trait PPPlayerActionsTrait
     // If null player needs to select cylinder from somewhere else
     if ($cylinder != null) {
       $this->tokens->moveToken($cylinder['key'], $location);
-      $card_id = 'card_' . $this->getGameStateValue("card_action_card_id");
       $this->tokens->setTokenUsed($card_id, 1); // unavailable false
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
@@ -509,7 +448,6 @@ trait PPPlayerActionsTrait
     }
 
     // if not free action reduce remaining actions.
-    $card_id = 'card_' . $this->getGameStateValue("card_action_card_id");
     if (!$this->isCardFavoredSuit($card_id)) {
       $this->incGameStateValue("remaining_actions", -1);
     }

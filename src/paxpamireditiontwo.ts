@@ -162,29 +162,6 @@ class PaxPamir implements PaxPamirGame {
     this.interactionManager.onUpdateActionButtons(stateName, args);
   }
 
-
-  // TODO (Frans): replace below with single actionButton
-  onSelectGift(evt) {
-    this.interactionManager.onSelectGift(evt);
-  }
-
-  onSelectRegion(evt) {
-    this.interactionManager.onSelectRegion(evt);
-  }
-  
-  onBorder(evt) {
-    this.interactionManager.onBorder(evt);
-  }
-
-  onCardActionClick(evt) {
-    this.interactionManager.onCardActionClick(evt);
-  }
-
-  onConfirm(evt) {
-    this.interactionManager.onConfirm(evt);
-  }
-
-
   //  .##.....##.########.####.##.......####.########.##....##
   //  .##.....##....##.....##..##........##.....##.....##..##.
   //  .##.....##....##.....##..##........##.....##......####..
@@ -220,7 +197,7 @@ class PaxPamir implements PaxPamirGame {
 
   // TODO (Frans): cast as number?
   public getPlayerId(): string {
-    return (this as unknown as Framework).player_id;
+    return this.framework().player_id;
   }
 
   // returns zone object for given backend location in token database
@@ -313,7 +290,7 @@ class PaxPamir implements PaxPamirGame {
 
   // Function that gets called every time a card is added to a stock component
   setupNewCard(cardDiv, cardId, divId) {
-    dojo.addClass(cardDiv, `pp_card_${cardId}`);
+    dojo.addClass(cardDiv, `pp_${cardId}`);
     // if card is played to a court
     if (divId.startsWith('pp_court_player')) {
       const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;

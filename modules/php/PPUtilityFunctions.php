@@ -120,6 +120,68 @@ trait PPUtilityFunctionsTrait
     return intval(self::getUniqueValueFromDB($sql));
   }
 
+
+  /**
+   * Validate card action
+   */
+  function isValidCardAction($card_id, $card_action)
+  {
+    self::dump("cardAction: card_id", $card_id);
+    self::dump("cardAction: card_action", $card_action);
+
+    $token_info = $this->tokens->getTokenInfo($card_id);
+    $card_info = $this->cards[$card_id];
+    $player_id = self::getActivePlayerId();
+    $location_info = explode("_", $token_info['location']);
+
+    // Checks to determine if it is a valid action
+    // Card should be in players court
+    if ($location_info[0] != 'court' || $location_info[1] != $player_id) {
+      throw new feException("Not a valid card action for player.");
+    }
+    // Card should not have been used yet
+    if ($token_info['used'] != 0) {
+      throw new feException("Card has already been used this turn.");
+    }
+    // Card should have the card action
+    if (!isset($card_info['actions'][$card_action])) {
+      throw new feException("Action does not exist on selected card.");
+    }
+
+    // $next_state = 'action';
+    if (!($this->getGameStateValue("remaining_actions") > 0 || $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'])) {
+      throw new feException("No remaining actions and not a free action.");
+      // $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
+
+      // switch ($card_action) {
+      //   case BATTLE:
+      //     break;
+      //   case BETRAY:
+      //     break;
+      //   case BUILD:
+      //     break;
+      //   case GIFT:
+      //     $next_state = 'card_action_gift';
+      //     break;
+      //   case MOVE:
+      //     break;
+      //   case TAX:
+      //     break;
+      //   default:
+      //     break;
+      // };
+
+      // self::notifyAllPlayers("cardAction", clienttranslate('${player_name} uses ${card_name} to ${card_action}.'), array(
+      //   'player_id' => $player_id,
+      //   'player_name' => self::getActivePlayerName(),
+      //   'card_action' => $card_action,
+      //   'card_name' => $this->cards[$card_id]['name'],
+      // ));
+    };
+    return true;
+    // $this->gamestate->nextState($next_state);
+  }
+
   /**
    * checks if coalition is different from current loyalty.
    * Handles any changes it it is.
@@ -198,7 +260,8 @@ trait PPUtilityFunctionsTrait
    * Returns card info from material.inc.php file.
    * Input is row from token table
    */
-  function getCardInfo($token) {
+  function getCardInfo($token)
+  {
     return $this->cards[$token['key']];
   }
 

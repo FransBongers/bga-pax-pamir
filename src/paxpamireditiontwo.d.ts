@@ -152,3 +152,11 @@ interface PaxPamirPlayer extends BgaPlayer {
   rupees: string;
   loyalty: string;
 }
+
+interface EnteringDiscardCourtArgs {
+  numberOfDiscards: number;
+}
+
+interface EnteringDiscardHandArgs {
+  numberOfDiscards: number;
+}

@@ -847,7 +847,9 @@ html {
 }
 
 .pp_discard {
-    opacity: 0.5;
+    /* opacity: 0.5; */
+    cursor: pointer !important;
+    margin-top: -16px;
 }
 
 .pp_disabled {

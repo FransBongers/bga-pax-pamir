@@ -13,6 +13,37 @@
 //  .##.....##.#########.##..####.#########.##....##..##.......##...##..
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
+interface UpdateInterfaceArgs {
+  cardAction?: {
+    cardId: string;
+  };
+  confirmPlaceSpy?: {
+    cardId: string;
+  };
+  confirmPlay?: {
+    cardId: string;
+  };
+  confirmPurchase?: {
+    cardId: string;
+    cost: string;
+  };
+  confirmSelectGift?: {
+    value: string;
+    cardId: string;
+  };
+  discardCourt?: {
+    numberOfDiscards: number;
+  };
+  discardHand?: {
+    numberOfDiscards: number;
+  };
+  placeRoad?: {
+    borders: string[];
+  };
+  placeSpy?: {
+    region: string;
+  };
+}
 
 class InteractionManager {
   private game: PaxPamirGame;
@@ -29,8 +60,6 @@ class InteractionManager {
   };
   // TODO(Frans): we should probably remove below props here since it's used in specific funtion
   private numberOfDiscards: number;
-  private selectedGift: string;
-  private selectedCard: string;
 
   constructor(game: PaxPamirGame) {
     console.log('Interaction Manager');
@@ -85,12 +114,41 @@ class InteractionManager {
   //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
   //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
 
-  updateInterface({ nextStep }: { nextStep: string }) {
+  updateInterface({ nextStep, args }: { nextStep: string; args?: UpdateInterfaceArgs }) {
     console.log(`updateInterface ${nextStep}`);
     this.clearPossible();
 
     switch (nextStep) {
-      case 'chooseLoyalty':
+      case CARD_ACTION_BATTLE:
+        this.updatePageTitle({
+          text: _('${you} must select a card or region'),
+          args: {},
+        });
+        this.setRegionsSelectable();
+        break;
+      case CARD_ACTION_BETRAY:
+        console.log('betray clicked');
+        break;
+      case CARD_ACTION_BUILD:
+        console.log('build clicked');
+        break;
+      case CARD_ACTION_GIFT:
+        this.updatePageTitle({
+          text: _('${you} must select a gift to purchase'),
+          args: {
+            you: '${you}',
+          },
+        });
+        this.setGiftsSelectable({ cardId: args.cardAction.cardId });
+        this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
+        break;
+      case CARD_ACTION_MOVE:
+        console.log('move clicked');
+        break;
+      case CARD_ACTION_TAX:
+        console.log('tax clicked');
+        break;
+      case CHOOSE_LOYALTY:
         this.addPrimaryActionButton({
           id: 'afghan_button',
           text: _('Afghan'),
@@ -107,98 +165,152 @@ class InteractionManager {
           callback: () => this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }),
         });
         break;
-      case 'playerActions':
+      case DISCARD_COURT:
+        this.updatePageTitle({
+          text:
+            this.numberOfDiscards !== 1
+              ? _('${you} must discard ${numberOfDiscards} cards')
+              : _('${you} must discard ${numberOfDiscards} card'),
+          args: {
+            numberOfDiscards: this.numberOfDiscards,
+            you: '${you}',
+          },
+        });
+        this.addPrimaryActionButton({
+          id: 'confirm_btn',
+          text: _('Confirm'),
+          callback: () => this.handleDiscardConfirm({ fromHand: false }),
+        });
+        dojo.addClass('confirm_btn', 'pp_disabled');
+        this.setCourtCardsSelectableForDiscard();
+        break;
+      case DISCARD_HAND:
+        this.updatePageTitle({
+          text:
+            this.numberOfDiscards !== 1
+              ? _('${you} must discard ${numberOfDiscards} cards')
+              : _('${you} must discard ${numberOfDiscards} card'),
+          args: {
+            numberOfDiscards: this.numberOfDiscards,
+            you: '${you}',
+          },
+        });
+        this.addPrimaryActionButton({
+          id: 'confirm_btn',
+          text: _('Confirm'),
+          callback: () => this.handleDiscardConfirm({ fromHand: true }),
+        });
+        dojo.addClass('confirm_btn', 'pp_disabled');
+        this.setHandCardsSelectable({
+          callback: ({ cardId }: { cardId: string }) => this.handleDiscardSelect({ cardId }),
+        });
+        break;
+      case PLAYER_ACTIONS:
         this.updateMainTitleTextActions();
         if (this.activePlayerHasActions()) {
-          this.addPrimaryActionButton({
-            id: 'purchase_btn',
-            text: _('Purchase'),
-            callback: () => this.updateInterface({ nextStep: 'selectCardToPurchase' }),
-          });
-          if (this.activePlayerHasHandCards()) {
-            this.addPrimaryActionButton({
-              id: 'play_btn',
-              text: _('Play'),
-              callback: () => this.updateInterface({ nextStep: 'selectCardToPlay' }),
-            });
-          }
-          if (this.activePlayerHasCourtCards()) {
-            this.addPrimaryActionButton({
-              id: 'card_action_btn',
-              text: _('Card Action'),
-              callback: () => this.updateInterface({ nextStep: 'selectCardAction' }),
-            });
-          }
           this.addSecondaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: () => this.onPass() });
           this.setMarketCardsSelectable();
-          this.setHandCardsSelectable({ action: 'play' });
+          this.setHandCardsSelectable({
+            callback: ({ cardId }: { cardId: string }) =>
+              this.updateInterface({ nextStep: CONFIRM_PLAY, args: { confirmPlay: { cardId } } }),
+          });
           this.setCardActionsSelectable();
         } else {
-          if (this.activePlayerHasFreeActions()) {
-            this.addPrimaryActionButton({
-              id: 'card_action_btn',
-              text: _('Card Action'),
-              callback: () => this.updateInterface({ nextStep: 'selectCardAction' }),
-            });
+          if (this.activePlayerHasFreeCardActions()) {
             this.setCardActionsSelectable();
           }
           this.addPrimaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: () => this.onPass() });
         }
         break;
-      case 'client_confirmPlaceSpy':
-        this.addPrimaryActionButton({ id: 'confirm_btn', text: _('Confirm'), callback: () => this.onConfirm({ action: 'placeSpy' }) });
+      case CONFIRM_PLACE_SPY:
+        dojo.query(`.pp_${args.confirmPlaceSpy.cardId}`).addClass('pp_selected');
+        this.updatePageTitle({
+          text: _('Place a spy on ${cardName}'),
+          args: {
+            cardName: this.getCardInfo({ cardId: args.confirmPlaceSpy.cardId as string }).name,
+          },
+        });
+        this.addPrimaryActionButton({
+          id: 'confirm_btn',
+          text: _('Confirm'),
+          callback: () => this.game.takeAction({ action: 'placeSpy', data: { cardId: args.confirmPlaceSpy.cardId } }),
+        });
         this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
+      case PLACE_ROAD:
+        (args?.placeRoad?.borders || []).forEach((border) => {
+          this.addPrimaryActionButton({
+            id: `${border}_btn`,
+            text: _(this.game.gamedatas.borders[border].name),
+            callback: () => this.game.takeAction({ action: 'placeRoad', data: { border } }),
+          });
+        });
         break;
-      case 'client_confirmPlay':
+      case PLACE_SPY:
+        this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
+        break;
+      case CONFIRM_PLAY:
+        dojo.query(`.pp_${args.confirmPlay.cardId}`).addClass('pp_selected');
+        this.updatePageTitle({
+          text: _("Select which side of court to play '${name}':"),
+          args: {
+            name: this.getCardInfo({ cardId: args.confirmPlay.cardId }).name,
+          },
+        });
+        this.game.framework().updatePageTitle();
         this.addPrimaryActionButton({
           id: 'left_side_btn',
           text: _('<< LEFT'),
-          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: this.selectedCard, leftSide: true } }),
+          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
         });
         this.addPrimaryActionButton({
           id: 'right_side_btn',
           text: _('RIGHT >>'),
-          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: this.selectedCard, leftSide: false } }),
+          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
         });
         this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
         break;
-      case 'client_confirmPurchase':
+      case CONFIRM_PURCHASE:
+        const { cardId, cost } = args.confirmPurchase;
+        const name = this.getCardInfo({ cardId }).name;
+        dojo.query(`.pp_${cardId}`).addClass('pp_selected');
+        this.updatePageTitle({
+          text: _("Purchase '${name}' for ${cost} ${rupees}?"),
+          args: {
+            name,
+            cost,
+            rupees: Number(cost) === 1 ? 'rupee' : 'rupees',
+          },
+        });
         this.addPrimaryActionButton({
           id: 'confirm_btn',
           text: _('Confirm'),
-          callback: () => this.onConfirm({ action: 'purchase' }),
+          callback: () => this.game.takeAction({ action: 'purchaseCard', data: { cardId: args.confirmPurchase.cardId } }),
         });
         this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
         break;
-      case 'client_confirmSelectGift':
+      case CONFIRM_SELECT_GIFT:
+        dojo.query(`#pp_gift_${args.confirmSelectGift.value}_${this.game.getPlayerId()}`).addClass('pp_selected');
+        this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: args.confirmSelectGift.value as string } });
         this.addDangerActionButton({
           id: 'confirm_btn',
           text: _('Confirm'),
-          callback: () => this.onConfirm({ action: 'confirmSelectGift' }),
+          callback: () =>
+            this.game.takeAction({
+              action: 'selectGift',
+              data: { selectedGift: args.confirmSelectGift.value, cardId: args.confirmSelectGift.cardId },
+            }),
         });
         this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
         break;
-      case 'client_endTurn':
+      case PASS:
+        this.updatePageTitle({ text: _('Confirm to your end turn'), args: {} });
         this.addDangerActionButton({
           id: 'confirm_btn',
           text: _('Confirm'),
-          callback: () => this.onConfirm({ action: 'pass' }),
+          callback: () => this.game.takeAction({ action: 'pass' }),
         });
         this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
         break;
-      case 'selectCardAction':
-        this.updateSelectableActions({ action: 'cardAction' });
-        this.setPageTitle('selectcardaction');
-        break;
-      case 'selectCardToPlay':
-        this.setHandCardsSelectable({ action: 'play' });
-        this.setPageTitle('playcard');
-        break;
-      case 'selectCardToPurchase':
-        this.setMarketCardsSelectable();
-        this.setPageTitle('selectpurchase');
-        break;
-
       default:
         console.log(`No changes for step ${nextStep}`);
         break;
@@ -217,10 +329,18 @@ class InteractionManager {
     return this.activePlayer.remainingActions > 0 || false;
   }
 
-  activePlayerHasFreeActions(): boolean {
-    return this.activePlayer.court.some(
-      ({ key, used }) => used == '0' && (this.game.gamedatas.cards[key] as CourtCard).suit == this.activePlayer.favoredSuit
-    );
+  activePlayerHasCardActions(): boolean {
+    return this.activePlayer.court.some(({ key, used }) => {
+      const cardInfo = this.game.gamedatas.cards[key] as CourtCard;
+      return used == '0' && Object.keys(cardInfo.actions).length > 0;
+    });
+  }
+
+  activePlayerHasFreeCardActions(): boolean {
+    return this.activePlayer.court.some(({ key, used }) => {
+      const cardInfo = this.game.gamedatas.cards[key] as CourtCard;
+      return used == '0' && cardInfo.suit == this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
+    });
   }
 
   activePlayerHasHandCards(): boolean {
@@ -246,147 +366,206 @@ class InteractionManager {
     if (!$(id)) this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
   }
 
-  updateMainTitleTextActions() {
-    const main = $('pagemaintitletext');
+  getCardInfo({ cardId }: { cardId: string }): Card {
+    return this.game.gamedatas.cards[cardId];
+  }
 
-    main.innerHTML +=
-      _(' may take ') +
-      '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-      this.activePlayer.remainingActions +
-      '</span>' +
-      _(' action(s): ');
+  /**
+   * Player had actions remaining
+   * 1. Player can only purchase cards (no cards in hand or in court);
+   *    You may purchase a card (x actions remaining)
+   * 2. Player can purchase and play cards (cards in hand, no card in court)
+   *    You may purchase a card or play a card (x actions remaining)
+   * 3. Player can purchase and perform card actions (no cards in hand, card in court)
+   *    You may purchase a card or perform a card action
+   * 4. Player can purchase, play and perform card actions (no cards in hand, card in court)
+   *    You may purchase a card, play a card or perform card actions (x actions remaining)
+   * Player has no actions remaining
+   * 5. Player can perform free actions (no actions but cards with favored suit in court)
+   *    You may perform free card actions
+   * 6. Player does not have free actions
+   */
+  updateMainTitleTextActions() {
+    const remainingActions = this.activePlayer.remainingActions;
+    const hasCardActions = this.activePlayerHasCardActions();
+    const hasHandCards = this.activePlayerHasHandCards();
+    const hasFreeCardActions = this.activePlayerHasFreeCardActions();
+    let titleText = '';
+    // cibst case = 0;
+    if (remainingActions > 0 && !hasHandCards && !hasCardActions) {
+      titleText = _('${you} may purchase a card');
+    } else if (remainingActions > 0 && hasHandCards && !hasCardActions) {
+      titleText = _('${you} may purchase a card or play a card');
+    } else if (remainingActions > 0 && !hasHandCards && hasCardActions) {
+      titleText = _('${you} may purchase a card or perform a card action');
+    } else if (remainingActions > 0 && hasHandCards && hasCardActions) {
+      titleText = _('${you} may purchase a card, play a card or perform a card action');
+    } else if (remainingActions === 0 && hasFreeCardActions) {
+      titleText = _('${you} may perform a free card action');
+    } else if (remainingActions === 0 && !hasFreeCardActions) {
+      titleText = _('${you} have no remaining actions');
+    }
+
+    if (remainingActions === 1) {
+      titleText += _(' (1 action remaining)');
+    } else if (remainingActions === 2) {
+      titleText += _(' (2 actions remaining)');
+    }
+
+    this.game.gamedatas.gamestate.descriptionmyturn = titleText;
+    this.game.framework().updatePageTitle();
+    // this.game.gamedatas.gamestate.descriptionmyturn;
+    // const main = $('pagemaintitletext');
+
+    // main.innerHTML +=
+    //   _(' may take ') +
+    //   '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
+    //   this.activePlayer.remainingActions +
+    //   '</span>' +
+    //   _(' action(s): ');
+    // this.game.framework().updatePageTitle();
+  }
+
+  handleDiscardSelect({ cardId }: { cardId: string }) {
+    console.log('handleSelect', this.numberOfDiscards);
+    dojo.query(`.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+    if (dojo.query('.pp_selected').length === this.numberOfDiscards) {
+      console.log('inside if');
+      dojo.removeClass('confirm_btn', 'pp_disabled');
+    } else {
+      dojo.addClass('confirm_btn', 'pp_disabled');
+    }
+  }
+
+  handleDiscardConfirm({ fromHand }: { fromHand: boolean }) {
+    let cards = '';
+    dojo.query('.pp_selected').forEach(function (item, index) {
+      cards += ' card_' + item.id.split('_')[6];
+    }, this);
+    this.game.takeAction({
+      action: 'discardCards',
+      data: {
+        cards,
+        fromHand,
+      },
+    });
   }
 
   setCardActionsSelectable() {
     const playerId = this.game.getPlayerId();
-    dojo.query(`.pp_card_in_court_${playerId}`).forEach((node) => {
-      const splitNodeId = node.id.split('_');
-      const cardId = `${splitNodeId[5]}_${splitNodeId[6]}`;
+    dojo.query(`.pp_card_in_court_${playerId}`).forEach((node: HTMLElement) => {
+      const cardId = `card_${node.id.split('_')[6]}`;
       const used = this.activePlayer.court?.find((card) => card.key === cardId)?.used === '1';
       if (
         !used &&
         (this.activePlayer.remainingActions > 0 || (this.game.gamedatas.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
       )
-        dojo.map(node.children, (child) => {
+        dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {
+            console.log('splitId', child.id.split('_')[0]);
+            console.log('cardId', cardId);
+            const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
             dojo.addClass(child, 'pp_selectable');
-            this._connections.push(dojo.connect(child, 'onclick', this, 'onCardActionClick'));
+            this._connections.push(
+              dojo.connect(child, 'onclick', this, () => this.updateInterface({ nextStep, args: { cardAction: { cardId } } }))
+            );
           }
         });
     });
   }
 
-  updateSelectableActions({ action }: { action: string }) {
-    console.log('updateSelectableActions', action);
-    this.resetActionArgs();
+  setRegionsSelectable() {
+    const container = document.getElementById(`pp_map_areas`);
+    container.classList.add('pp_selectable');
+    REGIONS.forEach((region) => {
+      console.log('region', region);
+      const element = document.getElementById(`pp_region_${region}`);
+      // console.log(node);
+      element.classList.add('pp_selectable');
+      this._connections.push(dojo.connect(element, 'onclick', this, () => console.log('Region', region)));
+    });
+  }
+
+  setGiftsSelectable({ cardId }: { cardId: string }) {
     const playerId = this.game.getPlayerId();
-    switch (action) {
-      case 'cardActionBattle':
-        console.log('battle');
-        console.log('dojo', dojo);
-        const container = document.getElementById(`pp_map_areas`);
-        container.classList.add('pp_selectable');
-        REGIONS.forEach((region) => {
-          console.log('region', region);
-          const element = document.getElementById(`pp_region_${region}`);
-          // console.log(node);
-          element.classList.add('pp_selectable');
-          this._connections.push(dojo.connect(element, 'onclick', this, 'onSelectRegion'));
-          // dojo.query(`#pp_region_${region}`).forEach((node) => {
-          // dojo.query(`.pp_region`).forEach((node) => {
-          // dojo.query('#pp_map_areas').forEach((node) => {
-          //     dojo.addClass(node, 'pp_selectable');
-          //     this.handles.push(dojo.connect(node,'onclick', this, 'onSelectRegion'));
-          // })
-        });
-        break;
-      case 'cardAction':
-        // Note Frans: perhaps there is a better way to get the court cards for the player
-        // based on backend data
-        dojo.query(`.pp_card_in_court_${playerId}`).forEach((node) => {
-          const splitNodeId = node.id.split('_');
-          const cardId = `${splitNodeId[5]}_${splitNodeId[6]}`;
-          const used = this.activePlayer.court?.find((card) => card.key === cardId)?.used === '1';
-          if (
-            !used &&
-            (this.activePlayer.remainingActions > 0 ||
-              (this.game.gamedatas.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
-          )
-            dojo.map(node.children, (child) => {
-              if (dojo.hasClass(child, 'pp_card_action')) {
-                dojo.addClass(child, 'pp_selectable');
-                this._connections.push(dojo.connect(child, 'onclick', this, 'onCardActionClick'));
-              }
-            });
-        });
-        break;
-      case 'cardActionGift':
-        ['2', '4', '6'].forEach((giftValue) => {
-          const hasGift =
-            this.game.playerManager
-              .getPlayer({ playerId })
-              .getGiftZone({
-                value: giftValue,
+    ['2', '4', '6'].forEach((giftValue) => {
+      const hasGift =
+        this.game.playerManager
+          .getPlayer({ playerId })
+          .getGiftZone({
+            value: giftValue,
+          })
+          .getAllItems().length > 0;
+      if (!hasGift && giftValue <= this.activePlayer.rupees) {
+        dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
+          dojo.addClass(node, 'pp_selectable');
+          this._connections.push(
+            dojo.connect(node, 'onclick', this, () =>
+              this.updateInterface({
+                nextStep: CONFIRM_SELECT_GIFT,
+                args: {
+                  confirmSelectGift: {
+                    value: giftValue,
+                    cardId,
+                  },
+                },
               })
-              .getAllItems().length > 0;
-          if (!hasGift && giftValue <= this.activePlayer.rupees) {
-            dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node) => {
-              dojo.addClass(node, 'pp_selectable');
-              this._connections.push(dojo.connect(node, 'onclick', this, 'onSelectGift'));
-            });
-          }
+            )
+          );
         });
-        break;
-      default:
-        break;
-    }
+      }
+    });
   }
 
   setMarketCardsSelectable() {
-    dojo.query('.pp_market_card').forEach((node) => {
+    dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cost = node.id.split('_')[3]; // cost is equal to the column number
-      const cardId = node.id.split('_')[6];
-      console.log('cardId', cardId, 'node', node);
-      if (cost <= this.activePlayer.rupees && !this.activePlayer.unavailableCards.includes('card_' + cardId)) {
+      const cardId = 'card_' + node.id.split('_')[6];
+      if (cost <= this.activePlayer.rupees && !this.activePlayer.unavailableCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
-        this._connections.push(dojo.connect(node, 'onclick', this, (evt) => this.onCard({ action: 'purchase', evt })));
+        this._connections.push(
+          dojo.connect(node, 'onclick', this, () =>
+            this.updateInterface({ nextStep: CONFIRM_PURCHASE, args: { confirmPurchase: { cardId, cost } } })
+          )
+        );
       }
     }, this);
   }
 
-  setHandCardsSelectable({ action }: { action: string }) {
-    dojo.query('.pp_card_in_hand').forEach(function (node, index) {
+  setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
+    dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
+      const cardId = 'card_' + node.id.split('_')[6];
+      console.log('hand card cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
-      this._connections.push(dojo.connect(node, 'onclick', this, (evt) => this.onCard({ action, evt })));
+      this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
     }, this);
   }
 
-  setCourtCardsSelectable({ playerId, action }: { playerId: string; action: string }) {
-    // dojo.query(`.pp_card_in_court_${this.game.getPlayerId()}`).forEach(function (node, index) {
-    dojo.query(`.pp_card_in_court_${playerId}`).forEach(function (node, index) {
+  setCourtCardsSelectableForDiscard() {
+    const playerId = this.game.getPlayerId();
+    dojo.query(`.pp_card_in_court_${playerId}`).forEach((node: HTMLElement, index: number) => {
+      const cardId = 'card_' + node.id.split('_')[6];
+      console.log('court card cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
-      this._connections.push(dojo.connect(node, 'onclick', this, (evt) => this.onCard({ action, evt })));
+      this._connections.push(dojo.connect(node, 'onclick', this, () => this.handleDiscardSelect({ cardId })));
     }, this);
   }
 
   setPlaceSpyCardsSelectable({ region }: { region: string }) {
-    // dojo.query(`.pp_card_in_court_${args?.region ? args.region : ''}`).forEach(function (node, index) {
-    dojo.query(`.pp_card_in_court_${region}`).forEach(function (node, index) {
+    dojo.query(`.pp_card_in_court_${region}`).forEach((node: HTMLElement, index: number) => {
+      const cardId = 'card_' + node.id.split('_')[6];
+      console.log('set selectable', cardId);
       dojo.addClass(node, 'pp_selectable');
-      this._connections.push(dojo.connect(node, 'onclick', this, (evt) => this.onCard({ action: 'placeSpy', evt })));
+      this._connections.push(
+        dojo.connect(node, 'onclick', this, () =>
+          this.updateInterface({ nextStep: CONFIRM_PLACE_SPY, args: { confirmPlaceSpy: { cardId } } })
+        )
+      );
     }, this);
   }
 
-  setPageTitle(suffix: string | null = null) {
-    if (suffix == null) {
-      suffix = 'generic';
-    }
-
-    if (!this.game.gamedatas.gamestate['descriptionmyturn' + suffix]) return;
-
-    this.game.gamedatas.gamestate.descriptionmyturn = this.game.gamedatas.gamestate['descriptionmyturn' + suffix];
-    if (this.game.gamedatas.gamestate['description' + suffix])
-      this.game.gamedatas.gamestate.description = this.game.gamedatas.gamestate['description' + suffix];
+  updatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
+    this.game.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
     this.game.framework().updatePageTitle();
   }
 
@@ -406,20 +585,26 @@ class InteractionManager {
   //  .##....##....##....##.....##....##....##......
   //  ..######.....##....##.....##....##....########
 
-  onEnteringState(stateName, args) {
+  onEnteringState(stateName: string, args: any) {
     // UI changes for active player
     if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
       switch (stateName) {
         case 'setup':
-          this.updateInterface({ nextStep: 'chooseLoyalty' });
-          break;
-        case 'client_cardActionBattle':
-          this.updateSelectableActions({ action: 'cardActionBattle' });
+          this.updateInterface({ nextStep: CHOOSE_LOYALTY });
           break;
         case 'cardActionGift':
           this.activePlayer.rupees = args.args.rupees;
-          console.log('activePlayer', this.activePlayer);
-          this.updateSelectableActions({ action: 'cardActionGift' });
+          this.updateInterface({ nextStep: CARD_ACTION_GIFT });
+          break;
+        case 'discardCourt':
+          this.numberOfDiscards = (args.args as EnteringDiscardCourtArgs).numberOfDiscards;
+          console.log('numberOfDiscards', this.numberOfDiscards);
+          this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args as EnteringDiscardCourtArgs } });
+          break;
+        case 'discardHand':
+          this.numberOfDiscards = (args.args as EnteringDiscardHandArgs).numberOfDiscards;
+          console.log('numberOfDiscards', this.numberOfDiscards);
+          this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
           break;
         case 'playerActions':
           const { court, favored_suit, hand, remaining_actions, rupees, unavailable_cards } = args.args;
@@ -431,39 +616,14 @@ class InteractionManager {
             rupees: rupees,
             unavailableCards: unavailable_cards,
           };
-          this.updateInterface({ nextStep: 'playerActions' });
-          // this.unavailableCards = args.args.unavailable_cards;
-          // this.remainingActions = args.args.remaining_actions;
+          this.updateInterface({ nextStep: PLAYER_ACTIONS });
+          break;
+        case 'placeRoad':
+          this.updateInterface({ nextStep: PLACE_ROAD, args: { placeRoad: { borders: args.args.region.borders } } });
           break;
         case 'placeSpy':
-          this.setPlaceSpyCardsSelectable({ region: args.args.region });
-          // this.updateSelectableCards({ action: 'placeSpy', args: args.args });
+          this.updateInterface({nextStep: PLACE_SPY, args: {placeSpy: {region: args.args.region}}})
           break;
-        case 'client_cardActionBattle':
-          this.updateInterface({ nextStep: 'client_cardActionBattle' });
-          break;
-        case 'client_confirmPlaceSpy':
-          this.updateInterface({ nextStep: 'client_confirmPlaceSpy' });
-          break;
-        case 'client_confirmPlay':
-          this.updateInterface({ nextStep: 'client_confirmPlay' });
-          break;
-        case 'client_confirmPurchase':
-          this.updateInterface({ nextStep: 'client_confirmPurchase' });
-          break;
-        case 'client_confirmSelectGift':
-          this.updateInterface({ nextStep: 'client_confirmSelectGift' });
-          break;
-        case 'client_endTurn':
-          this.updateInterface({ nextStep: 'client_endTurn' });
-          break;
-        // case 'client_selectPlay':
-
-        //   break;
-        // case 'client_selectPurchase':
-        //   this.updateInterface({ nextStep: 'client_selectPurchase' });
-        //   break;
-
         default:
           break;
       }
@@ -530,70 +690,7 @@ class InteractionManager {
   //  .##.....##.##.....##....##.......##....##.....##.##...###.##....##
   //  .########...#######.....##.......##.....#######..##....##..######.
 
-  onUpdateActionButtons(stateName, args) {
-    if (!(this.game as unknown as Framework).isCurrentPlayerActive()) {
-      return;
-    }
-
-    switch (stateName) {
-      // case 'negotiateBribe':
-      //     for ( var i = 0; i <= args.briber_max; i++ ) {
-      //         this.game.addActionButton( i+'_btn', $i, 'onBribe', null, false, 'blue' );
-      //     }
-      //     break;
-
-      case 'discardCourt':
-        this.numberOfDiscards = Object.keys(args.court).length - args.suits.political - 3;
-        if (this.numberOfDiscards > 1) var cardmsg = _(' court cards ');
-        else cardmsg = _(' court card');
-        $('pagemaintitletext').innerHTML +=
-          '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' + this.numberOfDiscards + '</span>' + cardmsg;
-        this.setCourtCardsSelectable({ action: 'discard_court', playerId: this.game.getPlayerId() });
-        this.game.framework().addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
-        dojo.addClass('confirm_btn', 'pp_disabled');
-        break;
-
-      case 'discardHand':
-        this.numberOfDiscards = Object.keys(args.hand).length - args.suits.intelligence - 2;
-        if (this.numberOfDiscards > 1) var cardmsg = _(' hand cards ');
-        else cardmsg = _(' hand card');
-        $('pagemaintitletext').innerHTML +=
-          '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' + this.numberOfDiscards + '</span>' + cardmsg;
-        this.setHandCardsSelectable({ action: 'discard_hand' });
-        (this.game as unknown as Framework).addActionButton('confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue');
-        dojo.addClass('confirm_btn', 'pp_disabled');
-        break;
-
-      case 'placeRoad':
-        args.region.borders.forEach((border) => {
-          (this.game as unknown as Framework).addActionButton(
-            `${border}_btn`,
-            _(this.game.gamedatas.borders[border].name),
-            'onBorder',
-            null,
-            false,
-            'blue'
-          );
-        });
-        break;
-
-      case 'cardActionGift':
-        (this.game as unknown as Framework).addActionButton('cancel_btn', _('Cancel'), () => this.onCancel(), null, false, 'gray');
-        break;
-      // case 'client_selectPlay':
-      //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
-      //     break;
-
-      // case 'client_confirmDiscard':
-      //     this.addActionButton( 'confirm_btn', _('Confirm'), 'onConfirm', null, false, 'blue' );
-      //     this.addActionButton( 'cancel_btn', _('Cancel'), 'onCancel', null, false, 'red' );
-      //     break;
-
-      default:
-        console.log('default');
-        break;
-    }
-  }
+  onUpdateActionButtons(stateName: string, args: unknown) {}
 
   //  ..######..##.......####..######..##....##
   //  .##....##.##........##..##....##.##...##.
@@ -611,165 +708,17 @@ class InteractionManager {
   // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
   // .##.....##.##.....##.##....##.########..########.########..######.
 
-  onSelectGift(evt) {
-    const divId = evt.currentTarget.id;
-    dojo.stopEvent(evt);
-    if (!(this.game as unknown as Framework).checkAction('selectGift')) return;
-
-    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
-      const value: string = divId.split('_')[2];
-      this.resetActionArgs();
-      this.selectedGift = value;
-      dojo.query(`#pp_gift_${value}_${this.game.getPlayerId()}`).addClass('pp_selected');
-      this.game.framework().setClientState('client_confirmSelectGift', {
-        descriptionmyturn: _(`Purchase gift for ${value} rupees?`),
-      });
-    }
-  }
-
-  onSelectRegion(evt) {
-    const divId = evt.currentTarget.id;
-    dojo.stopEvent(evt);
-    console.log('onSelectRegion', divId, evt);
-  }
-
   onPass() {
-    if (!(this.game as unknown as Framework).checkAction('pass')) return;
-    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
-      if (this.activePlayer.remainingActions == 0) {
-        this.game.takeAction({ action: 'pass' });
-      } else {
-        (this.game as unknown as Framework).setClientState('client_endTurn', {
-          descriptionmyturn: _('Confirm to your end turn '),
-        });
-      }
+    if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive()) return;
+    if (Number(this.activePlayer.remainingActions) > 0) {
+      this.updateInterface({ nextStep: 'pass' });
+      return;
     }
-  }
-
-  onBorder(evt) {
-    dojo.stopEvent(evt);
-    if (!(this.game as unknown as Framework).checkAction('placeRoad')) return;
-    const splitId = evt.target.id.split('_');
-    const border = `${splitId[0]}_${splitId[1]}`;
-    this.game.takeAction({ action: 'placeRoad', data: { border } });
-  }
-
-  onCard({ action, evt }: { action: string; evt: any }) {
-    const cardDivId = evt.currentTarget.id;
-    console.log('action', action, 'evt', evt);
-    dojo.stopEvent(evt);
-
-    const cardId = 'card_' + cardDivId.split('_')[6];
-    this.selectedCard = cardId;
-    let node;
-    if ((this.game as unknown as Framework).isCurrentPlayerActive()) {
-      switch (action) {
-        case 'purchase':
-          this.resetActionArgs();
-          node = $(cardDivId);
-          dojo.addClass(node, 'pp_selected');
-          const cost = cardDivId.split('_')[3];
-          (this.game as unknown as Framework).setClientState('client_confirmPurchase', {
-            descriptionmyturn: 'Purchase this card for ' + cost + ' rupees?',
-          });
-          break;
-
-        case 'play':
-          this.resetActionArgs();
-          node = $(cardDivId);
-          dojo.addClass(node, 'pp_selected');
-          (this.game as unknown as Framework).setClientState('client_confirmPlay', {
-            descriptionmyturn: 'Select which side of court to play card:',
-          });
-          break;
-
-        case 'discard_hand':
-        case 'discard_court':
-          node = $(cardDivId);
-          dojo.toggleClass(node, 'pp_selected');
-          dojo.toggleClass(node, 'pp_discard');
-          if (dojo.query('.pp_selected').length == this.numberOfDiscards) {
-            dojo.removeClass('confirm_btn', 'pp_disabled');
-          } else {
-            dojo.addClass('confirm_btn', 'pp_disabled');
-          }
-          break;
-        case 'placeSpy':
-          this.resetActionArgs();
-          node = $(cardDivId);
-          dojo.addClass(node, 'pp_selected');
-          const cardName = this.game.gamedatas.cards[cardId].name;
-          (this.game as unknown as Framework).setClientState('client_confirmPlaceSpy', {
-            descriptionmyturn: `Place a spy on ${cardName}`,
-          });
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  onCardActionClick(evt) {
-    const divId = evt.currentTarget.id;
-    dojo.stopEvent(evt);
-    this.resetActionArgs();
-    const splitId = divId.split('_');
-    const cardAction: string = splitId[0];
-    const cardId: string = `${splitId[1]}_${splitId[2]}`;
-    switch (cardAction) {
-      case 'gift':
-        this.game.takeAction({ action: 'cardAction', data: { cardAction, cardId } });
-        break;
-      case 'battle':
-        // this.updateSelectableActions();
-        (this.game as unknown as Framework).setClientState('client_cardActionBattle', {
-          descriptionmyturn: _('${you} must select a card or region'),
-        });
-        break;
-      case 'default':
-        console.log('default gift');
-        break;
-    }
+    this.game.takeAction({ action: 'pass' });
   }
 
   onCancel() {
     this.resetActionArgs();
     this.game.framework().restoreServerGameState();
-  }
-
-  onConfirm({ action }: { action: string }) {
-    switch (action) {
-      case 'purchase':
-        var cardId = this.selectedCard;
-        this.game.takeAction({ action: 'purchaseCard', data: { cardId } });
-        break;
-
-      case 'pass':
-        this.game.takeAction({ action: 'pass' });
-        break;
-      case 'confirmSelectGift':
-        this.game.takeAction({ action: 'selectGift', data: { selectedGift: this.selectedGift } });
-        break;
-      case 'discard_hand':
-      case 'discard_court':
-        let cards = '';
-        dojo.query('.pp_selected').forEach(function (item, index) {
-          cards += ' card_' + item.id.split('_')[6];
-        }, this);
-        this.game.takeAction({
-          action: 'discardCards',
-          data: {
-            cards,
-            fromHand: action == 'discard_hand',
-          },
-        });
-        break;
-      case 'placeSpy':
-        this.resetActionArgs();
-        this.game.takeAction({ action: 'placeSpy', data: { cardId: this.selectedCard } });
-        break;
-      default:
-        break;
-    }
   }
 }

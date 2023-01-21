@@ -13,12 +13,26 @@ trait PPStateArgsTrait
         game state.
     */
 
-  function argCardActionGift()
+
+  function argDiscardCourt()
   {
     $player_id = self::getActivePlayerId();
+    $countPoliticalSuit = $this->getPlayerSuitsTotals($player_id)[POLITICAL];
+    $countCourtCards = count($this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state'));
 
     return array(
-      'rupees' => $this->getPlayerRupees($player_id),
+      'numberOfDiscards' => $countCourtCards - $countPoliticalSuit - 3
+    );
+  }
+
+  function argDiscardHand()
+  {
+    $player_id = self::getActivePlayerId();
+    $countIntelligenceSuit = $this->getPlayerSuitsTotals($player_id)[INTELLIGENCE];
+    $countHandCards = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_' . $player_id, null, 'state'));
+
+    return array(
+      'numberOfDiscards' => $countHandCards - $countIntelligenceSuit - 2
     );
   }
 

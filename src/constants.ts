@@ -1,3 +1,23 @@
+// Interface steps
+const CARD_ACTION_BATTLE = 'cardActionBattle';
+const CARD_ACTION_BETRAY = 'cardActionBetray';
+const CARD_ACTION_BUILD = 'cardActionBuild';
+const CARD_ACTION_GIFT = 'cardActionGift';
+const CARD_ACTION_MOVE = 'cardActionMove';
+const CARD_ACTION_TAX = 'cardActionTax';
+const CHOOSE_LOYALTY = 'chooseLoyalty';
+const CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
+const CONFIRM_PLAY = 'confirmPlay';
+const CONFIRM_PURCHASE = 'confirmPurchase';
+const CONFIRM_SELECT_GIFT = 'confirmSelectGift';
+const DISCARD_COURT = 'discardCourt';
+const DISCARD_HAND = 'discardHand';
+const PLACE_ROAD = 'placeRoad';
+const PLACE_SPY = 'placeSpy';
+const PASS = 'pass';
+const PLAYER_ACTIONS = 'playerActions';
+
+
 // size of tokens
 const CARD_WIDTH = 150;
 const CARD_HEIGHT = 209;

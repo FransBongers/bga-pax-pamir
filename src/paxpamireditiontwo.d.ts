@@ -161,9 +161,3 @@ interface EnteringDiscardHandArgs {
   numberOfDiscards: number;
 }
 
-interface NotifChooseLoyaltyArgs {
-  player_id: string;
-  player_name: string;
-  coalition: string;
-  coalition_name: string;
-}

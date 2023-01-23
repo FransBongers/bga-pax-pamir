@@ -27,6 +27,10 @@ class PPNotificationManager {
     dojo.forEach(this.subscriptions, dojo.unsubscribe);
   }
 
+  getPlayer({ args }: Notif<{ player_id: string }>): PPPlayer {
+    return this.game.playerManager.getPlayer({ playerId: args.player_id });
+  }
+
   setupNotifications() {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
@@ -56,9 +60,10 @@ class PPNotificationManager {
     console.log('notif_cardAction', notif);
   }
 
-  notif_chooseLoyalty({ args }: Notif<NotifChooseLoyaltyArgs>) {
+  notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
+    const { args } = notif;
     console.log('notif_chooseLoyalty', args);
-    this.game.playerManager.getPlayer({ playerId: args.player_id }).updatePlayerLoyalty({ coalition: args.coalition });
+    this.getPlayer(notif).updatePlayerLoyalty({ coalition: args.coalition });
   }
 
   notif_discardCard(notif) {
@@ -151,32 +156,28 @@ class PPNotificationManager {
     this.game.playerManager.getPlayer({ playerId }).getCourtZone().updateDisplay();
   }
 
-  notif_purchaseCard(notif) {
+  notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
     console.log('notif_purchaseCard', notif);
+    const { marketLocation, newLocation, updatedCards, playerId } = notif.args;
 
     this.game.interactionManager.resetActionArgs();
-    const row = notif.args.market_location.split('_')[1];
-    const col = notif.args.market_location.split('_')[2];
+    const row = Number(marketLocation.split('_')[1]);
+    const col = Number(marketLocation.split('_')[2]);
 
     // Remove all rupees that were on the purchased card
-    this.game.market
-      .getMarketRupeesZone({ row, column: col })
-      .getAllItems()
-      .forEach((rupeeId) => {
-        this.game.market.getMarketRupeesZone({ row, column: col }).removeFromZone(rupeeId, true, `rupees_${notif.args.player_id}`);
-      });
+    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
 
     // Move card from markt
     const cardId = notif.args.card.key;
-    if (notif.args.new_location == 'active_events') {
+    if (newLocation == 'active_events') {
       this.game.moveCard({
         id: cardId,
         from: this.game.market.getMarketCardsStock({ row, column: col }),
         to: this.game.activeEvents,
       });
-    } else if (notif.args.new_location == 'discard') {
+    } else if (newLocation == 'discard') {
       this.game.market.getMarketCardsStock({ row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
-    } else if (notif.args.player_id == this.game.getPlayerId()) {
+    } else if (playerId == this.game.getPlayerId()) {
       this.game.moveCard({
         id: cardId,
         from: this.game.market.getMarketCardsStock({ row, column: col }),
@@ -188,33 +189,24 @@ class PPNotificationManager {
     }
 
     // Place paid rupees on market cards
-    notif.args.updated_cards.forEach((item, index) => {
-      const marketRow = Number(item.location.split('_')[1]);
-      const marketColumn = Number(item.location.split('_')[2]);
-      placeToken({
-        game: this.game,
-        location: this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-        id: item.rupee_id,
-        jstpl: 'jstpl_rupee',
-        jstplProps: {
-          id: item.rupee_id,
-        },
-      });
-    }, this);
+    updatedCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId });
+    });
   }
 
-  notif_refreshMarket(notif) {
+  notif_refreshMarket(notif: Notif<NotifRefreshMarketArgs>) {
     console.log('notif_refreshMarket', notif);
 
     this.game.interactionManager.resetActionArgs();
 
-    notif.args.card_moves.forEach(function (move, index) {
+    notif.args.cardMoves.forEach(function (move, index) {
       const fromRow = move.from.split('_')[1];
       const fromCol = move.from.split('_')[2];
       const toRow = move.to.split('_')[1];
       const toCol = move.to.split('_')[2];
       this.game.moveCard({
-        id: move.card_id,
+        id: move.cardId,
         from: this.game.market.marketCards[fromRow][fromCol],
         to: this.game.market.marketCards[toRow][toCol],
       });
@@ -230,10 +222,10 @@ class PPNotificationManager {
       });
     }, this);
 
-    notif.args.new_cards.forEach(function (move, index) {
+    notif.args.newCards.forEach(function (move, index) {
       placeCard({
         location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
-        id: move.card_id,
+        id: move.cardId,
       });
     }, this);
   }

@@ -308,8 +308,8 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var Player = /** @class */ (function () {
-    function Player(_a) {
+var PPPlayer = /** @class */ (function () {
+    function PPPlayer(_a) {
         var game = _a.game, player = _a.player;
         var _this = this;
         // console.log("Player", player);
@@ -421,21 +421,21 @@ var Player = /** @class */ (function () {
         $('political_' + playerId).innerHTML = gamedatas.counts[playerId].suits.political;
         $('intelligence_' + playerId).innerHTML = gamedatas.counts[playerId].suits.intelligence;
     }
-    Player.prototype.getCourtZone = function () {
+    PPPlayer.prototype.getCourtZone = function () {
         return this.court;
     };
-    Player.prototype.getCylinderZone = function () {
+    PPPlayer.prototype.getCylinderZone = function () {
         return this.cylinders;
     };
-    Player.prototype.getGiftZone = function (_a) {
+    PPPlayer.prototype.getGiftZone = function (_a) {
         var value = _a.value;
         return this.gifts[value];
     };
-    Player.prototype.getPlayerColor = function () {
+    PPPlayer.prototype.getPlayerColor = function () {
         return this.playerColor;
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
-    Player.prototype.updatePlayerLoyalty = function (_a) {
+    PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
         var coalition = _a.coalition;
         dojo
             .query("#loyalty_icon_".concat(this.playerId))
@@ -451,7 +451,7 @@ var Player = /** @class */ (function () {
             .addClass("pp_loyalty_".concat(coalition));
     };
     ;
-    return Player;
+    return PPPlayer;
 }());
 //  .########..##..........###....##....##.########.########.
 //  .##.....##.##.........##.##....##..##..##.......##.....##
@@ -475,7 +475,7 @@ var PPPlayerManager = /** @class */ (function () {
         for (var playerId in game.gamedatas.players) {
             var player = game.gamedatas.players[playerId];
             // console.log("playerManager", playerId, player);
-            this.players[playerId] = new Player({ player: player, game: this.game });
+            this.players[playerId] = new PPPlayer({ player: player, game: this.game });
         }
         // console.log("players", this.players);
     }
@@ -774,6 +774,26 @@ var PPMarket = /** @class */ (function () {
     PPMarket.prototype.getMarketRupeesZone = function (_a) {
         var row = _a.row, column = _a.column;
         return this.marketRupees[row][column];
+    };
+    PPMarket.prototype.removeRupeesFromCard = function (_a) {
+        var _this = this;
+        var row = _a.row, column = _a.column, to = _a.to;
+        this.marketRupees[row][column].getAllItems().forEach(function (rupeeId) {
+            _this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+        });
+    };
+    ;
+    PPMarket.prototype.placeRupeeOnCard = function (_a) {
+        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId;
+        placeToken({
+            game: this.game,
+            location: this.marketRupees[row][column],
+            id: rupeeId,
+            jstpl: 'jstpl_rupee',
+            jstplProps: {
+                id: rupeeId,
+            },
+        });
     };
     return PPMarket;
 }());
@@ -1457,6 +1477,10 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.destroy = function () {
         dojo.forEach(this.subscriptions, dojo.unsubscribe);
     };
+    PPNotificationManager.prototype.getPlayer = function (_a) {
+        var args = _a.args;
+        return this.game.playerManager.getPlayer({ playerId: args.player_id });
+    };
     PPNotificationManager.prototype.setupNotifications = function () {
         var _this = this;
         console.log('notifications subscriptions setup');
@@ -1483,10 +1507,10 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_cardAction = function (notif) {
         console.log('notif_cardAction', notif);
     };
-    PPNotificationManager.prototype.notif_chooseLoyalty = function (_a) {
-        var args = _a.args;
+    PPNotificationManager.prototype.notif_chooseLoyalty = function (notif) {
+        var args = notif.args;
         console.log('notif_chooseLoyalty', args);
-        this.game.playerManager.getPlayer({ playerId: args.player_id }).updatePlayerLoyalty({ coalition: args.coalition });
+        this.getPlayer(notif).updatePlayerLoyalty({ coalition: args.coalition });
     };
     PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
@@ -1574,29 +1598,25 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
         console.log('notif_purchaseCard', notif);
+        var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, updatedCards = _a.updatedCards, playerId = _a.playerId;
         this.game.interactionManager.resetActionArgs();
-        var row = notif.args.market_location.split('_')[1];
-        var col = notif.args.market_location.split('_')[2];
+        var row = Number(marketLocation.split('_')[1]);
+        var col = Number(marketLocation.split('_')[2]);
         // Remove all rupees that were on the purchased card
-        this.game.market
-            .getMarketRupeesZone({ row: row, column: col })
-            .getAllItems()
-            .forEach(function (rupeeId) {
-            _this.game.market.getMarketRupeesZone({ row: row, column: col }).removeFromZone(rupeeId, true, "rupees_".concat(notif.args.player_id));
-        });
+        this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
         // Move card from markt
         var cardId = notif.args.card.key;
-        if (notif.args.new_location == 'active_events') {
+        if (newLocation == 'active_events') {
             this.game.moveCard({
                 id: cardId,
                 from: this.game.market.getMarketCardsStock({ row: row, column: col }),
                 to: this.game.activeEvents,
             });
         }
-        else if (notif.args.new_location == 'discard') {
+        else if (newLocation == 'discard') {
             this.game.market.getMarketCardsStock({ row: row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
         }
-        else if (notif.args.player_id == this.game.getPlayerId()) {
+        else if (playerId == this.game.getPlayerId()) {
             this.game.moveCard({
                 id: cardId,
                 from: this.game.market.getMarketCardsStock({ row: row, column: col }),
@@ -1608,31 +1628,22 @@ var PPNotificationManager = /** @class */ (function () {
             this.game.spies[cardId] = undefined;
         }
         // Place paid rupees on market cards
-        notif.args.updated_cards.forEach(function (item, index) {
-            var marketRow = Number(item.location.split('_')[1]);
-            var marketColumn = Number(item.location.split('_')[2]);
-            placeToken({
-                game: _this.game,
-                location: _this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-                id: item.rupee_id,
-                jstpl: 'jstpl_rupee',
-                jstplProps: {
-                    id: item.rupee_id,
-                },
-            });
-        }, this);
+        updatedCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId });
+        });
     };
     PPNotificationManager.prototype.notif_refreshMarket = function (notif) {
         console.log('notif_refreshMarket', notif);
         this.game.interactionManager.resetActionArgs();
-        notif.args.card_moves.forEach(function (move, index) {
+        notif.args.cardMoves.forEach(function (move, index) {
             var _this = this;
             var fromRow = move.from.split('_')[1];
             var fromCol = move.from.split('_')[2];
             var toRow = move.to.split('_')[1];
             var toCol = move.to.split('_')[2];
             this.game.moveCard({
-                id: move.card_id,
+                id: move.cardId,
                 from: this.game.market.marketCards[fromRow][fromCol],
                 to: this.game.market.marketCards[toRow][toCol],
             });
@@ -1647,10 +1658,10 @@ var PPNotificationManager = /** @class */ (function () {
                 });
             });
         }, this);
-        notif.args.new_cards.forEach(function (move, index) {
+        notif.args.newCards.forEach(function (move, index) {
             placeCard({
                 location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
-                id: move.card_id,
+                id: move.cardId,
             });
         }, this);
     };

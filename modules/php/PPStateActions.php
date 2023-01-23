@@ -395,14 +395,14 @@ trait PPStateActionsTrait
           $this->tokens->moveAllTokensInLocation($from_location . '_rupees', $to_locaction . '_rupees');
           $empty_top[] = $i;
           $card_moves[] = array(
-            'card_id' => $card['key'],
+            'cardId' => $card['key'],
             'from' => $from_location,
             'to' => $to_locaction
           );
 
           self::notifyAllPlayers("refreshMarket", '', array(
-            'card_moves' => $card_moves,
-            'new_cards' => $new_cards,
+            'cardMoves' => $card_moves,
+            'newCards' => $new_cards,
           ));
 
           $this->gamestate->nextState('refresh_market');
@@ -422,14 +422,14 @@ trait PPStateActionsTrait
           $this->tokens->moveAllTokensInLocation($from_location . '_rupees', $to_locaction . '_rupees');
           $empty_bottom[] = $i;
           $card_moves[] = array(
-            'card_id' => $card['key'],
+            'cardId' => $card['key'],
             'from' => $from_location,
             'to' => $to_locaction
           );
 
           self::notifyAllPlayers("refreshMarket", '', array(
-            'card_moves' => $card_moves,
-            'new_cards' => $new_cards,
+            'cardMoves' => $card_moves,
+            'newCards' => $new_cards,
           ));
 
           $this->gamestate->nextState('refresh_market');
@@ -441,7 +441,7 @@ trait PPStateActionsTrait
     foreach ($empty_top as $i) {
       $card = $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_' . $i)[0];
       $new_cards[] = array(
-        'card_id' => $card['key'],
+        'cardId' => $card['key'],
         'from' => 'deck',
         'to' => 'market_0_' . $i
       );
@@ -450,15 +450,15 @@ trait PPStateActionsTrait
     foreach ($empty_bottom as $i) {
       $card = $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_' . $i)[0];
       $new_cards[] = array(
-        'card_id' => $card['key'],
+        'cardId' => $card['key'],
         'from' => 'deck',
         'to' => 'market_1_' . $i
       );
     }
 
     self::notifyAllPlayers("refreshMarket", clienttranslate('The market has been refreshed.'), array(
-      'card_moves' => $card_moves,
-      'new_cards' => $new_cards,
+      'cardMoves' => $card_moves,
+      'newCards' => $new_cards,
     ));
 
     $this->gamestate->nextState('next_turn');

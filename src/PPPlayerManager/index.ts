@@ -6,7 +6,7 @@
 //  .##........##.......##.....##....##....##.......##....##.
 //  .##........########.##.....##....##....########.##.....##
 
-class Player {
+class PPPlayer {
   private court: Stock;
   private cylinders: Zone;
   private game: PaxPamirGame;
@@ -192,7 +192,7 @@ class Player {
 
 class PPPlayerManager {
   private game: PaxPamirGame;
-  private players: Record<string, Player>;
+  private players: Record<string, PPPlayer>;
 
   constructor(game: PaxPamirGame) {
     console.log('Constructor PlayerManager');
@@ -202,12 +202,12 @@ class PPPlayerManager {
     for (const playerId in game.gamedatas.players) {
       const player = game.gamedatas.players[playerId];
       // console.log("playerManager", playerId, player);
-      this.players[playerId] = new Player({ player, game: this.game });
+      this.players[playerId] = new PPPlayer({ player, game: this.game });
     }
     // console.log("players", this.players);
   }
 
-  getPlayer({ playerId }: {playerId: string;}) {
+  getPlayer({ playerId }: {playerId: string;}): PPPlayer {
     return this.players[playerId];
   }
 }

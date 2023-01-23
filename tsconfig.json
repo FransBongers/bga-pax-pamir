@@ -21,6 +21,7 @@
     "src/PPMarket/index.ts",
     "src/PPInteractionManager/types.d.ts",
     "src/PPInteractionManager/index.ts",
+    "src/PPNotificationManager/types.d.ts",
     "src/PPNotificationManager/index.ts",
     "src/paxpamireditiontwo.ts",
     "src/define.ts"

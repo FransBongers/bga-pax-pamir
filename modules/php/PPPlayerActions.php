@@ -229,7 +229,6 @@ trait PPPlayerActionsTrait
     //             'card_name' => $card_name,
     //             'court_cards' => $court_cards,
     //             'bribe' => true,
-    //             'i18n' => array( 'card_name' ),
     //         ) );
     //         return;
     //     } elseif ($bribe != $bribe_amount) {
@@ -268,7 +267,6 @@ trait PPPlayerActionsTrait
         'card_name' => $card_name,
         'court_cards' => $court_cards,
         'bribe' => false,
-        'i18n' => array('card_name'),
       ));
 
       $this->updatePlayerCounts();
@@ -340,33 +338,34 @@ trait PPPlayerActionsTrait
 
       for ($i = $col - 1; $i >= 0; $i--) {
         $location = 'market_' . $row . '_' . $i;
+        $use_row_alt = false;
         $m_card = $this->tokens->getTokenOnLocation($location);
         if ($m_card == NULL) {
+          $use_row_alt = true;
           $location = 'market_' . $row_alt . '_' . $i;
           $m_card = $this->tokens->getTokenOnLocation($location);
         }
         if ($m_card !== NULL) {
-          $c = $this->tokens->getTokenOnTop(RUPEE_SUPPLY);
-          // $this->tokens->moveToken($c['key'], $m_card["key"]); 
-          $this->tokens->moveToken($c['key'], $location . '_rupees');
+          $rupee = $this->tokens->getTokenOnTop(RUPEE_SUPPLY);
+          $this->tokens->moveToken($rupee['key'], $location . '_rupees');
           $this->tokens->setTokenUsed($m_card["key"], 1); // set unavailable
           $updated_cards[] = array(
-            'location' => $location,
-            'card_id' => $m_card["key"],
-            'rupee_id' => $c['key']
+            'row' => intval($use_row_alt ? $row_alt : $row), 
+            'column' => $i,
+            'cardId' => $m_card["key"],
+            'rupeeId' => $rupee['key']
           );
         }
       }
 
-      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchased ${card_name}'), array(
-        'player_id' => $player_id,
-        'player_name' => self::getActivePlayerName(),
+      self::notifyAllPlayers("purchaseCard", clienttranslate('${playerName} purchased ${cardName}'), array(
+        'playerId' => $player_id,
+        'playerName' => self::getActivePlayerName(),
         'card' => $card,
-        'card_name' => $card_name,
-        'market_location' => $market_location,
-        'new_location' => $new_location,
-        'updated_cards' => $updated_cards,
-        'i18n' => array('card_name'),
+        'cardName' => $card_name,
+        'marketLocation' => $market_location,
+        'newLocation' => $new_location,
+        'updatedCards' => $updated_cards,
       ));
 
       $this->updatePlayerCounts();

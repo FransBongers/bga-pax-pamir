@@ -89,4 +89,22 @@ class PPMarket {
   getMarketRupeesZone({ row, column }: { row: number; column: number }) {
     return this.marketRupees[row][column];
   }
+
+  removeRupeesFromCard({ row, column, to }: { row: number; column: number; to: string }) {
+    this.marketRupees[row][column].getAllItems().forEach((rupeeId) => {
+      this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+    });
+  };
+
+  placeRupeeOnCard({ row, column, rupeeId}: { row: number; column: number; rupeeId: string; }) {
+    placeToken({
+      game: this.game,
+      location: this.marketRupees[row][column],
+      id: rupeeId,
+      jstpl: 'jstpl_rupee',
+      jstplProps: {
+        id: rupeeId,
+      },
+    });
+  }
 }

@@ -1,4 +1,6 @@
 <?php
+// namespace PaxPamir;
+// use APP_DbObject;
 
 trait PPMarketTrait
 {
@@ -33,11 +35,12 @@ trait PPMarketTrait
     }
   }
 
-  public function drawInitialMarketCards() {
-            // Assign initial cards to market
-            for ($i = 0; $i < 6; $i++) {
-              $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_'.$i);
-              $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_'.$i);
-          }
+  public function drawInitialMarketCards()
+  {
+    // Assign initial cards to market
+    for ($i = 0; $i < 6; $i++) {
+      $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_' . $i);
+      $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_' . $i);
+    }
   }
 }

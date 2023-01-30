@@ -160,20 +160,20 @@ var FavoredSuit = /** @class */ (function () {
         this.game = game;
         this.favoredSuitZones = {};
         // Setup zones for favored suit marker
-        game.gamedatas.suits.forEach(function (suit) {
-            _this.favoredSuitZones[suit.suit] = new ebg.zone();
+        Object.keys(game.gamedatas.suits).forEach(function (suit) {
+            _this.favoredSuitZones[suit] = new ebg.zone();
             setupTokenZone({
                 game: game,
-                zone: _this.favoredSuitZones[suit.suit],
-                nodeId: "pp_favored_suit_".concat(suit.suit),
+                zone: _this.favoredSuitZones[suit],
+                nodeId: "pp_favored_suit_".concat(suit),
                 tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
                 tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
             });
         });
-        var suitId = game.gamedatas.favored_suit.suit;
+        var suit = game.gamedatas.favoredSuit;
         placeToken({
             game: game,
-            location: this.favoredSuitZones[suitId],
+            location: this.favoredSuitZones[suit],
             //location: this.favoredSuit['intelligence'], // for testing change of favored suit
             id: "favored_suit_marker",
             jstpl: 'jstpl_favored_suit_marker',
@@ -215,14 +215,14 @@ var Supply = /** @class */ (function () {
                 itemMargin: 15,
                 instantaneous: true,
             });
-            Object.keys(game.gamedatas.coalition_blocks[coalition]).forEach(function (blockId) {
+            game.gamedatas.coalitionBlocks[coalition].forEach(function (block) {
                 placeToken({
                     game: game,
                     location: _this.coalitionBlocks[coalition],
-                    id: blockId,
+                    id: block.id,
                     jstpl: 'jstpl_coalition_block',
                     jstplProps: {
-                        id: blockId,
+                        id: block.id,
                         coalition: coalition,
                     },
                 });
@@ -331,7 +331,7 @@ var PPPlayer = /** @class */ (function () {
         gamedatas.court[playerId].forEach(function (card) {
             placeCard({
                 location: _this.court,
-                id: card.key,
+                id: card.id,
                 order: card.state,
             });
         });
@@ -346,14 +346,14 @@ var PPPlayer = /** @class */ (function () {
             itemMargin: 10,
         });
         // Add cylinders to zone
-        Object.keys(gamedatas.cylinders[playerId]).forEach(function (cylinderId) {
+        gamedatas.cylinders[playerId].forEach(function (cylinder) {
             placeToken({
                 game: _this.game,
                 location: _this.cylinders,
-                id: cylinderId,
+                id: cylinder.id,
                 jstpl: 'jstpl_cylinder',
                 jstplProps: {
-                    id: cylinderId,
+                    id: cylinder.id,
                     color: gamedatas.players[playerId].color,
                 },
             });
@@ -638,7 +638,7 @@ var Region = /** @class */ (function () {
             tokenHeight: RULER_TOKEN_HEIGHT,
         });
         this.ruler = game.gamedatas.rulers[region];
-        if (this.ruler === '0') {
+        if (this.ruler === 0) {
             placeToken({
                 game: game,
                 location: this.rulerZone,
@@ -744,24 +744,24 @@ var PPMarket = /** @class */ (function () {
                 if (cardInMarket) {
                     placeCard({
                         location: this.marketCards[row][column],
-                        id: cardInMarket.key,
+                        id: cardInMarket.id,
                     });
                 }
             }
         }
         // Put all rupees in market locations
-        Object.keys(game.gamedatas.rupees).forEach(function (rupeeId) {
-            var rupee = game.gamedatas.rupees[rupeeId];
+        game.gamedatas.rupees.forEach(function (rupee) {
+            // const rupee = game.gamedatas.rupees[rupeeId];
             if (rupee.location.startsWith('market')) {
                 var row = rupee.location.split('_')[1];
                 var column = rupee.location.split('_')[2];
                 placeToken({
                     game: game,
                     location: _this.marketRupees[row][column],
-                    id: rupeeId,
+                    id: rupee.id,
                     jstpl: 'jstpl_rupee',
                     jstplProps: {
-                        id: rupeeId,
+                        id: rupee.id,
                     },
                 });
             }
@@ -1078,17 +1078,17 @@ var PPInteractionManager = /** @class */ (function () {
     PPInteractionManager.prototype.activePlayerHasCardActions = function () {
         var _this = this;
         return this.activePlayer.court.some(function (_a) {
-            var key = _a.key, used = _a.used;
-            var cardInfo = _this.game.gamedatas.cards[key];
-            return used == '0' && Object.keys(cardInfo.actions).length > 0;
+            var id = _a.id, used = _a.used;
+            var cardInfo = _this.game.gamedatas.cards[id];
+            return used === 0 && Object.keys(cardInfo.actions).length > 0;
         });
     };
     PPInteractionManager.prototype.activePlayerHasFreeCardActions = function () {
         var _this = this;
         return this.activePlayer.court.some(function (_a) {
-            var key = _a.key, used = _a.used;
-            var cardInfo = _this.game.gamedatas.cards[key];
-            return used == '0' && cardInfo.suit == _this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
+            var id = _a.id, used = _a.used;
+            var cardInfo = _this.game.gamedatas.cards[id];
+            return used === 0 && cardInfo.suit == _this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
         });
     };
     PPInteractionManager.prototype.activePlayerHasHandCards = function () {
@@ -1209,7 +1209,7 @@ var PPInteractionManager = /** @class */ (function () {
         dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node) {
             var _a, _b;
             var cardId = "card_".concat(node.id.split('_')[6]);
-            var used = ((_b = (_a = _this.activePlayer.court) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.key === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === '1';
+            var used = ((_b = (_a = _this.activePlayer.court) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
                 (_this.activePlayer.remainingActions > 0 || _this.game.gamedatas.cards[cardId].suit === _this.activePlayer.favoredSuit))
                 dojo.map(node.children, function (child) {
@@ -1350,14 +1350,14 @@ var PPInteractionManager = /** @class */ (function () {
                     this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args } });
                     break;
                 case 'playerActions':
-                    var _a = args.args, court = _a.court, favored_suit = _a.favored_suit, hand = _a.hand, remaining_actions = _a.remaining_actions, rupees = _a.rupees, unavailable_cards = _a.unavailable_cards;
+                    var _a = args.args, court = _a.court, favoredSuit = _a.favoredSuit, hand = _a.hand, remainingActions = _a.remainingActions, rupees = _a.rupees, unavailableCards = _a.unavailableCards;
                     this.activePlayer = {
                         court: court,
-                        favoredSuit: favored_suit,
+                        favoredSuit: favoredSuit,
                         hand: hand,
-                        remainingActions: Number(remaining_actions),
+                        remainingActions: Number(remainingActions),
                         rupees: rupees,
-                        unavailableCards: unavailable_cards,
+                        unavailableCards: unavailableCards,
                     };
                     this.updateInterface({ nextStep: PLAYER_ACTIONS });
                     break;
@@ -1515,25 +1515,25 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
         this.game.interactionManager.resetActionArgs();
-        var playerId = notif.args.player_id;
+        var playerId = notif.args.playerId;
         var from = notif.args.from;
         if (from == 'hand') {
             // TODO (Frans): check how this works for other players than the one whos card gets discarded
-            this.game.discardCard({ id: notif.args.card_id, from: this.game.playerHand });
+            this.game.discardCard({ id: notif.args.cardId, from: this.game.playerHand });
         }
         else if (from == 'market_0_0' || from == 'market_1_0') {
             var splitFrom = from.split('_');
             this.game.discardCard({
-                id: notif.args.card_id,
-                from: this.game.market.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
+                id: notif.args.cardId,
+                from: this.game.market.getMarketCardsStock({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
             });
         }
         else {
-            this.game.discardCard({ id: notif.args.card_id, from: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone() });
-            notif.args.court_cards.forEach(function (card, index) {
+            this.game.discardCard({ id: notif.args.cardId, from: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone() });
+            notif.args.courtCards.forEach(function (card, index) {
                 this.game.updateCard({
                     location: this.game.playerManager.players[playerId].court,
-                    id: card.key,
+                    id: card.id,
                     order: card.state,
                 });
             }, this);
@@ -1570,17 +1570,17 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
         this.game.interactionManager.resetActionArgs();
-        var playerId = notif.args.player_id;
-        notif.args.court_cards.forEach(function (card, index) {
+        var playerId = notif.args.playerId;
+        notif.args.courtCards.forEach(function (card, index) {
             this.game.updateCard({
                 location: this.game.playerManager.players[playerId].court,
-                id: card.key,
+                id: card.id,
                 order: card.state,
             });
         }, this);
         if (playerId == this.game.getPlayerId()) {
             this.game.moveCard({
-                id: notif.args.card.key,
+                id: notif.args.card.id,
                 from: this.game.playerHand,
                 to: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone(),
             });
@@ -1590,7 +1590,7 @@ var PPNotificationManager = /** @class */ (function () {
             // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.playerManager.players[playerId].court});
             placeCard({
                 location: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone(),
-                id: notif.args.card.key,
+                id: notif.args.card.id,
             });
         }
         this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
@@ -1605,7 +1605,7 @@ var PPNotificationManager = /** @class */ (function () {
         // Remove all rupees that were on the purchased card
         this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
         // Move card from markt
-        var cardId = notif.args.card.key;
+        var cardId = notif.args.card.id;
         if (newLocation == 'active_events') {
             this.game.moveCard({
                 id: cardId,
@@ -1774,10 +1774,8 @@ var PaxPamir = /** @class */ (function () {
         console.log('game_name', this.framework().game_name);
         // Create a new div for buttons to avoid BGA auto clearing it
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
-        console.log('typescript version');
-        console.log('gamedatas', gamedatas);
         this.gamedatas = gamedatas;
-        console.log('this.gamedatas', this.gamedatas);
+        console.log('gamedatas', gamedatas);
         // Events
         setupCardsStock({
             game: this,
@@ -1786,10 +1784,10 @@ var PaxPamir = /** @class */ (function () {
             // className: `pp_card_in_court_${playerId}`
         });
         // TODO: use Object.values in similar cases?
-        Object.keys(gamedatas.active_events).forEach(function (key) {
+        Object.keys(gamedatas.activeEvents).forEach(function (key) {
             placeCard({
                 location: _this.activeEvents,
-                id: gamedatas.active_events[key].key,
+                id: gamedatas.activeEvents[key].id,
             });
         });
         this.objectManager = new PPObjectManager(this);
@@ -1805,31 +1803,31 @@ var PaxPamir = /** @class */ (function () {
             nodeId: 'pp_player_hand_cards',
             className: 'pp_card_in_hand',
         });
-        Object.keys(this.gamedatas.hand).forEach(function (cardId) {
-            placeCard({ location: _this.playerHand, id: cardId });
+        this.gamedatas.hand.forEach(function (card) {
+            placeCard({ location: _this.playerHand, id: card.id });
         });
-        // Place spies on cards
-        Object.keys(gamedatas.spies || {}).forEach(function (cardId) {
-            Object.keys(gamedatas.spies[cardId]).forEach(function (cylinderId) {
-                var playerId = cylinderId.split('_')[1];
-                placeToken({
-                    game: _this,
-                    location: _this.spies[cardId],
-                    id: cylinderId,
-                    jstpl: 'jstpl_cylinder',
-                    jstplProps: {
-                        id: cylinderId,
-                        color: gamedatas.players[playerId].color,
-                    },
-                    weight: _this.defaultWeightZone,
-                });
-            });
-        });
+        // // Place spies on cards
+        // Object.keys(gamedatas.spies || {}).forEach((cardId) => {
+        //   Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
+        //     const playerId = cylinderId.split('_')[1];
+        //     placeToken({
+        //       game: this,
+        //       location: this.spies[cardId],
+        //       id: cylinderId,
+        //       jstpl: 'jstpl_cylinder',
+        //       jstplProps: {
+        //         id: cylinderId,
+        //         color: gamedatas.players[playerId].color,
+        //       },
+        //       weight: this.defaultWeightZone,
+        //     });
+        //   });
+        // });
         if (this.notificationManager != undefined) {
             this.notificationManager.destroy();
         }
         this.notificationManager = new PPNotificationManager(this);
-        // Setup game notifications to handle (see "setupNotifications" method below)
+        // // Setup game notifications to handle (see "setupNotifications" method below)
         this.notificationManager.setupNotifications();
         // this.setupNotifications();
         console.log('Ending game setup');
@@ -1861,7 +1859,7 @@ var PaxPamir = /** @class */ (function () {
     //
     PaxPamir.prototype.onUpdateActionButtons = function (stateName, args) {
         console.log('onUpdateActionButtons: ' + stateName);
-        this.interactionManager.onUpdateActionButtons(stateName, args);
+        // this.interactionManager.onUpdateActionButtons(stateName, args);
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.

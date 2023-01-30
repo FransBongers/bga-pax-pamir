@@ -33,19 +33,51 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
-ALTER TABLE `player` ADD `rupees` int(10) unsigned NOT NULL DEFAULT '0';
+ALTER TABLE `player` ADD `rupees` int(10) unsigned NOT NULL DEFAULT 0;
 ALTER TABLE `player` ADD `loyalty` varchar(32) NOT NULL;
 
-CREATE TABLE IF NOT EXISTS `token` (
-  `token_key` varchar(32) NOT NULL,
-  `token_location` varchar(32) NOT NULL,
-  `token_state` int(10),
-  `token_used` int(10),
-  PRIMARY KEY (`token_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+--  CREATE TABLE IF NOT EXISTS `token` (
+--  `token_id` varchar(32) NOT NULL,
+--  `token_location` varchar(32) NOT NULL,
+--  `token_state` int(10),
+-- --  `token_used` int(10),
+--  PRIMARY KEY (`token_id`)
+--  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--  CREATE TABLE IF NOT EXISTS `token` (
+--   `token_key` varchar(32) NOT NULL,
+--   `token_location` varchar(32) NOT NULL,
+--   `token_state` int(10),
+--   `token_used` int(10),
+--   PRIMARY KEY (`token_key`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,
   `value` json,
   PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `user_preferences` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `player_id` int(10) NOT NULL,
+  `pref_id` int(10) NOT NULL,
+  `pref_value` int(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `cards` (
+  `card_id` varchar(32) NOT NULL,
+  `card_location` varchar(32) NOT NULL,
+  `card_state` int(10) DEFAULT 0,
+  `used` int(10) DEFAULT 0,
+  PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `tokens` (
+  `token_id` varchar(32) NOT NULL,
+  `token_location` varchar(32) NOT NULL,
+  `token_state` int(10) DEFAULT 0,
+  `used` int(10) DEFAULT 0,
+  PRIMARY KEY (`token_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

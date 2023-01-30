@@ -24,6 +24,14 @@
  *
  */
 
+namespace PaxPamir;
+
+require_once 'modules/php/constants.inc.php';
+
+$game_options = [];
+
+$game_preferences = [];
+
 $game_options = array(
 
     /*

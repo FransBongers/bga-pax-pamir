@@ -33,16 +33,22 @@ spl_autoload_register($swdNamespaceAutoload, true, true);
 
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 
+use PaxPamir\Market;
+use PaxPamir\Core\Globals;
+use PaxPamir\Core\Preferences;
+use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
+use PaxPamir\Managers\Tokens;
+
 require_once('modules/php/PPConstants.php');
 require_once('modules/php/PPMap.php');
 require_once('modules/php/PPMarket.php');
+// Todo check why PPPlayer import is needed
 require_once('modules/php/PPPlayer.php');
-require_once('modules/php/PPPlayerActions.php');
 require_once('modules/php/PPStateActions.php');
 require_once('modules/php/PPStateArgs.php');
 require_once('modules/php/PPSupply.php');
 require_once('modules/php/PPUtilityFunctions.php');
-require_once('modules/php/tokens.php');
 
 
 /*
@@ -51,15 +57,17 @@ require_once('modules/php/tokens.php');
  */
 class PaxPamirEditionTwo extends Table
 {
-    use PPMapTrait;
+    use PaxPamir\PPMapTrait;
     use PPMarketTrait;
-    use PPPlayerTrait;
-    use PPPlayerActionsTrait;
-    use PPStateActionsTrait;
-    use PPStateArgsTrait;
+    use PaxPamir\PPPlayerTrait;
+    use PaxPamir\States\NextPlayerTrait;
+    use PaxPamir\States\PlayerActionTrait;
+    use PaxPamir\PPStateActionsTrait;
+    use PaxPamir\PPStateArgsTrait;
     use PPSupplyTrait;
-    use PPUtilityFunctionsTrait;
+    use PaxPamir\PPUtilityFunctionsTrait;
 
+    public static $instance = null;
     function __construct()
     {
         // Your global variables labels:
@@ -69,26 +77,10 @@ class PaxPamirEditionTwo extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
-
+        self::$instance = $this;
         self::initGameStateLabels(array(
-            "setup" => 10,
-            "remaining_actions" => 11,
-            "favored_suit" => 12,
-            "dominance_checks_resolved" => 13,
-            "ruler_transcaspia" => 14,
-            "ruler_kabul" => 15,
-            "ruler_persia" => 16,
-            "ruler_herat" => 17,
-            "ruler_kandahar" => 18,
-            "ruler_punjab" => 19,
-            "bribe_card_id" => 20,
-            "bribe_amount" => 21,
-            "resolve_impact_icons_card_id" => 22,
-            "resolve_impact_icons_current_icon" => 23,
             "card_action_card_id" => 24,
         ));
-
-        $this->tokens = new Tokens();
     }
 
     protected function getGameName()
@@ -106,68 +98,38 @@ class PaxPamirEditionTwo extends Table
     */
     protected function setupNewGame($players, $options = array())
     {
-        // Set the colors of the players with HTML color code
-        // The default below is red/green/blue/orange/brown
-        // The number of colors defined here must correspond to the maximum number of players allowed for the gams
-        $gameinfos = self::getGameinfos();
-        $default_colors = $gameinfos['player_colors'];
-        $number_of_players = count($players);
+        Globals::setupNewGame($players, $options);
+        Preferences::setupNewGame($players, $options);
+        Players::setupNewGame($players, $options);
+        Cards::setupNewGame($players, $options);
+        Tokens::setupNewGame($players, $options);
 
-        // Create players
-        // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, loyalty, rupees) VALUES ";
-        $values = array();
-        foreach ($players as $player_id => $player) {
-            // Add initial data to player table
-            $color = array_shift($default_colors);
-            $loyalty = "null";
-            $rupees = 4;
-            $values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "','$loyalty','$rupees')";
-            // Add player cylinders to token module
-            $this->tokens->createTokensPack("cylinder_" . $player_id . "_{INDEX}", "cylinders_" . $player_id, 10);
-        }
-        $sql .= implode(',', $values);
-        self::DbQuery($sql);
-        self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
-        self::reloadPlayersBasicInfos();
-
-        /************ Start the game initialization *****/
-
-        $this->createMarketDeck($number_of_players);
-        $this->drawInitialMarketCards();
-
-        $this->createSupply();
-
-        $this->setInitialRulers();
-
-        // Init global values with their initial values 
-        // Note: values have to be integers
-        self::setGameStateInitialValue('setup', 1); // used to check if setup is done or not
-        self::setGameStateInitialValue('remaining_actions', 2);
-        self::setGameStateInitialValue('favored_suit', 0);
-        self::setGameStateInitialValue('dominance_checks_resolved', 0);
+        // /************ Start the game initialization *****/
 
 
-        self::setGameStateInitialValue('bribe_card_id', 0);
-        self::setGameStateInitialValue('bribe_amount', -1);
-        self::setGameStateInitialValue('resolve_impact_icons_card_id', 0);
-        self::setGameStateInitialValue('resolve_impact_icons_current_icon', -1);
-        self::setGameStateInitialValue('card_action_card_id', 0);
+        // self::setGameStateInitialValue('bribe_card_id', 0);
+        // self::setGameStateInitialValue('bribe_amount', -1);
+        // self::setGameStateInitialValue('resolve_impact_icons_card_id', 0);
+        // self::setGameStateInitialValue('resolve_impact_icons_current_icon', -1);
+        // self::setGameStateInitialValue('card_action_card_id', 0);
 
 
 
 
 
-        // Init game statistics
-        // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        // // Init game statistics
+        // // (note: statistics used in this file must be defined in your stats.inc.php file)
+        // //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
+        // //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
 
-        // Activate first player (which is in general a good idea :) )
-        $this->activeNextPlayer();
+        // // Activate first player (which is in general a good idea :) )
+        // $this->activeNextPlayer();
 
         /************ End of the game initialization *****/
+
+
+        $this->activeNextPlayer();
     }
 
     /*
@@ -181,72 +143,68 @@ class PaxPamirEditionTwo extends Table
     */
     protected function getAllDatas()
     {
-        $result = array();
+        $data = array();
 
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        $current_player_id = self::getCurrentPId(); // !! We must only return informations visible by this player !!
+        $data = [
+            'cards' => $this->cards,
+            // // Only get hand cards for current player (we might implement option to play with open hands?)
+            'hand' => Cards::getInLocation(['hand', $current_player_id])->toArray(),
+            'players' => Players::getUiData($current_player_id),
+            'rupees' => Tokens::getOfType('rupee'),
+            'favoredSuit' => Globals::getFavoredSuit(),
+            // TODO (Frans): data from material.inc.php. We might also replace this?
+            'loyalty' => $this->loyalty,
+            'suits' => $this->suits,
+        ];
 
-        // Get information about players from players table
-        $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
-        $result['players'] = self::getCollectionFromDb($sql);
-
-        // Get counts for all players
+        // // Get counts for all players
         $players = $this->loadPlayersBasicInfos();
         foreach ($players as $player_id => $player_info) {
-            $result['court'][$player_id] = $this->getPlayerCourtCards($player_id);
-            foreach ($result['court'][$player_id] as $card) {
-                $result['spies'][$card['key']] = $this->tokens->getTokensInLocation('spies_' . $card['key']);
+            $data['court'][$player_id] = Players::get($player_id)->getCourtCards(); // $this->getPlayerCourtCards($player_id);
+            foreach ($data['court'][$player_id] as $card) {
+                $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']]);
             }
 
-            $result['cylinders'][$player_id] = $this->tokens->getTokensInLocation('cylinders_' . $player_id);
-            $result['counts'][$player_id]['rupees'] = $this->getPlayerRupees($player_id);
-            // Number of cylinders played is total number of cylinders minus cylinders still available to player 
-            $result['counts'][$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_' . $player_id));
-            $result['counts'][$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_' . $player_id));
-            $result['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
-            $result['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
+            $data['cylinders'][$player_id] = Tokens::getInLocation(['cylinders', $player_id])->toArray();
+            $data['counts'][$player_id]['rupees'] = $this->getPlayerRupees($player_id);
+            //     // Number of cylinders played is total number of cylinders minus cylinders still available to player 
+            $data['counts'][$player_id]['cylinders'] = 10 - count($data['cylinders'][$player_id]);
+            $data['counts'][$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
+            $data['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
+            $data['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
 
             foreach (['2', '4', '6'] as $gift_value) {
-                $result['gifts'][$player_id][$gift_value] = $this->tokens->getTokensInLocation('gift_' . $gift_value . '_' . $player_id);
+                $data['gifts'][$player_id][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $player_id]);
             }
         }
 
-        // Only get hand cards for current player (we might implement option to play with open hands?)
-        $result['hand'] = $this->tokens->getTokensInLocation('hand_' . $current_player_id);
+
 
         foreach ($this->loyalty as $coalitionId => $coalition) {
-            // $result['coalition_blocks'][$coalition['id']] = $this->tokens->getTokensInLocation('block_'.$coalition['id'].'_pool');
-            $result['coalition_blocks'][$coalitionId] = $this->tokens->getTokensInLocation('blocks_' . $coalitionId);
+            $data['coalitionBlocks'][$coalitionId] = Tokens::getInLocation(['blocks', $coalitionId])->toArray();
         }
 
         foreach ($this->regions as $region => $regionInfo) {
-            $result['armies'][$region] = $this->tokens->getTokensInLocation('armies_' . $region);
-            $result['tribes'][$region] = $this->tokens->getTokensInLocation('tribes_' . $region);
+            $data['armies'][$region] = Tokens::getInLocation(['armies', $region]);
+            $data['tribes'][$region] = Tokens::getInLocation(['tribes', $region]);
         }
 
         foreach ($this->borders as $border => $borderInfo) {
-            $result['roads'][$border] = $this->tokens->getTokensInLocation('roads_' . $border);
+            $data['roads'][$border] = Tokens::getInLocation(['roads', $border]);
         }
 
-        // TODO (Frans): data from material.inc.php. We might also replace this?
-        $result['loyalty'] = $this->loyalty;
-        $result['suits'] = $this->suits;
-
-        // Add all card info
-        $result['cards'] = $this->cards;
-
-        // Add information about all cards in the market.
+        // // Add information about all cards in the market.
         for ($i = 0; $i < 6; $i++) {
-            $result['market'][0][$i] = $this->tokens->getTokenOnLocation('market_0_' . $i);
-            $result['market'][1][$i] = $this->tokens->getTokenOnLocation('market_1_' . $i);
+            $data['market'][0][$i] = Cards::getInLocation('market_0_' . $i)->first();
+            $data['market'][1][$i] = Cards::getInLocation('market_1_' . $i)->first();
         }
 
-        $result['rupees'] = $this->tokens->getTokensOfTypeInLocation('rupee', null);
-        $result['favored_suit'] = $this->suits[$this->getGameStateValue('favored_suit')];
-        $result['rulers'] = $this->getAllRegionRulers();
-        $result['active_events'] = $this->tokens->getTokensInLocation('active_events');
-        $result['borders'] = $this->borders;
+        $data['rulers'] = $this->getAllRegionRulers();
+        $data['activeEvents'] = Cards::getInLocation('active_events');
+        $data['borders'] = $this->borders;
 
-        return $result;
+        return $data;
     }
 
     /*
@@ -266,7 +224,34 @@ class PaxPamirEditionTwo extends Table
         return 0;
     }
 
+    public static function get()
+    {
+        self::dump("Get instance", "value");
+        return self::$instance;
+    }
 
+    function getCard($card_id)
+    {
+        return $this->cards[$card_id];
+    }
+
+    /////////////////////////////////////////////////////////////
+    // Exposing protected methods, please use at your own risk //
+    /////////////////////////////////////////////////////////////
+
+    // Exposing protected method getCurrentPlayerId
+    public static function getCurrentPId()
+    {
+        return self::getCurrentPlayerId();
+    }
+
+    // Exposing protected method translation
+    public static function translate($text)
+    {
+        return self::_($text);
+    }
+
+    // public functuio
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

@@ -66,29 +66,29 @@ class PPNotificationManager {
     this.getPlayer(notif).updatePlayerLoyalty({ coalition: args.coalition });
   }
 
-  notif_discardCard(notif) {
+  notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
     console.log('notif_discardCard', notif);
 
     this.game.interactionManager.resetActionArgs();
-    const playerId = notif.args.player_id;
+    const playerId = notif.args.playerId;
     const from = notif.args.from;
 
     if (from == 'hand') {
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      this.game.discardCard({ id: notif.args.card_id, from: this.game.playerHand });
+      this.game.discardCard({ id: notif.args.cardId, from: this.game.playerHand });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
       this.game.discardCard({
-        id: notif.args.card_id,
-        from: this.game.market.getMarketCardsStock({ row: splitFrom[1], column: splitFrom[2] }),
+        id: notif.args.cardId,
+        from: this.game.market.getMarketCardsStock({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
       });
     } else {
-      this.game.discardCard({ id: notif.args.card_id, from: this.game.playerManager.getPlayer({ playerId }).getCourtZone() });
+      this.game.discardCard({ id: notif.args.cardId, from: this.game.playerManager.getPlayer({ playerId }).getCourtZone() });
 
-      notif.args.court_cards.forEach(function (card, index) {
+      notif.args.courtCards.forEach(function (card, index) {
         this.game.updateCard({
           location: this.game.playerManager.players[playerId].court,
-          id: card.key,
+          id: card.id,
           order: card.state,
         });
       }, this);
@@ -124,23 +124,23 @@ class PPNotificationManager {
     });
   }
 
-  notif_playCard(notif) {
+  notif_playCard(notif: Notif<NotifPlayCardArgs>) {
     console.log('notif_playCard', notif);
 
     this.game.interactionManager.resetActionArgs();
-    var playerId = notif.args.player_id;
+    var playerId = notif.args.playerId;
 
-    notif.args.court_cards.forEach(function (card, index) {
+    notif.args.courtCards.forEach(function (card, index) {
       this.game.updateCard({
         location: this.game.playerManager.players[playerId].court,
-        id: card.key,
+        id: card.id,
         order: card.state,
       });
     }, this);
 
     if (playerId == this.game.getPlayerId()) {
       this.game.moveCard({
-        id: notif.args.card.key,
+        id: notif.args.card.id,
         from: this.game.playerHand,
         to: this.game.playerManager.getPlayer({ playerId }).getCourtZone(),
       });
@@ -149,7 +149,7 @@ class PPNotificationManager {
       // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.playerManager.players[playerId].court});
       placeCard({
         location: this.game.playerManager.getPlayer({ playerId }).getCourtZone(),
-        id: notif.args.card.key,
+        id: notif.args.card.id,
       });
     }
 
@@ -168,7 +168,7 @@ class PPNotificationManager {
     this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
 
     // Move card from markt
-    const cardId = notif.args.card.key;
+    const cardId = notif.args.card.id;
     if (newLocation == 'active_events') {
       this.game.moveCard({
         id: cardId,

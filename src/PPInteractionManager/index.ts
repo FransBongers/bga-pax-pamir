@@ -300,16 +300,16 @@ class PPInteractionManager {
   }
 
   activePlayerHasCardActions(): boolean {
-    return this.activePlayer.court.some(({ key, used }) => {
-      const cardInfo = this.game.gamedatas.cards[key] as CourtCard;
-      return used == '0' && Object.keys(cardInfo.actions).length > 0;
+    return this.activePlayer.court.some(({ id, used }) => {
+      const cardInfo = this.game.gamedatas.cards[id] as CourtCard;
+      return used === 0 && Object.keys(cardInfo.actions).length > 0;
     });
   }
 
   activePlayerHasFreeCardActions(): boolean {
-    return this.activePlayer.court.some(({ key, used }) => {
-      const cardInfo = this.game.gamedatas.cards[key] as CourtCard;
-      return used == '0' && cardInfo.suit == this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
+    return this.activePlayer.court.some(({ id, used }) => {
+      const cardInfo = this.game.gamedatas.cards[id] as CourtCard;
+      return used === 0 && cardInfo.suit == this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
     });
   }
 
@@ -425,7 +425,7 @@ class PPInteractionManager {
     const playerId = this.game.getPlayerId();
     dojo.query(`.pp_card_in_court_${playerId}`).forEach((node: HTMLElement) => {
       const cardId = `card_${node.id.split('_')[6]}`;
-      const used = this.activePlayer.court?.find((card) => card.key === cardId)?.used === '1';
+      const used = this.activePlayer.court?.find((card) => card.id === cardId)?.used === 1;
       if (
         !used &&
         (this.activePlayer.remainingActions > 0 || (this.game.gamedatas.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
@@ -577,14 +577,14 @@ class PPInteractionManager {
           this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
           break;
         case 'playerActions':
-          const { court, favored_suit, hand, remaining_actions, rupees, unavailable_cards } = args.args;
+          const { court, favoredSuit, hand, remainingActions, rupees, unavailableCards } = args.args;
           this.activePlayer = {
             court,
-            favoredSuit: favored_suit,
+            favoredSuit,
             hand,
-            remainingActions: Number(remaining_actions),
+            remainingActions: Number(remainingActions),
             rupees: rupees,
-            unavailableCards: unavailable_cards,
+            unavailableCards: unavailableCards,
           };
           this.updateInterface({ nextStep: PLAYER_ACTIONS });
           break;

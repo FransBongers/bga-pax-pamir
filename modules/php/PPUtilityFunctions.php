@@ -1,4 +1,9 @@
 <?php
+namespace PaxPamir;
+
+use PaxPamir\Core\Globals;
+use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Tokens;
 
 trait PPUtilityFunctionsTrait
 {
@@ -129,7 +134,7 @@ trait PPUtilityFunctionsTrait
     self::dump("cardAction: card_id", $card_id);
     self::dump("cardAction: card_action", $card_action);
 
-    $token_info = $this->tokens->getTokenInfo($card_id);
+    $token_info = Cards::get($card_id);
     $card_info = $this->cards[$card_id];
     $player_id = self::getActivePlayerId();
     $location_info = explode("_", $token_info['location']);
@@ -137,20 +142,20 @@ trait PPUtilityFunctionsTrait
     // Checks to determine if it is a valid action
     // Card should be in players court
     if ($location_info[0] != 'court' || $location_info[1] != $player_id) {
-      throw new feException("Not a valid card action for player.");
+      throw new \feException("Not a valid card action for player.");
     }
     // Card should not have been used yet
     if ($token_info['used'] != 0) {
-      throw new feException("Card has already been used this turn.");
+      throw new \feException("Card has already been used this turn.");
     }
     // Card should have the card action
     if (!isset($card_info['actions'][$card_action])) {
-      throw new feException("Action does not exist on selected card.");
+      throw new \feException("Action does not exist on selected card.");
     }
 
     // $next_state = 'action';
-    if (!($this->getGameStateValue("remaining_actions") > 0 || $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'])) {
-      throw new feException("No remaining actions and not a free action.");
+    if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $card_info['suit'])) {
+      throw new \feException("No remaining actions and not a free action.");
       // $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
 
       // switch ($card_action) {
@@ -262,7 +267,7 @@ trait PPUtilityFunctionsTrait
    */
   function getCardInfo($token)
   {
-    return $this->cards[$token['key']];
+    return $this->cards[$token['id']];
   }
 
 
@@ -297,16 +302,16 @@ trait PPUtilityFunctionsTrait
   {
     $result = array();
 
-    for ($i = 0; $i < 2; $i++) {
-      for ($j = 0; $j < 6; $j++) {
-        $res = $this->tokens->getTokensOfTypeInLocation('card', 'market_' . $i . '_' . $j, null, null, 1);
-        self::dump("unavailableCards getTokensOfType", $res);
-        $card = array_shift($res);
-        if (($card !== NULL) and ($card['used'] == 1)) {
-          $result[] = $card['key'];
-        }
-      }
-    }
+    // for ($i = 0; $i < 2; $i++) {
+    //   for ($j = 0; $j < 6; $j++) {
+    //     $res = Cards::getInLocation(['market',$i,$j]);
+    //     self::dump("unavailableCards getTokensOfType", $res);
+    //     $card = array_shift($res);
+    //     if (($card !== NULL) and ($card['used'] == 1)) {
+    //       $result[] = $card['id'];
+    //     }
+    //   }
+    // }
 
     return $result;
   }
@@ -316,7 +321,7 @@ trait PPUtilityFunctionsTrait
   {
     $moves = array();
     // return all coalition blocks to their pools
-    $afghan_blocks = $this->tokens->getTokensOfTypeInLocation('block_afghan');
+    $afghan_blocks = Tokens::getInLocation('block_afghan');
     foreach ($afghan_blocks as $token_id => $token_info) {
       if (!$this->startsWith($token_info['location'], "blocks")) {
         $moves[] = array(
@@ -324,11 +329,11 @@ trait PPUtilityFunctionsTrait
           'from' => $token_info['location'],
           'to' => BLOCKS_AFGHAN_SUPPLY
         );
-        $this->tokens->moveToken($token_id, BLOCKS_AFGHAN_SUPPLY);
+        Tokens::move($token_id, BLOCKS_AFGHAN_SUPPLY);
       };
     };
 
-    $russian_blocks = $this->tokens->getTokensOfTypeInLocation('block_russian');
+    $russian_blocks = Tokens::getInLocation('block_russian');
     foreach ($russian_blocks as $token_id => $token_info) {
       if (!$this->startsWith($token_info['location'], "blocks")) {
         $moves[] = array(
@@ -336,11 +341,11 @@ trait PPUtilityFunctionsTrait
           'from' => $token_info['location'],
           'to' => BLOCKS_RUSSIAN_SUPPLY
         );
-        $this->tokens->moveToken($token_id, BLOCKS_RUSSIAN_SUPPLY);
+        Tokens::move($token_id, BLOCKS_RUSSIAN_SUPPLY);
       };
     };
 
-    $british_blocks = $this->tokens->getTokensOfTypeInLocation('block_british');
+    $british_blocks = Tokens::getInLocation('block_british');
     foreach ($british_blocks as $token_id => $token_info) {
       if (!$this->startsWith($token_info['location'], "blocks")) {
         $moves[] = array(
@@ -348,7 +353,7 @@ trait PPUtilityFunctionsTrait
           'from' => $token_info['location'],
           'to' => BLOCKS_BRITISH_SUPPLY
         );
-        $this->tokens->moveToken($token_id, BLOCKS_BRITISH_SUPPLY);
+        Tokens::move($token_id, BLOCKS_BRITISH_SUPPLY);
       };
     };
 
@@ -410,8 +415,8 @@ trait PPUtilityFunctionsTrait
     foreach ($players as $player_id => $player_info) {
       $counts[$player_id] = array();
       $counts[$player_id]['rupees'] = $this->getPlayerRupees($player_id);
-      $counts[$player_id]['cylinders'] = 10 - count($this->tokens->getTokensOfTypeInLocation('cylinder', 'cylinders_' . $player_id));
-      $counts[$player_id]['cards'] = count($this->tokens->getTokensOfTypeInLocation('card', 'hand_' . $player_id));
+      $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
+      $counts[$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
       $counts[$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
       $counts[$player_id]['influence'] = $this->getPlayerInfluence($player_id);
     }

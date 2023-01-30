@@ -93,7 +93,7 @@ class Border {
 class Region {
   private game: PaxPamirGame;
   private region: string;
-  private ruler: string;
+  private ruler: number;
   private armyZone: Zone;
   private tribeZone: Zone;
   private rulerZone: Zone;
@@ -162,7 +162,7 @@ class Region {
     });
 
     this.ruler = game.gamedatas.rulers[region];
-    if (this.ruler === '0') {
+    if (this.ruler === 0) {
       placeToken({
         game,
         location: this.rulerZone,

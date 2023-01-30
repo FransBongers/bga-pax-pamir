@@ -1,15 +1,20 @@
 <?php
+namespace PaxPamir;
+
+use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
+use PaxPamir\Managers\Tokens;
 
 trait PPPlayerTrait
 {
   function getPlayerCourtCards($player_id)
   {
-    return $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+    return Players::get($player_id)->getCourtCards();
   }
 
   function getPlayerHand($player_id)
   {
-    return $this->tokens->getTokensOfTypeInLocation('card', 'hand_' . $player_id, null, 'state');
+    return Cards::getInLocation(['hand', $player_id]);
   }
 
   /**
@@ -27,7 +32,7 @@ trait PPPlayerTrait
   function getPlayerRupees($player_id)
   {
     $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
-    return $this->getUniqueValueFromDB($sql);
+    return intval($this->getUniqueValueFromDB($sql));
   }
 
   /**
@@ -48,14 +53,14 @@ trait PPPlayerTrait
     }
     for ($i = 1; $i <= 3; $i++) {
       $value = $i * 2;
-      $tokens_in_location = $this->tokens->getTokensInLocation('gift_' . $value . '_' . $player_id);
+      $tokens_in_location = Tokens::getInLocation(['gift' , $value , $player_id]);
       if (count($tokens_in_location) > 0) {
         $influence += 1;
       }
     }
 
 
-    // $this->tokens->getTokensOfTypeInLocation('cylinder', 'court_'.$player_id, null, 'state');
+    // Tokens::getInLocation('cylinder', 'court_'.$player_id, null, 'state');
     // TODO (Frans): get information about courd cards and add influence if patriot
     // Add number of prizes
 
@@ -73,9 +78,9 @@ trait PPPlayerTrait
       ECONOMIC => 0,
       INTELLIGENCE => 0
     );
-    $court_cards = $this->getPlayerCourtCards($player_id);
+    $court_cards = Players::get($player_id)->getCourtCards();// $this->getPlayerCourtCards($player_id);
     for ($i = 0; $i < count($court_cards); $i++) {
-      $card_info = $this->cards[$court_cards[$i]['key']];
+      $card_info = $this->cards[$court_cards[$i]['id']];
       $suits[$card_info['suit']] += $card_info['rank'];
     }
     return $suits;

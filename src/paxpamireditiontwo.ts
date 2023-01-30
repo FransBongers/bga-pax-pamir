@@ -60,10 +60,8 @@ class PaxPamir implements PaxPamirGame {
     // Create a new div for buttons to avoid BGA auto clearing it
     dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
 
-    console.log('typescript version');
-    console.log('gamedatas', gamedatas);
     this.gamedatas = gamedatas;
-    console.log('this.gamedatas', this.gamedatas);
+    console.log('gamedatas', gamedatas);
 
     // Events
     setupCardsStock({
@@ -74,10 +72,10 @@ class PaxPamir implements PaxPamirGame {
     });
 
     // TODO: use Object.values in similar cases?
-    Object.keys(gamedatas.active_events).forEach((key) => {
+    Object.keys(gamedatas.activeEvents).forEach((key) => {
       placeCard({
         location: this.activeEvents,
-        id: gamedatas.active_events[key].key,
+        id: gamedatas.activeEvents[key].id,
       });
     });
 
@@ -95,33 +93,33 @@ class PaxPamir implements PaxPamirGame {
       nodeId: 'pp_player_hand_cards',
       className: 'pp_card_in_hand',
     });
-    Object.keys(this.gamedatas.hand).forEach((cardId) => {
-      placeCard({ location: this.playerHand, id: cardId });
+    this.gamedatas.hand.forEach((card) => {
+      placeCard({ location: this.playerHand, id: card.id });
     });
 
-    // Place spies on cards
-    Object.keys(gamedatas.spies || {}).forEach((cardId) => {
-      Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
-        const playerId = cylinderId.split('_')[1];
-        placeToken({
-          game: this,
-          location: this.spies[cardId],
-          id: cylinderId,
-          jstpl: 'jstpl_cylinder',
-          jstplProps: {
-            id: cylinderId,
-            color: gamedatas.players[playerId].color,
-          },
-          weight: this.defaultWeightZone,
-        });
-      });
-    });
+    // // Place spies on cards
+    // Object.keys(gamedatas.spies || {}).forEach((cardId) => {
+    //   Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
+    //     const playerId = cylinderId.split('_')[1];
+    //     placeToken({
+    //       game: this,
+    //       location: this.spies[cardId],
+    //       id: cylinderId,
+    //       jstpl: 'jstpl_cylinder',
+    //       jstplProps: {
+    //         id: cylinderId,
+    //         color: gamedatas.players[playerId].color,
+    //       },
+    //       weight: this.defaultWeightZone,
+    //     });
+    //   });
+    // });
 
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
     }
     this.notificationManager = new PPNotificationManager(this);
-    // Setup game notifications to handle (see "setupNotifications" method below)
+    // // Setup game notifications to handle (see "setupNotifications" method below)
     this.notificationManager.setupNotifications();
 
     // this.setupNotifications();
@@ -159,7 +157,7 @@ class PaxPamir implements PaxPamirGame {
   //
   public onUpdateActionButtons(stateName: string, args: any) {
     console.log('onUpdateActionButtons: ' + stateName);
-    this.interactionManager.onUpdateActionButtons(stateName, args);
+    // this.interactionManager.onUpdateActionButtons(stateName, args);
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

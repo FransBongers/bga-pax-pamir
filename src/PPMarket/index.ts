@@ -57,25 +57,25 @@ class PPMarket {
         if (cardInMarket) {
           placeCard({
             location: this.marketCards[row][column],
-            id: cardInMarket.key,
+            id: cardInMarket.id,
           });
         }
       }
     }
 
     // Put all rupees in market locations
-    Object.keys(game.gamedatas.rupees).forEach((rupeeId) => {
-      const rupee = game.gamedatas.rupees[rupeeId];
+    game.gamedatas.rupees.forEach((rupee) => {
+      // const rupee = game.gamedatas.rupees[rupeeId];
       if (rupee.location.startsWith('market')) {
         const row = rupee.location.split('_')[1];
         const column = rupee.location.split('_')[2];
         placeToken({
           game,
           location: this.marketRupees[row][column],
-          id: rupeeId,
+          id: rupee.id,
           jstpl: 'jstpl_rupee',
           jstplProps: {
-            id: rupeeId,
+            id: rupee.id,
           },
         });
       }

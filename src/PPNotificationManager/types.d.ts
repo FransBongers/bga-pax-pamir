@@ -5,6 +5,24 @@ interface NotifChooseLoyaltyArgs {
   coalition_name: string;
 }
 
+interface NotifDiscardCardArgs {
+  cardId: string;
+  playerId: string;
+  playerName: string;
+  cardName: string;
+  courtCards: Token[];
+  from: string;
+}
+
+interface NotifPlayCardArgs {
+  playerId: string;
+  playerName: string;
+  card: Token;
+  cardName: string;
+  courtCards: Token[];
+  bribe: boolean;
+}
+
 interface NotifPurchaseCardArgs {
   playerId: string;
   playerName: string;

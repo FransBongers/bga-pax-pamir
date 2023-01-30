@@ -47,6 +47,10 @@
     
 */
 
+require_once 'modules/php/constants.inc.php';
+
+// $stats_type = [];
+
 $stats_type = array(
 
     // Statistics global to table

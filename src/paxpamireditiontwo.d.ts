@@ -41,15 +41,16 @@ interface EventCard {
 interface Suit {
   change: string;
   name: string;
-  suit: string; // change to id?
+  id: string;
   tooltip: string;
 }
 
+// TODO (Frans): separate Card / Token
 interface Token {
-  key: string;
+  id: string;
   location: string;
-  state: string; // TODO: cast to number in php
-  used: string; // TODO: cast to number in php
+  state: number; // TODO: cast to number in php
+  used: number; // TODO: cast to number in php
 }
 
 /**
@@ -58,7 +59,7 @@ interface Token {
  * - check typing of object keys (playerId: number vs string)
  */
 interface PaxPamirGamedatas extends Gamedatas {
-  active_events: Record<string, Token>;
+  activeEvents: Record<string, Token>;
   armies: {
     [region: string]: {
       [coalitionBlockId: string]: Token;
@@ -73,25 +74,19 @@ interface PaxPamirGamedatas extends Gamedatas {
   cards: {
     [cardId: string]: Card;
   };
-  coalition_blocks: {
-    [coalition: string]: {
-      [coalitionBlockId: string]: Token;
-    };
+  coalitionBlocks: {
+    [coalition: string]: Token[];
   };
   counts: {
     [playerId: number]: PlayerCounts;
   };
   court: { [playerId: number]: Token[] };
   cylinders: {
-    [playerId: number]: {
-      [cylinderId: string]: Token;
-    };
+    [playerId: number]: Token[];
   };
-  hand: {
-    [cardId: string]: Token;
-  };
+  hand: Token[];
   // current_player_id: string;
-  favored_suit: Suit;
+  favoredSuit: string;
   gifts: {
     [playerId: number]: Record<
       '2' | '4' | '6',
@@ -108,17 +103,17 @@ interface PaxPamirGamedatas extends Gamedatas {
     };
   };
   rulers: {
-    [region: string]: string; // TODO (Frans): check if we need to cast as number in backend
+    [region: string]: number;
   };
-  rupees: {
-    [rupeeId: string]: Token;
-  };
+  rupees: Token[];
   spies: {
     [cardId: string]: {
       [cylinderId: string]: Token;
     };
   };
-  suits: Suit[];
+  suits: {
+    [suit: string]: Suit;
+  };
   tribes: {
     [region: string]: {
       [cylinderId: string]: Token;
@@ -160,4 +155,3 @@ interface EnteringDiscardCourtArgs {
 interface EnteringDiscardHandArgs {
   numberOfDiscards: number;
 }
-

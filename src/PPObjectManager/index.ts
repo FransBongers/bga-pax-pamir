@@ -24,21 +24,21 @@ class FavoredSuit {
     this.favoredSuitZones = {};
 
     // Setup zones for favored suit marker
-    game.gamedatas.suits.forEach((suit) => {
-      this.favoredSuitZones[suit.suit] = new ebg.zone();
+    Object.keys(game.gamedatas.suits).forEach((suit) => {
+      this.favoredSuitZones[suit] = new ebg.zone();
       setupTokenZone({
         game,
-        zone: this.favoredSuitZones[suit.suit],
-        nodeId: `pp_favored_suit_${suit.suit}`,
+        zone: this.favoredSuitZones[suit],
+        nodeId: `pp_favored_suit_${suit}`,
         tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
         tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
       });
     });
 
-    const suitId = game.gamedatas.favored_suit.suit;
+    const suit = game.gamedatas.favoredSuit;
     placeToken({
       game,
-      location: this.favoredSuitZones[suitId],
+      location: this.favoredSuitZones[suit],
       //location: this.favoredSuit['intelligence'], // for testing change of favored suit
       id: `favored_suit_marker`,
       jstpl: 'jstpl_favored_suit_marker',
@@ -82,14 +82,14 @@ class Supply {
         itemMargin: 15,
         instantaneous: true,
       });
-      Object.keys(game.gamedatas.coalition_blocks[coalition]).forEach((blockId) => {
+      game.gamedatas.coalitionBlocks[coalition].forEach((block) => {
         placeToken({
           game,
           location: this.coalitionBlocks[coalition],
-          id: blockId,
+          id: block.id,
           jstpl: 'jstpl_coalition_block',
           jstplProps: {
-            id: blockId,
+            id: block.id,
             coalition,
           },
         });

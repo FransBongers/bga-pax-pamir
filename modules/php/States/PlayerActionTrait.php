@@ -1,7 +1,15 @@
 <?php
 
+namespace PaxPamir\States;
 
-trait PPPlayerActionsTrait
+use PaxPamir\Core\Game;
+use PaxPamir\Core\Globals;
+use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
+use PaxPamir\Managers\Tokens;
+
+trait PlayerActionTrait
 {
   //////////////////////////////////////////////////////////////////////////////
   //////////// Player actions
@@ -20,7 +28,7 @@ trait PPPlayerActionsTrait
   {
     self::checkAction('chooseLoyalty');
 
-    $player_id = self::getActivePlayerId();
+    $player_id = Players::getActiveId();
     $coalition_name = $this->loyalty[$coalition]['name'];
 
     $this->setPlayerLoyalty($player_id, $coalition);
@@ -28,7 +36,7 @@ trait PPPlayerActionsTrait
     // Notify
     self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} selected ${coalition_name}.'), array(
       'player_id' => $player_id,
-      'player_name' => self::getActivePlayerName(),
+      'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,
       'coalition_name' => $coalition_name
     ));
@@ -50,57 +58,57 @@ trait PPPlayerActionsTrait
 
     if ($from_hand) {
       if (count($cards) !== $discards['hand'])
-        throw new feException("Incorrect number of discards");
+        throw new \feException("Incorrect number of discards");
 
       foreach ($cards as $card_id) {
-        $this->tokens->moveToken($card_id, 'discard');
+        Cards::move($card_id, 'discard');
         $card_name = $this->cards[$card_id]['name'];
-        $removed_card = $this->tokens->getTokenInfo($card_id);
-        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+        $removed_card = Cards::get($card_id);
+        $court_cards = Cards::getInLocation(['court', $player_id])->toArray();
 
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${card_name} from their hand.', array(
-          'player_id' => $player_id,
-          'player_name' => self::getActivePlayerName(),
-          'card_name' => $card_name,
-          'court_cards' => $court_cards,
-          'card_id' => $card_id,
+        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their hand.', array(
+          'playerId' => $player_id,
+          'playerName' => self::getActivePlayerName(),
+          'cardName' => $card_name,
+          'courtCards' => $court_cards,
+          'cardId' => $card_id,
           'from' => 'hand'
         ));
       }
     } else {
       if (count($cards) != $discards['court'])
-        throw new feException("Incorrect number of discards");
+        throw new \feException("Incorrect number of discards");
 
       foreach ($cards as $card_id) {
 
         // Move all spies back to players cylinder pool
-        $spiesOnCard = $this->tokens->getTokensOfTypeInLocation('cylinder', 'spies_' . $card_id, null, 'state');
+        $spiesOnCard = Tokens::getInLocation(['spies', $card_id]);
         self::dump("spiesOnCard", $spiesOnCard);
         foreach ($spiesOnCard as $spy) {
-          $spyOwner = explode("_", $spy['key'])[1];
-          $this->tokens->moveToken($spy['key'], 'cylinders_' . $spyOwner);
+          $spyOwner = explode("_", $spy['id'])[1];
+          Tokens::move($spy['id'], ['cylinders', $spyOwner]);
         }
 
         // move card to discard location
-        $this->tokens->moveToken($card_id, 'discard');
+        Cards::move($card_id, 'discard');
         $card_name = $this->cards[$card_id]['name'];
-        $removed_card = $this->tokens->getTokenInfo($card_id);
-        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+        $removed_card = Cards::get($card_id);
+        $court_cards = Cards::getInLocation(['court', $player_id]);
 
         // slide card positions down to fill in gap
         foreach ($court_cards as $c) {
           if ($c['state'] > $removed_card['state'])
-            $this->tokens->setTokenState($c['key'], $c['state'] - 1);
+            Cards::setState($c['id'], $c['state'] - 1);
         }
 
-        $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+        $court_cards = Cards::getInLocation(['court', $player_id])->toArray();
 
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${card_name} from their court.', array(
-          'player_id' => $player_id,
-          'player_name' => self::getActivePlayerName(),
-          'card_name' => $card_name,
-          'court_cards' => $court_cards,
-          'card_id' => $card_id,
+        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their court.', array(
+          'playerId' => $player_id,
+          'playerName' => self::getActivePlayerName(),
+          'cardName' => $card_name,
+          'courtCards' => $court_cards,
+          'cardId' => $card_id,
           'from' => 'court'
         ));
       }
@@ -121,12 +129,12 @@ trait PPPlayerActionsTrait
 
     $player_id = self::getActivePlayerId();
 
-    $remaining_actions = $this->getGameStateValue("remaining_actions");
+    $remaining_actions = Globals::getRemainingActions();
     $state = $this->gamestate->state();
 
     if (($remaining_actions > 0) and ($state['name'] == 'playerActions')) {
       // self::incStat($remaining_actions, "skip", $player_id);
-      $this->setGameStateValue("remaining_actions", 0);
+      Globals::setRemainingActions(0);
 
       // Notify
       self::notifyAllPlayers("pass", clienttranslate('${player_name} ended their turn.'), array(
@@ -149,21 +157,21 @@ trait PPPlayerActionsTrait
     // TODO: check if allowed based on resolve_impact_icons_card_id
     $loyalty = $this->getPlayerLoyalty($player_id);
     $location = $this->locations['pools'][$loyalty];
-    $road = $this->tokens->getTokenOnTop($location);
+    $road = Tokens::getInLocation($location)->first();
     if ($road != null) {
       $to = $this->locations['roads'][$border];
-      $this->tokens->moveToken($road['key'], $to);
+      Tokens::move($road['id'], $to);
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
           0 => array(
             'from' => $location,
             'to' => $to,
-            'token_id' => $road['key'],
+            'token_id' => $road['id'],
           )
         )
       ));
     }
-    $this->incGameStateValue("resolve_impact_icons_current_icon", 1);
+    Globals::incResolveImpactIconsCurrentIcon(1);
     $this->gamestate->nextState('resolve_impact_icons');
   }
 
@@ -177,22 +185,22 @@ trait PPPlayerActionsTrait
 
     $player_id = self::getActivePlayerId();
     $from = "cylinders_" . $player_id;
-    $cylinder = $this->tokens->getTokenOnTop($from);
+    $cylinder = Tokens::getInLocation($from)->first();
 
     if ($cylinder != null) {
       $to = 'spies_' . $card_id;
-      $this->tokens->moveToken($cylinder['key'], $to);
+      Tokens::move($cylinder['id'], $to);
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
           0 => array(
             'from' => $from,
             'to' => $to,
-            'token_id' => $cylinder['key'],
+            'token_id' => $cylinder['id'],
           )
         )
       ));
     }
-    $this->incGameStateValue("resolve_impact_icons_current_icon", 1);
+    Globals::incResolveImpactIconsCurrentIcon(1);
     $this->gamestate->nextState('resolve_impact_icons');
   }
 
@@ -208,14 +216,14 @@ trait PPPlayerActionsTrait
     self::checkAction('playCard');
 
     $player_id = self::getActivePlayerId();
-    $card = $this->tokens->getTokenInfo($card_id);
+    $card = Cards::get($card_id);
     $card_name = $this->cards[$card_id]['name'];
 
-    $bribe_card_id = $this->getGameStateValue("bribe_card_id");
-    $bribe_ruler = $this->getRegionRulerForCard($bribe_card_id);
-    $bribe_amount = $this->getGameStateValue("bribe_amount");
+    // $bribe_card_id = $this->getGameStateValue("bribe_card_id");
+    // $bribe_ruler = $this->getRegionRulerForCard($bribe_card_id);
+    // $bribe_amount = $this->getGameStateValue("bribe_amount");
 
-    $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+    $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
 
     // TODO (Frans): decide how we want to implement bribes
     // if (($bribe_ruler != 0) and ($bribe_ruler != $player_id)) {
@@ -239,7 +247,7 @@ trait PPPlayerActionsTrait
     //     }
     // }
 
-    if ($this->getGameStateValue("remaining_actions") > 0) {
+    if (Globals::getRemainingActions() > 0) {
       // check if loyaly change
       $card_loyalty = $this->cards[$card_id]['loyalty'];
       if ($card_loyalty != null) {
@@ -248,34 +256,33 @@ trait PPPlayerActionsTrait
 
       if ($left_side) {
         for ($i = 0; $i < count($court_cards); $i++) {
-          // $this->tokens->setTokenState($court_cards[$i].key, $court_cards[$i].state+1);
-          $this->tokens->setTokenState($court_cards[$i]['key'], $i + 2);
+          Cards::setState($court_cards[$i]['id'], $i + 2);
         }
-        $this->tokens->moveToken($card_id, 'court_' . $player_id, 1);
-        $message = clienttranslate('${player_name} played ${card_name} to the left side of their court');
+        Cards::move($card_id, ['court', $player_id], 1);
+        $message = clienttranslate('${playerName} played ${cardName} to the left side of their court');
       } else {
-        $this->tokens->moveToken($card_id, 'court_' . $player_id, count($court_cards) + 1);
-        $message = clienttranslate('${player_name} played ${card_name} to the right side of their court');
+        Cards::move($card_id, ['court', $player_id], count($court_cards) + 1);
+        $message = clienttranslate('${playerName} played ${cardName} to the right side of their court');
       }
-      $this->incGameStateValue("remaining_actions", -1);
-      $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, 'state');
+      Globals::incRemainingActions(-1);
+      $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
 
       self::notifyAllPlayers("playCard", $message, array(
-        'player_id' => $player_id,
-        'player_name' => self::getActivePlayerName(),
+        'playerId' => $player_id,
+        'playerName' => self::getActivePlayerName(),
         'card' => $card,
-        'card_name' => $card_name,
-        'court_cards' => $court_cards,
+        'cardName' => $card_name,
+        'courtCards' => $court_cards,
         'bribe' => false,
       ));
 
       $this->updatePlayerCounts();
 
-      $this->setGameStateValue("bribe_card_id", 0);
-      $this->setGameStateValue("bribe_amount", -1);
+      // $this->setGameStateValue("bribe_card_id", 0);
+      // $this->setGameStateValue("bribe_amount", -1);
 
-      $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);
-      $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
+      Globals::setResolveImpactIconsCardId(explode("_", $card_id)[1]);
+      Globals::setResolveImpactIconsCurrentIcon(0);
       $this->gamestate->nextState('resolve_impact_icons');
     }
   }
@@ -289,12 +296,12 @@ trait PPPlayerActionsTrait
     self::checkAction('purchaseCard');
 
     $player_id = self::getActivePlayerId();
-    $card = $this->tokens->getTokenInfo($card_id);
+    $card = Cards::get($card_id);
     $card_info = $this->cards[$card_id];
 
     // Throw error if card is unavailble for purchase
     if ($card['used'] == 1) {
-      throw new feException("Card is unavailble");
+      throw new \feException("Card is unavailble");
     }
 
     $card_name = $this->cards[$card_id]['name'];
@@ -306,11 +313,11 @@ trait PPPlayerActionsTrait
     self::dump("row", $row);
 
     $next_state = 'action';
-    if ($this->getGameStateValue("remaining_actions") > 0) {
+    if (Globals::getRemainingActions() > 0) {
 
       // check cost
       if ($cost > $this->getPlayerRupees($player_id)) {
-        throw new feException("Not enough rupees");
+        throw new \feException("Not enough rupees");
       } else {
         // if enough rupees reduce player rupees
         $this->incPlayerRupees($player_id, -$cost);
@@ -325,13 +332,13 @@ trait PPPlayerActionsTrait
         $new_location = 'discard';
         $next_state = 'dominance_check';
       }
-      $this->tokens->moveToken($card_id, $new_location);
-      $this->incGameStateValue("remaining_actions", -1);
+      Cards::move($card_id, $new_location);
+      Globals::incRemainingActions(-1);
 
       // add rupees on card to player totals. Then put them in rupee_pool location
-      $rupees = $this->tokens->getTokensOfTypeInLocation('rupee', $market_location . '_rupees');
+      $rupees = Tokens::getInLocation([$market_location, 'rupees']);
       $this->incPlayerRupees($player_id, count($rupees));
-      $this->tokens->moveAllTokensInLocation($market_location . '_rupees', RUPEE_SUPPLY);
+      Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
 
       // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
       $updated_cards = array();
@@ -339,21 +346,21 @@ trait PPPlayerActionsTrait
       for ($i = $col - 1; $i >= 0; $i--) {
         $location = 'market_' . $row . '_' . $i;
         $use_row_alt = false;
-        $m_card = $this->tokens->getTokenOnLocation($location);
+        $m_card = Cards::getInLocation($location)->first();
         if ($m_card == NULL) {
           $use_row_alt = true;
           $location = 'market_' . $row_alt . '_' . $i;
-          $m_card = $this->tokens->getTokenOnLocation($location);
+          $m_card = Cards::getInLocation($location)->first();
         }
         if ($m_card !== NULL) {
-          $rupee = $this->tokens->getTokenOnTop(RUPEE_SUPPLY);
-          $this->tokens->moveToken($rupee['key'], $location . '_rupees');
-          $this->tokens->setTokenUsed($m_card["key"], 1); // set unavailable
+          $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
+          Tokens::move($rupee['id'], [$location, 'rupees']);
+          Cards::setUsed($m_card["id"], 1); // set unavailable
           $updated_cards[] = array(
-            'row' => intval($use_row_alt ? $row_alt : $row), 
+            'row' => intval($use_row_alt ? $row_alt : $row),
             'column' => $i,
-            'cardId' => $m_card["key"],
-            'rupeeId' => $rupee['key']
+            'cardId' => $m_card["id"],
+            'rupeeId' => $rupee['id']
           );
         }
       }
@@ -383,15 +390,15 @@ trait PPPlayerActionsTrait
         break;
       }
       $location = 'market_' . $row . '_' . $i;
-      $market_card = $this->tokens->getTokenOnLocation($location);
+      $market_card = Cards::getInLocation($location)->first();
       if ($market_card !== NULL) {
-        $rupee = $this->tokens->getTokenOnTop(RUPEE_SUPPLY);
-        $this->tokens->moveToken($rupee['key'], $location . '_rupees');
-        $this->tokens->setTokenUsed($market_card["key"], 1); // set unavailable
+        $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
+        Tokens::move($rupee['id'], [$location, 'rupees']);
+        Cards::setUsed($market_card["id"], 1); // set unavailable
         $updated_cards[] = array(
           'location' => $location,
-          'card_id' => $market_card["key"],
-          'rupee_id' => $rupee['key']
+          'card_id' => $market_card["id"],
+          'rupee_id' => $rupee['id']
         );
         $remaining_rupees--;
       }
@@ -402,7 +409,7 @@ trait PPPlayerActionsTrait
   function isCardFavoredSuit($card_id)
   {
     $card_info = $this->cards[$card_id];
-    return $this->suits[$this->getGameStateValue("favored_suit")]['suit'] == $card_info['suit'];
+    return Globals::getFavoredSuit() == $card_info['suit'];
   }
 
   /**
@@ -420,27 +427,27 @@ trait PPPlayerActionsTrait
     $rupees = $this->getPlayerRupees($player_id);
     // Player should have enough rupees
     if ($rupees < $selected_gift) {
-      throw new feException("Not enough rupees to pay for the gift.");
+      throw new \feException("Not enough rupees to pay for the gift.");
     }
     $location = 'gift_' . $selected_gift . '_' . $player_id;
-    $tokens_in_location = $this->tokens->getTokensInLocation($location);
-    if (count($tokens_in_location) > 0) {
-      throw new feException("Already a cylinder in selected location.");
+    $token_in_location = Tokens::getInLocation($location)->first();
+    if ($token_in_location != null) {
+      throw new \feException("Already a cylinder in selected location.");
     }
 
     $from = "cylinders_" . $player_id;
-    $cylinder = $this->tokens->getTokenOnTop($from);
+    $cylinder = Tokens::getInLocation($from)->first();
 
     // If null player needs to select cylinder from somewhere else
     if ($cylinder != null) {
-      $this->tokens->moveToken($cylinder['key'], $location);
-      $this->tokens->setTokenUsed($card_id, 1); // unavailable false
+      Tokens::move($cylinder['id'], $location);
+      Cards::setUsed($card_id, 1); // unavailable false
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
           0 => array(
             'from' => $from,
             'to' => $location,
-            'token_id' => $cylinder['key'],
+            'token_id' => $cylinder['id'],
           )
         )
       ));
@@ -448,7 +455,7 @@ trait PPPlayerActionsTrait
 
     // if not free action reduce remaining actions.
     if (!$this->isCardFavoredSuit($card_id)) {
-      $this->incGameStateValue("remaining_actions", -1);
+      Globals::incRemainingActions(-1);
     }
 
     $number_rupees_per_row = $selected_gift / 2;

@@ -35,10 +35,10 @@ class PPPlayer {
     });
 
     // Add court cards played by player to court
-    gamedatas.court[playerId].forEach((card) => {
+    gamedatas.court[playerId].forEach((card: Token) => {
       placeCard({
         location: this.court,
-        id: card.key,
+        id: card.id,
         order: card.state,
       });
     });
@@ -55,14 +55,14 @@ class PPPlayer {
     });
 
     // Add cylinders to zone
-    Object.keys(gamedatas.cylinders[playerId]).forEach((cylinderId) => {
+    gamedatas.cylinders[playerId].forEach((cylinder: Token) => {
       placeToken({
         game: this.game,
         location: this.cylinders,
-        id: cylinderId,
+        id: cylinder.id,
         jstpl: 'jstpl_cylinder',
         jstplProps: {
-          id: cylinderId,
+          id: cylinder.id,
           color: gamedatas.players[playerId].color,
         },
       });

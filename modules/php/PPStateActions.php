@@ -1,4 +1,9 @@
 <?php
+namespace PaxPamir;
+
+use PaxPamir\Core\Globals;
+use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Tokens;
 
 trait PPStateActionsTrait
 {
@@ -28,9 +33,9 @@ trait PPStateActionsTrait
 
     $player_id = self::getActivePlayerId();
 
-    $court_cards = $this->tokens->getTokensOfTypeInLocation('card', 'court_' . $player_id, null, null, 1);
+    $court_cards = Cards::getInLocation(['court', $player_id], null, null, 1);
     foreach ($court_cards as $card) {
-      $this->tokens->setTokenUsed($card["key"], 0);
+      Cards::setUsed($card["id"], 0);
     }
 
     $discards = $this->checkDiscardsForPlayer($player_id);
@@ -49,23 +54,23 @@ trait PPStateActionsTrait
 
     // Discard events at front of market
     // NOTE: perhaps move this to separate state for handling execution of the event
-    $top_card = $this->tokens->getTokenOnLocation('market_0_0');
-    $bottom_card = $this->tokens->getTokenOnLocation('market_1_0');
-    if ($top_card != null && $this->cards[$top_card['key']]['type'] == EVENT_CARD) {
-      $this->tokens->moveToken($top_card['key'], 'discard');
-      // $card_name = $this->cards[$top_card['key']]['name'];
+    $top_card = Cards::getInLocation('market_0_0')->first();
+    $bottom_card = Cards::getInLocation('market_1_0')->first();
+    if ($top_card != null && $this->cards[$top_card['id']]['type'] == EVENT_CARD) {
+      Cards::move($top_card['id'], 'discard');
+      // $card_name = $this->cards[$top_card['id']]['name'];
       self::notifyAllPlayers("discardCard", 'event is discarded from the market.', array(
         // 'card_name' => $card_name,
-        'card_id' => $top_card['key'],
+        'cardId' => $top_card['id'],
         'from' => 'market_0_0'
       ));
     };
-    if ($bottom_card != null && $this->cards[$bottom_card['key']]['type'] == EVENT_CARD) {
-      $this->tokens->moveToken($bottom_card['key'], 'discard');
-      // $card_name = $this->cards[$bottom_card['key']]['name'];
+    if ($bottom_card != null && $this->cards[$bottom_card['id']]['type'] == EVENT_CARD) {
+      Cards::move($bottom_card['id'], 'discard');
+      // $card_name = $this->cards[$bottom_card['id']]['name'];
       self::notifyAllPlayers("discardCard", 'event is discarded from the market.', array(
         // 'card_name' => $card_name,
-        'card_id' => $bottom_card['key'],
+        'cardId' => $bottom_card['id'],
         'from' => 'market_1_0'
       ));
     };
@@ -76,14 +81,14 @@ trait PPStateActionsTrait
   function stDominanceCheck()
   {
     // TODO: increase by 2 in case of instability
-    $this->incGameStateValue("dominance_checks_resolved", 1);
+    Globals::incDominanceChecksResolved(1);
     // Determine if check is successful
     // Get counts of all blocks left in pool
     $coalition_block_counts = array();
     $i = 0;
     foreach ($this->locations['pools'] as $coalitionId => $coalitionPool) {
       $coalition_block_counts[$i] = array(
-        'count' => $this->tokens->countTokensInLocation($coalitionPool),
+        'count' => Tokens::countInLocation($coalitionPool),
         'coalition' => $coalitionId,
       );
       $i += 1;
@@ -119,7 +124,7 @@ trait PPStateActionsTrait
       });
 
       $available_points = [5, 3, 1];
-      if ($this->getGameStateValue('dominance_checks_resolved') == 4) {
+      if (Globals::getDominanceChecksResolved() == 4) {
         $available_points = [10, 6, 2];
       }
       $scores = $this->determineVictoryPoints($loyal_players, $available_points);
@@ -135,7 +140,7 @@ trait PPStateActionsTrait
 
       // Determine VPs
       $available_points = [3, 1];
-      if ($this->getGameStateValue('dominance_checks_resolved') == 4) {
+      if (Globals::getDominanceChecksResolved() == 4) {
         $available_points = [6, 2];
       }
       $scores = $this->determineVictoryPoints($cylinder_counts, $available_points);
@@ -157,7 +162,7 @@ trait PPStateActionsTrait
     $i = 0;
     foreach ($players as $player_id => $player_info) {
       $counts[$i] = array(
-        'count' => 10 - $this->tokens->countTokensInLocation('cylinders_' . $player_id),
+        'count' => 10 - Tokens::countInLocation(['cylinders', $player_id]),
         'player_id' => $player_id,
       );
       $i += 1;
@@ -169,8 +174,8 @@ trait PPStateActionsTrait
   function stResolveImpactIcons()
   {
     $player_id = self::getActivePlayerId();
-    $card_id = 'card_' . $this->getGameStateValue("resolve_impact_icons_card_id");
-    $current_impact_icon_index = $this->getGameStateValue("resolve_impact_icons_current_icon");
+    $card_id = 'card_' . Globals::getResolveImpactIconsCardId();
+    $current_impact_icon_index = Globals::getResolveImpactIconsCurrentIcon();
     $card_info = $this->cards[$card_id];
     $impact_icons = $card_info['impact_icons'];
     self::dump('----------- resolving impact icons for card', $card_id);
@@ -192,32 +197,32 @@ trait PPStateActionsTrait
       case ARMY:
         $loyalty = $this->getPlayerLoyalty($player_id);
         $location = $this->locations['pools'][$loyalty];
-        $army = $this->tokens->getTokenOnTop($location);
+        $army = Tokens::getInLocation($location)->first();
         if ($army != null) {
           $to = $this->locations['armies'][$card_region];
-          $this->tokens->moveToken($army['key'], $this->locations['armies'][$card_region]);
+          Tokens::move($army['id'], $this->locations['armies'][$card_region]);
           self::notifyAllPlayers("moveToken", "", array(
             'moves' => array(
               0 => array(
                 'from' => $location,
                 'to' => $to,
-                'token_id' => $army['key'],
+                'token_id' => $army['id'],
               )
             )
           ));
         }
         break;
       case ECONOMIC_SUIT:
-        $previous_suit = self::getGameStateValue('favored_suit');
-        if ($previous_suit == 2) {
+        $previous_suit = Globals::getFavoredSuit();
+        if ($previous_suit == ECONOMIC) {
           break;
         }
         // Update favored suit
-        self::setGameStateValue('favored_suit', 2);
+        Globals::setFavoredSuit(ECONOMIC);
 
         // Suit change notification
-        $message = $this->suits[2]['change'];
-        $previous_suit_id = $this->suits[$previous_suit]['suit'];
+        $message = $this->suits[ECONOMIC]['change'];
+        $previous_suit_id = $this->suits[$previous_suit]['id'];
         self::notifyAllPlayers("moveToken", $message, array(
           'moves' => array(
             0 => array(
@@ -229,16 +234,16 @@ trait PPStateActionsTrait
         ));
         break;
       case INTELLIGENCE_SUIT:
-        $previous_suit = self::getGameStateValue('favored_suit');
-        if ($previous_suit == 1) {
+        $previous_suit = Globals::getFavoredSuit();
+        if ($previous_suit == INTELLIGENCE) {
           break;
         }
         // Update favored suit
-        self::setGameStateValue('favored_suit', 1);
+        Globals::setFavoredSuit(INTELLIGENCE);
 
         // Suit change notification
-        $message = $this->suits[1]['change'];
-        $previous_suit_id = $this->suits[$previous_suit]['suit'];
+        $message = $this->suits[INTELLIGENCE]['change'];
+        $previous_suit_id = $this->suits[$previous_suit]['id'];
         self::notifyAllPlayers("moveToken", $message, array(
           'moves' => array(
             0 => array(
@@ -250,16 +255,16 @@ trait PPStateActionsTrait
         ));
         break;
       case MILITARY_SUIT:
-        $previous_suit = self::getGameStateValue('favored_suit');
-        if ($previous_suit == 3) {
+        $previous_suit = Globals::getFavoredSuit();
+        if ($previous_suit == MILITARY) {
           break;
         }
         // Update favored suit
-        self::setGameStateValue('favored_suit', 3);
+        Globals::setFavoredSuit(MILITARY);
 
         // Suit change notification
-        $message = $this->suits[3]['change'];
-        $previous_suit_id = $this->suits[$previous_suit]['suit'];
+        $message = $this->suits[MILITARY]['change'];
+        $previous_suit_id = $this->suits[$previous_suit]['id'];
         self::notifyAllPlayers("moveToken", $message, array(
           'moves' => array(
             0 => array(
@@ -275,21 +280,21 @@ trait PPStateActionsTrait
         $this->updatePlayerCounts();
         break;
       case POLITICAL_SUIT:
-        $previous_suit = self::getGameStateValue('favored_suit');
-        if ($previous_suit == 0) {
+        $previous_suit = Globals::getFavoredSuit();
+        if ($previous_suit == POLITICAL) {
           break;
         }
         // Update favored suit
-        self::setGameStateValue('favored_suit', 0);
+        Globals::setFavoredSuit(POLITICAL);
 
         // Suit change notification
-        $message = $this->suits[0]['change'];
-        $previous_suit_id = $this->suits[$previous_suit]['suit'];
+        $message = $this->suits[POLITICAL]['change'];
+        $previous_suit_id = $this->suits[$previous_suit]['id'];
         self::notifyAllPlayers("moveToken", $message, array(
           'moves' => array(
             0 => array(
               'from' => 'favored_suit_' . $previous_suit_id,
-              'to' => 'favored_suit_' . ECONOMIC,
+              'to' => 'favored_suit_' . POLITICAL,
               'token_id' => 'favored_suit_marker',
             )
           )
@@ -303,16 +308,16 @@ trait PPStateActionsTrait
         break;
       case TRIBE:
         $from = "cylinders_" . $player_id;
-        $cylinder = $this->tokens->getTokenOnTop($from);
+        $cylinder = Tokens::getInLocation($from)->first();
         $to = $this->locations["tribes"][$card_region];
         if ($cylinder != null) {
-          $this->tokens->moveToken($cylinder['key'], $to);
+          Tokens::move($cylinder['id'], $to);
           self::notifyAllPlayers("moveToken", "", array(
             'moves' => array(
               0 => array(
                 'from' => $from,
                 'to' => $to,
-                'token_id' => $cylinder['key'],
+                'token_id' => $cylinder['id'],
               )
             )
           ));
@@ -328,46 +333,12 @@ trait PPStateActionsTrait
     } else {
       // increase index for currently resolved icon, then transition to resolve_impact_icons state again
       // to check if there are more that need to be resolved.
-      $this->setGameStateValue("resolve_impact_icons_current_icon", $current_impact_icon_index + 1);
+      Globals::setResolveImpactIconsCurrentIcon($current_impact_icon_index + 1);
       $this->gamestate->nextState('resolve_impact_icons');
     }
   }
 
-  function stNextPlayer()
-  {
-    $setup = $this->getGameStateValue("setup");
-    self::dump("setup in stNextPlayer", $setup);
-    // Active next player
-    if ($setup == 1) {
-      // setup
-      $player_id = self::activeNextPlayer();
-      $loyalty = $this->getPlayerLoyalty($player_id);
-      self::dump("loyalty in stNextPlayer", $loyalty == "null");
-      if ($this->getPlayerLoyalty($player_id) == "null") {
-        // choose next loyalty
-        $this->giveExtraTime($player_id);
 
-        $this->gamestate->nextState('setup');
-      } else {
-        // setup complete, go to player actions
-        $player_id = self::activePrevPlayer();
-        $this->giveExtraTime($player_id);
-
-        $this->setGameStateValue("setup", 0);
-        $this->setGameStateValue("remaining_actions", 2);
-
-        $this->gamestate->nextState('next_turn');
-      }
-    } else {
-      // player turn
-      $player_id = self::activeNextPlayer();
-
-      $this->setGameStateValue("remaining_actions", 2);
-      $this->giveExtraTime($player_id);
-
-      $this->gamestate->nextState('next_turn');
-    }
-  }
 
   /**
    * Refresh market at end of a players turn
@@ -384,18 +355,18 @@ trait PPStateActionsTrait
 
     for ($i = 0; $i < 6; $i++) {
       $from_location = 'market_0_' . $i;
-      $card = $this->tokens->getTokenOnLocation($from_location);
+      $card = Cards::getTopOf($from_location);
       if ($card == null) {
         $empty_top[] = $i;
       } else {
-        $this->tokens->setTokenUsed($card["key"], 0); // unavailable false
+        Cards::setUsed($card["id"], 0); // unavailable false
         if (count($empty_top) > 0) {
           $to_locaction = 'market_0_' . array_shift($empty_top);
-          $this->tokens->moveToken($card['key'], $to_locaction);
-          $this->tokens->moveAllTokensInLocation($from_location . '_rupees', $to_locaction . '_rupees');
+          Cards::move($card['id'], $to_locaction);
+          Tokens::moveAllInLocation([$from_location, 'rupees'], [$to_locaction, 'rupees']);
           $empty_top[] = $i;
           $card_moves[] = array(
-            'cardId' => $card['key'],
+            'cardId' => $card['id'],
             'from' => $from_location,
             'to' => $to_locaction
           );
@@ -411,18 +382,18 @@ trait PPStateActionsTrait
       }
 
       $from_location = 'market_1_' . $i;
-      $card = $this->tokens->getTokenOnLocation($from_location);
+      $card = Cards::getInLocation($from_location)->first();
       if ($card == null) {
         $empty_bottom[] = $i;
       } else {
-        $this->tokens->setTokenUsed($card["key"], 0);
+        Cards::setUsed($card["id"], 0);
         if (count($empty_bottom) > 0) {
           $to_locaction = 'market_1_' . array_shift($empty_bottom);
-          $this->tokens->moveToken($card['key'], $to_locaction);
-          $this->tokens->moveAllTokensInLocation($from_location . '_rupees', $to_locaction . '_rupees');
+          Cards::move($card['id'], $to_locaction);
+          Tokens::moveAllInLocation([$from_location, 'rupees'], [$to_locaction, 'rupees']);
           $empty_bottom[] = $i;
           $card_moves[] = array(
-            'cardId' => $card['key'],
+            'cardId' => $card['id'],
             'from' => $from_location,
             'to' => $to_locaction
           );
@@ -439,18 +410,18 @@ trait PPStateActionsTrait
     }
 
     foreach ($empty_top as $i) {
-      $card = $this->tokens->pickTokensForLocation(1, 'deck', 'market_0_' . $i)[0];
+      $card = Cards::pickOneForLocation('deck', ['market_0', $i]);
       $new_cards[] = array(
-        'cardId' => $card['key'],
+        'cardId' => $card['id'],
         'from' => 'deck',
         'to' => 'market_0_' . $i
       );
     }
 
     foreach ($empty_bottom as $i) {
-      $card = $this->tokens->pickTokensForLocation(1, 'deck', 'market_1_' . $i)[0];
+      $card = Cards::pickOneForLocation('deck', ['market_1', $i]);
       $new_cards[] = array(
-        'cardId' => $card['key'],
+        'cardId' => $card['id'],
         'from' => 'deck',
         'to' => 'market_1_' . $i
       );

@@ -1,16 +1,16 @@
 <?php
-namespace PaxPamir;
+namespace PaxPamir\Managers;
 
 use PaxPamir\Core\Globals;
 
-trait PPMapTrait
+class Map
 {
 
   /*
     Returns rulers for all regions. Value will either be 0 (no ruler) or
     the playerId of the player ruling the region
   */
-  function getAllRegionRulers()
+  public static function getRulers()
   {
 
     $result = array();

@@ -33,17 +33,15 @@ spl_autoload_register($swdNamespaceAutoload, true, true);
 
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 
-use PaxPamir\Market;
+use PaxPamir\Managers\Map;
+use PaxPamir\Managers\Market;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
-require_once('modules/php/PPMap.php');
 // Todo check why PPPlayer import is needed
-require_once('modules/php/PPStateActions.php');
-require_once('modules/php/PPStateArgs.php');
 require_once('modules/php/PPUtilityFunctions.php');
 
 
@@ -53,11 +51,15 @@ require_once('modules/php/PPUtilityFunctions.php');
  */
 class PaxPamirEditionTwo extends Table
 {
-    use PaxPamir\PPMapTrait;
+    use PaxPamir\States\CleanupTrait;
+    use PaxPamir\States\DiscardTrait;
+    use PaxPamir\States\DominanceCheckTrait;
     use PaxPamir\States\NextPlayerTrait;
+    use PaxPamir\States\PlaceRoadTrait;
+    use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayerActionTrait;
-    use PaxPamir\PPStateActionsTrait;
-    use PaxPamir\PPStateArgsTrait;
+    use PaxPamir\States\RefreshMarketTrait;
+    use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\PPUtilityFunctionsTrait;
 
     public static $instance = null;
@@ -184,7 +186,7 @@ class PaxPamirEditionTwo extends Table
             $data['market'][1][$i] = Cards::getInLocation('market_1_' . $i)->first();
         }
 
-        $data['rulers'] = $this->getAllRegionRulers();
+        $data['rulers'] = Map::getRulers();
         $data['activeEvents'] = Cards::getInLocation('active_events');
         $data['borders'] = $this->borders;
 
@@ -218,6 +220,38 @@ class PaxPamirEditionTwo extends Table
         return $this->cards[$card_id];
     }
 
+    /**
+     * Returns card info from material.inc.php file.
+     * Input is row from token table
+     */
+    function getCardInfo($token)
+    {
+        return $this->cards[$token['id']];
+    }
+
+    /**
+     * Calculates current totals for all player information and sends notification to all players
+     */
+    function updatePlayerCounts()
+    {
+        $counts = array();
+        $players = $this->loadPlayersBasicInfos();
+        // $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
+        // $result['players'] = self::getCollectionFromDb( $sql );
+        foreach ($players as $player_id => $player_info) {
+            $player = Players::get($player_id);
+            $counts[$player_id] = array();
+            $counts[$player_id]['rupees'] = $player->getRupees();
+            $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
+            $counts[$player_id]['cards'] = count($player->getHandCards());
+            $counts[$player_id]['suits'] = $player->getSuitTotals();
+            $counts[$player_id]['influence'] = $player->getInfluence();
+        }
+
+        self::notifyAllPlayers("updatePlayerCounts", '', array(
+            'counts' => $counts
+        ));
+    }
 
     /////////////////////////////////////////////////////////////
     // Exposing protected methods, please use at your own risk //

@@ -6,20 +6,53 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait PlayerActionTrait
 {
-  //////////////////////////////////////////////////////////////////////////////
-  //////////// Player actions
-  //////////// 
 
-  /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in paxpamireditiontwo.action.php)
-        NOTE: put in alphabetical order.
-    *
+  // ....###....########...######....######.
+  // ...##.##...##.....##.##....##..##....##
+  // ..##...##..##.....##.##........##......
+  // .##.....##.########..##...####..######.
+  // .#########.##...##...##....##........##
+  // .##.....##.##....##..##....##..##....##
+  // .##.....##.##.....##..######....######.
+
+  function argPlayerActions()
+  {
+    $player_id = self::getActivePlayerId();
+    $current_player_id = self::getCurrentPlayerId();
+    $player = Players::get($player_id);
+    return array(
+      'remainingActions' => Globals::getRemainingActions(),
+      'unavailableCards' => Cards::getUnavailableCards(),
+      'hand' => Cards::getInLocation(['hand', $current_player_id]),
+      'court' => Cards::getInLocationOrdered(['court', $player_id])->toArray(),
+      'suits' => $player->getSuitTotals(),
+      'rulers' => Map::getRulers(),
+      'favoredSuit' => Globals::getFavoredSuit(),
+      'rupees' => $player->getRupees(),
+    );
+  }
+
+  //  .########..##..........###....##....##.########.########.
+  //  .##.....##.##.........##.##....##..##..##.......##.....##
+  //  .##.....##.##........##...##....####...##.......##.....##
+  //  .########..##.......##.....##....##....######...########.
+  //  .##........##.......#########....##....##.......##...##..
+  //  .##........##.......##.....##....##....##.......##....##.
+  //  .##........########.##.....##....##....########.##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
 
   /**
    * Part of set up when players need to select loyalty.
@@ -46,78 +79,7 @@ trait PlayerActionTrait
 
 
 
-  /**
-   * Discard cards action when needed at end of a players turn
-   */
-  function discardCards($cards, $from_hand)
-  {
-    self::checkAction('discardCards');
 
-    $player = Players::get();
-    $discards = $player->checkDiscards();
-
-    if ($from_hand) {
-      if (count($cards) !== $discards['hand'])
-        throw new \feException("Incorrect number of discards");
-
-      foreach ($cards as $card_id) {
-        Cards::move($card_id, 'discard');
-        $card_name = $this->cards[$card_id]['name'];
-        $removed_card = Cards::get($card_id);
-        $court_cards = $player->getCourtCards();
-
-        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their hand.', array(
-          'playerId' => $player->getId(),
-          'playerName' => self::getActivePlayerName(),
-          'cardName' => $card_name,
-          'courtCards' => $court_cards,
-          'cardId' => $card_id,
-          'from' => 'hand'
-        ));
-      }
-    } else {
-      if (count($cards) != $discards['court'])
-        throw new \feException("Incorrect number of discards");
-
-      foreach ($cards as $card_id) {
-
-        // Move all spies back to players cylinder pool
-        $spiesOnCard = Tokens::getInLocation(['spies', $card_id]);
-        self::dump("spiesOnCard", $spiesOnCard);
-        foreach ($spiesOnCard as $spy) {
-          $spyOwner = explode("_", $spy['id'])[1];
-          Tokens::move($spy['id'], ['cylinders', $spyOwner]);
-        }
-
-        // move card to discard location
-        Cards::move($card_id, 'discard');
-        $card_name = $this->cards[$card_id]['name'];
-        $removed_card = Cards::get($card_id);
-        $court_cards = Cards::getInLocation(['court', $player_id]);
-
-        // slide card positions down to fill in gap
-        foreach ($court_cards as $c) {
-          if ($c['state'] > $removed_card['state'])
-            Cards::setState($c['id'], $c['state'] - 1);
-        }
-
-        $court_cards = Cards::getInLocation(['court', $player_id])->toArray();
-
-        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their court.', array(
-          'playerId' => $player_id,
-          'playerName' => self::getActivePlayerName(),
-          'cardName' => $card_name,
-          'courtCards' => $court_cards,
-          'cardId' => $card_id,
-          'from' => 'court'
-        ));
-      }
-    }
-
-    $this->updatePlayerCounts();
-
-    $this->gamestate->nextState('cleanup');
-  }
 
   function pass()
   {
@@ -146,63 +108,6 @@ trait PlayerActionTrait
     $this->gamestate->nextState('cleanup');
   }
 
-  /**
-   * Places road on a border for loyalty of active player
-   */
-  function placeRoad($border)
-  {
-    self::checkAction('placeRoad');
-    self::dump("placeRoad on ", $border);
-    $player_id = self::getActivePlayerId();
-    // TODO: check if allowed based on resolve_impact_icons_card_id
-    $loyalty = Players::get()->getLoyalty();
-    $location = $this->locations['pools'][$loyalty];
-    $road = Tokens::getInLocation($location)->first();
-    if ($road != null) {
-      $to = $this->locations['roads'][$border];
-      Tokens::move($road['id'], $to);
-      self::notifyAllPlayers("moveToken", "", array(
-        'moves' => array(
-          0 => array(
-            'from' => $location,
-            'to' => $to,
-            'token_id' => $road['id'],
-          )
-        )
-      ));
-    }
-    Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolve_impact_icons');
-  }
-
-  /**
-   * Places spy on card
-   */
-  function placeSpy($card_id)
-  {
-    self::checkAction('placeSpy');
-    self::dump("placeSpy on ", $card_id);
-
-    $player_id = self::getActivePlayerId();
-    $from = "cylinders_" . $player_id;
-    $cylinder = Tokens::getInLocation($from)->first();
-
-    if ($cylinder != null) {
-      $to = 'spies_' . $card_id;
-      Tokens::move($cylinder['id'], $to);
-      self::notifyAllPlayers("moveToken", "", array(
-        'moves' => array(
-          0 => array(
-            'from' => $from,
-            'to' => $to,
-            'token_id' => $cylinder['id'],
-          )
-        )
-      ));
-    }
-    Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolve_impact_icons');
-  }
 
   /**
    * Play card from hand to court
@@ -220,7 +125,7 @@ trait PlayerActionTrait
     $card_name = $this->cards[$card_id]['name'];
 
     // $bribe_card_id = $this->getGameStateValue("bribe_card_id");
-    // $bribe_ruler = $this->getRegionRulerForCard($bribe_card_id);
+    // $bribe_ruler = Cards::getRegionRulerForCard($bribe_card_id);
     // $bribe_amount = $this->getGameStateValue("bribe_amount");
 
     $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
@@ -479,5 +384,98 @@ trait PlayerActionTrait
     ));
 
     $this->gamestate->nextState('action');
+  }
+
+
+  /**
+   * Validate card action
+   */
+  function isValidCardAction($card_id, $card_action)
+  {
+    self::dump("cardAction: card_id", $card_id);
+    self::dump("cardAction: card_action", $card_action);
+
+    $token_info = Cards::get($card_id);
+    $card_info = $this->cards[$card_id];
+    $player_id = self::getActivePlayerId();
+    $location_info = explode("_", $token_info['location']);
+
+    // Checks to determine if it is a valid action
+    // Card should be in players court
+    if ($location_info[0] != 'court' || $location_info[1] != $player_id) {
+      throw new \feException("Not a valid card action for player.");
+    }
+    // Card should not have been used yet
+    if ($token_info['used'] != 0) {
+      throw new \feException("Card has already been used this turn.");
+    }
+    // Card should have the card action
+    if (!isset($card_info['actions'][$card_action])) {
+      throw new \feException("Action does not exist on selected card.");
+    }
+
+    // $next_state = 'action';
+    if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $card_info['suit'])) {
+      throw new \feException("No remaining actions and not a free action.");
+      // $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
+
+      // switch ($card_action) {
+      //   case BATTLE:
+      //     break;
+      //   case BETRAY:
+      //     break;
+      //   case BUILD:
+      //     break;
+      //   case GIFT:
+      //     $next_state = 'card_action_gift';
+      //     break;
+      //   case MOVE:
+      //     break;
+      //   case TAX:
+      //     break;
+      //   default:
+      //     break;
+      // };
+
+      // self::notifyAllPlayers("cardAction", clienttranslate('${player_name} uses ${card_name} to ${card_action}.'), array(
+      //   'player_id' => $player_id,
+      //   'player_name' => self::getActivePlayerName(),
+      //   'card_action' => $card_action,
+      //   'card_name' => $this->cards[$card_id]['name'],
+      // ));
+    };
+    return true;
+    // $this->gamestate->nextState($next_state);
+  }
+
+  /**
+   * checks if coalition is different from current loyalty.
+   * Handles any changes it it is.
+   */
+  function checkAndHandleLoyaltyChange($coalition)
+  {
+
+    $player_id = self::getActivePlayerId();
+    $current_loyaly = Players::get()->getLoyalty();
+    // check of loyalty needs to change. If it does not return
+    if ($current_loyaly == $coalition) {
+      return;
+    }
+
+
+    // TODO:
+    // 1. Return gifts
+    // 2. Discard prizes and patriots
+    // 3. Update loyalty
+    Players::get()->setLoyalty($coalition);
+
+    // Notify
+    $coalition_name = $this->loyalty[$coalition]['name'];
+    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changed loyalty to ${coalition_name}.'), array(
+      'player_id' => $player_id,
+      'player_name' => self::getActivePlayerName(),
+      'coalition' => $coalition,
+      'coalition_name' => $coalition_name
+    ));
   }
 }

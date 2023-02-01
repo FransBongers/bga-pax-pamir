@@ -113,4 +113,38 @@ class Cards extends \PaxPamir\Helpers\Pieces
       'used' => $value,
     ], $id);
   }
+
+  /**
+   * Should returns the cards that are not available for sale (because player already put rupee on it)
+   */
+  public static function getUnavailableCards()
+  {
+    $result = array();
+
+    // for ($i = 0; $i < 2; $i++) {
+    //   for ($j = 0; $j < 6; $j++) {
+    //     $res = Cards::getInLocation(['market',$i,$j]);
+    //     self::dump("unavailableCards getTokensOfType", $res);
+    //     $card = array_shift($res);
+    //     if (($card !== NULL) and ($card['used'] == 1)) {
+    //       $result[] = $card['id'];
+    //     }
+    //   }
+    // }
+
+    return $result;
+  }
+
+  /**
+   * Returns ruler of the region a card belongs to. 0 if no ruler, otherwise playerId.
+   */
+  public static function getRegionRulerForCard($card_id)
+  {
+    if ($card_id == 0) return 0;
+
+    $rulers = Map::getRulers();
+    $region = Game::get()->getCard($card_id)['region'];
+
+    return $rulers[$region];
+  }
 }

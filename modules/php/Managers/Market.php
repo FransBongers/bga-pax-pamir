@@ -1,5 +1,5 @@
 <?php
-namespace PaxPamir;
+namespace PaxPamir\Managers;
 
 use PaxPamir\Managers\Cards;
 

@@ -277,7 +277,7 @@ trait PPStateActionsTrait
         ));
         break;
       case LEVERAGE:
-        $this->incPlayerRupees($player_id, 2);
+        Players::get($player_id)->incRupees(2);
         $this->updatePlayerCounts();
         break;
       case POLITICAL_SUIT:

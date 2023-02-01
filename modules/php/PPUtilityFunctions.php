@@ -207,7 +207,7 @@ trait PPUtilityFunctionsTrait
     // 1. Return gifts
     // 2. Discard prizes and patriots
     // 3. Update loyalty
-    $this->setPlayerLoyalty($player_id, $coalition);
+    Players::get()->setLoyalty($coalition);
 
     // Notify
     $coalition_name = $this->loyalty[$coalition]['name'];
@@ -252,7 +252,7 @@ trait PPUtilityFunctionsTrait
           'current_score' => $current_score,
           'new_score' => $current_score + $points_per_player,
         );
-        $this->incPlayerScore($player_id, $points_per_player);
+        Players::get($player_id)->incScore($points_per_player);
       }
 
       // Slice data that was just used from arrays
@@ -361,39 +361,6 @@ trait PPUtilityFunctionsTrait
     return $moves;
   }
 
-  /**
-   * Update the number of rupees for a player in database
-   */
-  function incPlayerRupees($player_id, $value)
-  {
-    $rupees = Players::get($player_id)->getRupees();
-    $rupees += $value;
-    $sql = "UPDATE player SET rupees='$rupees' 
-              WHERE  player_id='$player_id' ";
-    self::DbQuery($sql);
-  }
-
-  /**
-   * Update a players score
-   */
-  function incPlayerScore($player_id, $value)
-  {
-    $score = $this->getPlayerScore($player_id);
-    $score += $value;
-    $sql = "UPDATE player SET player_score='$score' 
-              WHERE  player_id='$player_id' ";
-    self::DbQuery($sql);
-  }
-
-  /**
-   * Set loyalty for player in database
-   */
-  function setPlayerLoyalty($player_id, $coalition)
-  {
-    $sql = "UPDATE player SET loyalty='$coalition' 
-      WHERE  player_id='$player_id' ";
-    self::DbQuery($sql);
-  }
 
   /**
    * Check is string starts with a specific substring. Returns boolean

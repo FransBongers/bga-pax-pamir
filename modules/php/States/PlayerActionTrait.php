@@ -31,7 +31,7 @@ trait PlayerActionTrait
     $player_id = Players::getActiveId();
     $coalition_name = $this->loyalty[$coalition]['name'];
 
-    $this->setPlayerLoyalty($player_id, $coalition);
+    Players::get()->setLoyalty($coalition);
 
     // Notify
     self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} selected ${coalition_name}.'), array(
@@ -309,7 +309,7 @@ trait PlayerActionTrait
     self::dump("purchaseCard", $card_id, $player_id, $card);
     $row = explode("_", $market_location)[1];
     $row_alt = ($row == 0) ? 1 : 0;
-    $col = $cost = explode("_", $market_location)[2];
+    $col = $cost = intval(explode("_", $market_location)[2]);
     self::dump("row", $row);
 
     $next_state = 'action';
@@ -320,7 +320,7 @@ trait PlayerActionTrait
         throw new \feException("Not enough rupees");
       } else {
         // if enough rupees reduce player rupees
-        $this->incPlayerRupees($player_id, -$cost);
+        Players::get($player_id)->incRupees(-$cost);
       };
 
       // TODO (Frans): check if this is an event card or court card
@@ -337,7 +337,7 @@ trait PlayerActionTrait
 
       // add rupees on card to player totals. Then put them in rupee_pool location
       $rupees = Tokens::getInLocation([$market_location, 'rupees']);
-      $this->incPlayerRupees($player_id, count($rupees));
+      Players::get($player_id)->incRupees(count($rupees));
       Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
 
       // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
@@ -462,7 +462,7 @@ trait PlayerActionTrait
     $updated_cards = [];
     $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(0, $number_rupees_per_row));
     $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(1, $number_rupees_per_row));
-    $this->incPlayerRupees($player_id, -$selected_gift);
+    Players::get($player_id)->incRupees(-intval($selected_gift));
 
     $updated_counts = array(
       'rupees' => $rupees - $selected_gift,

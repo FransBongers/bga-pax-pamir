@@ -31,7 +31,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
   protected static function cast($row)
   {
     $val = json_decode(\stripslashes($row['value']), true);
-    return self::$variables[$row['name']] == 'int' ? ((int) $val) : $val;
+    return (self::$variables[$row['name']] ?? null) == 'int' ? ((int) $val) : $val;
   }
 
   /*
@@ -47,14 +47,13 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     foreach (
       self::DB()
         ->select(['value', 'name'])
-        ->get(false)
+        ->get()
       as $name => $variable
     ) {
       if (\array_key_exists($name, self::$variables)) {
         self::$data[$name] = $variable;
       }
     }
-
     self::$initialized = true;
     self::$log = $tmp;
   }
@@ -76,14 +75,14 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
       'str' => '',
     ];
     $val = $default[self::$variables[$name]];
-    try {
-      self::DB()->insert([
+    self::DB()->insert(
+      [
         'name' => $name,
         'value' => \json_encode($val),
-      ]);
-    } finally {
-      self::$data[$name] = $val;
-    }
+      ],
+      true
+    );
+    self::$data[$name] = $val;
   }
 
   /*
@@ -97,7 +96,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
 
     if (preg_match('/^([gs]et|inc|is)([A-Z])(.*)$/', $method, $match)) {
       // Sanity check : does the name correspond to a declared variable ?
-      $name = strtolower($match[2]) . $match[3];
+      $name = mb_strtolower($match[2]) . $match[3];
       if (!\array_key_exists($name, self::$variables)) {
         throw new \InvalidArgumentException("Property {$name} doesn't exist");
       }
@@ -118,6 +117,9 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
         return (bool) self::$data[$name];
       } elseif ($match[1] == 'set') {
         // Setters in DB and update cache
+        if (!isset($args[0])) {
+          throw new \InvalidArgumentException("Setting {$name} require a value");
+        }
         $value = $args[0];
         if (self::$variables[$name] == 'int') {
           $value = (int) $value;
@@ -138,11 +140,8 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
         $setter = 'set' . $match[2] . $match[3];
         return self::$setter(self::$getter() + (empty($args) ? 1 : $args[0]));
       }
-    } else {
-      throw new \feException('unknown method ' . $method);
-      return null;
     }
-    // return undefined;
+    return undefined;
   }
 
   /*

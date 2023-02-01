@@ -16,15 +16,15 @@ class Player extends \PaxPamir\Helpers\DB_Model
   protected $table = 'player';
   protected $primary = 'player_id';
   protected $attributes = [
-    'id' => 'player_id',
-    'no' => 'player_no',
+    'id' => ['player_id', 'int'],
+    'no' => ['player_no', 'int'],
     'name' => 'player_name',
     'color' => 'player_color',
     'eliminated' => 'player_eliminated',
-    'score' => 'player_score',
+    'score' => ['player_score', 'int'],
     'zombie' => 'player_zombie',
     'loyalty' => 'loyalty',
-    'rupees' => 'rupees',
+    'rupees' => ['rupees', 'int'],
   ];
 
   /*
@@ -54,10 +54,10 @@ class Player extends \PaxPamir\Helpers\DB_Model
     return (int) parent::getId();
   }
 
-  public function getCards()
-  {
-    return Cards::getOfPlayer($this->id);
-  }
+  // public function getCards()
+  // {
+  //   return Cards::getOfPlayer($this->id);
+  // }
 
   public static function getCounts()
   {
@@ -68,5 +68,10 @@ class Player extends \PaxPamir\Helpers\DB_Model
   function getCourtCards()
   {
     return Cards::getInLocationOrdered(['court', $this->id])->toArray();
+  }
+
+  function getHandCards()
+  {
+    return Cards::getInLocation(['hand', $this->id])->toArray();
   }
 }

@@ -152,16 +152,10 @@ class Pieces extends DB_Manager
     }
 
     if (is_array($location)) {
-      $delim = '_';
-      foreach ($location as $l) {
-        if (strpos($l, '%') !== false) {
-          $delim = '\\_';
-        }
-      }
-      $location = implode($delim, $location);
+      $location = implode('_', $location);
     }
 
-    $extra = $like ? '%\\\\' : '';
+    $extra = $like ? '%' : '';
     if (preg_match("/^[A-Za-z0-9${extra}-][A-Za-z_0-9${extra}-]*$/", $location) == 0) {
       throw new \BgaVisibleSystemException(
         "Class Pieces: location must be alphanum and underscore non empty string '$location'"
@@ -260,6 +254,7 @@ class Pieces extends DB_Manager
       ->whereIn(static::$prefix . 'id', $ids)
       ->get(false);
     if (count($result) != count($ids) && $raiseExceptionIfNotEnough) {
+      // throw new \feException(print_r(\debug_print_backtrace()));
       throw new \feException('Class Pieces: getMany, some pieces have not been found !' . json_encode($ids));
     }
 
@@ -368,6 +363,9 @@ class Pieces extends DB_Manager
     if (!is_array($ids)) {
       $ids = [$ids];
     }
+    if (empty($ids)) {
+      return [];
+    }
 
     self::checkLocation($location);
     self::checkState($state);
@@ -383,7 +381,7 @@ class Pieces extends DB_Manager
   public static function moveAllInLocation($fromLocation, $toLocation, $fromState = null, $toState = 0)
   {
     if (!is_null($fromLocation)) {
-      self::checkLocation($fromLocation, true);
+      self::checkLocation($fromLocation);
     }
     self::checkLocation($toLocation);
 
@@ -397,7 +395,7 @@ class Pieces extends DB_Manager
    */
   public static function moveAllInLocationKeepState($fromLocation, $toLocation)
   {
-    self::checkLocation($fromLocation, true);
+    self::checkLocation($fromLocation);
     self::checkLocation($toLocation);
     return self::moveAllInLocation($fromLocation, $toLocation, null, null);
   }
@@ -516,7 +514,7 @@ class Pieces extends DB_Manager
    *     "state" => <state>             // Optional argument specifies integer state, if not specified and $token_state_global is not specified auto-increment is used
    */
 
-  static function create($pieces, $globalLocation = null, $globalState = null, $globalId = null)
+  function create($pieces, $globalLocation = null, $globalState = null, $globalId = null)
   {
     $pos = is_null($globalLocation) ? 0 : self::getExtremePosition(true, $globalLocation) + 1;
 

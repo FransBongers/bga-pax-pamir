@@ -13,12 +13,29 @@ abstract class DB_Model extends \APP_DbObject implements \JsonSerializable
   protected $attributes = [];
 
   /**
+   * This array will contains class attributes that does not depends on the DB (static info), they can only be accessed, not modified
+   */
+  protected $staticAttributes = [];
+
+  /**
    * Fill in class attributes based on DB entry
    */
   public function __construct($row)
   {
     foreach ($this->attributes as $attribute => $field) {
-      $this->$attribute = $row[$field] ?? null;
+      $fieldName = is_array($field) ? $field[0] : $field;
+      $this->$attribute = $row[$fieldName] ?? null;
+      if (is_array($field)) {
+        if ($field[1] == 'int') {
+          $this->$attribute = (int) $this->$attribute;
+        }
+        if ($field[1] == 'bool') {
+          $this->$attribute = (bool) $this->$attribute;
+        }
+        if ($field[1] == 'obj') {
+          $this->$attribute = json_decode($this->$attribute, true);
+        }
+      }
     }
   }
 
@@ -28,7 +45,8 @@ abstract class DB_Model extends \APP_DbObject implements \JsonSerializable
   private function getPrimaryFieldValue()
   {
     foreach ($this->attributes as $attribute => $field) {
-      if ($field == $this->primary) {
+      $fieldName = is_array($field) ? $field[0] : $field;
+      if ($fieldName == $this->primary) {
         return $this->$attribute;
       }
     }
@@ -42,29 +60,71 @@ abstract class DB_Model extends \APP_DbObject implements \JsonSerializable
   {
     if (preg_match('/^([gs]et|inc|is)([A-Z])(.*)$/', $method, $match)) {
       // Sanity check : does the name correspond to a declared variable ?
-      $name = strtolower($match[2]) . $match[3];
+      $name = mb_strtolower($match[2]) . $match[3];
       if (!\array_key_exists($name, $this->attributes)) {
-        throw new \InvalidArgumentException("Attribute {$name} doesn't exist");
+        // Static attribute getters
+        if (in_array($name, $this->staticAttributes) && in_array($match[1], ['get', 'is'])) {
+          return $this->$name;
+        } else {
+          throw new \InvalidArgumentException("Attribute {$name} doesn't exist");
+        }
       }
 
       if ($match[1] == 'get') {
-        // Basic getters
-        return $this->$name;
+        if (count($args) > 0 && is_array($this->attributes[$name]) && $this->attributes[$name][1] == 'obj') {
+          // Handle json field
+          return $this->$name[$args[0]] ?? null;
+        } else {
+          // Basic getters
+          return $this->$name;
+        }
       } elseif ($match[1] == 'is') {
         // Boolean getter
         return (bool) ($this->$name == 1);
       } elseif ($match[1] == 'set') {
         // Setters in DB and update cache
         $value = $args[0];
-        $this->$name = $value;
 
-        $updateValue = $value;
+        // Auto-cast
+        $field = $this->attributes[$name];
+        $fieldName = is_array($field) ? $field[0] : $field;
+        $isObj = false;
+        if (is_array($field)) {
+          if ($field[1] == 'int') {
+            $value = (int) $value;
+            if ($value == $this->$name) {
+              return; // No modification, abort DB call
+            }
+          }
+          if ($field[1] == 'bool') {
+            $value = (bool) $value;
+            if ($value == $this->$name) {
+              return; // No modification, abort DB call
+            }
+          }
+          if ($field[1] == 'obj') {
+            $isObj = true;
+            $value = count($args) > 1 ? $args[1] : $args[0];
+            $objKey = count($args) > 1 ? $args[0] : null;
+          }
+        }
+
+        if ($isObj && $objKey !== null) {
+          $this->$name[$objKey] = $value;
+        } else {
+          $this->$name = $value;
+        }
+
+        $updateValue = $this->$name;
+        if ($isObj) {
+          $updateValue = json_encode($updateValue);
+        }
         if ($value != null) {
-          $updateValue = \addslashes($value);
+          $updateValue = \addslashes($updateValue);
         }
 
         // $this->DB()->update([$this->attributes[$name] => \addslashes($value)], $this->getPrimaryFieldValue());
-        $this->DB()->update([$this->attributes[$name] => $updateValue], $this->getPrimaryFieldValue());
+        $this->DB()->update([$fieldName => $updateValue], $this->getPrimaryFieldValue());
         return $value;
       } elseif ($match[1] == 'inc') {
         $getter = 'get' . $match[2] . $match[3];
@@ -91,24 +151,6 @@ abstract class DB_Model extends \APP_DbObject implements \JsonSerializable
   }
 
   /**
-   * Save query
-   */
-  public function save()
-  {
-    $id = null;
-    $data = [];
-    foreach ($this->attributes as $attribute => $field) {
-      if ($field == $this->primary) {
-        $id = $this->$attribute;
-      } else {
-        $data[$field] = $this->$attribute;
-      }
-    }
-
-    $this->DB()->update($data, $id);
-  }
-
-  /**
    * Private DB call
    */
   private function DB()
@@ -118,11 +160,11 @@ abstract class DB_Model extends \APP_DbObject implements \JsonSerializable
     }
 
     $log = null;
-    /*
-    if (static::$log ?? Game::get()->getGameStateValue('logging') == 1) {
-      $log = new Log(static::$table, static::$primary);
-    }
-    */
+
+    // if (static::$log ?? Game::get()->getGameStateValue('logging') == 1) {
+    //   $log = new Log($this->table, $this->primary);
+    // }
+
     return new QueryBuilder(
       $this->table,
       function ($row) {

@@ -36,21 +36,6 @@
 ALTER TABLE `player` ADD `rupees` int(10) unsigned NOT NULL DEFAULT 0;
 ALTER TABLE `player` ADD `loyalty` varchar(32) NOT NULL;
 
---  CREATE TABLE IF NOT EXISTS `token` (
---  `token_id` varchar(32) NOT NULL,
---  `token_location` varchar(32) NOT NULL,
---  `token_state` int(10),
--- --  `token_used` int(10),
---  PRIMARY KEY (`token_id`)
---  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---  CREATE TABLE IF NOT EXISTS `token` (
---   `token_key` varchar(32) NOT NULL,
---   `token_location` varchar(32) NOT NULL,
---   `token_state` int(10),
---   `token_used` int(10),
---   PRIMARY KEY (`token_key`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,
@@ -81,3 +66,13 @@ CREATE TABLE IF NOT EXISTS `tokens` (
   `used` int(10) DEFAULT 0,
   PRIMARY KEY (`token_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- CREATE TABLE IF NOT EXISTS `log` (
+--   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+--   `move_id` int(10) NOT NULL,
+--   `table` varchar(32) NOT NULL,
+--   `primary` varchar(32) NOT NULL,
+--   `type` varchar(32) NOT NULL,
+--   `affected` JSON,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

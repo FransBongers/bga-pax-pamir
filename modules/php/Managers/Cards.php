@@ -60,7 +60,6 @@ class Cards extends \PaxPamir\Helpers\Pieces
   public static function setupNewGame($players, $options)
   {
     self::createDeck(count($players));
-    self::drawInitialMarketCards();
   }
 
   private function createDeck($player_count)
@@ -105,15 +104,6 @@ class Cards extends \PaxPamir\Helpers\Pieces
       foreach ($pile as $id => $info) {
         self::move($id, 'deck', $info['state'] + $n_cards);
       }
-    }
-  }
-
-  private function drawInitialMarketCards()
-  {
-    // Assign initial cards to market
-    for ($i = 0; $i < 6; $i++) {
-      self::pickForLocation(1, 'deck', 'market_0_' . $i);
-      self::pickForLocation(1, 'deck', 'market_1_' . $i);
     }
   }
 

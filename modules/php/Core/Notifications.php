@@ -33,6 +33,26 @@ class Notifications
     self::notify($pId, 'message', $txt, $args);
   }
 
+  public static function clearTurn($player, $notifIds)
+  {
+    self::notifyAll('clearTurn', clienttranslate('${player_name} restart their turn'), [
+      'player' => $player,
+      'notifIds' => $notifIds,
+    ]);
+  }
+
+  public static function refreshUI($datas)
+  {
+    // Keep only the thing that matters
+    $fDatas = [
+      // Add data here that needs to be refreshed
+    ];
+
+    self::notifyAll('refreshUI', '', [
+      'datas' => $fDatas,
+    ]);
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

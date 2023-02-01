@@ -40,14 +40,11 @@ use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
-require_once('modules/php/PPConstants.php');
 require_once('modules/php/PPMap.php');
-require_once('modules/php/PPMarket.php');
 // Todo check why PPPlayer import is needed
 require_once('modules/php/PPPlayer.php');
 require_once('modules/php/PPStateActions.php');
 require_once('modules/php/PPStateArgs.php');
-require_once('modules/php/PPSupply.php');
 require_once('modules/php/PPUtilityFunctions.php');
 
 
@@ -58,13 +55,11 @@ require_once('modules/php/PPUtilityFunctions.php');
 class PaxPamirEditionTwo extends Table
 {
     use PaxPamir\PPMapTrait;
-    use PPMarketTrait;
     use PaxPamir\PPPlayerTrait;
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\PPStateActionsTrait;
     use PaxPamir\PPStateArgsTrait;
-    use PPSupplyTrait;
     use PaxPamir\PPUtilityFunctionsTrait;
 
     public static $instance = null;
@@ -103,19 +98,7 @@ class PaxPamirEditionTwo extends Table
         Players::setupNewGame($players, $options);
         Cards::setupNewGame($players, $options);
         Tokens::setupNewGame($players, $options);
-
-        // /************ Start the game initialization *****/
-
-
-        // self::setGameStateInitialValue('bribe_card_id', 0);
-        // self::setGameStateInitialValue('bribe_amount', -1);
-        // self::setGameStateInitialValue('resolve_impact_icons_card_id', 0);
-        // self::setGameStateInitialValue('resolve_impact_icons_current_icon', -1);
-        // self::setGameStateInitialValue('card_action_card_id', 0);
-
-
-
-
+        Market::setupNewGame($players, $options);
 
         // // Init game statistics
         // // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -146,10 +129,14 @@ class PaxPamirEditionTwo extends Table
         $data = array();
 
         $current_player_id = self::getCurrentPId(); // !! We must only return informations visible by this player !!
+        $player = Players::get($current_player_id);
+        self::dump('player_in_getAllDatas', $player);
         $data = [
+            'customLoyalty' => $player->getLoyalty(),
+            'customRupees' => $player->getRupees(),
             'cards' => $this->cards,
             // // Only get hand cards for current player (we might implement option to play with open hands?)
-            'hand' => Cards::getInLocation(['hand', $current_player_id])->toArray(),
+            'hand' => Players::get($current_player_id)->getHandCards(),
             'players' => Players::getUiData($current_player_id),
             'rupees' => Tokens::getOfType('rupee'),
             'favoredSuit' => Globals::getFavoredSuit(),
@@ -226,7 +213,6 @@ class PaxPamirEditionTwo extends Table
 
     public static function get()
     {
-        self::dump("Get instance", "value");
         return self::$instance;
     }
 
@@ -234,6 +220,7 @@ class PaxPamirEditionTwo extends Table
     {
         return $this->cards[$card_id];
     }
+
 
     /////////////////////////////////////////////////////////////
     // Exposing protected methods, please use at your own risk //

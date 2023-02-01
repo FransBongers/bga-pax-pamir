@@ -1,35 +1,22 @@
 <?php
-
 namespace PaxPamir;
-// use APP_DbObject;
 
-class Market  extends Helpers\Pieces
+use PaxPamir\Managers\Cards;
+
+class Market
 {
-  protected static $table = 'token';
-  protected static $prefix = 'token_';
-  // protected static $customFields = ['used'];
 
-  protected static function cast($token)
+  public static function setupNewGame($players, $options)
   {
-    return [
-      'id' => $token['id'],
-      'location' => $token['location'],
-      'state' => $token['state'],
-    ];
+    self::drawInitialMarketCards();
   }
 
-  public static function setupNewGame($players)
+  private function drawInitialMarketCards()
   {
-    $number_of_players = count($players);
-    $tokens = [];
-    $info = [
-      "id" => "card_{INDEX}",
-      "nbr" => 100,
-      "nbrStart" => 1,
-      "location" => COURT_CARD
-    ];
-    array_push($tokens, $info);
-    self::create($tokens);
-    // self::singleCreate('card', 'court', 0);
+    // Assign initial cards to market
+    for ($i = 0; $i < 6; $i++) {
+      Cards::pickForLocation(1, 'deck', 'market_0_' . $i);
+      Cards::pickForLocation(1, 'deck', 'market_1_' . $i);
+    }
   }
 }

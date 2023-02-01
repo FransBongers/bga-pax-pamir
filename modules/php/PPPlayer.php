@@ -7,16 +7,6 @@ use PaxPamir\Managers\Tokens;
 
 trait PPPlayerTrait
 {
-  function getPlayerCourtCards($player_id)
-  {
-    return Players::get($player_id)->getCourtCards();
-  }
-
-  function getPlayerHand($player_id)
-  {
-    return Cards::getInLocation(['hand', $player_id]);
-  }
-
   /**
    * Get loyalty for player
    */
@@ -44,7 +34,7 @@ trait PPPlayerTrait
     $player_loyalty = $this->getPlayerLoyalty($player_id);
 
     // Patriots
-    $court_cards = $this->getPlayerCourtCards($player_id);
+    $court_cards = Players::get($player_id)->getCourtCards();
     foreach($court_cards as $card) {
       $card_loyalty = $this->getCardInfo($card)['loyalty'];
       if ($card_loyalty === $player_loyalty) {
@@ -78,7 +68,7 @@ trait PPPlayerTrait
       ECONOMIC => 0,
       INTELLIGENCE => 0
     );
-    $court_cards = Players::get($player_id)->getCourtCards();// $this->getPlayerCourtCards($player_id);
+    $court_cards = Players::get($player_id)->getCourtCards();
     for ($i = 0; $i < count($court_cards); $i++) {
       $card_info = $this->cards[$court_cards[$i]['id']];
       $suits[$card_info['suit']] += $card_info['rank'];
@@ -94,10 +84,11 @@ trait PPPlayerTrait
     //
     // check for extra cards in hand and court
     //
+    $player = Players::get($player_id);
     $result = array();
     $suits = $this->getPlayerSuitsTotals($player_id);
-    $court_cards = $this->getPlayerCourtCards($player_id);
-    $hand = $this->getPlayerHand($player_id);
+    $court_cards = $player->getCourtCards();
+    $hand = $player->getHandCards();
 
     $result['court'] = count($court_cards) - $suits['political'] - 3;
     $result['court'] = max($result['court'], 0);

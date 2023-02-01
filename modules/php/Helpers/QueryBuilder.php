@@ -42,9 +42,9 @@ class QueryBuilder extends \APP_DbObject
   /*
    * Single insert, array syntax is [ 'name_of_field' => $value, ... ]
    */
-  public function insert($fields = [])
+  public function insert($fields = [], $overwriteIfExists = false)
   {
-    $this->multipleInsert(array_keys($fields))->values([array_values($fields)]);
+    $this->multipleInsert(array_keys($fields), $overwriteIfExists)->values([array_values($fields)]);
     return self::DbGetLastId();
   }
 
@@ -52,10 +52,10 @@ class QueryBuilder extends \APP_DbObject
    * Multiple insert, syntax is : ->multipleInsert(['field1', 'field2'])->values([ [1, 'test'], [2, 'tester'], ....])
    *   !!!! each values must have the content in same order as the fields
    */
-  public function multipleInsert($fields = [])
+  public function multipleInsert($fields = [], $overwriteIfExists = false)
   {
     $keys = implode('`, `', array_values($fields));
-    $this->sql = "INSERT INTO `{$this->table}` (`{$keys}`) VALUES";
+    $this->sql = ($overwriteIfExists ? 'REPLACE' : 'INSERT') . " INTO `{$this->table}` (`{$keys}`) VALUES";
     $this->insertPrimaryIndex = array_search($this->primary, $fields);
     return $this;
   }
@@ -79,7 +79,7 @@ class QueryBuilder extends \APP_DbObject
       }
       $vals[] = '(' . implode(',', $rowValues) . ')';
       $ids[] =
-        $row[$this->primary] ?? ($this->insertPrimaryIndex === false ? $startingId++ : $row[$this->insertPrimaryIndex]);
+        $rom[$this->primary] ?? ($this->insertPrimaryIndex === false ? $startingId++ : $row[$this->insertPrimaryIndex]);
     }
 
     $this->sql .= implode(',', $vals);
@@ -365,6 +365,13 @@ class QueryBuilder extends \APP_DbObject
   {
     $this->where = is_null($this->where) ? ' WHERE ' : $this->where . ($this->isOrWhere ? ' OR ' : ' AND ');
     $this->where .= "`$field` IS NULL";
+    return $this;
+  }
+
+  public function whereNotNull($field)
+  {
+    $this->where = is_null($this->where) ? ' WHERE ' : $this->where . ($this->isOrWhere ? ' OR ' : ' AND ');
+    $this->where .= "`$field` IS NOT NULL";
     return $this;
   }
 

@@ -53,8 +53,8 @@ trait PlayerActionTrait
   {
     self::checkAction('discardCards');
 
-    $player_id = self::getActivePlayerId();
-    $discards = $this->checkDiscardsForPlayer($player_id);
+    $player = Players::get();
+    $discards = $player->checkDiscards();
 
     if ($from_hand) {
       if (count($cards) !== $discards['hand'])
@@ -64,10 +64,10 @@ trait PlayerActionTrait
         Cards::move($card_id, 'discard');
         $card_name = $this->cards[$card_id]['name'];
         $removed_card = Cards::get($card_id);
-        $court_cards = Cards::getInLocation(['court', $player_id])->toArray();
+        $court_cards = $player->getCourtCards();
 
         self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their hand.', array(
-          'playerId' => $player_id,
+          'playerId' => $player->getId(),
           'playerName' => self::getActivePlayerName(),
           'cardName' => $card_name,
           'courtCards' => $court_cards,
@@ -466,7 +466,7 @@ trait PlayerActionTrait
 
     $updated_counts = array(
       'rupees' => $rupees - $selected_gift,
-      'influence' => $this->getPlayerInfluence($player_id),
+      'influence' => Players::get($player_id)->getInfluence(),
     );
 
     self::notifyAllPlayers("selectGift", clienttranslate('${player_name} purchased a gift for ${value} rupees'), array(

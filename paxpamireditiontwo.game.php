@@ -42,7 +42,6 @@ use PaxPamir\Managers\Tokens;
 
 require_once('modules/php/PPMap.php');
 // Todo check why PPPlayer import is needed
-require_once('modules/php/PPPlayer.php');
 require_once('modules/php/PPStateActions.php');
 require_once('modules/php/PPStateArgs.php');
 require_once('modules/php/PPUtilityFunctions.php');
@@ -55,7 +54,6 @@ require_once('modules/php/PPUtilityFunctions.php');
 class PaxPamirEditionTwo extends Table
 {
     use PaxPamir\PPMapTrait;
-    use PaxPamir\PPPlayerTrait;
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\PPStateActionsTrait;
@@ -157,8 +155,8 @@ class PaxPamirEditionTwo extends Table
             //     // Number of cylinders played is total number of cylinders minus cylinders still available to player 
             $data['counts'][$player_id]['cylinders'] = 10 - count($data['cylinders'][$player_id]);
             $data['counts'][$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
-            $data['counts'][$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
-            $data['counts'][$player_id]['influence'] = $this->getPlayerInfluence($player_id);
+            $data['counts'][$player_id]['suits'] = $player->getSuitTotals();
+            $data['counts'][$player_id]['influence'] = $player->getInfluence();
 
             foreach (['2', '4', '6'] as $gift_value) {
                 $data['gifts'][$player_id][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $player_id]);

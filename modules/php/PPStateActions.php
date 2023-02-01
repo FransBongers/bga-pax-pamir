@@ -39,7 +39,7 @@ trait PPStateActionsTrait
       Cards::setUsed($card["id"], 0);
     }
 
-    $discards = $this->checkDiscardsForPlayer($player_id);
+    $discards = Players::get()->checkDiscards();
 
     if ($discards['court'] > 0) {
       $this->gamestate->nextState('discard_court');
@@ -111,10 +111,11 @@ trait PPStateActionsTrait
       // Create array of players loyal to dominant coalition and their total influence
       $loyal_players = array();
       foreach ($players as $player_id => $player_info) {
-        if (Players::get($player_id)->getLoyalty() == $dominant_coalition) {
+        $player = Players::get($player_id);
+        if ($player->getLoyalty() == $dominant_coalition) {
           $loyal_players[] = array(
             'player_id' => $player_id,
-            'count' => $this->getPlayerInfluence($player_id),
+            'count' => $player->getInfluence(),
           );
         }
       };

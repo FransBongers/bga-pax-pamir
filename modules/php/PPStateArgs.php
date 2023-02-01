@@ -21,9 +21,9 @@ trait PPStateArgsTrait
 
   function argDiscardCourt()
   {
-    $player_id = self::getActivePlayerId();
-    $countPoliticalSuit = $this->getPlayerSuitsTotals($player_id)[POLITICAL];
-    $countCourtCards = count(Cards::getInLocation(['court', $player_id]));
+    $player = Players::get();
+    $countPoliticalSuit = $player->getSuitTotals()[POLITICAL];
+    $countCourtCards = count($player->getCourtCards());
 
     return array(
       'numberOfDiscards' => $countCourtCards - $countPoliticalSuit - 3
@@ -32,9 +32,9 @@ trait PPStateArgsTrait
 
   function argDiscardHand()
   {
-    $player_id = self::getActivePlayerId();
-    $countIntelligenceSuit = $this->getPlayerSuitsTotals($player_id)[INTELLIGENCE];
-    $countHandCards = count(Cards::getInLocation(['hand', $player_id]));
+    $player = Players::get();
+    $countIntelligenceSuit = $player->getSuitTotals()[INTELLIGENCE];
+    $countHandCards = count($player->getHandCards());
 
     return array(
       'numberOfDiscards' => $countHandCards - $countIntelligenceSuit - 2
@@ -67,16 +67,16 @@ trait PPStateArgsTrait
   {
     $player_id = self::getActivePlayerId();
     $current_player_id = self::getCurrentPlayerId();
-
+    $player = Players::get($player_id);
     return array(
       'remainingActions' => Globals::getRemainingActions(),
       'unavailableCards' => $this->getUnavailableCards(),
       'hand' => Cards::getInLocation(['hand',$current_player_id]),
       'court' => Cards::getInLocationOrdered(['court',$player_id])->toArray(),
-      'suits' => $this->getPlayerSuitsTotals($player_id),
+      'suits' => $player->getSuitTotals(),
       'rulers' => $this->getAllRegionRulers(),
       'favoredSuit' => Globals::getFavoredSuit(),
-      'rupees' => Players::get($player_id)->getRupees(),
+      'rupees' => $player->getRupees(),
     );
   }
 }

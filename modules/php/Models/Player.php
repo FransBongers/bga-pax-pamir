@@ -1,10 +1,13 @@
 <?php
 namespace PaxPamir\Models;
+
+use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
 
 /*
@@ -73,5 +76,73 @@ class Player extends \PaxPamir\Helpers\DB_Model
   function getHandCards()
   {
     return Cards::getInLocation(['hand', $this->id])->toArray();
+  }
+
+    /**
+   *   Returns total influence for player
+   */
+  function getInfluence()
+  {
+    
+    $influence = 1;
+    $player_loyalty = $this->getLoyalty();
+
+    // Patriots
+    $court_cards = $this->getCourtCards();
+    foreach($court_cards as $card) {
+      $card_loyalty = Game::get()->getCardInfo($card)['loyalty'];
+      if ($card_loyalty === $player_loyalty) {
+        $influence += 1;
+      }
+    }
+    for ($i = 1; $i <= 3; $i++) {
+      $value = $i * 2;
+      $tokens_in_location = Tokens::getInLocation(['gift' , $value , $this->id]);
+      if (count($tokens_in_location) > 0) {
+        $influence += 1;
+      }
+    }
+
+    // Tokens::getInLocation('cylinder', 'court_'.$player_id, null, 'state');
+    // TODO (Frans): get information about courd cards and add influence if patriot
+    // Add number of prizes
+
+    return $influence;
+  }
+
+  function getSuitTotals()
+  {
+    $suits = array(
+      POLITICAL => 0,
+      MILITARY => 0,
+      ECONOMIC => 0,
+      INTELLIGENCE => 0
+    );
+    
+    $court_cards = $this->getCourtCards();
+    for ($i = 0; $i < count($court_cards); $i++) {
+      $card = $court_cards[$i];
+      $suits[$card['suit']] += $card['rank'];
+    }
+    return $suits;
+  }
+
+  function checkDiscards()
+  {
+    //
+    // check for extra cards in hand and court
+    //
+    $result = array();
+    $suits = $this->getSuitTotals();
+    $court_cards = $this->getCourtCards();
+    $hand = $this->getHandCards();
+
+    $result['court'] = count($court_cards) - $suits['political'] - 3;
+    $result['court'] = max($result['court'], 0);
+
+    $result['hand'] = count($hand) - $suits['intelligence'] - 2;
+    $result['hand'] = max($result['hand'], 0);
+
+    return $result;
   }
 }

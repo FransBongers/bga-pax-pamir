@@ -272,17 +272,6 @@ trait PPUtilityFunctionsTrait
   }
 
 
-  // /**
-  //  * Get current score for player
-  //  */
-  // function getPlayerScore($player_id)
-  // {
-  //   $sql = "SELECT player_score FROM player WHERE  player_id='$player_id' ";
-  //   return $this->getUniqueValueFromDB($sql);
-  // }
-
-
-
   /**
    * Returns ruler of the region a card belongs to. 0 if no ruler, otherwise playerId.
    */
@@ -381,12 +370,13 @@ trait PPUtilityFunctionsTrait
     // $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
     // $result['players'] = self::getCollectionFromDb( $sql );
     foreach ($players as $player_id => $player_info) {
+      $player = Players::get($player_id);
       $counts[$player_id] = array();
-      $counts[$player_id]['rupees'] = Players::get($player_id)->getRupees();
+      $counts[$player_id]['rupees'] = $player->getRupees();
       $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
-      $counts[$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
-      $counts[$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);
-      $counts[$player_id]['influence'] = $this->getPlayerInfluence($player_id);
+      $counts[$player_id]['cards'] = count($player->getHandCards());
+      $counts[$player_id]['suits'] = $player->getSuitTotals();
+      $counts[$player_id]['influence'] = $player->getInfluence();
     }
 
     self::notifyAllPlayers("updatePlayerCounts", '', array(

@@ -3,6 +3,7 @@ namespace PaxPamir;
 
 use PaxPamir\Core\Globals;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
 
 trait PPStateArgsTrait
 {
@@ -75,7 +76,7 @@ trait PPStateArgsTrait
       'suits' => $this->getPlayerSuitsTotals($player_id),
       'rulers' => $this->getAllRegionRulers(),
       'favoredSuit' => Globals::getFavoredSuit(),
-      'rupees' => $this->getPlayerRupees($player_id),
+      'rupees' => Players::get($player_id)->getRupees(),
     );
   }
 }

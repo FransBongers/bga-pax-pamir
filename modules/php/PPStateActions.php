@@ -3,6 +3,7 @@ namespace PaxPamir;
 
 use PaxPamir\Core\Globals;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait PPStateActionsTrait
@@ -110,7 +111,7 @@ trait PPStateActionsTrait
       // Create array of players loyal to dominant coalition and their total influence
       $loyal_players = array();
       foreach ($players as $player_id => $player_info) {
-        if ($this->getPlayerLoyalty($player_id) == $dominant_coalition) {
+        if (Players::get($player_id)->getLoyalty() == $dominant_coalition) {
           $loyal_players[] = array(
             'player_id' => $player_id,
             'count' => $this->getPlayerInfluence($player_id),
@@ -195,7 +196,7 @@ trait PPStateActionsTrait
 
     switch ($current_icon) {
       case ARMY:
-        $loyalty = $this->getPlayerLoyalty($player_id);
+        $loyalty = Players::get()->getLoyalty();
         $location = $this->locations['pools'][$loyalty];
         $army = Tokens::getInLocation($location)->first();
         if ($army != null) {

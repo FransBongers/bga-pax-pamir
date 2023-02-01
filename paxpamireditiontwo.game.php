@@ -132,8 +132,6 @@ class PaxPamirEditionTwo extends Table
         $player = Players::get($current_player_id);
         self::dump('player_in_getAllDatas', $player);
         $data = [
-            'customLoyalty' => $player->getLoyalty(),
-            'customRupees' => $player->getRupees(),
             'cards' => $this->cards,
             // // Only get hand cards for current player (we might implement option to play with open hands?)
             'hand' => Players::get($current_player_id)->getHandCards(),
@@ -148,13 +146,14 @@ class PaxPamirEditionTwo extends Table
         // // Get counts for all players
         $players = $this->loadPlayersBasicInfos();
         foreach ($players as $player_id => $player_info) {
-            $data['court'][$player_id] = Players::get($player_id)->getCourtCards(); // $this->getPlayerCourtCards($player_id);
+            $player = Players::get($player_id);
+            $data['court'][$player_id] = $player->getCourtCards();
             foreach ($data['court'][$player_id] as $card) {
                 $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']]);
             }
 
             $data['cylinders'][$player_id] = Tokens::getInLocation(['cylinders', $player_id])->toArray();
-            $data['counts'][$player_id]['rupees'] = $this->getPlayerRupees($player_id);
+            $data['counts'][$player_id]['rupees'] = $player->getRupees();
             //     // Number of cylinders played is total number of cylinders minus cylinders still available to player 
             $data['counts'][$player_id]['cylinders'] = 10 - count($data['cylinders'][$player_id]);
             $data['counts'][$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));

@@ -3,6 +3,7 @@ namespace PaxPamir;
 
 use PaxPamir\Core\Globals;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait PPUtilityFunctionsTrait
@@ -195,7 +196,7 @@ trait PPUtilityFunctionsTrait
   {
 
     $player_id = self::getActivePlayerId();
-    $current_loyaly = $this->getPlayerLoyalty($player_id);
+    $current_loyaly = Players::get()->getLoyalty();
     // check of loyalty needs to change. If it does not return
     if ($current_loyaly == $coalition) {
       return;
@@ -365,7 +366,7 @@ trait PPUtilityFunctionsTrait
    */
   function incPlayerRupees($player_id, $value)
   {
-    $rupees = $this->getPlayerRupees($player_id);
+    $rupees = Players::get($player_id)->getRupees();
     $rupees += $value;
     $sql = "UPDATE player SET rupees='$rupees' 
               WHERE  player_id='$player_id' ";
@@ -414,7 +415,7 @@ trait PPUtilityFunctionsTrait
     // $result['players'] = self::getCollectionFromDb( $sql );
     foreach ($players as $player_id => $player_info) {
       $counts[$player_id] = array();
-      $counts[$player_id]['rupees'] = $this->getPlayerRupees($player_id);
+      $counts[$player_id]['rupees'] = Players::get($player_id)->getRupees();
       $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
       $counts[$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
       $counts[$player_id]['suits'] = $this->getPlayerSuitsTotals($player_id);

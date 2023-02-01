@@ -7,34 +7,18 @@ use PaxPamir\Managers\Tokens;
 
 trait PPPlayerTrait
 {
-  /**
-   * Get loyalty for player
-   */
-  function getPlayerLoyalty($player_id)
-  {
-    $sql = "SELECT loyalty FROM player WHERE  player_id='$player_id' ";
-    return $this->getUniqueValueFromDB($sql);
-  }
-
-  /**
-   * Get total number of rupees owned by player
-   */
-  function getPlayerRupees($player_id)
-  {
-    $sql = "SELECT rupees FROM player WHERE  player_id='$player_id' ";
-    return intval($this->getUniqueValueFromDB($sql));
-  }
 
   /**
    *   Returns total influence for player
    */
   function getPlayerInfluence($player_id)
   {
+    $player = Players::get($player_id);
     $influence = 1;
-    $player_loyalty = $this->getPlayerLoyalty($player_id);
+    $player_loyalty = $player->getLoyalty();
 
     // Patriots
-    $court_cards = Players::get($player_id)->getCourtCards();
+    $court_cards = $player->getCourtCards();
     foreach($court_cards as $card) {
       $card_loyalty = $this->getCardInfo($card)['loyalty'];
       if ($card_loyalty === $player_loyalty) {

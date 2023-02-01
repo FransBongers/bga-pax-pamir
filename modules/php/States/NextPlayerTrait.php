@@ -2,6 +2,7 @@
 namespace PaxPamir\States;
 
 use PaxPamir\Core\Globals;
+use PaxPamir\Managers\Players;
 
 trait NextPlayerTrait
 {
@@ -13,9 +14,7 @@ trait NextPlayerTrait
     if ($setup == 1) {
       // setup
       $player_id = self::activeNextPlayer();
-      $loyalty = $this->getPlayerLoyalty($player_id);
-      self::dump("loyalty in stNextPlayer", $loyalty == "null");
-      if ($this->getPlayerLoyalty($player_id) == null) {
+      if (Players::get($player_id)->getLoyalty() == null) {
         // choose next loyalty
         $this->giveExtraTime($player_id);
 

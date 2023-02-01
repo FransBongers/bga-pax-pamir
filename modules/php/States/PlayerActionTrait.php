@@ -155,7 +155,7 @@ trait PlayerActionTrait
     self::dump("placeRoad on ", $border);
     $player_id = self::getActivePlayerId();
     // TODO: check if allowed based on resolve_impact_icons_card_id
-    $loyalty = $this->getPlayerLoyalty($player_id);
+    $loyalty = Players::get()->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
     $road = Tokens::getInLocation($location)->first();
     if ($road != null) {
@@ -316,7 +316,7 @@ trait PlayerActionTrait
     if (Globals::getRemainingActions() > 0) {
 
       // check cost
-      if ($cost > $this->getPlayerRupees($player_id)) {
+      if ($cost > Players::get($player_id)->getRupees()) {
         throw new \feException("Not enough rupees");
       } else {
         // if enough rupees reduce player rupees
@@ -424,7 +424,7 @@ trait PlayerActionTrait
     }
 
     $player_id = self::getActivePlayerId();
-    $rupees = $this->getPlayerRupees($player_id);
+    $rupees = Players::get()->getRupees();
     // Player should have enough rupees
     if ($rupees < $selected_gift) {
       throw new \feException("Not enough rupees to pay for the gift.");

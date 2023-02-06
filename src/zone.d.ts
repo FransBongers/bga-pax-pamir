@@ -1,4 +1,5 @@
 interface Zone {
+  container_div: string;
   create: (
     game: Game,
     $div: string,
@@ -19,4 +20,6 @@ interface Zone {
   removeAll: () => void;
   removeFromZone: (objectId: string, destroy?: boolean, to?: string) => void;
   setPattern: (pattern: string) => void;
+  updateDisplay: () => void;
+  items: {id: string, weight: number}[];
 }

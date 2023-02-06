@@ -27,8 +27,8 @@ class PPNotificationManager {
     dojo.forEach(this.subscriptions, dojo.unsubscribe);
   }
 
-  getPlayer({ args }: Notif<{ player_id: string }>): PPPlayer {
-    return this.game.playerManager.getPlayer({ playerId: args.player_id });
+  getPlayer({ playerId }: { playerId: string }): PPPlayer {
+    return this.game.playerManager.getPlayer({ playerId });
   }
 
   setupNotifications() {
@@ -63,7 +63,10 @@ class PPNotificationManager {
   notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
     const { args } = notif;
     console.log('notif_chooseLoyalty', args);
-    this.getPlayer(notif).updatePlayerLoyalty({ coalition: args.coalition });
+    const playerId = args.player_id;
+    this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
+    // TODO (make this notif more generic for loyalty changes?)
+    this.getPlayer({ playerId }).setCounter({ counter: 'influence', value: 1 });
   }
 
   notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
@@ -75,23 +78,17 @@ class PPNotificationManager {
 
     if (from == 'hand') {
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      this.game.discardCard({ id: notif.args.cardId, from: this.game.playerHand });
+      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({playerId}).getHandZone() });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
       this.game.discardCard({
         id: notif.args.cardId,
-        from: this.game.market.getMarketCardsStock({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
+        from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
       });
     } else {
-      this.game.discardCard({ id: notif.args.cardId, from: this.game.playerManager.getPlayer({ playerId }).getCourtZone() });
+      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId }).getCourtZone() });
 
-      notif.args.courtCards.forEach(function (card, index) {
-        this.game.updateCard({
-          location: this.game.playerManager.players[playerId].court,
-          id: card.id,
-          order: card.state,
-        });
-      }, this);
+      // TODO: check if it is needed to update weight of cards in zone?
     }
   }
 
@@ -100,7 +97,7 @@ class PPNotificationManager {
     const { scores, moves } = notif.args;
     Object.keys(scores).forEach((playerId) => {
       this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].new_score);
-      this.game.moveToken({
+      this.game.move({
         id: `vp_cylinder_${playerId}`,
         from: this.game.objectManager.vpTrack.getZone(scores[playerId].current_score),
         to: this.game.objectManager.vpTrack.getZone(scores[playerId].new_score),
@@ -112,14 +109,14 @@ class PPNotificationManager {
       const coalition = to.split('_')[1];
       const splitFrom = from.split('_');
       const isArmy = splitFrom[0] == 'armies';
-      this.game.moveToken({
+      this.game.move({
         id: token_id,
         to: this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }),
         from: isArmy
           ? this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
           : this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
-        addClass: 'pp_coalition_block',
-        removeClass: isArmy ? 'pp_army' : 'pp_road',
+        addClass: ['pp_coalition_block'],
+        removeClass: isArmy ? ['pp_army'] : ['pp_road'],
       });
     });
   }
@@ -130,30 +127,20 @@ class PPNotificationManager {
     this.game.interactionManager.resetActionArgs();
     var playerId = notif.args.playerId;
 
-    notif.args.courtCards.forEach(function (card, index) {
-      this.game.updateCard({
-        location: this.game.playerManager.players[playerId].court,
-        id: card.id,
-        order: card.state,
-      });
-    }, this);
+    const player = this.getPlayer({ playerId });
+    notif.args.courtCards.forEach((card, index) => {
+      const item = player.getCourtZone().items.find((item) => item.id === card.id);
+      if (item) {
+        item.weight = card.state;
+      }
+    });
 
-    if (playerId == this.game.getPlayerId()) {
-      this.game.moveCard({
-        id: notif.args.card.id,
-        from: this.game.playerHand,
-        to: this.game.playerManager.getPlayer({ playerId }).getCourtZone(),
-      });
-    } else {
-      // TODO (Frans): check why moveCard results in a UI error => probably because other players don't have a playerHand?
-      // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.playerManager.players[playerId].court});
-      placeCard({
-        location: this.game.playerManager.getPlayer({ playerId }).getCourtZone(),
-        id: notif.args.card.id,
-      });
-    }
+    player.moveToCourt({
+      card: notif.args.card,
+      from: playerId == this.game.getPlayerId() ? player.getHandZone() : null,
+    });
 
-    this.game.playerManager.getPlayer({ playerId }).getCourtZone().updateDisplay();
+    this.getPlayer({ playerId }).getCourtZone().updateDisplay();
   }
 
   notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
@@ -170,28 +157,23 @@ class PPNotificationManager {
     // Move card from markt
     const cardId = notif.args.card.id;
     if (newLocation == 'active_events') {
-      this.game.moveCard({
+      this.game.move({
         id: cardId,
-        from: this.game.market.getMarketCardsStock({ row, column: col }),
+        from: this.game.market.getMarketCardZone({ row, column: col }),
         to: this.game.activeEvents,
       });
     } else if (newLocation == 'discard') {
-      this.game.market.getMarketCardsStock({ row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
+      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
     } else if (playerId == this.game.getPlayerId()) {
-      this.game.moveCard({
-        id: cardId,
-        from: this.game.market.getMarketCardsStock({ row, column: col }),
-        to: this.game.playerHand,
-      });
+      this.getPlayer({ playerId }).moveToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     } else {
-      this.game.moveCard({ id: cardId, from: this.game.market.getMarketCardsStock({ row, column: col }), to: null });
-      this.game.spies[cardId] = undefined;
+      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, `cards_${playerId}`);
     }
 
     // Place paid rupees on market cards
     updatedCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
     });
   }
 
@@ -200,34 +182,36 @@ class PPNotificationManager {
 
     this.game.interactionManager.resetActionArgs();
 
-    notif.args.cardMoves.forEach(function (move, index) {
-      const fromRow = move.from.split('_')[1];
-      const fromCol = move.from.split('_')[2];
-      const toRow = move.to.split('_')[1];
-      const toCol = move.to.split('_')[2];
-      this.game.moveCard({
+    notif.args.cardMoves.forEach((move, index) => {
+      const fromRow = Number(move.from.split('_')[1]);
+      const fromCol = Number(move.from.split('_')[2]);
+      const toRow = Number(move.to.split('_')[1]);
+      const toCol = Number(move.to.split('_')[2]);
+      this.game.move({
         id: move.cardId,
-        from: this.game.market.marketCards[fromRow][fromCol],
-        to: this.game.market.marketCards[toRow][toCol],
+        from: this.game.market.getMarketCardZone({ row: fromRow, column: fromCol }),
+        to: this.game.market.getMarketCardZone({ row: toRow, column: toCol }),
       });
       // TODO (Frans): check why in case of moving multiple rupees at the same time
       // they overlap
-      this.game.market.marketRupees[fromRow][fromCol].getAllItems().forEach((rupeeId) => {
-        this.game.moveToken({
-          id: rupeeId,
-          to: this.game.market.marketRupees[toRow][toCol],
-          from: this.game.market.marketRupees[fromRow][toRow],
-          weight: this.game.defaultWeightZone,
+      this.game.market
+        .getMarketRupeesZone({ row: fromRow, column: fromCol })
+        .getAllItems()
+        .forEach((rupeeId) => {
+          this.game.move({
+            id: rupeeId,
+            to: this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }),
+            from: this.game.market.getMarketRupeesZone({ row: fromRow, column: toRow }),
+          });
         });
-      });
-    }, this);
+    });
 
-    notif.args.newCards.forEach(function (move, index) {
-      placeCard({
-        location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
-        id: move.cardId,
-      });
-    }, this);
+    notif.args.newCards.forEach((move, index) => {
+      dojo.place(tplCard({ cardId: move.cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
+      this.game.market
+        .getMarketCardZone({ row: Number(move.to.split('_')[1]), column: Number(move.to.split('_')[2]) })
+        .placeInZone(move.cardId);
+    });
   }
 
   notif_selectGift(notif) {
@@ -249,8 +233,8 @@ class PPNotificationManager {
         from: `rupees_${player_id}`,
       });
     }, this);
-    $('rupee_count_' + player_id).innerHTML = updated_counts.rupees;
-    $('influence_' + player_id).innerHTML = updated_counts.influence;
+    this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'rupees', value: updated_counts.rupees });
+    this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'influence', value: updated_counts.influence });
   }
 
   notif_updatePlayerCounts(notif) {
@@ -259,15 +243,16 @@ class PPNotificationManager {
     const counts = notif.args.counts;
 
     Object.keys(counts).forEach((playerId) => {
-      $('influence_' + playerId).innerHTML = counts[playerId].influence;
-      $('cylinder_count_' + playerId).innerHTML = counts[playerId].cylinders;
-      $('rupee_count_' + playerId).innerHTML = counts[playerId].rupees;
-      $('card_count_' + playerId).innerHTML = counts[playerId].cards;
+      const player = this.getPlayer({ playerId });
+      player.setCounter({ counter: 'influence', value: counts[playerId].influence });
+      player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
+      player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
+      player.setCounter({ counter: 'cards', value: counts[playerId].cards });
 
-      $('economic_' + playerId).innerHTML = counts[playerId].suits.economic;
-      $('military_' + playerId).innerHTML = counts[playerId].suits.military;
-      $('political_' + playerId).innerHTML = counts[playerId].suits.political;
-      $('intelligence_' + playerId).innerHTML = counts[playerId].suits.intelligence;
+      player.setCounter({ counter: 'economic', value: counts[playerId].suits.economic });
+      player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
+      player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
+      player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
     });
   }
 
@@ -279,9 +264,9 @@ class PPNotificationManager {
       const toZone = this.game.getZoneForLocation({ location: to });
 
       // TODO: perhaps create separate function for this
-      const addClass = to.startsWith('armies') ? 'pp_army' : to.startsWith('roads') ? 'pp_road' : undefined;
-      const removeClass = from.startsWith('blocks') ? 'pp_coalition_block' : undefined;
-      this.game.moveToken({
+      const addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
+      const removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
+      this.game.move({
         id: token_id,
         from: fromZone,
         to: toZone,

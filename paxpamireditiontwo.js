@@ -70,21 +70,27 @@ var BORDERS = [
     KANDAHAR_PUNJAB,
     PERSIA_TRANSCASPIA,
 ];
+var tplCard = function (_a) {
+    var cardId = _a.cardId, extraClasses = _a.extraClasses;
+    return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
+};
+var tplRupee = function (_a) {
+    var rupeeId = _a.rupeeId;
+    return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
+};
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
-var placeCard = function (_a) {
-    var _b;
-    var location = _a.location, id = _a.id, _c = _a.order, order = _c === void 0 ? null : _c;
-    if (order != null) {
-        location.changeItemsWeight((_b = {},
-            _b[id] = order,
-            _b));
-    }
-    location.addToStockWithId(id, id, 'pp_market_deck');
-    // this.setupCardSpyZone({location, cardId: id});
-    // this.addTooltip( location.getItemDivId(id), id, '' );
-};
+// const placeCard = ({ location, id, order = null }) => {
+//   if (order != null) {
+//     location.changeItemsWeight({
+//       [id]: order,
+//     });
+//   }
+//   location.addToStockWithId(id, id, 'pp_market_deck');
+//   // this.setupCardSpyZone({location, cardId: id});
+//   // this.addTooltip( location.getItemDivId(id), id, '' );
+// };
 // TODO(Frans): detereming jstpl based on id?
 var placeToken = function (_a) {
     var game = _a.game, location = _a.location, id = _a.id, jstpl = _a.jstpl, jstplProps = _a.jstplProps, _b = _a.weight, weight = _b === void 0 ? 0 : _b, _c = _a.classes, classes = _c === void 0 ? [] : _c, _d = _a.from, from = _d === void 0 ? null : _d;
@@ -95,34 +101,33 @@ var placeToken = function (_a) {
     });
     location.placeInZone(id, weight);
 };
-// Function to setup stock components for cards
-var setupCardsStock = function (_a) {
-    var game = _a.game, stock = _a.stock, nodeId = _a.nodeId, className = _a.className;
-    var useLargeCards = false;
-    stock.create(game, $(nodeId), CARD_WIDTH, CARD_HEIGHT);
-    // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
-    var backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
-    stock.image_items_per_row = useLargeCards ? 117 : 118;
-    stock.item_margin = 10;
-    // TODO: below is option to customize the created div (and add zones to card for example)
-    stock.jstpl_stock_item =
-        '<div id="${id}" class="stockitem pp_card ' +
-            className +
-            '" \
-              style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:' +
-            backgroundSize +
-            ";\
-              background-image:url('${image}');\"></div>";
-    Object.keys(game.gamedatas.cards).forEach(function (cardId) {
-        var cardFileLocation = useLargeCards
-            ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg'
-            : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
-        stock.addItemType(cardId, 0, cardFileLocation, useLargeCards ? Number(cardId.split('_')[1]) - 1 : Number(cardId.split('_')[1]));
-    });
-    stock.extraClasses = "pp_card ".concat(className);
-    stock.setSelectionMode(0);
-    stock.onItemCreate = dojo.hitch(game, 'setupNewCard');
-};
+// // Function to setup stock components for cards
+// const setupCardsStock = ({ game, stock, nodeId, className }: { game: Game; stock: Stock; nodeId: string; className?: string }) => {
+//   const useLargeCards = false;
+//   stock.create(game, $(nodeId), CARD_WIDTH, CARD_HEIGHT);
+//   // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+//   const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
+//   stock.image_items_per_row = useLargeCards ? 117 : 118;
+//   stock.item_margin = 10;
+//   // TODO: below is option to customize the created div (and add zones to card for example)
+//   stock.jstpl_stock_item =
+//     '<div id="${id}" class="stockitem pp_card ' +
+//     className +
+//     '" \
+//               style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:' +
+//     backgroundSize +
+//     ";\
+//               background-image:url('${image}');\"></div>";
+//   Object.keys(game.gamedatas.cards).forEach((cardId) => {
+//     const cardFileLocation = useLargeCards
+//       ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg'
+//       : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
+//     stock.addItemType(cardId, 0, cardFileLocation, useLargeCards ? Number(cardId.split('_')[1]) - 1 : Number(cardId.split('_')[1]));
+//   });
+//   stock.extraClasses = `pp_card ${className}`;
+//   stock.setSelectionMode(0);
+//   stock.onItemCreate = dojo.hitch(game, 'setupNewCard');
+// };
 // Function to set up zones for tokens (armies, tribes, cylinders etc.)
 var setupTokenZone = function (_a) {
     var game = _a.game, zone = _a.zone, nodeId = _a.nodeId, tokenWidth = _a.tokenWidth, tokenHeight = _a.tokenHeight, _b = _a.itemMargin, itemMargin = _b === void 0 ? null : _b, _c = _a.instantaneous, instantaneous = _c === void 0 ? false : _c, _d = _a.pattern, pattern = _d === void 0 ? null : _d, _e = _a.customPattern, customPattern = _e === void 0 ? null : _e;
@@ -312,29 +317,27 @@ var PPPlayer = /** @class */ (function () {
     function PPPlayer(_a) {
         var game = _a.game, player = _a.player;
         var _this = this;
+        this.hand = new ebg.zone();
+        this.counters = {
+            cards: new ebg.counter(),
+            cylinders: new ebg.counter(),
+            economic: new ebg.counter(),
+            influence: new ebg.counter(),
+            intelligence: new ebg.counter(),
+            military: new ebg.counter(),
+            political: new ebg.counter(),
+            rupees: new ebg.counter(),
+        };
         // console.log("Player", player);
         this.game = game;
         var playerId = player.id;
         this.playerId = playerId;
+        this.player = player;
         this.playerName = player.name;
         this.playerColor = player.color;
         var gamedatas = game.gamedatas;
-        // Create player court stock
-        this.court = new ebg.stock();
-        setupCardsStock({
-            game: this.game,
-            stock: this.court,
-            nodeId: "pp_court_player_".concat(playerId),
-            className: "pp_card_in_court_".concat(playerId),
-        });
-        // Add court cards played by player to court
-        gamedatas.court[playerId].forEach(function (card) {
-            placeCard({
-                location: _this.court,
-                id: card.id,
-                order: card.state,
-            });
-        });
+        this.setupHand({ gamedatas: gamedatas });
+        this.setupCourt({ gamedatas: gamedatas });
         // Create cylinder zone
         this.cylinders = new ebg.zone();
         setupTokenZone({
@@ -403,26 +406,87 @@ var PPPlayer = /** @class */ (function () {
                 });
             });
         });
-        // Set up players board
-        var player_board_div = $('player_board_' + playerId);
-        dojo.place(this.game.format_block('jstpl_player_board', __assign(__assign({}, player), { p_color: player.color })), player_board_div);
-        if (player.loyalty !== 'null') {
-            this.updatePlayerLoyalty({ coalition: player.loyalty });
-        }
-        // TODO (Frans): check use of counter component for all counts
-        $('cylinders_' + playerId).classList.add("pp_player_color_".concat(player.color));
-        // Set all values in player panels
-        $('influence_' + playerId).innerHTML = gamedatas.counts[playerId].influence;
-        $('cylinder_count_' + playerId).innerHTML = gamedatas.counts[playerId].cylinders;
-        $('rupee_count_' + playerId).innerHTML = gamedatas.players[playerId].rupees;
-        $('card_count_' + playerId).innerHTML = gamedatas.counts[playerId].cards;
-        $('economic_' + playerId).innerHTML = gamedatas.counts[playerId].suits.economic;
-        $('military_' + playerId).innerHTML = gamedatas.counts[playerId].suits.military;
-        $('political_' + playerId).innerHTML = gamedatas.counts[playerId].suits.political;
-        $('intelligence_' + playerId).innerHTML = gamedatas.counts[playerId].suits.intelligence;
+        this.setupPlayerPanels({ gamedatas: gamedatas });
     }
+    // Setup functions
+    PPPlayer.prototype.setupHand = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
+        if (!(this.playerId === this.game.getPlayerId())) {
+            return;
+        }
+        this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
+        this.hand.instantaneous = true;
+        this.hand.item_margin = 16;
+        gamedatas.hand.forEach(function (card) {
+            dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
+            _this.hand.placeInZone(card.id);
+        });
+        this.hand.instantaneous = false;
+    };
+    PPPlayer.prototype.setupCourt = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
+        this.court = new ebg.zone();
+        this.court.create(this.game, "pp_court_player_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
+        this.court.item_margin = 16;
+        gamedatas.court[this.playerId].forEach(function (card) {
+            var cardId = card.id;
+            var _a = _this.game.gamedatas.cards[cardId], actions = _a.actions, region = _a.region;
+            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_card_in_court_".concat(_this.playerId, " pp_card_in_court_").concat(region) }), "pp_court_player_".concat(_this.playerId));
+            _this.setupCourtCard({ cardId: cardId });
+            _this.court.placeInZone(cardId, card.state);
+        });
+        console.log('court', this.court);
+    };
+    PPPlayer.prototype.setupPlayerPanels = function (_a) {
+        var gamedatas = _a.gamedatas;
+        // Set up panels
+        var player_board_div = $('player_board_' + this.playerId);
+        dojo.place(this.game.format_block('jstpl_player_board', __assign(__assign({}, this.player), { p_color: this.playerColor })), player_board_div);
+        $("cylinders_".concat(this.playerId)).classList.add("pp_player_color_".concat(this.playerColor));
+        // TODO: check how player loyalty is returned with new setup. Seems to be empty string?
+        if (this.player.loyalty && this.player.loyalty !== 'null') {
+            this.updatePlayerLoyalty({ coalition: this.player.loyalty });
+        }
+        this.counters.cards.create("card_count_".concat(this.playerId, "_counter"));
+        this.counters.cylinders.create("cylinder_count_".concat(this.playerId, "_counter"));
+        this.counters.economic.create("economic_".concat(this.playerId, "_counter"));
+        this.counters.influence.create("influence_".concat(this.playerId, "_counter"));
+        this.counters.intelligence.create("intelligence_".concat(this.playerId, "_counter"));
+        this.counters.military.create("military_".concat(this.playerId, "_counter"));
+        this.counters.political.create("political_".concat(this.playerId, "_counter"));
+        this.counters.rupees.create("rupee_count_".concat(this.playerId, "_counter"));
+        // Set all values in player panels
+        if (this.player.loyalty && this.player.loyalty !== 'null') {
+            this.counters.influence.setValue(gamedatas.counts[this.playerId].influence);
+        }
+        else {
+            this.counters.influence.disable();
+        }
+        this.counters.cylinders.setValue(gamedatas.counts[this.playerId].cylinders);
+        this.counters.rupees.setValue(gamedatas.players[this.playerId].rupees);
+        this.counters.cards.setValue(gamedatas.counts[this.playerId].cards);
+        this.counters.economic.setValue(gamedatas.counts[this.playerId].suits.economic);
+        this.counters.military.setValue(gamedatas.counts[this.playerId].suits.military);
+        this.counters.political.setValue(gamedatas.counts[this.playerId].suits.political);
+        this.counters.intelligence.setValue(gamedatas.counts[this.playerId].suits.intelligence);
+    };
+    PPPlayer.prototype.setupCourtCard = function (_a) {
+        var cardId = _a.cardId;
+        var _b = this.game.gamedatas.cards[cardId], actions = _b.actions, region = _b.region;
+        this.game.createSpyZone({ cardId: cardId });
+        Object.keys(actions).forEach(function (action, index) {
+            var actionId = action + '_' + cardId;
+            dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action pp_card_action_").concat(action, "\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
+        });
+    };
+    // Getters & setters
     PPPlayer.prototype.getCourtZone = function () {
         return this.court;
+    };
+    PPPlayer.prototype.getHandZone = function () {
+        return this.hand;
     };
     PPPlayer.prototype.getCylinderZone = function () {
         return this.cylinders;
@@ -433,6 +497,34 @@ var PPPlayer = /** @class */ (function () {
     };
     PPPlayer.prototype.getPlayerColor = function () {
         return this.playerColor;
+    };
+    PPPlayer.prototype.setCounter = function (_a) {
+        var counter = _a.counter, value = _a.value;
+        this.counters[counter].setValue(value);
+    };
+    PPPlayer.prototype.moveToHand = function (_a) {
+        var cardId = _a.cardId, from = _a.from;
+        this.game.move({ id: cardId, to: this.hand, from: from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+    };
+    PPPlayer.prototype.moveToCourt = function (_a) {
+        var card = _a.card, from = _a.from;
+        var region = this.game.gamedatas.cards[card.id].region;
+        if (!from) {
+            dojo.place(tplCard({ cardId: card.id, extraClasses: "pp_card_in_court_".concat(this.playerId, " pp_card_in_court_").concat(region) }), "pp_court_player_".concat(this.playerId));
+            this.setupCourtCard({ cardId: card.id });
+            this.court.placeInZone(card.id, card.state);
+        }
+        else {
+            this.setupCourtCard({ cardId: card.id });
+            this.game.move({
+                id: card.id,
+                to: this.court,
+                from: from,
+                addClass: ["pp_card_in_court_".concat(this.playerId, ", pp_card_in_court_").concat(region)],
+                removeClass: ['pp_card_in_hand'],
+                weight: card.state,
+            });
+        }
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
@@ -450,7 +542,6 @@ var PPPlayer = /** @class */ (function () {
             .removeClass('pp_loyalty_russian')
             .addClass("pp_loyalty_".concat(coalition));
     };
-    ;
     return PPPlayer;
 }());
 //  .########..##..........###....##....##.########.########.
@@ -709,65 +800,58 @@ var PPMap = /** @class */ (function () {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 var PPMarket = /** @class */ (function () {
     function PPMarket(game) {
-        var _this = this;
         console.log('MarketManager');
         this.game = game;
         this.marketCards = [];
         this.marketRupees = [];
+        var gamedatas = game.gamedatas;
         // Set up market
         for (var row = 0; row <= 1; row++) {
             this.marketCards[row] = [];
             this.marketRupees[row] = [];
             for (var column = 0; column <= 5; column++) {
-                // Set up stock component for each card in the market
-                var containerId = "pp_market_".concat(row, "_").concat(column);
-                this.marketCards[row][column] = new ebg.stock();
-                setupCardsStock({
-                    game: game,
-                    stock: this.marketCards[row][column],
-                    nodeId: containerId,
-                    className: 'pp_market_card',
-                });
-                // Set up zone for all rupees in the market
-                var rupeeContainerId = "pp_market_".concat(row, "_").concat(column, "_rupees");
-                this.marketRupees[row][column] = new ebg.zone();
-                setupTokenZone({
-                    game: game,
-                    zone: this.marketRupees[row][column],
-                    nodeId: rupeeContainerId,
-                    tokenWidth: RUPEE_WIDTH,
-                    tokenHeight: RUPEE_HEIGHT,
-                    itemMargin: -30,
-                });
-                // add cards
-                var cardInMarket = game.gamedatas.market[row][column];
-                if (cardInMarket) {
-                    placeCard({
-                        location: this.marketCards[row][column],
-                        id: cardInMarket.id,
-                    });
-                }
+                this.setupMarketCardZone({ row: row, column: column, gamedatas: gamedatas });
+                this.setupMarketRupeeZone({ row: row, column: column, gamedatas: gamedatas });
             }
         }
-        // Put all rupees in market locations
-        game.gamedatas.rupees.forEach(function (rupee) {
-            // const rupee = game.gamedatas.rupees[rupeeId];
-            if (rupee.location.startsWith('market')) {
-                var row = rupee.location.split('_')[1];
-                var column = rupee.location.split('_')[2];
-                placeToken({
-                    game: game,
-                    location: _this.marketRupees[row][column],
-                    id: rupee.id,
-                    jstpl: 'jstpl_rupee',
-                    jstplProps: {
-                        id: rupee.id,
-                    },
-                });
-            }
-        });
     }
-    PPMarket.prototype.getMarketCardsStock = function (_a) {
+    PPMarket.prototype.setupMarketCardZone = function (_a) {
+        var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
+        var containerId = "pp_market_".concat(row, "_").concat(column);
+        this.marketCards[row][column] = new ebg.zone();
+        this.marketCards[row][column].create(this.game, containerId, CARD_WIDTH, CARD_HEIGHT);
+        this.marketCards[row][column].instantaneous = true;
+        // add cards
+        var cardInMarket = gamedatas.market[row][column];
+        if (cardInMarket) {
+            dojo.place(tplCard({ cardId: cardInMarket.id, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
+            this.marketCards[row][column].placeInZone(cardInMarket.id);
+        }
+        this.marketCards[row][column].instantaneous = false;
+    };
+    PPMarket.prototype.setupMarketRupeeZone = function (_a) {
+        var _this = this;
+        var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
+        // Set up zone for all rupees in the market
+        var rupeeContainerId = "pp_market_".concat(row, "_").concat(column, "_rupees");
+        this.marketRupees[row][column] = new ebg.zone();
+        setupTokenZone({
+            game: this.game,
+            zone: this.marketRupees[row][column],
+            nodeId: rupeeContainerId,
+            tokenWidth: RUPEE_WIDTH,
+            tokenHeight: RUPEE_HEIGHT,
+            itemMargin: -30,
+        });
+        this.marketRupees[row][column].instantaneous = true;
+        gamedatas.rupees
+            .filter(function (rupee) { return rupee.location === "market_".concat(row, "_").concat(column, "_rupees"); })
+            .forEach(function (rupee) {
+            _this.placeRupeeOnCard({ row: row, column: column, rupeeId: rupee.id, fromDiv: _this.marketRupees[row][column].container_div });
+        });
+        this.marketRupees[row][column].instantaneous = false;
+    };
+    PPMarket.prototype.getMarketCardZone = function (_a) {
         var row = _a.row, column = _a.column;
         return this.marketCards[row][column];
     };
@@ -782,18 +866,11 @@ var PPMarket = /** @class */ (function () {
             _this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
         });
     };
-    ;
     PPMarket.prototype.placeRupeeOnCard = function (_a) {
-        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId;
-        placeToken({
-            game: this.game,
-            location: this.marketRupees[row][column],
-            id: rupeeId,
-            jstpl: 'jstpl_rupee',
-            jstplProps: {
-                id: rupeeId,
-            },
-        });
+        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv;
+        // TODO (chech why this does not slide from player player panel in case fromDiv is panelId)
+        dojo.place(tplRupee({ rupeeId: rupeeId }), fromDiv);
+        this.marketRupees[row][column].placeInZone(rupeeId);
     };
     return PPMarket;
 }());
@@ -1167,15 +1244,6 @@ var PPInteractionManager = /** @class */ (function () {
         }
         this.game.gamedatas.gamestate.descriptionmyturn = titleText;
         this.game.framework().updatePageTitle();
-        // this.game.gamedatas.gamestate.descriptionmyturn;
-        // const main = $('pagemaintitletext');
-        // main.innerHTML +=
-        //   _(' may take ') +
-        //   '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-        //   this.activePlayer.remainingActions +
-        //   '</span>' +
-        //   _(' action(s): ');
-        // this.game.framework().updatePageTitle();
     };
     PPInteractionManager.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
@@ -1192,8 +1260,8 @@ var PPInteractionManager = /** @class */ (function () {
     PPInteractionManager.prototype.handleDiscardConfirm = function (_a) {
         var fromHand = _a.fromHand;
         var cards = '';
-        dojo.query('.pp_selected').forEach(function (item, index) {
-            cards += ' card_' + item.id.split('_')[6];
+        dojo.query('.pp_selected').forEach(function (node, index) {
+            cards += ' ' + node.id;
         }, this);
         this.game.takeAction({
             action: 'discardCards',
@@ -1208,7 +1276,7 @@ var PPInteractionManager = /** @class */ (function () {
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node) {
             var _a, _b;
-            var cardId = "card_".concat(node.id.split('_')[6]);
+            var cardId = node.id;
             var used = ((_b = (_a = _this.activePlayer.court) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
                 (_this.activePlayer.remainingActions > 0 || _this.game.gamedatas.cards[cardId].suit === _this.activePlayer.favoredSuit))
@@ -1267,8 +1335,8 @@ var PPInteractionManager = /** @class */ (function () {
     PPInteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;
         dojo.query('.pp_market_card').forEach(function (node) {
-            var cost = node.id.split('_')[3]; // cost is equal to the column number
-            var cardId = 'card_' + node.id.split('_')[6];
+            var cost = node.parentElement.id.split('_')[3]; // cost is equal to the column number
+            var cardId = node.id;
             if (cost <= _this.activePlayer.rupees && !_this.activePlayer.unavailableCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
                 _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
@@ -1281,8 +1349,7 @@ var PPInteractionManager = /** @class */ (function () {
         var _this = this;
         var callback = _a.callback;
         dojo.query('.pp_card_in_hand').forEach(function (node, index) {
-            var cardId = 'card_' + node.id.split('_')[6];
-            console.log('hand card cardId', cardId);
+            var cardId = node.id;
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
         }, this);
@@ -1301,7 +1368,7 @@ var PPInteractionManager = /** @class */ (function () {
         var _this = this;
         var region = _a.region;
         dojo.query(".pp_card_in_court_".concat(region)).forEach(function (node, index) {
-            var cardId = 'card_' + node.id.split('_')[6];
+            var cardId = node.id;
             console.log('set selectable', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
@@ -1478,8 +1545,8 @@ var PPNotificationManager = /** @class */ (function () {
         dojo.forEach(this.subscriptions, dojo.unsubscribe);
     };
     PPNotificationManager.prototype.getPlayer = function (_a) {
-        var args = _a.args;
-        return this.game.playerManager.getPlayer({ playerId: args.player_id });
+        var playerId = _a.playerId;
+        return this.game.playerManager.getPlayer({ playerId: playerId });
     };
     PPNotificationManager.prototype.setupNotifications = function () {
         var _this = this;
@@ -1510,7 +1577,10 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_chooseLoyalty = function (notif) {
         var args = notif.args;
         console.log('notif_chooseLoyalty', args);
-        this.getPlayer(notif).updatePlayerLoyalty({ coalition: args.coalition });
+        var playerId = args.player_id;
+        this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
+        // TODO (make this notif more generic for loyalty changes?)
+        this.getPlayer({ playerId: playerId }).setCounter({ counter: 'influence', value: 1 });
     };
     PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
@@ -1519,24 +1589,18 @@ var PPNotificationManager = /** @class */ (function () {
         var from = notif.args.from;
         if (from == 'hand') {
             // TODO (Frans): check how this works for other players than the one whos card gets discarded
-            this.game.discardCard({ id: notif.args.cardId, from: this.game.playerHand });
+            this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId: playerId }).getHandZone() });
         }
         else if (from == 'market_0_0' || from == 'market_1_0') {
             var splitFrom = from.split('_');
             this.game.discardCard({
                 id: notif.args.cardId,
-                from: this.game.market.getMarketCardsStock({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
+                from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
             });
         }
         else {
-            this.game.discardCard({ id: notif.args.cardId, from: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone() });
-            notif.args.courtCards.forEach(function (card, index) {
-                this.game.updateCard({
-                    location: this.game.playerManager.players[playerId].court,
-                    id: card.id,
-                    order: card.state,
-                });
-            }, this);
+            this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId: playerId }).getCourtZone() });
+            // TODO: check if it is needed to update weight of cards in zone?
         }
     };
     PPNotificationManager.prototype.notif_dominanceCheck = function (notif) {
@@ -1545,7 +1609,7 @@ var PPNotificationManager = /** @class */ (function () {
         var _a = notif.args, scores = _a.scores, moves = _a.moves;
         Object.keys(scores).forEach(function (playerId) {
             _this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].new_score);
-            _this.game.moveToken({
+            _this.game.move({
                 id: "vp_cylinder_".concat(playerId),
                 from: _this.game.objectManager.vpTrack.getZone(scores[playerId].current_score),
                 to: _this.game.objectManager.vpTrack.getZone(scores[playerId].new_score),
@@ -1556,14 +1620,14 @@ var PPNotificationManager = /** @class */ (function () {
             var coalition = to.split('_')[1];
             var splitFrom = from.split('_');
             var isArmy = splitFrom[0] == 'armies';
-            _this.game.moveToken({
+            _this.game.move({
                 id: token_id,
                 to: _this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: coalition }),
                 from: isArmy
                     ? _this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
                     : _this.game.map.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone(),
-                addClass: 'pp_coalition_block',
-                removeClass: isArmy ? 'pp_army' : 'pp_road',
+                addClass: ['pp_coalition_block'],
+                removeClass: isArmy ? ['pp_army'] : ['pp_road'],
             });
         });
     };
@@ -1571,29 +1635,18 @@ var PPNotificationManager = /** @class */ (function () {
         console.log('notif_playCard', notif);
         this.game.interactionManager.resetActionArgs();
         var playerId = notif.args.playerId;
+        var player = this.getPlayer({ playerId: playerId });
         notif.args.courtCards.forEach(function (card, index) {
-            this.game.updateCard({
-                location: this.game.playerManager.players[playerId].court,
-                id: card.id,
-                order: card.state,
-            });
-        }, this);
-        if (playerId == this.game.getPlayerId()) {
-            this.game.moveCard({
-                id: notif.args.card.id,
-                from: this.game.playerHand,
-                to: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone(),
-            });
-        }
-        else {
-            // TODO (Frans): check why moveCard results in a UI error => probably because other players don't have a playerHand?
-            // this.game.moveCard({id: notif.args.card.key, from: null, to: this.game.playerManager.players[playerId].court});
-            placeCard({
-                location: this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone(),
-                id: notif.args.card.id,
-            });
-        }
-        this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
+            var item = player.getCourtZone().items.find(function (item) { return item.id === card.id; });
+            if (item) {
+                item.weight = card.state;
+            }
+        });
+        player.moveToCourt({
+            card: notif.args.card,
+            from: playerId == this.game.getPlayerId() ? player.getHandZone() : null,
+        });
+        this.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
     PPNotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
@@ -1607,63 +1660,60 @@ var PPNotificationManager = /** @class */ (function () {
         // Move card from markt
         var cardId = notif.args.card.id;
         if (newLocation == 'active_events') {
-            this.game.moveCard({
+            this.game.move({
                 id: cardId,
-                from: this.game.market.getMarketCardsStock({ row: row, column: col }),
+                from: this.game.market.getMarketCardZone({ row: row, column: col }),
                 to: this.game.activeEvents,
             });
         }
         else if (newLocation == 'discard') {
-            this.game.market.getMarketCardsStock({ row: row, column: col }).removeFromStockById(cardId, 'pp_discard_pile');
+            this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
         }
         else if (playerId == this.game.getPlayerId()) {
-            this.game.moveCard({
-                id: cardId,
-                from: this.game.market.getMarketCardsStock({ row: row, column: col }),
-                to: this.game.playerHand,
-            });
+            this.getPlayer({ playerId: playerId }).moveToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
         else {
-            this.game.moveCard({ id: cardId, from: this.game.market.getMarketCardsStock({ row: row, column: col }), to: null });
-            this.game.spies[cardId] = undefined;
+            this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, true, "cards_".concat(playerId));
         }
         // Place paid rupees on market cards
         updatedCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
         });
     };
     PPNotificationManager.prototype.notif_refreshMarket = function (notif) {
+        var _this = this;
         console.log('notif_refreshMarket', notif);
         this.game.interactionManager.resetActionArgs();
         notif.args.cardMoves.forEach(function (move, index) {
-            var _this = this;
-            var fromRow = move.from.split('_')[1];
-            var fromCol = move.from.split('_')[2];
-            var toRow = move.to.split('_')[1];
-            var toCol = move.to.split('_')[2];
-            this.game.moveCard({
+            var fromRow = Number(move.from.split('_')[1]);
+            var fromCol = Number(move.from.split('_')[2]);
+            var toRow = Number(move.to.split('_')[1]);
+            var toCol = Number(move.to.split('_')[2]);
+            _this.game.move({
                 id: move.cardId,
-                from: this.game.market.marketCards[fromRow][fromCol],
-                to: this.game.market.marketCards[toRow][toCol],
+                from: _this.game.market.getMarketCardZone({ row: fromRow, column: fromCol }),
+                to: _this.game.market.getMarketCardZone({ row: toRow, column: toCol }),
             });
             // TODO (Frans): check why in case of moving multiple rupees at the same time
             // they overlap
-            this.game.market.marketRupees[fromRow][fromCol].getAllItems().forEach(function (rupeeId) {
-                _this.game.moveToken({
+            _this.game.market
+                .getMarketRupeesZone({ row: fromRow, column: fromCol })
+                .getAllItems()
+                .forEach(function (rupeeId) {
+                _this.game.move({
                     id: rupeeId,
-                    to: _this.game.market.marketRupees[toRow][toCol],
-                    from: _this.game.market.marketRupees[fromRow][toRow],
-                    weight: _this.game.defaultWeightZone,
+                    to: _this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }),
+                    from: _this.game.market.getMarketRupeesZone({ row: fromRow, column: toRow }),
                 });
             });
-        }, this);
+        });
         notif.args.newCards.forEach(function (move, index) {
-            placeCard({
-                location: this.game.market.marketCards[move.to.split('_')[1]][move.to.split('_')[2]],
-                id: move.cardId,
-            });
-        }, this);
+            dojo.place(tplCard({ cardId: move.cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
+            _this.game.market
+                .getMarketCardZone({ row: Number(move.to.split('_')[1]), column: Number(move.to.split('_')[2]) })
+                .placeInZone(move.cardId);
+        });
     };
     PPNotificationManager.prototype.notif_selectGift = function (notif) {
         var _this = this;
@@ -1685,22 +1735,24 @@ var PPNotificationManager = /** @class */ (function () {
                 from: "rupees_".concat(player_id),
             });
         }, this);
-        $('rupee_count_' + player_id).innerHTML = updated_counts.rupees;
-        $('influence_' + player_id).innerHTML = updated_counts.influence;
+        this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'rupees', value: updated_counts.rupees });
+        this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'influence', value: updated_counts.influence });
     };
     PPNotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
+        var _this = this;
         console.log('notif_updatePlayerCounts', notif);
         this.game.playerCounts = notif.args.counts;
         var counts = notif.args.counts;
         Object.keys(counts).forEach(function (playerId) {
-            $('influence_' + playerId).innerHTML = counts[playerId].influence;
-            $('cylinder_count_' + playerId).innerHTML = counts[playerId].cylinders;
-            $('rupee_count_' + playerId).innerHTML = counts[playerId].rupees;
-            $('card_count_' + playerId).innerHTML = counts[playerId].cards;
-            $('economic_' + playerId).innerHTML = counts[playerId].suits.economic;
-            $('military_' + playerId).innerHTML = counts[playerId].suits.military;
-            $('political_' + playerId).innerHTML = counts[playerId].suits.political;
-            $('intelligence_' + playerId).innerHTML = counts[playerId].suits.intelligence;
+            var player = _this.getPlayer({ playerId: playerId });
+            player.setCounter({ counter: 'influence', value: counts[playerId].influence });
+            player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
+            player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
+            player.setCounter({ counter: 'cards', value: counts[playerId].cards });
+            player.setCounter({ counter: 'economic', value: counts[playerId].suits.economic });
+            player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
+            player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
+            player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
         });
     };
     PPNotificationManager.prototype.notif_moveToken = function (notif) {
@@ -1711,9 +1763,9 @@ var PPNotificationManager = /** @class */ (function () {
             var fromZone = _this.game.getZoneForLocation({ location: from });
             var toZone = _this.game.getZoneForLocation({ location: to });
             // TODO: perhaps create separate function for this
-            var addClass = to.startsWith('armies') ? 'pp_army' : to.startsWith('roads') ? 'pp_road' : undefined;
-            var removeClass = from.startsWith('blocks') ? 'pp_coalition_block' : undefined;
-            _this.game.moveToken({
+            var addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
+            var removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
+            _this.game.move({
                 id: token_id,
                 from: fromZone,
                 to: toZone,
@@ -1750,9 +1802,8 @@ var PaxPamir = /** @class */ (function () {
     function PaxPamir() {
         // global variables
         this.defaultWeightZone = 0;
-        this.playerHand = new ebg.stock();
         this.playerEvents = {}; // events per player
-        this.activeEvents = new ebg.stock(); // active events
+        this.activeEvents = new ebg.zone(); // active events
         this.spies = {}; // spies per cards
         this.playerCounts = {}; // rename to playerTotals?
         console.log('paxpamireditiontwo constructor');
@@ -1777,52 +1828,39 @@ var PaxPamir = /** @class */ (function () {
         this.gamedatas = gamedatas;
         console.log('gamedatas', gamedatas);
         // Events
-        setupCardsStock({
-            game: this,
-            stock: this.activeEvents,
-            nodeId: 'pp_active_events',
-            // className: `pp_card_in_court_${playerId}`
+        this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
+        this.activeEvents.instantaneous = true;
+        this.activeEvents.item_margin = 16;
+        // Add current event cards
+        gamedatas.activeEvents.forEach(function (card) {
+            dojo.place(tplCard({ cardId: card.id }), 'pp_active_events');
+            _this.activeEvents.placeInZone(card.id);
         });
-        // TODO: use Object.values in similar cases?
-        Object.keys(gamedatas.activeEvents).forEach(function (key) {
-            placeCard({
-                location: _this.activeEvents,
-                id: gamedatas.activeEvents[key].id,
-            });
-        });
+        this.activeEvents.instantaneous = false;
         this.objectManager = new PPObjectManager(this);
         this.playerManager = new PPPlayerManager(this);
         this.map = new PPMap(this);
         this.market = new PPMarket(this);
         this.interactionManager = new PPInteractionManager(this);
         this.playerCounts = gamedatas.counts;
-        // Setup player hand
-        setupCardsStock({
-            game: this,
-            stock: this.playerHand,
-            nodeId: 'pp_player_hand_cards',
-            className: 'pp_card_in_hand',
+        // TODO: refactor
+        // Place spies on cards
+        Object.keys(gamedatas.spies || {}).forEach(function (cardId) {
+            (gamedatas.spies[cardId] || []).forEach(function (cylinder) {
+                var playerId = cylinder.id.split('_')[1];
+                placeToken({
+                    game: _this,
+                    location: _this.spies[cardId],
+                    id: cylinder.id,
+                    jstpl: 'jstpl_cylinder',
+                    jstplProps: {
+                        id: cylinder.id,
+                        color: gamedatas.players[playerId].color,
+                    },
+                    weight: _this.defaultWeightZone,
+                });
+            });
         });
-        this.gamedatas.hand.forEach(function (card) {
-            placeCard({ location: _this.playerHand, id: card.id });
-        });
-        // // Place spies on cards
-        // Object.keys(gamedatas.spies || {}).forEach((cardId) => {
-        //   Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
-        //     const playerId = cylinderId.split('_')[1];
-        //     placeToken({
-        //       game: this,
-        //       location: this.spies[cardId],
-        //       id: cylinderId,
-        //       jstpl: 'jstpl_cylinder',
-        //       jstplProps: {
-        //         id: cylinderId,
-        //         color: gamedatas.players[playerId].color,
-        //       },
-        //       weight: this.defaultWeightZone,
-        //     });
-        //   });
-        // });
         if (this.notificationManager != undefined) {
             this.notificationManager.destroy();
         }
@@ -1880,14 +1918,14 @@ var PaxPamir = /** @class */ (function () {
             var items = this.spies[id].getAllItems();
             items.forEach(function (cylinderId) {
                 var playerId = cylinderId.split('_')[1];
-                _this.moveToken({
+                _this.move({
                     id: cylinderId,
                     to: _this.playerManager.getPlayer({ playerId: playerId }).getCylinderZone(),
                     from: _this.spies[id],
                 });
             });
         }
-        from.removeFromStockById(id, 'pp_discard_pile');
+        from.removeFromZone(id, true, 'pp_discard_pile');
     };
     PaxPamir.prototype.framework = function () {
         return this;
@@ -1955,37 +1993,46 @@ var PaxPamir = /** @class */ (function () {
             from.removeFromStockById(id);
         }
     };
-    PaxPamir.prototype.moveToken = function (_a) {
-        var id = _a.id, to = _a.to, from = _a.from, _b = _a.weight, weight = _b === void 0 ? this.defaultWeightZone : _b, _c = _a.addClass, addClass = _c === void 0 ? undefined : _c, _d = _a.removeClass, removeClass = _d === void 0 ? undefined : _d;
-        if (addClass) {
-            dojo.addClass(id, addClass);
-        }
-        if (removeClass) {
-            dojo.removeClass(id, removeClass);
-        }
+    PaxPamir.prototype.move = function (_a) {
+        var id = _a.id, to = _a.to, from = _a.from, _b = _a.weight, weight = _b === void 0 ? this.defaultWeightZone : _b, _c = _a.addClass, addClass = _c === void 0 ? [] : _c, _d = _a.removeClass, removeClass = _d === void 0 ? [] : _d;
+        addClass.forEach(function (newClass) {
+            dojo.addClass(id, newClass);
+        });
+        removeClass.forEach(function (oldClass) {
+            dojo.removeClass(id, oldClass);
+        });
         to.placeInZone(id, weight);
         from.removeFromZone(id, false);
     };
-    // Function that gets called every time a card is added to a stock component
-    PaxPamir.prototype.setupNewCard = function (cardDiv, cardId, divId) {
-        dojo.addClass(cardDiv, "pp_".concat(cardId));
-        // if card is played to a court
-        if (divId.startsWith('pp_court_player')) {
-            var _a = this.gamedatas.cards[cardId], actions_1 = _a.actions, region = _a.region;
-            // add region class for selectable functions
-            // const region = this.gamedatas.cards[cardId].region;
-            dojo.addClass(cardDiv, "pp_card_in_court_".concat(region));
-            var spyZoneId = 'spies_' + cardId;
-            dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), divId);
-            this.setupCardSpyZone({ nodeId: spyZoneId, cardId: cardId });
-            // TODO (add spy zone here)
-            // TODO (add card actions)
-            Object.keys(actions_1).forEach(function (action, index) {
-                var actionId = action + '_' + cardId;
-                dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action pp_card_action_").concat(action, "\" style=\"left: ").concat(actions_1[action].left, "px; top: ").concat(actions_1[action].top, "px\"></div>"), divId);
-            });
-        }
+    PaxPamir.prototype.createSpyZone = function (_a) {
+        var cardId = _a.cardId;
+        var spyZoneId = 'spies_' + cardId;
+        dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), cardId);
+        this.setupCardSpyZone({ nodeId: spyZoneId, cardId: cardId });
     };
+    // // Function that gets called every time a card is added to a stock component
+    // setupNewCard(cardDiv, cardId, divId) {
+    //   dojo.addClass(cardDiv, `pp_${cardId}`);
+    //   // if card is played to a court
+    //   if (divId.startsWith('pp_court_player')) {
+    //     const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
+    //     // add region class for selectable functions
+    //     // const region = this.gamedatas.cards[cardId].region;
+    //     dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
+    //     const spyZoneId = 'spies_' + cardId;
+    //     dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
+    //     this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
+    //     // TODO (add spy zone here)
+    //     // TODO (add card actions)
+    //     Object.keys(actions).forEach((action, index) => {
+    //       const actionId = action + '_' + cardId;
+    //       dojo.place(
+    //         `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
+    //         divId
+    //       );
+    //     });
+    //   }
+    // }
     // Every time a card is moved or placed in court this function will be called to set up zone.
     PaxPamir.prototype.setupCardSpyZone = function (_a) {
         var nodeId = _a.nodeId, cardId = _a.cardId;

@@ -169,16 +169,16 @@ var jstpl_ruler_token='<div class="pp_ruler_token pp_${region}" id="${id}"></div
 
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\
-        <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><span id="influence_${id}" class="pp_icon_count">0</span></div>\
-        <div id="cylinders_${id}" class="pp_icon pp_cylinder_icon"><span id="cylinder_count_${id}"  class="pp_icon_count">0</span></div>\
-        <div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><span id="rupee_count_${id}"  class="pp_icon_count">0</span></div>\
-        <div id="cards_${id}" class="pp_icon pp_card_icon"><span id="card_count_${id}"  class="pp_icon_count">0</span></div>\
+        <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><div id="influence_${id}" class="pp_icon_count"><span id="influence_${id}_counter"></span></div></div>\
+        <div id="cylinders_${id}" class="pp_icon pp_cylinder_icon"><div id="cylinder_count_${id}" class="pp_icon_count"><span id="cylinder_count_${id}_counter"></span></div></div>\
+        <div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${id}" class="pp_icon_count"><span id="rupee_count_${id}_counter"></span></div></div>\
+        <div id="cards_${id}" class="pp_icon pp_card_icon"><div id="card_count_${id}" class="pp_icon_count"><span id="card_count_${id}_counter"></span></div></div>\
     </div>\
     <div id="suits_${id}" class="pp_icon_container">\
-        <div class="pp_icon pp_suit_icon political"><span id="political_${id}" class="pp_icon_count">0</span></div>\
-        <div class="pp_icon pp_suit_icon intelligence"><span id="intelligence_${id}" class="pp_icon_count">0</span></div>\
-        <div class="pp_icon pp_suit_icon economic"><span id="economic_${id}" class="pp_icon_count">0</span></div>\
-        <div class="pp_icon pp_suit_icon military"><span id="military_${id}" class="pp_icon_count">0</span></div>\
+        <div class="pp_icon pp_suit_icon political"><div id="political_${id}" class="pp_icon_count"><span id="political_${id}_counter"></span></div></div>\
+        <div class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${id}" class="pp_icon_count"><span id="intelligence_${id}_counter"></span></div></div>\
+        <div class="pp_icon pp_suit_icon economic"><div id="economic_${id}" class="pp_icon_count"><span id="economic_${id}_counter"></span></div></div>\
+        <div class="pp_icon pp_suit_icon military"><div id="military_${id}" class="pp_icon_count"><span id="military_${id}_counter"></span></div></div>\
     </div>\
 </div>';
 

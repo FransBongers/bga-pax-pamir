@@ -171,7 +171,7 @@ trait PlayerActionTrait
       }
       Globals::incRemainingActions(-1);
       $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
-
+      $card = Cards::get($card_id);
       self::notifyAllPlayers("playCard", $message, array(
         'playerId' => $player_id,
         'playerName' => self::getActivePlayerName(),

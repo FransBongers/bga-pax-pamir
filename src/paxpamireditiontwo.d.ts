@@ -59,7 +59,7 @@ interface Token {
  * - check typing of object keys (playerId: number vs string)
  */
 interface PaxPamirGamedatas extends Gamedatas {
-  activeEvents: Record<string, Token>;
+  activeEvents: Token[];
   armies: {
     [region: string]: {
       [coalitionBlockId: string]: Token;
@@ -107,9 +107,7 @@ interface PaxPamirGamedatas extends Gamedatas {
   };
   rupees: Token[];
   spies: {
-    [cardId: string]: {
-      [cylinderId: string]: Token;
-    };
+    [cardId: string]: Token[];
   };
   suits: {
     [suit: string]: Suit;
@@ -122,7 +120,7 @@ interface PaxPamirGamedatas extends Gamedatas {
 }
 
 interface PaxPamirGame extends Game {
-  activeEvents: Stock;
+  activeEvents: Zone;
   gamedatas: PaxPamirGamedatas;
   interactionManager: PPInteractionManager;
   map: PPMap;
@@ -130,15 +128,15 @@ interface PaxPamirGame extends Game {
   objectManager: PPObjectManager;
   playerManager: PPPlayerManager;
   playerCounts: Record<string, number>;
-  playerHand: Stock;
   spies: {
     [cardId: string]: Zone;
   };
   getPlayerId: () => string;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
-  discardCard: (props: { id: string; from: Stock; order?: null }) => void;
+  createSpyZone: ({ cardId }: { cardId: string }) => void;
+  discardCard: (props: { id: string; from: Zone; order?: null }) => void;
   moveCard: (props: { id: string; from: Stock; to?: Stock | null; order?: number | null }) => void;
-  moveToken: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string; removeClass?: string }) => void;
+  move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
 }

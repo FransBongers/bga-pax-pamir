@@ -33,9 +33,8 @@ class PaxPamir implements PaxPamirGame {
   public playerManager: PPPlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
-  public playerHand = new ebg.stock();
   private playerEvents = {}; // events per player
-  public activeEvents: Stock = new ebg.stock(); // active events
+  public activeEvents: Zone = new ebg.zone(); // active events
   public spies = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals?
 
@@ -64,20 +63,15 @@ class PaxPamir implements PaxPamirGame {
     console.log('gamedatas', gamedatas);
 
     // Events
-    setupCardsStock({
-      game: this,
-      stock: this.activeEvents,
-      nodeId: 'pp_active_events',
-      // className: `pp_card_in_court_${playerId}`
+    this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
+    this.activeEvents.instantaneous = true;
+    this.activeEvents.item_margin = 16;
+    // Add current event cards
+    gamedatas.activeEvents.forEach((card) => {
+      dojo.place(tplCard({ cardId: card.id }), 'pp_active_events');
+      this.activeEvents.placeInZone(card.id);
     });
-
-    // TODO: use Object.values in similar cases?
-    Object.keys(gamedatas.activeEvents).forEach((key) => {
-      placeCard({
-        location: this.activeEvents,
-        id: gamedatas.activeEvents[key].id,
-      });
-    });
+    this.activeEvents.instantaneous = false;
 
     this.objectManager = new PPObjectManager(this);
     this.playerManager = new PPPlayerManager(this);
@@ -86,34 +80,24 @@ class PaxPamir implements PaxPamirGame {
     this.interactionManager = new PPInteractionManager(this);
     this.playerCounts = gamedatas.counts;
 
-    // Setup player hand
-    setupCardsStock({
-      game: this,
-      stock: this.playerHand,
-      nodeId: 'pp_player_hand_cards',
-      className: 'pp_card_in_hand',
+    // TODO: refactor
+    // Place spies on cards
+    Object.keys(gamedatas.spies || {}).forEach((cardId) => {
+      (gamedatas.spies[cardId] || []).forEach((cylinder) => {
+        const playerId = cylinder.id.split('_')[1];
+        placeToken({
+          game: this,
+          location: this.spies[cardId],
+          id: cylinder.id,
+          jstpl: 'jstpl_cylinder',
+          jstplProps: {
+            id: cylinder.id,
+            color: gamedatas.players[playerId].color,
+          },
+          weight: this.defaultWeightZone,
+        });
+      });
     });
-    this.gamedatas.hand.forEach((card) => {
-      placeCard({ location: this.playerHand, id: card.id });
-    });
-
-    // // Place spies on cards
-    // Object.keys(gamedatas.spies || {}).forEach((cardId) => {
-    //   Object.keys(gamedatas.spies[cardId]).forEach((cylinderId) => {
-    //     const playerId = cylinderId.split('_')[1];
-    //     placeToken({
-    //       game: this,
-    //       location: this.spies[cardId],
-    //       id: cylinderId,
-    //       jstpl: 'jstpl_cylinder',
-    //       jstplProps: {
-    //         id: cylinderId,
-    //         color: gamedatas.players[playerId].color,
-    //       },
-    //       weight: this.defaultWeightZone,
-    //     });
-    //   });
-    // });
 
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
@@ -171,14 +155,14 @@ class PaxPamir implements PaxPamirGame {
   ///////////////////////////////////////////////////
   //// Utility methods - add in alphabetical order
 
-  public discardCard({ id, from, order = null }: { id: string; from: Stock; order?: null }) {
+  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: null }) {
     // Move all spies back to cylinder pools
     if (this.spies?.[id]) {
       // ['cylinder_2371052_3']
       const items = this.spies[id].getAllItems();
       items.forEach((cylinderId) => {
         const playerId = cylinderId.split('_')[1];
-        this.moveToken({
+        this.move({
           id: cylinderId,
           to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
           from: this.spies[id],
@@ -186,7 +170,7 @@ class PaxPamir implements PaxPamirGame {
       });
     }
 
-    from.removeFromStockById(id, 'pp_discard_pile');
+    from.removeFromZone(id, true, 'pp_discard_pile');
   }
 
   public framework(): Framework {
@@ -260,56 +244,63 @@ class PaxPamir implements PaxPamirGame {
     }
   }
 
-  public moveToken({
+  public move({
     id,
     to,
     from,
     weight = this.defaultWeightZone,
-    addClass = undefined,
-    removeClass = undefined,
+    addClass = [],
+    removeClass = [],
   }: {
     id: string;
     to: Zone;
     from: Zone;
     weight?: number;
-    addClass?: string;
-    removeClass?: string;
+    addClass?: string[];
+    removeClass?: string[];
   }) {
-    if (addClass) {
-      dojo.addClass(id, addClass);
-    }
-    if (removeClass) {
-      dojo.removeClass(id, removeClass);
-    }
+    addClass.forEach((newClass) => {
+      dojo.addClass(id, newClass);
+    });
+
+    removeClass.forEach((oldClass) => {
+      dojo.removeClass(id, oldClass);
+    });
 
     to.placeInZone(id, weight);
     from.removeFromZone(id, false);
   }
 
-  // Function that gets called every time a card is added to a stock component
-  setupNewCard(cardDiv, cardId, divId) {
-    dojo.addClass(cardDiv, `pp_${cardId}`);
-    // if card is played to a court
-    if (divId.startsWith('pp_court_player')) {
-      const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
-      // add region class for selectable functions
-      // const region = this.gamedatas.cards[cardId].region;
-      dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
-
-      const spyZoneId = 'spies_' + cardId;
-      dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
-      this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
-      // TODO (add spy zone here)
-      // TODO (add card actions)
-      Object.keys(actions).forEach((action, index) => {
-        const actionId = action + '_' + cardId;
-        dojo.place(
-          `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
-          divId
-        );
-      });
-    }
+  createSpyZone({ cardId }: { cardId: string }) {
+    const spyZoneId = 'spies_' + cardId;
+    dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, cardId);
+    this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
   }
+
+  // // Function that gets called every time a card is added to a stock component
+  // setupNewCard(cardDiv, cardId, divId) {
+  //   dojo.addClass(cardDiv, `pp_${cardId}`);
+  //   // if card is played to a court
+  //   if (divId.startsWith('pp_court_player')) {
+  //     const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
+  //     // add region class for selectable functions
+  //     // const region = this.gamedatas.cards[cardId].region;
+  //     dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
+
+  //     const spyZoneId = 'spies_' + cardId;
+  //     dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
+  //     this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
+  //     // TODO (add spy zone here)
+  //     // TODO (add card actions)
+  //     Object.keys(actions).forEach((action, index) => {
+  //       const actionId = action + '_' + cardId;
+  //       dojo.place(
+  //         `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
+  //         divId
+  //       );
+  //     });
+  //   }
+  // }
 
   // Every time a card is moved or placed in court this function will be called to set up zone.
   setupCardSpyZone({ nodeId, cardId }) {
@@ -346,13 +337,7 @@ class PaxPamir implements PaxPamirGame {
   /*
    * Make an AJAX call with automatic lock
    */
-  takeAction({
-    action,
-    data = {},
-  }: {
-    action: string;
-    data?: Record<string, unknown>;
-  }) {
+  takeAction({ action, data = {} }: { action: string; data?: Record<string, unknown> }) {
     console.log(`takeAction ${action}`, data);
     if (!this.framework().checkAction(action)) {
       this.actionError(action);

@@ -14,6 +14,7 @@
     "src/zone.d.ts",
     "src/paxpamireditiontwo.d.ts",
     "src/constants.ts",
+    "src/templates.ts",
     "src/utility.ts",
     "src/PPObjectManager/index.ts",
     "src/PPPlayerManager/index.ts",

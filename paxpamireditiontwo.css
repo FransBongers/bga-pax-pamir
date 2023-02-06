@@ -807,6 +807,13 @@ html {
 }
 */
 
+.pp_card_in_zone {
+    width: 150px;
+    height: 209px;
+    background-size: 150px 209px;
+    background-repeat: no-repeat;
+}
+
 
 .pp_card {
     /* box-shadow: 1px 1px 4px; */
@@ -865,10 +872,17 @@ html {
 .pp_rupee {
     width: 50px;
     height: 50px;
-    background-image: url('img/temp/rupee.png');
+    /* background-image: url('img/temp/rupee.png'); */
     border-radius: 25px;
     box-shadow: 1px 1px 4px;
     z-index: 1;
+}
+
+.pp_rupee_inner {
+    background-size: 100%;
+    background-image: url('img/rupee.svg');
+    width: 100%;
+    height: 100%;
 }
 
 /* ------- PLAYER BOARD ------- */
@@ -897,14 +911,20 @@ html {
 .pp_icon_count {
     position: absolute;
     color: black;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     /* bottom: 11px; */
     /* left: 18px; */
     bottom: 0px;
     right: 0px;
     /* font-weight: 700; */
-    padding: 0px 2px;
+    /* padding: 0px 2px; */
     background-color: white;
     border-radius: 50%;
+    border: solid 1px #000000;
 }
 
 .pp_icon_container {

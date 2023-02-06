@@ -384,16 +384,6 @@ class PPInteractionManager {
 
     this.game.gamedatas.gamestate.descriptionmyturn = titleText;
     this.game.framework().updatePageTitle();
-    // this.game.gamedatas.gamestate.descriptionmyturn;
-    // const main = $('pagemaintitletext');
-
-    // main.innerHTML +=
-    //   _(' may take ') +
-    //   '<span id="remaining_actions_value" style="font-weight:bold;color:#ED0023;">' +
-    //   this.activePlayer.remainingActions +
-    //   '</span>' +
-    //   _(' action(s): ');
-    // this.game.framework().updatePageTitle();
   }
 
   handleDiscardSelect({ cardId }: { cardId: string }) {
@@ -409,8 +399,8 @@ class PPInteractionManager {
 
   handleDiscardConfirm({ fromHand }: { fromHand: boolean }) {
     let cards = '';
-    dojo.query('.pp_selected').forEach(function (item, index) {
-      cards += ' card_' + item.id.split('_')[6];
+    dojo.query('.pp_selected').forEach((node: HTMLElement, index) => {
+      cards += ' ' + node.id;
     }, this);
     this.game.takeAction({
       action: 'discardCards',
@@ -424,7 +414,7 @@ class PPInteractionManager {
   setCardActionsSelectable() {
     const playerId = this.game.getPlayerId();
     dojo.query(`.pp_card_in_court_${playerId}`).forEach((node: HTMLElement) => {
-      const cardId = `card_${node.id.split('_')[6]}`;
+      const cardId = node.id;
       const used = this.activePlayer.court?.find((card) => card.id === cardId)?.used === 1;
       if (
         !used &&
@@ -489,8 +479,8 @@ class PPInteractionManager {
 
   setMarketCardsSelectable() {
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
-      const cost = node.id.split('_')[3]; // cost is equal to the column number
-      const cardId = 'card_' + node.id.split('_')[6];
+      const cost = node.parentElement.id.split('_')[3]; // cost is equal to the column number
+      const cardId = node.id;
       if (cost <= this.activePlayer.rupees && !this.activePlayer.unavailableCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this._connections.push(
@@ -504,8 +494,7 @@ class PPInteractionManager {
 
   setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
     dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
-      const cardId = 'card_' + node.id.split('_')[6];
-      console.log('hand card cardId', cardId);
+      const cardId = node.id;
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
     }, this);
@@ -523,7 +512,7 @@ class PPInteractionManager {
 
   setPlaceSpyCardsSelectable({ region }: { region: string }) {
     dojo.query(`.pp_card_in_court_${region}`).forEach((node: HTMLElement, index: number) => {
-      const cardId = 'card_' + node.id.split('_')[6];
+      const cardId = node.id;
       console.log('set selectable', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(

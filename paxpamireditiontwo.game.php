@@ -149,7 +149,7 @@ class PaxPamirEditionTwo extends Table
             $player = Players::get($player_id);
             $data['court'][$player_id] = $player->getCourtCards();
             foreach ($data['court'][$player_id] as $card) {
-                $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']]);
+                $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']])->toArray();
             }
 
             $data['cylinders'][$player_id] = Tokens::getInLocation(['cylinders', $player_id])->toArray();
@@ -187,7 +187,7 @@ class PaxPamirEditionTwo extends Table
         }
 
         $data['rulers'] = Map::getRulers();
-        $data['activeEvents'] = Cards::getInLocation('active_events');
+        $data['activeEvents'] = Cards::getInLocation('active_events')->toArray();
         $data['borders'] = $this->borders;
 
         return $data;

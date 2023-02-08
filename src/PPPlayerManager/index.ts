@@ -246,6 +246,26 @@ class PPPlayer {
     this.counters[counter].setValue(value);
   }
 
+  addSideSelectToCourt() {
+    this.court.instantaneous = true;
+    dojo.place(
+      tplCardSelect({ side: 'left' }),
+      `pp_court_player_${this.playerId}`
+    );
+    this.court.placeInZone('pp_card_select_left', -1000);
+    dojo.place(
+      tplCardSelect({ side: 'right' }),
+      `pp_court_player_${this.playerId}`
+    );
+    this.court.placeInZone('pp_card_select_right', 1000);
+  }
+
+  removeSideSelectFromCourt() {
+    this.court.removeFromZone('pp_card_select_left', true);
+    this.court.removeFromZone('pp_card_select_right', true);
+    this.court.instantaneous = false;
+  }
+
   moveToHand({ cardId, from }: { cardId: string; from: Zone }) {
     this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
   }

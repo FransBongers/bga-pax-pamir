@@ -7,7 +7,8 @@ var CARD_ACTION_MOVE = 'cardActionMove';
 var CARD_ACTION_TAX = 'cardActionTax';
 var CHOOSE_LOYALTY = 'chooseLoyalty';
 var CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
-var CONFIRM_PLAY = 'confirmPlay';
+var PLAY_CARD_SELECT_SIDE = 'playCardSelectSide';
+var PLAY_CARD_CONFIRM = 'playCardConfirm';
 var CONFIRM_PURCHASE = 'confirmPurchase';
 var CONFIRM_SELECT_GIFT = 'confirmSelectGift';
 var DISCARD_COURT = 'discardCourt';
@@ -73,6 +74,10 @@ var BORDERS = [
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
+};
+var tplCardSelect = function (_a) {
+    var side = _a.side;
+    return "<div id=\"pp_card_select_".concat(side, "\" class=\"pp_card_select_side\"></div>");
 };
 var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
@@ -501,6 +506,18 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.setCounter = function (_a) {
         var counter = _a.counter, value = _a.value;
         this.counters[counter].setValue(value);
+    };
+    PPPlayer.prototype.addSideSelectToCourt = function () {
+        this.court.instantaneous = true;
+        dojo.place(tplCardSelect({ side: 'left' }), "pp_court_player_".concat(this.playerId));
+        this.court.placeInZone('pp_card_select_left', -1000);
+        dojo.place(tplCardSelect({ side: 'right' }), "pp_court_player_".concat(this.playerId));
+        this.court.placeInZone('pp_card_select_right', 1000);
+    };
+    PPPlayer.prototype.removeSideSelectFromCourt = function () {
+        this.court.removeFromZone('pp_card_select_left', true);
+        this.court.removeFromZone('pp_card_select_right', true);
+        this.court.instantaneous = false;
     };
     PPPlayer.prototype.moveToHand = function (_a) {
         var cardId = _a.cardId, from = _a.from;
@@ -1035,7 +1052,16 @@ var PPInteractionManager = /** @class */ (function () {
                     this.setHandCardsSelectable({
                         callback: function (_a) {
                             var cardId = _a.cardId;
-                            return _this.updateInterface({ nextStep: CONFIRM_PLAY, args: { confirmPlay: { cardId: cardId } } });
+                            var numberOfCardsInCourt = _this.game.playerManager
+                                .getPlayer({ playerId: _this.game.getPlayerId() })
+                                .getCourtZone()
+                                .getAllItems().length;
+                            if (numberOfCardsInCourt === 0) {
+                                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left' } } });
+                            }
+                            else {
+                                _this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId } } });
+                            }
                         },
                     });
                     this.setCardActionsSelectable();
@@ -1073,26 +1099,56 @@ var PPInteractionManager = /** @class */ (function () {
             case PLACE_SPY:
                 this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
                 break;
-            case CONFIRM_PLAY:
-                dojo.query(".pp_".concat(args.confirmPlay.cardId)).addClass('pp_selected');
+            case PLAY_CARD_SELECT_SIDE:
+                dojo.query(".pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
                 this.updatePageTitle({
-                    text: _("Select which side of court to play '${name}':"),
+                    text: _("Select which side of court to play '${name}'"),
                     args: {
-                        name: this.getCardInfo({ cardId: args.confirmPlay.cardId }).name,
+                        name: this.getCardInfo({ cardId: args.playCardSelectSide.cardId }).name,
                     },
                 });
-                this.game.framework().updatePageTitle();
-                this.addPrimaryActionButton({
-                    id: 'left_side_btn',
-                    text: _('<< LEFT'),
-                    callback: function () { return _this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }); },
-                });
-                this.addPrimaryActionButton({
-                    id: 'right_side_btn',
-                    text: _('RIGHT >>'),
-                    callback: function () { return _this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }); },
-                });
+                this.setSideSelectable({ cardId: args.playCardSelectSide.cardId });
                 this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                break;
+            case PLAY_CARD_CONFIRM:
+                dojo.query("#pp_card_select_".concat(args.playCardConfirm.side)).addClass('pp_selected');
+                dojo.query(".pp_".concat(args.playCardConfirm.cardId)).addClass('pp_selected');
+                if (args.playCardConfirm.firstCard) {
+                    this.updatePageTitle({
+                        text: _("Play '${name}' to court?"),
+                        args: {
+                            name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+                        },
+                    });
+                }
+                else {
+                    this.updatePageTitle({
+                        text: _("Play '${name}' to ${side} side of court?"),
+                        args: {
+                            name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+                            side: args.playCardConfirm.side,
+                        },
+                    });
+                }
+                this.addPrimaryActionButton({
+                    id: 'confirm_btn',
+                    text: _('Confirm'),
+                    callback: function () {
+                        _this.removeSideSelectable();
+                        _this.game.takeAction({
+                            action: 'playCard',
+                            data: { cardId: args.playCardConfirm.cardId, leftSide: args.playCardConfirm.side === 'left' },
+                        });
+                    },
+                });
+                this.addDangerActionButton({
+                    id: 'cancel_btn',
+                    text: _('Cancel'),
+                    callback: function () {
+                        _this.removeSideSelectable();
+                        _this.onCancel();
+                    },
+                });
                 break;
             case CONFIRM_PURCHASE:
                 var _c = args.confirmPurchase, cardId = _c.cardId, cost = _c.cost;
@@ -1126,7 +1182,14 @@ var PPInteractionManager = /** @class */ (function () {
                         });
                     },
                 });
-                this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                this.addDangerActionButton({
+                    id: 'cancel_btn',
+                    text: _('Cancel'),
+                    callback: function () {
+                        _this.removeSideSelectable();
+                        _this.onCancel();
+                    },
+                });
                 break;
             case PASS:
                 this.updatePageTitle({ text: _('Confirm to your end turn'), args: {} });
@@ -1331,6 +1394,38 @@ var PPInteractionManager = /** @class */ (function () {
                 });
             }
         });
+    };
+    PPInteractionManager.prototype.setSideSelectable = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
+        dojo.query('#pp_card_select_left').forEach(function (node) {
+            dojo.connect(node, 'onclick', _this, function () {
+                // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
+                // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: true } });
+                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'left' } } });
+            });
+        });
+        dojo.query('#pp_card_select_right').forEach(function (node) {
+            dojo.connect(node, 'onclick', _this, function () {
+                // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
+                // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: false } });
+                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'right' } } });
+            });
+        });
+        // this.addPrimaryActionButton({
+        //   id: 'left_side_btn',
+        //   text: _('<< LEFT'),
+        //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
+        // });
+        // this.addPrimaryActionButton({
+        //   id: 'right_side_btn',
+        //   text: _('RIGHT >>'),
+        //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
+        // });
+    };
+    PPInteractionManager.prototype.removeSideSelectable = function () {
+        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
     };
     PPInteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;

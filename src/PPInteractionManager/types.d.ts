@@ -5,7 +5,12 @@ interface UpdateInterfaceArgs {
   confirmPlaceSpy?: {
     cardId: string;
   };
-  confirmPlay?: {
+  playCardConfirm?: {
+    cardId: string;
+    side: 'left' | 'right';
+    firstCard: boolean;
+  };
+  playCardSelectSide?: {
     cardId: string;
   };
   confirmPurchase?: {

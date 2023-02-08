@@ -636,6 +636,7 @@ html {
 .pp_player_tableau_inner_container {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
     /* background-color: blue; */
 }
 
@@ -814,6 +815,18 @@ html {
     background-repeat: no-repeat;
 }
 
+.pp_card_select_side {
+    width: 150px;
+    height: 209px;
+    border-radius: 10px;
+    border: 4px dashed var(--selectable-color);
+    box-sizing: border-box;
+}
+
+.pp_card_select_side:hover,.pp_card_select_side.pp_selected {
+    border-color: var(--selected-color) !important;
+    cursor: pointer;
+}
 
 .pp_card {
     /* box-shadow: 1px 1px 4px; */
@@ -848,10 +861,15 @@ html {
 	box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
 }
 
-.pp_selected {
+.pp_card.pp_selected {
+    cursor: pointer;
+    box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
+}
+
+/* .pp_selected {
 	cursor: pointer;
 	box-shadow: 0px 0px 0px 4px var(--selected-color) !important;
-}
+} */
 
 .pp_discard {
     /* opacity: 0.5; */

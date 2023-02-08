@@ -14,7 +14,6 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-
 class PPInteractionManager {
   private game: PaxPamirGame;
   private _connections: unknown[];
@@ -181,8 +180,17 @@ class PPInteractionManager {
           this.addSecondaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: () => this.onPass() });
           this.setMarketCardsSelectable();
           this.setHandCardsSelectable({
-            callback: ({ cardId }: { cardId: string }) =>
-              this.updateInterface({ nextStep: CONFIRM_PLAY, args: { confirmPlay: { cardId } } }),
+            callback: ({ cardId }: { cardId: string }) => {
+              const numberOfCardsInCourt = this.game.playerManager
+                .getPlayer({ playerId: this.game.getPlayerId() })
+                .getCourtZone()
+                .getAllItems().length;
+              if (numberOfCardsInCourt === 0) {
+                this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
+              } else {
+                this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
+              }
+            },
           });
           this.setCardActionsSelectable();
         } else {
@@ -218,26 +226,55 @@ class PPInteractionManager {
       case PLACE_SPY:
         this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
         break;
-      case CONFIRM_PLAY:
-        dojo.query(`.pp_${args.confirmPlay.cardId}`).addClass('pp_selected');
+      case PLAY_CARD_SELECT_SIDE:
+        dojo.query(`.pp_${args.playCardSelectSide.cardId}`).addClass('pp_selected');
         this.updatePageTitle({
-          text: _("Select which side of court to play '${name}':"),
+          text: _("Select which side of court to play '${name}'"),
           args: {
-            name: this.getCardInfo({ cardId: args.confirmPlay.cardId }).name,
+            name: this.getCardInfo({ cardId: args.playCardSelectSide.cardId }).name,
           },
         });
-        this.game.framework().updatePageTitle();
-        this.addPrimaryActionButton({
-          id: 'left_side_btn',
-          text: _('<< LEFT'),
-          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
-        });
-        this.addPrimaryActionButton({
-          id: 'right_side_btn',
-          text: _('RIGHT >>'),
-          callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
-        });
+        this.setSideSelectable({ cardId: args.playCardSelectSide.cardId });
         this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
+        break;
+      case PLAY_CARD_CONFIRM:
+        dojo.query(`#pp_card_select_${args.playCardConfirm.side}`).addClass('pp_selected');
+        dojo.query(`.pp_${args.playCardConfirm.cardId}`).addClass('pp_selected');
+        if (args.playCardConfirm.firstCard) {
+          this.updatePageTitle({
+            text: _("Play '${name}' to court?"),
+            args: {
+              name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+            },
+          });
+        } else {
+          this.updatePageTitle({
+            text: _("Play '${name}' to ${side} side of court?"),
+            args: {
+              name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+              side: args.playCardConfirm.side,
+            },
+          });
+        }
+        this.addPrimaryActionButton({
+          id: 'confirm_btn',
+          text: _('Confirm'),
+          callback: () => {
+            this.removeSideSelectable();
+            this.game.takeAction({
+              action: 'playCard',
+              data: { cardId: args.playCardConfirm.cardId, leftSide: args.playCardConfirm.side === 'left' },
+            });
+          },
+        });
+        this.addDangerActionButton({
+          id: 'cancel_btn',
+          text: _('Cancel'),
+          callback: () => {
+            this.removeSideSelectable();
+            this.onCancel();
+          },
+        });
         break;
       case CONFIRM_PURCHASE:
         const { cardId, cost } = args.confirmPurchase;
@@ -270,7 +307,14 @@ class PPInteractionManager {
               data: { selectedGift: args.confirmSelectGift.value, cardId: args.confirmSelectGift.cardId },
             }),
         });
-        this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: () => this.onCancel() });
+        this.addDangerActionButton({
+          id: 'cancel_btn',
+          text: _('Cancel'),
+          callback: () => {
+            this.removeSideSelectable();
+            this.onCancel();
+          },
+        });
         break;
       case PASS:
         this.updatePageTitle({ text: _('Confirm to your end turn'), args: {} });
@@ -477,6 +521,38 @@ class PPInteractionManager {
     });
   }
 
+  setSideSelectable({ cardId }: { cardId: string }) {
+    this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
+    dojo.query('#pp_card_select_left').forEach((node: HTMLElement) => {
+      dojo.connect(node, 'onclick', this, () => {
+        // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
+        // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: true } });
+        this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: false, side: 'left' } } });
+      });
+    });
+    dojo.query('#pp_card_select_right').forEach((node: HTMLElement) => {
+      dojo.connect(node, 'onclick', this, () => {
+        // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
+        // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: false } });
+        this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: false, side: 'right' } } });
+      });
+    });
+    // this.addPrimaryActionButton({
+    //   id: 'left_side_btn',
+    //   text: _('<< LEFT'),
+    //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
+    // });
+    // this.addPrimaryActionButton({
+    //   id: 'right_side_btn',
+    //   text: _('RIGHT >>'),
+    //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
+    // });
+  }
+
+  removeSideSelectable() {
+    this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
+  }
+
   setMarketCardsSelectable() {
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cost = node.parentElement.id.split('_')[3]; // cost is equal to the column number
@@ -581,7 +657,7 @@ class PPInteractionManager {
           this.updateInterface({ nextStep: PLACE_ROAD, args: { placeRoad: { borders: args.args.region.borders } } });
           break;
         case 'placeSpy':
-          this.updateInterface({nextStep: PLACE_SPY, args: {placeSpy: {region: args.args.region}}})
+          this.updateInterface({ nextStep: PLACE_SPY, args: { placeSpy: { region: args.args.region } } });
           break;
         default:
           break;

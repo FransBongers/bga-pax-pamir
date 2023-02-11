@@ -23,7 +23,7 @@ trait PlaceRoadTrait
   function argPlaceRoad()
   {
     $player_id = self::getActivePlayerId();
-    $card_id = 'card_' . Globals::getResolveImpactIconsCardId();
+    $card_id = Globals::getResolveImpactIconsCardId();
     $card_info = $this->cards[$card_id];
     $card_region = $card_info['region'];
     return array(

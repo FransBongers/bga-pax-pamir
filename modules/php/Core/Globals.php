@@ -22,7 +22,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "setup" => "int",
 
     // TODO: check implementation
-    "resolveImpactIconsCardId" => "int",
+    "resolveImpactIconsCardId" => "str",
     "resolveImpactIconsCurrentIcon" => "int"
   ];
 

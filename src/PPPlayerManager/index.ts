@@ -228,7 +228,7 @@ class PPPlayer {
     return this.cylinders;
   }
 
-  getGiftZone({ value }: { value: string }) {
+  getGiftZone({ value }: { value: number }) {
     return this.gifts[value];
   }
 

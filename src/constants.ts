@@ -41,6 +41,12 @@ const RULER_TOKEN_HEIGHT = 50;
 
 // names etc.
 
+// suits
+const ECONOMIC = 'economic';
+const MILITARY = 'military';
+const POLITICAL = 'political';
+const INTELLIGENCE = 'intelligence';
+
 // coalitions
 const AFGHAN = 'afghan';
 const BRITISH = 'british';

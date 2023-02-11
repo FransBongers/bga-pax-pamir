@@ -186,7 +186,7 @@ trait PlayerActionTrait
       // $this->setGameStateValue("bribe_card_id", 0);
       // $this->setGameStateValue("bribe_amount", -1);
 
-      Globals::setResolveImpactIconsCardId(explode("_", $card_id)[1]);
+      Globals::setResolveImpactIconsCardId($card_id);
       Globals::setResolveImpactIconsCurrentIcon(0);
       $this->gamestate->nextState('resolve_impact_icons');
     }
@@ -204,6 +204,8 @@ trait PlayerActionTrait
     $card = Cards::get($card_id);
     $card_info = $this->cards[$card_id];
 
+    $base_cost = Globals::getFavoredSuit() === MILITARY ? 2 : 1;
+
     // Throw error if card is unavailble for purchase
     if ($card['used'] == 1) {
       throw new \feException("Card is unavailble");
@@ -214,7 +216,8 @@ trait PlayerActionTrait
     self::dump("purchaseCard", $card_id, $player_id, $card);
     $row = explode("_", $market_location)[1];
     $row_alt = ($row == 0) ? 1 : 0;
-    $col = $cost = intval(explode("_", $market_location)[2]);
+    $col = intval(explode("_", $market_location)[2]);
+    $cost = $col * $base_cost;
     self::dump("row", $row);
 
     $next_state = 'action';
@@ -240,12 +243,6 @@ trait PlayerActionTrait
       Cards::move($card_id, $new_location);
       Globals::incRemainingActions(-1);
 
-      // add rupees on card to player totals. Then put them in rupee_pool location
-      $rupees = Tokens::getInLocation([$market_location, 'rupees']);
-      Players::get($player_id)->incRupees(count($rupees));
-      Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
-
-      // TODO (Frans): better check below code, but assume it adds rupees to the cards in the market
       $updated_cards = array();
 
       for ($i = $col - 1; $i >= 0; $i--) {
@@ -258,17 +255,24 @@ trait PlayerActionTrait
           $m_card = Cards::getInLocation($location)->first();
         }
         if ($m_card !== NULL) {
-          $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
-          Tokens::move($rupee['id'], [$location, 'rupees']);
           Cards::setUsed($m_card["id"], 1); // set unavailable
-          $updated_cards[] = array(
-            'row' => intval($use_row_alt ? $row_alt : $row),
-            'column' => $i,
-            'cardId' => $m_card["id"],
-            'rupeeId' => $rupee['id']
-          );
+          for ($j = 1; $j <= $base_cost; $j++) {
+            $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
+            Tokens::move($rupee['id'], [$location, 'rupees']);
+            $updated_cards[] = array(
+              'row' => intval($use_row_alt ? $row_alt : $row),
+              'column' => $i,
+              'cardId' => $m_card["id"],
+              'rupeeId' => $rupee['id']
+            );
+          }
         }
       }
+
+      // add rupees on card to player totals. Then put them in rupee_pool location
+      $rupees = Tokens::getInLocation([$market_location, 'rupees']);
+      Players::get($player_id)->incRupees(count($rupees));
+      Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
 
       self::notifyAllPlayers("purchaseCard", clienttranslate('${playerName} purchased ${cardName}'), array(
         'playerId' => $player_id,

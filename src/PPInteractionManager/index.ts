@@ -24,7 +24,7 @@ class PPInteractionManager {
     favoredSuit?: string;
     hand?: Record<string, Token>;
     remainingActions?: number;
-    rupees?: string;
+    rupees?: number;
     unavailableCards?: string[];
   };
   // TODO(Frans): we should probably remove below props here since it's used in specific funtion
@@ -297,7 +297,7 @@ class PPInteractionManager {
         break;
       case CONFIRM_SELECT_GIFT:
         dojo.query(`#pp_gift_${args.confirmSelectGift.value}_${this.game.getPlayerId()}`).addClass('pp_selected');
-        this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: args.confirmSelectGift.value as string } });
+        this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + args.confirmSelectGift.value } });
         this.addDangerActionButton({
           id: 'confirm_btn',
           text: _('Confirm'),
@@ -431,10 +431,8 @@ class PPInteractionManager {
   }
 
   handleDiscardSelect({ cardId }: { cardId: string }) {
-    console.log('handleSelect', this.numberOfDiscards);
     dojo.query(`.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
     if (dojo.query('.pp_selected').length === this.numberOfDiscards) {
-      console.log('inside if');
       dojo.removeClass('confirm_btn', 'pp_disabled');
     } else {
       dojo.addClass('confirm_btn', 'pp_disabled');
@@ -466,8 +464,6 @@ class PPInteractionManager {
       )
         dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {
-            console.log('splitId', child.id.split('_')[0]);
-            console.log('cardId', cardId);
             const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
             dojo.addClass(child, 'pp_selectable');
             this._connections.push(
@@ -482,9 +478,7 @@ class PPInteractionManager {
     const container = document.getElementById(`pp_map_areas`);
     container.classList.add('pp_selectable');
     REGIONS.forEach((region) => {
-      console.log('region', region);
       const element = document.getElementById(`pp_region_${region}`);
-      // console.log(node);
       element.classList.add('pp_selectable');
       this._connections.push(dojo.connect(element, 'onclick', this, () => console.log('Region', region)));
     });
@@ -492,7 +486,7 @@ class PPInteractionManager {
 
   setGiftsSelectable({ cardId }: { cardId: string }) {
     const playerId = this.game.getPlayerId();
-    ['2', '4', '6'].forEach((giftValue) => {
+    [2, 4, 6].forEach((giftValue) => {
       const hasGift =
         this.game.playerManager
           .getPlayer({ playerId })
@@ -525,28 +519,14 @@ class PPInteractionManager {
     this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
     dojo.query('#pp_card_select_left').forEach((node: HTMLElement) => {
       dojo.connect(node, 'onclick', this, () => {
-        // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
-        // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: true } });
         this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: false, side: 'left' } } });
       });
     });
     dojo.query('#pp_card_select_right').forEach((node: HTMLElement) => {
       dojo.connect(node, 'onclick', this, () => {
-        // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
-        // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: false } });
         this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: false, side: 'right' } } });
       });
     });
-    // this.addPrimaryActionButton({
-    //   id: 'left_side_btn',
-    //   text: _('<< LEFT'),
-    //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
-    // });
-    // this.addPrimaryActionButton({
-    //   id: 'right_side_btn',
-    //   text: _('RIGHT >>'),
-    //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
-    // });
   }
 
   removeSideSelectable() {
@@ -554,8 +534,9 @@ class PPInteractionManager {
   }
 
   setMarketCardsSelectable() {
+    const baseCardCost = this.activePlayer.favoredSuit === MILITARY ? 2 : 1;
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
-      const cost = node.parentElement.id.split('_')[3]; // cost is equal to the column number
+      const cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
       const cardId = node.id;
       if (cost <= this.activePlayer.rupees && !this.activePlayer.unavailableCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
@@ -580,7 +561,6 @@ class PPInteractionManager {
     const playerId = this.game.getPlayerId();
     dojo.query(`.pp_card_in_court_${playerId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = 'card_' + node.id.split('_')[6];
-      console.log('court card cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => this.handleDiscardSelect({ cardId })));
     }, this);
@@ -589,7 +569,6 @@ class PPInteractionManager {
   setPlaceSpyCardsSelectable({ region }: { region: string }) {
     dojo.query(`.pp_card_in_court_${region}`).forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
-      console.log('set selectable', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(
         dojo.connect(node, 'onclick', this, () =>
@@ -633,12 +612,10 @@ class PPInteractionManager {
           break;
         case 'discardCourt':
           this.numberOfDiscards = (args.args as EnteringDiscardCourtArgs).numberOfDiscards;
-          console.log('numberOfDiscards', this.numberOfDiscards);
           this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args as EnteringDiscardCourtArgs } });
           break;
         case 'discardHand':
           this.numberOfDiscards = (args.args as EnteringDiscardHandArgs).numberOfDiscards;
-          console.log('numberOfDiscards', this.numberOfDiscards);
           this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
           break;
         case 'playerActions':
@@ -648,7 +625,7 @@ class PPInteractionManager {
             favoredSuit,
             hand,
             remainingActions: Number(remainingActions),
-            rupees: rupees,
+            rupees: Number(rupees),
             unavailableCards: unavailableCards,
           };
           this.updateInterface({ nextStep: PLAYER_ACTIONS });

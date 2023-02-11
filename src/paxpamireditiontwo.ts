@@ -199,7 +199,7 @@ class PaxPamir implements PaxPamirGame {
         return this.playerManager.getPlayer({ playerId: splitLocation[1] }).getCylinderZone();
       case 'gift':
         // gift_2_playerId
-        return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: splitLocation[1] });
+        return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: Number(splitLocation[1]) });
       case 'favored':
         // favored_suit_economic
         return this.objectManager.favoredSuit.getFavoredSuitZone({

@@ -15,10 +15,10 @@ interface UpdateInterfaceArgs {
   };
   confirmPurchase?: {
     cardId: string;
-    cost: string;
+    cost: number;
   };
   confirmSelectGift?: {
-    value: string;
+    value: number;
     cardId: string;
   };
   discardCourt?: {

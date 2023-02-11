@@ -31,7 +31,7 @@ trait ResolveImpactIconsTrait
   function stResolveImpactIcons()
   {
     $player_id = self::getActivePlayerId();
-    $card_id = 'card_' . Globals::getResolveImpactIconsCardId();
+    $card_id = Globals::getResolveImpactIconsCardId();
     $current_impact_icon_index = Globals::getResolveImpactIconsCurrentIcon();
     $card_info = $this->cards[$card_id];
     $impact_icons = $card_info['impact_icons'];

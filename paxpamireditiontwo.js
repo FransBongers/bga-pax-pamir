@@ -37,6 +37,11 @@ var FAVORED_SUIT_MARKER_HEIGHT = 50;
 var RULER_TOKEN_WIDTH = 50;
 var RULER_TOKEN_HEIGHT = 50;
 // names etc.
+// suits
+var ECONOMIC = 'economic';
+var MILITARY = 'military';
+var POLITICAL = 'political';
+var INTELLIGENCE = 'intelligence';
 // coalitions
 var AFGHAN = 'afghan';
 var BRITISH = 'british';
@@ -1171,7 +1176,7 @@ var PPInteractionManager = /** @class */ (function () {
                 break;
             case CONFIRM_SELECT_GIFT:
                 dojo.query("#pp_gift_".concat(args.confirmSelectGift.value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
-                this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: args.confirmSelectGift.value } });
+                this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + args.confirmSelectGift.value } });
                 this.addDangerActionButton({
                     id: 'confirm_btn',
                     text: _('Confirm'),
@@ -1310,10 +1315,8 @@ var PPInteractionManager = /** @class */ (function () {
     };
     PPInteractionManager.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
-        console.log('handleSelect', this.numberOfDiscards);
         dojo.query(".pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
         if (dojo.query('.pp_selected').length === this.numberOfDiscards) {
-            console.log('inside if');
             dojo.removeClass('confirm_btn', 'pp_disabled');
         }
         else {
@@ -1345,8 +1348,6 @@ var PPInteractionManager = /** @class */ (function () {
                 (_this.activePlayer.remainingActions > 0 || _this.game.gamedatas.cards[cardId].suit === _this.activePlayer.favoredSuit))
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
-                        console.log('splitId', child.id.split('_')[0]);
-                        console.log('cardId', cardId);
                         var nextStep_1 = "cardAction".concat(capitalizeFirstLetter(child.id.split('_')[0]));
                         dojo.addClass(child, 'pp_selectable');
                         _this._connections.push(dojo.connect(child, 'onclick', _this, function () { return _this.updateInterface({ nextStep: nextStep_1, args: { cardAction: { cardId: cardId } } }); }));
@@ -1359,9 +1360,7 @@ var PPInteractionManager = /** @class */ (function () {
         var container = document.getElementById("pp_map_areas");
         container.classList.add('pp_selectable');
         REGIONS.forEach(function (region) {
-            console.log('region', region);
             var element = document.getElementById("pp_region_".concat(region));
-            // console.log(node);
             element.classList.add('pp_selectable');
             _this._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
         });
@@ -1370,7 +1369,7 @@ var PPInteractionManager = /** @class */ (function () {
         var _this = this;
         var cardId = _a.cardId;
         var playerId = this.game.getPlayerId();
-        ['2', '4', '6'].forEach(function (giftValue) {
+        [2, 4, 6].forEach(function (giftValue) {
             var hasGift = _this.game.playerManager
                 .getPlayer({ playerId: playerId })
                 .getGiftZone({
@@ -1401,36 +1400,23 @@ var PPInteractionManager = /** @class */ (function () {
         this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
         dojo.query('#pp_card_select_left').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
-                // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: true } });
                 _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'left' } } });
             });
         });
         dojo.query('#pp_card_select_right').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                // this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectToCourt();
-                // this.game.takeAction({ action: 'playCard', data: { cardId, leftSide: false } });
                 _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'right' } } });
             });
         });
-        // this.addPrimaryActionButton({
-        //   id: 'left_side_btn',
-        //   text: _('<< LEFT'),
-        //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: true } }),
-        // });
-        // this.addPrimaryActionButton({
-        //   id: 'right_side_btn',
-        //   text: _('RIGHT >>'),
-        //   callback: () => this.game.takeAction({ action: 'playCard', data: { cardId: args.confirmPlay.cardId, leftSide: false } }),
-        // });
     };
     PPInteractionManager.prototype.removeSideSelectable = function () {
         this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
     };
     PPInteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;
+        var baseCardCost = this.activePlayer.favoredSuit === MILITARY ? 2 : 1;
         dojo.query('.pp_market_card').forEach(function (node) {
-            var cost = node.parentElement.id.split('_')[3]; // cost is equal to the column number
+            var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
             var cardId = node.id;
             if (cost <= _this.activePlayer.rupees && !_this.activePlayer.unavailableCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
@@ -1454,7 +1440,6 @@ var PPInteractionManager = /** @class */ (function () {
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[6];
-            console.log('court card cardId', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
         }, this);
@@ -1464,7 +1449,6 @@ var PPInteractionManager = /** @class */ (function () {
         var region = _a.region;
         dojo.query(".pp_card_in_court_".concat(region)).forEach(function (node, index) {
             var cardId = node.id;
-            console.log('set selectable', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
                 return _this.updateInterface({ nextStep: CONFIRM_PLACE_SPY, args: { confirmPlaceSpy: { cardId: cardId } } });
@@ -1503,12 +1487,10 @@ var PPInteractionManager = /** @class */ (function () {
                     break;
                 case 'discardCourt':
                     this.numberOfDiscards = args.args.numberOfDiscards;
-                    console.log('numberOfDiscards', this.numberOfDiscards);
                     this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args } });
                     break;
                 case 'discardHand':
                     this.numberOfDiscards = args.args.numberOfDiscards;
-                    console.log('numberOfDiscards', this.numberOfDiscards);
                     this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args } });
                     break;
                 case 'playerActions':
@@ -1518,7 +1500,7 @@ var PPInteractionManager = /** @class */ (function () {
                         favoredSuit: favoredSuit,
                         hand: hand,
                         remainingActions: Number(remainingActions),
-                        rupees: rupees,
+                        rupees: Number(rupees),
                         unavailableCards: unavailableCards,
                     };
                     this.updateInterface({ nextStep: PLAYER_ACTIONS });
@@ -2047,7 +2029,7 @@ var PaxPamir = /** @class */ (function () {
                 return this.playerManager.getPlayer({ playerId: splitLocation[1] }).getCylinderZone();
             case 'gift':
                 // gift_2_playerId
-                return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: splitLocation[1] });
+                return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: Number(splitLocation[1]) });
             case 'favored':
                 // favored_suit_economic
                 return this.objectManager.favoredSuit.getFavoredSuitZone({

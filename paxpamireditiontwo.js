@@ -186,6 +186,7 @@ var FavoredSuit = /** @class */ (function () {
             });
         });
         var suit = game.gamedatas.favoredSuit;
+        this.favoredSuitZones[suit].instantaneous = true;
         placeToken({
             game: game,
             location: this.favoredSuitZones[suit],
@@ -196,6 +197,7 @@ var FavoredSuit = /** @class */ (function () {
                 id: "favored_suit_marker",
             },
         });
+        this.favoredSuitZones[suit].instantaneous = false;
     }
     FavoredSuit.prototype.getFavoredSuitZone = function (_a) {
         var suit = _a.suit;
@@ -338,6 +340,7 @@ var PPPlayer = /** @class */ (function () {
             political: new ebg.counter(),
             rupees: new ebg.counter(),
         };
+        this.rulerTokens = new ebg.zone();
         // console.log("Player", player);
         this.game = game;
         var playerId = player.id;
@@ -357,6 +360,30 @@ var PPPlayer = /** @class */ (function () {
             tokenWidth: CYLINDER_WIDTH,
             tokenHeight: CYLINDER_HEIGHT,
             itemMargin: 10,
+        });
+        // Create rulerTokens zone
+        setupTokenZone({
+            game: this.game,
+            zone: this.rulerTokens,
+            nodeId: "pp_ruler_tokens_player_".concat(playerId),
+            tokenWidth: RULER_TOKEN_WIDTH,
+            tokenHeight: RULER_TOKEN_HEIGHT,
+            itemMargin: 10,
+        });
+        Object.keys(gamedatas.rulers).forEach(function (region) {
+            if (gamedatas.rulers[region] === Number(_this.playerId)) {
+                console.log('place ruler token player');
+                placeToken({
+                    game: game,
+                    location: _this.rulerTokens,
+                    id: "pp_ruler_token_".concat(region),
+                    jstpl: 'jstpl_ruler_token',
+                    jstplProps: {
+                        id: "pp_ruler_token_".concat(region),
+                        region: region,
+                    },
+                });
+            }
         });
         // Add cylinders to zone
         gamedatas.cylinders[playerId].forEach(function (cylinder) {
@@ -447,7 +474,6 @@ var PPPlayer = /** @class */ (function () {
             _this.setupCourtCard({ cardId: cardId });
             _this.court.placeInZone(cardId, card.state);
         });
-        console.log('court', this.court);
     };
     PPPlayer.prototype.setupPlayerPanels = function (_a) {
         var gamedatas = _a.gamedatas;
@@ -504,6 +530,9 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.getGiftZone = function (_a) {
         var value = _a.value;
         return this.gifts[value];
+    };
+    PPPlayer.prototype.getRulerTokensZone = function () {
+        return this.rulerTokens;
     };
     PPPlayer.prototype.getPlayerColor = function () {
         return this.playerColor;
@@ -750,8 +779,9 @@ var Region = /** @class */ (function () {
             tokenWidth: RULER_TOKEN_WIDTH,
             tokenHeight: RULER_TOKEN_HEIGHT,
         });
+        this.rulerZone.instantaneous = true;
         this.ruler = game.gamedatas.rulers[region];
-        if (this.ruler === 0) {
+        if (this.ruler === null) {
             placeToken({
                 game: game,
                 location: this.rulerZone,
@@ -763,12 +793,14 @@ var Region = /** @class */ (function () {
                 },
             });
         }
+        ;
+        this.rulerZone.instantaneous = false;
     }
     Region.prototype.getArmyZone = function () {
         return this.armyZone;
     };
     Region.prototype.getRulerZone = function () {
-        this.rulerZone;
+        return this.rulerZone;
     };
     Region.prototype.getTribeZone = function () {
         return this.tribeZone;
@@ -785,7 +817,6 @@ var Region = /** @class */ (function () {
 var PPMap = /** @class */ (function () {
     function PPMap(game) {
         var _this = this;
-        console.log('Constructor Map');
         this.game = game;
         this.borders = {};
         this.regions = {};
@@ -822,7 +853,6 @@ var PPMap = /** @class */ (function () {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 var PPMarket = /** @class */ (function () {
     function PPMarket(game) {
-        console.log('MarketManager');
         this.game = game;
         this.marketCards = [];
         this.marketRupees = [];
@@ -912,7 +942,6 @@ var PPMarket = /** @class */ (function () {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 var PPInteractionManager = /** @class */ (function () {
     function PPInteractionManager(game) {
-        console.log('Interaction Manager');
         this.game = game;
         this._connections = [];
         // Will store all data for active player and gets refreshed with entering player actions state
@@ -927,7 +956,6 @@ var PPInteractionManager = /** @class */ (function () {
         dojo.query('.pp_selected').removeClass('pp_selected');
     };
     PPInteractionManager.prototype.resetActionArgs = function () {
-        console.log('resetActionArgs');
         // Remove all selectable / selected classes
         dojo.query('.pp_selectable').removeClass('pp_selectable');
         dojo.query('.pp_selected').removeClass('pp_selected');
@@ -1630,6 +1658,7 @@ var PPNotificationManager = /** @class */ (function () {
         console.log('notifications subscriptions setup');
         var notifs = [
             ['cardAction', 1],
+            ['changeRuler', 1],
             ['chooseLoyalty', 1],
             ['dominanceCheck', 1],
             ['purchaseCard', 2000],
@@ -1650,6 +1679,23 @@ var PPNotificationManager = /** @class */ (function () {
     };
     PPNotificationManager.prototype.notif_cardAction = function (notif) {
         console.log('notif_cardAction', notif);
+    };
+    PPNotificationManager.prototype.notif_changeRuler = function (notif) {
+        var args = notif.args;
+        console.log('notif_changeRuler', args);
+        var oldRuler = args.oldRuler, newRuler = args.newRuler, region = args.region;
+        var lowerCaseRegion = region.toLowerCase();
+        var from = oldRuler === null
+            ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+            : this.game.playerManager.getPlayer({ playerId: '' + oldRuler }).getRulerTokensZone();
+        var to = newRuler === null
+            ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+            : this.game.playerManager.getPlayer({ playerId: '' + newRuler }).getRulerTokensZone();
+        this.game.move({
+            id: "pp_ruler_token_".concat(lowerCaseRegion),
+            from: from,
+            to: to,
+        });
     };
     PPNotificationManager.prototype.notif_chooseLoyalty = function (notif) {
         var args = notif.args;
@@ -1899,7 +1945,6 @@ var PaxPamir = /** @class */ (function () {
     */
     PaxPamir.prototype.setup = function (gamedatas) {
         var _this = this;
-        console.log('game_name', this.framework().game_name);
         // Create a new div for buttons to avoid BGA auto clearing it
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
         this.gamedatas = gamedatas;
@@ -1959,7 +2004,7 @@ var PaxPamir = /** @class */ (function () {
     // onEnteringState: this method is called each time we are entering into a new game state.
     //                  You can use this method to perform some user interface changes at this moment.
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
-        console.log('Entering state: ' + stateName, args);
+        console.log('Entering state: ' + stateName, args.args);
         this.interactionManager.onEnteringState(stateName, args);
     };
     // onLeavingState: this method is called each time we are leaving a game state.

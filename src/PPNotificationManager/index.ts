@@ -35,6 +35,7 @@ class PPNotificationManager {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
       ['cardAction', 1],
+      ['changeRuler', 1],
       ['chooseLoyalty', 1],
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
@@ -60,6 +61,26 @@ class PPNotificationManager {
     console.log('notif_cardAction', notif);
   }
 
+  notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
+    const { args } = notif;
+    console.log('notif_changeRuler', args);
+    const { oldRuler, newRuler, region } = args;
+    const lowerCaseRegion = region.toLowerCase();
+    const from =
+      oldRuler === null
+        ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+        : this.game.playerManager.getPlayer({ playerId: '' + oldRuler }).getRulerTokensZone();
+    const to: Zone =
+      newRuler === null
+        ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+        : this.game.playerManager.getPlayer({ playerId: '' + newRuler }).getRulerTokensZone();
+    this.game.move({
+      id: `pp_ruler_token_${lowerCaseRegion}`,
+      from,
+      to,
+    });
+  }
+
   notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
     const { args } = notif;
     console.log('notif_chooseLoyalty', args);
@@ -78,7 +99,7 @@ class PPNotificationManager {
 
     if (from == 'hand') {
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({playerId}).getHandZone() });
+      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId }).getHandZone() });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
       this.game.discardCard({

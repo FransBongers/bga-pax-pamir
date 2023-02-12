@@ -103,7 +103,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     };
   };
   rulers: {
-    [region: string]: number;
+    [region: string]: number | null;
   };
   rupees: Token[];
   spies: {

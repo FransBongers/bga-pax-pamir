@@ -35,6 +35,7 @@ class PPPlayer {
     rupees: new ebg.counter(),
   };
   private player: PaxPamirPlayer;
+  private rulerTokens = new ebg.zone();
 
   constructor({ game, player }: { game: PaxPamirGame; player: PaxPamirPlayer }) {
     // console.log("Player", player);
@@ -60,6 +61,31 @@ class PPPlayer {
       tokenHeight: CYLINDER_HEIGHT,
       itemMargin: 10,
     });
+
+    // Create rulerTokens zone
+    setupTokenZone({
+      game: this.game,
+      zone: this.rulerTokens,
+      nodeId: `pp_ruler_tokens_player_${playerId}`,
+      tokenWidth: RULER_TOKEN_WIDTH,
+      tokenHeight: RULER_TOKEN_HEIGHT,
+      itemMargin: 10,
+    });
+    Object.keys(gamedatas.rulers).forEach((region: string) => {
+      if (gamedatas.rulers[region] ===  Number(this.playerId)) {
+        console.log('place ruler token player');
+        placeToken({
+          game,
+          location: this.rulerTokens,
+          id: `pp_ruler_token_${region}`,
+          jstpl: 'jstpl_ruler_token',
+          jstplProps: {
+            id: `pp_ruler_token_${region}`,
+            region,
+          },
+        });
+      }
+    })
 
     // Add cylinders to zone
     gamedatas.cylinders[playerId].forEach((cylinder: Token) => {
@@ -160,7 +186,6 @@ class PPPlayer {
 
       this.court.placeInZone(cardId, card.state);
     });
-    console.log('court', this.court);
   }
 
   setupPlayerPanels({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
@@ -230,6 +255,10 @@ class PPPlayer {
 
   getGiftZone({ value }: { value: number }) {
     return this.gifts[value];
+  }
+
+  getRulerTokensZone(): Zone {
+    return this.rulerTokens;
   }
 
   getPlayerColor(): string {

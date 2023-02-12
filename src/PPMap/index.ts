@@ -160,9 +160,9 @@ class Region {
       tokenWidth: RULER_TOKEN_WIDTH,
       tokenHeight: RULER_TOKEN_HEIGHT,
     });
-
+    this.rulerZone.instantaneous = true;
     this.ruler = game.gamedatas.rulers[region];
-    if (this.ruler === 0) {
+    if (this.ruler === null) {
       placeToken({
         game,
         location: this.rulerZone,
@@ -173,15 +173,16 @@ class Region {
           region,
         },
       });
-    }
+    };
+    this.rulerZone.instantaneous = false;
   }
 
   getArmyZone() {
     return this.armyZone;
   }
 
-  getRulerZone() {
-    this.rulerZone;
+  getRulerZone(): Zone {
+    return this.rulerZone;
   }
 
   getTribeZone() {
@@ -203,7 +204,6 @@ class PPMap {
   private regions: Record<string, Region>;
 
   constructor(game: PaxPamirGame) {
-    console.log('Constructor Map');
     this.game = game;
     this.borders = {};
     this.regions = {};

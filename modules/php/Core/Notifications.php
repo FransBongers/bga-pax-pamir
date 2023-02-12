@@ -53,6 +53,20 @@ class Notifications
     ]);
   }
 
+  public static function changeRuler($old_ruler, $new_ruler, $region)
+  {
+    $msg = clienttranslate('${playerName} is the new ruler of ${region}');
+    if ($new_ruler === null) {
+      $msg = clienttranslate('${playerName} is no longer ruler of ${region}');
+    }
+    self::notifyAll('changeRuler', $msg,[
+      'playerName' => Players::get($new_ruler === null ? $old_ruler : $new_ruler)->getName(),
+      'oldRuler' => $old_ruler,
+      'newRuler' => $new_ruler,
+      'region' => ucfirst($region),
+    ]);
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

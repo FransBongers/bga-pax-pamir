@@ -13,6 +13,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
+    "rulers" => "obj",
     "rulerHerat" => "int",
     "rulerKabul" => "int",
     "rulerKandahar" => "int",
@@ -151,12 +152,14 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
   {
     self::setDominanceChecksResolved(0);
     self::setFavoredSuit("political");
-    self::setRulerHerat(0);
-    self::setRulerKabul(0);
-    self::setRulerKandahar(0);
-    self::setRulerPersia(0);
-    self::setRulerPunjab(0);
-    self::setRulerTranscaspia(0);
+    self::setRulers(array(
+      HERAT => null,
+      KABUL => null,
+      KANDAHAR => null,
+      PERSIA => null,
+      PUNJAB => null,
+      TRANSCASPIA => null,
+    ));
     self::setRemainingActions(2);
     self::setSetup(1);
   }

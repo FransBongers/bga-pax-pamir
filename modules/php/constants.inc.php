@@ -24,6 +24,12 @@ const AFGHAN = 'afghan';
 const BRITISH = 'british';
 const RUSSIAN = 'russian';
 
+const COALITIONS = [
+  AFGHAN,
+  BRITISH,
+  RUSSIAN,
+];
+
 /**
  * Event card effects
  */

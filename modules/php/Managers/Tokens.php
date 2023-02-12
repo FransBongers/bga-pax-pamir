@@ -1,4 +1,5 @@
 <?php
+
 namespace PaxPamir\Managers;
 
 use PaxPamir\Core\Globals;
@@ -36,19 +37,27 @@ class Tokens extends \PaxPamir\Helpers\Pieces
   /**
    * getOfPlayer: return the cards in the hand of given player
    */
-  public static function getOfPlayer($pId)
-  {
-    return self::getInLocation(['hand', $pId]);
-  }
+  // public static function getOfPlayer($pId)
+  // {
+  //   return self::getInLocation(['hand', $pId]);
+  // }
 
   public static function getOfType($type)
   {
     return self::getSelectQuery()
-      ->where(static::$prefix . 'id', 'LIKE', $type.'%')
+      ->where(static::$prefix . 'id', 'LIKE', $type . '%')
       ->get()
       ->toArray();
-
   }
+
+  // public static function getOfTypeInLocation($type, $location)
+  // {
+  //   return self::getSelectQuery()
+  //     ->where(static::$prefix . 'id', 'LIKE', $type . '%')
+  //     ->where(static::$prefix . 'location', $location)
+  //     ->get()
+  //     ->toArray();
+  // }
 
   //////////////////////////////////
   //////////////////////////////////
@@ -96,7 +105,6 @@ class Tokens extends \PaxPamir\Helpers\Pieces
       "used" => 0,
     ]);
     self::create($tokens);
-
   }
 
   public static function setUsed($id, $value)

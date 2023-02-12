@@ -1,3 +1,10 @@
+interface NotifChangeRulerArgs {
+  playerName: string;
+  oldRuler: number;
+  newRuler: number;
+  region: string;
+}
+
 interface NotifChooseLoyaltyArgs {
   player_id: string;
   player_name: string;

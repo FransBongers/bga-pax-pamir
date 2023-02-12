@@ -31,7 +31,6 @@ class PPInteractionManager {
   private numberOfDiscards: number;
 
   constructor(game: PaxPamirGame) {
-    console.log('Interaction Manager');
     this.game = game;
     this._connections = [];
     // Will store all data for active player and gets refreshed with entering player actions state
@@ -50,8 +49,6 @@ class PPInteractionManager {
   }
 
   resetActionArgs() {
-    console.log('resetActionArgs');
-
     // Remove all selectable / selected classes
     dojo.query('.pp_selectable').removeClass('pp_selectable');
     dojo.query('.pp_selected').removeClass('pp_selected');

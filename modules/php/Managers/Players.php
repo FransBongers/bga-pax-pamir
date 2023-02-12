@@ -67,7 +67,7 @@ class Players extends \PaxPamir\Helpers\DB_Manager
     return Game::get()->getCurrentPId();
   }
 
-  public function getAll()
+  public static function getAll()
   {
     $players = self::DB()->get(false);
     return $players;

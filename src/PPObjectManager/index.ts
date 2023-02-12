@@ -36,6 +36,7 @@ class FavoredSuit {
     });
 
     const suit = game.gamedatas.favoredSuit;
+    this.favoredSuitZones[suit].instantaneous = true;
     placeToken({
       game,
       location: this.favoredSuitZones[suit],
@@ -46,6 +47,7 @@ class FavoredSuit {
         id: `favored_suit_marker`,
       },
     });
+    this.favoredSuitZones[suit].instantaneous = false;
   }
 
   getFavoredSuitZone({ suit }) {

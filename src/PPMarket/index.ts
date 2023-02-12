@@ -20,7 +20,6 @@ class PPMarket {
   private marketRupees: Zone[][];
 
   constructor(game: PaxPamirGame) {
-    console.log('MarketManager');
     this.game = game;
     this.marketCards = [];
     this.marketRupees = [];

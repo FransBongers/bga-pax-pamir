@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -43,6 +44,9 @@ trait ResolveImpactIconsTrait
     if ($current_impact_icon_index >= count($impact_icons)) {
       // $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);
       // $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
+      if (in_array(TRIBE, $impact_icons, true) || in_array(ARMY, $impact_icons, true)) {
+        Map::checkRulerChange($card_region);
+      };
       $this->gamestate->nextState('action');
       return;
     }

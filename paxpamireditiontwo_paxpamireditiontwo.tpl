@@ -146,7 +146,10 @@
                 </div>
                 <div class="pp_tableau_right">
                     <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
-                    <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
+                    <div id="pp_bottom_court_{player_id}" class="pp_bottom_court">
+                        <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
+                        <div id="pp_ruler_tokens_player_{player_id}" class="pp_ruler_tokens_player"></div>
+                    </div>
                 </div>
             </div>
         </div>

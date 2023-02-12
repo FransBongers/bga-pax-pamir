@@ -55,7 +55,6 @@ class PaxPamir implements PaxPamirGame {
     "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
   */
   public setup(gamedatas: PaxPamirGamedatas) {
-    console.log('game_name', this.framework().game_name);
     // Create a new div for buttons to avoid BGA auto clearing it
     dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
 
@@ -124,7 +123,7 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
-    console.log('Entering state: ' + stateName, args);
+    console.log('Entering state: ' + stateName, args.args);
     this.interactionManager.onEnteringState(stateName, args);
   }
 

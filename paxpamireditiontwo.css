@@ -784,8 +784,18 @@ html {
 }
 
 .pp_cylinders {
-    /* width: 60px; */
+    width: 400px;
+    /* margin: 0px 20px 15px 20px; */
+}
+
+.pp_bottom_court {
     margin: 0px 20px 15px 20px;
+    display: flex;
+    flex-direction: row;
+}
+
+.pp_ruler_tokens_player {
+    flex-grow: 1;
 }
 
 .pp_tableau_title {

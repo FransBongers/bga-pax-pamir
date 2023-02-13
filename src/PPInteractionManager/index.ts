@@ -256,13 +256,11 @@ class PPInteractionManager {
         this.addPrimaryActionButton({
           id: 'confirm_btn',
           text: _('Confirm'),
-          callback: () => {
-            this.removeSideSelectable();
+          callback: () =>
             this.game.takeAction({
               action: 'playCard',
               data: { cardId: args.playCardConfirm.cardId, leftSide: args.playCardConfirm.side === 'left' },
-            });
-          },
+            }),
         });
         this.addDangerActionButton({
           id: 'cancel_btn',

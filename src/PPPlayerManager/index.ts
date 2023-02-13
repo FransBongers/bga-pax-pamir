@@ -59,7 +59,7 @@ class PPPlayer {
       nodeId: `pp_cylinders_player_${playerId}`,
       tokenWidth: CYLINDER_WIDTH,
       tokenHeight: CYLINDER_HEIGHT,
-      itemMargin: 10,
+      itemMargin: 8,
     });
 
     // Create rulerTokens zone
@@ -301,6 +301,7 @@ class PPPlayer {
 
   moveToCourt({ card, from }: { card: Token; from: Zone | null }) {
     const { region } = this.game.gamedatas.cards[card.id] as CourtCard;
+    
     if (!from) {
       dojo.place(
         tplCard({ cardId: card.id, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
@@ -319,6 +320,7 @@ class PPPlayer {
         weight: card.state,
       });
     }
+    this.removeSideSelectFromCourt();
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

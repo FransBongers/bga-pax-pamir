@@ -359,7 +359,7 @@ var PPPlayer = /** @class */ (function () {
             nodeId: "pp_cylinders_player_".concat(playerId),
             tokenWidth: CYLINDER_WIDTH,
             tokenHeight: CYLINDER_HEIGHT,
-            itemMargin: 10,
+            itemMargin: 8,
         });
         // Create rulerTokens zone
         setupTokenZone({
@@ -576,6 +576,7 @@ var PPPlayer = /** @class */ (function () {
                 weight: card.state,
             });
         }
+        this.removeSideSelectFromCourt();
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
@@ -1167,8 +1168,7 @@ var PPInteractionManager = /** @class */ (function () {
                     id: 'confirm_btn',
                     text: _('Confirm'),
                     callback: function () {
-                        _this.removeSideSelectable();
-                        _this.game.takeAction({
+                        return _this.game.takeAction({
                             action: 'playCard',
                             data: { cardId: args.playCardConfirm.cardId, leftSide: args.playCardConfirm.side === 'left' },
                         });

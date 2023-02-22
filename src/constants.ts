@@ -7,6 +7,7 @@ const CARD_ACTION_MOVE = 'cardActionMove';
 const CARD_ACTION_TAX = 'cardActionTax';
 const CHOOSE_LOYALTY = 'chooseLoyalty';
 const CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
+const PLAY_CARD_BRIBE = 'playCardBribe';
 const PLAY_CARD_SELECT_SIDE = 'playCardSelectSide';
 const PLAY_CARD_CONFIRM = 'playCardConfirm';
 const CONFIRM_PURCHASE = 'confirmPurchase';

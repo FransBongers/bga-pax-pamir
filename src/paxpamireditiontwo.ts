@@ -176,9 +176,8 @@ class PaxPamir implements PaxPamirGame {
     return this as unknown as Framework;
   }
 
-  // TODO (Frans): cast as number?
-  public getPlayerId(): string {
-    return this.framework().player_id;
+  public getPlayerId(): number {
+    return Number(this.framework().player_id);
   }
 
   // returns zone object for given backend location in token database
@@ -195,10 +194,10 @@ class PaxPamir implements PaxPamirGame {
         });
       case 'cylinders':
         // cylinders_playerId
-        return this.playerManager.getPlayer({ playerId: splitLocation[1] }).getCylinderZone();
+        return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
       case 'gift':
         // gift_2_playerId
-        return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: Number(splitLocation[1]) });
+        return this.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
       case 'favored':
         // favored_suit_economic
         return this.objectManager.favoredSuit.getFavoredSuitZone({

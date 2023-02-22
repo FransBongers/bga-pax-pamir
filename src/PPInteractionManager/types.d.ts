@@ -5,6 +5,11 @@ interface UpdateInterfaceArgs {
   confirmPlaceSpy?: {
     cardId: string;
   };
+  playCardBribe?: {
+    cardId: string;
+    region: string;
+    ruler: PPPlayer;
+  };
   playCardConfirm?: {
     cardId: string;
     side: 'left' | 'right';

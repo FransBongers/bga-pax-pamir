@@ -585,7 +585,7 @@ html {
 }
 
 .pp_spy_zone {
-    width: 132px;
+    width: 136px;
     height: 30px;
     left: 8px;
     top: 78px;
@@ -1067,12 +1067,47 @@ html {
     border-radius: 3px;
 }
 
+.pp_keyword_token {
+    width: 20px;
+    height: 20px;
+    background-image: url("img/tokens.png");
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    position: relative;
+    top: 4px;
+    pointer-events: none;
+}
+
+.pp_herat_icon {
+    background-image: url("img/region_herat.svg");
+}
+
+.pp_kabul_icon {
+    background-image: url("img/region_kabul.svg");
+}
+
+.pp_kandahar_icon {
+    background-image: url("img/region_kandahar.svg");
+}
+
+.pp_persia_icon {
+    background-image: url("img/region_persia.svg");
+}
+
+.pp_punjab_icon {
+    background-image: url("img/region_punjab.svg");
+}
+
+.pp_transcaspia_icon {
+    background-image: url("img/region_transcaspia.svg");
+}
+
 /* BUTTONS */
 
 #afghan_button {
     background-color: var(--afghan-color);
 }
-
 
 #british_button {
     background-color: var(--british-color);
@@ -1080,6 +1115,10 @@ html {
 
 #russian_button {
     background-color: var(--russian-color);
+}
+
+.loyalty_button {
+    text-shadow: -1px -1px 0px #00000099,1px 1px 0px#00000099,-1px 1px 0px #00000099,1px -1px 0px #00000099;
 }
 
 /* ------- CARDS START ------- */

@@ -7,6 +7,7 @@ var CARD_ACTION_MOVE = 'cardActionMove';
 var CARD_ACTION_TAX = 'cardActionTax';
 var CHOOSE_LOYALTY = 'chooseLoyalty';
 var CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
+var PLAY_CARD_BRIBE = 'playCardBribe';
 var PLAY_CARD_SELECT_SIDE = 'playCardSelectSide';
 var PLAY_CARD_CONFIRM = 'playCardConfirm';
 var CONFIRM_PURCHASE = 'confirmPurchase';
@@ -88,8 +89,37 @@ var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+};
+var getKeywords = function (_a) {
+    var _b = _a.playerColor, playerColor = _b === void 0 ? '#000' : _b;
+    return {
+        you: '${you}',
+        playerName: "<span style=\"font-weight:bold;color:#".concat(playerColor, ";\">${playerName}</span>"),
+        herat: '<div class="pp_keyword_token pp_herat_icon"></div>',
+        kabul: '<div class="pp_keyword_token pp_kabul_icon"></div>',
+        kandahar: '<div class="pp_keyword_token pp_kandahar_icon"></div>',
+        persia: '<div class="pp_keyword_token pp_persia_icon"></div>',
+        punjab: '<div class="pp_keyword_token pp_punjab_icon"></div>',
+        transcaspia: '<div class="pp_keyword_token pp_transcaspia_icon"></div>',
+    };
+};
+var substituteKeywords = function (_a) {
+    var string = _a.string, args = _a.args, playerColor = _a.playerColor;
+    console.log('color', playerColor);
+    return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
 // const placeCard = ({ location, id, order = null }) => {
 //   if (order != null) {
@@ -314,17 +344,6 @@ var PPObjectManager = /** @class */ (function () {
 //  .##........##.......#########....##....##.......##...##..
 //  .##........##.......##.....##....##....##.......##....##.
 //  .##........########.##.....##....##....########.##.....##
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var PPPlayer = /** @class */ (function () {
     function PPPlayer(_a) {
         var game = _a.game, player = _a.player;
@@ -344,7 +363,7 @@ var PPPlayer = /** @class */ (function () {
         // console.log("Player", player);
         this.game = game;
         var playerId = player.id;
-        this.playerId = playerId;
+        this.playerId = Number(playerId);
         this.player = player;
         this.playerName = player.name;
         this.playerColor = player.color;
@@ -501,7 +520,7 @@ var PPPlayer = /** @class */ (function () {
             this.counters.influence.disable();
         }
         this.counters.cylinders.setValue(gamedatas.counts[this.playerId].cylinders);
-        this.counters.rupees.setValue(gamedatas.players[this.playerId].rupees);
+        this.counters.rupees.setValue(gamedatas.counts[this.playerId].rupees);
         this.counters.cards.setValue(gamedatas.counts[this.playerId].cards);
         this.counters.economic.setValue(gamedatas.counts[this.playerId].suits.economic);
         this.counters.military.setValue(gamedatas.counts[this.playerId].suits.military);
@@ -530,6 +549,12 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.getGiftZone = function (_a) {
         var value = _a.value;
         return this.gifts[value];
+    };
+    PPPlayer.prototype.getColor = function () {
+        return this.playerColor;
+    };
+    PPPlayer.prototype.getName = function () {
+        return this.playerName;
     };
     PPPlayer.prototype.getRulerTokensZone = function () {
         return this.rulerTokens;
@@ -794,11 +819,17 @@ var Region = /** @class */ (function () {
                 },
             });
         }
-        ;
         this.rulerZone.instantaneous = false;
     }
     Region.prototype.getArmyZone = function () {
         return this.armyZone;
+    };
+    Region.prototype.getRuler = function () {
+        return this.ruler;
+    };
+    Region.prototype.setRuler = function (_a) {
+        var playerId = _a.playerId;
+        this.ruler = playerId;
     };
     Region.prototype.getRulerZone = function () {
         return this.rulerZone;
@@ -1025,16 +1056,19 @@ var PPInteractionManager = /** @class */ (function () {
                     id: 'afghan_button',
                     text: _('Afghan'),
                     callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: AFGHAN } }); },
+                    extraClasses: 'loyalty_button',
                 });
                 this.addPrimaryActionButton({
                     id: 'british_button',
                     text: _('British'),
                     callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: BRITISH } }); },
+                    extraClasses: 'loyalty_button',
                 });
                 this.addPrimaryActionButton({
                     id: 'russian_button',
                     text: _('Russian'),
                     callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }); },
+                    extraClasses: 'loyalty_button',
                 });
                 break;
             case DISCARD_COURT:
@@ -1086,16 +1120,16 @@ var PPInteractionManager = /** @class */ (function () {
                     this.setHandCardsSelectable({
                         callback: function (_a) {
                             var cardId = _a.cardId;
-                            var numberOfCardsInCourt = _this.game.playerManager
-                                .getPlayer({ playerId: _this.game.getPlayerId() })
-                                .getCourtZone()
-                                .getAllItems().length;
-                            if (numberOfCardsInCourt === 0) {
-                                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left' } } });
-                            }
-                            else {
-                                _this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId } } });
-                            }
+                            _this.playCardNextStep({ cardId: cardId });
+                            // const numberOfCardsInCourt = this.game.playerManager
+                            //   .getPlayer({ playerId: this.game.getPlayerId() })
+                            //   .getCourtZone()
+                            //   .getAllItems().length;
+                            // if (numberOfCardsInCourt === 0) {
+                            //   this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
+                            // } else {
+                            //   this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
+                            // }
                         },
                     });
                     this.setCardActionsSelectable();
@@ -1132,6 +1166,22 @@ var PPInteractionManager = /** @class */ (function () {
                 break;
             case PLACE_SPY:
                 this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
+                break;
+            case PLAY_CARD_BRIBE:
+                dojo.query(".pp_".concat(args.playCardBribe.cardId)).addClass('pp_selected');
+                this.updatePageTitle({
+                    text: substituteKeywords({
+                        string: " ${you} need to pay a bribe to ${playerName}, ruler of ${region} ${".concat(args.playCardBribe.region, "}, or ask to waive."),
+                        args: {
+                            region: capitalizeFirstLetter(args.playCardBribe.region),
+                        },
+                        playerColor: args.playCardBribe.ruler.getColor(),
+                    }),
+                    args: {
+                        playerName: args.playCardBribe.ruler.getName(),
+                        you: '${you}',
+                    },
+                });
                 break;
             case PLAY_CARD_SELECT_SIDE:
                 dojo.query(".pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
@@ -1273,20 +1323,45 @@ var PPInteractionManager = /** @class */ (function () {
     /*
      * Add a blue/grey button if it doesn't already exists
      */
+    PPInteractionManager.prototype.addActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses, _b = _a.color, color = _b === void 0 ? 'none' : _b;
+        if ($(id)) {
+            return;
+        }
+        this.game.framework().addActionButton(id, text, callback, 'customActions', false, color);
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
+    };
     PPInteractionManager.prototype.addPrimaryActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback;
-        if (!$(id))
-            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
     };
     PPInteractionManager.prototype.addSecondaryActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback;
-        if (!$(id))
-            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
     };
     PPInteractionManager.prototype.addDangerActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback;
-        if (!$(id))
-            this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
     };
     PPInteractionManager.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;
@@ -1364,6 +1439,33 @@ var PPInteractionManager = /** @class */ (function () {
                 fromHand: fromHand,
             },
         });
+    };
+    PPInteractionManager.prototype.playCardNextStep = function (_a) {
+        var cardId = _a.cardId;
+        // Check if other player rules the region
+        var cardInfo = this.getCardInfo({ cardId: cardId });
+        var region = cardInfo.region;
+        var rulerId = this.game.map.getRegion({ region: region }).getRuler();
+        var playerId = this.game.getPlayerId();
+        console.log('ruler', rulerId);
+        if (rulerId !== null && rulerId !== playerId) {
+            console.log('another player rules the region');
+            this.updateInterface({
+                nextStep: PLAY_CARD_BRIBE,
+                args: { playCardBribe: { cardId: cardId, region: region, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }) } },
+            });
+            return;
+        }
+        var numberOfCardsInCourt = this.game.playerManager
+            .getPlayer({ playerId: this.game.getPlayerId() })
+            .getCourtZone()
+            .getAllItems().length;
+        if (numberOfCardsInCourt === 0) {
+            this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left' } } });
+        }
+        else {
+            this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId } } });
+        }
     };
     PPInteractionManager.prototype.setCardActionsSelectable = function () {
         var _this = this;
@@ -1687,10 +1789,11 @@ var PPNotificationManager = /** @class */ (function () {
         var lowerCaseRegion = region.toLowerCase();
         var from = oldRuler === null
             ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
-            : this.game.playerManager.getPlayer({ playerId: '' + oldRuler }).getRulerTokensZone();
+            : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
         var to = newRuler === null
             ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
-            : this.game.playerManager.getPlayer({ playerId: '' + newRuler }).getRulerTokensZone();
+            : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
+        this.game.map.getRegion({ region: lowerCaseRegion }).setRuler({ playerId: newRuler });
         this.game.move({
             id: "pp_ruler_token_".concat(lowerCaseRegion),
             from: from,
@@ -1700,7 +1803,7 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_chooseLoyalty = function (notif) {
         var args = notif.args;
         console.log('notif_chooseLoyalty', args);
-        var playerId = args.player_id;
+        var playerId = Number(args.player_id);
         this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
         // TODO (make this notif more generic for loyalty changes?)
         this.getPlayer({ playerId: playerId }).setCounter({ counter: 'influence', value: 1 });
@@ -1708,7 +1811,7 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
         this.game.interactionManager.resetActionArgs();
-        var playerId = notif.args.playerId;
+        var playerId = Number(notif.args.playerId);
         var from = notif.args.from;
         if (from == 'hand') {
             // TODO (Frans): check how this works for other players than the one whos card gets discarded
@@ -1757,7 +1860,7 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
         this.game.interactionManager.resetActionArgs();
-        var playerId = notif.args.playerId;
+        var playerId = Number(notif.args.playerId);
         var player = this.getPlayer({ playerId: playerId });
         notif.args.courtCards.forEach(function (card, index) {
             var item = player.getCourtZone().items.find(function (item) { return item.id === card.id; });
@@ -1767,14 +1870,15 @@ var PPNotificationManager = /** @class */ (function () {
         });
         player.moveToCourt({
             card: notif.args.card,
-            from: playerId == this.game.getPlayerId() ? player.getHandZone() : null,
+            from: Number(playerId) === this.game.getPlayerId() ? player.getHandZone() : null,
         });
         this.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
     PPNotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
         console.log('notif_purchaseCard', notif);
-        var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, updatedCards = _a.updatedCards, playerId = _a.playerId;
+        var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, updatedCards = _a.updatedCards;
+        var playerId = Number(notif.args.playerId);
         this.game.interactionManager.resetActionArgs();
         var row = Number(marketLocation.split('_')[1]);
         var col = Number(marketLocation.split('_')[2]);
@@ -1792,7 +1896,7 @@ var PPNotificationManager = /** @class */ (function () {
         else if (newLocation == 'discard') {
             this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
         }
-        else if (playerId == this.game.getPlayerId()) {
+        else if (playerId === this.game.getPlayerId()) {
             this.getPlayer({ playerId: playerId }).moveToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
         else {
@@ -1867,7 +1971,7 @@ var PPNotificationManager = /** @class */ (function () {
         this.game.playerCounts = notif.args.counts;
         var counts = notif.args.counts;
         Object.keys(counts).forEach(function (playerId) {
-            var player = _this.getPlayer({ playerId: playerId });
+            var player = _this.getPlayer({ playerId: Number(playerId) });
             player.setCounter({ counter: 'influence', value: counts[playerId].influence });
             player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
             player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
@@ -2052,9 +2156,8 @@ var PaxPamir = /** @class */ (function () {
     PaxPamir.prototype.framework = function () {
         return this;
     };
-    // TODO (Frans): cast as number?
     PaxPamir.prototype.getPlayerId = function () {
-        return this.framework().player_id;
+        return Number(this.framework().player_id);
     };
     // returns zone object for given backend location in token database
     PaxPamir.prototype.getZoneForLocation = function (_a) {
@@ -2071,10 +2174,10 @@ var PaxPamir = /** @class */ (function () {
                 });
             case 'cylinders':
                 // cylinders_playerId
-                return this.playerManager.getPlayer({ playerId: splitLocation[1] }).getCylinderZone();
+                return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
             case 'gift':
                 // gift_2_playerId
-                return this.playerManager.getPlayer({ playerId: splitLocation[2] }).getGiftZone({ value: Number(splitLocation[1]) });
+                return this.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
             case 'favored':
                 // favored_suit_economic
                 return this.objectManager.favoredSuit.getFavoredSuitZone({

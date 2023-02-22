@@ -119,16 +119,19 @@ class PPInteractionManager {
           id: 'afghan_button',
           text: _('Afghan'),
           callback: () => this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: AFGHAN } }),
+          extraClasses: 'loyalty_button',
         });
         this.addPrimaryActionButton({
           id: 'british_button',
           text: _('British'),
           callback: () => this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: BRITISH } }),
+          extraClasses: 'loyalty_button',
         });
         this.addPrimaryActionButton({
           id: 'russian_button',
           text: _('Russian'),
           callback: () => this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }),
+          extraClasses: 'loyalty_button',
         });
         break;
       case DISCARD_COURT:
@@ -178,15 +181,16 @@ class PPInteractionManager {
           this.setMarketCardsSelectable();
           this.setHandCardsSelectable({
             callback: ({ cardId }: { cardId: string }) => {
-              const numberOfCardsInCourt = this.game.playerManager
-                .getPlayer({ playerId: this.game.getPlayerId() })
-                .getCourtZone()
-                .getAllItems().length;
-              if (numberOfCardsInCourt === 0) {
-                this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
-              } else {
-                this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
-              }
+              this.playCardNextStep({ cardId });
+              // const numberOfCardsInCourt = this.game.playerManager
+              //   .getPlayer({ playerId: this.game.getPlayerId() })
+              //   .getCourtZone()
+              //   .getAllItems().length;
+              // if (numberOfCardsInCourt === 0) {
+              //   this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
+              // } else {
+              //   this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
+              // }
             },
           });
           this.setCardActionsSelectable();
@@ -222,6 +226,22 @@ class PPInteractionManager {
         break;
       case PLACE_SPY:
         this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
+        break;
+      case PLAY_CARD_BRIBE:
+        dojo.query(`.pp_${args.playCardBribe.cardId}`).addClass('pp_selected');
+        this.updatePageTitle({
+          text: substituteKeywords({
+            string: ` \${you} need to pay a bribe to \${playerName}, ruler of \${region} \${${args.playCardBribe.region}}, or ask to waive.`,
+            args: {
+              region: capitalizeFirstLetter(args.playCardBribe.region),
+            },
+            playerColor: args.playCardBribe.ruler.getColor(),
+          }),
+          args: {
+            playerName: args.playCardBribe.ruler.getName(),
+            you: '${you}',
+          },
+        });
         break;
       case PLAY_CARD_SELECT_SIDE:
         dojo.query(`.pp_${args.playCardSelectSide.cardId}`).addClass('pp_selected');
@@ -363,16 +383,86 @@ class PPInteractionManager {
   /*
    * Add a blue/grey button if it doesn't already exists
    */
-  addPrimaryActionButton({ id, text, callback }: { id: string; text: string; callback: Function | string }) {
-    if (!$(id)) this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+  addActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+    color = 'none',
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+    color?: 'blue' | 'gray' | 'red' | 'none';
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.game.framework().addActionButton(id, text, callback, 'customActions', false, color);
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
   }
 
-  addSecondaryActionButton({ id, text, callback }: { id: string; text: string; callback: Function | string }) {
-    if (!$(id)) this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+  addPrimaryActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
   }
 
-  addDangerActionButton({ id, text, callback }: { id: string; text: string; callback: Function | string }) {
-    if (!$(id)) this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+  addSecondaryActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
+  }
+
+  addDangerActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
   }
 
   getCardInfo({ cardId }: { cardId: string }): Card {
@@ -446,6 +536,33 @@ class PPInteractionManager {
         fromHand,
       },
     });
+  }
+
+  playCardNextStep({ cardId }: { cardId: string }) {
+    // Check if other player rules the region
+    const cardInfo = this.getCardInfo({ cardId }) as CourtCard;
+    const { region } = cardInfo;
+    const rulerId = this.game.map.getRegion({ region }).getRuler();
+    const playerId = this.game.getPlayerId();
+    console.log('ruler', rulerId);
+    if (rulerId !== null && rulerId !== playerId) {
+      console.log('another player rules the region');
+      this.updateInterface({
+        nextStep: PLAY_CARD_BRIBE,
+        args: { playCardBribe: { cardId, region, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }) } },
+      });
+      return;
+    }
+
+    const numberOfCardsInCourt = this.game.playerManager
+      .getPlayer({ playerId: this.game.getPlayerId() })
+      .getCourtZone()
+      .getAllItems().length;
+    if (numberOfCardsInCourt === 0) {
+      this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
+    } else {
+      this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
+    }
   }
 
   setCardActionsSelectable() {

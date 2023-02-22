@@ -1,7 +1,7 @@
 interface NotifChangeRulerArgs {
   playerName: string;
-  oldRuler: number;
-  newRuler: number;
+  oldRuler: number | null;
+  newRuler: number | null;
   region: string;
 }
 

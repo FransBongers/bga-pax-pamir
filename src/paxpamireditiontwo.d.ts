@@ -2,7 +2,13 @@ interface PlayerCounts {
   cards: number;
   cylinders: number;
   influence: number;
-  rupees: string; // TODO (Frans): return as number
+  rupees: number; // TODO (Frans): return as Number
+  suits: {
+    economic: number;
+    intelligence: number;
+    military: number;
+    political: number;
+  };
 }
 
 type Card = CourtCard | DominanceCheckCard | EventCard;
@@ -77,9 +83,9 @@ interface PaxPamirGamedatas extends Gamedatas {
   coalitionBlocks: {
     [coalition: string]: Token[];
   };
-  counts: {
-    [playerId: number]: PlayerCounts;
-  };
+  counts: Record<number, PlayerCounts>;
+  //   [playerId: number]: PlayerCounts;
+  // };
   court: { [playerId: number]: Token[] };
   cylinders: {
     [playerId: number]: Token[];
@@ -96,7 +102,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     >;
   };
   market: Token[][];
-  players: { [playerId: number]: PaxPamirPlayer };
+  players: Record<number, PaxPamirPlayer>;
   roads: {
     [border: string]: {
       [coalitionBlockId: string]: Token;
@@ -131,7 +137,7 @@ interface PaxPamirGame extends Game {
   spies: {
     [cardId: string]: Zone;
   };
-  getPlayerId: () => string;
+  getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   discardCard: (props: { id: string; from: Zone; order?: null }) => void;

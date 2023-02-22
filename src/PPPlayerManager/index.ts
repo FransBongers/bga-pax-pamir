@@ -13,7 +13,7 @@ class PPPlayer {
   private game: PaxPamirGame;
   private gifts: Record<string, Zone>;
   private playerColor: string;
-  private playerId: string;
+  private playerId: number;
   private playerName: string;
   private counters: {
     cards: Counter;
@@ -41,7 +41,7 @@ class PPPlayer {
     // console.log("Player", player);
     this.game = game;
     const playerId = player.id;
-    this.playerId = playerId;
+    this.playerId = Number(playerId);
     this.player = player;
     this.playerName = player.name;
     this.playerColor = player.color;
@@ -218,7 +218,7 @@ class PPPlayer {
       this.counters.influence.disable();
     }
     this.counters.cylinders.setValue(gamedatas.counts[this.playerId].cylinders);
-    this.counters.rupees.setValue(gamedatas.players[this.playerId].rupees);
+    this.counters.rupees.setValue(gamedatas.counts[this.playerId].rupees);
     this.counters.cards.setValue(gamedatas.counts[this.playerId].cards);
 
     this.counters.economic.setValue(gamedatas.counts[this.playerId].suits.economic);
@@ -255,6 +255,14 @@ class PPPlayer {
 
   getGiftZone({ value }: { value: number }) {
     return this.gifts[value];
+  }
+
+  getColor(): string {
+    return this.playerColor;
+  }
+
+  getName(): string {
+    return this.playerName;
   }
 
   getRulerTokensZone(): Zone {
@@ -359,7 +367,7 @@ class PPPlayer {
 
 class PPPlayerManager {
   private game: PaxPamirGame;
-  private players: Record<string, PPPlayer>;
+  private players: Record<number, PPPlayer>;
 
   constructor(game: PaxPamirGame) {
     console.log('Constructor PlayerManager');
@@ -374,7 +382,7 @@ class PPPlayerManager {
     // console.log("players", this.players);
   }
 
-  getPlayer({ playerId }: { playerId: string }): PPPlayer {
+  getPlayer({ playerId }: { playerId: number }): PPPlayer {
     return this.players[playerId];
   }
 }

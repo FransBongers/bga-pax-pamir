@@ -93,7 +93,7 @@ class Border {
 class Region {
   private game: PaxPamirGame;
   private region: string;
-  private ruler: number;
+  private ruler: number | null;
   private armyZone: Zone;
   private tribeZone: Zone;
   private rulerZone: Zone;
@@ -173,12 +173,20 @@ class Region {
           region,
         },
       });
-    };
+    }
     this.rulerZone.instantaneous = false;
   }
 
   getArmyZone() {
     return this.armyZone;
+  }
+
+  getRuler(): number | null {
+    return this.ruler;
+  }
+
+  setRuler({ playerId }: { playerId: number | null }) {
+    this.ruler = playerId;
   }
 
   getRulerZone(): Zone {

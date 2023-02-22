@@ -27,7 +27,7 @@ class PPNotificationManager {
     dojo.forEach(this.subscriptions, dojo.unsubscribe);
   }
 
-  getPlayer({ playerId }: { playerId: string }): PPPlayer {
+  getPlayer({ playerId }: { playerId: number }): PPPlayer {
     return this.game.playerManager.getPlayer({ playerId });
   }
 
@@ -69,11 +69,12 @@ class PPNotificationManager {
     const from =
       oldRuler === null
         ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
-        : this.game.playerManager.getPlayer({ playerId: '' + oldRuler }).getRulerTokensZone();
+        : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
     const to: Zone =
       newRuler === null
         ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
-        : this.game.playerManager.getPlayer({ playerId: '' + newRuler }).getRulerTokensZone();
+        : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
+    this.game.map.getRegion({ region: lowerCaseRegion }).setRuler({ playerId: newRuler });
     this.game.move({
       id: `pp_ruler_token_${lowerCaseRegion}`,
       from,
@@ -84,7 +85,7 @@ class PPNotificationManager {
   notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
     const { args } = notif;
     console.log('notif_chooseLoyalty', args);
-    const playerId = args.player_id;
+    const playerId = Number(args.player_id);
     this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
     // TODO (make this notif more generic for loyalty changes?)
     this.getPlayer({ playerId }).setCounter({ counter: 'influence', value: 1 });
@@ -94,7 +95,7 @@ class PPNotificationManager {
     console.log('notif_discardCard', notif);
 
     this.game.interactionManager.resetActionArgs();
-    const playerId = notif.args.playerId;
+    const playerId = Number(notif.args.playerId);
     const from = notif.args.from;
 
     if (from == 'hand') {
@@ -146,7 +147,7 @@ class PPNotificationManager {
     console.log('notif_playCard', notif);
 
     this.game.interactionManager.resetActionArgs();
-    var playerId = notif.args.playerId;
+    var playerId = Number(notif.args.playerId);
 
     const player = this.getPlayer({ playerId });
     notif.args.courtCards.forEach((card, index) => {
@@ -158,7 +159,7 @@ class PPNotificationManager {
 
     player.moveToCourt({
       card: notif.args.card,
-      from: playerId == this.game.getPlayerId() ? player.getHandZone() : null,
+      from: Number(playerId) === this.game.getPlayerId() ? player.getHandZone() : null,
     });
 
     this.getPlayer({ playerId }).getCourtZone().updateDisplay();
@@ -166,8 +167,8 @@ class PPNotificationManager {
 
   notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
     console.log('notif_purchaseCard', notif);
-    const { marketLocation, newLocation, updatedCards, playerId } = notif.args;
-
+    const { marketLocation, newLocation, updatedCards } = notif.args;
+    const playerId = Number(notif.args.playerId);
     this.game.interactionManager.resetActionArgs();
     const row = Number(marketLocation.split('_')[1]);
     const col = Number(marketLocation.split('_')[2]);
@@ -185,7 +186,7 @@ class PPNotificationManager {
       });
     } else if (newLocation == 'discard') {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
-    } else if (playerId == this.game.getPlayerId()) {
+    } else if (playerId === this.game.getPlayerId()) {
       this.getPlayer({ playerId }).moveToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     } else {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, `cards_${playerId}`);
@@ -264,7 +265,7 @@ class PPNotificationManager {
     const counts = notif.args.counts;
 
     Object.keys(counts).forEach((playerId) => {
-      const player = this.getPlayer({ playerId });
+      const player = this.getPlayer({ playerId: Number(playerId) });
       player.setCounter({ counter: 'influence', value: counts[playerId].influence });
       player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
       player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });

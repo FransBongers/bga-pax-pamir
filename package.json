@@ -5,9 +5,11 @@
   "main": "paxpamireditiontwo.js",
   "scripts": {
     "build:ts": "tsc",
+    "build:scss": "sass --no-source-map src/paxpamireditiontwo.scss paxpamireditiontwo.css",
     "watch:ts": "tsc --watch",
-    "watch": "npm run watch:ts",
-    "build": "npm run build:ts"
+    "watch:scss": "sass --watch src/paxpamireditiontwo.scss paxpamireditiontwo.css",
+    "watch": "npm run watch:ts && npm run watch:scss",
+    "build": "npm run build:ts && npm run build:scss"
   },
   "author": "yourname",
   "license": "MIT",

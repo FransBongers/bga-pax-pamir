@@ -1,0 +1,125 @@
+
+/* ------- PLAYER BOARD ------- */
+
+.pp_suit_icon {
+  background-image: url(img/temp/suits.png);
+  height: 44px;
+}
+
+.pp_suit_icon.economic {
+  background-position:0px 0;
+}
+
+.pp_suit_icon.military {
+  background-position:-42px 0;
+}
+
+.pp_suit_icon.political {
+  background-position:-85px 0;
+}
+
+.pp_suit_icon.intelligence {
+  background-position:-128px 0;
+}
+
+.pp_icon_count {
+  position: absolute;
+  color: black;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* bottom: 11px; */
+  /* left: 18px; */
+  bottom: 0px;
+  right: 0px;
+  /* font-weight: 700; */
+  /* padding: 0px 2px; */
+  background-color: white;
+  border-radius: 50%;
+  border: solid 1px #000000;
+}
+
+.pp_icon_container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  margin: 3px;
+}
+
+.pp_icon {
+  background-repeat: no-repeat;
+  position: relative;
+  margin: 4px;
+  width: 44px;
+}
+
+.pp_loyalty_icon {
+  /* height: 30px; */
+  
+  /* background-size: 132px 30px;  */
+  /* background-position: -250px 0px; */
+  background-size: contain;
+  /* background-repeat: no-repeat;
+  width: 44px; */
+}
+
+.pp_loyalty_icon.pp_loyalty_afghan {
+  background-image: url('img/loyalty_afghan.svg');
+  height: 25px;
+  padding-bottom: 12px;
+}
+
+.pp_loyalty_icon.pp_loyalty_british {
+  background-image: url('img/loyalty_british.svg');
+  height: 16px;
+  padding-bottom: 22px;
+}
+
+.pp_loyalty_icon.pp_loyalty_russian {
+  background-image: url('img/loyalty_russian.svg');
+  height: 14px;
+  padding-bottom: 22px;
+}
+
+.pp_cylinder_icon {
+  /* background-image: url(img/temp/tokens.png);
+  background-size: 220px 44px; */
+  height: 44px;
+}
+
+.pp_cylinder_icon.pp_player_color_98B3C0 {
+  background-image: url('img/cylinder_blue.svg');
+}
+
+.pp_cylinder_icon.pp_player_color_B9B6B1 {
+  background-image: url('img/cylinder_grey.svg');
+}
+
+.pp_cylinder_icon.pp_player_color_DFCFB6 {
+  background-image: url('img/cylinder_yellow.svg');
+}
+
+.pp_cylinder_icon.pp_player_color_C19B9E {
+  background-image: url('img/cylinder_red.svg');
+}
+
+.pp_cylinder_icon.pp_player_color_807F7F {
+  background-image: url('img/cylinder_black.svg');
+}
+
+.pp_player_board_rupee {
+  height: 44px;
+  background-size: 44px;
+  background-image: url('img/rupee.svg');
+}
+
+.pp_card_icon {
+  height: 44px;
+  width: 32px;
+  background-size: 32px 44px;
+  background-image: url('img/temp/cards/back.jpg');
+  margin-left: 16px;
+  border-radius: 3px;
+}

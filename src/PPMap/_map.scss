@@ -1,0 +1,307 @@
+/* ------- MAP AND REGIONS ------- */
+
+#pp_map {
+  background-image: url('img/temp/paxpamir_board.jpg');
+  background-size: 1000px 581px;
+  background-repeat: no-repeat;
+  grid-column: 1 / span 1;
+  grid-row: span 1;
+  height: 581px;
+  position: relative;
+  width: 1000px;
+  box-shadow: rgb(0 0 0) 2px 2px 8px;
+}
+
+#pp_map_areas {
+  position: absolute;
+  left: 91px;
+  top: 89px;
+  width: 819px;
+  height: 402px;
+  /* background-color: blue; */
+}
+
+#pp_map_areas.pp_selectable {
+  z-index: 50;
+}
+
+.pp_region {
+  fill: transparent;
+}
+
+.pp_region.pp_selectable {
+  fill: green;
+  fill-opacity: 25%;
+  stroke: green;
+  stroke-width: 4;
+  cursor: pointer;
+}
+
+.pp_location {
+  position: absolute;
+  /* border: 2px solid blue; */
+}
+
+.pp_favored_suit {
+  height: 54px;
+  width: 26px;
+  position: absolute;
+  /* border: 2px solid blue; */
+  box-sizing: border-box;
+}
+
+.pp_favored_suit_marker {
+  height: 50px;
+  width: 22px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('img/favoured_suit_marker.svg');
+}
+
+
+#pp_favored_suit_political {
+  top: 116px;
+  left: 42px;
+}
+
+#pp_favored_suit_intelligence {
+  top: 197px;
+  left: 42px;
+}
+
+#pp_favored_suit_economic {
+  top: 278px;
+  left: 42px;
+}
+
+#pp_favored_suit_military {
+  top: 361px;
+  left: 42px;
+}
+
+.pp_vp_track {
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  /* box-shadow: 0px 0px 0px 4px blue !important; */
+}
+
+.pp_position_ruler_token {
+  height: 54px;
+  width: 50px;
+  position: absolute;
+  /* box-shadow: 0px 0px 0px 4px blue !important; */
+}
+
+#pp_position_ruler_token_herat {
+  top: 323px;
+  left: 394px;
+}
+
+#pp_position_ruler_token_kabul {
+  top: 120px;
+  left: 594px;
+}
+
+#pp_position_ruler_token_kandahar {
+  top: 373px;
+  left: 648px;
+}
+
+#pp_position_ruler_token_persia {
+  top: 363px;
+  left: 163px;
+}
+
+#pp_position_ruler_token_punjab {
+  top: 252px;
+  left: 831px;
+}
+
+#pp_position_ruler_token_transcaspia {
+  top: 110px;
+  left: 207px;
+}
+
+.pp_ruler_token {
+  height: 50px;
+  width: 50px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.4);
+  border-radius: 50%;
+}
+
+.pp_ruler_token.pp_herat {
+  background-image: url('img/ruler_token_herat.svg');
+}
+
+.pp_ruler_token.pp_kabul {
+  background-image: url('img/ruler_token_kabul.svg');
+}
+
+.pp_ruler_token.pp_kandahar {
+  background-image: url('img/ruler_token_kandahar.svg');
+}
+
+.pp_ruler_token.pp_persia {
+  background-image: url('img/ruler_token_persia.svg');
+}
+
+.pp_ruler_token.pp_punjab {
+  background-image: url('img/ruler_token_punjab.svg');
+}
+
+.pp_ruler_token.pp_transcaspia {
+  background-image: url('img/ruler_token_transcaspia.svg');
+}
+
+
+#pp_herat_armies {
+  top: 380px;
+  left: 320px;
+  height: 80px;
+  width: 190px;
+}
+
+#pp_kabul_armies {
+  top: 180px;
+  left: 520px;
+  height: 40px;
+  width: 190px;
+}
+
+#pp_kandahar_armies {
+  top: 420px;
+  left: 580px;
+  height: 40px;
+  width: 160px;
+}
+
+#pp_persia_armies {
+  top: 420px;
+  left: 100px;
+  height: 60px;
+  width: 160px;
+}
+
+#pp_punjab_armies {
+  top: 300px;
+  left: 800px;
+  height: 160px;
+  width: 100px;
+}
+
+#pp_transcaspia_armies {
+  top: 220px;
+  left: 100px;
+  height: 40px;
+  width: 190px;
+}
+
+
+#pp_herat_tribes {
+  top: 320px;
+  left: 320px;
+  height: 40px;
+  width: 190px;
+}
+
+#pp_kabul_tribes {
+  top: 100px;
+  left: 520px;
+  height: 40px;
+  width: 190px;
+}
+
+#pp_kandahar_tribes {
+  top: 360px;
+  left: 580px;
+  height: 40px;
+  width: 160px;
+}
+
+#pp_persia_tribes {
+  top: 360px;
+  left: 100px;
+  height: 40px;
+  width: 160px;
+}
+
+#pp_punjab_tribes {
+  top: 240px;
+  left: 800px;
+  height: 40px;
+  width: 100px;
+}
+
+#pp_transcaspia_tribes {
+  top: 120px;
+  left: 100px;
+  height: 40px;
+  width: 190px;
+}
+
+/* Borders */
+#pp_herat_kabul_border {
+  top: 230px;
+  left: 420px;
+  height: 80px;
+  width: 110px;
+}
+
+#pp_herat_kandahar_border {
+  top: 340px;
+  left: 525px;
+  height: 140px;
+  width: 40px;
+}
+
+#pp_herat_transcaspia_border {
+  top: 230px;
+  left: 280px;
+  height: 100px;
+  width: 130px;
+}
+
+#pp_herat_persia_border {
+  top: 340px;
+  left: 270px;
+  height: 140px;
+  width: 40px;
+}
+
+#pp_kabul_kandahar_border {
+  top: 290px;
+  left: 560px;
+  height: 40px;
+  width: 160px;
+}
+
+#pp_kabul_punjab_border {
+  top: 100px;
+  left: 770px;
+  height: 110px;
+  width: 100px;
+}
+
+#pp_kabul_transcaspia_border {
+  top: 100px;
+  left: 410px;
+  height: 120px;
+  width: 40px;
+}
+
+#pp_kandahar_punjab_border {
+  top: 360px;
+  left: 750px;
+  height: 120px;
+  width: 40px;
+}
+
+#pp_persia_transcaspia_border {
+  top: 290px;
+  left: 100px;
+  height: 40px;
+  width: 150px;
+}

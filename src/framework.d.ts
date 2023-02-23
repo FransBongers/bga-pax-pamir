@@ -31,6 +31,7 @@ interface Framework {
     callback_anycase?: (result: unknown) => void,
     ajax_method?: string
   ) => void;
+  attachToNewParent: (mobile_obj: string | Element, target_obj: string | Element) => void
   checkAction: (action: string) => boolean;
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
   game_name: string;
@@ -38,6 +39,7 @@ interface Framework {
   notifqueue: {
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
   };
+  placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;
   player_id: string;
   removeActionButtons: () => void;
   restoreServerGameState: () => void;
@@ -48,6 +50,7 @@ interface Framework {
   };
   setClientState: (newState: string, args: Record<string, unknown>) => void;
   showMessage: (msg: string, type: string) => void;
+  slideToObject: any;
   updatePageTitle: () => void;
 }
 

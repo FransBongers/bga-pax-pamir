@@ -67,7 +67,7 @@ class PPMarket {
     gamedatas.rupees
       .filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`)
       .forEach((rupee: Token) => {
-        this.placeRupeeOnCard({ row, column, rupeeId: rupee.id, fromDiv: this.marketRupees[row][column].container_div });
+        this.placeRupeeSetup({ row, column, rupeeId: rupee.id, fromDiv: this.marketRupees[row][column].container_div, setup: true });
       });
     this.marketRupees[row][column].instantaneous = false;
   }
@@ -86,11 +86,28 @@ class PPMarket {
     });
   }
 
-  
-
-  placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
+  placeRupeeSetup({
+    row,
+    column,
+    rupeeId,
+    fromDiv,
+    setup = false,
+  }: {
+    row: number;
+    column: number;
+    rupeeId: string;
+    fromDiv: string;
+    setup?: boolean;
+  }) {
     // TODO (chech why this does not slide from player player panel in case fromDiv is panelId)
     dojo.place(tplRupee({ rupeeId }), fromDiv);
+    this.marketRupees[row][column].placeInZone(rupeeId);
+  }
+
+  placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
+    dojo.place(tplRupee({ rupeeId }), fromDiv);
+    const divId = this.marketRupees[row][column].container_div;
+    this.game.framework().slideToObject(rupeeId, divId, 5000, 5000).play();
     this.marketRupees[row][column].placeInZone(rupeeId);
   }
 }

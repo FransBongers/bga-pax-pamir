@@ -26,6 +26,11 @@ html {
     background-color: antiquewhite;
 }
 
+#rupee_1 {
+    background-color: blue !important;
+    z-index: 1000;
+}
+
 #pp_play_area {
     grid-gap: 15px;
     display: grid;

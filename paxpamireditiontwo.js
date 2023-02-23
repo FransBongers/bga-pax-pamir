@@ -1,3 +1,171 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+/**
+ * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
+ * all its connectors (onClick, etc)
+ */
+var attachToNewParentNoDestroy = function (mobileEltId, newParentId, pos, placePosition) {
+    var mobile = $(mobileEltId);
+    var new_parent = $(newParentId);
+    var src = dojo.position(mobile);
+    if (placePosition)
+        mobile.style.position = placePosition;
+    dojo.place(mobile, new_parent, pos);
+    mobile.offsetTop; //force re-flow
+    var tgt = dojo.position(mobile);
+    var box = dojo.marginBox(mobile);
+    var cbox = dojo.contentBox(mobile);
+    var left = box.l + src.x - tgt.x;
+    var top = box.t + src.y - tgt.y;
+    mobile.style.position = 'absolute';
+    mobile.style.left = left + 'px';
+    mobile.style.top = top + 'px';
+    box.l += box.w - cbox.w;
+    box.t += box.h - cbox.h;
+    mobile.offsetTop; //force re-flow
+    return box;
+};
+var isFastMode = function () {
+    // return this.instantaneousMode;
+    return false;
+};
+var slide = function (_a) {
+    var game = _a.game, mobileElt = _a.mobileElt, targetElt = _a.targetElt, _b = _a.options, options = _b === void 0 ? {} : _b;
+    var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true }, options);
+    config.phantomStart = config.phantomStart || config.phantom;
+    config.phantomEnd = config.phantomEnd || config.phantom;
+    // Mobile elt
+    mobileElt = $(mobileElt);
+    var mobile = mobileElt;
+    // Target elt
+    targetElt = $(targetElt);
+    var targetId = targetElt;
+    var newParent = config.attach ? targetId : $(mobile).parentNode;
+    // Handle fast mode
+    if (isFastMode() && (config.destroy || config.clearPos)) {
+        if (config.destroy)
+            dojo.destroy(mobile);
+        else
+            dojo.place(mobile, targetElt);
+        return new Promise(function (resolve, reject) {
+            // @ts-ignore
+            resolve();
+        });
+    }
+    // Handle phantom at start
+    if (config.phantomStart && config.from == null) {
+        mobile = dojo.clone(mobileElt);
+        // @ts-ignore
+        dojo.attr(mobile, 'id', mobileElt.id + '_animated');
+        dojo.place(mobile, 'game_play_area');
+        // @ts-ignore
+        game.framework().placeOnObject(mobile, mobileElt);
+        dojo.addClass(mobileElt, 'phantom');
+        config.from = mobileElt;
+    }
+    // Handle phantom at end
+    // @ts-ignore
+    if (config.phantomEnd) {
+        // @ts-ignore
+        targetId = dojo.clone(mobileElt);
+        // @ts-ignore
+        dojo.attr(targetId, 'id', mobileElt.id + '_afterSlide');
+        dojo.addClass(targetId, 'phantom');
+        if (config.beforeBrother != null) {
+            dojo.place(targetId, config.beforeBrother, 'before');
+        }
+        else {
+            dojo.place(targetId, targetElt);
+        }
+    }
+    dojo.style(mobile, 'zIndex', 5000);
+    dojo.addClass(mobile, config.className);
+    if (config.changeParent)
+        changeParent(mobile, 'game_play_area');
+    if (config.from != null)
+        game.framework().placeOnObject(mobile, config.from);
+    return new Promise(function (resolve, reject) {
+        var animation = config.pos == null
+            ? game.framework().slideToObject(mobile, config.to || targetId, config.duration, config.delay)
+            : game.framework().slideToObjectPos(mobile, config.to || targetId, config.pos.x, config.pos.y, config.duration, config.delay);
+        dojo.connect(animation, 'onEnd', function () {
+            dojo.style(mobile, 'zIndex', null);
+            dojo.removeClass(mobile, config.className);
+            // @ts-ignore
+            if (config.phantomStart) {
+                dojo.place(mobileElt, mobile, 'replace');
+                dojo.removeClass(mobileElt, 'phantom');
+                mobile = mobileElt;
+            }
+            if (config.changeParent) {
+                // @ts-ignore
+                if (config.phantomEnd)
+                    dojo.place(mobile, targetId, 'replace');
+                else
+                    changeParent(mobile, newParent);
+            }
+            if (config.destroy)
+                dojo.destroy(mobile);
+            if (config.clearPos && !config.destroy)
+                dojo.style(mobile, { top: null, left: null, position: null });
+            // @ts-ignore
+            resolve();
+        });
+        animation.play();
+    });
+};
+var changeParent = function (mobile, new_parent, relation) {
+    if (mobile === null) {
+        console.error('attachToNewParent: mobile obj is null');
+        return;
+    }
+    if (new_parent === null) {
+        console.error('attachToNewParent: new_parent is null');
+        return;
+    }
+    if (typeof mobile == 'string') {
+        mobile = $(mobile);
+    }
+    if (typeof new_parent == 'string') {
+        new_parent = $(new_parent);
+    }
+    if (typeof relation == 'undefined') {
+        relation = 'last';
+    }
+    var src = dojo.position(mobile);
+    dojo.style(mobile, 'position', 'absolute');
+    dojo.place(mobile, new_parent, relation);
+    var tgt = dojo.position(mobile);
+    var box = dojo.marginBox(mobile);
+    var cbox = dojo.contentBox(mobile);
+    var left = box.l + src.x - tgt.x;
+    var top = box.t + src.y - tgt.y;
+    positionObjectDirectly(mobile, left, top);
+    // @ts-ignore
+    box.l += box.w - cbox.w;
+    // @ts-ignore
+    box.t += box.h - cbox.h;
+    return box;
+};
+var positionObjectDirectly = function (mobileObj, x, y) {
+    // do not remove this "dead" code some-how it makes difference
+    dojo.style(mobileObj, 'left'); // bug? re-compute style
+    // console.log("place " + x + "," + y);
+    dojo.style(mobileObj, {
+        left: x + 'px',
+        top: y + 'px',
+    });
+    dojo.style(mobileObj, 'left'); // bug? re-compute style
+};
 // Interface steps
 var CARD_ACTION_BATTLE = 'cardActionBattle';
 var CARD_ACTION_BETRAY = 'cardActionBetray';
@@ -88,17 +256,6 @@ var tplCardSelect = function (_a) {
 var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
-};
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
 };
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -959,8 +1116,9 @@ var PPMarket = /** @class */ (function () {
     PPMarket.prototype.placeRupeeOnCard = function (_a) {
         var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv;
         dojo.place(tplRupee({ rupeeId: rupeeId }), fromDiv);
-        var divId = this.marketRupees[row][column].container_div;
-        this.game.framework().slideToObject(rupeeId, divId, 5000, 5000).play();
+        var div = this.marketRupees[row][column].container_div;
+        attachToNewParentNoDestroy(rupeeId, div);
+        this.game.framework().slideToObject(rupeeId, div).play();
         this.marketRupees[row][column].placeInZone(rupeeId);
     };
     return PPMarket;

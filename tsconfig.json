@@ -12,6 +12,8 @@
     "src/counter.d.ts",
     "src/stock.d.ts",
     "src/zone.d.ts",
+    "src/animation/types.d.ts",
+    "src/animation/index.ts",
     "src/paxpamireditiontwo.d.ts",
     "src/constants.ts",
     "src/templates.ts",

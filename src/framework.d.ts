@@ -31,7 +31,7 @@ interface Framework {
     callback_anycase?: (result: unknown) => void,
     ajax_method?: string
   ) => void;
-  attachToNewParent: (mobile_obj: string | Element, target_obj: string | Element) => void
+  attachToNewParent: (mobile_obj: string | Element, target_obj: string | Element) => void;
   checkAction: (action: string) => boolean;
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
   game_name: string;
@@ -50,7 +50,8 @@ interface Framework {
   };
   setClientState: (newState: string, args: Record<string, unknown>) => void;
   showMessage: (msg: string, type: string) => void;
-  slideToObject: any;
+  slideToObject: (mobile_obj: HTMLElement | string, target_obj: HTMLElement | string, duration?: number, delay?: number) => Animation;
+  slideToObjectPos: (mobile_obj: HTMLElement | string, target_obj: HTMLElement | string, target_x: number, target_y: number, duration?: number, delay?: number ) => Animation;
   updatePageTitle: () => void;
 }
 
@@ -64,11 +65,19 @@ interface Notif<T> {
   uid: string;
 }
 
+type DojoBox = { l: number; t: number; w: number; h: number; };
+type DojoPosition = 'replace' | 'first' | 'last' | 'before' | 'after' | 'only' | number;
+type CssPosition = 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit';
+
 /* TODO repace Function by (..params) => void */
 interface Dojo {
   addClass: (node: string | HTMLElement, className: string) => void;
   animateProperty: (params: { node: string; properties: any }) => any;
+  // https://dojotoolkit.org/reference-guide/1.7/dojo/clone.html
+  clone: (something: any) => any;
   connect: Function;
+  // https://dojotoolkit.org/reference-guide/1.7/dojo/contentBox.html
+  contentBox: (node: HTMLElement) => DojoBox;
   destroy: (node: string | HTMLElement) => void;
   disconnect: Function;
   empty: (node: string | HTMLElement) => void;
@@ -87,8 +96,11 @@ interface Dojo {
   hasClass: (node: string | HTMLElement, className: string) => boolean;
   hitch: Function;
   map: Function;
-  marginBox: Function;
-  place: (html: string, node: string | HTMLElement, action?: string) => void;
+  // https://dojotoolkit.org/reference-guide/1.7/dojo/marginBox.html
+  marginBox: (node: HTMLElement) => DojoBox;
+  // https://en.doc.boardgamearena.com/Game_interface_logic:_yourgamename.js#Moving_elements 
+  // https://dojotoolkit.org/reference-guide/1.7/dojo/place.html
+  place: (html: string, node: string | HTMLElement, pos?: DojoPosition) => void;
   position: (
     obj: HTMLElement,
     includeScroll?: boolean
@@ -96,7 +108,12 @@ interface Dojo {
   query: (query: string) => any; //HTMLElement[]; with some more functions
   removeClass: (node: string | HTMLElement, className?: string) => void;
   stopEvent: (evt) => void;
-  string: any;
+  string: {
+    pad: (input: string, size: number) => string,
+    rep: (input:string, numberOfRepeats: number) => string;
+    substitute: (input: string, args: Record<string,any>) => string;
+    trim: (input: string) => string;
+  };
   style: Function;
   subscribe: Function;
   toggleClass: (

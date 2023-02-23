@@ -106,8 +106,9 @@ class PPMarket {
 
   placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
     dojo.place(tplRupee({ rupeeId }), fromDiv);
-    const divId = this.marketRupees[row][column].container_div;
-    this.game.framework().slideToObject(rupeeId, divId, 5000, 5000).play();
+    const div = this.marketRupees[row][column].container_div;
+    attachToNewParentNoDestroy(rupeeId , div);
+    this.game.framework().slideToObject(rupeeId, div).play();
     this.marketRupees[row][column].placeInZone(rupeeId);
   }
 }

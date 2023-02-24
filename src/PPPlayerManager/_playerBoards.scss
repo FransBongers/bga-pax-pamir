@@ -2,24 +2,24 @@
 /* ------- PLAYER BOARD ------- */
 
 .pp_suit_icon {
-  background-image: url(img/temp/suits.png);
-  height: 44px;
+  height: 46px;
+  background-size: 44px;
 }
 
 .pp_suit_icon.economic {
-  background-position:0px 0;
+  background-image: url('img/suit_economic.svg');
 }
 
 .pp_suit_icon.military {
-  background-position:-42px 0;
+  background-image: url('img/suit_military.svg');
 }
 
 .pp_suit_icon.political {
-  background-position:-85px 0;
+  background-image: url('img/suit_political.svg');
 }
 
 .pp_suit_icon.intelligence {
-  background-position:-128px 0;
+  background-image: url('img/suit_intelligence.svg');
 }
 
 .pp_icon_count {

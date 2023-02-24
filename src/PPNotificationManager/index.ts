@@ -195,6 +195,7 @@ class PPNotificationManager {
     // Place paid rupees on market cards
     updatedCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;
+      // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
       this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
     });
   }

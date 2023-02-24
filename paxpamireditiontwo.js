@@ -723,6 +723,10 @@ var PPPlayer = /** @class */ (function () {
         var counter = _a.counter, value = _a.value;
         this.counters[counter].setValue(value);
     };
+    PPPlayer.prototype.incCounter = function (_a) {
+        var counter = _a.counter, value = _a.value;
+        this.counters[counter].incValue(value);
+    };
     PPPlayer.prototype.addSideSelectToCourt = function () {
         this.court.instantaneous = true;
         dojo.place(tplCardSelect({ side: 'left' }), "pp_court_player_".concat(this.playerId));
@@ -1088,7 +1092,8 @@ var PPMarket = /** @class */ (function () {
         gamedatas.rupees
             .filter(function (rupee) { return rupee.location === "market_".concat(row, "_").concat(column, "_rupees"); })
             .forEach(function (rupee) {
-            _this.placeRupeeSetup({ row: row, column: column, rupeeId: rupee.id, fromDiv: _this.marketRupees[row][column].container_div, setup: true });
+            dojo.place(tplRupee({ rupeeId: rupee.id }), _this.marketRupees[row][column].container_div);
+            _this.marketRupees[row][column].placeInZone(rupee.id);
         });
         this.marketRupees[row][column].instantaneous = false;
     };
@@ -1106,12 +1111,6 @@ var PPMarket = /** @class */ (function () {
         this.marketRupees[row][column].getAllItems().forEach(function (rupeeId) {
             _this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
         });
-    };
-    PPMarket.prototype.placeRupeeSetup = function (_a) {
-        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv, _b = _a.setup, setup = _b === void 0 ? false : _b;
-        // TODO (chech why this does not slide from player player panel in case fromDiv is panelId)
-        dojo.place(tplRupee({ rupeeId: rupeeId }), fromDiv);
-        this.marketRupees[row][column].placeInZone(rupeeId);
     };
     PPMarket.prototype.placeRupeeOnCard = function (_a) {
         var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv;
@@ -2070,6 +2069,7 @@ var PPNotificationManager = /** @class */ (function () {
         // Place paid rupees on market cards
         updatedCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
             _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
         });
     };

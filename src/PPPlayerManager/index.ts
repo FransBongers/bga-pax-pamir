@@ -283,6 +283,16 @@ class PPPlayer {
     this.counters[counter].setValue(value);
   }
 
+  incCounter({
+    counter,
+    value,
+  }: {
+    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
+    value: number;
+  }): void {
+    this.counters[counter].incValue(value);
+  }
+
   addSideSelectToCourt() {
     this.court.instantaneous = true;
     dojo.place(

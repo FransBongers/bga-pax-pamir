@@ -30,94 +30,59 @@ trait RefreshMarketTrait
 
   /**
    * Refresh market at end of a players turn
+   * 1. Fill all empty spaces by moving cards (incl rupees) to their leftmost position
+   * 2. Draw new cards to fill any empty spaces, starting with leftmost returning market to normal size if possible
+   *  => in empty column top row first.
    */
   function stRefreshMarket()
   {
+    $emptySpaces = [[], []];
+    $cardMoves = [];
+    $newCards = [];
 
-    // Refill market
-
-    $empty_top = array();
-    $empty_bottom = array();
-    $card_moves = array();
-    $new_cards = array();
-
-    for ($i = 0; $i < 6; $i++) {
-      $from_location = 'market_0_' . $i;
-      $card = Cards::getTopOf($from_location);
-      if ($card == null) {
-        $empty_top[] = $i;
-      } else {
-        Cards::setUsed($card["id"], 0); // unavailable false
-        if (count($empty_top) > 0) {
-          $to_locaction = 'market_0_' . array_shift($empty_top);
-          Cards::move($card['id'], $to_locaction);
-          Tokens::moveAllInLocation([$from_location, 'rupees'], [$to_locaction, 'rupees']);
-          $empty_top[] = $i;
-          $card_moves[] = array(
-            'cardId' => $card['id'],
-            'from' => $from_location,
-            'to' => $to_locaction
-          );
-
-          self::notifyAllPlayers("refreshMarket", '', array(
-            'cardMoves' => $card_moves,
-            'newCards' => $new_cards,
-          ));
-
-          $this->gamestate->nextState('refresh_market');
-          return;
-        }
-      }
-
-      $from_location = 'market_1_' . $i;
-      $card = Cards::getInLocation($from_location)->first();
-      if ($card == null) {
-        $empty_bottom[] = $i;
-      } else {
-        Cards::setUsed($card["id"], 0);
-        if (count($empty_bottom) > 0) {
-          $to_locaction = 'market_1_' . array_shift($empty_bottom);
-          Cards::move($card['id'], $to_locaction);
-          Tokens::moveAllInLocation([$from_location, 'rupees'], [$to_locaction, 'rupees']);
-          $empty_bottom[] = $i;
-          $card_moves[] = array(
-            'cardId' => $card['id'],
-            'from' => $from_location,
-            'to' => $to_locaction
-          );
-
-          self::notifyAllPlayers("refreshMarket", '', array(
-            'cardMoves' => $card_moves,
-            'newCards' => $new_cards,
-          ));
-
-          $this->gamestate->nextState('refresh_market');
-          return;
+    // Move cards to leftmost position
+    for ($column = 0; $column < 6; $column++) {
+      for ($row = 0; $row < 2; $row++) {
+        $fromLocation = 'market_' . $row . '_' . $column;
+        $card = Cards::getTopOf($fromLocation);
+        if ($card == null) {
+          $emptySpaces[$row][] = $column;
+        } else {
+          // Note (Frans): perhaps we can do this with single query at end of refresh
+          Cards::setUsed($card["id"], 0); // unavailable false
+          if (count($emptySpaces[$row]) > 0) {
+            $toLocaction = 'market_' . $row . '_' . array_shift($emptySpaces[$row]);
+            Cards::move($card['id'], $toLocaction);
+            Tokens::moveAllInLocation([$fromLocation, 'rupees'], [$toLocaction, 'rupees']);
+            $cardMoves[] = array(
+              'cardId' => $card['id'],
+              'from' => $fromLocation,
+              'to' => $toLocaction
+            );
+            $emptySpaces[$row][] = $column;
+          }
         }
       }
     }
 
-    foreach ($empty_top as $i) {
-      $card = Cards::pickOneForLocation('deck', ['market_0', $i]);
-      $new_cards[] = array(
-        'cardId' => $card['id'],
-        'from' => 'deck',
-        'to' => 'market_0_' . $i
-      );
-    }
-
-    foreach ($empty_bottom as $i) {
-      $card = Cards::pickOneForLocation('deck', ['market_1', $i]);
-      $new_cards[] = array(
-        'cardId' => $card['id'],
-        'from' => 'deck',
-        'to' => 'market_1_' . $i
-      );
+    // Fill empty spaces
+    for ($column = 0; $column < 6; $column++) {
+      for ($row = 0; $row < 2; $row++) {
+        if (count($emptySpaces[$row]) > 0 && $emptySpaces[$row][0] == $column) {
+          $card = Cards::pickOneForLocation('deck', ['market',$row, $column]);
+          $newCards[] = array(
+            'cardId' => $card['id'],
+            'from' => 'deck',
+            'to' => 'market_'.$row.'_' . $column
+          );
+          array_shift($emptySpaces[$row]);
+        }
+      }
     }
 
     self::notifyAllPlayers("refreshMarket", clienttranslate('The market has been refreshed.'), array(
-      'cardMoves' => $card_moves,
-      'newCards' => $new_cards,
+      'cardMoves' => $cardMoves,
+      'newCards' => $newCards,
     ));
 
     $this->gamestate->nextState('next_turn');

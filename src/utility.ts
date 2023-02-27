@@ -2,6 +2,25 @@ const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+const getTokenDiv = (key: string, args: Record<string, string | number | Record<string, any>>) => {
+  // console.log('key', key, 'args', args);
+  const data = args[key];
+  switch(key) {
+    case 'card_log':
+      return `<div class="pp_card pp_card_in_log pp_${data}"></div>`
+    case 'coalition_log_token':
+      return `<div class="pp_icon_log pp_loyalty_icon_log pp_${data}"></div>`
+    case 'new_cards_log':
+      let newCards = '';
+      (data as any[]).forEach((card) => {
+        newCards += `<div class="pp_card pp_card_in_log pp_${card.cardId}" style="display: inline-block; margin-right: 4px;"></div>`
+      })
+      return newCards
+    default:
+      return args[key]
+  }
+};
+
 const getKeywords = ({ playerColor = '#000' }: { playerColor?: string }) => {
   return {
     you: '${you}',

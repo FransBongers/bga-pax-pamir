@@ -67,11 +67,13 @@ trait PlayerActionTrait
     Players::get()->setLoyalty($coalition);
 
     // Notify
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} selected ${coalition_name}.'), array(
+    // TODO (Frans): check i18n for coalition name
+    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalition_name} ${coalition_log_token}'), array(
       'player_id' => $player_id,
       'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,
-      'coalition_name' => $coalition_name
+      'coalition_name' => $coalition_name,
+      'coalition_log_token' => $coalition,
     ));
 
     $this->gamestate->nextState('next');
@@ -164,10 +166,10 @@ trait PlayerActionTrait
           Cards::setState($court_cards[$i]['id'], $i + 2);
         }
         Cards::move($card_id, ['court', $player_id], 1);
-        $message = clienttranslate('${playerName} played ${cardName} to the left side of their court');
+        $message = clienttranslate('${playerName} plays ${cardName} to the left side of their court');
       } else {
         Cards::move($card_id, ['court', $player_id], count($court_cards) + 1);
-        $message = clienttranslate('${playerName} played ${cardName} to the right side of their court');
+        $message = clienttranslate('${playerName} plays ${cardName} to the right side of their court');
       }
       Globals::incRemainingActions(-1);
       $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
@@ -274,11 +276,12 @@ trait PlayerActionTrait
       Players::get($player_id)->incRupees(count($rupees));
       Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
 
-      self::notifyAllPlayers("purchaseCard", clienttranslate('${playerName} purchased ${cardName}'), array(
+      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${card_log}'), array(
         'playerId' => $player_id,
-        'playerName' => self::getActivePlayerName(),
+        'player_name' => self::getActivePlayerName(),
         'card' => $card,
         'cardName' => $card_name,
+        'card_log' => $card['id'],
         'marketLocation' => $market_location,
         'newLocation' => $new_location,
         'updatedCards' => $updated_cards,
@@ -378,7 +381,7 @@ trait PlayerActionTrait
       'influence' => Players::get($player_id)->getInfluence(),
     );
 
-    self::notifyAllPlayers("selectGift", clienttranslate('${player_name} purchased a gift for ${value} rupees'), array(
+    self::notifyAllPlayers("selectGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
       'player_id' => $player_id,
       'player_name' => self::getActivePlayerName(),
       'value' => $selected_gift,
@@ -475,7 +478,7 @@ trait PlayerActionTrait
 
     // Notify
     $coalition_name = $this->loyalty[$coalition]['name'];
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changed loyalty to ${coalition_name}.'), array(
+    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changes loyalty to ${coalition_name}'), array(
       'player_id' => $player_id,
       'player_name' => self::getActivePlayerName(),
       'coalition' => $coalition,

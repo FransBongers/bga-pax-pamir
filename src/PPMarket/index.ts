@@ -92,6 +92,6 @@ class PPMarket {
     const div = this.marketRupees[row][column].container_div;
     attachToNewParentNoDestroy(rupeeId , div);
     this.game.framework().slideToObject(rupeeId, div).play();
-    this.marketRupees[row][column].placeInZone(rupeeId);
+      this.marketRupees[row][column].placeInZone(rupeeId);
   }
 }

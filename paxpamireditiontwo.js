@@ -260,6 +260,24 @@ var tplRupee = function (_a) {
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
+var getTokenDiv = function (key, args) {
+    // console.log('key', key, 'args', args);
+    var data = args[key];
+    switch (key) {
+        case 'card_log':
+            return "<div class=\"pp_card pp_card_in_log pp_".concat(data, "\"></div>");
+        case 'coalition_log_token':
+            return "<div class=\"pp_icon_log pp_loyalty_icon_log pp_".concat(data, "\"></div>");
+        case 'new_cards_log':
+            var newCards_1 = '';
+            data.forEach(function (card) {
+                newCards_1 += "<div class=\"pp_card pp_card_in_log pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
+            });
+            return newCards_1;
+        default:
+            return args[key];
+    }
+};
 var getKeywords = function (_a) {
     var _b = _a.playerColor, playerColor = _b === void 0 ? '#000' : _b;
     return {
@@ -2299,6 +2317,28 @@ var PaxPamir = /** @class */ (function () {
     //  ..#######.....##....####.########.####....##.......##...
     ///////////////////////////////////////////////////
     //// Utility methods - add in alphabetical order
+    /* @Override */
+    PaxPamir.prototype.format_string_recursive = function (log, args) {
+        try {
+            if (log && args && !args.processed) {
+                args.processed = true;
+                // list of special keys we want to replace with images
+                var keys = ['card_log', 'coalition_log_token', 'new_cards_log'];
+                // list of other known variables
+                //  var keys = this.notification_manager.keys;
+                for (var i in keys) {
+                    var key = keys[i];
+                    if (args[key] != undefined) {
+                        args[key] = getTokenDiv(key, args);
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error(log, args, 'Exception thrown', e.stack);
+        }
+        return this.inherited(arguments);
+    };
     PaxPamir.prototype.discardCard = function (_a) {
         var _this = this;
         var _b;

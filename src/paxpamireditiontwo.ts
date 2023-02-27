@@ -154,6 +154,31 @@ class PaxPamir implements PaxPamirGame {
   ///////////////////////////////////////////////////
   //// Utility methods - add in alphabetical order
 
+  /* @Override */
+  format_string_recursive(log, args) {
+    try {
+      if (log && args && !args.processed) {
+        args.processed = true;
+
+        // list of special keys we want to replace with images
+        const keys = ['card_log', 'coalition_log_token', 'new_cards_log'];
+
+        // list of other known variables
+        //  var keys = this.notification_manager.keys;
+
+        for (var i in keys) {
+          var key = keys[i];
+          if (args[key] != undefined) {
+            args[key] = getTokenDiv(key, args);
+          }
+        }
+      }
+    } catch (e) {
+      console.error(log, args, 'Exception thrown', e.stack);
+    }
+    return (this as any).inherited(arguments);
+  }
+
   public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: null }) {
     // Move all spies back to cylinder pools
     if (this.spies?.[id]) {

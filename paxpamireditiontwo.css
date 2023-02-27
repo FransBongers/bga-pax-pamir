@@ -4,6 +4,10 @@
  */
 /* --selectable-color: #DE9043; */
 /* --selected-color: #512D75; */
+.phantom {
+  visibility: hidden;
+}
+
 /* ------- MAP AND REGIONS ------- */
 #pp_map {
   background-image: url("img/temp/paxpamir_board.jpg");
@@ -354,6 +358,32 @@
   flex-direction: row;
   align-items: flex-end;
   margin: 3px;
+}
+
+.pp_icon_log {
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.pp_loyalty_icon_log.pp_afghan {
+  background-image: url("img/loyalty_afghan.svg");
+  height: 20px;
+  width: 38px;
+  display: inline-block;
+}
+
+.pp_loyalty_icon_log.pp_british {
+  background-image: url("img/loyalty_british.svg");
+  height: 20px;
+  width: 34px;
+  display: inline-block;
+}
+
+.pp_loyalty_icon_log.pp_russian {
+  background-image: url("img/loyalty_russian.svg");
+  height: 20px;
+  width: 35px;
+  display: inline-block;
 }
 
 .pp_icon {
@@ -905,6 +935,15 @@ html {
   height: 209px;
   background-size: 150px 209px;
   background-repeat: no-repeat;
+}
+
+.pp_card_in_log {
+  width: 75px;
+  height: 104px;
+  background-size: 75px 104px;
+  background-repeat: no-repeat;
+  border-radius: 5px !important;
+  box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
 }
 
 .pp_card_select_side {

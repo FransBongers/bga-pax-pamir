@@ -1,3 +1,8 @@
+/**
+ * Note: we need to keep player_name in snake case, because the framework uses
+ * it to add player colors to the log messages.
+ */
+
 interface NotifChangeRulerArgs {
   playerName: string;
   oldRuler: number | null;
@@ -32,7 +37,7 @@ interface NotifPlayCardArgs {
 
 interface NotifPurchaseCardArgs {
   playerId: string;
-  playerName: string;
+  player_name: string;
   card: Token;
   cardName: string;
   marketLocation: string;

@@ -48,6 +48,34 @@
   margin: 3px;
 }
 
+.pp_icon_log {
+  background-size: contain;
+  background-repeat: no-repeat;
+  
+  // width: 30px;
+}
+
+.pp_loyalty_icon_log.pp_afghan {
+  background-image: url('img/loyalty_afghan.svg');
+  height: 20px;
+  width: 38px;
+  display: inline-block;
+}
+
+.pp_loyalty_icon_log.pp_british {
+  background-image: url('img/loyalty_british.svg');
+  height: 20px;
+  width: 34px;
+  display: inline-block
+}
+
+.pp_loyalty_icon_log.pp_russian {
+  background-image: url('img/loyalty_russian.svg');
+  height: 20px;
+  width: 35px;
+  display: inline-block
+}
+
 .pp_icon {
   background-repeat: no-repeat;
   position: relative;

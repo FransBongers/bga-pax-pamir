@@ -14,6 +14,7 @@
  */
 
 @use 'base';
+@use 'animation/animation';
 @use 'PPMap/map';
 @use 'PPPlayerManager/playerBoards';
 @use 'PPPlayerManager/playerTableaus';
@@ -253,6 +254,15 @@ html {
     height: 209px;
     background-size: 150px 209px;
     background-repeat: no-repeat;
+}
+
+.pp_card_in_log {
+    width: 75px;
+    height: 104px;
+    background-size: 75px 104px;
+    background-repeat: no-repeat;
+    border-radius: 5px !important;
+    box-shadow: 2.5px 2.5px 2.5px 0px rgba(0,0,0,0.4) !important; 
 }
 
 .pp_card_select_side {

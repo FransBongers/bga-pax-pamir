@@ -80,9 +80,10 @@ trait RefreshMarketTrait
       }
     }
 
-    self::notifyAllPlayers("refreshMarket", clienttranslate('The market has been refreshed.'), array(
+    self::notifyAllPlayers("refreshMarket", clienttranslate('The market is filled. New cards: ${new_cards_log}'), array(
       'cardMoves' => $cardMoves,
       'newCards' => $newCards,
+      'new_cards_log' => $newCards
     ));
 
     $this->gamestate->nextState('next_turn');

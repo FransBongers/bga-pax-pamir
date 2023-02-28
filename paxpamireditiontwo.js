@@ -40,6 +40,7 @@ var isFastMode = function () {
 };
 var slide = function (_a) {
     var game = _a.game, mobileElt = _a.mobileElt, targetElt = _a.targetElt, _b = _a.options, options = _b === void 0 ? {} : _b;
+    console.log('using slide');
     var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true }, options);
     config.phantomStart = config.phantomStart || config.phantom;
     config.phantomEnd = config.phantomEnd || config.phantom;
@@ -245,6 +246,25 @@ var BORDERS = [
     KANDAHAR_PUNJAB,
     PERSIA_TRANSCASPIA,
 ];
+// impact icons
+var IMPACT_ICON_ROAD = 'road';
+var IMPACT_ICON_ARMY = 'army';
+var IMPACT_ICON_LEVERAGE = 'leverage';
+var IMPACT_ICON_SPY = 'spy';
+var IMPACT_ICON_TRIBE = 'tribe';
+var IMPACT_ICON_ECONOMIC_SUIT = 'economic_suit';
+var IMPACT_ICON_MILITARY_SUIT = 'military_suit';
+var IMPACT_ICON_POLITICAL_SUIT = 'political_suit';
+var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence_suit';
+/**
+ * Card actions types
+ */
+var TYPE_BATTLE = 'battle';
+var TYPE_BETRAY = 'betray';
+var TYPE_BUILD = 'build';
+var TYPE_GIFT = 'gift';
+var TYPE_MOVE = 'move';
+var TYPE_TAX = 'tax';
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
@@ -256,6 +276,107 @@ var tplCardSelect = function (_a) {
 var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
+};
+var getImpactIconText = function (_a) {
+    var impactIcon = _a.impactIcon;
+    switch (impactIcon) {
+        case IMPACT_ICON_ARMY:
+            return _('Place one coalition block of your loyalty on any border of this region. This piece is now an army.');
+        case IMPACT_ICON_ROAD:
+            return _('Place one coalition block of your loyalty on any border of this region. This piece is now a road.');
+        case IMPACT_ICON_LEVERAGE:
+            return _('Take two rupees from the bank. This card is leveraged.');
+        case IMPACT_ICON_SPY:
+            return _("Place one of your cylinders on a card in any player's court that matches the played card's region. This piece is now a spy.");
+        case IMPACT_ICON_TRIBE:
+            return _('Place one of your cylinders in this region. This piece is now a tribe.');
+        case IMPACT_ICON_ECONOMIC_SUIT:
+            return _('Move the favored suit marker to the suit indicated.');
+        case IMPACT_ICON_MILITARY_SUIT:
+            return _('Move the favored suit marker to the suit indicated.');
+        case IMPACT_ICON_POLITICAL_SUIT:
+            return _('Move the favored suit marker to the suit indicated.');
+        case IMPACT_ICON_INTELLIGENCE_SUIT:
+            return _('Move the favored suit marker to the suit indicated.');
+        default:
+            return '';
+    }
+};
+var tplTooltipImpactIcon = function (_a) {
+    var impactIcon = _a.impactIcon, loyalty = _a.loyalty;
+    console.log('tplTooltipImpactIcon', impactIcon);
+    var icon = '';
+    switch (impactIcon) {
+        case IMPACT_ICON_ARMY:
+            icon = "<div class=\"pp_army pp_".concat(loyalty || 'neutral', "\"></div>");
+            break;
+        case IMPACT_ICON_ROAD:
+            icon = "<div class=\"pp_road pp_".concat(loyalty || 'neutral', "\"></div>");
+            break;
+        case IMPACT_ICON_TRIBE:
+            icon = "<div class=\"pp_tooltip_impact_icon_tribe pp_impact_icon_".concat(impactIcon, "\"></div>");
+            break;
+        case IMPACT_ICON_LEVERAGE:
+        case IMPACT_ICON_SPY:
+        case IMPACT_ICON_ECONOMIC_SUIT:
+        case IMPACT_ICON_MILITARY_SUIT:
+        case IMPACT_ICON_POLITICAL_SUIT:
+        case IMPACT_ICON_INTELLIGENCE_SUIT:
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_".concat(impactIcon, "\"></div>");
+            break;
+        default:
+            break;
+    }
+    return "<div class=\"pp_card_tooltip_section_container\">\n            <div class=\"pp_card_tooltip_section_inner_container\">\n              ".concat(icon, "\n            </div>\n            <span class=\"pp_impact_icon_text\">").concat(getImpactIconText({ impactIcon: impactIcon }), "</span>\n          </div>");
+};
+var getCardActionText = function (_a) {
+    var type = _a.type;
+    switch (type) {
+        case TYPE_BATTLE:
+            return _('At a single site (region or court card), remove any combination of enemy tribes, roads, spies or armies equal to rank. You cannot remove more units than you yourself have armies/spies in that battle.');
+        case TYPE_BETRAY:
+            return _('Pay 2. Discard a card where you have a spy. You may take its prize.');
+        case TYPE_BUILD:
+            return _('Pay 2/4/6 to place 1, 2 or 3 blocks in any region you rule (as an army) or on adjacent borders (as a road).');
+        case TYPE_GIFT:
+            return _('Pay 2/4/6 to purchase 1st, 2nd or 3rd gift.');
+        case TYPE_MOVE:
+            return _('For each rank, move one spy or army.');
+        case TYPE_TAX:
+            return _('Take rupees from market cards. If you rule a region, may take from players with at least one card associated with that region.');
+        default:
+            return '';
+    }
+};
+var tplTooltipCardAction = function (_a) {
+    var type = _a.type, rank = _a.rank;
+    return "<div class=\"pp_card_tooltip_section_container\">\n    <div class=\"pp_card_tooltip_section_inner_container\">\n      <div class=\"pp_tooltip_card_action pp_card_action_".concat(type, " pp_rank_").concat(rank, "\"></div>\n    </div>\n    <span class=\"pp_impact_icon_text\">").concat(getCardActionText({ type: type }), "</span>\n  </div>");
+};
+var tplCourtCardTooltip = function (_a) {
+    var cardId = _a.cardId, cardInfo = _a.cardInfo, specialAbilities = _a.specialAbilities;
+    if (cardId === 'card_50') {
+        console.log(cardId, cardInfo);
+    }
+    var impactIcons = '';
+    if (cardInfo.impact_icons.length > 0) {
+        impactIcons += "<span class=\"section_title\">".concat(_('Impact icons'), "</span>");
+        new Set(cardInfo.impact_icons).forEach(function (icon) {
+            impactIcons += tplTooltipImpactIcon({ impactIcon: icon, loyalty: cardInfo.loyalty });
+        });
+    }
+    var cardActions = '';
+    if (Object.values(cardInfo.actions).length > 0) {
+        cardActions += "<span class=\"section_title\">".concat(_('Card actions'), "</span>");
+        Object.values(cardInfo.actions).forEach(function (_a) {
+            var type = _a.type;
+            cardActions += tplTooltipCardAction({ type: type, rank: cardInfo.rank });
+        });
+    }
+    var specialAbility = '';
+    if (cardInfo.special_ability) {
+        specialAbility = "<span class=\"section_title\">".concat(_(specialAbilities[cardInfo.special_ability].title), "</span>\n    <span class=\"special_ability_text\">").concat(_(specialAbilities[cardInfo.special_ability].description), "</span>\n    ");
+    }
+    return "<div class=\"pp_card_tooltip\">\n    <div class=\"pp_card_tooltip_inner_container\">\n      <span class=\"title\">".concat(cardInfo.name, "</span>\n      <span class=\"flavor_text\">").concat(cardInfo.flavor_text, "</span>\n      ").concat(impactIcons, "\n      ").concat(cardActions, "\n      ").concat(specialAbility, "\n      \n    </div>\n    <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n  </div>");
 };
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -358,6 +479,34 @@ var setupTokenZone = function (_a) {
         zone.itemIdToCoords = customPattern;
     }
 };
+//  .########..#######...#######..##.......########.####.########.      
+//  ....##....##.....##.##.....##.##..........##.....##..##.....##      
+//  ....##....##.....##.##.....##.##..........##.....##..##.....##      
+//  ....##....##.....##.##.....##.##..........##.....##..########.      
+//  ....##....##.....##.##.....##.##..........##.....##..##.......      
+//  ....##....##.....##.##.....##.##..........##.....##..##.......      
+//  ....##.....#######...#######..########....##....####.##.......      
+//  .##.....##....###....##....##....###.....######...########.########.
+//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
+//  .####.####..##...##..####..##..##...##..##........##.......##.....##
+//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
+//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
+//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
+//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
+var PPTooltipManager = /** @class */ (function () {
+    function PPTooltipManager(game) {
+        this.game = game;
+    }
+    PPTooltipManager.prototype.addTooltipToCard = function (_a) {
+        var cardId = _a.cardId;
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        if (cardInfo.type === 'court_card') {
+            var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.specialAbilities, });
+            this.game.framework().addTooltipHtml(cardId, html, 1000);
+        }
+    };
+    return PPTooltipManager;
+}());
 // .########....###....##.....##..#######..########..########.########.
 // .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
 // .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
@@ -1077,6 +1226,14 @@ var PPMarket = /** @class */ (function () {
                 this.setupMarketRupeeZone({ row: row, column: column, gamedatas: gamedatas });
             }
         }
+        // dojo.place(
+        //   tplCourtCardTooltip({
+        //     cardId: 'card_67',
+        //     cardInfo: this.game.getCardInfo({ cardId: 'card_67' }) as CourtCard,
+        //     specialAbilities: this.game.gamedatas.specialAbilities,
+        //   }),
+        //   'pp_active_events'
+        // );
     }
     PPMarket.prototype.setupMarketCardZone = function (_a) {
         var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
@@ -1087,8 +1244,10 @@ var PPMarket = /** @class */ (function () {
         // add cards
         var cardInMarket = gamedatas.market[row][column];
         if (cardInMarket) {
-            dojo.place(tplCard({ cardId: cardInMarket.id, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
-            this.marketCards[row][column].placeInZone(cardInMarket.id);
+            var cardId = cardInMarket.id;
+            dojo.place(tplCard({ cardId: cardId, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
+            this.marketCards[row][column].placeInZone(cardId);
+            this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
         }
         this.marketCards[row][column].instantaneous = false;
     };
@@ -2246,6 +2405,7 @@ var PaxPamir = /** @class */ (function () {
             _this.activeEvents.placeInZone(card.id);
         });
         this.activeEvents.instantaneous = false;
+        this.tooltipManager = new PPTooltipManager(this);
         this.objectManager = new PPObjectManager(this);
         this.playerManager = new PPPlayerManager(this);
         this.map = new PPMap(this);
@@ -2338,6 +2498,10 @@ var PaxPamir = /** @class */ (function () {
             console.error(log, args, 'Exception thrown', e.stack);
         }
         return this.inherited(arguments);
+    };
+    PaxPamir.prototype.getCardInfo = function (_a) {
+        var cardId = _a.cardId;
+        return this.gamedatas.cards[cardId];
     };
     PaxPamir.prototype.discardCard = function (_a) {
         var _this = this;

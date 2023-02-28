@@ -34,6 +34,14 @@ class PPMarket {
         this.setupMarketRupeeZone({ row, column, gamedatas });
       }
     }
+    // dojo.place(
+    //   tplCourtCardTooltip({
+    //     cardId: 'card_67',
+    //     cardInfo: this.game.getCardInfo({ cardId: 'card_67' }) as CourtCard,
+    //     specialAbilities: this.game.gamedatas.specialAbilities,
+    //   }),
+    //   'pp_active_events'
+    // );
   }
 
   setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
@@ -45,8 +53,10 @@ class PPMarket {
     // add cards
     const cardInMarket = gamedatas.market[row][column];
     if (cardInMarket) {
-      dojo.place(tplCard({ cardId: cardInMarket.id, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
-      this.marketCards[row][column].placeInZone(cardInMarket.id);
+      const cardId = cardInMarket.id;
+      dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
+      this.marketCards[row][column].placeInZone(cardId);
+      this.game.tooltipManager.addTooltipToCard({ cardId });
     }
     this.marketCards[row][column].instantaneous = false;
   }
@@ -90,8 +100,8 @@ class PPMarket {
   placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
     dojo.place(tplRupee({ rupeeId }), fromDiv);
     const div = this.marketRupees[row][column].container_div;
-    attachToNewParentNoDestroy(rupeeId , div);
+    attachToNewParentNoDestroy(rupeeId, div);
     this.game.framework().slideToObject(rupeeId, div).play();
-      this.marketRupees[row][column].placeInZone(rupeeId);
+    this.marketRupees[row][column].placeInZone(rupeeId);
   }
 }

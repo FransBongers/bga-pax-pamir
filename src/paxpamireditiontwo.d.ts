@@ -112,6 +112,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     [region: string]: number | null;
   };
   rupees: Token[];
+  specialAbilities: Record<string, {title: string; description: string;}>
   spies: {
     [cardId: string]: Token[];
   };
@@ -137,6 +138,8 @@ interface PaxPamirGame extends Game {
   spies: {
     [cardId: string]: Zone;
   };
+  tooltipManager: PPTooltipManager;
+  getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;

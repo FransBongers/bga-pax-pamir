@@ -23,6 +23,8 @@ interface Framework {
     blinking?: boolean,
     color?: string
   ) => void;
+  addTooltipHtml: ( nodeId: string, html: string, delay?:number ) => void;
+  addTooltipHtmlToClass: (cssClass: string, html: string, delay?:number ) => void;
   ajaxcall: (
     url: string,
     parameters: Record<string, unknown>,

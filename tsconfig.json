@@ -18,6 +18,7 @@
     "src/constants.ts",
     "src/templates.ts",
     "src/utility.ts",
+    "src/PPTooltipManager/index.ts",
     "src/PPObjectManager/index.ts",
     "src/PPPlayerManager/index.ts",
     "src/PPMap/index.ts",

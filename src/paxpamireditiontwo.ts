@@ -37,6 +37,7 @@ class PaxPamir implements PaxPamirGame {
   public activeEvents: Zone = new ebg.zone(); // active events
   public spies = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals?
+  public tooltipManager: PPTooltipManager;
 
   constructor() {
     console.log('paxpamireditiontwo constructor');
@@ -72,6 +73,7 @@ class PaxPamir implements PaxPamirGame {
     });
     this.activeEvents.instantaneous = false;
 
+    this.tooltipManager = new PPTooltipManager(this);
     this.objectManager = new PPObjectManager(this);
     this.playerManager = new PPPlayerManager(this);
     this.map = new PPMap(this);
@@ -177,6 +179,10 @@ class PaxPamir implements PaxPamirGame {
       console.error(log, args, 'Exception thrown', e.stack);
     }
     return (this as any).inherited(arguments);
+  }
+
+  public getCardInfo({ cardId }: { cardId: string }): Card {
+    return this.gamedatas.cards[cardId];
   }
 
   public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: null }) {

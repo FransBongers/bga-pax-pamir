@@ -133,6 +133,7 @@ class PaxPamirEditionTwo extends Table
         self::dump('player_in_getAllDatas', $player);
         $data = [
             'cards' => $this->cards,
+            'specialAbilities' => $this->specialAbilities,
             // // Only get hand cards for current player (we might implement option to play with open hands?)
             'hand' => Players::get($current_player_id)->getHandCards(),
             'players' => Players::getUiData($current_player_id),

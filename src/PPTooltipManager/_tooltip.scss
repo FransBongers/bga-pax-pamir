@@ -1,0 +1,175 @@
+.dijitTooltipContainer {
+  padding: 0px !important;
+  // background-color: yellow !important;
+}
+
+.pp_tooltip_impact_icon_tribe {
+  width: 25px;
+  height: 25px;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+}
+
+.pp_tooltip_card_action {
+  width: 35px;
+  height: 35px;
+  background-size: 35px 35px;
+  background-repeat: no-repeat;
+}
+
+.pp_card_action_betray {
+  background-image: url('img/action_betray.svg');
+}
+
+.pp_card_action_battle.pp_rank_1 {
+  background-image: url('img/action_battle_one.svg');
+}
+
+.pp_card_action_battle.pp_rank_2 {
+  background-image: url('img/action_battle_two.svg');
+}
+
+.pp_card_action_build {
+  background-image: url('img/action_build.svg');
+}
+
+.pp_card_action_gift {
+  background-image: url('img/action_gift.svg');
+}
+
+.pp_card_action_move.pp_rank_1 {
+  background-image: url('img/action_march_one.svg');
+}
+
+.pp_card_action_move.pp_rank_2 {
+  background-image: url('img/action_march_two.svg');
+}
+
+.pp_card_action_move.pp_rank_3 {
+  background-image: url('img/action_march_three.svg');
+}
+
+.pp_card_action_tax.pp_rank_1 {
+  background-image: url('img/action_tax_one.svg');
+}
+
+.pp_card_action_tax.pp_rank_2 {
+  background-image: url('img/action_tax_two.svg');
+}
+
+.pp_tooltip_impact_icon {
+  width: 35px;
+  height: 35px;
+  background-size: 35px 35px;
+  background-repeat: no-repeat;
+}
+
+.pp_impact_icon_leverage {
+  background-image: url('img/impact_leverage.svg');
+}
+
+.pp_impact_icon_spy {
+  background-image: url('img/impact_place_spy.svg');
+}
+
+.pp_impact_icon_tribe {
+  background-image: url('img/impact_place_tribe.svg');
+}
+
+.pp_impact_icon_economic_suit {
+  background-image: url('img/impact_suit_economic.svg');
+}
+
+.pp_impact_icon_military_suit {
+  background-image: url('img/impact_suit_military.svg');
+}
+
+.pp_impact_icon_political_suit {
+  background-image: url('img/impact_suit_political.svg');
+}
+
+.pp_impact_icon_intelligence_suit {
+  background-image: url('img/impact_suit_intelligence.svg');
+}
+
+.pp_impact_icon_text {
+  font-size: small;
+  text-align: left;
+}
+
+.pp_card_tooltip {
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  padding: 8px;
+  padding-bottom: 16px;
+  width: 440px;
+  min-height: 372px;
+  // background-color: purple;
+
+  .pp_card_tooltip_inner_container {
+    flex-grow: 1;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    // background-color: yellow;
+    width: 274px;
+
+    .title {
+      font-size: large;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 4px;
+    }
+
+    .section_title {
+      font-size: medium;
+      font-weight: bold;
+      text-align: left;
+      margin-bottom: 4px;
+      margin-top: 4px;
+    }
+
+    .pp_card_tooltip_section_container {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 8px;
+
+      .pp_card_tooltip_section_inner_container {
+        min-width: 40px;
+        margin-right: 8px;
+        display: flex;
+        justify-content: center;
+      }
+    }
+
+    .special_ability_text {
+      text-align: left;
+      font-size: small;
+    }
+
+    .flavor_text {
+      text-align: left;
+      font-size: small;
+      font-style: italic;
+      // margin-top: auto;
+      // padding-top: 4px;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.pp_card_in_tooltip {
+  // position: absolute;
+  // bottom: 8px;
+  // left: 290px;
+  margin-right: -100px;
+  margin-left: 8px;
+  align-self: center;
+  width: 240px;
+  height: 334px;
+  background-size: 240px 334px;
+  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+  border-radius: 10px;
+}

@@ -87,3 +87,24 @@ const BORDERS = [
   KANDAHAR_PUNJAB,
   PERSIA_TRANSCASPIA,
 ];
+
+// impact icons
+const IMPACT_ICON_ROAD = 'road';
+const IMPACT_ICON_ARMY = 'army';
+const IMPACT_ICON_LEVERAGE = 'leverage';
+const IMPACT_ICON_SPY = 'spy';
+const IMPACT_ICON_TRIBE = 'tribe';
+const IMPACT_ICON_ECONOMIC_SUIT = 'economic_suit';
+const IMPACT_ICON_MILITARY_SUIT = 'military_suit';
+const IMPACT_ICON_POLITICAL_SUIT = 'political_suit';
+const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence_suit';
+
+/**
+ * Card actions types
+ */
+ const TYPE_BATTLE = 'battle';
+ const TYPE_BETRAY = 'betray';
+ const TYPE_BUILD = 'build';
+ const TYPE_GIFT = 'gift';
+ const TYPE_MOVE = 'move';
+ const TYPE_TAX = 'tax';

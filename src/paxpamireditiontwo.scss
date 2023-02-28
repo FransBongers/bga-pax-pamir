@@ -18,6 +18,7 @@
 @use 'PPMap/map';
 @use 'PPPlayerManager/playerBoards';
 @use 'PPPlayerManager/playerTableaus';
+@use 'PPTooltipManager/tooltip';
 
 html {
     background: url("") rgb(192, 192, 192);
@@ -134,6 +135,10 @@ html {
 
 .pp_army.pp_russian {
     background-image: url('img/army_russian.svg');
+}
+
+.pp_army.pp_neutral {
+    background-image: url('img/army_neutral.svg');
 }
 
 .pp_road {
@@ -253,14 +258,14 @@ html {
     width: 150px;
     height: 209px;
     background-size: 150px 209px;
-    background-repeat: no-repeat;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+    border-radius: 10px;
 }
 
 .pp_card_in_log {
     width: 75px;
     height: 104px;
     background-size: 75px 104px;
-    background-repeat: no-repeat;
     border-radius: 5px !important;
     box-shadow: 2.5px 2.5px 2.5px 0px rgba(0,0,0,0.4) !important; 
 }
@@ -279,13 +284,9 @@ html {
 }
 
 .pp_card {
-    /* box-shadow: 1px 1px 4px; */
-
-    /* TODO: (Frans): check why setting border-radius leads to issues with stock component / some cards being 'invisible' */
-    /* border-radius: 10px; */
-    border-radius: 10px;
+    background-repeat: no-repeat;
     border: 1px black solid;
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+    
 }
 
 .pp_card_action {

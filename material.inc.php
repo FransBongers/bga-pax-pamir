@@ -192,6 +192,89 @@ $this->borders = array (
   ),
 );
 
+$this->specialAbilities = array(
+  SA_INDISPENSABLE_ADVISORS => array( 
+    'title' => clienttranslate('Indispensable Advisors'),
+    'description' => clienttranslate('Your spies cannot be removed in battles with other spies.')
+  ),
+  SA_INSURRESCTION => array( 
+    'title' => clienttranslate('Insurrection'),
+    'description' => clienttranslate('After resolving a Dominance Check, place two Afghan armies in Kabul.')
+  ),
+  SA_CLAIM_OF_ANCIENT_LINEAGE => array(  
+    'title' => clienttranslate('Claim of Ancient Lineage'),
+    'description' => clienttranslate('When you take the tax action, act as if you rule every region.')
+  ),
+  SA_BODYGUARDS => array( 
+    'title' => clienttranslate('Bodyguards'),
+    'description' => clienttranslate('Your political cards cannot be targets of the betray action.')
+  ),
+  SA_CITADEL_KABUL => array( 
+    'title' => clienttranslate('Citadel'),
+    'description' => clienttranslate('Your tribes in Kabul cannot be attacked.')
+  ),
+  SA_CITADEL_TRANSCASPIA => array( 
+    'title' => clienttranslate('Citadel'),
+    'description' => clienttranslate('Your tribes in Transcaspia cannot be attacked.')
+  ),
+  SA_STRANGE_BEDFELLOWS => array( 
+    'title' => clienttranslate('Strange Bedfellows'),
+    'description' => clienttranslate('For spy travel, you treat cards that share a region as adjacent.')
+  ),
+  SA_CIVIL_SERVICE_REFORM => array( 
+    'title' => clienttranslate('Civil Service Reforms'),
+    'description' => clienttranslate('You do not pay bribes when taking hostage actions.')
+  ),
+  SA_SAFE_HOUSE => array( 
+    'title' => clienttranslate('Safe House'),
+    'description' => clienttranslate('When another player removes your spy in battle, you may place it on this card instead.')
+  ),
+  SA_CHARISMATIC_COURTIERS => array( 
+    'title' => clienttranslate('Charismatic Courtiers'),
+    'description' => clienttranslate('You do not pay bribes when playing cards.')
+  ),
+  SA_BLACKMAIL_HERAT => array( 
+    'title' => clienttranslate('Blackmail'),
+    'description' => clienttranslate('At start of turn, you may place a spy on any Herat court card without a spy.')
+  ),
+  SA_BLACKMAIL_KANDAHAR => array( 
+    'title' => clienttranslate('Blackmail'),
+    'description' => clienttranslate('At start of turn, you may place a spy on any Kandahar court card without a spy.')
+  ),
+  SA_INDIAN_SUPPLIES => array( 
+    'title' => clienttranslate('Indian Supplies'),
+    'description' => clienttranslate('Your armies may move without a road.')
+  ),
+  SA_WELL_CONNECTED => array( 
+    'title' => clienttranslate('Well-Connected'),
+    'description' => clienttranslate('Your spies may double their distance moved when using a move action.')
+  ),
+  SA_HERAT_INFLUENCE => array( 
+    'title' => clienttranslate('Herat Influence'),
+    'description' => clienttranslate('You do not pay for Herat cards in the market.')
+  ),
+  SA_PERSIAN_INFLUENCE => array( 
+    'title' => clienttranslate('Persian Influence'),
+    'description' => clienttranslate('You do not pay for Persia cards in the market.')
+  ),
+  SA_RUSSIAN_INFLUENCE => array( 
+    'title' => clienttranslate('Russian Influence'),
+    'description' => clienttranslate('You do not pay for Russian Patriots in the market.')
+  ),
+  SA_INFRASTRUCTURE => array( 
+    'title' => clienttranslate('Infrastructure'),
+    'description' => clienttranslate('After you take the build action, place one additional block in a legal space.')
+  ),
+  SA_SAVVY_OPERATOR => array( 
+    'title' => clienttranslate('Savvy Operator'),
+    'description' => clienttranslate('This card is always treated as if it were in the favored suit.')
+  ),
+  SA_IRREGULARS => array( 
+    'title' => clienttranslate('Irregulars'),
+    'description' => clienttranslate('This card is always treated as if it were in the favored suit.')
+  ),
+);
+
 $this->cards = array(
   'card_1' => array(
     'id' => 'card_1',
@@ -484,7 +567,7 @@ $this->cards = array(
     'prize' => null,
     'rank' => 1,
     'region' => KABUL,
-    'special_ability' => SA_CITADEL,
+    'special_ability' => SA_CITADEL_KABUL,
     'suit' => MILITARY,
     'type' => COURT_CARD,
     'tooltip_action' => clienttranslate("military"),
@@ -942,7 +1025,7 @@ $this->cards = array(
     'prize' => AFGHAN,
     'rank' => 1,
     'region' => KANDAHAR,
-    'special_ability' => SA_BLACK_MAIL,
+    'special_ability' => SA_BLACKMAIL_KANDAHAR,
     'suit' => POLITICAL,
     'type' => COURT_CARD,
     'tooltip_action' => clienttranslate("political"),
@@ -1136,7 +1219,7 @@ $this->cards = array(
     'prize' => null,
     'rank' => 1,
     'region' => HERAT,
-    'special_ability' => SA_BLACK_MAIL,
+    'special_ability' => SA_BLACKMAIL_HERAT,
     'suit' => INTELLIGENCE,
     'type' => COURT_CARD,
     'tooltip_action' => clienttranslate("intelligence"),
@@ -1900,7 +1983,7 @@ $this->cards = array(
     'prize' => null,
     'rank' => 1,
     'region' => TRANSCASPIA,
-    'special_ability' => SA_CITADEL,
+    'special_ability' => SA_CITADEL_TRANSCASPIA,
     'suit' => MILITARY,
     'type' => COURT_CARD,
     'tooltip_action' => clienttranslate("military"),

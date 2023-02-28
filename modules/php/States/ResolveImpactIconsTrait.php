@@ -35,23 +35,23 @@ trait ResolveImpactIconsTrait
     $card_id = Globals::getResolveImpactIconsCardId();
     $current_impact_icon_index = Globals::getResolveImpactIconsCurrentIcon();
     $card_info = $this->cards[$card_id];
-    $impact_icons = $card_info['impact_icons'];
+    $impactIcons = $card_info['impactIcons'];
     self::dump('----------- resolving impact icons for card', $card_id);
     self::dump('----------- resolving impact icons current icon', $current_impact_icon_index);
-    self::dump('----------- resolving impact icons number of icons', count($impact_icons));
+    self::dump('----------- resolving impact icons number of icons', count($impactIcons));
     $card_region = $card_info['region'];
 
-    if ($current_impact_icon_index >= count($impact_icons)) {
-      // $this->setGameStateValue("resolve_impact_icons_card_id", explode("_", $card_id)[1]);
-      // $this->setGameStateValue("resolve_impact_icons_current_icon", 0);
-      if (in_array(TRIBE, $impact_icons, true) || in_array(ARMY, $impact_icons, true)) {
+    if ($current_impact_icon_index >= count($impactIcons)) {
+      // $this->setGameStateValue("resolve_impactIcons_card_id", explode("_", $card_id)[1]);
+      // $this->setGameStateValue("resolve_impactIcons_current_icon", 0);
+      if (in_array(TRIBE, $impactIcons, true) || in_array(ARMY, $impactIcons, true)) {
         Map::checkRulerChange($card_region);
       };
       $this->gamestate->nextState('action');
       return;
     }
 
-    $current_icon = $impact_icons[$current_impact_icon_index];
+    $current_icon = $impactIcons[$current_impact_icon_index];
     $next_state = null;
 
     switch ($current_icon) {

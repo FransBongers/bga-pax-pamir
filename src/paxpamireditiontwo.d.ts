@@ -11,35 +11,35 @@ interface PlayerCounts {
   };
 }
 
-type Card = CourtCard | DominanceCheckCard | EventCard;
+type Card = CourtCard | EventCard;
 
 interface CourtCard {
   actions: Record<string, { type: string; left: number; top: number }>;
-  flavor_text: string;
+  flavorText: string;
   id: string;
-  impact_icons: string[];
+  impactIcons: string[];
   loyalty: string | null;
   name: string;
   prize: string;
   rank: number;
   region: string;
-  special_ability: string;
+  specialAbility: string;
   suit: string;
-  tooltip_action: string;
   type: 'court_card';
 }
 
-interface DominanceCheckCard {
-  id: string;
-  name: string;
-  type: 'dominance_check_card';
-}
-
 interface EventCard {
-  discarded: string;
+  discarded: {
+    effect: string;
+    title?: string;
+    description?: string;
+  };
   id: string;
-  name: string;
-  purchased: string;
+  purchased: {
+    effect: string;
+    title: string;
+    description: string;
+  };
   type: 'event_card';
 }
 

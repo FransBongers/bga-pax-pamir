@@ -12,6 +12,15 @@ const tplRupee = ({ rupeeId }: { rupeeId: string }) => {
           </div>`;
 };
 
+const tplCardTooltipContainer = ({cardId, content}: {cardId: string; content: string;}): string => {
+  return `<div class="pp_card_tooltip">
+  <div class="pp_card_tooltip_inner_container">
+    ${content}
+  </div>
+  <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
+</div>`
+}
+
 const getImpactIconText = ({ impactIcon }: { impactIcon: string }) => {
   switch (impactIcon) {
     case IMPACT_ICON_ARMY:
@@ -112,13 +121,10 @@ const tplCourtCardTooltip = ({
   cardInfo: CourtCard;
   specialAbilities: Record<string, { title: string; description: string }>;
 }): string => {
-  if (cardId === 'card_50') {
-    console.log(cardId, cardInfo);
-  }
   let impactIcons = '';
-  if (cardInfo.impact_icons.length > 0) {
+  if (cardInfo.impactIcons.length > 0) {
     impactIcons += `<span class="section_title">${_('Impact icons')}</span>`;
-    new Set(cardInfo.impact_icons).forEach((icon) => {
+    new Set(cardInfo.impactIcons).forEach((icon) => {
       impactIcons += tplTooltipImpactIcon({ impactIcon: icon, loyalty: cardInfo.loyalty });
     });
   }
@@ -132,21 +138,45 @@ const tplCourtCardTooltip = ({
   }
 
   let specialAbility = '';
-  if (cardInfo.special_ability) {
-    specialAbility = `<span class="section_title">${_(specialAbilities[cardInfo.special_ability].title)}</span>
-    <span class="special_ability_text">${_(specialAbilities[cardInfo.special_ability].description)}</span>
+  if (cardInfo.specialAbility) {
+    specialAbility = `<span class="section_title">${_(specialAbilities[cardInfo.specialAbility].title)}</span>
+    <span class="special_ability_text">${_(specialAbilities[cardInfo.specialAbility].description)}</span>
     `;
   }
 
-  return `<div class="pp_card_tooltip">
-    <div class="pp_card_tooltip_inner_container">
-      <span class="title">${cardInfo.name}</span>
-      <span class="flavor_text">${(cardInfo as CourtCard).flavor_text}</span>
-      ${impactIcons}
-      ${cardActions}
-      ${specialAbility}
+  return tplCardTooltipContainer({cardId, content: `
+  <span class="title">${cardInfo.name}</span>
+  <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
+  ${impactIcons}
+  ${cardActions}
+  ${specialAbility}
+  `  });
+  //  `<div class="pp_card_tooltip">
+  //   <div class="pp_card_tooltip_inner_container">
+  //     <span class="title">${cardInfo.name}</span>
+  //     <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
+  //     ${impactIcons}
+  //     ${cardActions}
+  //     ${specialAbility}
       
-    </div>
-    <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
-  </div>`;
+  //   </div>
+  //   <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
+  // </div>`;
 };
+
+const tplEventCardTooltip = ({
+  cardId,
+  cardInfo,
+}: {
+  cardId: string;
+  cardInfo: EventCard;
+}): string => {
+  return tplCardTooltipContainer({cardId, content: `
+    <span class="title">${_('If discarded')}</span>
+    <span class="pp_tooltip_description_text" style="font-weight: bold;">${cardInfo.discarded.title || ''}</span>
+    <span class="pp_tooltip_description_text">${cardInfo.discarded.description || ''}</span>
+    <span class="title" style="margin-top: 32px;">${_('If purchased')}</span>
+    <span class="pp_tooltip_description_text" style="font-weight: bold;">${cardInfo.purchased.title || ''}</span>
+    <span class="pp_tooltip_description_text">${cardInfo.purchased.description || ''}</span>
+  `})
+} 

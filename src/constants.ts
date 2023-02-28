@@ -42,6 +42,10 @@ const RULER_TOKEN_HEIGHT = 50;
 
 // names etc.
 
+// card types
+const EVENT_CARD = 'event_card';
+const COURT_CARD = 'court_card';
+
 // suits
 const ECONOMIC = 'economic';
 const MILITARY = 'military';

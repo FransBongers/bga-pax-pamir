@@ -207,6 +207,9 @@ var FAVORED_SUIT_MARKER_HEIGHT = 50;
 var RULER_TOKEN_WIDTH = 50;
 var RULER_TOKEN_HEIGHT = 50;
 // names etc.
+// card types
+var EVENT_CARD = 'event_card';
+var COURT_CARD = 'court_card';
 // suits
 var ECONOMIC = 'economic';
 var MILITARY = 'military';
@@ -276,6 +279,10 @@ var tplCardSelect = function (_a) {
 var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
+};
+var tplCardTooltipContainer = function (_a) {
+    var cardId = _a.cardId, content = _a.content;
+    return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n</div>");
 };
 var getImpactIconText = function (_a) {
     var impactIcon = _a.impactIcon;
@@ -354,13 +361,10 @@ var tplTooltipCardAction = function (_a) {
 };
 var tplCourtCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo, specialAbilities = _a.specialAbilities;
-    if (cardId === 'card_50') {
-        console.log(cardId, cardInfo);
-    }
     var impactIcons = '';
-    if (cardInfo.impact_icons.length > 0) {
+    if (cardInfo.impactIcons.length > 0) {
         impactIcons += "<span class=\"section_title\">".concat(_('Impact icons'), "</span>");
-        new Set(cardInfo.impact_icons).forEach(function (icon) {
+        new Set(cardInfo.impactIcons).forEach(function (icon) {
             impactIcons += tplTooltipImpactIcon({ impactIcon: icon, loyalty: cardInfo.loyalty });
         });
     }
@@ -373,10 +377,24 @@ var tplCourtCardTooltip = function (_a) {
         });
     }
     var specialAbility = '';
-    if (cardInfo.special_ability) {
-        specialAbility = "<span class=\"section_title\">".concat(_(specialAbilities[cardInfo.special_ability].title), "</span>\n    <span class=\"special_ability_text\">").concat(_(specialAbilities[cardInfo.special_ability].description), "</span>\n    ");
+    if (cardInfo.specialAbility) {
+        specialAbility = "<span class=\"section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
     }
-    return "<div class=\"pp_card_tooltip\">\n    <div class=\"pp_card_tooltip_inner_container\">\n      <span class=\"title\">".concat(cardInfo.name, "</span>\n      <span class=\"flavor_text\">").concat(cardInfo.flavor_text, "</span>\n      ").concat(impactIcons, "\n      ").concat(cardActions, "\n      ").concat(specialAbility, "\n      \n    </div>\n    <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n  </div>");
+    return tplCardTooltipContainer({ cardId: cardId, content: "\n  <span class=\"title\">".concat(cardInfo.name, "</span>\n  <span class=\"flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  ") });
+    //  `<div class="pp_card_tooltip">
+    //   <div class="pp_card_tooltip_inner_container">
+    //     <span class="title">${cardInfo.name}</span>
+    //     <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
+    //     ${impactIcons}
+    //     ${cardActions}
+    //     ${specialAbility}
+    //   </div>
+    //   <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
+    // </div>`;
+};
+var tplEventCardTooltip = function (_a) {
+    var cardId = _a.cardId, cardInfo = _a.cardInfo;
+    return tplCardTooltipContainer({ cardId: cardId, content: "\n    <span class=\"title\">".concat(_('If discarded'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.discarded.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.discarded.description || '', "</span>\n    <span class=\"title\" style=\"margin-top: 32px;\">").concat(_('If purchased'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.purchased.description || '', "</span>\n  ") });
 };
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -502,6 +520,10 @@ var PPTooltipManager = /** @class */ (function () {
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         if (cardInfo.type === 'court_card') {
             var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.specialAbilities, });
+            this.game.framework().addTooltipHtml(cardId, html, 1000);
+        }
+        else {
+            var html = tplEventCardTooltip({ cardId: cardId, cardInfo: cardInfo });
             this.game.framework().addTooltipHtml(cardId, html, 1000);
         }
     };
@@ -1576,7 +1598,8 @@ var PPInteractionManager = /** @class */ (function () {
                 break;
             case CONFIRM_PURCHASE:
                 var _c = args.confirmPurchase, cardId = _c.cardId, cost = _c.cost;
-                var name_1 = this.getCardInfo({ cardId: cardId }).name;
+                var cpCardInfo = this.getCardInfo({ cardId: cardId });
+                var name_1 = cpCardInfo.type === COURT_CARD ? cpCardInfo.name : cpCardInfo.purchased.title;
                 dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
                 this.updatePageTitle({
                     text: _("Purchase '${name}' for ${cost} ${rupees}?"),

@@ -14,7 +14,6 @@ const TAX = 'tax';
  * Card types
  */
 const EVENT_CARD = 'event_card';
-const DOMINANCE_CHECK_CARD = 'dominance_check_card';
 const COURT_CARD = 'court_card';
 
 /**
@@ -33,6 +32,7 @@ const COALITIONS = [
 /**
  * Event card effects
  */
+const ECE_DOMINANCE_CHECK = 'dominance_check';
 const ECE_MILITARY_SUIT = 'military_suit';
 const ECE_NEW_TACTICS = 'new_tactics';
 const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassement_of_riches';
@@ -52,7 +52,7 @@ const ECE_NATION_BUILDING = 'nation_building';
 const ECE_RIOTS_IN_PERSIA = 'riots_in_persia';
 const ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backing_of_persian_aristocracy';
 const ECE_CONFIDENCE_FAILURE = 'confidence_failure';
-const ECE_OTHER_PERSUASICE_METHODS = 'other_persuasive_methods';
+const ECE_OTHER_PERSUASIVE_METHODS = 'other_persuasive_methods';
 const ECE_INTELLIGENCE_SUIT = 'intelligence_suit';
 const ECE_PASHTUNWALI_VALUES = 'pashtunwali_values';
 const ECE_POLITICAL_SUIT = 'political_suit';

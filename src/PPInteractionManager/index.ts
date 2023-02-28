@@ -206,7 +206,7 @@ class PPInteractionManager {
         this.updatePageTitle({
           text: _('Place a spy on ${cardName}'),
           args: {
-            cardName: this.getCardInfo({ cardId: args.confirmPlaceSpy.cardId as string }).name,
+            cardName: (this.getCardInfo({ cardId: args.confirmPlaceSpy.cardId as string }) as CourtCard).name,
           },
         });
         this.addPrimaryActionButton({
@@ -248,7 +248,7 @@ class PPInteractionManager {
         this.updatePageTitle({
           text: _("Select which side of court to play '${name}'"),
           args: {
-            name: this.getCardInfo({ cardId: args.playCardSelectSide.cardId }).name,
+            name: (this.getCardInfo({ cardId: args.playCardSelectSide.cardId }) as CourtCard).name,
           },
         });
         this.setSideSelectable({ cardId: args.playCardSelectSide.cardId });
@@ -261,14 +261,14 @@ class PPInteractionManager {
           this.updatePageTitle({
             text: _("Play '${name}' to court?"),
             args: {
-              name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+              name: (this.getCardInfo({ cardId: args.playCardConfirm.cardId }) as CourtCard).name,
             },
           });
         } else {
           this.updatePageTitle({
             text: _("Play '${name}' to ${side} side of court?"),
             args: {
-              name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
+              name: (this.getCardInfo({ cardId: args.playCardConfirm.cardId }) as CourtCard).name,
               side: args.playCardConfirm.side,
             },
           });
@@ -293,7 +293,8 @@ class PPInteractionManager {
         break;
       case CONFIRM_PURCHASE:
         const { cardId, cost } = args.confirmPurchase;
-        const name = this.getCardInfo({ cardId }).name;
+        const cpCardInfo = this.getCardInfo({ cardId });
+        const name = cpCardInfo.type === COURT_CARD ? cpCardInfo.name : cpCardInfo.purchased.title;
         dojo.query(`.pp_${cardId}`).addClass('pp_selected');
         this.updatePageTitle({
           text: _("Purchase '${name}' for ${cost} ${rupees}?"),

@@ -85,7 +85,7 @@ class PPNotificationManager {
   notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
     const { args } = notif;
     console.log('notif_chooseLoyalty', args);
-    const playerId = Number(args.player_id);
+    const playerId = Number(args.playerId);
     this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
     // TODO (make this notif more generic for loyalty changes?)
     this.getPlayer({ playerId }).setCounter({ counter: 'influence', value: 1 });
@@ -118,21 +118,21 @@ class PPNotificationManager {
     console.log('notif_dominanceCheck', notif);
     const { scores, moves } = notif.args;
     Object.keys(scores).forEach((playerId) => {
-      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].new_score);
+      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
       this.game.move({
         id: `vp_cylinder_${playerId}`,
-        from: this.game.objectManager.vpTrack.getZone(scores[playerId].current_score),
-        to: this.game.objectManager.vpTrack.getZone(scores[playerId].new_score),
+        from: this.game.objectManager.vpTrack.getZone(scores[playerId].currentScore),
+        to: this.game.objectManager.vpTrack.getZone(scores[playerId].newScore),
       });
     });
 
     (moves || []).forEach((move) => {
-      const { token_id, from, to } = move;
+      const { tokenId, from, to } = move;
       const coalition = to.split('_')[1];
       const splitFrom = from.split('_');
       const isArmy = splitFrom[0] == 'armies';
       this.game.move({
-        id: token_id,
+        id: tokenId,
         to: this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }),
         from: isArmy
           ? this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
@@ -240,24 +240,24 @@ class PPNotificationManager {
   notif_selectGift(notif) {
     console.log('notif_selectGift', notif);
     this.game.interactionManager.resetActionArgs();
-    const { updated_cards, player_id, rupee_count, updated_counts } = notif.args;
+    const { updatedCards, playerId, rupee_count, updatedCounts } = notif.args;
     // Place paid rupees on market cards
-    updated_cards.forEach((item, index) => {
+    updatedCards.forEach((item, index) => {
       const marketRow = item.location.split('_')[1];
       const marketColumn = item.location.split('_')[2];
       placeToken({
         game: this.game,
         location: this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-        id: item.rupee_id,
+        id: item.rupeeId,
         jstpl: 'jstpl_rupee',
         jstplProps: {
           id: item.rupee_id,
         },
-        from: `rupees_${player_id}`,
+        from: `rupees_${playerId}`,
       });
     }, this);
-    this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'rupees', value: updated_counts.rupees });
-    this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'influence', value: updated_counts.influence });
+    this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });
+    this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'influence', value: updatedCounts.influence });
   }
 
   notif_updatePlayerCounts(notif) {
@@ -282,7 +282,7 @@ class PPNotificationManager {
   notif_moveToken(notif) {
     console.log('notif_moveToken', notif);
     notif.args.moves.forEach((move) => {
-      const { token_id, from, to, updates } = move;
+      const { tokenId, from, to, updates } = move;
       const fromZone = this.game.getZoneForLocation({ location: from });
       const toZone = this.game.getZoneForLocation({ location: to });
 
@@ -290,7 +290,7 @@ class PPNotificationManager {
       const addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
       const removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
       this.game.move({
-        id: token_id,
+        id: tokenId,
         from: fromZone,
         to: toZone,
         addClass,

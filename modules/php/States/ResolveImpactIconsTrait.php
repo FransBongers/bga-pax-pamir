@@ -67,7 +67,7 @@ trait ResolveImpactIconsTrait
               0 => array(
                 'from' => $location,
                 'to' => $to,
-                'token_id' => $army['id'],
+                'tokenId' => $army['id'],
               )
             )
           ));
@@ -89,7 +89,7 @@ trait ResolveImpactIconsTrait
             0 => array(
               'from' => 'favored_suit_' . $previous_suit_id,
               'to' => 'favored_suit_' . ECONOMIC,
-              'token_id' => 'favored_suit_marker',
+              'tokenId' => 'favored_suit_marker',
             )
           )
         ));
@@ -110,7 +110,7 @@ trait ResolveImpactIconsTrait
             0 => array(
               'from' => 'favored_suit_' . $previous_suit_id,
               'to' => 'favored_suit_' . INTELLIGENCE,
-              'token_id' => 'favored_suit_marker',
+              'tokenId' => 'favored_suit_marker',
             )
           )
         ));
@@ -131,7 +131,7 @@ trait ResolveImpactIconsTrait
             0 => array(
               'from' => 'favored_suit_' . $previous_suit_id,
               'to' => 'favored_suit_' . MILITARY,
-              'token_id' => 'favored_suit_marker',
+              'tokenId' => 'favored_suit_marker',
             )
           )
         ));
@@ -156,16 +156,16 @@ trait ResolveImpactIconsTrait
             0 => array(
               'from' => 'favored_suit_' . $previous_suit_id,
               'to' => 'favored_suit_' . POLITICAL,
-              'token_id' => 'favored_suit_marker',
+              'tokenId' => 'favored_suit_marker',
             )
           )
         ));
         break;
       case ROAD:
-        $next_state = "place_road";
+        $next_state = "placeRoad";
         break;
       case SPY:
-        $next_state = "place_spy";
+        $next_state = "placeSpy";
         break;
       case TRIBE:
         $from = "cylinders_" . $player_id;
@@ -178,7 +178,7 @@ trait ResolveImpactIconsTrait
               0 => array(
                 'from' => $from,
                 'to' => $to,
-                'token_id' => $cylinder['id'],
+                'tokenId' => $cylinder['id'],
               )
             )
           ));
@@ -192,10 +192,10 @@ trait ResolveImpactIconsTrait
     if ($next_state != null) {
       $this->gamestate->nextState($next_state);
     } else {
-      // increase index for currently resolved icon, then transition to resolve_impact_icons state again
+      // increase index for currently resolved icon, then transition to resolveImpactIcons state again
       // to check if there are more that need to be resolved.
       Globals::setResolveImpactIconsCurrentIcon($current_impact_icon_index + 1);
-      $this->gamestate->nextState('resolve_impact_icons');
+      $this->gamestate->nextState('resolveImpactIcons');
     }
   }
 }

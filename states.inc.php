@@ -106,7 +106,7 @@ $machinestates = array(
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
         "transitions" => array( 
-            "next_turn" => STATE_PLAYER_ACTIONS,
+            "nextTurn" => STATE_PLAYER_ACTIONS,
             "setup" => STATE_SETUP,
             "final" => STATE_FINAL 
         )
@@ -124,14 +124,14 @@ $machinestates = array(
         "possibleactions" => array( "purchaseCard", "playCard", "selectGift", "pass" ),
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS,
-            "dominance_check" => STATE_DOMINANCE_CHECK,
-            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
-            "negotiate_bribe" => STATE_NEGOTIATE_BRIBE, 
-            "card_action_battle" => STATE_CARD_ACTION_BATTLE,
-            "card_action_betray" => STATE_CARD_ACTION_BETRAY,
-            "card_action_build" => STATE_CARD_ACTION_BUILD,
-            "card_action_move" => STATE_CARD_ACTION_MOVE,
-            "card_action_tax" => STATE_CARD_ACTION_TAX,
+            "dominanceCheck" => STATE_DOMINANCE_CHECK,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "negotiateBribe" => STATE_NEGOTIATE_BRIBE, 
+            "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
+            "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
+            "cardActionBuild" => STATE_CARD_ACTION_BUILD,
+            "cardActionMove" => STATE_CARD_ACTION_MOVE,
+            "cardActionTax" => STATE_CARD_ACTION_TAX,
             "cleanup" => STATE_CLEANUP,
         )
     ),
@@ -142,9 +142,9 @@ $machinestates = array(
         "action" => "stCleanup",
         "updateGameProgression" => false,
         "transitions" => array(
-            "discard_court" => STATE_DISCARD_COURT, 
-            "discard_hand" => STATE_DISCARD_HAND, 
-            "discard_events" => STATE_CLEANUP_DISCARD_EVENTS,
+            "discardCourt" => STATE_DISCARD_COURT, 
+            "discardHand" => STATE_DISCARD_HAND, 
+            "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
         )
     ),
 
@@ -154,7 +154,7 @@ $machinestates = array(
         "action" => "stCleanupDiscardEvents",
         "updateGameProgression" => false,
         "transitions" => array(
-            "refresh_market" => STATE_REFRESH_MARKET,
+            "refreshMarket" => STATE_REFRESH_MARKET,
         )
     ),
 
@@ -165,12 +165,12 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array( 
             "action" => STATE_PLAYER_ACTIONS,
-            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
-            "refresh_market" => STATE_REFRESH_MARKET,
-            "place_road" => STATE_PLACE_ROAD,
-            "place_spy" => STATE_PLACE_SPY,
-            "discard_court" => STATE_DISCARD_COURT, 
-            "discard_hand" => STATE_DISCARD_HAND,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "refreshMarket" => STATE_REFRESH_MARKET,
+            "placeRoad" => STATE_PLACE_ROAD,
+            "placeSpy" => STATE_PLACE_SPY,
+            "discardCourt" => STATE_DISCARD_COURT, 
+            "discardHand" => STATE_DISCARD_HAND,
         )
     ),
 
@@ -180,8 +180,8 @@ $machinestates = array(
         "action" => "stRefreshMarket",
         "updateGameProgression" => false,
         "transitions" => array( 
-            "next_turn" => STATE_NEXT_PLAYER,
-            "refresh_market" => STATE_REFRESH_MARKET,
+            "nextTurn" => STATE_NEXT_PLAYER,
+            "refreshMarket" => STATE_REFRESH_MARKET,
         )
     ),
 
@@ -192,8 +192,8 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "action" => STATE_PLAYER_ACTIONS,
-            // "next_turn" => STATE_NEXT_PLAYER,
-            // "refresh_market" => STATE_REFRESH_MARKET,
+            // "nextTurn" => STATE_NEXT_PLAYER,
+            // "refreshMarket" => STATE_REFRESH_MARKET,
         )
     ),
 
@@ -229,7 +229,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "placeRoad" ),
         "transitions" => array( 
-            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 
@@ -241,7 +241,7 @@ $machinestates = array(
         "args" => "argPlaceSpy",
         "possibleactions" => array( "placeSpy" ),
         "transitions" => array( 
-            "resolve_impact_icons" => STATE_RESOLVE_IMPACT_ICONS,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 

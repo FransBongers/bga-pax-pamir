@@ -4,23 +4,23 @@
  */
 
 interface NotifChangeRulerArgs {
-  playerName: string;
+  player_name: string;
   oldRuler: number | null;
   newRuler: number | null;
   region: string;
 }
 
 interface NotifChooseLoyaltyArgs {
-  player_id: string;
+  playerId: string;
   player_name: string;
   coalition: string;
-  coalition_name: string;
+  coalitionName: string;
 }
 
 interface NotifDiscardCardArgs {
   cardId: string;
   playerId: string;
-  playerName: string;
+  player_name: string;
   cardName: string;
   courtCards: Token[];
   from: string;
@@ -28,7 +28,7 @@ interface NotifDiscardCardArgs {
 
 interface NotifPlayCardArgs {
   playerId: string;
-  playerName: string;
+  player_name: string;
   card: Token;
   cardName: string;
   courtCards: Token[];

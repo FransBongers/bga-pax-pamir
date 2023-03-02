@@ -53,16 +53,16 @@ class Notifications
     ]);
   }
 
-  public static function changeRuler($old_ruler, $new_ruler, $region)
+  public static function changeRuler($oldRuler, $newRuler, $region)
   {
-    $msg = clienttranslate('${playerName} is the new ruler of ${region}');
-    if ($new_ruler === null) {
-      $msg = clienttranslate('${playerName} is no longer ruler of ${region}');
+    $msg = clienttranslate('${player_name} is the new ruler of ${region}');
+    if ($newRuler === null) {
+      $msg = clienttranslate('${player_name} is no longer ruler of ${region}');
     }
     self::notifyAll('changeRuler', $msg,[
-      'playerName' => Players::get($new_ruler === null ? $old_ruler : $new_ruler)->getName(),
-      'oldRuler' => $old_ruler,
-      'newRuler' => $new_ruler,
+      'player_name' => Players::get($newRuler === null ? $oldRuler : $newRuler)->getName(),
+      'oldRuler' => $oldRuler,
+      'newRuler' => $newRuler,
       'region' => ucfirst($region),
     ]);
   }
@@ -77,7 +77,7 @@ class Notifications
   {
     if (isset($args['player'])) {
       $args['player_name'] = $args['player']->getName();
-      $args['player_id'] = $args['player']->getId();
+      $args['playerId'] = $args['player']->getId();
       unset($args['player']);
     }
     // if (isset($args['card'])) {

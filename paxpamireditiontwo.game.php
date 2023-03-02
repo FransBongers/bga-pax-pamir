@@ -74,7 +74,7 @@ class PaxPamirEditionTwo extends Table
         parent::__construct();
         self::$instance = $this;
         self::initGameStateLabels(array(
-            "card_action_card_id" => 24,
+            "cardActionCardId" => 24,
         ));
     }
 
@@ -128,15 +128,15 @@ class PaxPamirEditionTwo extends Table
     {
         $data = array();
 
-        $current_player_id = self::getCurrentPId(); // !! We must only return informations visible by this player !!
-        $player = Players::get($current_player_id);
+        $currentPlayerId = self::getCurrentPId(); // !! We must only return informations visible by this player !!
+        $player = Players::get($currentPlayerId);
         self::dump('player_in_getAllDatas', $player);
         $data = [
             'cards' => $this->cards,
             'specialAbilities' => $this->specialAbilities,
             // // Only get hand cards for current player (we might implement option to play with open hands?)
-            'hand' => Players::get($current_player_id)->getHandCards(),
-            'players' => Players::getUiData($current_player_id),
+            'hand' => Players::get($currentPlayerId)->getHandCards(),
+            'players' => Players::getUiData($currentPlayerId),
             'rupees' => Tokens::getOfType('rupee'),
             'favoredSuit' => Globals::getFavoredSuit(),
             // TODO (Frans): data from material.inc.php. We might also replace this?
@@ -146,23 +146,23 @@ class PaxPamirEditionTwo extends Table
 
         // // Get counts for all players
         $players = $this->loadPlayersBasicInfos();
-        foreach ($players as $player_id => $player_info) {
-            $player = Players::get($player_id);
-            $data['court'][$player_id] = $player->getCourtCards();
-            foreach ($data['court'][$player_id] as $card) {
+        foreach ($players as $playerId => $player_info) {
+            $player = Players::get($playerId);
+            $data['court'][$playerId] = $player->getCourtCards();
+            foreach ($data['court'][$playerId] as $card) {
                 $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']])->toArray();
             }
 
-            $data['cylinders'][$player_id] = Tokens::getInLocation(['cylinders', $player_id])->toArray();
-            $data['counts'][$player_id]['rupees'] = $player->getRupees();
-            //     // Number of cylinders played is total number of cylinders minus cylinders still available to player 
-            $data['counts'][$player_id]['cylinders'] = 10 - count($data['cylinders'][$player_id]);
-            $data['counts'][$player_id]['cards'] = count(Cards::getInLocation(['hand', $player_id]));
-            $data['counts'][$player_id]['suits'] = $player->getSuitTotals();
-            $data['counts'][$player_id]['influence'] = $player->getInfluence();
+            $data['cylinders'][$playerId] = Tokens::getInLocation(['cylinders', $playerId])->toArray();
+            $data['counts'][$playerId]['rupees'] = $player->getRupees();
+            // Number of cylinders played is total number of cylinders minus cylinders still available to player 
+            $data['counts'][$playerId]['cylinders'] = 10 - count($data['cylinders'][$playerId]);
+            $data['counts'][$playerId]['cards'] = count(Cards::getInLocation(['hand', $playerId]));
+            $data['counts'][$playerId]['suits'] = $player->getSuitTotals();
+            $data['counts'][$playerId]['influence'] = $player->getInfluence();
 
             foreach (['2', '4', '6'] as $gift_value) {
-                $data['gifts'][$player_id][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $player_id]);
+                $data['gifts'][$playerId][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $playerId]);
             }
         }
 

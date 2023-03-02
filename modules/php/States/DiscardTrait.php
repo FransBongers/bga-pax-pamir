@@ -61,30 +61,30 @@ trait DiscardTrait
   /**
    * Discard cards action when needed at end of a players turn
    */
-  function discardCards($cards, $from_hand)
+  function discardCards($cards, $fromHand)
   {
     self::checkAction('discardCards');
 
     $player = Players::get();
-    $player_id = $player->getId();
+    $playerId = $player->getId();
     $discards = $player->checkDiscards();
 
-    if ($from_hand) {
+    if ($fromHand) {
       if (count($cards) !== $discards['hand'])
         throw new \feException("Incorrect number of discards");
 
-      foreach ($cards as $card_id) {
-        Cards::move($card_id, 'discard');
-        $card_name = $this->cards[$card_id]['name'];
-        $removed_card = Cards::get($card_id);
-        $court_cards = $player->getCourtCards();
+      foreach ($cards as $cardId) {
+        Cards::move($cardId, 'discard');
+        $cardName = $this->cards[$cardId]['name'];
+        $removed_card = Cards::get($cardId);
+        $courtCards = $player->getCourtCards();
 
-        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their hand.', array(
+        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from their hand.', array(
           'playerId' => $player->getId(),
-          'playerName' => self::getActivePlayerName(),
-          'cardName' => $card_name,
-          'courtCards' => $court_cards,
-          'cardId' => $card_id,
+          'player_name' => self::getActivePlayerName(),
+          'cardName' => $cardName,
+          'courtCards' => $courtCards,
+          'cardId' => $cardId,
           'from' => 'hand'
         ));
       }
@@ -92,10 +92,10 @@ trait DiscardTrait
       if (count($cards) != $discards['court'])
         throw new \feException("Incorrect number of discards");
 
-      foreach ($cards as $card_id) {
+      foreach ($cards as $cardId) {
 
         // Move all spies back to players cylinder pool
-        $spiesOnCard = Tokens::getInLocation(['spies', $card_id]);
+        $spiesOnCard = Tokens::getInLocation(['spies', $cardId]);
         self::dump("spiesOnCard", $spiesOnCard);
         foreach ($spiesOnCard as $spy) {
           $spyOwner = explode("_", $spy['id'])[1];
@@ -103,25 +103,25 @@ trait DiscardTrait
         }
 
         // move card to discard location
-        Cards::move($card_id, 'discard');
-        $card_name = $this->cards[$card_id]['name'];
-        $removed_card = Cards::get($card_id);
-        $court_cards = Cards::getInLocation(['court', $player_id]);
+        Cards::move($cardId, 'discard');
+        $cardName = $this->cards[$cardId]['name'];
+        $removedCard = Cards::get($cardId);
+        $courtCards = Cards::getInLocation(['court', $playerId]);
 
         // slide card positions down to fill in gap
-        foreach ($court_cards as $c) {
-          if ($c['state'] > $removed_card['state'])
+        foreach ($courtCards as $c) {
+          if ($c['state'] > $removedCard['state'])
             Cards::setState($c['id'], $c['state'] - 1);
         }
 
-        $court_cards = Cards::getInLocation(['court', $player_id])->toArray();
+        $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
 
-        self::notifyAllPlayers("discardCard", '${playerName} discarded ${cardName} from their court.', array(
-          'playerId' => $player_id,
-          'playerName' => self::getActivePlayerName(),
-          'cardName' => $card_name,
-          'courtCards' => $court_cards,
-          'cardId' => $card_id,
+        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from their court.', array(
+          'playerId' => $playerId,
+          'player_name' => self::getActivePlayerName(),
+          'cardName' => $cardName,
+          'courtCards' => $courtCards,
+          'cardId' => $cardId,
           'from' => 'court'
         ));
       }

@@ -76,7 +76,7 @@ class Cards extends \PaxPamir\Helpers\Pieces
       "id" => "card_{INDEX}",
       "nbr" => 4,
       "nbrStart" => 101,
-      "location" => DOMINANCE_CHECK_CARD,
+      "location" => 'dominanceCheckCard',
       "used" => 0,
     ]);
     array_push($cards, [
@@ -96,7 +96,7 @@ class Cards extends \PaxPamir\Helpers\Pieces
         self::pickForLocation(2, EVENT_CARD, 'pile');
       } elseif ($i > 2) {
         self::pickForLocation(1, EVENT_CARD, 'pile');
-        self::pickForLocation(1, DOMINANCE_CHECK_CARD, 'pile');
+        self::pickForLocation(1, 'dominanceCheckCard', 'pile');
       }
       self::shuffle('pile');
       $pile = self::getInLocation('pile');

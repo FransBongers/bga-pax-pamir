@@ -43,8 +43,8 @@ const RULER_TOKEN_HEIGHT = 50;
 // names etc.
 
 // card types
-const EVENT_CARD = 'event_card';
-const COURT_CARD = 'court_card';
+const EVENT_CARD = 'eventCard';
+const COURT_CARD = 'courtCard';
 
 // suits
 const ECONOMIC = 'economic';
@@ -98,10 +98,10 @@ const IMPACT_ICON_ARMY = 'army';
 const IMPACT_ICON_LEVERAGE = 'leverage';
 const IMPACT_ICON_SPY = 'spy';
 const IMPACT_ICON_TRIBE = 'tribe';
-const IMPACT_ICON_ECONOMIC_SUIT = 'economic_suit';
-const IMPACT_ICON_MILITARY_SUIT = 'military_suit';
-const IMPACT_ICON_POLITICAL_SUIT = 'political_suit';
-const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence_suit';
+const IMPACT_ICON_ECONOMIC_SUIT = 'economicSuit';
+const IMPACT_ICON_MILITARY_SUIT = 'militarySuit';
+const IMPACT_ICON_POLITICAL_SUIT = 'politicalSuit';
+const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligenceSuit';
 
 /**
  * Card actions types

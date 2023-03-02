@@ -55,7 +55,7 @@ trait PlaceRoadTrait
     self::checkAction('placeRoad');
     self::dump("placeRoad on ", $border);
     $player_id = self::getActivePlayerId();
-    // TODO: check if allowed based on resolve_impact_icons_card_id
+    // TODO: check if allowed based on resolveImpactIconsCardId
     $loyalty = Players::get()->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
     $road = Tokens::getInLocation($location)->first();
@@ -67,12 +67,12 @@ trait PlaceRoadTrait
           0 => array(
             'from' => $location,
             'to' => $to,
-            'token_id' => $road['id'],
+            'tokenId' => $road['id'],
           )
         )
       ));
     }
     Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolve_impact_icons');
+    $this->gamestate->nextState('resolveImpactIcons');
   }
 }

@@ -23,14 +23,14 @@ trait PlayerActionTrait
 
   function argPlayerActions()
   {
-    $player_id = self::getActivePlayerId();
-    $current_player_id = self::getCurrentPlayerId();
-    $player = Players::get($player_id);
+    $playerId = self::getActivePlayerId();
+    $currentPlayerId = self::getCurrentPlayerId();
+    $player = Players::get($playerId);
     return array(
       'remainingActions' => Globals::getRemainingActions(),
       'unavailableCards' => Cards::getUnavailableCards(),
-      'hand' => Cards::getInLocation(['hand', $current_player_id]),
-      'court' => Cards::getInLocationOrdered(['court', $player_id])->toArray(),
+      'hand' => Cards::getInLocation(['hand', $currentPlayerId]),
+      'court' => Cards::getInLocationOrdered(['court', $playerId])->toArray(),
       'suits' => $player->getSuitTotals(),
       'rulers' => Map::getRulers(),
       'favoredSuit' => Globals::getFavoredSuit(),
@@ -61,19 +61,19 @@ trait PlayerActionTrait
   {
     self::checkAction('chooseLoyalty');
 
-    $player_id = Players::getActiveId();
-    $coalition_name = $this->loyalty[$coalition]['name'];
+    $playerId = Players::getActiveId();
+    $coalitionName = $this->loyalty[$coalition]['name'];
 
     Players::get()->setLoyalty($coalition);
 
     // Notify
     // TODO (Frans): check i18n for coalition name
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalition_name} ${coalition_log_token}'), array(
-      'player_id' => $player_id,
+    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${coalitionLogToken}'), array(
+      'playerId' => $playerId,
       'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,
-      'coalition_name' => $coalition_name,
-      'coalition_log_token' => $coalition,
+      'coalitionName' => $coalitionName,
+      'coalitionLogToken' => $coalition,
     ));
 
     $this->gamestate->nextState('next');
@@ -91,18 +91,17 @@ trait PlayerActionTrait
 
     self::checkAction('pass');
 
-    $player_id = self::getActivePlayerId();
+    $playerId = self::getActivePlayerId();
 
-    $remaining_actions = Globals::getRemainingActions();
+    $remainingActions = Globals::getRemainingActions();
     $state = $this->gamestate->state();
 
-    if (($remaining_actions > 0) and ($state['name'] == 'playerActions')) {
-      // self::incStat($remaining_actions, "skip", $player_id);
+    if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
       Globals::setRemainingActions(0);
 
       // Notify
       self::notifyAllPlayers("pass", clienttranslate('${player_name} ended their turn.'), array(
-        'player_id' => $player_id,
+        'playerId' => $playerId,
         'player_name' => self::getActivePlayerName(),
       ));
     }
@@ -114,7 +113,7 @@ trait PlayerActionTrait
   /**
    * Play card from hand to court
    */
-  function playCard($card_id, $left_side = true, $bribe = null)
+  function playCard($cardId, $leftSide = true, $bribe = null)
   {
     //
     // play a card from hand into the court on either the left or right side
@@ -122,21 +121,21 @@ trait PlayerActionTrait
 
     self::checkAction('playCard');
 
-    $player_id = self::getActivePlayerId();
-    $card = Cards::get($card_id);
-    $card_name = $this->cards[$card_id]['name'];
+    $playerId = self::getActivePlayerId();
+    $card = Cards::get($cardId);
+    $card_name = $this->cards[$cardId]['name'];
 
     // $bribe_card_id = $this->getGameStateValue("bribe_card_id");
     // $bribe_ruler = Cards::getRegionRulerForCard($bribe_card_id);
     // $bribe_amount = $this->getGameStateValue("bribe_amount");
 
-    $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
+    $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
 
     // TODO (Frans): decide how we want to implement bribes
     // if (($bribe_ruler != 0) and ($bribe_ruler != $player_id)) {
     //     if ($bribe_amount == -1) {
-    //         $this->setGameStateValue("bribe_card_id", $card_id);
-    //         $this->gamestate->setPlayersMultiactive( [$bribe_ruler], 'negotiate_bribe', $bExclusive = true );
+    //         $this->setGameStateValue("bribe_card_id", $cardId);
+    //         $this->gamestate->setPlayersMultiactive( [$bribe_ruler], 'negotiateBribe', $bExclusive = true );
     //         self::notifyAllPlayers( "playCard", $message, array(
     //             'player_id' => $player_id,
     //             'player_name' => self::getActivePlayerName(),
@@ -156,27 +155,27 @@ trait PlayerActionTrait
 
     if (Globals::getRemainingActions() > 0) {
       // check if loyaly change
-      $card_loyalty = $this->cards[$card_id]['loyalty'];
-      if ($card_loyalty != null) {
-        $this->checkAndHandleLoyaltyChange($card_loyalty);
+      $cardLoyalty = $this->cards[$cardId]['loyalty'];
+      if ($cardLoyalty != null) {
+        $this->checkAndHandleLoyaltyChange($cardLoyalty);
       }
 
-      if ($left_side) {
-        for ($i = 0; $i < count($court_cards); $i++) {
-          Cards::setState($court_cards[$i]['id'], $i + 2);
+      if ($leftSide) {
+        for ($i = 0; $i < count($courtCards); $i++) {
+          Cards::setState($courtCards[$i]['id'], $i + 2);
         }
-        Cards::move($card_id, ['court', $player_id], 1);
-        $message = clienttranslate('${playerName} plays ${cardName} to the left side of their court');
+        Cards::move($cardId, ['court', $playerId], 1);
+        $message = clienttranslate('${player_name} plays ${cardName} to the left side of their court');
       } else {
-        Cards::move($card_id, ['court', $player_id], count($court_cards) + 1);
-        $message = clienttranslate('${playerName} plays ${cardName} to the right side of their court');
+        Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
+        $message = clienttranslate('${player_name} plays ${cardName} to the right side of their court');
       }
       Globals::incRemainingActions(-1);
-      $court_cards = Cards::getInLocationOrdered(['court', $player_id])->toArray();
-      $card = Cards::get($card_id);
+      $court_cards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+      $card = Cards::get($cardId);
       self::notifyAllPlayers("playCard", $message, array(
-        'playerId' => $player_id,
-        'playerName' => self::getActivePlayerName(),
+        'playerId' => $playerId,
+        'player_name' => self::getActivePlayerName(),
         'card' => $card,
         'cardName' => $card_name,
         'courtCards' => $court_cards,
@@ -188,83 +187,83 @@ trait PlayerActionTrait
       // $this->setGameStateValue("bribe_card_id", 0);
       // $this->setGameStateValue("bribe_amount", -1);
 
-      Globals::setResolveImpactIconsCardId($card_id);
+      Globals::setResolveImpactIconsCardId($cardId);
       Globals::setResolveImpactIconsCurrentIcon(0);
-      $this->gamestate->nextState('resolve_impact_icons');
+      $this->gamestate->nextState('resolveImpactIcons');
     }
   }
 
   /**
    * purchase card from market
    */
-  function purchaseCard($card_id)
+  function purchaseCard($cardId)
   {
-    self::dump("purchaseCard", $card_id);
+    self::dump("purchaseCard", $cardId);
     self::checkAction('purchaseCard');
 
-    $player_id = self::getActivePlayerId();
-    $card = Cards::get($card_id);
-    $card_info = $this->cards[$card_id];
+    $playerId = self::getActivePlayerId();
+    $card = Cards::get($cardId);
+    $cardInfo = $this->cards[$cardId];
 
-    $base_cost = Globals::getFavoredSuit() === MILITARY ? 2 : 1;
+    $baseCost = Globals::getFavoredSuit() === MILITARY ? 2 : 1;
 
     // Throw error if card is unavailble for purchase
     if ($card['used'] == 1) {
       throw new \feException("Card is unavailble");
     }
 
-    $card_name = $this->cards[$card_id]['name'];
-    $market_location = $card['location'];
-    self::dump("purchaseCard", $card_id, $player_id, $card);
-    $row = explode("_", $market_location)[1];
-    $row_alt = ($row == 0) ? 1 : 0;
-    $col = intval(explode("_", $market_location)[2]);
-    $cost = $col * $base_cost;
+    $cardName = $this->cards[$cardId]['name'];
+    $marketLocation = $card['location'];
+    self::dump("purchaseCard", $cardId, $playerId, $card);
+    $row = explode("_", $marketLocation)[1];
+    $rowAlt = ($row == 0) ? 1 : 0;
+    $col = intval(explode("_", $marketLocation)[2]);
+    $cost = $col * $baseCost;
     self::dump("row", $row);
 
-    $next_state = 'action';
+    $nextState = 'action';
     if (Globals::getRemainingActions() > 0) {
 
       // check cost
-      if ($cost > Players::get($player_id)->getRupees()) {
+      if ($cost > Players::get($playerId)->getRupees()) {
         throw new \feException("Not enough rupees");
       } else {
         // if enough rupees reduce player rupees
-        Players::get($player_id)->incRupees(-$cost);
+        Players::get($playerId)->incRupees(-$cost);
       };
 
       // TODO (Frans): check if this is an event card or court card
       // move card to player hand location and reduce number of remaining actions
-      $new_location = 'hand_' . $player_id;
-      if ($card_info['type'] == EVENT_CARD) {
-        $new_location = 'active_events';
-      } else if ($card_info['type'] == DOMINANCE_CHECK_CARD) {
-        $new_location = 'discard';
-        $next_state = 'dominance_check';
+      $newLocation = 'hand_' . $playerId;
+      if ($cardInfo['type'] == EVENT_CARD && $cardInfo['purchased']['title'] === ECE_DOMINANCE_CHECK) {
+        $newLocation = 'discard';
+        $nextState = 'dominanceCheck';
+      } else if ($cardInfo['type'] == EVENT_CARD) {
+        $newLocation = 'active_events';
       }
-      Cards::move($card_id, $new_location);
+      Cards::move($cardId, $newLocation);
       Globals::incRemainingActions(-1);
 
-      $updated_cards = array();
+      $updatedCards = array();
 
       for ($i = $col - 1; $i >= 0; $i--) {
         $location = 'market_' . $row . '_' . $i;
-        $use_row_alt = false;
-        $m_card = Cards::getInLocation($location)->first();
-        if ($m_card == NULL) {
-          $use_row_alt = true;
-          $location = 'market_' . $row_alt . '_' . $i;
-          $m_card = Cards::getInLocation($location)->first();
+        $useRowAlt = false;
+        $marketCard = Cards::getInLocation($location)->first();
+        if ($marketCard == NULL) {
+          $useRowAlt = true;
+          $location = 'market_' . $rowAlt . '_' . $i;
+          $marketCard = Cards::getInLocation($location)->first();
         }
-        if ($m_card !== NULL) {
-          Cards::setUsed($m_card["id"], 1); // set unavailable
-          for ($j = 1; $j <= $base_cost; $j++) {
+        if ($marketCard !== NULL) {
+          Cards::setUsed($marketCard["id"], 1); // set unavailable
+          for ($j = 1; $j <= $baseCost; $j++) {
             $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
             Tokens::move($rupee['id'], [$location, 'rupees']);
-            $updated_cards[] = array(
-              'row' => intval($use_row_alt ? $row_alt : $row),
+            $updatedCards[] = array(
+              'row' => intval($useRowAlt ? $rowAlt : $row),
               'column' => $i,
-              'cardId' => $m_card["id"],
+              'cardId' => $marketCard["id"],
               'rupeeId' => $rupee['id']
             );
           }
@@ -272,122 +271,122 @@ trait PlayerActionTrait
       }
 
       // add rupees on card to player totals. Then put them in rupee_pool location
-      $rupees = Tokens::getInLocation([$market_location, 'rupees']);
-      Players::get($player_id)->incRupees(count($rupees));
-      Tokens::moveAllInLocation([$market_location, 'rupees'], RUPEE_SUPPLY);
+      $rupees = Tokens::getInLocation([$marketLocation, 'rupees']);
+      Players::get($playerId)->incRupees(count($rupees));
+      Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
       self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${card_log}'), array(
-        'playerId' => $player_id,
+        'playerId' => $playerId,
         'player_name' => self::getActivePlayerName(),
         'card' => $card,
-        'cardName' => $card_name,
+        'cardName' => $cardName,
         'card_log' => $card['id'],
-        'marketLocation' => $market_location,
-        'newLocation' => $new_location,
-        'updatedCards' => $updated_cards,
+        'marketLocation' => $marketLocation,
+        'newLocation' => $newLocation,
+        'updatedCards' => $updatedCards,
       ));
 
       $this->updatePlayerCounts();
     }
 
-    $this->gamestate->nextState($next_state);
+    $this->gamestate->nextState($nextState);
   }
 
-  function placeRupeesInMarketRow($row, $remaining_rupees)
+  function placeRupeesInMarketRow($row, $remainingRupees)
   {
-    $updated_cards = [];
+    $updatedCards = [];
     // $remaining_rupees = $number_rupees;
     for ($i = 5; $i >= 0; $i--) {
-      if ($remaining_rupees <= 0) {
+      if ($remainingRupees <= 0) {
         break;
       }
       $location = 'market_' . $row . '_' . $i;
-      $market_card = Cards::getInLocation($location)->first();
-      if ($market_card !== NULL) {
+      $marketCard = Cards::getInLocation($location)->first();
+      if ($marketCard !== NULL) {
         $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
         Tokens::move($rupee['id'], [$location, 'rupees']);
-        Cards::setUsed($market_card["id"], 1); // set unavailable
-        $updated_cards[] = array(
+        Cards::setUsed($marketCard["id"], 1); // set unavailable
+        $updatedCards[] = array(
           'location' => $location,
-          'card_id' => $market_card["id"],
-          'rupee_id' => $rupee['id']
+          'cardId' => $marketCard["id"],
+          'rupeeId' => $rupee['id']
         );
-        $remaining_rupees--;
+        $remainingRupees--;
       }
     }
-    return $updated_cards;
+    return $updatedCards;
   }
 
-  function isCardFavoredSuit($card_id)
+  function isCardFavoredSuit($cardId)
   {
-    $card_info = $this->cards[$card_id];
-    return Globals::getFavoredSuit() == $card_info['suit'];
+    $cardInfo = $this->cards[$cardId];
+    return Globals::getFavoredSuit() == $cardInfo['suit'];
   }
 
   /**
    * Play card from hand to court
    */
-  function selectGift($selected_gift, $card_id)
+  function selectGift($selectedGift, $cardId)
   {
     self::checkAction('selectGift');
-    self::dump("selected_gift", $selected_gift);
-    if (!$this->isValidCardAction($card_id, 'gift')) {
+    self::dump("selectedGift", $selectedGift);
+    if (!$this->isValidCardAction($cardId, 'gift')) {
       return;
     }
 
-    $player_id = self::getActivePlayerId();
+    $playerId = self::getActivePlayerId();
     $rupees = Players::get()->getRupees();
     // Player should have enough rupees
-    if ($rupees < $selected_gift) {
+    if ($rupees < $selectedGift) {
       throw new \feException("Not enough rupees to pay for the gift.");
     }
-    $location = 'gift_' . $selected_gift . '_' . $player_id;
-    $token_in_location = Tokens::getInLocation($location)->first();
-    if ($token_in_location != null) {
+    $location = 'gift_' . $selectedGift . '_' . $playerId;
+    $tokenInLocation = Tokens::getInLocation($location)->first();
+    if ($tokenInLocation != null) {
       throw new \feException("Already a cylinder in selected location.");
     }
 
-    $from = "cylinders_" . $player_id;
+    $from = "cylinders_" . $playerId;
     $cylinder = Tokens::getInLocation($from)->first();
 
     // If null player needs to select cylinder from somewhere else
     if ($cylinder != null) {
       Tokens::move($cylinder['id'], $location);
-      Cards::setUsed($card_id, 1); // unavailable false
+      Cards::setUsed($cardId, 1); // unavailable false
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
           0 => array(
             'from' => $from,
             'to' => $location,
-            'token_id' => $cylinder['id'],
+            'tokenId' => $cylinder['id'],
           )
         )
       ));
     }
 
     // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($card_id)) {
+    if (!$this->isCardFavoredSuit($cardId)) {
       Globals::incRemainingActions(-1);
     }
 
-    $number_rupees_per_row = $selected_gift / 2;
-    $updated_cards = [];
-    $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(0, $number_rupees_per_row));
-    $updated_cards = array_merge($updated_cards, $this->placeRupeesInMarketRow(1, $number_rupees_per_row));
-    Players::get($player_id)->incRupees(-intval($selected_gift));
+    $numberRupeesPerRow = $selectedGift / 2;
+    $updatedCards = [];
+    $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(0, $numberRupeesPerRow));
+    $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(1, $numberRupeesPerRow));
+    Players::get($playerId)->incRupees(-intval($selectedGift));
 
-    $updated_counts = array(
-      'rupees' => $rupees - $selected_gift,
-      'influence' => Players::get($player_id)->getInfluence(),
+    $updatedCounts = array(
+      'rupees' => $rupees - $selectedGift,
+      'influence' => Players::get($playerId)->getInfluence(),
     );
 
     self::notifyAllPlayers("selectGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
-      'player_id' => $player_id,
+      'playerId' => $playerId,
       'player_name' => self::getActivePlayerName(),
-      'value' => $selected_gift,
-      'updated_cards' => $updated_cards,
-      'rupee_count' => $rupees - $selected_gift,
-      'updated_counts' => $updated_counts,
+      'value' => $selectedGift,
+      'updatedCards' => $updatedCards,
+      'rupeeCount' => $rupees - $selectedGift,
+      'updatedCounts' => $updatedCounts,
     ));
 
     $this->gamestate->nextState('action');
@@ -397,36 +396,36 @@ trait PlayerActionTrait
   /**
    * Validate card action
    */
-  function isValidCardAction($card_id, $card_action)
+  function isValidCardAction($cardId, $cardAction)
   {
-    self::dump("cardAction: card_id", $card_id);
-    self::dump("cardAction: card_action", $card_action);
+    self::dump("cardAction: cardId", $cardId);
+    self::dump("cardAction: cardAction", $cardAction);
 
-    $token_info = Cards::get($card_id);
-    $card_info = $this->cards[$card_id];
-    $player_id = self::getActivePlayerId();
-    $location_info = explode("_", $token_info['location']);
+    $tokenInfo = Cards::get($cardId);
+    $cardInfo = $this->cards[$cardId];
+    $playerId = self::getActivePlayerId();
+    $location_info = explode("_", $tokenInfo['location']);
 
     // Checks to determine if it is a valid action
     // Card should be in players court
-    if ($location_info[0] != 'court' || $location_info[1] != $player_id) {
+    if ($location_info[0] != 'court' || $location_info[1] != $playerId) {
       throw new \feException("Not a valid card action for player.");
     }
     // Card should not have been used yet
-    if ($token_info['used'] != 0) {
+    if ($tokenInfo['used'] != 0) {
       throw new \feException("Card has already been used this turn.");
     }
     // Card should have the card action
-    if (!isset($card_info['actions'][$card_action])) {
+    if (!isset($cardInfo['actions'][$cardAction])) {
       throw new \feException("Action does not exist on selected card.");
     }
 
     // $next_state = 'action';
-    if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $card_info['suit'])) {
+    if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $cardInfo['suit'])) {
       throw new \feException("No remaining actions and not a free action.");
-      // $this->setGameStateValue("card_action_card_id", explode("_", $card_id)[1]);
+      // $this->setGameStateValue("cardActionCardId", explode("_", $cardId)[1]);
 
-      // switch ($card_action) {
+      // switch ($cardAction) {
       //   case BATTLE:
       //     break;
       //   case BETRAY:
@@ -434,7 +433,7 @@ trait PlayerActionTrait
       //   case BUILD:
       //     break;
       //   case GIFT:
-      //     $next_state = 'card_action_gift';
+      //     $next_state = 'cardActionGift';
       //     break;
       //   case MOVE:
       //     break;
@@ -444,11 +443,11 @@ trait PlayerActionTrait
       //     break;
       // };
 
-      // self::notifyAllPlayers("cardAction", clienttranslate('${player_name} uses ${card_name} to ${card_action}.'), array(
-      //   'player_id' => $player_id,
+      // self::notifyAllPlayers("cardAction", clienttranslate('${player_name} uses ${card_name} to ${cardAction}.'), array(
+      //   'playerId' => $playerId,
       //   'player_name' => self::getActivePlayerName(),
-      //   'card_action' => $card_action,
-      //   'card_name' => $this->cards[$card_id]['name'],
+      //   'cardAction' => $cardAction,
+      //   'card_name' => $this->cards[$cardId]['name'],
       // ));
     };
     return true;
@@ -462,7 +461,7 @@ trait PlayerActionTrait
   function checkAndHandleLoyaltyChange($coalition)
   {
 
-    $player_id = self::getActivePlayerId();
+    $playerId = self::getActivePlayerId();
     $current_loyaly = Players::get()->getLoyalty();
     // check of loyalty needs to change. If it does not return
     if ($current_loyaly == $coalition) {
@@ -479,7 +478,7 @@ trait PlayerActionTrait
     // Notify
     $coalition_name = $this->loyalty[$coalition]['name'];
     self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changes loyalty to ${coalition_name}'), array(
-      'player_id' => $player_id,
+      'playerId' => $playerId,
       'player_name' => self::getActivePlayerName(),
       'coalition' => $coalition,
       'coalition_name' => $coalition_name

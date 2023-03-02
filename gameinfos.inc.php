@@ -13,22 +13,22 @@
 $gameinfos = array( 
 
 // Name of the game in English (will serve as the basis for translation) 
-'game_name' => "My Great Game",
+'game_name' => "Pax Pamir: Second Edition",
 
 // Game designer (or game designers, separated by commas)
-'designer' => 'John Doe',       
+'designer' => 'Cole Wehrle',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => 'Jane Doe',         
+'artist' => 'Cole Wehrle',         
 
 // Year of FIRST publication of this game. Can be negative.
-'year' => 2000,                 
+'year' => 2019,                 
 
 // Game publisher (use empty string if there is no publisher)
-'publisher' => 'My Publishing Company',                     
+'publisher' => 'Wehrlegig Games',                     
 
 // Url of game publisher website
-'publisher_website' => 'http://www.mypublishingcompany.com/',   
+'publisher_website' => 'https://wehrlegig.com/',   
 
 // Board Game Geek ID of the publisher
 'publisher_bgg_id' => 39814,
@@ -132,7 +132,7 @@ $gameinfos = array(
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
 'presentation' => array(
-   totranslate("Pax Pamir 2nd edition!"),
+   totranslate("In Pax Pamir, players assume the role of nineteenth century Afghan leaders attempting to forge a new state after the collapse of the Durrani Empire. Western histories often call this period \"The Great Game\" because of the role played by the Europeans who attempted to use central Asia as a theater for their own rivalries. In this game, those empires are viewed strictly from the perspective of the Afghans who sought to manipulate the interloping ferengi (foreigners) for their own purposes."),
 //    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
 //    ...
 ),

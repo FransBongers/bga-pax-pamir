@@ -163,7 +163,7 @@ class PaxPamir implements PaxPamirGame {
         args.processed = true;
 
         // list of special keys we want to replace with images
-        const keys = ['card_log', 'coalition_log_token', 'new_cards_log'];
+        const keys = ['card_log', 'coalitionLogToken', 'new_cards_log'];
 
         // list of other known variables
         //  var keys = this.notification_manager.keys;

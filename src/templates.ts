@@ -151,17 +151,6 @@ const tplCourtCardTooltip = ({
   ${cardActions}
   ${specialAbility}
   `  });
-  //  `<div class="pp_card_tooltip">
-  //   <div class="pp_card_tooltip_inner_container">
-  //     <span class="title">${cardInfo.name}</span>
-  //     <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
-  //     ${impactIcons}
-  //     ${cardActions}
-  //     ${specialAbility}
-      
-  //   </div>
-  //   <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
-  // </div>`;
 };
 
 const tplEventCardTooltip = ({

@@ -8,7 +8,7 @@ const getTokenDiv = (key: string, args: Record<string, string | number | Record<
   switch(key) {
     case 'card_log':
       return `<div class="pp_card pp_card_in_log pp_${data}"></div>`
-    case 'coalition_log_token':
+    case 'coalitionLogToken':
       return `<div class="pp_icon_log pp_loyalty_icon_log pp_${data}"></div>`
     case 'new_cards_log':
       let newCards = '';

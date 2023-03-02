@@ -34,10 +34,10 @@ trait DominanceCheckTrait
     Globals::incDominanceChecksResolved(1);
     // Determine if check is successful
     // Get counts of all blocks left in pool
-    $coalition_block_counts = array();
+    $coalitionBlockCounts = array();
     $i = 0;
     foreach ($this->locations['pools'] as $coalitionId => $coalitionPool) {
-      $coalition_block_counts[$i] = array(
+      $coalitionBlockCounts[$i] = array(
         'count' => Tokens::countInLocation($coalitionPool),
         'coalition' => $coalitionId,
       );
@@ -45,60 +45,60 @@ trait DominanceCheckTrait
     }
     // sort array lowest to highest. Since we count remaining blocks the coalition with the lowest
     // number has the most blocks in play
-    usort($coalition_block_counts, function ($a, $b) {
+    usort($coalitionBlockCounts, function ($a, $b) {
       return $a['count'] - $b['count'];
     });
-    $check_successful = $coalition_block_counts[1]['count'] - $coalition_block_counts[0]['count'] >= 4;
+    $checkSuccessful = $coalitionBlockCounts[1]['count'] - $coalitionBlockCounts[0]['count'] >= 4;
 
     // scores object which will be returned with notification
     $scores = array();
     $moves = array();
-    if ($check_successful) {
-      $dominant_coalition =  $coalition_block_counts[0]['coalition'];
+    if ($checkSuccessful) {
+      $dominantCoalition =  $coalitionBlockCounts[0]['coalition'];
       $players = $this->loadPlayersBasicInfos();
 
       // Create array of players loyal to dominant coalition and their total influence
-      $loyal_players = array();
-      foreach ($players as $player_id => $player_info) {
-        $player = Players::get($player_id);
-        if ($player->getLoyalty() == $dominant_coalition) {
-          $loyal_players[] = array(
-            'player_id' => $player_id,
+      $loyalPlayers = array();
+      foreach ($players as $playerId => $playerInfo) {
+        $player = Players::get($playerId);
+        if ($player->getLoyalty() == $dominantCoalition) {
+          $loyalPlayers[] = array(
+            'playerId' => $playerId,
             'count' => $player->getInfluence(),
           );
         }
       };
 
       // Sort array so leader is at position 0
-      usort($loyal_players, function ($a, $b) {
+      usort($loyalPlayers, function ($a, $b) {
         return $b['count'] - $a['count'];
       });
 
-      $available_points = [5, 3, 1];
+      $availablePoints = [5, 3, 1];
       if (Globals::getDominanceChecksResolved() == 4) {
-        $available_points = [10, 6, 2];
+        $availablePoints = [10, 6, 2];
       }
-      $scores = $this->determineVictoryPoints($loyal_players, $available_points);
+      $scores = $this->determineVictoryPoints($loyalPlayers, $availablePoints);
       $moves = $this->handleSuccessfulDominanceCheck();
     } else {
       // Determine numer of cylinders in play by each player
-      $cylinder_counts = $this->getCylindersInPlayPerPlayer();
+      $cylinderCounts = $this->getCylindersInPlayPerPlayer();
 
       // Sort array so player with highest number is at 0.
-      usort($cylinder_counts, function ($a, $b) {
+      usort($cylinderCounts, function ($a, $b) {
         return $b['count'] - $a['count'];
       });
 
       // Determine VPs
-      $available_points = [3, 1];
+      $availablePoints = [3, 1];
       if (Globals::getDominanceChecksResolved() == 4) {
-        $available_points = [6, 2];
+        $availablePoints = [6, 2];
       }
-      $scores = $this->determineVictoryPoints($cylinder_counts, $available_points);
+      $scores = $this->determineVictoryPoints($cylinderCounts, $availablePoints);
     }
     self::notifyAllPlayers("dominanceCheck", clienttranslate('A Dominance Check has been resolved.'), array(
       'scores' => $scores,
-      'successful' => $check_successful,
+      'successful' => $checkSuccessful,
       'moves' => $moves,
     ));
 
@@ -119,10 +119,10 @@ trait DominanceCheckTrait
     $counts = array();
     $players = $this->loadPlayersBasicInfos();
     $i = 0;
-    foreach ($players as $player_id => $player_info) {
+    foreach ($players as $playerId => $playerInfo) {
       $counts[$i] = array(
-        'count' => 10 - Tokens::countInLocation(['cylinders', $player_id]),
-        'player_id' => $player_id,
+        'count' => 10 - Tokens::countInLocation(['cylinders', $playerId]),
+        'playerId' => $playerId,
       );
       $i += 1;
     }
@@ -134,40 +134,40 @@ trait DominanceCheckTrait
    * Calculates VPs based on an array with available point [5,3,1] and 
    * a ranking of players and count with first player on position 0.
    */
-  function determineVictoryPoints($player_ranking, $available_points)
+  function determineVictoryPoints($playerRanking, $availablePoints)
   {
     $scores = array();
-    while (count($available_points) > 0 && count($player_ranking) > 0) {
-      $current_highest_influence = $player_ranking[0]['count'];
+    while (count($availablePoints) > 0 && count($playerRanking) > 0) {
+      $currentHighestInfluence = $playerRanking[0]['count'];
 
       // Filter to get all players with the same score as the leading player
-      $same_score = array_filter($player_ranking, function ($element) use ($current_highest_influence) {
-        return $element['count'] == $current_highest_influence;
+      $sameScore = array_filter($playerRanking, function ($element) use ($currentHighestInfluence) {
+        return $element['count'] == $currentHighestInfluence;
       });
-      $count_same_score = count($same_score);
+      $countSameScore = count($sameScore);
 
       // Calculate points earned per player based on numer of players
-      $total_points = 0;
-      for ($i = 0; $i < $count_same_score; $i++) {
-        $total_points += $available_points[$i];
+      $totalPoints = 0;
+      for ($i = 0; $i < $countSameScore; $i++) {
+        $totalPoints += $availablePoints[$i];
       }
-      $points_per_player = floor($total_points / $count_same_score);
+      $pointsPerPlayer = floor($totalPoints / $countSameScore);
 
       // Update database and add data to scores object for notifictation
-      for ($i = 0; $i < $count_same_score; $i++) {
-        $player_id = $player_ranking[$i]['player_id'];
-        $current_score = Players::get($player_id)->getScore();
-        $scores[$player_id] = array(
-          'player_id' => $player_id,
-          'current_score' => $current_score,
-          'new_score' => $current_score + $points_per_player,
+      for ($i = 0; $i < $countSameScore; $i++) {
+        $playerId = $playerRanking[$i]['playerId'];
+        $currentScore = Players::get($playerId)->getScore();
+        $scores[$playerId] = array(
+          'playerId' => $playerId,
+          'currentScore' => $currentScore,
+          'newScore' => $currentScore + $pointsPerPlayer,
         );
-        Players::get($player_id)->incScore($points_per_player);
+        Players::get($playerId)->incScore($pointsPerPlayer);
       }
 
       // Slice data that was just used from arrays
-      $available_points = array_slice($available_points, $count_same_score);
-      $player_ranking = array_slice($player_ranking, $count_same_score);
+      $availablePoints = array_slice($availablePoints, $countSameScore);
+      $playerRanking = array_slice($playerRanking, $countSameScore);
     };
     return $scores;
   }
@@ -176,39 +176,39 @@ trait DominanceCheckTrait
   {
     $moves = array();
     // return all coalition blocks to their pools
-    $afghan_blocks = Tokens::getInLocation('block_afghan');
-    foreach ($afghan_blocks as $token_id => $token_info) {
-      if (!$this->startsWith($token_info['location'], "blocks")) {
+    $afghanBlocks = Tokens::getInLocation(BLOCKS_AFGHAN_SUPPLY);
+    foreach ($afghanBlocks as $tokenId => $tokenInfo) {
+      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
-          'token_id' => $token_id,
-          'from' => $token_info['location'],
+          'tokenId' => $tokenId,
+          'from' => $tokenInfo['location'],
           'to' => BLOCKS_AFGHAN_SUPPLY
         );
-        Tokens::move($token_id, BLOCKS_AFGHAN_SUPPLY);
+        Tokens::move($tokenId, BLOCKS_AFGHAN_SUPPLY);
       };
     };
 
-    $russian_blocks = Tokens::getInLocation('block_russian');
-    foreach ($russian_blocks as $token_id => $token_info) {
-      if (!$this->startsWith($token_info['location'], "blocks")) {
+    $russianBlocks = Tokens::getInLocation(BLOCKS_RUSSIAN_SUPPLY);
+    foreach ($russianBlocks as $tokenId => $tokenInfo) {
+      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
-          'token_id' => $token_id,
-          'from' => $token_info['location'],
+          'tokenId' => $tokenId,
+          'from' => $tokenInfo['location'],
           'to' => BLOCKS_RUSSIAN_SUPPLY
         );
-        Tokens::move($token_id, BLOCKS_RUSSIAN_SUPPLY);
+        Tokens::move($tokenId, BLOCKS_RUSSIAN_SUPPLY);
       };
     };
 
-    $british_blocks = Tokens::getInLocation('block_british');
-    foreach ($british_blocks as $token_id => $token_info) {
-      if (!$this->startsWith($token_info['location'], "blocks")) {
+    $britishBlocks = Tokens::getInLocation(BLOCKS_BRITISH_SUPPLY);
+    foreach ($britishBlocks as $tokenId => $tokenInfo) {
+      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
-          'token_id' => $token_id,
-          'from' => $token_info['location'],
+          'tokenId' => $tokenId,
+          'from' => $tokenInfo['location'],
           'to' => BLOCKS_BRITISH_SUPPLY
         );
-        Tokens::move($token_id, BLOCKS_BRITISH_SUPPLY);
+        Tokens::move($tokenId, BLOCKS_BRITISH_SUPPLY);
       };
     };
 

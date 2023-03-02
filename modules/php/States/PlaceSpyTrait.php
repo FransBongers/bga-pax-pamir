@@ -50,29 +50,29 @@ trait PlaceSpyTrait
   /**
    * Places spy on card
    */
-  function placeSpy($card_id)
+  function placeSpy($cardId)
   {
     self::checkAction('placeSpy');
-    self::dump("placeSpy on ", $card_id);
+    self::dump("placeSpy on ", $cardId);
 
-    $player_id = self::getActivePlayerId();
-    $from = "cylinders_" . $player_id;
+    $playerId = self::getActivePlayerId();
+    $from = "cylinders_" . $playerId;
     $cylinder = Tokens::getInLocation($from)->first();
 
     if ($cylinder != null) {
-      $to = 'spies_' . $card_id;
+      $to = 'spies_' . $cardId;
       Tokens::move($cylinder['id'], $to);
       self::notifyAllPlayers("moveToken", "", array(
         'moves' => array(
           0 => array(
             'from' => $from,
             'to' => $to,
-            'token_id' => $cylinder['id'],
+            'tokenId' => $cylinder['id'],
           )
         )
       ));
     }
     Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolve_impact_icons');
+    $this->gamestate->nextState('resolveImpactIcons');
   }
 }

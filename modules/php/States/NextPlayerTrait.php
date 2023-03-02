@@ -13,30 +13,30 @@ trait NextPlayerTrait
     // Active next player
     if ($setup == 1) {
       // setup
-      $player_id = self::activeNextPlayer();
-      if (Players::get($player_id)->getLoyalty() == null) {
+      $playerId = self::activeNextPlayer();
+      if (Players::get($playerId)->getLoyalty() == null) {
         // choose next loyalty
-        $this->giveExtraTime($player_id);
+        $this->giveExtraTime($playerId);
 
         $this->gamestate->nextState('setup');
       } else {
         // setup complete, go to player actions
-        $player_id = self::activePrevPlayer();
-        $this->giveExtraTime($player_id);
+        $playerId = self::activePrevPlayer();
+        $this->giveExtraTime($playerId);
 
         Globals::setSetup(0);
         Globals::setRemainingActions(2);
 
-        $this->gamestate->nextState('next_turn');
+        $this->gamestate->nextState('nextTurn');
       }
     } else {
       // player turn
-      $player_id = self::activeNextPlayer();
+      $playerId = self::activeNextPlayer();
 
       Globals::setRemainingActions(2);
-      $this->giveExtraTime($player_id);
+      $this->giveExtraTime($playerId);
 
-      $this->gamestate->nextState('next_turn');
+      $this->gamestate->nextState('nextTurn');
     }
   }
 }

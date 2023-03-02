@@ -19,13 +19,13 @@ class Map
 
   public static function checkRulerChange($region)
   {
-    $new_ruler = self::determineRuler($region);
+    $newRuler = self::determineRuler($region);
     $rulers = Globals::getRulers();
-    $current_ruler = $rulers[$region];
-    if ($new_ruler !== $current_ruler) {
-      $rulers[$region] = $new_ruler;
+    $currentRuler = $rulers[$region];
+    if ($newRuler !== $currentRuler) {
+      $rulers[$region] = $newRuler;
       Globals::setRulers($rulers);
-      Notifications::changeRuler($current_ruler, $new_ruler, $region);
+      Notifications::changeRuler($currentRuler, $newRuler, $region);
     };
   }
 
@@ -36,35 +36,35 @@ class Map
   public static function determineRuler($region)
   {
     $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
-    $player_ids = Players::getAll()->getIds();
-    $ruling_pieces = array();
-    $tribes_per_player = array();
-    foreach ($player_ids as $player_id) {
-      // $ruling_pieces[$player_id] = 0;
-      $tribes_per_player[$player_id] = 0;
+    $playerIds = Players::getAll()->getIds();
+    $rulingPieces = array();
+    $tribesPerPlayer = array();
+    foreach ($playerIds as $playerId) {
+      // $rulingPieces[$playerId] = 0;
+      $tribesPerPlayer[$playerId] = 0;
     }
 
     foreach ($tribes as $tribe) {
-      $player_id = explode("_", $tribe['id'])[1];
-      $tribes_per_player[$player_id] += 1;
+      $playerId = explode("_", $tribe['id'])[1];
+      $tribesPerPlayer[$playerId] += 1;
     };
 
     $armies = Tokens::getInLocation('armies_' . $region);
-    $army_counts = array();
+    $armyCounts = array();
     foreach (COALITIONS as $coalition) {
-      $army_counts[$coalition] = count($armies->filter(function ($army) use ($coalition) {
+      $armyCounts[$coalition] = count($armies->filter(function ($army) use ($coalition) {
         return explode('_', $army['id'])[1] === $coalition;
       }));
     }
 
-    foreach ($player_ids as $player_id) {
-      $loyalty = Players::get($player_id)->getLoyalty();
-      $ruling_pieces[$player_id] = $tribes_per_player[$player_id] + $army_counts[$loyalty];
+    foreach ($playerIds as $playerId) {
+      $loyalty = Players::get($playerId)->getLoyalty();
+      $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
     };
 
-    $players_with_highest_strength = array_keys($ruling_pieces, max($ruling_pieces));
-    if (count($players_with_highest_strength) === 1 && $tribes_per_player[$players_with_highest_strength[0]]  > 0) {
-      return $players_with_highest_strength[0];
+    $playersWithHighestStrength = array_keys($rulingPieces, max($rulingPieces));
+    if (count($playersWithHighestStrength) === 1 && $tribesPerPlayer[$playersWithHighestStrength[0]]  > 0) {
+      return $playersWithHighestStrength[0];
     };
     return null;
   }

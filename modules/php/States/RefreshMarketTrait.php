@@ -86,6 +86,6 @@ trait RefreshMarketTrait
       'new_cards_log' => $newCards
     ));
 
-    $this->gamestate->nextState('next_turn');
+    $this->gamestate->nextState('nextTurn');
   }
 }

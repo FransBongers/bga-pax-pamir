@@ -208,8 +208,8 @@ var RULER_TOKEN_WIDTH = 50;
 var RULER_TOKEN_HEIGHT = 50;
 // names etc.
 // card types
-var EVENT_CARD = 'event_card';
-var COURT_CARD = 'court_card';
+var EVENT_CARD = 'eventCard';
+var COURT_CARD = 'courtCard';
 // suits
 var ECONOMIC = 'economic';
 var MILITARY = 'military';
@@ -255,10 +255,10 @@ var IMPACT_ICON_ARMY = 'army';
 var IMPACT_ICON_LEVERAGE = 'leverage';
 var IMPACT_ICON_SPY = 'spy';
 var IMPACT_ICON_TRIBE = 'tribe';
-var IMPACT_ICON_ECONOMIC_SUIT = 'economic_suit';
-var IMPACT_ICON_MILITARY_SUIT = 'military_suit';
-var IMPACT_ICON_POLITICAL_SUIT = 'political_suit';
-var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence_suit';
+var IMPACT_ICON_ECONOMIC_SUIT = 'economicSuit';
+var IMPACT_ICON_MILITARY_SUIT = 'militarySuit';
+var IMPACT_ICON_POLITICAL_SUIT = 'politicalSuit';
+var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligenceSuit';
 /**
  * Card actions types
  */
@@ -381,16 +381,6 @@ var tplCourtCardTooltip = function (_a) {
         specialAbility = "<span class=\"section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
     }
     return tplCardTooltipContainer({ cardId: cardId, content: "\n  <span class=\"title\">".concat(cardInfo.name, "</span>\n  <span class=\"flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  ") });
-    //  `<div class="pp_card_tooltip">
-    //   <div class="pp_card_tooltip_inner_container">
-    //     <span class="title">${cardInfo.name}</span>
-    //     <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
-    //     ${impactIcons}
-    //     ${cardActions}
-    //     ${specialAbility}
-    //   </div>
-    //   <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
-    // </div>`;
 };
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
@@ -405,7 +395,7 @@ var getTokenDiv = function (key, args) {
     switch (key) {
         case 'card_log':
             return "<div class=\"pp_card pp_card_in_log pp_".concat(data, "\"></div>");
-        case 'coalition_log_token':
+        case 'coalitionLogToken':
             return "<div class=\"pp_icon_log pp_loyalty_icon_log pp_".concat(data, "\"></div>");
         case 'new_cards_log':
             var newCards_1 = '';
@@ -2167,7 +2157,7 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_chooseLoyalty = function (notif) {
         var args = notif.args;
         console.log('notif_chooseLoyalty', args);
-        var playerId = Number(args.player_id);
+        var playerId = Number(args.playerId);
         this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
         // TODO (make this notif more generic for loyalty changes?)
         this.getPlayer({ playerId: playerId }).setCounter({ counter: 'influence', value: 1 });
@@ -2198,20 +2188,20 @@ var PPNotificationManager = /** @class */ (function () {
         console.log('notif_dominanceCheck', notif);
         var _a = notif.args, scores = _a.scores, moves = _a.moves;
         Object.keys(scores).forEach(function (playerId) {
-            _this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].new_score);
+            _this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
             _this.game.move({
                 id: "vp_cylinder_".concat(playerId),
-                from: _this.game.objectManager.vpTrack.getZone(scores[playerId].current_score),
-                to: _this.game.objectManager.vpTrack.getZone(scores[playerId].new_score),
+                from: _this.game.objectManager.vpTrack.getZone(scores[playerId].currentScore),
+                to: _this.game.objectManager.vpTrack.getZone(scores[playerId].newScore),
             });
         });
         (moves || []).forEach(function (move) {
-            var token_id = move.token_id, from = move.from, to = move.to;
+            var tokenId = move.tokenId, from = move.from, to = move.to;
             var coalition = to.split('_')[1];
             var splitFrom = from.split('_');
             var isArmy = splitFrom[0] == 'armies';
             _this.game.move({
-                id: token_id,
+                id: tokenId,
                 to: _this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: coalition }),
                 from: isArmy
                     ? _this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
@@ -2311,24 +2301,24 @@ var PPNotificationManager = /** @class */ (function () {
         var _this = this;
         console.log('notif_selectGift', notif);
         this.game.interactionManager.resetActionArgs();
-        var _a = notif.args, updated_cards = _a.updated_cards, player_id = _a.player_id, rupee_count = _a.rupee_count, updated_counts = _a.updated_counts;
+        var _a = notif.args, updatedCards = _a.updatedCards, playerId = _a.playerId, rupee_count = _a.rupee_count, updatedCounts = _a.updatedCounts;
         // Place paid rupees on market cards
-        updated_cards.forEach(function (item, index) {
+        updatedCards.forEach(function (item, index) {
             var marketRow = item.location.split('_')[1];
             var marketColumn = item.location.split('_')[2];
             placeToken({
                 game: _this.game,
                 location: _this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-                id: item.rupee_id,
+                id: item.rupeeId,
                 jstpl: 'jstpl_rupee',
                 jstplProps: {
                     id: item.rupee_id,
                 },
-                from: "rupees_".concat(player_id),
+                from: "rupees_".concat(playerId),
             });
         }, this);
-        this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'rupees', value: updated_counts.rupees });
-        this.getPlayer({ playerId: notif.args.player_id }).setCounter({ counter: 'influence', value: updated_counts.influence });
+        this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });
+        this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'influence', value: updatedCounts.influence });
     };
     PPNotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
         var _this = this;
@@ -2351,14 +2341,14 @@ var PPNotificationManager = /** @class */ (function () {
         var _this = this;
         console.log('notif_moveToken', notif);
         notif.args.moves.forEach(function (move) {
-            var token_id = move.token_id, from = move.from, to = move.to, updates = move.updates;
+            var tokenId = move.tokenId, from = move.from, to = move.to, updates = move.updates;
             var fromZone = _this.game.getZoneForLocation({ location: from });
             var toZone = _this.game.getZoneForLocation({ location: to });
             // TODO: perhaps create separate function for this
             var addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
             var removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
             _this.game.move({
-                id: token_id,
+                id: tokenId,
                 from: fromZone,
                 to: toZone,
                 addClass: addClass,
@@ -2506,7 +2496,7 @@ var PaxPamir = /** @class */ (function () {
             if (log && args && !args.processed) {
                 args.processed = true;
                 // list of special keys we want to replace with images
-                var keys = ['card_log', 'coalition_log_token', 'new_cards_log'];
+                var keys = ['card_log', 'coalitionLogToken', 'new_cards_log'];
                 // list of other known variables
                 //  var keys = this.notification_manager.keys;
                 for (var i in keys) {

@@ -60,6 +60,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\RefreshMarketTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
+    use PaxPamir\States\TurnTrait;
     use PaxPamir\PPUtilityFunctionsTrait;
 
     public static $instance = null;

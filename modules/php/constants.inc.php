@@ -118,9 +118,9 @@ const INTELLIGENCE = 'intelligence';
  * Supply locations
  */
 const RUPEE_SUPPLY = 'rupeePool';
-const BLOCKS_AFGHAN_SUPPLY = 'blocksAfghan';
-const BLOCKS_BRITISH_SUPPLY = 'blocksBritish';
-const BLOCKS_RUSSIAN_SUPPLY = 'blocksRussian';
+const BLOCKS_AFGHAN_SUPPLY = 'blocks_afghan';
+const BLOCKS_BRITISH_SUPPLY = 'blocks_british';
+const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
 
 /*
  * Game options

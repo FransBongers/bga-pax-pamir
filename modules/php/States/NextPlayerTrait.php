@@ -27,7 +27,7 @@ trait NextPlayerTrait
         Globals::setSetup(0);
         Globals::setRemainingActions(2);
 
-        $this->gamestate->nextState('nextTurn');
+        $this->gamestate->nextState('prepareNextTurn');
       }
     } else {
       // player turn
@@ -36,7 +36,7 @@ trait NextPlayerTrait
       Globals::setRemainingActions(2);
       $this->giveExtraTime($playerId);
 
-      $this->gamestate->nextState('nextTurn');
+      $this->gamestate->nextState('prepareNextTurn');
     }
   }
 }

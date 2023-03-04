@@ -508,7 +508,7 @@ var PPTooltipManager = /** @class */ (function () {
     PPTooltipManager.prototype.addTooltipToCard = function (_a) {
         var cardId = _a.cardId;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
-        if (cardInfo.type === 'court_card') {
+        if (cardInfo.type === COURT_CARD) {
             var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.specialAbilities, });
             this.game.framework().addTooltipHtml(cardId, html, 1000);
         }

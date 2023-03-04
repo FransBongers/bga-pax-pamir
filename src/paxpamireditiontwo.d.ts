@@ -25,7 +25,7 @@ interface CourtCard {
   region: string;
   specialAbility: string;
   suit: string;
-  type: 'court_card';
+  type: 'courtCard';
 }
 
 interface EventCard {
@@ -40,7 +40,7 @@ interface EventCard {
     title: string;
     description: string;
   };
-  type: 'event_card';
+  type: 'eventCard';
 }
 
 // TODO(Frans): check what we need

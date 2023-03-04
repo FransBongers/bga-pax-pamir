@@ -51,15 +51,16 @@
 // define contants for state ids
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
-    define("STATE_PLAYER_ACTIONS", 3);
-    define("STATE_NEGOTIATE_BRIBE", 4);
-    define("STATE_RESOLVE_IMPACT_ICONS", 5);
-    define("STATE_DISCARD_COURT", 6);
-    define("STATE_DISCARD_HAND", 7);
-    define("STATE_PLACE_ROAD", 8);
-    define("STATE_PLACE_SPY", 9);
-    define("STATE_CLEANUP", 10);
-    define("STATE_CLEANUP_DISCARD_EVENTS", 11);
+    define("STATE_PREPARE_TURN", 3);
+    define("STATE_PLAYER_ACTIONS", 4);
+    define("STATE_NEGOTIATE_BRIBE", 5);
+    define("STATE_RESOLVE_IMPACT_ICONS", 6);
+    define("STATE_DISCARD_COURT", 7);
+    define("STATE_DISCARD_HAND", 8);
+    define("STATE_PLACE_ROAD", 9);
+    define("STATE_PLACE_SPY", 10);
+    define("STATE_CLEANUP", 11);
+    define("STATE_CLEANUP_DISCARD_EVENTS", 12);
     // define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("STATE_DOMINANCE_CHECK", 30);
@@ -106,9 +107,19 @@ $machinestates = array(
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
         "transitions" => array( 
-            "nextTurn" => STATE_PLAYER_ACTIONS,
+            "prepareNextTurn" => STATE_PREPARE_TURN,
             "setup" => STATE_SETUP,
             "final" => STATE_FINAL 
+        )
+    ),
+
+    STATE_PREPARE_TURN => array(
+        "name" => "prepareTurn",
+        "type" => "game",
+        "action" => "stPrepareTurn",
+        "updateGameProgression" => true,
+        "transitions" => array( 
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 

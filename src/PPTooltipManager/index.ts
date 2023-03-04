@@ -23,7 +23,7 @@ class PPTooltipManager {
 
   addTooltipToCard({cardId}: {cardId: string;}): void {
     const cardInfo = this.game.getCardInfo({cardId});
-    if (cardInfo.type === 'court_card') {
+    if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({cardId, cardInfo, specialAbilities: this.game.gamedatas.specialAbilities,});
       this.game.framework().addTooltipHtml(cardId, html, 1000);
     } else {

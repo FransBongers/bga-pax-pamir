@@ -137,7 +137,7 @@ trait ResolveImpactIconsTrait
         ));
         break;
       case LEVERAGE:
-        Players::get($player_id)->incRupees(2);
+        Players::incRupees($player_id, 2);
         $this->updatePlayerCounts();
         break;
       case POLITICAL_SUIT:

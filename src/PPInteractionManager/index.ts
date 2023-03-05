@@ -200,6 +200,7 @@ class PPInteractionManager {
           }
           this.addPrimaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: () => this.onPass() });
         }
+        this.addDangerActionButton({ id: 'undo_btn', text: _('Undo'), callback: () => this.game.takeAction({ action: 'restart' }) });
         break;
       case CONFIRM_PLACE_SPY:
         dojo.query(`.pp_${args.confirmPlaceSpy.cardId}`).addClass('pp_selected');
@@ -219,7 +220,7 @@ class PPInteractionManager {
         (args?.placeRoad?.borders || []).forEach((border) => {
           this.addPrimaryActionButton({
             id: `${border}_btn`,
-            text: _(this.game.gamedatas.borders[border].name),
+            text: _(this.game.gamedatas.staticData.borders[border].name),
             callback: () => this.game.takeAction({ action: 'placeRoad', data: { border } }),
           });
         });
@@ -361,14 +362,14 @@ class PPInteractionManager {
 
   activePlayerHasCardActions(): boolean {
     return this.activePlayer.court.some(({ id, used }) => {
-      const cardInfo = this.game.gamedatas.cards[id] as CourtCard;
+      const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
       return used === 0 && Object.keys(cardInfo.actions).length > 0;
     });
   }
 
   activePlayerHasFreeCardActions(): boolean {
     return this.activePlayer.court.some(({ id, used }) => {
-      const cardInfo = this.game.gamedatas.cards[id] as CourtCard;
+      const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
       return used === 0 && cardInfo.suit == this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
     });
   }
@@ -467,7 +468,7 @@ class PPInteractionManager {
   }
 
   getCardInfo({ cardId }: { cardId: string }): Card {
-    return this.game.gamedatas.cards[cardId];
+    return this.game.gamedatas.staticData.cards[cardId];
   }
 
   /**
@@ -573,7 +574,7 @@ class PPInteractionManager {
       const used = this.activePlayer.court?.find((card) => card.id === cardId)?.used === 1;
       if (
         !used &&
-        (this.activePlayer.remainingActions > 0 || (this.game.gamedatas.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
+        (this.activePlayer.remainingActions > 0 || (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
       )
         dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {

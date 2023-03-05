@@ -4,7 +4,9 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
@@ -79,10 +81,6 @@ trait PlayerActionTrait
     $this->gamestate->nextState('next');
   }
 
-
-
-
-
   function pass()
   {
     //
@@ -109,6 +107,32 @@ trait PlayerActionTrait
     $this->gamestate->nextState('cleanup');
   }
 
+  /**
+   * Revert gamestate to last save point (usually start of turn)
+   */
+  function restart()
+  {
+    self::checkAction('restart');
+    if (Log::getAll()->empty()) {
+      throw new \BgaVisibleSystemException('Nothing to undo');
+    }
+    Log::revertAll();
+    // TODO: check what the us of Globals::fetch is
+    Globals::fetch();
+
+    // Refresh interface
+    $datas = $this->getAllDatas(-1);
+    // Unset all private and static information
+    unset($datas['staticData']);
+
+    // unset($datas['canceledNotifIds']);
+
+    Notifications::smallRefreshInterface($datas);
+    $player = Players::getCurrent();
+    Notifications::smallRefreshHand($player);
+
+    $this->gamestate->jumpToState(Globals::getLogState());
+  }
 
   /**
    * Play card from hand to court
@@ -229,7 +253,7 @@ trait PlayerActionTrait
         throw new \feException("Not enough rupees");
       } else {
         // if enough rupees reduce player rupees
-        Players::get($playerId)->incRupees(-$cost);
+        Players::incRupees($playerId, -$cost);
       };
 
       // TODO (Frans): check if this is an event card or court card
@@ -272,7 +296,7 @@ trait PlayerActionTrait
 
       // add rupees on card to player totals. Then put them in rupee_pool location
       $rupees = Tokens::getInLocation([$marketLocation, 'rupees']);
-      Players::get($playerId)->incRupees(count($rupees));
+      Players::incRupees($playerId, count($rupees));
       Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
       self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${card_log}'), array(
@@ -373,7 +397,7 @@ trait PlayerActionTrait
     $updatedCards = [];
     $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(0, $numberRupeesPerRow));
     $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(1, $numberRupeesPerRow));
-    Players::get($playerId)->incRupees(-intval($selectedGift));
+    Players::incRupees($playerId, -intval($selectedGift));
 
     $updatedCounts = array(
       'rupees' => $rupees - $selectedGift,

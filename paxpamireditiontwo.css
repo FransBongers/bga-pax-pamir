@@ -486,7 +486,7 @@
   /* position: relative; */
   display: flex;
   flex-direction: row;
-  /* min-height: 330px; */
+  min-height: 270px;
   margin-bottom: 15px;
   padding-bottom: 16px;
 }

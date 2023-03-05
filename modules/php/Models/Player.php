@@ -1,4 +1,5 @@
 <?php
+
 namespace PaxPamir\Models;
 
 use PaxPamir\Core\Game;
@@ -41,14 +42,30 @@ class Player extends \PaxPamir\Helpers\DB_Model
   public function jsonSerialize($currentPlayerId = null)
   {
     $data = parent::jsonSerialize();
-    $data['id'] = intval($data['id']);
-    $data['rupees'] = intval($data['rupees']);
-    $data['score'] = intval($data['score']);
-    // $current = $this->id == $currentPlayerId;
-    // $data = array_merge($data, [
-    //   'cards' => $current ? $this->getCards()->toArray() : [],
-    // ]);
+    $current = $this->id == $currentPlayerId;
+    $cylinders = $this->getCylinders();
+    $hand = $this->getHandCards();
+    $data = array_merge($data, [
+      'hand' => $current ? $hand : [],
+      'court' => [
+        'cards' => $this->getCourtCards()
+      ],
+      'cylinders' => $cylinders,
+      'counts' => [
+        'cards' => count($hand),
+        'cylinders' => 10 - count($cylinders),
+        'influence' => $this->getInfluence(),
+        'suits' => $this->getSuitTotals()
+      ]
+    ]);
 
+    foreach ($data['court']['cards'] as $card) {
+      $data['court']['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']])->toArray();
+    }
+
+    foreach (['2', '4', '6'] as $gift_value) {
+      $data['gifts'][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $this->id]);
+    }
     return $data;
   }
 
@@ -65,7 +82,6 @@ class Player extends \PaxPamir\Helpers\DB_Model
   public static function getCounts()
   {
     $counts = array();
-
   }
 
   function getCourtCards()
@@ -78,18 +94,23 @@ class Player extends \PaxPamir\Helpers\DB_Model
     return Cards::getInLocation(['hand', $this->id])->toArray();
   }
 
-    /**
+  function getCylinders()
+  {
+    return Tokens::getInLocation(['cylinders', $this->id])->toArray();
+  }
+
+  /**
    *   Returns total influence for player
    */
   function getInfluence()
   {
-    
+
     $influence = 1;
     $player_loyalty = $this->getLoyalty();
 
     // Patriots
     $court_cards = $this->getCourtCards();
-    foreach($court_cards as $card) {
+    foreach ($court_cards as $card) {
       $card_loyalty = Game::get()->getCardInfo($card)['loyalty'];
       if ($card_loyalty === $player_loyalty) {
         $influence += 1;
@@ -97,7 +118,7 @@ class Player extends \PaxPamir\Helpers\DB_Model
     }
     for ($i = 1; $i <= 3; $i++) {
       $value = $i * 2;
-      $tokens_in_location = Tokens::getInLocation(['gift' , $value , $this->id]);
+      $tokens_in_location = Tokens::getInLocation(['gift', $value, $this->id]);
       if (count($tokens_in_location) > 0) {
         $influence += 1;
       }
@@ -118,7 +139,7 @@ class Player extends \PaxPamir\Helpers\DB_Model
       ECONOMIC => 0,
       INTELLIGENCE => 0
     );
-    
+
     $court_cards = $this->getCourtCards();
     for ($i = 0; $i < count($court_cards); $i++) {
       $card = $court_cards[$i];

@@ -49,7 +49,6 @@ const getImpactIconText = ({ impactIcon }: { impactIcon: string }) => {
 };
 
 const tplTooltipImpactIcon = ({ impactIcon, loyalty }: { impactIcon: string; loyalty: string | null }): string => {
-  console.log('tplTooltipImpactIcon', impactIcon);
   let icon = '';
   switch (impactIcon) {
     case IMPACT_ICON_ARMY:

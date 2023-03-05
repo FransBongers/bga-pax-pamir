@@ -67,12 +67,14 @@ CREATE TABLE IF NOT EXISTS `tokens` (
   PRIMARY KEY (`token_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- CREATE TABLE IF NOT EXISTS `log` (
---   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
---   `move_id` int(10) NOT NULL,
---   `table` varchar(32) NOT NULL,
---   `primary` varchar(32) NOT NULL,
---   `type` varchar(32) NOT NULL,
---   `affected` JSON,
---   PRIMARY KEY (`id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE IF NOT EXISTS `log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `move_id` int(10) NOT NULL,
+  `table` varchar(32) NOT NULL,
+  `primary` varchar(32) NOT NULL,
+  `type` varchar(32) NOT NULL,
+  `affected` JSON,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `gamelog` ADD `cancel` TINYINT(1) NOT NULL DEFAULT 0;

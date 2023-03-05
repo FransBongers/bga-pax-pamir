@@ -25,33 +25,39 @@ class PPMarket {
     this.marketRupees = [];
     const gamedatas = game.gamedatas;
 
+    this.setupMarket({gamedatas});
+  }
+
+  setupMarket({gamedatas}: {gamedatas: PaxPamirGamedatas}) {
+    console.log('marketCards', this.marketCards);
     // Set up market
     for (let row = 0; row <= 1; row++) {
-      this.marketCards[row] = [];
-      this.marketRupees[row] = [];
+      if(!this.marketCards[row]) {
+        this.marketCards[row] = [];
+      }
+      if(!this.marketRupees[row]) {
+        this.marketRupees[row] = [];
+      }
       for (let column = 0; column <= 5; column++) {
         this.setupMarketCardZone({ row, column, gamedatas });
         this.setupMarketRupeeZone({ row, column, gamedatas });
       }
     }
-    // dojo.place(
-    //   tplCourtCardTooltip({
-    //     cardId: 'card_67',
-    //     cardInfo: this.game.getCardInfo({ cardId: 'card_67' }) as CourtCard,
-    //     specialAbilities: this.game.gamedatas.specialAbilities,
-    //   }),
-    //   'pp_active_events'
-    // );
   }
 
   setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     const containerId = `pp_market_${row}_${column}`;
-    this.marketCards[row][column] = new ebg.zone();
-    this.marketCards[row][column].create(this.game, containerId, CARD_WIDTH, CARD_HEIGHT);
-    this.marketCards[row][column].instantaneous = true;
+    if (this.marketCards[row][column]) {
+      this.marketCards[row][column].removeAll();
+      // return;
+    } else {
+      this.marketCards[row][column] = new ebg.zone();
+      this.marketCards[row][column].create(this.game, containerId, CARD_WIDTH, CARD_HEIGHT);
+    }
 
+    this.marketCards[row][column].instantaneous = true;
     // add cards
-    const cardInMarket = gamedatas.market[row][column];
+    const cardInMarket = gamedatas.market.cards[row][column];
     if (cardInMarket) {
       const cardId = cardInMarket.id;
       dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
@@ -64,23 +70,37 @@ class PPMarket {
   setupMarketRupeeZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     // Set up zone for all rupees in the market
     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
-    this.marketRupees[row][column] = new ebg.zone();
-    setupTokenZone({
-      game: this.game,
-      zone: this.marketRupees[row][column],
-      nodeId: rupeeContainerId,
-      tokenWidth: RUPEE_WIDTH,
-      tokenHeight: RUPEE_HEIGHT,
-      itemMargin: -30,
-    });
+    if(this.marketRupees[row][column]) {
+      this.marketRupees[row][column].removeAll();
+    } else {
+      this.marketRupees[row][column] = new ebg.zone();
+      setupTokenZone({
+        game: this.game,
+        zone: this.marketRupees[row][column],
+        nodeId: rupeeContainerId,
+        tokenWidth: RUPEE_WIDTH,
+        tokenHeight: RUPEE_HEIGHT,
+        itemMargin: -30,
+      });
+    }
+
     this.marketRupees[row][column].instantaneous = true;
-    gamedatas.rupees
+    gamedatas.market.rupees
       .filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`)
       .forEach((rupee: Token) => {
         dojo.place(tplRupee({ rupeeId: rupee.id }), this.marketRupees[row][column].container_div);
         this.marketRupees[row][column].placeInZone(rupee.id);
       });
     this.marketRupees[row][column].instantaneous = false;
+  }
+
+  clearZones() {
+    for (let row = 0; row <= 1; row++) {
+      for (let column = 0; column <= 5; column++) {
+        clearZone({zone: this.marketCards[row][column]});
+        clearZone({zone: this.marketRupees[row][column]});
+      }
+    }
   }
 
   getMarketCardZone({ row, column }: { row: number; column: number }): Zone {

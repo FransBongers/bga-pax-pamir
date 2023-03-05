@@ -33,6 +33,23 @@ class Notifications
     self::notify($pId, 'message', $txt, $args);
   }
 
+  public static function refreshInterface($data)
+  {
+    self::notifyAll('refreshInterface', '', $data);
+  }
+
+  public static function smallRefreshInterface($data)
+  {
+    self::notifyAll('smallRefreshInterface', '', $data);
+  }
+
+  public static function smallRefreshHand($player)
+  {
+    self::notify($player, 'smallRefreshHand', '', [
+      'playerDatas' => $player->jsonSerialize($player->getId()),
+    ]);
+  }
+
   public static function clearTurn($player, $notifIds)
   {
     self::notifyAll('clearTurn', clienttranslate('${player_name} restart their turn'), [

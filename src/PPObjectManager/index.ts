@@ -24,7 +24,7 @@ class FavoredSuit {
     this.favoredSuitZones = {};
 
     // Setup zones for favored suit marker
-    Object.keys(game.gamedatas.suits).forEach((suit) => {
+    Object.keys(game.gamedatas.staticData.suits).forEach((suit) => {
       this.favoredSuitZones[suit] = new ebg.zone();
       setupTokenZone({
         game,
@@ -48,6 +48,12 @@ class FavoredSuit {
       },
     });
     this.favoredSuitZones[suit].instantaneous = false;
+  }
+
+  clearZones() {
+    Object.values(this.favoredSuitZones).forEach((zone) => {
+      clearZone({zone});
+    })
   }
 
   getFavoredSuitZone({ suit }) {
@@ -99,6 +105,12 @@ class Supply {
     });
   }
 
+  clearZones() {
+    Object.values(this.coalitionBlocks).forEach((zone) => {
+      clearZone({zone});
+    })
+  }
+
   getCoalitionBlocksZone({ coalition }: { coalition: string }) {
     return this.coalitionBlocks[coalition];
   }
@@ -114,24 +126,54 @@ class Supply {
 
 class VpTrack {
   private game: PaxPamirGame;
-  private vpTrackZones: Record<string, Zone>;
+  private vpTrackZones: Record<string, Zone> = {};
 
   constructor({ game }: { game: PaxPamirGame }) {
     console.log('VpTrack');
     this.game = game;
+    this.setupVpTrack({gamedatas: game.gamedatas});
+  }
 
-    this.vpTrackZones = {};
+  clearZones() {
+    for (let i = 0; i <= 23; i++) {
+      clearZone({zone: this.vpTrackZones[i]});
+    }
+  }
+
+  setupVpTrack({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     // Create VP track
     for (let i = 0; i <= 23; i++) {
-      this.vpTrackZones[i] = new ebg.zone();
-      setupTokenZone({
+      if (this.vpTrackZones[i]) {
+        this.vpTrackZones[i].removeAll();
+      } else {
+        this.vpTrackZones[i] = new ebg.zone();
+        setupTokenZone({
+          game: this.game,
+          zone: this.vpTrackZones[i],
+          nodeId: `pp_vp_track_${i}`,
+          tokenWidth: CYLINDER_WIDTH,
+          tokenHeight: CYLINDER_HEIGHT,
+        });
+        this.vpTrackZones[i].setPattern('ellipticalfit');
+      }
+    }
+
+    // Add cylinders
+    for (const playerId in gamedatas.players) {
+      const player = gamedatas.players[playerId];
+      const zone = this.getZone(player.score);
+      zone.instantaneous = true;
+      placeToken({
         game: this.game,
-        zone: this.vpTrackZones[i],
-        nodeId: `pp_vp_track_${i}`,
-        tokenWidth: CYLINDER_WIDTH,
-        tokenHeight: CYLINDER_HEIGHT,
+        location: zone,
+        id: `vp_cylinder_${playerId}`,
+        jstpl: 'jstpl_cylinder',
+        jstplProps: {
+          id: `vp_cylinder_${playerId}`,
+          color: player.color,
+        },
       });
-      this.vpTrackZones[i].setPattern('ellipticalfit');
+      zone.instantaneous = false;
     }
   }
 
@@ -169,5 +211,11 @@ class PPObjectManager {
     this.favoredSuit = new FavoredSuit({ game });
     this.supply = new Supply({ game });
     this.vpTrack = new VpTrack({ game });
+  }
+
+  clearZones() {
+    this.favoredSuit.clearZones();
+    this.supply.clearZones();
+    this.vpTrack.clearZones();
   }
 }

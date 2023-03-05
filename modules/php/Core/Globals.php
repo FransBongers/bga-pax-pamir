@@ -10,6 +10,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
 {
   protected static $initialized = false;
   protected static $variables = [
+    'logState' => 'int', // Used to store state id when enabling the log
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
@@ -142,7 +143,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
         return self::$setter(self::$getter() + (empty($args) ? 1 : $args[0]));
       }
     }
-    return undefined;
+    // return undefined;
   }
 
   /*

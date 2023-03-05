@@ -59,71 +59,53 @@ interface Token {
   used: number; // TODO: cast to number in php
 }
 
+interface RegionGamedatas {
+  armies: Token[];
+  tribes: Token[];
+}
+
 /**
  * TODO (Frans):
  * - some objects are returned as array by php if there is no data and object if there is data. Check how to handle this.
  * - check typing of object keys (playerId: number vs string)
  */
 interface PaxPamirGamedatas extends Gamedatas {
+  staticData: {
+    borders: {
+      [border: string]: {
+        name: string;
+        regions: string;
+      };
+    };
+    cards: {
+      [cardId: string]: Card;
+    };
+    specialAbilities: Record<string, { title: string; description: string }>;
+    suits: {
+      [suit: string]: Suit;
+    };
+  };
+  map: {
+    borders: Record<string, {
+      roads: Token[];
+    }>;
+    regions: Record<string, RegionGamedatas>;
+    rulers: {
+      [region: string]: number | null;
+    };
+  }
   activeEvents: Token[];
-  armies: {
-    [region: string]: {
-      [coalitionBlockId: string]: Token;
-    };
-  };
-  borders: {
-    [border: string]: {
-      name: string;
-      regions: string;
-    };
-  };
-  cards: {
-    [cardId: string]: Card;
-  };
   coalitionBlocks: {
     [coalition: string]: Token[];
   };
-  counts: Record<number, PlayerCounts>;
-  //   [playerId: number]: PlayerCounts;
-  // };
-  court: { [playerId: number]: Token[] };
-  cylinders: {
-    [playerId: number]: Token[];
-  };
-  hand: Token[];
   // current_player_id: string;
   favoredSuit: string;
-  gifts: {
-    [playerId: number]: Record<
-      '2' | '4' | '6',
-      {
-        [cylinderId: string]: Token;
-      }
-    >;
+  market: {
+    cards: Token[][];
+    rupees: Token[];
   };
-  market: Token[][];
   players: Record<number, PaxPamirPlayer>;
-  roads: {
-    [border: string]: {
-      [coalitionBlockId: string]: Token;
-    };
-  };
-  rulers: {
-    [region: string]: number | null;
-  };
-  rupees: Token[];
-  specialAbilities: Record<string, {title: string; description: string;}>
-  spies: {
-    [cardId: string]: Token[];
-  };
-  suits: {
-    [suit: string]: Suit;
-  };
-  tribes: {
-    [region: string]: {
-      [cylinderId: string]: Token;
-    };
-  };
+  // rupees: Token[];
 }
 
 interface PaxPamirGame extends Game {
@@ -139,6 +121,7 @@ interface PaxPamirGame extends Game {
     [cardId: string]: Zone;
   };
   tooltipManager: PPTooltipManager;
+  clearZones: () => void;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
@@ -151,8 +134,21 @@ interface PaxPamirGame extends Game {
 }
 
 interface PaxPamirPlayer extends BgaPlayer {
-  rupees: string;
+  counts: Omit<PlayerCounts, 'rupees'>;
+  court: {
+    cards: Token[];
+    spies: Record<string, Token[]>;
+  };
+  cylinders: Token[];
+  gifts: Record<
+    '2' | '4' | '6',
+    {
+      [cylinderId: string]: Token;
+    }
+  >;
+  hand: Token[]; // Will only contain cards if player is current player (or with open hands variant?)
   loyalty: string;
+  rupees: number;
 }
 
 interface EnteringDiscardCourtArgs {

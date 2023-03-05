@@ -48,6 +48,12 @@ const substituteKeywords = ({
   return dojo.string.substitute(_(string), { ...getKeywords({ playerColor }), ...(args || {}) });
 };
 
+const clearZone = ({zone}: {zone: Zone}) => {
+  zone.instantaneous = true;
+  zone.removeAll();
+  zone.instantaneous = false;
+}
+
 // const placeCard = ({ location, id, order = null }) => {
 //   if (order != null) {
 //     location.changeItemsWeight({
@@ -83,7 +89,7 @@ const placeToken = ({
   from?: string | null; // TODO (Frans): this is defined as action. Check what this actually does
 }) => {
   // console.log('from', from)
-  dojo.place(game.framework().format_block(jstpl, jstplProps), from || 'pp_supply');
+  dojo.place(game.framework().format_block(jstpl, jstplProps), from || location.container_div);
   classes.forEach((className) => {
     dojo.addClass(id, className);
   });

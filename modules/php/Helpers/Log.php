@@ -1,6 +1,9 @@
 <?php
+
 namespace PaxPamir\Helpers;
+
 use PaxPamir\Core\Game;
+use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Managers\Players;
 
@@ -19,12 +22,18 @@ class Log extends \APP_DbObject
 {
   public function enable()
   {
+    Globals::setLogState(Game::get()->gamestate->state_id());
     Game::get()->setGameStateValue('logging', 1);
   }
 
   public function disable()
   {
     Game::get()->setGameStateValue('logging', 0);
+  }
+
+  public function checkpoint()
+  {
+    Globals::setLogState(-1);
   }
 
   /**
@@ -36,6 +45,18 @@ class Log extends \APP_DbObject
     $entry['move_id'] = self::getUniqueValueFromDB('SELECT global_value FROM global WHERE global_id = 3');
     $query = new QueryBuilder('log', null, 'id');
     $query->insert($entry);
+  }
+
+  /**
+   * Get the list of commits
+   */
+  public function getAll()
+  {
+    $query = new QueryBuilder('log', null, 'id');
+    return $query
+      ->select(['id', 'table', 'primary', 'type', 'affected', 'move_id'])
+      ->orderBy('id', 'DESC')
+      ->get();
   }
 
   /**
@@ -94,9 +115,10 @@ class Log extends \APP_DbObject
     $query->delete()->run();
 
     // Cancel the game notifications
-    $query = new QueryBuilder('gamelog', null, 'gamelog_packet_id');
+    
     if (!empty($moveIds)) {
       // Update field
+      $query = new QueryBuilder('gamelog', null, 'gamelog_packet_id');
       $query
         ->update(['cancel' => 1])
         ->whereIn('gamelog_move_id', $moveIds)
@@ -106,17 +128,18 @@ class Log extends \APP_DbObject
       Notifications::clearTurn(Players::getCurrent(), $notifIds);
     }
 
-    // Notify
-    $datas = Game::get()->getAllDatas();
-    Notifications::refreshUI($datas);
+    // // Notify
+    // $datas = Game::get()->getAllDatas();
+    // Notifications::refreshUI($datas);
 
-    if (!empty($moveIds)) {
-      // Delete notifications
-      $query
-        ->delete()
-        ->where('cancel', 1)
-        ->run();
-    }
+    // TODO: check if we want to remove this or just keep them crossed
+    // if (!empty($moveIds)) {
+    //   // Delete notifications
+    //   $query
+    //     ->delete()
+    //     ->where('cancel', 1)
+    //     ->run();
+    // }
 
     return $moveIds;
   }

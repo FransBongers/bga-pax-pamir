@@ -35,7 +35,7 @@ class PaxPamir implements PaxPamirGame {
   private defaultWeightZone: number = 0;
   private playerEvents = {}; // events per player
   public activeEvents: Zone = new ebg.zone(); // active events
-  public spies = {}; // spies per cards
+  public spies: Record<string, Zone> = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals?
   public tooltipManager: PPTooltipManager;
 
@@ -79,26 +79,6 @@ class PaxPamir implements PaxPamirGame {
     this.map = new PPMap(this);
     this.market = new PPMarket(this);
     this.interactionManager = new PPInteractionManager(this);
-    this.playerCounts = gamedatas.counts;
-
-    // TODO: refactor
-    // Place spies on cards
-    Object.keys(gamedatas.spies || {}).forEach((cardId) => {
-      (gamedatas.spies[cardId] || []).forEach((cylinder) => {
-        const playerId = cylinder.id.split('_')[1];
-        placeToken({
-          game: this,
-          location: this.spies[cardId],
-          id: cylinder.id,
-          jstpl: 'jstpl_cylinder',
-          jstplProps: {
-            id: cylinder.id,
-            color: gamedatas.players[playerId].color,
-          },
-          weight: this.defaultWeightZone,
-        });
-      });
-    });
 
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
@@ -181,8 +161,19 @@ class PaxPamir implements PaxPamirGame {
     return (this as any).inherited(arguments);
   }
 
+  public clearZones() {
+    console.log('clear zones');
+    this.market.clearZones();
+    this.playerManager.clearPlayerZones();
+    Object.values(this.spies).forEach((zone) => {
+      zone.removeAll();
+    });
+    this.map.clearZones();
+    this.objectManager.clearZones();
+  }
+
   public getCardInfo({ cardId }: { cardId: string }): Card {
-    return this.gamedatas.cards[cardId];
+    return this.gamedatas.staticData.cards[cardId];
   }
 
   public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: null }) {
@@ -191,7 +182,7 @@ class PaxPamir implements PaxPamirGame {
       // ['cylinder_2371052_3']
       const items = this.spies[id].getAllItems();
       items.forEach((cylinderId) => {
-        const playerId = cylinderId.split('_')[1];
+        const playerId = Number(cylinderId.split('_')[1]);
         this.move({
           id: cylinderId,
           to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
@@ -334,14 +325,12 @@ class PaxPamir implements PaxPamirGame {
   // Every time a card is moved or placed in court this function will be called to set up zone.
   setupCardSpyZone({ nodeId, cardId }) {
     // Note (Frans): we probably need to remove spies before moving / placing card
-    if (this.spies[cardId]) {
-      this.spies[cardId].removeAll();
+    if (!this.spies[cardId]) {
+      // ** setup for zone
+      this.spies[cardId] = new ebg.zone();
+      this.spies[cardId].create(this, nodeId, CYLINDER_WIDTH, CYLINDER_HEIGHT);
+      this.spies[cardId].item_margin = 4;
     }
-
-    // ** setup for zone
-    this.spies[cardId] = new ebg.zone();
-    this.spies[cardId].create(this, nodeId, CYLINDER_WIDTH, CYLINDER_HEIGHT);
-    this.spies[cardId].item_margin = 4;
   }
 
   // Updates weight of item in the stock component for ordering purposes

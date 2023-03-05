@@ -37,12 +37,15 @@ class PPNotificationManager {
       ['cardAction', 1],
       ['changeRuler', 1],
       ['chooseLoyalty', 1],
+      ['clearTurn', 1],
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
       ['playCard', 2000],
       ['discardCard', 500],
       ['refreshMarket', 250],
       ['selectGift', 1],
+      ['smallRefreshHand', 1],
+      ['smallRefreshInterface', 1],
       ['moveToken', 250],
       ['updatePlayerCounts', 1],
       ['log', 1],
@@ -89,6 +92,11 @@ class PPNotificationManager {
     this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
     // TODO (make this notif more generic for loyalty changes?)
     this.getPlayer({ playerId }).setCounter({ counter: 'influence', value: 1 });
+  }
+
+  notif_clearTurn(notif) {
+    const { args } = notif;
+    console.log('notif_clearTurn', args);
   }
 
   notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
@@ -260,7 +268,26 @@ class PPNotificationManager {
     this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'influence', value: updatedCounts.influence });
   }
 
-  notif_updatePlayerCounts(notif) {
+  notif_smallRefreshHand(notif) {
+    console.log('notif_smallRefreshHand', notif);
+  }
+
+  notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {
+    console.log('notif_smallRefreshInterface', notif);
+    const updatedGamedatas = {
+      ...this.game.gamedatas,
+      ...notif.args,
+    };
+    this.game.clearZones();
+    console.log('updatedGamedatas', updatedGamedatas);
+    this.game.gamedatas = updatedGamedatas;
+    // this.game.market.setupMarket({gamedatas: updatedGamedatas});
+    // this.game.playerManager.updatePlayers({gamedatas: updatedGamedatas});
+    // this.game.map.updateMap({gamedatas: updatedGamedatas});
+    // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+  }
+
+  notif_updatePlayerCounts(notif) {``
     console.log('notif_updatePlayerCounts', notif);
     this.game.playerCounts = notif.args.counts;
     const counts = notif.args.counts;

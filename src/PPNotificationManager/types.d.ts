@@ -57,3 +57,5 @@ interface NotifRefreshMarketArgs {
     to: string;
   }[];
 }
+
+type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;

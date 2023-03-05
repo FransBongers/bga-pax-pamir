@@ -74,6 +74,13 @@
         self::ajaxResponse( );
     }
 
+    public function restart()
+    {
+        self::setAjaxMode();
+        $result = $this->game->restart();
+        self::ajaxResponse( );
+    }
+
     public function placeRoad()
     {
         self::setAjaxMode();     

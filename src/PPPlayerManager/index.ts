@@ -9,9 +9,9 @@
 class PPPlayer {
   private court: Zone;
   private cylinders: Zone;
-  private hand: Zone = new ebg.zone();
+  private hand: Zone;
   private game: PaxPamirGame;
-  private gifts: Record<string, Zone>;
+  private gifts: Record<string, Zone> = {};
   private playerColor: string;
   private playerId: number;
   private playerName: string;
@@ -35,7 +35,7 @@ class PPPlayer {
     rupees: new ebg.counter(),
   };
   private player: PaxPamirPlayer;
-  private rulerTokens = new ebg.zone();
+  private rulerTokens: Zone;
 
   constructor({ game, player }: { game: PaxPamirGame; player: PaxPamirPlayer }) {
     // console.log("Player", player);
@@ -47,48 +47,82 @@ class PPPlayer {
     this.playerColor = player.color;
 
     const gamedatas = game.gamedatas;
+    this.setupPlayer({ gamedatas });
+  }
 
-    this.setupHand({ gamedatas });
-    this.setupCourt({ gamedatas });
+  updatePlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    const playerGamedatas = gamedatas.players[this.playerId];
 
-    // Create cylinder zone
-    this.cylinders = new ebg.zone();
-    setupTokenZone({
-      game: this.game,
-      zone: this.cylinders,
-      nodeId: `pp_cylinders_player_${playerId}`,
-      tokenWidth: CYLINDER_WIDTH,
-      tokenHeight: CYLINDER_HEIGHT,
-      itemMargin: 8,
-    });
+    this.setupCourt({ playerGamedatas });
+    this.setupCylinders({ playerGamedatas });
+    this.setupRulerTokens({ gamedatas });
+    this.updatePlayerPanel({ playerGamedatas });
+  }
 
-    // Create rulerTokens zone
-    setupTokenZone({
-      game: this.game,
-      zone: this.rulerTokens,
-      nodeId: `pp_ruler_tokens_player_${playerId}`,
-      tokenWidth: RULER_TOKEN_WIDTH,
-      tokenHeight: RULER_TOKEN_HEIGHT,
-      itemMargin: 10,
-    });
-    Object.keys(gamedatas.rulers).forEach((region: string) => {
-      if (gamedatas.rulers[region] ===  Number(this.playerId)) {
-        console.log('place ruler token player');
+  // Setup functions
+  setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    const playerGamedatas = gamedatas.players[this.playerId];
+
+    this.setupHand({ playerGamedatas });
+    this.setupCourt({ playerGamedatas });
+    this.setupCylinders({ playerGamedatas });
+    this.setupRulerTokens({ gamedatas });
+    this.setupPlayerPanel({ playerGamedatas });
+  }
+
+  setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    if (!this.court) {
+      this.court = new ebg.zone();
+      this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
+      this.court.item_margin = 16;
+      this.court.instantaneous = true;
+    }
+
+    this.court.instantaneous = true;
+    playerGamedatas.court.cards.forEach((card: Token) => {
+      const cardId = card.id;
+      const { actions, region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
+      dojo.place(
+        tplCard({ cardId, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
+        `pp_court_player_${this.playerId}`
+      );
+
+      this.setupCourtCard({ cardId });
+      this.court.placeInZone(cardId, card.state);
+
+      // Add spies
+      (playerGamedatas.court.spies[cardId] || []).forEach((cylinder: Token) => {
+        const playerId = cylinder.id.split('_')[1];
         placeToken({
-          game,
-          location: this.rulerTokens,
-          id: `pp_ruler_token_${region}`,
-          jstpl: 'jstpl_ruler_token',
+          game: this.game,
+          location: this.game.spies[cardId],
+          id: cylinder.id,
+          jstpl: 'jstpl_cylinder',
           jstplProps: {
-            id: `pp_ruler_token_${region}`,
-            region,
+            id: cylinder.id,
+            color: this.game.gamedatas.players[playerId].color,
           },
         });
-      }
-    })
+      });
+    });
+    this.court.instantaneous = false;
+  }
 
+  setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    if (!this.cylinders) {
+      this.cylinders = new ebg.zone();
+      setupTokenZone({
+        game: this.game,
+        zone: this.cylinders,
+        nodeId: `pp_cylinders_player_${this.playerId}`,
+        tokenWidth: CYLINDER_WIDTH,
+        tokenHeight: CYLINDER_HEIGHT,
+        itemMargin: 8,
+      });
+    }
+    this.cylinders.instantaneous = true;
     // Add cylinders to zone
-    gamedatas.cylinders[playerId].forEach((cylinder: Token) => {
+    playerGamedatas.cylinders.forEach((cylinder: Token) => {
       placeToken({
         game: this.game,
         location: this.cylinders,
@@ -96,44 +130,37 @@ class PPPlayer {
         jstpl: 'jstpl_cylinder',
         jstplProps: {
           id: cylinder.id,
-          color: gamedatas.players[playerId].color,
+          color: playerGamedatas.color,
         },
       });
     });
+    this.cylinders.instantaneous = true;
+  }
 
-    // Add cylinder to VP track
-    // Note (Frans): should probably move this to objectManager
-    placeToken({
-      game: this.game,
-      location: this.game.objectManager.vpTrack.getZone(player.score),
-      id: `vp_cylinder_${playerId}`,
-      jstpl: 'jstpl_cylinder',
-      jstplProps: {
-        id: `vp_cylinder_${playerId}`,
-        color: gamedatas.players[playerId].color,
-      },
-    });
-
-    this.gifts = {};
+  setupGifts({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up gift zones
     ['2', '4', '6'].forEach((value) => {
-      this.gifts[value] = new ebg.zone();
-      setupTokenZone({
-        game: this.game,
-        zone: this.gifts[value],
-        nodeId: `pp_gift_${value}_zone_${playerId}`,
-        tokenWidth: 40,
-        tokenHeight: 40,
-        // itemMargin: 10,
-        pattern: 'custom',
-        customPattern: () => {
-          return { x: 5, y: 5, w: 30, h: 30 };
-        },
-      });
+      if (this.gifts[value]) {
+        this.gifts[value].removeAll();
+      } else {
+        this.gifts[value] = new ebg.zone();
+        setupTokenZone({
+          game: this.game,
+          zone: this.gifts[value],
+          nodeId: `pp_gift_${value}_zone_${this.playerId}`,
+          tokenWidth: 40,
+          tokenHeight: 40,
+          // itemMargin: 10,
+          pattern: 'custom',
+          customPattern: () => {
+            return { x: 5, y: 5, w: 30, h: 30 };
+          },
+        });
+      }
     });
 
     // Add gifts to zones
-    const playerGifts = gamedatas.gifts[playerId];
+    const playerGifts = playerGamedatas.gifts;
     Object.keys(playerGifts).forEach((giftValue) => {
       Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
         placeToken({
@@ -143,52 +170,35 @@ class PPPlayer {
           jstpl: 'jstpl_cylinder',
           jstplProps: {
             id: cylinderId,
-            color: gamedatas.players[playerId].color,
+            color: this.playerColor,
           },
         });
       });
     });
-
-    this.setupPlayerPanels({ gamedatas });
   }
 
-  // Setup functions
-  setupHand({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupHand({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     if (!(this.playerId === this.game.getPlayerId())) {
       return;
     }
+    if (this.hand) {
+      this.hand.removeAll();
+    } else {
+      this.hand = new ebg.zone();
+      this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
+      this.hand.item_margin = 16;
+    }
 
-    this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
     this.hand.instantaneous = true;
-    this.hand.item_margin = 16;
 
-    gamedatas.hand.forEach((card) => {
+    playerGamedatas.hand.forEach((card) => {
       dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
       this.hand.placeInZone(card.id);
     });
     this.hand.instantaneous = false;
   }
 
-  setupCourt({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    this.court = new ebg.zone();
-    this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
-    this.court.item_margin = 16;
-
-    gamedatas.court[this.playerId].forEach((card: Token) => {
-      const cardId = card.id;
-      const { actions, region } = this.game.gamedatas.cards[cardId] as CourtCard;
-      dojo.place(
-        tplCard({ cardId, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
-        `pp_court_player_${this.playerId}`
-      );
-
-      this.setupCourtCard({ cardId });
-
-      this.court.placeInZone(cardId, card.state);
-    });
-  }
-
-  setupPlayerPanels({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up panels
     const player_board_div = $('player_board_' + this.playerId);
     dojo.place(
@@ -211,24 +221,63 @@ class PPPlayer {
     this.counters.political.create(`political_${this.playerId}_counter`);
     this.counters.rupees.create(`rupee_count_${this.playerId}_counter`);
 
+    this.updatePlayerPanel({ playerGamedatas });
+  }
+
+  updatePlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    const counts = playerGamedatas.counts;
+
     // Set all values in player panels
     if (this.player.loyalty && this.player.loyalty !== 'null') {
-      this.counters.influence.setValue(gamedatas.counts[this.playerId].influence);
+      this.counters.influence.setValue(playerGamedatas.counts.influence);
     } else {
       this.counters.influence.disable();
     }
-    this.counters.cylinders.setValue(gamedatas.counts[this.playerId].cylinders);
-    this.counters.rupees.setValue(gamedatas.counts[this.playerId].rupees);
-    this.counters.cards.setValue(gamedatas.counts[this.playerId].cards);
+    this.counters.cylinders.setValue(counts.cylinders);
+    this.counters.rupees.setValue(playerGamedatas.rupees);
+    this.counters.cards.setValue(counts.cards);
 
-    this.counters.economic.setValue(gamedatas.counts[this.playerId].suits.economic);
-    this.counters.military.setValue(gamedatas.counts[this.playerId].suits.military);
-    this.counters.political.setValue(gamedatas.counts[this.playerId].suits.political);
-    this.counters.intelligence.setValue(gamedatas.counts[this.playerId].suits.intelligence);
+    this.counters.economic.setValue(counts.suits.economic);
+    this.counters.military.setValue(counts.suits.military);
+    this.counters.political.setValue(counts.suits.political);
+    this.counters.intelligence.setValue(counts.suits.intelligence);
+  }
+
+  setupRulerTokens({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    if (!this.rulerTokens) {
+      this.rulerTokens = new ebg.zone();
+      // Create rulerTokens zone
+      setupTokenZone({
+        game: this.game,
+        zone: this.rulerTokens,
+        nodeId: `pp_ruler_tokens_player_${this.playerId}`,
+        tokenWidth: RULER_TOKEN_WIDTH,
+        tokenHeight: RULER_TOKEN_HEIGHT,
+        itemMargin: 10,
+      });
+    }
+
+    this.rulerTokens.instantaneous = true;
+    Object.keys(gamedatas.map.rulers).forEach((region: string) => {
+      if (gamedatas.map.rulers[region] === Number(this.playerId)) {
+        console.log('place ruler token player');
+        placeToken({
+          game: this.game,
+          location: this.rulerTokens,
+          id: `pp_ruler_token_${region}`,
+          jstpl: 'jstpl_ruler_token',
+          jstplProps: {
+            id: `pp_ruler_token_${region}`,
+            region,
+          },
+        });
+      }
+    });
+    this.rulerTokens.instantaneous = false;
   }
 
   setupCourtCard({ cardId }: { cardId: string }) {
-    const { actions, region } = this.game.gamedatas.cards[cardId] as CourtCard;
+    const { actions, region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
     this.game.createSpyZone({ cardId });
     Object.keys(actions).forEach((action, index) => {
       const actionId = action + '_' + cardId;
@@ -237,6 +286,12 @@ class PPPlayer {
         cardId
       );
     });
+  }
+
+  clearZones() {
+    clearZone({zone: this.court});
+    clearZone({zone: this.cylinders});
+    clearZone({zone: this.rulerTokens});
   }
 
   // Getters & setters
@@ -295,15 +350,9 @@ class PPPlayer {
 
   addSideSelectToCourt() {
     this.court.instantaneous = true;
-    dojo.place(
-      tplCardSelect({ side: 'left' }),
-      `pp_court_player_${this.playerId}`
-    );
+    dojo.place(tplCardSelect({ side: 'left' }), `pp_court_player_${this.playerId}`);
     this.court.placeInZone('pp_card_select_left', -1000);
-    dojo.place(
-      tplCardSelect({ side: 'right' }),
-      `pp_court_player_${this.playerId}`
-    );
+    dojo.place(tplCardSelect({ side: 'right' }), `pp_court_player_${this.playerId}`);
     this.court.placeInZone('pp_card_select_right', 1000);
   }
 
@@ -318,8 +367,8 @@ class PPPlayer {
   }
 
   moveToCourt({ card, from }: { card: Token; from: Zone | null }) {
-    const { region } = this.game.gamedatas.cards[card.id] as CourtCard;
-    
+    const { region } = this.game.gamedatas.staticData.cards[card.id] as CourtCard;
+
     if (!from) {
       dojo.place(
         tplCard({ cardId: card.id, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
@@ -394,5 +443,17 @@ class PPPlayerManager {
 
   getPlayer({ playerId }: { playerId: number }): PPPlayer {
     return this.players[playerId];
+  }
+
+  updatePlayers({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    for (const playerId in gamedatas.players) {
+      this.players[playerId].updatePlayer({ gamedatas });
+    }
+  }
+
+  clearPlayerZones() {
+    Object.keys(this.players).forEach((playerId) => {
+      this.players[playerId].clearZones();
+    });
   }
 }

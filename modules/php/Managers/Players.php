@@ -84,6 +84,16 @@ class Players extends \PaxPamir\Helpers\DB_Manager
       ->getSingle();
   }
 
+  /*
+   * Workaroud function since db calls from Player model don't seem to be logged
+   * TODO: check if we can handle it from Player model
+   */
+  public static function incRupees($pId, $increment)
+  {
+    $value = self::get($pId)->getRupees() + $increment;
+    return self::DB()->update(['rupees' => $value], $pId);
+  }
+
   public function getMany($pIds)
   {
     $players = self::DB()

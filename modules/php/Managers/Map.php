@@ -2,11 +2,34 @@
 
 namespace PaxPamir\Managers;
 
+use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 
 class Map
 {
+
+  /*
+    Returns all data to setup map in frontend
+  */
+  public static function getUiData()
+  {
+    $data = [
+      'rulers' => Map::getRulers(),
+    ];
+    $game = Game::get();
+
+    foreach ($game->regions as $region => $regionInfo) {
+      $data['regions'][$region]['armies'] = Tokens::getInLocation(['armies', $region])->toArray();
+      $data['regions'][$region]['tribes'] = Tokens::getInLocation(['tribes', $region])->toArray();
+    }
+
+    foreach ($game->borders as $border => $borderInfo) {
+      $data['borders'][$border]['roads'] = Tokens::getInLocation(['roads', $border])->toArray();
+  }
+
+    return $data;
+  }
 
   /*
     Returns rulers for all regions. Value will either be 0 (no ruler) or

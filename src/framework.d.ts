@@ -46,9 +46,7 @@ interface Framework {
   removeActionButtons: () => void;
   restoreServerGameState: () => void;
   scoreCtrl: {
-    [playerId: number | string]: {
-      toValue: (newScore: number) => void;
-    }
+    [playerId: number | string]: Counter;
   };
   setClientState: (newState: string, args: Record<string, unknown>) => void;
   showMessage: (msg: string, type: string) => void;

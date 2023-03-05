@@ -75,7 +75,7 @@ class PaxPamirEditionTwo extends Table
         parent::__construct();
         self::$instance = $this;
         self::initGameStateLabels(array(
-            "cardActionCardId" => 24,
+            'logging' => 10,
         ));
     }
 
@@ -101,6 +101,8 @@ class PaxPamirEditionTwo extends Table
         Tokens::setupNewGame($players, $options);
         Market::setupNewGame($players, $options);
 
+        $this->setGameStateInitialValue('logging', false);
+
         // // Init game statistics
         // // (note: statistics used in this file must be defined in your stats.inc.php file)
         // //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
@@ -125,72 +127,31 @@ class PaxPamirEditionTwo extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
+    public function getAllDatas($pId = null)
     {
-        $data = array();
+        $pId = $pId ?? self::getCurrentPId();
 
-        $currentPlayerId = self::getCurrentPId(); // !! We must only return informations visible by this player !!
-        $player = Players::get($currentPlayerId);
-        self::dump('player_in_getAllDatas', $player);
         $data = [
-            'cards' => $this->cards,
-            'specialAbilities' => $this->specialAbilities,
-            // // Only get hand cards for current player (we might implement option to play with open hands?)
-            'hand' => Players::get($currentPlayerId)->getHandCards(),
-            'players' => Players::getUiData($currentPlayerId),
-            'rupees' => Tokens::getOfType('rupee'),
-            'favoredSuit' => Globals::getFavoredSuit(),
             // TODO (Frans): data from material.inc.php. We might also replace this?
-            'loyalty' => $this->loyalty,
-            'suits' => $this->suits,
+            'staticData' => [
+                'borders' => $this->borders,
+                'cards' => $this->cards,
+                'specialAbilities' => $this->specialAbilities,
+                'loyalty' => $this->loyalty,
+                'suits' => $this->suits,
+            ],
+            'players' => Players::getUiData($pId),
+            'map' => Map::getUiData(),
+            'market' => Market::getUiData(),
+            // 'rupees' => Tokens::getOfType('rupee'),
+            'favoredSuit' => Globals::getFavoredSuit(),
         ];
 
-        // // Get counts for all players
-        $players = $this->loadPlayersBasicInfos();
-        foreach ($players as $playerId => $player_info) {
-            $player = Players::get($playerId);
-            $data['court'][$playerId] = $player->getCourtCards();
-            foreach ($data['court'][$playerId] as $card) {
-                $data['spies'][$card['id']] = Tokens::getInLocation(['spies', $card['id']])->toArray();
-            }
-
-            $data['cylinders'][$playerId] = Tokens::getInLocation(['cylinders', $playerId])->toArray();
-            $data['counts'][$playerId]['rupees'] = $player->getRupees();
-            // Number of cylinders played is total number of cylinders minus cylinders still available to player 
-            $data['counts'][$playerId]['cylinders'] = 10 - count($data['cylinders'][$playerId]);
-            $data['counts'][$playerId]['cards'] = count(Cards::getInLocation(['hand', $playerId]));
-            $data['counts'][$playerId]['suits'] = $player->getSuitTotals();
-            $data['counts'][$playerId]['influence'] = $player->getInfluence();
-
-            foreach (['2', '4', '6'] as $gift_value) {
-                $data['gifts'][$playerId][$gift_value] = Tokens::getInLocation(['gift', $gift_value, $playerId]);
-            }
-        }
-
-
-
+        // TODO: move to SupplyManager class?
         foreach ($this->loyalty as $coalitionId => $coalition) {
             $data['coalitionBlocks'][$coalitionId] = Tokens::getInLocation(['blocks', $coalitionId])->toArray();
         }
-
-        foreach ($this->regions as $region => $regionInfo) {
-            $data['armies'][$region] = Tokens::getInLocation(['armies', $region]);
-            $data['tribes'][$region] = Tokens::getInLocation(['tribes', $region]);
-        }
-
-        foreach ($this->borders as $border => $borderInfo) {
-            $data['roads'][$border] = Tokens::getInLocation(['roads', $border]);
-        }
-
-        // // Add information about all cards in the market.
-        for ($i = 0; $i < 6; $i++) {
-            $data['market'][0][$i] = Cards::getInLocation('market_0_' . $i)->first();
-            $data['market'][1][$i] = Cards::getInLocation('market_1_' . $i)->first();
-        }
-
-        $data['rulers'] = Map::getRulers();
         $data['activeEvents'] = Cards::getInLocation('active_events')->toArray();
-        $data['borders'] = $this->borders;
 
         return $data;
     }

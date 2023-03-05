@@ -24,7 +24,7 @@ class PPTooltipManager {
   addTooltipToCard({cardId}: {cardId: string;}): void {
     const cardInfo = this.game.getCardInfo({cardId});
     if (cardInfo.type === COURT_CARD) {
-      const html = tplCourtCardTooltip({cardId, cardInfo, specialAbilities: this.game.gamedatas.specialAbilities,});
+      const html = tplCourtCardTooltip({cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities,});
       this.game.framework().addTooltipHtml(cardId, html, 1000);
     } else {
       const html = tplEventCardTooltip({cardId, cardInfo});

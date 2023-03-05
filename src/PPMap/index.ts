@@ -15,9 +15,10 @@ class Border {
     this.game = game;
     this.border = border;
     this.roadZone = new ebg.zone();
+    const borderGamedatas = game.gamedatas.map.borders[border];
 
     this.createBorderZone({ border, zone: this.roadZone });
-    Object.keys(game.gamedatas.roads[border]).forEach((id) => {
+    borderGamedatas.roads.forEach(({ id }) => {
       placeToken({
         game,
         location: this.roadZone,
@@ -29,6 +30,10 @@ class Border {
         },
       });
     });
+  }
+
+  clearZones() {
+    clearZone({ zone: this.roadZone });
   }
 
   createBorderZone({ border, zone }: { border: string; zone: Zone }) {
@@ -102,23 +107,36 @@ class Region {
     // console.log('constructor Region ', region);
     this.game = game;
     this.region = region;
-    this.armyZone = new ebg.zone();
-    this.tribeZone = new ebg.zone();
-    this.rulerZone = new ebg.zone();
 
+    this.setupRegion({ gamedatas: game.gamedatas });
+  }
+
+  setupRegion({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    const regionGamedatas: RegionGamedatas = gamedatas.map.regions[this.region];
+    this.setupArmyZone({ regionGamedatas });
+    this.setupTribeZone({ regionGamedatas });
+    this.setupRulerZone({ gamedatas });
+  }
+
+  setupArmyZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
+    if (!this.armyZone) {
+      this.armyZone = new ebg.zone();
+    }
     // Setup army zone
     setupTokenZone({
-      game,
+      game: this.game,
       zone: this.armyZone,
-      nodeId: `pp_${region}_armies`,
+      nodeId: `pp_${this.region}_armies`,
       tokenWidth: ARMY_WIDTH,
       tokenHeight: ARMY_HEIGHT,
       itemMargin: -5,
     });
+
+    this.armyZone.instantaneous = true;
     // place armies
-    Object.keys(game.gamedatas.armies[region]).forEach((id) => {
+    regionGamedatas.armies.forEach(({ id }) => {
       placeToken({
-        game,
+        game: this.game,
         location: this.armyZone,
         id,
         jstpl: 'jstpl_army',
@@ -128,53 +146,74 @@ class Region {
         },
       });
     });
+    this.armyZone.instantaneous = false;
+  }
+
+  setupRulerZone({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    if (!this.rulerZone) {
+      this.rulerZone = new ebg.zone();
+    }
+
+    // Ruler
+    setupTokenZone({
+      game: this.game,
+      zone: this.rulerZone,
+      nodeId: `pp_position_ruler_token_${this.region}`,
+      tokenWidth: RULER_TOKEN_WIDTH,
+      tokenHeight: RULER_TOKEN_HEIGHT,
+    });
+    this.rulerZone.instantaneous = true;
+    this.ruler = gamedatas.map.rulers[this.region];
+    if (this.ruler === null) {
+      placeToken({
+        game: this.game,
+        location: this.rulerZone,
+        id: `pp_ruler_token_${this.region}`,
+        jstpl: 'jstpl_ruler_token',
+        jstplProps: {
+          id: `pp_ruler_token_${this.region}`,
+          region: this.region,
+        },
+      });
+    }
+    this.rulerZone.instantaneous = false;
+  }
+
+  setupTribeZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
+    if (!this.tribeZone) {
+      this.tribeZone = new ebg.zone();
+    }
 
     // tribe zone
     setupTokenZone({
-      game,
+      game: this.game,
       zone: this.tribeZone,
-      nodeId: `pp_${region}_tribes`,
+      nodeId: `pp_${this.region}_tribes`,
       tokenWidth: TRIBE_WIDTH,
       tokenHeight: TRIBE_HEIGHT,
     });
 
+    this.tribeZone.instantaneous = true;
     // tribes
-    Object.keys(game.gamedatas.tribes[region]).forEach((id) => {
+    regionGamedatas.tribes.forEach(({ id }) => {
       placeToken({
-        game,
+        game: this.game,
         location: this.tribeZone,
         id,
         jstpl: 'jstpl_cylinder',
         jstplProps: {
           id,
-          color: game.gamedatas.players[id.split('_')[1]].color,
+          color: this.game.gamedatas.players[id.split('_')[1]].color,
         },
       });
     });
+    this.tribeZone.instantaneous = false;
+  }
 
-    // Ruler
-    setupTokenZone({
-      game,
-      zone: this.rulerZone,
-      nodeId: `pp_position_ruler_token_${region}`,
-      tokenWidth: RULER_TOKEN_WIDTH,
-      tokenHeight: RULER_TOKEN_HEIGHT,
-    });
-    this.rulerZone.instantaneous = true;
-    this.ruler = game.gamedatas.rulers[region];
-    if (this.ruler === null) {
-      placeToken({
-        game,
-        location: this.rulerZone,
-        id: `pp_ruler_token_${region}`,
-        jstpl: 'jstpl_ruler_token',
-        jstplProps: {
-          id: `pp_ruler_token_${region}`,
-          region,
-        },
-      });
-    }
-    this.rulerZone.instantaneous = false;
+  clearZones() {
+    clearZone({ zone: this.armyZone });
+    clearZone({ zone: this.rulerZone });
+    clearZone({ zone: this.tribeZone });
   }
 
   getArmyZone() {
@@ -221,6 +260,22 @@ class PPMap {
 
     BORDERS.forEach((border) => {
       this.borders[border] = new Border({ border, game });
+    });
+  }
+
+  clearZones() {
+    Object.values(this.borders).forEach((border) => {
+      border.clearZones();
+    });
+    Object.values(this.regions).forEach((region) => {
+      console.log('region', region.getTribeZone().items);
+      region.clearZones();
+    });
+  }
+
+  updateMap({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    Object.values(this.regions).forEach((region) => {
+      region.setupRegion({ gamedatas });
     });
   }
 

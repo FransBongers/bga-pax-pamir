@@ -14,13 +14,18 @@ class Border {
   constructor({ game, border }: { game: PaxPamirGame; border: string }) {
     this.game = game;
     this.border = border;
-    this.roadZone = new ebg.zone();
-    const borderGamedatas = game.gamedatas.map.borders[border];
 
-    this.createBorderZone({ border, zone: this.roadZone });
+    
+    this.setupBorder({ gamedatas: game.gamedatas });
+  }
+
+  setupBorder({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    const borderGamedatas = gamedatas.map.borders[this.border];
+    this.roadZone = new ebg.zone();
+    this.createBorderZone({ border: this.border, zone: this.roadZone });
     borderGamedatas.roads.forEach(({ id }) => {
       placeToken({
-        game,
+        game: this.game,
         location: this.roadZone,
         id,
         jstpl: 'jstpl_road',
@@ -32,8 +37,9 @@ class Border {
     });
   }
 
-  clearZones() {
-    clearZone({ zone: this.roadZone });
+  clearInterface() {
+    dojo.empty(this.roadZone.container_div);
+    this.roadZone = undefined;
   }
 
   createBorderZone({ border, zone }: { border: string; zone: Zone }) {
@@ -210,10 +216,13 @@ class Region {
     this.tribeZone.instantaneous = false;
   }
 
-  clearZones() {
-    clearZone({ zone: this.armyZone });
-    clearZone({ zone: this.rulerZone });
-    clearZone({ zone: this.tribeZone });
+  clearInterface() {
+    dojo.empty(this.armyZone.container_div);
+    this.armyZone = undefined;
+    dojo.empty(this.rulerZone.container_div);
+    this.rulerZone = undefined;
+    dojo.empty(this.tribeZone.container_div);
+    this.tribeZone = undefined;
   }
 
   getArmyZone() {
@@ -263,17 +272,19 @@ class PPMap {
     });
   }
 
-  clearZones() {
+  clearInterface() {
     Object.values(this.borders).forEach((border) => {
-      border.clearZones();
+      border.clearInterface();
     });
     Object.values(this.regions).forEach((region) => {
-      console.log('region', region.getTribeZone().items);
-      region.clearZones();
+      region.clearInterface();
     });
   }
 
   updateMap({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    Object.values(this.borders).forEach((border) => {
+      border.setupBorder({gamedatas});
+    });
     Object.values(this.regions).forEach((region) => {
       region.setupRegion({ gamedatas });
     });

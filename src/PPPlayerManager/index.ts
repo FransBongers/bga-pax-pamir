@@ -55,6 +55,7 @@ class PPPlayer {
 
     this.setupCourt({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
+    this.setupGifts({playerGamedatas});
     this.setupRulerTokens({ gamedatas });
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -66,17 +67,16 @@ class PPPlayer {
     this.setupHand({ playerGamedatas });
     this.setupCourt({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
+    this.setupGifts({playerGamedatas});
     this.setupRulerTokens({ gamedatas });
     this.setupPlayerPanel({ playerGamedatas });
   }
 
   setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    if (!this.court) {
-      this.court = new ebg.zone();
-      this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
-      this.court.item_margin = 16;
-      this.court.instantaneous = true;
-    }
+    this.court = new ebg.zone();
+    this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
+    this.court.item_margin = 16;
+    this.court.instantaneous = true;
 
     this.court.instantaneous = true;
     playerGamedatas.court.cards.forEach((card: Token) => {
@@ -109,17 +109,16 @@ class PPPlayer {
   }
 
   setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    if (!this.cylinders) {
-      this.cylinders = new ebg.zone();
-      setupTokenZone({
-        game: this.game,
-        zone: this.cylinders,
-        nodeId: `pp_cylinders_player_${this.playerId}`,
-        tokenWidth: CYLINDER_WIDTH,
-        tokenHeight: CYLINDER_HEIGHT,
-        itemMargin: 8,
-      });
-    }
+    this.cylinders = new ebg.zone();
+    setupTokenZone({
+      game: this.game,
+      zone: this.cylinders,
+      nodeId: `pp_cylinders_player_${this.playerId}`,
+      tokenWidth: CYLINDER_WIDTH,
+      tokenHeight: CYLINDER_HEIGHT,
+      itemMargin: 8,
+    });
+
     this.cylinders.instantaneous = true;
     // Add cylinders to zone
     playerGamedatas.cylinders.forEach((cylinder: Token) => {
@@ -140,23 +139,19 @@ class PPPlayer {
   setupGifts({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up gift zones
     ['2', '4', '6'].forEach((value) => {
-      if (this.gifts[value]) {
-        this.gifts[value].removeAll();
-      } else {
-        this.gifts[value] = new ebg.zone();
-        setupTokenZone({
-          game: this.game,
-          zone: this.gifts[value],
-          nodeId: `pp_gift_${value}_zone_${this.playerId}`,
-          tokenWidth: 40,
-          tokenHeight: 40,
-          // itemMargin: 10,
-          pattern: 'custom',
-          customPattern: () => {
-            return { x: 5, y: 5, w: 30, h: 30 };
-          },
-        });
-      }
+      this.gifts[value] = new ebg.zone();
+      setupTokenZone({
+        game: this.game,
+        zone: this.gifts[value],
+        nodeId: `pp_gift_${value}_zone_${this.playerId}`,
+        tokenWidth: 40,
+        tokenHeight: 40,
+        // itemMargin: 10,
+        pattern: 'custom',
+        customPattern: () => {
+          return { x: 5, y: 5, w: 30, h: 30 };
+        },
+      });
     });
 
     // Add gifts to zones
@@ -288,10 +283,17 @@ class PPPlayer {
     });
   }
 
-  clearZones() {
-    clearZone({zone: this.court});
-    clearZone({zone: this.cylinders});
-    clearZone({zone: this.rulerTokens});
+  clearInterface() {
+    dojo.empty(this.court.container_div);
+    this.court = undefined;
+    dojo.empty(this.cylinders.container_div);
+    this.cylinders = undefined;
+    dojo.empty(this.rulerTokens.container_div);
+    this.rulerTokens = undefined;
+    ['2', '4', '6'].forEach((value) => {
+      dojo.empty(this.gifts[value].container_div);
+      this.gifts[value] = undefined;
+    });
   }
 
   // Getters & setters
@@ -451,9 +453,9 @@ class PPPlayerManager {
     }
   }
 
-  clearPlayerZones() {
+  clearInterface() {
     Object.keys(this.players).forEach((playerId) => {
-      this.players[playerId].clearZones();
+      this.players[playerId].clearInterface();
     });
   }
 }

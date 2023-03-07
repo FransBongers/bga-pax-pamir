@@ -47,6 +47,7 @@ class PPMarket {
 
   setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     const containerId = `pp_market_${row}_${column}`;
+    dojo.place(`<div id="pp_market_${row}_${column}_rupees" class="pp_market_rupees"></div>`, containerId);
     if (this.marketCards[row][column]) {
       this.marketCards[row][column].removeAll();
       // return;
@@ -94,13 +95,15 @@ class PPMarket {
     this.marketRupees[row][column].instantaneous = false;
   }
 
-  clearZones() {
+  clearInterface() {
     for (let row = 0; row <= 1; row++) {
       for (let column = 0; column <= 5; column++) {
-        clearZone({zone: this.marketCards[row][column]});
-        clearZone({zone: this.marketRupees[row][column]});
+        dojo.empty(this.marketCards[row][column].container_div);
+        this.marketCards[row][column] = undefined;
+        this.marketRupees[row][column] = undefined;
       }
     }
+    console.log('marketCards after clearInterface', this.marketCards);
   }
 
   getMarketCardZone({ row, column }: { row: number; column: number }): Zone {

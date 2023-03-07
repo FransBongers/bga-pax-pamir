@@ -96,7 +96,10 @@ class PPNotificationManager {
 
   notif_clearTurn(notif) {
     const { args } = notif;
+    const notifIds = args.notifIds;
     console.log('notif_clearTurn', args);
+    console.log('notif_clearTurn notifIds', notifIds);
+    this.game.cancelLogs(notifIds);
   }
 
   notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
@@ -278,12 +281,13 @@ class PPNotificationManager {
       ...this.game.gamedatas,
       ...notif.args,
     };
-    this.game.clearZones();
+    this.game.clearInterface();
     console.log('updatedGamedatas', updatedGamedatas);
     this.game.gamedatas = updatedGamedatas;
-    // this.game.market.setupMarket({gamedatas: updatedGamedatas});
-    // this.game.playerManager.updatePlayers({gamedatas: updatedGamedatas});
-    // this.game.map.updateMap({gamedatas: updatedGamedatas});
+    this.game.market.setupMarket({gamedatas: updatedGamedatas});
+    this.game.playerManager.updatePlayers({gamedatas: updatedGamedatas});
+    this.game.map.updateMap({gamedatas: updatedGamedatas});
+    this.game.objectManager.updateInterface({gamedatas: updatedGamedatas});
     // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
   }
 

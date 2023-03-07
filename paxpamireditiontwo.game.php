@@ -33,11 +33,12 @@ spl_autoload_register($swdNamespaceAutoload, true, true);
 
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 
-use PaxPamir\Managers\Map;
-use PaxPamir\Managers\Market;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Preferences;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Map;
+use PaxPamir\Managers\Market;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -145,6 +146,7 @@ class PaxPamirEditionTwo extends Table
             'market' => Market::getUiData(),
             // 'rupees' => Tokens::getOfType('rupee'),
             'favoredSuit' => Globals::getFavoredSuit(),
+            'canceledNotifIds' => Log::getCanceledNotifIds(),
         ];
 
         // TODO: move to SupplyManager class?

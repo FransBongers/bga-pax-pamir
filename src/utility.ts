@@ -48,12 +48,6 @@ const substituteKeywords = ({
   return dojo.string.substitute(_(string), { ...getKeywords({ playerColor }), ...(args || {}) });
 };
 
-const clearZone = ({zone}: {zone: Zone}) => {
-  zone.instantaneous = true;
-  zone.removeAll();
-  zone.instantaneous = false;
-}
-
 // const placeCard = ({ location, id, order = null }) => {
 //   if (order != null) {
 //     location.changeItemsWeight({

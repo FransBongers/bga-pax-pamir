@@ -38,7 +38,10 @@ interface Framework {
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
   game_name: string;
   isCurrentPlayerActive: () => boolean;
+  isLoadingComplete: boolean;
+  inherited(args: any); // TODO: check what this does?
   notifqueue: {
+    next_log_id: string;
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
   };
   placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;

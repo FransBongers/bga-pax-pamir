@@ -124,8 +124,7 @@ trait PlayerActionTrait
     $datas = $this->getAllDatas(-1);
     // Unset all private and static information
     unset($datas['staticData']);
-
-    // unset($datas['canceledNotifIds']);
+    unset($datas['canceledNotifIds']);
 
     Notifications::smallRefreshInterface($datas);
     $player = Players::getCurrent();

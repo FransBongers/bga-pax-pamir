@@ -23,9 +23,9 @@ class Market
       $data['cards'][0][$i] = Cards::getInLocation('market_0_' . $i)->first();
       $data['cards'][1][$i] = Cards::getInLocation('market_1_' . $i)->first();
     }
-    $data['rupees'] = array_filter(Tokens::getOfType('rupee'), function ($rupee) {
+    $data['rupees'] = array_values(array_filter(Tokens::getOfType('rupee'), function ($rupee) {
       return str_starts_with($rupee['location'], 'market');
-    });
+    }));
 
     return $data;
   }

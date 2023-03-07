@@ -105,7 +105,6 @@
     <div id="pp_market_board">
         <!-- BEGIN market -->
         <div id="pp_market_{ROW}_{COLUMN}" class="pp_market" style="left: {LEFT}px; top: {TOP}px;">
-            <div id="pp_market_{ROW}_{COLUMN}_rupees" class="pp_market_rupees"></div>
         </div>
         <!-- END market -->
         <div id="cards">

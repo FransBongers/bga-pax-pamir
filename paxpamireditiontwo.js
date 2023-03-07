@@ -424,12 +424,6 @@ var substituteKeywords = function (_a) {
     console.log('color', playerColor);
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
-var clearZone = function (_a) {
-    var zone = _a.zone;
-    zone.instantaneous = true;
-    zone.removeAll();
-    zone.instantaneous = false;
-};
 // const placeCard = ({ location, id, order = null }) => {
 //   if (order != null) {
 //     location.changeItemsWeight({
@@ -541,25 +535,29 @@ var PPTooltipManager = /** @class */ (function () {
 var FavoredSuit = /** @class */ (function () {
     function FavoredSuit(_a) {
         var game = _a.game;
-        var _this = this;
         console.log('Constructor Favored Suit');
         this.game = game;
+        this.setup({ gamedatas: game.gamedatas });
+    }
+    FavoredSuit.prototype.setup = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
         this.favoredSuitZones = {};
         // Setup zones for favored suit marker
-        Object.keys(game.gamedatas.staticData.suits).forEach(function (suit) {
+        Object.keys(this.game.gamedatas.staticData.suits).forEach(function (suit) {
             _this.favoredSuitZones[suit] = new ebg.zone();
             setupTokenZone({
-                game: game,
+                game: _this.game,
                 zone: _this.favoredSuitZones[suit],
                 nodeId: "pp_favored_suit_".concat(suit),
                 tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
                 tokenHeight: FAVORED_SUIT_MARKER_HEIGHT,
             });
         });
-        var suit = game.gamedatas.favoredSuit;
+        var suit = gamedatas.favoredSuit;
         this.favoredSuitZones[suit].instantaneous = true;
         placeToken({
-            game: game,
+            game: this.game,
             location: this.favoredSuitZones[suit],
             //location: this.favoredSuit['intelligence'], // for testing change of favored suit
             id: "favored_suit_marker",
@@ -569,10 +567,12 @@ var FavoredSuit = /** @class */ (function () {
             },
         });
         this.favoredSuitZones[suit].instantaneous = false;
-    }
-    FavoredSuit.prototype.clearZones = function () {
-        Object.values(this.favoredSuitZones).forEach(function (zone) {
-            clearZone({ zone: zone });
+    };
+    FavoredSuit.prototype.clearInterface = function () {
+        var _this = this;
+        Object.keys(this.favoredSuitZones).forEach(function (key) {
+            dojo.empty(_this.favoredSuitZones[key].container_div);
+            _this.favoredSuitZones[key] = undefined;
         });
     };
     FavoredSuit.prototype.getFavoredSuitZone = function (_a) {
@@ -591,16 +591,20 @@ var FavoredSuit = /** @class */ (function () {
 var Supply = /** @class */ (function () {
     function Supply(_a) {
         var game = _a.game;
-        var _this = this;
         console.log('Constructor Supply');
         this.game = game;
+        this.setup({ gamedatas: game.gamedatas });
+    }
+    Supply.prototype.setup = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
         // blocks per coalition (supply)
         this.coalitionBlocks = {};
         // Setup supply of coalition blocks
         COALITIONS.forEach(function (coalition) {
             _this.coalitionBlocks[coalition] = new ebg.zone();
             setupTokenZone({
-                game: game,
+                game: _this.game,
                 zone: _this.coalitionBlocks[coalition],
                 nodeId: "pp_".concat(coalition, "_coalition_blocks"),
                 tokenWidth: COALITION_BLOCK_WIDTH,
@@ -608,9 +612,9 @@ var Supply = /** @class */ (function () {
                 itemMargin: 15,
                 instantaneous: true,
             });
-            game.gamedatas.coalitionBlocks[coalition].forEach(function (block) {
+            gamedatas.coalitionBlocks[coalition].forEach(function (block) {
                 placeToken({
-                    game: game,
+                    game: _this.game,
                     location: _this.coalitionBlocks[coalition],
                     id: block.id,
                     jstpl: 'jstpl_coalition_block',
@@ -621,10 +625,12 @@ var Supply = /** @class */ (function () {
                 });
             });
         });
-    }
-    Supply.prototype.clearZones = function () {
-        Object.values(this.coalitionBlocks).forEach(function (zone) {
-            clearZone({ zone: zone });
+    };
+    Supply.prototype.clearInterface = function () {
+        var _this = this;
+        Object.keys(this.coalitionBlocks).forEach(function (key) {
+            dojo.empty(_this.coalitionBlocks[key].container_div);
+            _this.coalitionBlocks[key] = undefined;
         });
     };
     Supply.prototype.getCoalitionBlocksZone = function (_a) {
@@ -643,18 +649,19 @@ var Supply = /** @class */ (function () {
 var VpTrack = /** @class */ (function () {
     function VpTrack(_a) {
         var game = _a.game;
-        this.vpTrackZones = {};
         console.log('VpTrack');
         this.game = game;
         this.setupVpTrack({ gamedatas: game.gamedatas });
     }
-    VpTrack.prototype.clearZones = function () {
+    VpTrack.prototype.clearInterface = function () {
         for (var i = 0; i <= 23; i++) {
-            clearZone({ zone: this.vpTrackZones[i] });
+            dojo.empty(this.vpTrackZones[i].container_div);
+            this.vpTrackZones[i] = undefined;
         }
     };
     VpTrack.prototype.setupVpTrack = function (_a) {
         var gamedatas = _a.gamedatas;
+        this.vpTrackZones = {};
         // Create VP track
         for (var i = 0; i <= 23; i++) {
             if (this.vpTrackZones[i]) {
@@ -717,10 +724,16 @@ var PPObjectManager = /** @class */ (function () {
         this.supply = new Supply({ game: game });
         this.vpTrack = new VpTrack({ game: game });
     }
-    PPObjectManager.prototype.clearZones = function () {
-        this.favoredSuit.clearZones();
-        this.supply.clearZones();
-        this.vpTrack.clearZones();
+    PPObjectManager.prototype.updateInterface = function (_a) {
+        var gamedatas = _a.gamedatas;
+        this.favoredSuit.setup({ gamedatas: gamedatas });
+        this.supply.setup({ gamedatas: gamedatas });
+        this.vpTrack.setupVpTrack({ gamedatas: gamedatas });
+    };
+    PPObjectManager.prototype.clearInterface = function () {
+        this.favoredSuit.clearInterface();
+        this.supply.clearInterface();
+        this.vpTrack.clearInterface();
     };
     return PPObjectManager;
 }());
@@ -760,6 +773,7 @@ var PPPlayer = /** @class */ (function () {
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
+        this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
@@ -770,18 +784,17 @@ var PPPlayer = /** @class */ (function () {
         this.setupHand({ playerGamedatas: playerGamedatas });
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
+        this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.setupPlayerPanel({ playerGamedatas: playerGamedatas });
     };
     PPPlayer.prototype.setupCourt = function (_a) {
         var _this = this;
         var playerGamedatas = _a.playerGamedatas;
-        if (!this.court) {
-            this.court = new ebg.zone();
-            this.court.create(this.game, "pp_court_player_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
-            this.court.item_margin = 16;
-            this.court.instantaneous = true;
-        }
+        this.court = new ebg.zone();
+        this.court.create(this.game, "pp_court_player_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
+        this.court.item_margin = 16;
+        this.court.instantaneous = true;
         this.court.instantaneous = true;
         playerGamedatas.court.cards.forEach(function (card) {
             var cardId = card.id;
@@ -809,17 +822,15 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.setupCylinders = function (_a) {
         var _this = this;
         var playerGamedatas = _a.playerGamedatas;
-        if (!this.cylinders) {
-            this.cylinders = new ebg.zone();
-            setupTokenZone({
-                game: this.game,
-                zone: this.cylinders,
-                nodeId: "pp_cylinders_player_".concat(this.playerId),
-                tokenWidth: CYLINDER_WIDTH,
-                tokenHeight: CYLINDER_HEIGHT,
-                itemMargin: 8,
-            });
-        }
+        this.cylinders = new ebg.zone();
+        setupTokenZone({
+            game: this.game,
+            zone: this.cylinders,
+            nodeId: "pp_cylinders_player_".concat(this.playerId),
+            tokenWidth: CYLINDER_WIDTH,
+            tokenHeight: CYLINDER_HEIGHT,
+            itemMargin: 8,
+        });
         this.cylinders.instantaneous = true;
         // Add cylinders to zone
         playerGamedatas.cylinders.forEach(function (cylinder) {
@@ -841,24 +852,19 @@ var PPPlayer = /** @class */ (function () {
         var playerGamedatas = _a.playerGamedatas;
         // Set up gift zones
         ['2', '4', '6'].forEach(function (value) {
-            if (_this.gifts[value]) {
-                _this.gifts[value].removeAll();
-            }
-            else {
-                _this.gifts[value] = new ebg.zone();
-                setupTokenZone({
-                    game: _this.game,
-                    zone: _this.gifts[value],
-                    nodeId: "pp_gift_".concat(value, "_zone_").concat(_this.playerId),
-                    tokenWidth: 40,
-                    tokenHeight: 40,
-                    // itemMargin: 10,
-                    pattern: 'custom',
-                    customPattern: function () {
-                        return { x: 5, y: 5, w: 30, h: 30 };
-                    },
-                });
-            }
+            _this.gifts[value] = new ebg.zone();
+            setupTokenZone({
+                game: _this.game,
+                zone: _this.gifts[value],
+                nodeId: "pp_gift_".concat(value, "_zone_").concat(_this.playerId),
+                tokenWidth: 40,
+                tokenHeight: 40,
+                // itemMargin: 10,
+                pattern: 'custom',
+                customPattern: function () {
+                    return { x: 5, y: 5, w: 30, h: 30 };
+                },
+            });
         });
         // Add gifts to zones
         var playerGifts = playerGamedatas.gifts;
@@ -978,10 +984,18 @@ var PPPlayer = /** @class */ (function () {
             dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action pp_card_action_").concat(action, "\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
         });
     };
-    PPPlayer.prototype.clearZones = function () {
-        clearZone({ zone: this.court });
-        clearZone({ zone: this.cylinders });
-        clearZone({ zone: this.rulerTokens });
+    PPPlayer.prototype.clearInterface = function () {
+        var _this = this;
+        dojo.empty(this.court.container_div);
+        this.court = undefined;
+        dojo.empty(this.cylinders.container_div);
+        this.cylinders = undefined;
+        dojo.empty(this.rulerTokens.container_div);
+        this.rulerTokens = undefined;
+        ['2', '4', '6'].forEach(function (value) {
+            dojo.empty(_this.gifts[value].container_div);
+            _this.gifts[value] = undefined;
+        });
     };
     // Getters & setters
     PPPlayer.prototype.getCourtZone = function () {
@@ -1108,10 +1122,10 @@ var PPPlayerManager = /** @class */ (function () {
             this.players[playerId].updatePlayer({ gamedatas: gamedatas });
         }
     };
-    PPPlayerManager.prototype.clearPlayerZones = function () {
+    PPPlayerManager.prototype.clearInterface = function () {
         var _this = this;
         Object.keys(this.players).forEach(function (playerId) {
-            _this.players[playerId].clearZones();
+            _this.players[playerId].clearInterface();
         });
     };
     return PPPlayerManager;
@@ -1126,16 +1140,20 @@ var PPPlayerManager = /** @class */ (function () {
 var Border = /** @class */ (function () {
     function Border(_a) {
         var game = _a.game, border = _a.border;
-        var _this = this;
         this.game = game;
         this.border = border;
+        this.setupBorder({ gamedatas: game.gamedatas });
+    }
+    Border.prototype.setupBorder = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
+        var borderGamedatas = gamedatas.map.borders[this.border];
         this.roadZone = new ebg.zone();
-        var borderGamedatas = game.gamedatas.map.borders[border];
-        this.createBorderZone({ border: border, zone: this.roadZone });
+        this.createBorderZone({ border: this.border, zone: this.roadZone });
         borderGamedatas.roads.forEach(function (_a) {
             var id = _a.id;
             placeToken({
-                game: game,
+                game: _this.game,
                 location: _this.roadZone,
                 id: id,
                 jstpl: 'jstpl_road',
@@ -1145,9 +1163,10 @@ var Border = /** @class */ (function () {
                 },
             });
         });
-    }
-    Border.prototype.clearZones = function () {
-        clearZone({ zone: this.roadZone });
+    };
+    Border.prototype.clearInterface = function () {
+        dojo.empty(this.roadZone.container_div);
+        this.roadZone = undefined;
     };
     Border.prototype.createBorderZone = function (_a) {
         var border = _a.border, zone = _a.zone;
@@ -1319,10 +1338,13 @@ var Region = /** @class */ (function () {
         });
         this.tribeZone.instantaneous = false;
     };
-    Region.prototype.clearZones = function () {
-        clearZone({ zone: this.armyZone });
-        clearZone({ zone: this.rulerZone });
-        clearZone({ zone: this.tribeZone });
+    Region.prototype.clearInterface = function () {
+        dojo.empty(this.armyZone.container_div);
+        this.armyZone = undefined;
+        dojo.empty(this.rulerZone.container_div);
+        this.rulerZone = undefined;
+        dojo.empty(this.tribeZone.container_div);
+        this.tribeZone = undefined;
     };
     Region.prototype.getArmyZone = function () {
         return this.armyZone;
@@ -1362,17 +1384,19 @@ var PPMap = /** @class */ (function () {
             _this.borders[border] = new Border({ border: border, game: game });
         });
     }
-    PPMap.prototype.clearZones = function () {
+    PPMap.prototype.clearInterface = function () {
         Object.values(this.borders).forEach(function (border) {
-            border.clearZones();
+            border.clearInterface();
         });
         Object.values(this.regions).forEach(function (region) {
-            console.log('region', region.getTribeZone().items);
-            region.clearZones();
+            region.clearInterface();
         });
     };
     PPMap.prototype.updateMap = function (_a) {
         var gamedatas = _a.gamedatas;
+        Object.values(this.borders).forEach(function (border) {
+            border.setupBorder({ gamedatas: gamedatas });
+        });
         Object.values(this.regions).forEach(function (region) {
             region.setupRegion({ gamedatas: gamedatas });
         });
@@ -1429,6 +1453,7 @@ var PPMarket = /** @class */ (function () {
     PPMarket.prototype.setupMarketCardZone = function (_a) {
         var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
         var containerId = "pp_market_".concat(row, "_").concat(column);
+        dojo.place("<div id=\"pp_market_".concat(row, "_").concat(column, "_rupees\" class=\"pp_market_rupees\"></div>"), containerId);
         if (this.marketCards[row][column]) {
             this.marketCards[row][column].removeAll();
             // return;
@@ -1476,13 +1501,15 @@ var PPMarket = /** @class */ (function () {
         });
         this.marketRupees[row][column].instantaneous = false;
     };
-    PPMarket.prototype.clearZones = function () {
+    PPMarket.prototype.clearInterface = function () {
         for (var row = 0; row <= 1; row++) {
             for (var column = 0; column <= 5; column++) {
-                clearZone({ zone: this.marketCards[row][column] });
-                clearZone({ zone: this.marketRupees[row][column] });
+                dojo.empty(this.marketCards[row][column].container_div);
+                this.marketCards[row][column] = undefined;
+                this.marketRupees[row][column] = undefined;
             }
         }
+        console.log('marketCards after clearInterface', this.marketCards);
     };
     PPMarket.prototype.getMarketCardZone = function (_a) {
         var row = _a.row, column = _a.column;
@@ -2366,7 +2393,10 @@ var PPNotificationManager = /** @class */ (function () {
     };
     PPNotificationManager.prototype.notif_clearTurn = function (notif) {
         var args = notif.args;
+        var notifIds = args.notifIds;
         console.log('notif_clearTurn', args);
+        console.log('notif_clearTurn notifIds', notifIds);
+        this.game.cancelLogs(notifIds);
     };
     PPNotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
@@ -2532,12 +2562,13 @@ var PPNotificationManager = /** @class */ (function () {
     PPNotificationManager.prototype.notif_smallRefreshInterface = function (notif) {
         console.log('notif_smallRefreshInterface', notif);
         var updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
-        this.game.clearZones();
+        this.game.clearInterface();
         console.log('updatedGamedatas', updatedGamedatas);
         this.game.gamedatas = updatedGamedatas;
-        // this.game.market.setupMarket({gamedatas: updatedGamedatas});
-        // this.game.playerManager.updatePlayers({gamedatas: updatedGamedatas});
-        // this.game.map.updateMap({gamedatas: updatedGamedatas});
+        this.game.market.setupMarket({ gamedatas: updatedGamedatas });
+        this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
+        this.game.map.updateMap({ gamedatas: updatedGamedatas });
+        this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
         // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
     };
     PPNotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
@@ -2609,6 +2640,8 @@ var PaxPamir = /** @class */ (function () {
         this.activeEvents = new ebg.zone(); // active events
         this.spies = {}; // spies per cards
         this.playerCounts = {}; // rename to playerTotals?
+        this._notif_uid_to_log_id = {};
+        this._last_notif = null;
         console.log('paxpamireditiontwo constructor');
     }
     /*
@@ -2651,6 +2684,10 @@ var PaxPamir = /** @class */ (function () {
         this.notificationManager = new PPNotificationManager(this);
         // // Setup game notifications to handle (see "setupNotifications" method below)
         this.notificationManager.setupNotifications();
+        dojo.connect(this.framework().notifqueue, 'addToLog', function () {
+            _this.checkLogCancel(_this._last_notif == null ? null : _this._last_notif.msg.uid);
+            _this.addLogClass();
+        });
         // this.setupNotifications();
         console.log('Ending game setup');
     };
@@ -2714,15 +2751,78 @@ var PaxPamir = /** @class */ (function () {
         }
         return this.inherited(arguments);
     };
-    PaxPamir.prototype.clearZones = function () {
-        console.log('clear zones');
-        this.market.clearZones();
-        this.playerManager.clearPlayerZones();
-        Object.values(this.spies).forEach(function (zone) {
-            zone.removeAll();
+    /*
+     * [Undocumented] Called by BGA framework on any notification message
+     * Handle cancelling log messages for restart turn
+     */
+    PaxPamir.prototype.onPlaceLogOnChannel = function (msg) {
+        console.log('msg', msg);
+        var currentLogId = this.framework().notifqueue.next_log_id;
+        var res = this.framework().inherited(arguments);
+        console.log('res', res);
+        this._notif_uid_to_log_id[msg.uid] = currentLogId;
+        this._last_notif = {
+            logId: currentLogId,
+            msg: msg,
+        };
+        console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
+        return res;
+    };
+    /*
+     * cancelLogs:
+     *   strikes all log messages related to the given array of notif ids
+     */
+    PaxPamir.prototype.checkLogCancel = function (notifId) {
+        if (this.gamedatas.canceledNotifIds != null && this.gamedatas.canceledNotifIds.includes(notifId)) {
+            this.cancelLogs([notifId]);
+        }
+    };
+    PaxPamir.prototype.cancelLogs = function (notifIds) {
+        var _this = this;
+        console.log('notifIds', notifIds);
+        notifIds.forEach(function (uid) {
+            if (_this._notif_uid_to_log_id.hasOwnProperty(uid)) {
+                var logId = _this._notif_uid_to_log_id[uid];
+                if ($('log_' + logId))
+                    dojo.addClass('log_' + logId, 'cancel');
+            }
         });
-        this.map.clearZones();
-        this.objectManager.clearZones();
+    };
+    PaxPamir.prototype.addLogClass = function () {
+        if (this._last_notif == null)
+            return;
+        var notif = this._last_notif;
+        if ($('log_' + notif.logId)) {
+            var type = notif.msg.type;
+            if (type == 'history_history')
+                type = notif.msg.args.originalType;
+            dojo.addClass('log_' + notif.logId, 'notif_' + type);
+        }
+    };
+    /*
+     * [Undocumented] Override BGA framework functions to call onLoadingComplete when loading is done
+     */
+    PaxPamir.prototype.setLoader = function (value, max) {
+        this.framework().inherited(arguments);
+        if (!this.framework().isLoadingComplete && value >= 100) {
+            this.framework().isLoadingComplete = true;
+            this.onLoadingComplete();
+        }
+    };
+    PaxPamir.prototype.onLoadingComplete = function () {
+        // debug('Loading complete');
+        this.cancelLogs(this.gamedatas.canceledNotifIds);
+    };
+    PaxPamir.prototype.clearInterface = function () {
+        console.log('clear interface');
+        Object.values(this.spies).forEach(function (zone) {
+            dojo.empty(zone.container_div);
+            zone = undefined;
+        });
+        this.market.clearInterface();
+        this.playerManager.clearInterface();
+        this.map.clearInterface();
+        this.objectManager.clearInterface();
     };
     PaxPamir.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;

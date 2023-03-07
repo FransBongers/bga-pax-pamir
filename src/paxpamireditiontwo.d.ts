@@ -59,6 +59,10 @@ interface Token {
   used: number; // TODO: cast to number in php
 }
 
+interface BorderGamedatas {
+  roads: Token[];
+}
+
 interface RegionGamedatas {
   armies: Token[];
   tribes: Token[];
@@ -70,6 +74,7 @@ interface RegionGamedatas {
  * - check typing of object keys (playerId: number vs string)
  */
 interface PaxPamirGamedatas extends Gamedatas {
+  canceledNotifIds: string[];
   staticData: {
     borders: {
       [border: string]: {
@@ -86,9 +91,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     };
   };
   map: {
-    borders: Record<string, {
-      roads: Token[];
-    }>;
+    borders: Record<string, BorderGamedatas>;
     regions: Record<string, RegionGamedatas>;
     rulers: {
       [region: string]: number | null;
@@ -121,7 +124,8 @@ interface PaxPamirGame extends Game {
     [cardId: string]: Zone;
   };
   tooltipManager: PPTooltipManager;
-  clearZones: () => void;
+  cancelLogs: (notifIds: string[]) => void;
+  clearInterface: () => void;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;

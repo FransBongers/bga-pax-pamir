@@ -21,13 +21,18 @@ class FavoredSuit {
   constructor({ game }: { game: PaxPamirGame }) {
     console.log('Constructor Favored Suit');
     this.game = game;
+
+    this.setup({ gamedatas: game.gamedatas });
+  }
+
+  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     this.favoredSuitZones = {};
 
     // Setup zones for favored suit marker
-    Object.keys(game.gamedatas.staticData.suits).forEach((suit) => {
+    Object.keys(this.game.gamedatas.staticData.suits).forEach((suit) => {
       this.favoredSuitZones[suit] = new ebg.zone();
       setupTokenZone({
-        game,
+        game: this.game,
         zone: this.favoredSuitZones[suit],
         nodeId: `pp_favored_suit_${suit}`,
         tokenWidth: FAVORED_SUIT_MARKER_WIDTH,
@@ -35,10 +40,10 @@ class FavoredSuit {
       });
     });
 
-    const suit = game.gamedatas.favoredSuit;
+    const suit = gamedatas.favoredSuit;
     this.favoredSuitZones[suit].instantaneous = true;
     placeToken({
-      game,
+      game: this.game,
       location: this.favoredSuitZones[suit],
       //location: this.favoredSuit['intelligence'], // for testing change of favored suit
       id: `favored_suit_marker`,
@@ -50,10 +55,11 @@ class FavoredSuit {
     this.favoredSuitZones[suit].instantaneous = false;
   }
 
-  clearZones() {
-    Object.values(this.favoredSuitZones).forEach((zone) => {
-      clearZone({zone});
-    })
+  clearInterface() {
+    Object.keys(this.favoredSuitZones).forEach((key) => {
+      dojo.empty(this.favoredSuitZones[key].container_div);
+      this.favoredSuitZones[key] = undefined;
+    });
   }
 
   getFavoredSuitZone({ suit }) {
@@ -76,13 +82,18 @@ class Supply {
   constructor({ game }: { game: PaxPamirGame }) {
     console.log('Constructor Supply');
     this.game = game;
+
+    this.setup({ gamedatas: game.gamedatas });
+  }
+
+  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     // blocks per coalition (supply)
     this.coalitionBlocks = {};
     // Setup supply of coalition blocks
     COALITIONS.forEach((coalition) => {
       this.coalitionBlocks[coalition] = new ebg.zone();
       setupTokenZone({
-        game,
+        game: this.game,
         zone: this.coalitionBlocks[coalition],
         nodeId: `pp_${coalition}_coalition_blocks`,
         tokenWidth: COALITION_BLOCK_WIDTH,
@@ -90,9 +101,9 @@ class Supply {
         itemMargin: 15,
         instantaneous: true,
       });
-      game.gamedatas.coalitionBlocks[coalition].forEach((block) => {
+      gamedatas.coalitionBlocks[coalition].forEach((block) => {
         placeToken({
-          game,
+          game: this.game,
           location: this.coalitionBlocks[coalition],
           id: block.id,
           jstpl: 'jstpl_coalition_block',
@@ -105,10 +116,11 @@ class Supply {
     });
   }
 
-  clearZones() {
-    Object.values(this.coalitionBlocks).forEach((zone) => {
-      clearZone({zone});
-    })
+  clearInterface() {
+    Object.keys(this.coalitionBlocks).forEach((key) => {
+      dojo.empty(this.coalitionBlocks[key].container_div);
+      this.coalitionBlocks[key] = undefined;
+    });
   }
 
   getCoalitionBlocksZone({ coalition }: { coalition: string }) {
@@ -126,21 +138,23 @@ class Supply {
 
 class VpTrack {
   private game: PaxPamirGame;
-  private vpTrackZones: Record<string, Zone> = {};
+  private vpTrackZones: Record<string, Zone>;
 
   constructor({ game }: { game: PaxPamirGame }) {
     console.log('VpTrack');
     this.game = game;
-    this.setupVpTrack({gamedatas: game.gamedatas});
+    this.setupVpTrack({ gamedatas: game.gamedatas });
   }
 
-  clearZones() {
+  clearInterface() {
     for (let i = 0; i <= 23; i++) {
-      clearZone({zone: this.vpTrackZones[i]});
+      dojo.empty(this.vpTrackZones[i].container_div);
+      this.vpTrackZones[i] = undefined;
     }
   }
 
   setupVpTrack({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    this.vpTrackZones = {};
     // Create VP track
     for (let i = 0; i <= 23; i++) {
       if (this.vpTrackZones[i]) {
@@ -213,9 +227,15 @@ class PPObjectManager {
     this.vpTrack = new VpTrack({ game });
   }
 
-  clearZones() {
-    this.favoredSuit.clearZones();
-    this.supply.clearZones();
-    this.vpTrack.clearZones();
+  updateInterface({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    this.favoredSuit.setup({ gamedatas });
+    this.supply.setup({ gamedatas });
+    this.vpTrack.setupVpTrack({ gamedatas });
+  }
+
+  clearInterface() {
+    this.favoredSuit.clearInterface();
+    this.supply.clearInterface();
+    this.vpTrack.clearInterface();
   }
 }

@@ -38,6 +38,8 @@ class PaxPamir implements PaxPamirGame {
   public spies: Record<string, Zone> = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals?
   public tooltipManager: PPTooltipManager;
+  private _notif_uid_to_log_id = {};
+  private _last_notif = null;
 
   constructor() {
     console.log('paxpamireditiontwo constructor');
@@ -87,6 +89,10 @@ class PaxPamir implements PaxPamirGame {
     // // Setup game notifications to handle (see "setupNotifications" method below)
     this.notificationManager.setupNotifications();
 
+    dojo.connect(this.framework().notifqueue, 'addToLog', () => {
+      this.checkLogCancel(this._last_notif == null ? null : this._last_notif.msg.uid);
+      this.addLogClass();
+    });
     // this.setupNotifications();
     console.log('Ending game setup');
   }
@@ -161,15 +167,83 @@ class PaxPamir implements PaxPamirGame {
     return (this as any).inherited(arguments);
   }
 
-  public clearZones() {
-    console.log('clear zones');
-    this.market.clearZones();
-    this.playerManager.clearPlayerZones();
-    Object.values(this.spies).forEach((zone) => {
-      zone.removeAll();
+  /*
+   * [Undocumented] Called by BGA framework on any notification message
+   * Handle cancelling log messages for restart turn
+   */
+  onPlaceLogOnChannel(msg: Notif<unknown>) {
+    console.log('msg', msg);
+    const currentLogId = this.framework().notifqueue.next_log_id;
+    const res = this.framework().inherited(arguments);
+    console.log('res', res);
+    this._notif_uid_to_log_id[msg.uid] = currentLogId;
+    this._last_notif = {
+      logId: currentLogId,
+      msg,
+    };
+    console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
+    return res;
+  }
+
+  /*
+   * cancelLogs:
+   *   strikes all log messages related to the given array of notif ids
+   */
+  checkLogCancel(notifId) {
+    if (this.gamedatas.canceledNotifIds != null && this.gamedatas.canceledNotifIds.includes(notifId)) {
+      this.cancelLogs([notifId]);
+    }
+  }
+
+  public cancelLogs(notifIds: string[]) {
+    console.log('notifIds', notifIds);
+    notifIds.forEach((uid) => {
+      if (this._notif_uid_to_log_id.hasOwnProperty(uid)) {
+        let logId = this._notif_uid_to_log_id[uid];
+        if ($('log_' + logId)) dojo.addClass('log_' + logId, 'cancel');
+      }
     });
-    this.map.clearZones();
-    this.objectManager.clearZones();
+  }
+
+  addLogClass() {
+    if (this._last_notif == null) return;
+
+    let notif = this._last_notif;
+    if ($('log_' + notif.logId)) {
+      let type = notif.msg.type;
+      if (type == 'history_history') type = notif.msg.args.originalType;
+
+      dojo.addClass('log_' + notif.logId, 'notif_' + type);
+    }
+  }
+
+  /*
+   * [Undocumented] Override BGA framework functions to call onLoadingComplete when loading is done
+   */
+  setLoader(value, max) {
+    this.framework().inherited(arguments);
+    if (!this.framework().isLoadingComplete && value >= 100) {
+      this.framework().isLoadingComplete = true;
+      this.onLoadingComplete();
+    }
+  }
+
+  onLoadingComplete() {
+    // debug('Loading complete');
+    this.cancelLogs(this.gamedatas.canceledNotifIds);
+  }
+
+  public clearInterface() {
+    console.log('clear interface');
+    Object.values(this.spies).forEach((zone) => {
+      dojo.empty(zone.container_div);
+      zone = undefined;
+    });
+
+    this.market.clearInterface();
+    this.playerManager.clearInterface();
+    this.map.clearInterface();
+    this.objectManager.clearInterface();
   }
 
   public getCardInfo({ cardId }: { cardId: string }): Card {

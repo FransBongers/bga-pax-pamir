@@ -70,12 +70,12 @@ trait PlayerActionTrait
 
     // Notify
     // TODO (Frans): check i18n for coalition name
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${coalitionLogToken}'), array(
+    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
       'playerId' => $playerId,
       'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,
       'coalitionName' => $coalitionName,
-      'coalitionLogToken' => $coalition,
+      'logTokenCoalition' => $coalition,
     ));
 
     $this->gamestate->nextState('next');
@@ -298,12 +298,12 @@ trait PlayerActionTrait
       Players::incRupees($playerId, count($rupees));
       Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
-      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${card_log}'), array(
+      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenCard}'), array(
         'playerId' => $playerId,
         'player_name' => self::getActivePlayerName(),
         'card' => $card,
         'cardName' => $cardName,
-        'card_log' => $card['id'],
+        'logTokenCard' => $card['id'],
         'marketLocation' => $marketLocation,
         'newLocation' => $newLocation,
         'updatedCards' => $updatedCards,

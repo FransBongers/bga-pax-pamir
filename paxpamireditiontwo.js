@@ -167,6 +167,55 @@ var positionObjectDirectly = function (mobileObj, x, y) {
     });
     dojo.style(mobileObj, 'left'); // bug? re-compute style
 };
+var LOG_TOKEN_ARMY = 'logTokenArmy';
+var LOG_TOKEN_CARD = 'logTokenCard';
+var LOG_TOKEN_COALITION = 'logTokenCoalition';
+var LOG_TOKEN_NEW_CARDS = 'logTokenNewCards';
+var LOG_TOKEN_SPY = 'logTokenSpy';
+var LOG_TOKEN_TRIBE = 'logTokenTribe';
+var logTokenKeys = [LOG_TOKEN_CARD, LOG_TOKEN_COALITION, LOG_TOKEN_NEW_CARDS, LOG_TOKEN_ARMY, LOG_TOKEN_TRIBE, LOG_TOKEN_SPY];
+var getLogTokenDiv = function (key, args) {
+    // console.log('key', key, 'args', args);
+    var data = args[key];
+    switch (key) {
+        case LOG_TOKEN_ARMY:
+            return tplLogTokenArmy({ coalition: data });
+        case LOG_TOKEN_CARD:
+            return tplLogTokenCard({ cardId: data });
+        case LOG_TOKEN_TRIBE:
+            return tplLogTokenTribe({ color: data });
+        case LOG_TOKEN_COALITION:
+            return tplLogTokenCoalition({ coalition: data });
+        case LOG_TOKEN_NEW_CARDS:
+            return tplLogTokenNewCards({ cards: data });
+        default:
+            return args[key];
+    }
+};
+var tplLogTokenArmy = function (_a) {
+    var coalition = _a.coalition;
+    return "<div class=\"pp_".concat(coalition, " pp_army pp_log_token\"></div>");
+};
+var tplLogTokenCard = function (_a) {
+    var cardId = _a.cardId;
+    return "<div class=\"pp_card pp_card_in_log pp_".concat(cardId, "\"></div>");
+};
+var tplLogTokenCoalition = function (_a) {
+    var coalition = _a.coalition;
+    return "<div class=\"pp_icon_log pp_loyalty_icon_log pp_".concat(coalition, "\"></div>");
+};
+var tplLogTokenTribe = function (_a) {
+    var color = _a.color;
+    return "<div class=\"pp_cylinder pp_player_color_".concat(color, " pp_log_token\"></div>");
+};
+var tplLogTokenNewCards = function (_a) {
+    var cards = _a.cards;
+    var newCards = '';
+    cards.forEach(function (card) {
+        newCards += "<div class=\"pp_card pp_card_in_log pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
+    });
+    return newCards;
+};
 // Interface steps
 var CARD_ACTION_BATTLE = 'cardActionBattle';
 var CARD_ACTION_BETRAY = 'cardActionBetray';
@@ -387,28 +436,6 @@ var tplEventCardTooltip = function (_a) {
 };
 var capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-};
-var getTokenDiv = function (key, args) {
-    // console.log('key', key, 'args', args);
-    var data = args[key];
-    switch (key) {
-        case 'logTokenArmy':
-            return "<div class=\"pp_".concat(data, " pp_army pp_log_token\"></div>");
-        case 'logTokenTribe':
-            return "<div class=\"pp_cylinder pp_player_color_".concat(data, " pp_log_token\"></div>");
-        case 'card_log':
-            return "<div class=\"pp_card pp_card_in_log pp_".concat(data, "\"></div>");
-        case 'coalitionLogToken':
-            return "<div class=\"pp_icon_log pp_loyalty_icon_log pp_".concat(data, "\"></div>");
-        case 'new_cards_log':
-            var newCards_1 = '';
-            data.forEach(function (card) {
-                newCards_1 += "<div class=\"pp_card pp_card_in_log pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
-            });
-            return newCards_1;
-        default:
-            return args[key];
-    }
 };
 var getKeywords = function (_a) {
     var _b = _a.playerColor, playerColor = _b === void 0 ? '#000' : _b;
@@ -2732,13 +2759,13 @@ var PaxPamir = /** @class */ (function () {
             if (log && args && !args.processed) {
                 args.processed = true;
                 // list of special keys we want to replace with images
-                var keys = ['card_log', 'coalitionLogToken', 'new_cards_log', 'logTokenArmy', 'logTokenTribe', 'logTokenSpy'];
+                var keys = logTokenKeys;
                 // list of other known variables
                 //  var keys = this.notification_manager.keys;
                 for (var i in keys) {
                     var key = keys[i];
                     if (args[key] != undefined) {
-                        args[key] = getTokenDiv(key, args);
+                        args[key] = getLogTokenDiv(key, args);
                     }
                 }
             }

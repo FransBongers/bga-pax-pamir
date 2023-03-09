@@ -149,7 +149,7 @@ class PaxPamir implements PaxPamirGame {
         args.processed = true;
 
         // list of special keys we want to replace with images
-        const keys = ['card_log', 'coalitionLogToken', 'new_cards_log', 'logTokenArmy', 'logTokenTribe', 'logTokenSpy'];
+        const keys = logTokenKeys;
 
         // list of other known variables
         //  var keys = this.notification_manager.keys;
@@ -157,7 +157,7 @@ class PaxPamir implements PaxPamirGame {
         for (var i in keys) {
           var key = keys[i];
           if (args[key] != undefined) {
-            args[key] = getTokenDiv(key, args);
+            args[key] = getLogTokenDiv(key, args);
           }
         }
       }

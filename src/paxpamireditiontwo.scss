@@ -15,6 +15,7 @@
 
 @use 'base';
 @use 'animation/animation';
+@use 'logs/logs';
 @use 'Map/map';
 @use 'PlayerManager/playerBoards';
 @use 'PlayerManager/playerTableaus';
@@ -39,44 +40,6 @@ html {
     text-align: center;
     top: 5px;
 }
-
-/* ------- LOGS ------- */
-
-/* Cancelled notification messages */
-.log.cancel {
-    color: #c62828 !important;
-    text-decoration: line-through;
-  }
-  
-  /* Desktop logs */
-  .log.cancel .roundedbox {
-    background-color: rgba(240, 186, 117, 0.6) !important;
-  }
-  
-  /* Mobile logs */
-  .log.cancel.roundedbox {
-    background-color: #ef9a9a;
-  }
-
-  .pp_log_token {
-    display: inline-block;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
-
-  .pp_log_token.pp_army {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 30px;
-    width: 19px;
-    z-index: 1;
-    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));
-    margin-bottom: -5px;
-  }
-
-  .pp_log_token.pp_cylinder {
-    margin-bottom: -5px;
-  }
 
 /* ------- SUPPLY ------- */
 

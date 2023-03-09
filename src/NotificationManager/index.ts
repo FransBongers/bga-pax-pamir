@@ -14,7 +14,7 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class PPNotificationManager {
+class NotificationManager {
   private game: PaxPamirGame;
   private subscriptions: unknown[];
 

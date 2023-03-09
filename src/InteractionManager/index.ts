@@ -14,7 +14,7 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class PPInteractionManager {
+class InteractionManager {
   private game: PaxPamirGame;
   private _connections: unknown[];
 

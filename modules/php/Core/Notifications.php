@@ -84,6 +84,11 @@ class Notifications
     ]);
   }
 
+  public static function moveToken($message, $args)
+  {
+    self::notifyAll('moveToken', $message, $args);
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

@@ -31,6 +31,11 @@ class Map
     return $data;
   }
 
+  public static function getRegionInfo($region)
+  {
+    return Game::get()->regions[$region];
+  }
+
   /*
     Returns rulers for all regions. Value will either be 0 (no ruler) or
     the playerId of the player ruling the region

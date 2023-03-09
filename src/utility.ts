@@ -6,6 +6,10 @@ const getTokenDiv = (key: string, args: Record<string, string | number | Record<
   // console.log('key', key, 'args', args);
   const data = args[key];
   switch(key) {
+    case 'logTokenArmy':
+      return `<div class="pp_${data} pp_army pp_log_token"></div>`;
+    case 'logTokenTribe':
+      return `<div class="pp_cylinder pp_player_color_${data} pp_log_token"></div>`
     case 'card_log':
       return `<div class="pp_card pp_card_in_log pp_${data}"></div>`
     case 'coalitionLogToken':

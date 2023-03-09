@@ -25,12 +25,12 @@ declare const playSound;
 
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
-  public interactionManager: PPInteractionManager;
+  public interactionManager: InteractionManager;
   public map: PPMap;
-  public market: PPMarket;
-  private notificationManager: PPNotificationManager;
-  public objectManager: PPObjectManager;
-  public playerManager: PPPlayerManager;
+  public market: Market;
+  private notificationManager: NotificationManager;
+  public objectManager: ObjectManager;
+  public playerManager: PlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
   private playerEvents = {}; // events per player
@@ -76,16 +76,16 @@ class PaxPamir implements PaxPamirGame {
     this.activeEvents.instantaneous = false;
 
     this.tooltipManager = new PPTooltipManager(this);
-    this.objectManager = new PPObjectManager(this);
-    this.playerManager = new PPPlayerManager(this);
+    this.objectManager = new ObjectManager(this);
+    this.playerManager = new PlayerManager(this);
     this.map = new PPMap(this);
-    this.market = new PPMarket(this);
-    this.interactionManager = new PPInteractionManager(this);
+    this.market = new Market(this);
+    this.interactionManager = new InteractionManager(this);
 
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
     }
-    this.notificationManager = new PPNotificationManager(this);
+    this.notificationManager = new NotificationManager(this);
     // // Setup game notifications to handle (see "setupNotifications" method below)
     this.notificationManager.setupNotifications();
 
@@ -149,7 +149,7 @@ class PaxPamir implements PaxPamirGame {
         args.processed = true;
 
         // list of special keys we want to replace with images
-        const keys = ['card_log', 'coalitionLogToken', 'new_cards_log'];
+        const keys = ['card_log', 'coalitionLogToken', 'new_cards_log', 'logTokenArmy', 'logTokenTribe', 'logTokenSpy'];
 
         // list of other known variables
         //  var keys = this.notification_manager.keys;

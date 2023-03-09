@@ -908,6 +908,26 @@ html {
   background-color: #ef9a9a;
 }
 
+.pp_log_token {
+  display: inline-block;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.pp_log_token.pp_army {
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 30px;
+  width: 19px;
+  z-index: 1;
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
+  margin-bottom: -5px;
+}
+
+.pp_log_token.pp_cylinder {
+  margin-bottom: -5px;
+}
+
 /* ------- SUPPLY ------- */
 #pp_supply {
   grid-column: 1/span 1;
@@ -1738,5 +1758,3 @@ html {
 }
 
 /* ------- CARDS END ------- */
-
-/*# sourceMappingURL=paxpamireditiontwo.css.map */

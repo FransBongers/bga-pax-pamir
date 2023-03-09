@@ -426,7 +426,7 @@ class PPPlayer {
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
-class PPPlayerManager {
+class PlayerManager {
   private game: PaxPamirGame;
   private players: Record<number, PPPlayer>;
 

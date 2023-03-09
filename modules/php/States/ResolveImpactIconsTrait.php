@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -62,15 +63,19 @@ trait ResolveImpactIconsTrait
         if ($army != null) {
           $to = $this->locations['armies'][$card_region];
           Tokens::move($army['id'], $this->locations['armies'][$card_region]);
-          self::notifyAllPlayers("moveToken", "", array(
-            'moves' => array(
-              0 => array(
+          $message = clienttranslate('${player_name} places ${logTokenArmy} in ${region}');
+          Notifications::moveToken($message, [
+            'player' => Players::get(),
+            'logTokenArmy' => $loyalty,
+            'region' => Map::getRegionInfo($card_region)['name'],
+            'moves' => [
+              [
                 'from' => $location,
                 'to' => $to,
                 'tokenId' => $army['id'],
-              )
-            )
-          ));
+              ]
+            ]
+          ]);
         }
         break;
       case ECONOMIC_SUIT:
@@ -173,15 +178,19 @@ trait ResolveImpactIconsTrait
         $to = $this->locations["tribes"][$card_region];
         if ($cylinder != null) {
           Tokens::move($cylinder['id'], $to);
-          self::notifyAllPlayers("moveToken", "", array(
-            'moves' => array(
-              0 => array(
+          $message = clienttranslate('${player_name} places ${logTokenTribe} in ${region}');
+          Notifications::moveToken($message, [
+            'player' => Players::get(),
+            'logTokenTribe' => Players::get()->getColor(),
+            'region' => Map::getRegionInfo($card_region)['name'],
+            'moves' => [
+              [
                 'from' => $from,
                 'to' => $to,
                 'tokenId' => $cylinder['id'],
-              )
-            )
-          ));
+              ]
+            ]
+          ]);
         }
         break;
       default:

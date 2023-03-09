@@ -114,11 +114,11 @@ interface PaxPamirGamedatas extends Gamedatas {
 interface PaxPamirGame extends Game {
   activeEvents: Zone;
   gamedatas: PaxPamirGamedatas;
-  interactionManager: PPInteractionManager;
+  interactionManager: InteractionManager;
   map: PPMap;
-  market: PPMarket;
-  objectManager: PPObjectManager;
-  playerManager: PPPlayerManager;
+  market: Market;
+  objectManager: ObjectManager;
+  playerManager: PlayerManager;
   playerCounts: Record<string, number>;
   spies: {
     [cardId: string]: Zone;

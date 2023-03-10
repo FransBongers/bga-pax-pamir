@@ -514,6 +514,7 @@
 
 #pp_player_tableaus {
   grid-column: span 1;
+  grid-row: span 4;
   min-height: 300px;
   display: flex;
   flex-direction: column;
@@ -921,12 +922,21 @@ html {
   grid-gap: 15px;
   display: grid;
   grid-auto-flow: dense;
-  grid-template-columns: repeat(auto-fill, 1000px);
   grid-template-rows: repeat(auto-fill, 581px 241px 492px);
   justify-content: center;
   position: relative;
   text-align: center;
   top: 5px;
+}
+@media (max-width: 2080px) {
+  #pp_play_area {
+    grid-template-columns: repeat(auto-fill, 1000px);
+  }
+}
+@media (min-width: 2080px) {
+  #pp_play_area {
+    grid-template-columns: repeat(auto-fill, 1000px minmax(840px, 1fr));
+  }
 }
 
 /* ------- SUPPLY ------- */

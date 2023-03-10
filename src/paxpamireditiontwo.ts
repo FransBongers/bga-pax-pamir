@@ -60,7 +60,8 @@ class PaxPamir implements PaxPamirGame {
   public setup(gamedatas: PaxPamirGamedatas) {
     // Create a new div for buttons to avoid BGA auto clearing it
     dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
-
+    // const playAreaWidth = document.getElementById('pp_play_area').offsetWidth;
+    // console.log('playAreaWidth',playAreaWidth);
     this.gamedatas = gamedatas;
     console.log('gamedatas', gamedatas);
 

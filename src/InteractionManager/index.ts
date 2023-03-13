@@ -229,7 +229,7 @@ class InteractionManager {
         this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
         break;
       case PLAY_CARD_BRIBE:
-        dojo.query(`.pp_${args.playCardBribe.cardId}`).addClass('pp_selected');
+        dojo.query(`.pp_card_in_hand.pp_${args.playCardBribe.cardId}`).addClass('pp_selected');
         this.updatePageTitle({
           text: substituteKeywords({
             string: ` \${you} need to pay a bribe to \${playerName}, ruler of \${region} \${${args.playCardBribe.region}}, or ask to waive.`,
@@ -245,7 +245,7 @@ class InteractionManager {
         });
         break;
       case PLAY_CARD_SELECT_SIDE:
-        dojo.query(`.pp_${args.playCardSelectSide.cardId}`).addClass('pp_selected');
+        dojo.query(`.pp_card_in_hand.pp_${args.playCardSelectSide.cardId}`).addClass('pp_selected');
         this.updatePageTitle({
           text: _("Select which side of court to play '${name}'"),
           args: {
@@ -257,7 +257,7 @@ class InteractionManager {
         break;
       case PLAY_CARD_CONFIRM:
         dojo.query(`#pp_card_select_${args.playCardConfirm.side}`).addClass('pp_selected');
-        dojo.query(`.pp_${args.playCardConfirm.cardId}`).addClass('pp_selected');
+        dojo.query(`.pp_card_in_hand.pp_${args.playCardConfirm.cardId}`).addClass('pp_selected');
         if (args.playCardConfirm.firstCard) {
           this.updatePageTitle({
             text: _("Play '${name}' to court?"),

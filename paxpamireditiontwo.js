@@ -170,18 +170,29 @@ var positionObjectDirectly = function (mobileObj, x, y) {
 var LOG_TOKEN_ARMY = 'logTokenArmy';
 var LOG_TOKEN_CARD = 'logTokenCard';
 var LOG_TOKEN_COALITION = 'logTokenCoalition';
+var LOG_TOKEN_FAVORED_SUIT = 'logTokenFavoredSuit';
 var LOG_TOKEN_NEW_CARDS = 'logTokenNewCards';
 var LOG_TOKEN_SPY = 'logTokenSpy';
 var LOG_TOKEN_TRIBE = 'logTokenTribe';
-var logTokenKeys = [LOG_TOKEN_CARD, LOG_TOKEN_COALITION, LOG_TOKEN_NEW_CARDS, LOG_TOKEN_ARMY, LOG_TOKEN_TRIBE, LOG_TOKEN_SPY];
+var logTokenKeys = [
+    LOG_TOKEN_CARD,
+    LOG_TOKEN_COALITION,
+    LOG_TOKEN_FAVORED_SUIT,
+    LOG_TOKEN_NEW_CARDS,
+    LOG_TOKEN_ARMY,
+    LOG_TOKEN_TRIBE,
+    LOG_TOKEN_SPY,
+];
 var getLogTokenDiv = function (key, args) {
-    // console.log('key', key, 'args', args);
+    console.log('getLogTokenDiv', key, 'args', args);
     var data = args[key];
     switch (key) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: data });
         case LOG_TOKEN_CARD:
             return tplLogTokenCard({ cardId: data });
+        case LOG_TOKEN_FAVORED_SUIT:
+            return tplLogTokenFavoredSuit({ suit: data });
         case LOG_TOKEN_TRIBE:
             return tplLogTokenTribe({ color: data });
         case LOG_TOKEN_COALITION:
@@ -198,11 +209,15 @@ var tplLogTokenArmy = function (_a) {
 };
 var tplLogTokenCard = function (_a) {
     var cardId = _a.cardId;
-    return "<div class=\"pp_card pp_card_in_log pp_".concat(cardId, "\"></div>");
+    return "<div class=\"pp_card pp_log_token pp_".concat(cardId, "\"></div>");
 };
 var tplLogTokenCoalition = function (_a) {
     var coalition = _a.coalition;
-    return "<div class=\"pp_icon_log pp_loyalty_icon_log pp_".concat(coalition, "\"></div>");
+    return "<div class=\"pp_log_token pp_loyalty_icon pp_".concat(coalition, "\"></div>");
+};
+var tplLogTokenFavoredSuit = function (_a) {
+    var suit = _a.suit;
+    return "<div class=\"pp_log_token pp_impact_icon_suit ".concat(suit, "\"></div>");
 };
 var tplLogTokenTribe = function (_a) {
     var color = _a.color;
@@ -212,7 +227,7 @@ var tplLogTokenNewCards = function (_a) {
     var cards = _a.cards;
     var newCards = '';
     cards.forEach(function (card) {
-        newCards += "<div class=\"pp_card pp_card_in_log pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
+        newCards += "<div class=\"pp_card pp_log_token pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
     });
     return newCards;
 };
@@ -1104,16 +1119,16 @@ var PPPlayer = /** @class */ (function () {
         var coalition = _a.coalition;
         dojo
             .query("#loyalty_icon_".concat(this.playerId))
-            .removeClass('pp_loyalty_afghan')
-            .removeClass('pp_loyalty_british')
-            .removeClass('pp_loyalty_russian')
-            .addClass("pp_loyalty_".concat(coalition));
+            .removeClass('pp_afghan')
+            .removeClass('pp_british')
+            .removeClass('pp_russian')
+            .addClass("pp_".concat(coalition));
         dojo
             .query("#pp_loyalty_dial_".concat(this.playerId))
-            .removeClass('pp_loyalty_afghan')
-            .removeClass('pp_loyalty_british')
-            .removeClass('pp_loyalty_russian')
-            .addClass("pp_loyalty_".concat(coalition));
+            .removeClass('pp_afghan')
+            .removeClass('pp_british')
+            .removeClass('pp_russian')
+            .addClass("pp_".concat(coalition));
     };
     return PPPlayer;
 }());
@@ -1771,7 +1786,7 @@ var InteractionManager = /** @class */ (function () {
                 this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
                 break;
             case PLAY_CARD_BRIBE:
-                dojo.query(".pp_".concat(args.playCardBribe.cardId)).addClass('pp_selected');
+                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardBribe.cardId)).addClass('pp_selected');
                 this.updatePageTitle({
                     text: substituteKeywords({
                         string: " ${you} need to pay a bribe to ${playerName}, ruler of ${region} ${".concat(args.playCardBribe.region, "}, or ask to waive."),
@@ -1787,7 +1802,7 @@ var InteractionManager = /** @class */ (function () {
                 });
                 break;
             case PLAY_CARD_SELECT_SIDE:
-                dojo.query(".pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
+                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
                 this.updatePageTitle({
                     text: _("Select which side of court to play '${name}'"),
                     args: {
@@ -1799,7 +1814,7 @@ var InteractionManager = /** @class */ (function () {
                 break;
             case PLAY_CARD_CONFIRM:
                 dojo.query("#pp_card_select_".concat(args.playCardConfirm.side)).addClass('pp_selected');
-                dojo.query(".pp_".concat(args.playCardConfirm.cardId)).addClass('pp_selected');
+                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardConfirm.cardId)).addClass('pp_selected');
                 if (args.playCardConfirm.firstCard) {
                     this.updatePageTitle({
                         text: _("Play '${name}' to court?"),

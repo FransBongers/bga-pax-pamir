@@ -396,17 +396,17 @@ class PPPlayer {
   updatePlayerLoyalty({ coalition }) {
     dojo
       .query(`#loyalty_icon_${this.playerId}`)
-      .removeClass('pp_loyalty_afghan')
-      .removeClass('pp_loyalty_british')
-      .removeClass('pp_loyalty_russian')
-      .addClass(`pp_loyalty_${coalition}`);
+      .removeClass('pp_afghan')
+      .removeClass('pp_british')
+      .removeClass('pp_russian')
+      .addClass(`pp_${coalition}`);
 
     dojo
       .query(`#pp_loyalty_dial_${this.playerId}`)
-      .removeClass('pp_loyalty_afghan')
-      .removeClass('pp_loyalty_british')
-      .removeClass('pp_loyalty_russian')
-      .addClass(`pp_loyalty_${coalition}`);
+      .removeClass('pp_afghan')
+      .removeClass('pp_british')
+      .removeClass('pp_russian')
+      .addClass(`pp_${coalition}`);
   }
 }
 

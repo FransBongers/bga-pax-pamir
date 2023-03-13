@@ -52,7 +52,7 @@ class Notifications
 
   public static function clearTurn($player, $notifIds)
   {
-    self::notifyAll('clearTurn', clienttranslate('${player_name} restarts their turn'), [
+    self::notifyAll('clearTurn', clienttranslate('${player_name} restarts his turn'), [
       'player' => $player,
       'notifIds' => $notifIds,
     ]);

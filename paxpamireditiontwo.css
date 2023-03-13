@@ -32,6 +32,33 @@
   margin-right: 2px;
 }
 
+.pp_log_token.pp_loyalty_icon.pp_afghan {
+  height: 20px;
+  width: 38px;
+  padding-bottom: 0px;
+}
+
+.pp_log_token.pp_loyalty_icon.pp_british {
+  height: 20px;
+  width: 34px;
+  padding-bottom: 0px;
+}
+
+.pp_log_token.pp_loyalty_icon.pp_russian {
+  height: 20px;
+  width: 35px;
+  padding-bottom: 0px;
+}
+
+.pp_log_token.pp_card {
+  display: block;
+  width: 75px;
+  height: 104px;
+  background-size: 75px 104px;
+  border-radius: 5px !important;
+  box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
+}
+
 .pp_log_token.pp_army {
   background-size: contain;
   background-repeat: no-repeat;
@@ -44,6 +71,30 @@
 
 .pp_log_token.pp_cylinder {
   margin-bottom: -5px;
+}
+
+.pp_log_token.pp_impact_icon_suit {
+  width: 30px;
+  height: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-bottom: -7px;
+}
+
+.pp_impact_icon_suit.economic {
+  background-image: url("img/impact_suit_economic.svg");
+}
+
+.pp_impact_icon_suit.military {
+  background-image: url("img/impact_suit_military.svg");
+}
+
+.pp_impact_icon_suit.political {
+  background-image: url("img/impact_suit_political.svg");
+}
+
+.pp_impact_icon_suit.intelligence {
+  background-image: url("img/impact_suit_intelligence.svg");
 }
 
 /* ------- MAP AND REGIONS ------- */
@@ -398,32 +449,6 @@
   margin: 3px;
 }
 
-.pp_icon_log {
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-.pp_loyalty_icon_log.pp_afghan {
-  background-image: url("img/loyalty_afghan.svg");
-  height: 20px;
-  width: 38px;
-  display: inline-block;
-}
-
-.pp_loyalty_icon_log.pp_british {
-  background-image: url("img/loyalty_british.svg");
-  height: 20px;
-  width: 34px;
-  display: inline-block;
-}
-
-.pp_loyalty_icon_log.pp_russian {
-  background-image: url("img/loyalty_russian.svg");
-  height: 20px;
-  width: 35px;
-  display: inline-block;
-}
-
 .pp_icon {
   background-repeat: no-repeat;
   position: relative;
@@ -436,23 +461,23 @@
   /* background-size: 132px 30px;  */
   /* background-position: -250px 0px; */
   background-size: contain;
-  /* background-repeat: no-repeat;
-  width: 44px; */
+  background-repeat: no-repeat;
+  /* width: 44px; */
 }
 
-.pp_loyalty_icon.pp_loyalty_afghan {
+.pp_loyalty_icon.pp_afghan {
   background-image: url("img/loyalty_afghan.svg");
   height: 25px;
   padding-bottom: 12px;
 }
 
-.pp_loyalty_icon.pp_loyalty_british {
+.pp_loyalty_icon.pp_british {
   background-image: url("img/loyalty_british.svg");
   height: 16px;
   padding-bottom: 22px;
 }
 
-.pp_loyalty_icon.pp_loyalty_russian {
+.pp_loyalty_icon.pp_russian {
   background-image: url("img/loyalty_russian.svg");
   height: 14px;
   padding-bottom: 22px;
@@ -1154,14 +1179,6 @@ html {
   background-size: 150px 209px;
   box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
-}
-
-.pp_card_in_log {
-  width: 75px;
-  height: 104px;
-  background-size: 75px 104px;
-  border-radius: 5px !important;
-  box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
 }
 
 .pp_card_select_side {

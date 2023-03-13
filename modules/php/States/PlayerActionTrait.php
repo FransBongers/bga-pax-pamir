@@ -98,7 +98,7 @@ trait PlayerActionTrait
       Globals::setRemainingActions(0);
 
       // Notify
-      self::notifyAllPlayers("pass", clienttranslate('${player_name} ended their turn.'), array(
+      self::notifyAllPlayers("pass", clienttranslate('${player_name} ends his turn.'), array(
         'playerId' => $playerId,
         'player_name' => self::getActivePlayerName(),
       ));
@@ -188,10 +188,10 @@ trait PlayerActionTrait
           Cards::setState($courtCards[$i]['id'], $i + 2);
         }
         Cards::move($cardId, ['court', $playerId], 1);
-        $message = clienttranslate('${player_name} plays ${cardName} to the left side of their court');
+        $message = clienttranslate('${player_name} plays ${cardName} to the left side of his court');
       } else {
         Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
-        $message = clienttranslate('${player_name} plays ${cardName} to the right side of their court');
+        $message = clienttranslate('${player_name} plays ${cardName} to the right side of his court');
       }
       Globals::incRemainingActions(-1);
       $court_cards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
@@ -235,7 +235,7 @@ trait PlayerActionTrait
       throw new \feException("Card is unavailble");
     }
 
-    $cardName = $this->cards[$cardId]['name'];
+    $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
     $marketLocation = $card['location'];
     self::dump("purchaseCard", $cardId, $playerId, $card);
     $row = explode("_", $marketLocation)[1];

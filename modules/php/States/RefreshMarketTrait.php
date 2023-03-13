@@ -80,7 +80,7 @@ trait RefreshMarketTrait
       }
     }
 
-    self::notifyAllPlayers("refreshMarket", clienttranslate('The market is filled. New cards: ${logTokenNewCards}'), array(
+    self::notifyAllPlayers("refreshMarket", clienttranslate('The market is refilled. New cards: ${logTokenNewCards}'), array(
       'cardMoves' => $cardMoves,
       'newCards' => $newCards,
       'logTokenNewCards' => $newCards

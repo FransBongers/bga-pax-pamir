@@ -79,7 +79,7 @@ trait DiscardTrait
         $removed_card = Cards::get($cardId);
         $courtCards = $player->getCourtCards();
 
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from their hand.', array(
+        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from his hand.', array(
           'playerId' => $player->getId(),
           'player_name' => self::getActivePlayerName(),
           'cardName' => $cardName,
@@ -116,7 +116,7 @@ trait DiscardTrait
 
         $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
 
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from their court.', array(
+        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from his court.', array(
           'playerId' => $playerId,
           'player_name' => self::getActivePlayerName(),
           'cardName' => $cardName,

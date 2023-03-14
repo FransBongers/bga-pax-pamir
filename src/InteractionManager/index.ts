@@ -203,7 +203,7 @@ class InteractionManager {
         this.addDangerActionButton({ id: 'undo_btn', text: _('Undo'), callback: () => this.game.takeAction({ action: 'restart' }) });
         break;
       case CONFIRM_PLACE_SPY:
-        dojo.query(`.pp_${args.confirmPlaceSpy.cardId}`).addClass('pp_selected');
+        dojo.query(`.pp_card_in_court.pp_${args.confirmPlaceSpy.cardId}`).addClass('pp_selected');
         this.updatePageTitle({
           text: _('Place a spy on ${cardName}'),
           args: {
@@ -298,11 +298,10 @@ class InteractionManager {
         const name = cpCardInfo.type === COURT_CARD ? cpCardInfo.name : cpCardInfo.purchased.title;
         dojo.query(`.pp_${cardId}`).addClass('pp_selected');
         this.updatePageTitle({
-          text: _("Purchase '${name}' for ${cost} ${rupees}?"),
+          text: _("Purchase '${name}' for ${cost} rupee(s)?"),
           args: {
             name,
             cost,
-            rupees: Number(cost) === 1 ? 'rupee' : 'rupees',
           },
         });
         this.addPrimaryActionButton({
@@ -681,7 +680,7 @@ class InteractionManager {
   }
 
   setPlaceSpyCardsSelectable({ region }: { region: string }) {
-    dojo.query(`.pp_card_in_court_${region}`).forEach((node: HTMLElement, index: number) => {
+    dojo.query(`.pp_card_in_court.pp_${region}`).forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(

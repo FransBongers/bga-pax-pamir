@@ -188,10 +188,10 @@ trait ResolveImpactIconsTrait
         $to = $this->locations["tribes"][$card_region];
         if ($cylinder != null) {
           Tokens::move($cylinder['id'], $to);
-          $message = clienttranslate('${player_name} places ${logTokenTribe} in ${region}');
+          $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${region}');
           Notifications::moveToken($message, [
             'player' => Players::get(),
-            'logTokenTribe' => Players::get()->getColor(),
+            'logTokenCylinder' => Players::get()->getColor(),
             'region' => Map::getRegionInfo($card_region)['name'],
             'moves' => [
               [

@@ -83,7 +83,7 @@ class PPPlayer {
       const cardId = card.id;
       const { actions, region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
       dojo.place(
-        tplCard({ cardId, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
+        tplCard({ cardId, extraClasses: `pp_card_in_court pp_${this.playerId} pp_${region}` }),
         `pp_court_player_${this.playerId}`
       );
 

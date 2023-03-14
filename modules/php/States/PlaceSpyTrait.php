@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
@@ -62,15 +63,20 @@ trait PlaceSpyTrait
     if ($cylinder != null) {
       $to = 'spies_' . $cardId;
       Tokens::move($cylinder['id'], $to);
-      self::notifyAllPlayers("moveToken", "", array(
-        'moves' => array(
-          0 => array(
+      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${cardName}${logTokenCardLarge}');
+      Notifications::moveToken($message, [
+        'player' => Players::get(),
+        'logTokenCardLarge' => $cardId,
+        'logTokenCylinder' => Players::get()->getColor(),
+        'cardName' => Cards::get($cardId)['name'],
+        'moves' => [
+          [
             'from' => $from,
             'to' => $to,
             'tokenId' => $cylinder['id'],
-          )
-        )
-      ));
+          ]
+        ]
+      ]);
     }
     Globals::incResolveImpactIconsCurrentIcon(1);
     $this->gamestate->nextState('resolveImpactIcons');

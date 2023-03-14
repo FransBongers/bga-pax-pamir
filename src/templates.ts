@@ -24,7 +24,7 @@ const tplCardTooltipContainer = ({cardId, content}: {cardId: string; content: st
 const getImpactIconText = ({ impactIcon }: { impactIcon: string }) => {
   switch (impactIcon) {
     case IMPACT_ICON_ARMY:
-      return _('Place one coalition block of your loyalty on any border of this region. This piece is now an army.');
+      return _('Place one coalition block of your loyalty in this region. This piece is now an army.');
     case IMPACT_ICON_ROAD:
       return _('Place one coalition block of your loyalty on any border of this region. This piece is now a road.');
     case IMPACT_ICON_LEVERAGE:
@@ -62,11 +62,14 @@ const tplTooltipImpactIcon = ({ impactIcon, loyalty }: { impactIcon: string; loy
       break;
     case IMPACT_ICON_LEVERAGE:
     case IMPACT_ICON_SPY:
+      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_${impactIcon}"></div>`;
+      break;
     case IMPACT_ICON_ECONOMIC_SUIT:
     case IMPACT_ICON_MILITARY_SUIT:
     case IMPACT_ICON_POLITICAL_SUIT:
     case IMPACT_ICON_INTELLIGENCE_SUIT:
-      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_${impactIcon}"></div>`;
+      console.log('impactIcon', impactIcon)
+      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_suit ${impactIcon}"></div>`;
       break;
     default:
       break;

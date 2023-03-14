@@ -98,10 +98,10 @@ const IMPACT_ICON_ARMY = 'army';
 const IMPACT_ICON_LEVERAGE = 'leverage';
 const IMPACT_ICON_SPY = 'spy';
 const IMPACT_ICON_TRIBE = 'tribe';
-const IMPACT_ICON_ECONOMIC_SUIT = 'economicSuit';
-const IMPACT_ICON_MILITARY_SUIT = 'militarySuit';
-const IMPACT_ICON_POLITICAL_SUIT = 'politicalSuit';
-const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligenceSuit';
+const IMPACT_ICON_ECONOMIC_SUIT = 'economic';
+const IMPACT_ICON_MILITARY_SUIT = 'military';
+const IMPACT_ICON_POLITICAL_SUIT = 'political';
+const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 
 /**
  * Card actions types

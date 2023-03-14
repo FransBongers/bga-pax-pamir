@@ -188,11 +188,11 @@ trait PlayerActionTrait
           Cards::setState($courtCards[$i]['id'], $i + 2);
         }
         Cards::move($cardId, ['court', $playerId], 1);
-        $message = clienttranslate('${player_name} plays ${cardName} to the left side of his court');
+        
       } else {
         Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
-        $message = clienttranslate('${player_name} plays ${cardName} to the right side of his court');
       }
+      $message = clienttranslate('${player_name} plays ${cardName} ${logTokenCard} to the ${side} side of his court');
       Globals::incRemainingActions(-1);
       $court_cards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
       $card = Cards::get($cardId);
@@ -203,6 +203,8 @@ trait PlayerActionTrait
         'cardName' => $card_name,
         'courtCards' => $court_cards,
         'bribe' => false,
+        'logTokenCard' => $cardId,
+        'side' => $leftSide ? clienttranslate('left') : clienttranslate('right')
       ));
 
       $this->updatePlayerCounts();
@@ -298,12 +300,12 @@ trait PlayerActionTrait
       Players::incRupees($playerId, count($rupees));
       Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
-      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenCard}'), array(
+      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenCardLarge}'), array(
         'playerId' => $playerId,
         'player_name' => self::getActivePlayerName(),
         'card' => $card,
         'cardName' => $cardName,
-        'logTokenCard' => $card['id'],
+        'logTokenCardLarge' => $card['id'],
         'marketLocation' => $marketLocation,
         'newLocation' => $newLocation,
         'updatedCards' => $updatedCards,

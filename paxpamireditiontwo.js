@@ -169,36 +169,44 @@ var positionObjectDirectly = function (mobileObj, x, y) {
 };
 var LOG_TOKEN_ARMY = 'logTokenArmy';
 var LOG_TOKEN_CARD = 'logTokenCard';
+var LOG_TOKEN_CARD_LARGE = 'logTokenCardLarge';
 var LOG_TOKEN_COALITION = 'logTokenCoalition';
 var LOG_TOKEN_FAVORED_SUIT = 'logTokenFavoredSuit';
 var LOG_TOKEN_NEW_CARDS = 'logTokenNewCards';
+var LOG_TOKEN_ROAD = 'logTokenRoad';
 var LOG_TOKEN_SPY = 'logTokenSpy';
-var LOG_TOKEN_TRIBE = 'logTokenTribe';
+var LOG_TOKEN_CYLINDER = 'logTokenCylinder';
 var logTokenKeys = [
+    LOG_TOKEN_ARMY,
     LOG_TOKEN_CARD,
+    LOG_TOKEN_CARD_LARGE,
     LOG_TOKEN_COALITION,
     LOG_TOKEN_FAVORED_SUIT,
     LOG_TOKEN_NEW_CARDS,
-    LOG_TOKEN_ARMY,
-    LOG_TOKEN_TRIBE,
+    LOG_TOKEN_ROAD,
     LOG_TOKEN_SPY,
+    LOG_TOKEN_CYLINDER,
 ];
 var getLogTokenDiv = function (key, args) {
-    console.log('getLogTokenDiv', key, 'args', args);
     var data = args[key];
+    console.log('getLogTokenDiv', key, 'data', data);
     switch (key) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: data });
         case LOG_TOKEN_CARD:
             return tplLogTokenCard({ cardId: data });
+        case LOG_TOKEN_CARD_LARGE:
+            return tplLogTokenCard({ cardId: data, large: true });
         case LOG_TOKEN_FAVORED_SUIT:
             return tplLogTokenFavoredSuit({ suit: data });
-        case LOG_TOKEN_TRIBE:
-            return tplLogTokenTribe({ color: data });
+        case LOG_TOKEN_CYLINDER:
+            return tplLogTokenCylinder({ color: data });
         case LOG_TOKEN_COALITION:
             return tplLogTokenCoalition({ coalition: data });
         case LOG_TOKEN_NEW_CARDS:
             return tplLogTokenNewCards({ cards: data });
+        case LOG_TOKEN_ROAD:
+            return tplLogTokenRoad({ coalition: data });
         default:
             return args[key];
     }
@@ -208,28 +216,32 @@ var tplLogTokenArmy = function (_a) {
     return "<div class=\"pp_".concat(coalition, " pp_army pp_log_token\"></div>");
 };
 var tplLogTokenCard = function (_a) {
-    var cardId = _a.cardId;
-    return "<div class=\"pp_card pp_log_token pp_".concat(cardId, "\"></div>");
+    var cardId = _a.cardId, large = _a.large;
+    return "<div class=\"pp_card pp_log_token pp_".concat(cardId).concat(large ? ' pp_large' : '', "\"></div>");
 };
 var tplLogTokenCoalition = function (_a) {
     var coalition = _a.coalition;
     return "<div class=\"pp_log_token pp_loyalty_icon pp_".concat(coalition, "\"></div>");
 };
+var tplLogTokenCylinder = function (_a) {
+    var color = _a.color;
+    return "<div class=\"pp_cylinder pp_player_color_".concat(color, " pp_log_token\"></div>");
+};
 var tplLogTokenFavoredSuit = function (_a) {
     var suit = _a.suit;
     return "<div class=\"pp_log_token pp_impact_icon_suit ".concat(suit, "\"></div>");
-};
-var tplLogTokenTribe = function (_a) {
-    var color = _a.color;
-    return "<div class=\"pp_cylinder pp_player_color_".concat(color, " pp_log_token\"></div>");
 };
 var tplLogTokenNewCards = function (_a) {
     var cards = _a.cards;
     var newCards = '';
     cards.forEach(function (card) {
-        newCards += "<div class=\"pp_card pp_log_token pp_".concat(card.cardId, "\" style=\"display: inline-block; margin-right: 4px;\"></div>");
+        newCards += "<div class=\"pp_card pp_log_token pp_".concat(card.cardId, " pp_large\" style=\"display: inline-block; margin-right: 4px;\"></div>");
     });
     return newCards;
+};
+var tplLogTokenRoad = function (_a) {
+    var coalition = _a.coalition;
+    return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
 };
 // Interface steps
 var CARD_ACTION_BATTLE = 'cardActionBattle';
@@ -319,10 +331,10 @@ var IMPACT_ICON_ARMY = 'army';
 var IMPACT_ICON_LEVERAGE = 'leverage';
 var IMPACT_ICON_SPY = 'spy';
 var IMPACT_ICON_TRIBE = 'tribe';
-var IMPACT_ICON_ECONOMIC_SUIT = 'economicSuit';
-var IMPACT_ICON_MILITARY_SUIT = 'militarySuit';
-var IMPACT_ICON_POLITICAL_SUIT = 'politicalSuit';
-var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligenceSuit';
+var IMPACT_ICON_ECONOMIC_SUIT = 'economic';
+var IMPACT_ICON_MILITARY_SUIT = 'military';
+var IMPACT_ICON_POLITICAL_SUIT = 'political';
+var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 /**
  * Card actions types
  */
@@ -352,7 +364,7 @@ var getImpactIconText = function (_a) {
     var impactIcon = _a.impactIcon;
     switch (impactIcon) {
         case IMPACT_ICON_ARMY:
-            return _('Place one coalition block of your loyalty on any border of this region. This piece is now an army.');
+            return _('Place one coalition block of your loyalty in this region. This piece is now an army.');
         case IMPACT_ICON_ROAD:
             return _('Place one coalition block of your loyalty on any border of this region. This piece is now a road.');
         case IMPACT_ICON_LEVERAGE:
@@ -388,11 +400,14 @@ var tplTooltipImpactIcon = function (_a) {
             break;
         case IMPACT_ICON_LEVERAGE:
         case IMPACT_ICON_SPY:
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_".concat(impactIcon, "\"></div>");
+            break;
         case IMPACT_ICON_ECONOMIC_SUIT:
         case IMPACT_ICON_MILITARY_SUIT:
         case IMPACT_ICON_POLITICAL_SUIT:
         case IMPACT_ICON_INTELLIGENCE_SUIT:
-            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_".concat(impactIcon, "\"></div>");
+            console.log('impactIcon', impactIcon);
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_suit ".concat(impactIcon, "\"></div>");
             break;
         default:
             break;
@@ -845,7 +860,7 @@ var PPPlayer = /** @class */ (function () {
         playerGamedatas.court.cards.forEach(function (card) {
             var cardId = card.id;
             var _a = _this.game.gamedatas.staticData.cards[cardId], actions = _a.actions, region = _a.region;
-            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_card_in_court_".concat(_this.playerId, " pp_card_in_court_").concat(region) }), "pp_court_player_".concat(_this.playerId));
+            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_card_in_court pp_".concat(_this.playerId, " pp_").concat(region) }), "pp_court_player_".concat(_this.playerId));
             _this.setupCourtCard({ cardId: cardId });
             _this.court.placeInZone(cardId, card.state);
             // Add spies
@@ -1760,7 +1775,7 @@ var InteractionManager = /** @class */ (function () {
                 this.addDangerActionButton({ id: 'undo_btn', text: _('Undo'), callback: function () { return _this.game.takeAction({ action: 'restart' }); } });
                 break;
             case CONFIRM_PLACE_SPY:
-                dojo.query(".pp_".concat(args.confirmPlaceSpy.cardId)).addClass('pp_selected');
+                dojo.query(".pp_card_in_court.pp_".concat(args.confirmPlaceSpy.cardId)).addClass('pp_selected');
                 this.updatePageTitle({
                     text: _('Place a spy on ${cardName}'),
                     args: {
@@ -1857,11 +1872,10 @@ var InteractionManager = /** @class */ (function () {
                 var name_1 = cpCardInfo.type === COURT_CARD ? cpCardInfo.name : cpCardInfo.purchased.title;
                 dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
                 this.updatePageTitle({
-                    text: _("Purchase '${name}' for ${cost} ${rupees}?"),
+                    text: _("Purchase '${name}' for ${cost} rupee(s)?"),
                     args: {
                         name: name_1,
                         cost: cost,
-                        rupees: Number(cost) === 1 ? 'rupee' : 'rupees',
                     },
                 });
                 this.addPrimaryActionButton({
@@ -2196,7 +2210,7 @@ var InteractionManager = /** @class */ (function () {
     InteractionManager.prototype.setPlaceSpyCardsSelectable = function (_a) {
         var _this = this;
         var region = _a.region;
-        dojo.query(".pp_card_in_court_".concat(region)).forEach(function (node, index) {
+        dojo.query(".pp_card_in_court.pp_".concat(region)).forEach(function (node, index) {
             var cardId = node.id;
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () {

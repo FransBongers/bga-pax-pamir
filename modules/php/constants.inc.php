@@ -66,10 +66,10 @@ const ARMY = 'army';
 const LEVERAGE = 'leverage';
 const SPY = 'spy';
 const TRIBE = 'tribe';
-const ECONOMIC_SUIT = 'economicSuit';
-const MILITARY_SUIT = 'militarySuit';
-const POLITICAL_SUIT = 'politicalSuit';
-const INTELLIGENCE_SUIT = 'intelligenceSuit';
+const ECONOMIC_SUIT = 'economic';
+const MILITARY_SUIT = 'military';
+const POLITICAL_SUIT = 'political';
+const INTELLIGENCE_SUIT = 'intelligence';
 
 /**
  * Regions

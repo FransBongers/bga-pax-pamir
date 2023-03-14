@@ -51,12 +51,23 @@
 }
 
 .pp_log_token.pp_card {
+  height: 30px;
+  width: 22px;
+  background-size: 22px 30px;
+  border-radius: 2px !important;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.4) !important;
+  margin-bottom: -5px;
+}
+
+.pp_log_token.pp_card.pp_large {
   display: block;
   width: 75px;
   height: 104px;
   background-size: 75px 104px;
   border-radius: 5px !important;
   box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
+  margin-top: 2px;
+  margin-bottom: 0px;
 }
 
 .pp_log_token.pp_army {
@@ -66,6 +77,10 @@
   width: 19px;
   z-index: 1;
   filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
+  margin-bottom: -5px;
+}
+
+.pp_log_token.pp_road {
   margin-bottom: -5px;
 }
 

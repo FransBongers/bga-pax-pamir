@@ -75,12 +75,19 @@ html {
 }
 
 #pp_discard_pile {
-    width: 150px;
-    height: 209px;
+    width: 149px;
+    height: 208px;
     border-radius: 10px;
     border: 4px dashed black;
     box-sizing: border-box;
     margin-right: 10px;
+    position: relative;
+}
+
+#pp_discard_pile > .pp_card {
+    top: -5px;
+    left: -5px;
+    position: absolute;
 }
 
 #pp_market_deck {

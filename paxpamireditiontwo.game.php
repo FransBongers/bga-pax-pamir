@@ -147,6 +147,7 @@ class PaxPamirEditionTwo extends Table
             // 'rupees' => Tokens::getOfType('rupee'),
             'favoredSuit' => Globals::getFavoredSuit(),
             'canceledNotifIds' => Log::getCanceledNotifIds(),
+            'discardPile' => Cards::getTopOf(DISCARD),
         ];
 
         // TODO: move to SupplyManager class?

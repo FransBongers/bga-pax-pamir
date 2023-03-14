@@ -24,6 +24,7 @@ interface NotifDiscardCardArgs {
   cardName: string;
   courtCards: Token[];
   from: string;
+  state: number;
 }
 
 interface NotifPlayCardArgs {

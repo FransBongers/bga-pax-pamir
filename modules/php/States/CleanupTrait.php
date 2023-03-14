@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
@@ -59,31 +60,27 @@ trait CleanupTrait
     }
   }
 
+  function checkAndDiscardIfEvent($location)
+  {
+    $card = Cards::getInLocation($location)->first();
+    if ($card != null && $card['type'] == EVENT_CARD) {
+      $state = Cards::getExtremePosition(true, DISCARD);
+      Cards::move($card['id'], DISCARD, $state + 1);
+      Notifications::discardEventCardFromMarket($card,$location);
+      // self::notifyAllPlayers("discardCard", '${player_name} discards event card from the market: ${logTokenCardLarge}', array(
+      //   'player_name' => self::getActivePlayerName(),
+      //   'cardId' => $card['id'],
+      //   'from' => $location,
+      //   'logTokenCardLarge' => $card['id']
+      // ));
+    };
+  }
+
   function stCleanupDiscardEvents()
   {
-
     // Discard events at front of market
-    // NOTE: perhaps move this to separate state for handling execution of the event
-    $topCard = Cards::getInLocation('market_0_0')->first();
-    $bottomCard = Cards::getInLocation('market_1_0')->first();
-    if ($topCard != null && $this->cards[$topCard['id']]['type'] == EVENT_CARD) {
-      Cards::move($topCard['id'], 'discard');
-      // $card_name = $this->cards[$topCard['id']]['name'];
-      self::notifyAllPlayers("discardCard", 'event is discarded from the market.', array(
-        // 'card_name' => $card_name,
-        'cardId' => $topCard['id'],
-        'from' => 'market_0_0'
-      ));
-    };
-    if ($bottomCard != null && $this->cards[$bottomCard['id']]['type'] == EVENT_CARD) {
-      Cards::move($bottomCard['id'], 'discard');
-      // $card_name = $this->cards[$bottomCard['id']]['name'];
-      self::notifyAllPlayers("discardCard", 'event is discarded from the market.', array(
-        // 'card_name' => $card_name,
-        'cardId' => $bottomCard['id'],
-        'from' => 'market_1_0'
-      ));
-    };
+    $this->checkAndDiscardIfEvent('market_0_0');
+    $this->checkAndDiscardIfEvent('market_1_0');
 
     $this->gamestate->nextState('refreshMarket');
   }

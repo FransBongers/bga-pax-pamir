@@ -122,6 +122,11 @@ const BLOCKS_AFGHAN_SUPPLY = 'blocks_afghan';
 const BLOCKS_BRITISH_SUPPLY = 'blocks_british';
 const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
 
+/**
+ * Card locations
+ */
+const DISCARD = 'discard';
+
 /*
  * Game options
  */

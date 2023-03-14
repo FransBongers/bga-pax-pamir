@@ -89,6 +89,17 @@ class Notifications
     self::notifyAll('moveToken', $message, $args);
   }
 
+  public static function discardEventCardFromMarket($card,$location)
+  {
+
+    self::notifyAll("discardCard", '${player_name} discards event card from the market: ${logTokenCardLarge}', array(
+      'player' => Players::get(),
+      'cardId' => $card['id'],
+      'from' => $location,
+      'logTokenCardLarge' => $card['id']
+    ));
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

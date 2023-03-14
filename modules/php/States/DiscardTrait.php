@@ -68,13 +68,14 @@ trait DiscardTrait
     $player = Players::get();
     $playerId = $player->getId();
     $discards = $player->checkDiscards();
-
+    $state = Cards::getExtremePosition(true, DISCARD);
     if ($fromHand) {
       if (count($cards) !== $discards['hand'])
         throw new \feException("Incorrect number of discards");
 
       foreach ($cards as $cardId) {
-        Cards::move($cardId, 'discard');
+        $state += 1;
+        Cards::move($cardId, DISCARD, $state);
         $cardName = $this->cards[$cardId]['name'];
         $removed_card = Cards::get($cardId);
         $courtCards = $player->getCourtCards();
@@ -85,6 +86,7 @@ trait DiscardTrait
           'cardName' => $cardName,
           'courtCards' => $courtCards,
           'cardId' => $cardId,
+          'state' => $state,
           'from' => 'hand'
         ));
       }
@@ -93,7 +95,6 @@ trait DiscardTrait
         throw new \feException("Incorrect number of discards");
 
       foreach ($cards as $cardId) {
-
         // Move all spies back to players cylinder pool
         $spiesOnCard = Tokens::getInLocation(['spies', $cardId]);
         self::dump("spiesOnCard", $spiesOnCard);
@@ -101,9 +102,9 @@ trait DiscardTrait
           $spyOwner = explode("_", $spy['id'])[1];
           Tokens::move($spy['id'], ['cylinders', $spyOwner]);
         }
-
+        $state += 1;
         // move card to discard location
-        Cards::move($cardId, 'discard');
+        Cards::move($cardId, DISCARD, $state);
         $cardName = $this->cards[$cardId]['name'];
         $removedCard = Cards::get($cardId);
         $courtCards = Cards::getInLocation(['court', $playerId]);
@@ -122,6 +123,7 @@ trait DiscardTrait
           'cardName' => $cardName,
           'courtCards' => $courtCards,
           'cardId' => $cardId,
+          'state' => $state,
           'from' => 'court'
         ));
       }

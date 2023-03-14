@@ -1,3 +1,32 @@
+// .########..####..######...######.....###....########..########.
+// .##.....##..##..##....##.##....##...##.##...##.....##.##.....##
+// .##.....##..##..##.......##........##...##..##.....##.##.....##
+// .##.....##..##...######..##.......##.....##.########..##.....##
+// .##.....##..##........##.##.......#########.##...##...##.....##
+// .##.....##..##..##....##.##....##.##.....##.##....##..##.....##
+// .########..####..######...######..##.....##.##.....##.########.
+
+class DiscardPile {
+  private game: PaxPamirGame;
+
+  constructor({ game }: { game: PaxPamirGame }) {
+    console.log('Constructor DiscardPile');
+    this.game = game;
+
+    this.setup({ gamedatas: game.gamedatas });
+  }
+
+  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    if(gamedatas.discardPile) {
+      dojo.place(tplCard({ cardId: gamedatas.discardPile.id }), 'pp_discard_pile');
+    }
+  }
+
+  clearInterface() {
+    dojo.empty('pp_discard_pile');
+  }
+}
+
 // .########....###....##.....##..#######..########..########.########.
 // .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
 // .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
@@ -214,6 +243,7 @@ class VpTrack {
 
 class ObjectManager {
   private game: PaxPamirGame;
+  public discardPile: DiscardPile;
   public favoredSuit: FavoredSuit;
   public supply: Supply;
   public vpTrack: VpTrack;
@@ -222,18 +252,21 @@ class ObjectManager {
     console.log('ObjectManager');
     this.game = game;
 
+    this.discardPile = new DiscardPile({ game });
     this.favoredSuit = new FavoredSuit({ game });
     this.supply = new Supply({ game });
     this.vpTrack = new VpTrack({ game });
   }
 
   updateInterface({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    this.discardPile.setup({ gamedatas });
     this.favoredSuit.setup({ gamedatas });
     this.supply.setup({ gamedatas });
     this.vpTrack.setupVpTrack({ gamedatas });
   }
 
   clearInterface() {
+    this.discardPile.clearInterface();
     this.favoredSuit.clearInterface();
     this.supply.clearInterface();
     this.vpTrack.clearInterface();

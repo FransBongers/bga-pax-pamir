@@ -189,7 +189,7 @@ var logTokenKeys = [
 ];
 var getLogTokenDiv = function (key, args) {
     var data = args[key];
-    console.log('getLogTokenDiv', key, 'data', data);
+    // console.log('getLogTokenDiv', key, 'data', data);
     switch (key) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: data });
@@ -579,6 +579,31 @@ var PPTooltipManager = /** @class */ (function () {
     };
     return PPTooltipManager;
 }());
+// .########..####..######...######.....###....########..########.
+// .##.....##..##..##....##.##....##...##.##...##.....##.##.....##
+// .##.....##..##..##.......##........##...##..##.....##.##.....##
+// .##.....##..##...######..##.......##.....##.########..##.....##
+// .##.....##..##........##.##.......#########.##...##...##.....##
+// .##.....##..##..##....##.##....##.##.....##.##....##..##.....##
+// .########..####..######...######..##.....##.##.....##.########.
+var DiscardPile = /** @class */ (function () {
+    function DiscardPile(_a) {
+        var game = _a.game;
+        console.log('Constructor DiscardPile');
+        this.game = game;
+        this.setup({ gamedatas: game.gamedatas });
+    }
+    DiscardPile.prototype.setup = function (_a) {
+        var gamedatas = _a.gamedatas;
+        if (gamedatas.discardPile) {
+            dojo.place(tplCard({ cardId: gamedatas.discardPile.id }), 'pp_discard_pile');
+        }
+    };
+    DiscardPile.prototype.clearInterface = function () {
+        dojo.empty('pp_discard_pile');
+    };
+    return DiscardPile;
+}());
 // .########....###....##.....##..#######..########..########.########.
 // .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
 // .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
@@ -781,17 +806,20 @@ var ObjectManager = /** @class */ (function () {
     function ObjectManager(game) {
         console.log('ObjectManager');
         this.game = game;
+        this.discardPile = new DiscardPile({ game: game });
         this.favoredSuit = new FavoredSuit({ game: game });
         this.supply = new Supply({ game: game });
         this.vpTrack = new VpTrack({ game: game });
     }
     ObjectManager.prototype.updateInterface = function (_a) {
         var gamedatas = _a.gamedatas;
+        this.discardPile.setup({ gamedatas: gamedatas });
         this.favoredSuit.setup({ gamedatas: gamedatas });
         this.supply.setup({ gamedatas: gamedatas });
         this.vpTrack.setupVpTrack({ gamedatas: gamedatas });
     };
     ObjectManager.prototype.clearInterface = function () {
+        this.discardPile.clearInterface();
         this.favoredSuit.clearInterface();
         this.supply.clearInterface();
         this.vpTrack.clearInterface();
@@ -1723,9 +1751,7 @@ var InteractionManager = /** @class */ (function () {
                 break;
             case DISCARD_HAND:
                 this.updatePageTitle({
-                    text: this.numberOfDiscards !== 1
-                        ? _('${you} must discard ${numberOfDiscards} cards')
-                        : _('${you} must discard ${numberOfDiscards} card'),
+                    text: _('${you} must discard ${numberOfDiscards} card(s)'),
                     args: {
                         numberOfDiscards: this.numberOfDiscards,
                         you: '${you}',
@@ -2051,8 +2077,10 @@ var InteractionManager = /** @class */ (function () {
     };
     InteractionManager.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
-        dojo.query(".pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
-        if (dojo.query('.pp_selected').length === this.numberOfDiscards) {
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+        var numberSelected = dojo.query('.pp_selected').length;
+        console.log('button_check', numberSelected, this.numberOfDiscards);
+        if (numberSelected === this.numberOfDiscards) {
             dojo.removeClass('confirm_btn', 'pp_disabled');
         }
         else {
@@ -2061,17 +2089,20 @@ var InteractionManager = /** @class */ (function () {
     };
     InteractionManager.prototype.handleDiscardConfirm = function (_a) {
         var fromHand = _a.fromHand;
-        var cards = '';
-        dojo.query('.pp_selected').forEach(function (node, index) {
-            cards += ' ' + node.id;
-        }, this);
-        this.game.takeAction({
-            action: 'discardCards',
-            data: {
-                cards: cards,
-                fromHand: fromHand,
-            },
-        });
+        var nodes = dojo.query('.pp_selected');
+        if (nodes.length === this.numberOfDiscards) {
+            var cards_1 = '';
+            nodes.forEach(function (node, index) {
+                cards_1 += ' ' + node.id;
+            }, this);
+            this.game.takeAction({
+                action: 'discardCards',
+                data: {
+                    cards: cards_1,
+                    fromHand: fromHand,
+                },
+            });
+        }
     };
     InteractionManager.prototype.playCardNextStep = function (_a) {
         var cardId = _a.cardId;
@@ -2458,17 +2489,26 @@ var NotificationManager = /** @class */ (function () {
         var from = notif.args.from;
         if (from == 'hand') {
             // TODO (Frans): check how this works for other players than the one whos card gets discarded
-            this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId: playerId }).getHandZone() });
+            this.game.discardCard({
+                id: notif.args.cardId,
+                order: notif.args.state || undefined,
+                from: this.getPlayer({ playerId: playerId }).getHandZone(),
+            });
         }
         else if (from == 'market_0_0' || from == 'market_1_0') {
             var splitFrom = from.split('_');
             this.game.discardCard({
                 id: notif.args.cardId,
                 from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
+                order: notif.args.state || undefined,
             });
         }
         else {
-            this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId: playerId }).getCourtZone() });
+            this.game.discardCard({
+                id: notif.args.cardId,
+                order: notif.args.state || undefined,
+                from: this.getPlayer({ playerId: playerId }).getCourtZone(),
+            });
             // TODO: check if it is needed to update weight of cards in zone?
         }
     };
@@ -2811,16 +2851,15 @@ var PaxPamir = /** @class */ (function () {
      * Handle cancelling log messages for restart turn
      */
     PaxPamir.prototype.onPlaceLogOnChannel = function (msg) {
-        console.log('msg', msg);
+        // console.log('msg', msg);
         var currentLogId = this.framework().notifqueue.next_log_id;
         var res = this.framework().inherited(arguments);
-        console.log('res', res);
         this._notif_uid_to_log_id[msg.uid] = currentLogId;
         this._last_notif = {
             logId: currentLogId,
             msg: msg,
         };
-        console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
+        // console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
         return res;
     };
     /*
@@ -2900,7 +2939,15 @@ var PaxPamir = /** @class */ (function () {
                 });
             });
         }
-        from.removeFromZone(id, true, 'pp_discard_pile');
+        // this.move({
+        //   id,
+        //   from,
+        //   to: this.objectManager.discardPile.getZone(),
+        //   weight: order
+        // })
+        from.removeFromZone(id, false);
+        attachToNewParentNoDestroy(id, 'pp_discard_pile');
+        this.framework().slideToObject(id, 'pp_discard_pile').play();
     };
     PaxPamir.prototype.framework = function () {
         return this;

@@ -75,6 +75,7 @@ interface RegionGamedatas {
  */
 interface PaxPamirGamedatas extends Gamedatas {
   canceledNotifIds: string[];
+  discardPile: Card | null;
   staticData: {
     borders: {
       [border: string]: {
@@ -130,7 +131,7 @@ interface PaxPamirGame extends Game {
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
-  discardCard: (props: { id: string; from: Zone; order?: null }) => void;
+  discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   moveCard: (props: { id: string; from: Stock; to?: Stock | null; order?: number | null }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   // AJAX calls

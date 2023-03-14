@@ -155,10 +155,7 @@ class InteractionManager {
         break;
       case DISCARD_HAND:
         this.updatePageTitle({
-          text:
-            this.numberOfDiscards !== 1
-              ? _('${you} must discard ${numberOfDiscards} cards')
-              : _('${you} must discard ${numberOfDiscards} card'),
+          text: _('${you} must discard ${numberOfDiscards} card(s)'),
           args: {
             numberOfDiscards: this.numberOfDiscards,
             you: '${you}',
@@ -517,8 +514,10 @@ class InteractionManager {
   }
 
   handleDiscardSelect({ cardId }: { cardId: string }) {
-    dojo.query(`.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
-    if (dojo.query('.pp_selected').length === this.numberOfDiscards) {
+    dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+    const numberSelected = dojo.query('.pp_selected').length;
+    console.log('button_check', numberSelected, this.numberOfDiscards);
+    if (numberSelected === this.numberOfDiscards) {
       dojo.removeClass('confirm_btn', 'pp_disabled');
     } else {
       dojo.addClass('confirm_btn', 'pp_disabled');
@@ -526,17 +525,20 @@ class InteractionManager {
   }
 
   handleDiscardConfirm({ fromHand }: { fromHand: boolean }) {
-    let cards = '';
-    dojo.query('.pp_selected').forEach((node: HTMLElement, index) => {
-      cards += ' ' + node.id;
-    }, this);
-    this.game.takeAction({
-      action: 'discardCards',
-      data: {
-        cards,
-        fromHand,
-      },
-    });
+    const nodes = dojo.query('.pp_selected');
+    if (nodes.length === this.numberOfDiscards) {
+      let cards = '';
+      nodes.forEach((node: HTMLElement, index) => {
+        cards += ' ' + node.id;
+      }, this);
+      this.game.takeAction({
+        action: 'discardCards',
+        data: {
+          cards,
+          fromHand,
+        },
+      });
+    }
   }
 
   playCardNextStep({ cardId }: { cardId: string }) {

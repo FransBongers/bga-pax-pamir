@@ -22,7 +22,7 @@ const logTokenKeys = [
 
 const getLogTokenDiv = (key: string, args: Record<string, string | number | Record<string, any>>) => {
   const data = args[key];
-  console.log('getLogTokenDiv', key, 'data', data);
+  // console.log('getLogTokenDiv', key, 'data', data);
   switch (key) {
     case LOG_TOKEN_ARMY:
       return tplLogTokenArmy({ coalition: data as string });

@@ -173,16 +173,15 @@ class PaxPamir implements PaxPamirGame {
    * Handle cancelling log messages for restart turn
    */
   onPlaceLogOnChannel(msg: Notif<unknown>) {
-    console.log('msg', msg);
+    // console.log('msg', msg);
     const currentLogId = this.framework().notifqueue.next_log_id;
     const res = this.framework().inherited(arguments);
-    console.log('res', res);
     this._notif_uid_to_log_id[msg.uid] = currentLogId;
     this._last_notif = {
       logId: currentLogId,
       msg,
     };
-    console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
+    // console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
     return res;
   }
 
@@ -251,7 +250,7 @@ class PaxPamir implements PaxPamirGame {
     return this.gamedatas.staticData.cards[cardId];
   }
 
-  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: null }) {
+  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
     // Move all spies back to cylinder pools
     if (this.spies?.[id]) {
       // ['cylinder_2371052_3']
@@ -265,8 +264,16 @@ class PaxPamir implements PaxPamirGame {
         });
       });
     }
+    // this.move({
+    //   id,
+    //   from,
+    //   to: this.objectManager.discardPile.getZone(),
+    //   weight: order
+    // })
 
-    from.removeFromZone(id, true, 'pp_discard_pile');
+    from.removeFromZone(id, false);
+    attachToNewParentNoDestroy(id, 'pp_discard_pile');
+    this.framework().slideToObject(id, 'pp_discard_pile').play();
   }
 
   public framework(): Framework {

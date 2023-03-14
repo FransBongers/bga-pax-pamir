@@ -111,15 +111,24 @@ class NotificationManager {
 
     if (from == 'hand') {
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId }).getHandZone() });
+      this.game.discardCard({
+        id: notif.args.cardId,
+        order: notif.args.state || undefined,
+        from: this.getPlayer({ playerId }).getHandZone(),
+      });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
       this.game.discardCard({
         id: notif.args.cardId,
         from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
+        order: notif.args.state || undefined,
       });
     } else {
-      this.game.discardCard({ id: notif.args.cardId, from: this.getPlayer({ playerId }).getCourtZone() });
+      this.game.discardCard({
+        id: notif.args.cardId,
+        order: notif.args.state || undefined,
+        from: this.getPlayer({ playerId }).getCourtZone(),
+      });
 
       // TODO: check if it is needed to update weight of cards in zone?
     }
@@ -284,14 +293,15 @@ class NotificationManager {
     this.game.clearInterface();
     console.log('updatedGamedatas', updatedGamedatas);
     this.game.gamedatas = updatedGamedatas;
-    this.game.market.setupMarket({gamedatas: updatedGamedatas});
-    this.game.playerManager.updatePlayers({gamedatas: updatedGamedatas});
-    this.game.map.updateMap({gamedatas: updatedGamedatas});
-    this.game.objectManager.updateInterface({gamedatas: updatedGamedatas});
+    this.game.market.setupMarket({ gamedatas: updatedGamedatas });
+    this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
+    this.game.map.updateMap({ gamedatas: updatedGamedatas });
+    this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
     // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
   }
 
-  notif_updatePlayerCounts(notif) {``
+  notif_updatePlayerCounts(notif) {
+    ``;
     console.log('notif_updatePlayerCounts', notif);
     this.game.playerCounts = notif.args.counts;
     const counts = notif.args.counts;

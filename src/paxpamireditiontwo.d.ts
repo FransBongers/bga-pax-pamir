@@ -132,8 +132,8 @@ interface PaxPamirGame extends Game {
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   discardCard: (props: { id: string; from: Zone; order?: number }) => void;
-  moveCard: (props: { id: string; from: Stock; to?: Stock | null; order?: number | null }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
+  returnSpiesFromCard: (props: {cardId: string}) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
 }

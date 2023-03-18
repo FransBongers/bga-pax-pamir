@@ -120,6 +120,15 @@ class Market {
     this.marketRupees[row][column].placeInZone(rupeeId);
   }
 
+  addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
+    dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
+    const div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
+    attachToNewParentNoDestroy(cardId, div);
+    this.game.framework().slideToObject(cardId, div).play();
+    this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
+    this.game.tooltipManager.addTooltipToCard({ cardId });
+  }
+
   /**
    * Move card and all rupees on it.
    */
@@ -143,12 +152,11 @@ class Market {
     this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
-  addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
-    dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
-    const div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
-    attachToNewParentNoDestroy(cardId, div);
-    this.game.framework().slideToObject(cardId, div).play();
-    this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
-    this.game.tooltipManager.addTooltipToCard({ cardId });
+  discardCard({ cardId, row, column }: { cardId: string; row: number; column: number }) {
+    // Move card to discard pile
+    this.getMarketCardZone({ row, column }).removeFromZone(cardId, false);
+    attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
+    discardCardAnimation({cardId, game: this.game});
+    // this.game.framework().slideToObject(cardId, 'pp_discard_pile').play();
   }
 }

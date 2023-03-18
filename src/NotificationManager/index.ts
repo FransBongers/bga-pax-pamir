@@ -41,7 +41,7 @@ class NotificationManager {
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
       ['playCard', 2000],
-      ['discardCard', 500],
+      ['discardCard', 1000],
       ['refreshMarket', 250],
       ['selectGift', 1],
       ['smallRefreshHand', 1],
@@ -110,26 +110,28 @@ class NotificationManager {
     const from = notif.args.from;
 
     if (from == 'hand') {
+      this.getPlayer({ playerId }).discardHandCard({ cardId: notif.args.cardId });
       // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      this.game.discardCard({
-        id: notif.args.cardId,
-        order: notif.args.state || undefined,
-        from: this.getPlayer({ playerId }).getHandZone(),
-      });
+      // this.game.discardCard({
+      //   id: notif.args.cardId,
+      //   order: notif.args.state || undefined,
+      //   from: this.getPlayer({ playerId }).getHandZone(),
+      // });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
-      this.game.discardCard({
-        id: notif.args.cardId,
-        from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
-        order: notif.args.state || undefined,
-      });
+      this.game.market.discardCard({ cardId: notif.args.cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
+      // this.game.discardCard({
+      //   id: notif.args.cardId,
+      //   from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
+      //   order: notif.args.state || undefined,
+      // });
     } else {
-      this.game.discardCard({
-        id: notif.args.cardId,
-        order: notif.args.state || undefined,
-        from: this.getPlayer({ playerId }).getCourtZone(),
-      });
-
+      this.getPlayer({ playerId }).discardCourtCard({ cardId: notif.args.cardId });
+      // this.game.discardCard({
+      //   id: notif.args.cardId,
+      //   order: notif.args.state || undefined,
+      //   from: this.getPlayer({ playerId }).getCourtZone(),
+      // });
       // TODO: check if it is needed to update weight of cards in zone?
     }
   }
@@ -177,9 +179,8 @@ class NotificationManager {
       }
     });
 
-    player.moveToCourt({
+    player.playCard({
       card: notif.args.card,
-      from: Number(playerId) === this.game.getPlayerId() ? player.getHandZone() : null,
     });
 
     this.getPlayer({ playerId }).getCourtZone().updateDisplay();
@@ -206,10 +207,8 @@ class NotificationManager {
       });
     } else if (newLocation == 'discard') {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
-    } else if (playerId === this.game.getPlayerId()) {
-      this.getPlayer({ playerId }).moveToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     } else {
-      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, `cards_${playerId}`);
+      this.getPlayer({ playerId }).purchaseCard({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     }
 
     // Place paid rupees on market cards
@@ -300,7 +299,6 @@ class NotificationManager {
   }
 
   notif_updatePlayerCounts(notif) {
-    ``;
     console.log('notif_updatePlayerCounts', notif);
     this.game.playerCounts = notif.args.counts;
     const counts = notif.args.counts;

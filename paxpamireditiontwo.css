@@ -658,11 +658,11 @@
   top: 2px;
 }
 
-.pp_loyalty_dial.pp_loyalty_british {
+.pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
 }
 
-.pp_loyalty_dial.pp_loyalty_russian {
+.pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
 }
 

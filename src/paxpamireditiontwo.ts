@@ -250,26 +250,25 @@ class PaxPamir implements PaxPamirGame {
     return this.gamedatas.staticData.cards[cardId];
   }
 
-  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
-    // Move all spies back to cylinder pools
-    if (this.spies?.[id]) {
+  public returnSpiesFromCard({cardId}: {cardId: string;}) {
+    if (this.spies?.[cardId]) {
       // ['cylinder_2371052_3']
-      const items = this.spies[id].getAllItems();
+      const items = this.spies[cardId].getAllItems();
       items.forEach((cylinderId) => {
         const playerId = Number(cylinderId.split('_')[1]);
         this.move({
           id: cylinderId,
           to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
-          from: this.spies[id],
+          from: this.spies[cardId],
         });
       });
     }
-    // this.move({
-    //   id,
-    //   from,
-    //   to: this.objectManager.discardPile.getZone(),
-    //   weight: order
-    // })
+  }
+
+  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
+    // Move all spies back to cylinder pools
+    this.returnSpiesFromCard({cardId: id});
+
 
     from.removeFromZone(id, false);
     attachToNewParentNoDestroy(id, 'pp_discard_pile');
@@ -321,28 +320,6 @@ class PaxPamir implements PaxPamirGame {
       default:
         console.log('no zone determined');
         break;
-    }
-  }
-
-  public moveCard({ id, from, to = null, order = null }: { id: string; from: Stock; to?: Stock | null; order?: number | null }) {
-    let fromDiv = null;
-    if (from !== null) {
-      fromDiv = from.getItemDivId(id);
-    }
-    if (to !== null) {
-      if (order != null) {
-        to.changeItemsWeight({ id: order });
-      }
-      to.addToStockWithId(id, id, fromDiv);
-
-      // We need to set up new zone because id of div will change due to stock component
-      // this.setupCardSpyZone({location: to, cardId: id});
-
-      // this.addTooltip( to_location.getItemDivId(id), id, '' );
-    }
-
-    if (from !== null) {
-      from.removeFromStockById(id);
     }
   }
 

@@ -50,6 +50,14 @@ class PPPlayer {
     this.setupPlayer({ gamedatas });
   }
 
+  // ..######..########.########.##.....##.########.
+  // .##....##.##..........##....##.....##.##.....##
+  // .##.......##..........##....##.....##.##.....##
+  // ..######..######......##....##.....##.########.
+  // .......##.##..........##....##.....##.##.......
+  // .##....##.##..........##....##.....##.##.......
+  // ..######..########....##.....#######..##.......
+
   updatePlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     const playerGamedatas = gamedatas.players[this.playerId];
 
@@ -298,7 +306,21 @@ class PPPlayer {
     });
   }
 
-  // Getters & setters
+  // ..######...########.########.########.########.########...######.
+  // .##....##..##..........##.......##....##.......##.....##.##....##
+  // .##........##..........##.......##....##.......##.....##.##......
+  // .##...####.######......##.......##....######...########...######.
+  // .##....##..##..........##.......##....##.......##...##.........##
+  // .##....##..##..........##.......##....##.......##....##..##....##
+  // ..######...########....##.......##....########.##.....##..######.
+
+  // ..######..########.########.########.########.########...######.
+  // .##....##.##..........##.......##....##.......##.....##.##....##
+  // .##.......##..........##.......##....##.......##.....##.##......
+  // ..######..######......##.......##....######...########...######.
+  // .......##.##..........##.......##....##.......##...##.........##
+  // .##....##.##..........##.......##....##.......##....##..##....##
+  // ..######..########....##.......##....########.##.....##..######.
 
   getCourtZone(): Zone {
     return this.court;
@@ -352,6 +374,14 @@ class PPPlayer {
     this.counters[counter].incValue(value);
   }
 
+  //  .##.....##.########.####.##.......####.########.##....##
+  //  .##.....##....##.....##..##........##.....##.....##..##.
+  //  .##.....##....##.....##..##........##.....##......####..
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  ..#######.....##....####.########.####....##.......##...
+
   addSideSelectToCourt() {
     this.court.instantaneous = true;
     dojo.place(tplCardSelect({ side: 'left' }), `pp_court_player_${this.playerId}`);
@@ -366,34 +396,73 @@ class PPPlayer {
     this.court.instantaneous = false;
   }
 
-  moveToHand({ cardId, from }: { cardId: string; from: Zone }) {
-    this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
-    this.game.tooltipManager.addTooltipToCard({ cardId });
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  purchaseCard({ cardId, from }: { cardId: string; from: Zone }) {
+    if (this.playerId === this.game.getPlayerId()) {
+      this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+      this.game.tooltipManager.addTooltipToCard({ cardId });
+    } else {
+      dojo.addClass(cardId, 'pp_moving');
+      from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
+    }
   }
 
-  moveToCourt({ card, from }: { card: Token; from: Zone | null }) {
+  playCard({ card }: { card: Token }) {
     const { region } = this.game.gamedatas.staticData.cards[card.id] as CourtCard;
-
-    if (!from) {
-      dojo.place(
-        tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
-        `pp_court_player_${this.playerId}`
-      );
-      this.setupCourtCard({ cardId: card.id });
-      this.court.placeInZone(card.id, card.state);
-    } else {
+    if (this.playerId === this.game.getPlayerId()) {
       this.setupCourtCard({ cardId: card.id });
       this.game.move({
         id: card.id,
         to: this.court,
-        from,
+        from: this.getHandZone(),
         addClass: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
         removeClass: ['pp_card_in_hand'],
         weight: card.state,
       });
+      this.removeSideSelectFromCourt();
+    } else {
+      dojo.place(
+        tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
+        `cards_${this.playerId}`
+      );
+      this.setupCourtCard({ cardId: card.id });
+      dojo.addClass(card.id, 'pp_moving');
+      const div = this.court.container_div;
+      attachToNewParentNoDestroy(card.id, div);
+      const animation = this.game.framework().slideToObject(card.id, div);
+      dojo.connect(animation, 'onEnd', () => {
+        dojo.removeClass(card.id, 'pp_moving');
+      });
+      animation.play();
+      this.court.placeInZone(card.id, card.state);
     }
-    this.removeSideSelectFromCourt();
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+  }
+
+  discardCourtCard({ cardId }: { cardId: string }) {
+    // Move all spies back to cylinder pools if there are any
+    this.game.returnSpiesFromCard({ cardId });
+
+    // Move card to discard pile
+    this.court.removeFromZone(cardId, false);
+    discardCardAnimation({cardId, game: this.game});
+    // TODO: check leverage and check overthrow rule
+  }
+
+  discardHandCard({ cardId }: { cardId: string }) {
+    if (this.playerId === this.game.getPlayerId()) {
+      this.hand.removeFromZone(cardId, false);
+    } else {
+      dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
+    }
+    discardCardAnimation({cardId, game: this.game});
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

@@ -1,3 +1,14 @@
+const discardCardAnimation = ({cardId, game}: {cardId: string; game: PaxPamirGame}) => {
+  attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
+  dojo.addClass(cardId, 'pp_moving');
+  const animation = game.framework().slideToObject(cardId, 'pp_discard_pile');
+  dojo.connect(animation, 'onEnd', () => {
+    dojo.removeClass(cardId, 'pp_moving');
+  });
+  animation.play();
+}
+
+
 /**
  * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
  * all its connectors (onClick, etc)

@@ -76,6 +76,7 @@ type CssPosition = 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'in
 interface Dojo {
   addClass: (node: string | HTMLElement, className: string) => void;
   animateProperty: (params: { node: string; properties: any }) => any;
+  byId: (nodeId: string) => HTMLElement;
   // https://dojotoolkit.org/reference-guide/1.7/dojo/clone.html
   clone: (something: any) => any;
   connect: Function;

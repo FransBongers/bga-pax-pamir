@@ -13,4 +13,5 @@ interface SlideConfig {
   phantom?: boolean;
   phantomStart?: boolean;
   phantomEnd?: boolean;
+  zIndex?: number | null; // Added to set zIndex different from 5000 which overlaps title bar
 }

@@ -368,9 +368,15 @@ class PaxPamir implements PaxPamirGame {
     removeClass.forEach((oldClass) => {
       dojo.removeClass(id, oldClass);
     });
-
+    
+    dojo.addClass(id, 'pp_moving');
     to.placeInZone(id, weight);
     from.removeFromZone(id, false);
+
+    // TODO: check if there is a better way than using setTimeout
+    setTimeout(() => {
+      dojo.removeClass(id, 'pp_moving');
+    },2000)
   }
 
   createSpyZone({ cardId }: { cardId: string }) {

@@ -45,6 +45,7 @@ const slide = ({game, mobileElt, targetElt, options = {}}: {game: PaxPamirGame; 
     beforeBrother: null,
     to: null,
     phantom: true,
+    zIndex: null,
     ...options,
   };
 
@@ -97,7 +98,7 @@ const slide = ({game, mobileElt, targetElt, options = {}}: {game: PaxPamirGame; 
     }
   }
 
-  dojo.style(mobile, 'zIndex', 5000);
+  dojo.style(mobile, 'zIndex', config.zIndex || 5000);
   dojo.addClass(mobile, config.className);
   if (config.changeParent) changeParent(mobile, 'game_play_area');
   if (config.from != null) game.framework().placeOnObject(mobile, config.from);

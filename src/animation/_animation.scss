@@ -1,3 +1,12 @@
 .phantom { 
   visibility: hidden
 }
+
+.pp_moving {
+  z-index: 900;
+}
+
+.pp_hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}

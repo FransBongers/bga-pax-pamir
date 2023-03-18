@@ -119,4 +119,35 @@ class Market {
     this.game.framework().slideToObject(rupeeId, div).play();
     this.marketRupees[row][column].placeInZone(rupeeId);
   }
+
+  /**
+   * Move card and all rupees on it.
+   */
+  moveCard({cardId, from, to}: {cardId: string; from: MarketLocation; to: MarketLocation}) {
+    this.game.move({
+      id: cardId,
+      from: this.getMarketCardZone({ row: from.row, column: from.column }),
+      to: this.getMarketCardZone({ row: to.row, column: to.column }),
+    });
+    // TODO (Frans): check why in case of moving multiple rupees at the same time
+    // they overlap
+    this.getMarketRupeesZone({ row: from.row, column: from.column })
+      .getAllItems()
+      .forEach((rupeeId) => {
+        this.game.move({
+          id: rupeeId,
+          to: this.getMarketRupeesZone({ row: to.row, column: to.column }),
+          from: this.getMarketRupeesZone({ row: from.row, column: from.row }),
+        });
+      });
+  }
+
+  addCardFromDeck({cardId, to}: {cardId: string; to: MarketLocation}) {
+    dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
+    const div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
+    attachToNewParentNoDestroy(cardId, div);
+    this.game.framework().slideToObject(cardId, div).play();
+    this.getMarketCardZone({ row: to.row, column: to.column })
+      .placeInZone(cardId);
+  }
 }

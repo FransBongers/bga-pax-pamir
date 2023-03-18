@@ -41,7 +41,7 @@ var isFastMode = function () {
 var slide = function (_a) {
     var game = _a.game, mobileElt = _a.mobileElt, targetElt = _a.targetElt, _b = _a.options, options = _b === void 0 ? {} : _b;
     console.log('using slide');
-    var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true }, options);
+    var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true, zIndex: null }, options);
     config.phantomStart = config.phantomStart || config.phantom;
     config.phantomEnd = config.phantomEnd || config.phantom;
     // Mobile elt
@@ -88,7 +88,7 @@ var slide = function (_a) {
             dojo.place(targetId, targetElt);
         }
     }
-    dojo.style(mobile, 'zIndex', 5000);
+    dojo.style(mobile, 'zIndex', config.zIndex || 5000);
     dojo.addClass(mobile, config.className);
     if (config.changeParent)
         changeParent(mobile, 'game_play_area');
@@ -1616,6 +1616,38 @@ var Market = /** @class */ (function () {
         this.game.framework().slideToObject(rupeeId, div).play();
         this.marketRupees[row][column].placeInZone(rupeeId);
     };
+    /**
+     * Move card and all rupees on it.
+     */
+    Market.prototype.moveCard = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, from = _a.from, to = _a.to;
+        this.game.move({
+            id: cardId,
+            from: this.getMarketCardZone({ row: from.row, column: from.column }),
+            to: this.getMarketCardZone({ row: to.row, column: to.column }),
+        });
+        // TODO (Frans): check why in case of moving multiple rupees at the same time
+        // they overlap
+        this.getMarketRupeesZone({ row: from.row, column: from.column })
+            .getAllItems()
+            .forEach(function (rupeeId) {
+            _this.game.move({
+                id: rupeeId,
+                to: _this.getMarketRupeesZone({ row: to.row, column: to.column }),
+                from: _this.getMarketRupeesZone({ row: from.row, column: from.row }),
+            });
+        });
+    };
+    Market.prototype.addCardFromDeck = function (_a) {
+        var cardId = _a.cardId, to = _a.to;
+        dojo.place(tplCard({ cardId: cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
+        var div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
+        attachToNewParentNoDestroy(cardId, div);
+        this.game.framework().slideToObject(cardId, div).play();
+        this.getMarketCardZone({ row: to.row, column: to.column })
+            .placeInZone(cardId);
+    };
     return Market;
 }());
 //  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##
@@ -2601,29 +2633,28 @@ var NotificationManager = /** @class */ (function () {
             var fromCol = Number(move.from.split('_')[2]);
             var toRow = Number(move.to.split('_')[1]);
             var toCol = Number(move.to.split('_')[2]);
-            _this.game.move({
-                id: move.cardId,
-                from: _this.game.market.getMarketCardZone({ row: fromRow, column: fromCol }),
-                to: _this.game.market.getMarketCardZone({ row: toRow, column: toCol }),
-            });
-            // TODO (Frans): check why in case of moving multiple rupees at the same time
-            // they overlap
-            _this.game.market
-                .getMarketRupeesZone({ row: fromRow, column: fromCol })
-                .getAllItems()
-                .forEach(function (rupeeId) {
-                _this.game.move({
-                    id: rupeeId,
-                    to: _this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }),
-                    from: _this.game.market.getMarketRupeesZone({ row: fromRow, column: toRow }),
-                });
+            _this.game.market.moveCard({
+                cardId: move.cardId,
+                from: {
+                    row: fromRow,
+                    column: fromCol,
+                },
+                to: {
+                    row: toRow,
+                    column: toCol,
+                },
             });
         });
         notif.args.newCards.forEach(function (move, index) {
-            dojo.place(tplCard({ cardId: move.cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
-            _this.game.market
-                .getMarketCardZone({ row: Number(move.to.split('_')[1]), column: Number(move.to.split('_')[2]) })
-                .placeInZone(move.cardId);
+            var row = Number(move.to.split('_')[1]);
+            var column = Number(move.to.split('_')[2]);
+            _this.game.market.addCardFromDeck({
+                to: {
+                    row: row,
+                    column: column,
+                },
+                cardId: move.cardId,
+            });
         });
     };
     NotificationManager.prototype.notif_selectGift = function (notif) {
@@ -3022,8 +3053,13 @@ var PaxPamir = /** @class */ (function () {
         removeClass.forEach(function (oldClass) {
             dojo.removeClass(id, oldClass);
         });
+        dojo.addClass(id, 'pp_moving');
         to.placeInZone(id, weight);
         from.removeFromZone(id, false);
+        // TODO: check if there is a better way than using setTimeout
+        setTimeout(function () {
+            dojo.removeClass(id, 'pp_moving');
+        }, 2000);
     };
     PaxPamir.prototype.createSpyZone = function (_a) {
         var cardId = _a.cardId;

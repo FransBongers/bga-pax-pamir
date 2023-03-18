@@ -230,30 +230,29 @@ class NotificationManager {
       const fromCol = Number(move.from.split('_')[2]);
       const toRow = Number(move.to.split('_')[1]);
       const toCol = Number(move.to.split('_')[2]);
-      this.game.move({
-        id: move.cardId,
-        from: this.game.market.getMarketCardZone({ row: fromRow, column: fromCol }),
-        to: this.game.market.getMarketCardZone({ row: toRow, column: toCol }),
+      this.game.market.moveCard({
+        cardId: move.cardId,
+        from: {
+          row: fromRow,
+          column: fromCol,
+        },
+        to: {
+          row: toRow,
+          column: toCol,
+        },
       });
-      // TODO (Frans): check why in case of moving multiple rupees at the same time
-      // they overlap
-      this.game.market
-        .getMarketRupeesZone({ row: fromRow, column: fromCol })
-        .getAllItems()
-        .forEach((rupeeId) => {
-          this.game.move({
-            id: rupeeId,
-            to: this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }),
-            from: this.game.market.getMarketRupeesZone({ row: fromRow, column: toRow }),
-          });
-        });
     });
 
     notif.args.newCards.forEach((move, index) => {
-      dojo.place(tplCard({ cardId: move.cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
-      this.game.market
-        .getMarketCardZone({ row: Number(move.to.split('_')[1]), column: Number(move.to.split('_')[2]) })
-        .placeInZone(move.cardId);
+      const row = Number(move.to.split('_')[1]);
+      const column = Number(move.to.split('_')[2]);
+      this.game.market.addCardFromDeck({
+        to: {
+          row,
+          column,
+        },
+        cardId: move.cardId,
+      });
     });
   }
 

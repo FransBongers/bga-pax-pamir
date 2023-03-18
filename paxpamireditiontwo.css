@@ -1239,8 +1239,12 @@ html {
 }
 
 .pp_card_action.pp_selectable {
-  box-shadow: 0px 0px 0px 2px blue !important;
+  box-shadow: 0px 0px 0px 2px yellow !important;
   cursor: pointer !important;
+}
+
+.pp_card_action.pp_selectable:hover {
+  box-shadow: 0px 0px 0px 2px blue !important;
 }
 
 .pp_card.pp_selectable {

@@ -119,20 +119,14 @@ class Cards extends \PaxPamir\Helpers\Pieces
    */
   public static function getUnavailableCards()
   {
-    $result = array();
+    return array_map(function ($card) {
+      return $card['id'];
+    }, self::getSelectQuery()->where('used', 1)->get()->toArray());
+  }
 
-    // for ($i = 0; $i < 2; $i++) {
-    //   for ($j = 0; $j < 6; $j++) {
-    //     $res = Cards::getInLocation(['market',$i,$j]);
-    //     self::dump("unavailableCards getTokensOfType", $res);
-    //     $card = array_shift($res);
-    //     if (($card !== NULL) and ($card['used'] == 1)) {
-    //       $result[] = $card['id'];
-    //     }
-    //   }
-    // }
-
-    return $result;
+  public static function resetUsed()
+  {
+    self::DB()->update(['used' => 0])->run();
   }
 
   /**

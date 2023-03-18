@@ -514,7 +514,7 @@ class Pieces extends DB_Manager
    *     "state" => <state>             // Optional argument specifies integer state, if not specified and $token_state_global is not specified auto-increment is used
    */
 
-  function create($pieces, $globalLocation = null, $globalState = null, $globalId = null)
+  static function create($pieces, $globalLocation = null, $globalState = null, $globalId = null)
   {
     $pos = is_null($globalLocation) ? 0 : self::getExtremePosition(true, $globalLocation) + 1;
 

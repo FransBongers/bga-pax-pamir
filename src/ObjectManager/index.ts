@@ -140,6 +140,7 @@ class Supply {
             id: block.id,
             coalition,
           },
+          weight: block.state,
         });
       });
     });

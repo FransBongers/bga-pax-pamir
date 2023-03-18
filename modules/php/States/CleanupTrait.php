@@ -42,12 +42,7 @@ trait CleanupTrait
      * 4. refreshMarket
      */
 
-    $playerId = self::getActivePlayerId();
-
-    $courtCards = Cards::getInLocation(['court', $playerId], null, null, 1);
-    foreach ($courtCards as $card) {
-      Cards::setUsed($card["id"], 0);
-    }
+    Cards::resetUsed();
 
     $discards = Players::get()->checkDiscards();
 
@@ -66,7 +61,7 @@ trait CleanupTrait
     if ($card != null && $card['type'] == EVENT_CARD) {
       $state = Cards::getExtremePosition(true, DISCARD);
       Cards::move($card['id'], DISCARD, $state + 1);
-      Notifications::discardEventCardFromMarket($card,$location);
+      Notifications::discardEventCardFromMarket($card, $location);
       // self::notifyAllPlayers("discardCard", '${player_name} discards event card from the market: ${logTokenCardLarge}', array(
       //   'player_name' => self::getActivePlayerName(),
       //   'cardId' => $card['id'],

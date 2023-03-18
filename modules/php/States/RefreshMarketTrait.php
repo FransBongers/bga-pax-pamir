@@ -48,8 +48,6 @@ trait RefreshMarketTrait
         if ($card == null) {
           $emptySpaces[$row][] = $column;
         } else {
-          // Note (Frans): perhaps we can do this with single query at end of refresh
-          Cards::setUsed($card["id"], 0); // unavailable false
           if (count($emptySpaces[$row]) > 0) {
             $toLocaction = 'market_' . $row . '_' . array_shift($emptySpaces[$row]);
             Cards::move($card['id'], $toLocaction);

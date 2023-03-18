@@ -50,6 +50,7 @@ class Players extends \PaxPamir\Helpers\DB_Manager
           "used" => 0,
         ]
       ]);
+      Tokens::shuffle("cylinders_" . $pId);
     }
     $query->values($values);
 

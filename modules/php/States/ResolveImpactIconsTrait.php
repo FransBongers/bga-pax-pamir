@@ -59,7 +59,7 @@ trait ResolveImpactIconsTrait
       case ARMY:
         $loyalty = Players::get()->getLoyalty();
         $location = $this->locations['pools'][$loyalty];
-        $army = Tokens::getInLocation($location)->first();
+        $army = Tokens::getTopOf($location);
         if ($army != null) {
           $to = $this->locations['armies'][$card_region];
           Tokens::move($army['id'], $this->locations['armies'][$card_region]);

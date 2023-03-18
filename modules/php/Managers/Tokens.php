@@ -105,6 +105,9 @@ class Tokens extends \PaxPamir\Helpers\Pieces
       "used" => 0,
     ]);
     self::create($tokens);
+    self::shuffle(BLOCKS_AFGHAN_SUPPLY);
+    self::shuffle(BLOCKS_BRITISH_SUPPLY);
+    self::shuffle(BLOCKS_RUSSIAN_SUPPLY);
   }
 
   public static function setUsed($id, $value)

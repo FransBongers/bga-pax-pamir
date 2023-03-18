@@ -58,7 +58,7 @@ trait PlaceSpyTrait
 
     $playerId = self::getActivePlayerId();
     $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getInLocation($from)->first();
+    $cylinder = Tokens::getTopOf($from);
 
     if ($cylinder != null) {
       $to = 'spies_' . $cardId;

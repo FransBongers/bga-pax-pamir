@@ -59,7 +59,7 @@ trait PlaceRoadTrait
     // TODO: check if allowed based on resolveImpactIconsCardId
     $loyalty = Players::get()->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
-    $road = Tokens::getInLocation($location)->first();
+    $road = Tokens::getTopOf($location);
     if ($road != null) {
       $to = $this->locations['roads'][$border];
       $region0 = explode("_", $border)[0];

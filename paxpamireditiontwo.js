@@ -708,6 +708,7 @@ var Supply = /** @class */ (function () {
                         id: block.id,
                         coalition: coalition,
                     },
+                    weight: block.state,
                 });
             });
         });
@@ -888,9 +889,10 @@ var PPPlayer = /** @class */ (function () {
         playerGamedatas.court.cards.forEach(function (card) {
             var cardId = card.id;
             var _a = _this.game.gamedatas.staticData.cards[cardId], actions = _a.actions, region = _a.region;
-            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_card_in_court pp_".concat(_this.playerId, " pp_").concat(region) }), "pp_court_player_".concat(_this.playerId));
+            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_card_in_court pp_player_".concat(_this.playerId, " pp_").concat(region) }), "pp_court_player_".concat(_this.playerId));
             _this.setupCourtCard({ cardId: cardId });
             _this.court.placeInZone(cardId, card.state);
+            _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
             // Add spies
             (playerGamedatas.court.spies[cardId] || []).forEach(function (cylinder) {
                 var playerId = cylinder.id.split('_')[1];
@@ -932,9 +934,10 @@ var PPPlayer = /** @class */ (function () {
                     id: cylinder.id,
                     color: playerGamedatas.color,
                 },
+                weight: cylinder.state,
             });
         });
-        this.cylinders.instantaneous = true;
+        this.cylinders.instantaneous = false;
     };
     PPPlayer.prototype.setupGifts = function (_a) {
         var _this = this;
@@ -990,6 +993,7 @@ var PPPlayer = /** @class */ (function () {
         playerGamedatas.hand.forEach(function (card) {
             dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
             _this.hand.placeInZone(card.id);
+            _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
         });
         this.hand.instantaneous = false;
     };
@@ -1070,7 +1074,7 @@ var PPPlayer = /** @class */ (function () {
         this.game.createSpyZone({ cardId: cardId });
         Object.keys(actions).forEach(function (action, index) {
             var actionId = action + '_' + cardId;
-            dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action pp_card_action_").concat(action, "\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
+            dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
         });
     };
     PPPlayer.prototype.clearInterface = function () {
@@ -1135,12 +1139,13 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.moveToHand = function (_a) {
         var cardId = _a.cardId, from = _a.from;
         this.game.move({ id: cardId, to: this.hand, from: from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
     PPPlayer.prototype.moveToCourt = function (_a) {
         var card = _a.card, from = _a.from;
         var region = this.game.gamedatas.staticData.cards[card.id].region;
         if (!from) {
-            dojo.place(tplCard({ cardId: card.id, extraClasses: "pp_card_in_court_".concat(this.playerId, " pp_card_in_court_").concat(region) }), "pp_court_player_".concat(this.playerId));
+            dojo.place(tplCard({ cardId: card.id, extraClasses: "pp_card_in_court pp_player_".concat(this.playerId, " pp_").concat(region) }), "pp_court_player_".concat(this.playerId));
             this.setupCourtCard({ cardId: card.id });
             this.court.placeInZone(card.id, card.state);
         }
@@ -1150,12 +1155,13 @@ var PPPlayer = /** @class */ (function () {
                 id: card.id,
                 to: this.court,
                 from: from,
-                addClass: ["pp_card_in_court_".concat(this.playerId, ", pp_card_in_court_").concat(region)],
+                addClass: ['pp_card_in_court', "pp_player_".concat(this.playerId), "pp_".concat(region)],
                 removeClass: ['pp_card_in_hand'],
                 weight: card.state,
             });
         }
         this.removeSideSelectFromCourt();
+        this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
@@ -1638,6 +1644,7 @@ var Market = /** @class */ (function () {
                 from: _this.getMarketRupeesZone({ row: from.row, column: from.row }),
             });
         });
+        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
     Market.prototype.addCardFromDeck = function (_a) {
         var cardId = _a.cardId, to = _a.to;
@@ -1645,8 +1652,8 @@ var Market = /** @class */ (function () {
         var div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
         attachToNewParentNoDestroy(cardId, div);
         this.game.framework().slideToObject(cardId, div).play();
-        this.getMarketCardZone({ row: to.row, column: to.column })
-            .placeInZone(cardId);
+        this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
+        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
     return Market;
 }());
@@ -2166,12 +2173,13 @@ var InteractionManager = /** @class */ (function () {
     InteractionManager.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
-        dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node) {
+        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node) {
             var _a, _b;
             var cardId = node.id;
             var used = ((_b = (_a = _this.activePlayer.court) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
-                (_this.activePlayer.remainingActions > 0 || _this.game.gamedatas.staticData.cards[cardId].suit === _this.activePlayer.favoredSuit))
+                (_this.activePlayer.remainingActions > 0 ||
+                    _this.game.gamedatas.staticData.cards[cardId].suit === _this.activePlayer.favoredSuit))
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
                         var nextStep_1 = "cardAction".concat(capitalizeFirstLetter(child.id.split('_')[0]));
@@ -2241,6 +2249,7 @@ var InteractionManager = /** @class */ (function () {
     InteractionManager.prototype.setMarketCardsSelectable = function () {
         var _this = this;
         var baseCardCost = this.activePlayer.favoredSuit === MILITARY ? 2 : 1;
+        console.log('unavailable', this.activePlayer.unavailableCards);
         dojo.query('.pp_market_card').forEach(function (node) {
             var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
             var cardId = node.id;
@@ -2264,7 +2273,7 @@ var InteractionManager = /** @class */ (function () {
     InteractionManager.prototype.setCourtCardsSelectableForDiscard = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
-        dojo.query(".pp_card_in_court_".concat(playerId)).forEach(function (node, index) {
+        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[6];
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));

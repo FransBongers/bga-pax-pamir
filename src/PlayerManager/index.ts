@@ -55,7 +55,7 @@ class PPPlayer {
 
     this.setupCourt({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
-    this.setupGifts({playerGamedatas});
+    this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -67,7 +67,7 @@ class PPPlayer {
     this.setupHand({ playerGamedatas });
     this.setupCourt({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
-    this.setupGifts({playerGamedatas});
+    this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.setupPlayerPanel({ playerGamedatas });
   }
@@ -83,13 +83,13 @@ class PPPlayer {
       const cardId = card.id;
       const { actions, region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
       dojo.place(
-        tplCard({ cardId, extraClasses: `pp_card_in_court pp_${this.playerId} pp_${region}` }),
+        tplCard({ cardId, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
         `pp_court_player_${this.playerId}`
       );
 
       this.setupCourtCard({ cardId });
       this.court.placeInZone(cardId, card.state);
-
+      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
       // Add spies
       (playerGamedatas.court.spies[cardId] || []).forEach((cylinder: Token) => {
         const playerId = cylinder.id.split('_')[1];
@@ -131,9 +131,10 @@ class PPPlayer {
           id: cylinder.id,
           color: playerGamedatas.color,
         },
+        weight: cylinder.state,
       });
     });
-    this.cylinders.instantaneous = true;
+    this.cylinders.instantaneous = false;
   }
 
   setupGifts({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -189,6 +190,7 @@ class PPPlayer {
     playerGamedatas.hand.forEach((card) => {
       dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
       this.hand.placeInZone(card.id);
+      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     });
     this.hand.instantaneous = false;
   }
@@ -277,7 +279,7 @@ class PPPlayer {
     Object.keys(actions).forEach((action, index) => {
       const actionId = action + '_' + cardId;
       dojo.place(
-        `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
+        `<div id="${actionId}" class="pp_card_action" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
         cardId
       );
     });
@@ -366,6 +368,7 @@ class PPPlayer {
 
   moveToHand({ cardId, from }: { cardId: string; from: Zone }) {
     this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+    this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
   moveToCourt({ card, from }: { card: Token; from: Zone | null }) {
@@ -373,7 +376,7 @@ class PPPlayer {
 
     if (!from) {
       dojo.place(
-        tplCard({ cardId: card.id, extraClasses: `pp_card_in_court_${this.playerId} pp_card_in_court_${region}` }),
+        tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
         `pp_court_player_${this.playerId}`
       );
       this.setupCourtCard({ cardId: card.id });
@@ -384,12 +387,13 @@ class PPPlayer {
         id: card.id,
         to: this.court,
         from,
-        addClass: [`pp_card_in_court_${this.playerId}, pp_card_in_court_${region}`],
+        addClass: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
         removeClass: ['pp_card_in_hand'],
         weight: card.state,
       });
     }
     this.removeSideSelectFromCourt();
+    this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

@@ -17,17 +17,17 @@ class Market {
     this.marketRupees = [];
     const gamedatas = game.gamedatas;
 
-    this.setupMarket({gamedatas});
+    this.setupMarket({ gamedatas });
   }
 
-  setupMarket({gamedatas}: {gamedatas: PaxPamirGamedatas}) {
+  setupMarket({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     console.log('marketCards', this.marketCards);
     // Set up market
     for (let row = 0; row <= 1; row++) {
-      if(!this.marketCards[row]) {
+      if (!this.marketCards[row]) {
         this.marketCards[row] = [];
       }
-      if(!this.marketRupees[row]) {
+      if (!this.marketRupees[row]) {
         this.marketRupees[row] = [];
       }
       for (let column = 0; column <= 5; column++) {
@@ -63,7 +63,7 @@ class Market {
   setupMarketRupeeZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     // Set up zone for all rupees in the market
     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
-    if(this.marketRupees[row][column]) {
+    if (this.marketRupees[row][column]) {
       this.marketRupees[row][column].removeAll();
     } else {
       this.marketRupees[row][column] = new ebg.zone();
@@ -123,7 +123,7 @@ class Market {
   /**
    * Move card and all rupees on it.
    */
-  moveCard({cardId, from, to}: {cardId: string; from: MarketLocation; to: MarketLocation}) {
+  moveCard({ cardId, from, to }: { cardId: string; from: MarketLocation; to: MarketLocation }) {
     this.game.move({
       id: cardId,
       from: this.getMarketCardZone({ row: from.row, column: from.column }),
@@ -140,14 +140,15 @@ class Market {
           from: this.getMarketRupeesZone({ row: from.row, column: from.row }),
         });
       });
+    this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
-  addCardFromDeck({cardId, to}: {cardId: string; to: MarketLocation}) {
+  addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
     dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
     const div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
     attachToNewParentNoDestroy(cardId, div);
     this.game.framework().slideToObject(cardId, div).play();
-    this.getMarketCardZone({ row: to.row, column: to.column })
-      .placeInZone(cardId);
+    this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
+    this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 }

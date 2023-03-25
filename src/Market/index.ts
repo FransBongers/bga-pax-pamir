@@ -155,7 +155,6 @@ class Market {
   discardCard({ cardId, row, column }: { cardId: string; row: number; column: number }) {
     // Move card to discard pile
     this.getMarketCardZone({ row, column }).removeFromZone(cardId, false);
-    attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
     discardCardAnimation({cardId, game: this.game});
     // this.game.framework().slideToObject(cardId, 'pp_discard_pile').play();
   }

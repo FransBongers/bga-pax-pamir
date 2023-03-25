@@ -269,6 +269,7 @@ var CONFIRM_PURCHASE = 'confirmPurchase';
 var CONFIRM_SELECT_GIFT = 'confirmSelectGift';
 var DISCARD_COURT = 'discardCourt';
 var DISCARD_HAND = 'discardHand';
+var NEGOTIATE_BRIBE = 'negotiateBribe';
 var PLACE_ROAD = 'placeRoad';
 var PLACE_SPY = 'placeSpy';
 var PASS = 'pass';
@@ -1492,6 +1493,7 @@ var Region = /** @class */ (function () {
             nodeId: "pp_".concat(this.region, "_tribes"),
             tokenWidth: TRIBE_WIDTH,
             tokenHeight: TRIBE_HEIGHT,
+            itemMargin: 6,
         });
         this.tribeZone.instantaneous = true;
         // tribes
@@ -1523,6 +1525,16 @@ var Region = /** @class */ (function () {
     };
     Region.prototype.getRuler = function () {
         return this.ruler;
+    };
+    Region.prototype.getRulerTribes = function () {
+        var _this = this;
+        if (this.ruler) {
+            return this.getTribeZone().getAllItems().filter(function (id) {
+                return Number(id.split('_')[1]) === _this.ruler;
+            });
+        }
+        ;
+        return [];
     };
     Region.prototype.setRuler = function (_a) {
         var playerId = _a.playerId;
@@ -1736,7 +1748,6 @@ var Market = /** @class */ (function () {
         var cardId = _a.cardId, row = _a.row, column = _a.column;
         // Move card to discard pile
         this.getMarketCardZone({ row: row, column: column }).removeFromZone(cardId, false);
-        attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
         discardCardAnimation({ cardId: cardId, game: this.game });
         // this.game.framework().slideToObject(cardId, 'pp_discard_pile').play();
     };
@@ -1894,6 +1905,45 @@ var InteractionManager = /** @class */ (function () {
                     },
                 });
                 break;
+            case NEGOTIATE_BRIBE:
+                this.updatePageTitle({
+                    text: '${you} must accept or decline bribe of ${amount} rupee(s)',
+                    args: {
+                        amount: args.negotiateBribe.amount,
+                        you: '${you}',
+                    },
+                });
+                this.addPrimaryActionButton({
+                    id: 'accept_btn',
+                    text: _('Accept'),
+                    callback: function () { return _this.game.takeAction({ action: 'acceptBribe' }); },
+                });
+                var isRuler_1 = args.negotiateBribe.ruler === this.game.getPlayerId();
+                args.negotiateBribe.possible.reverse().forEach(function (value) {
+                    if (value == args.negotiateBribe.amount || (isRuler_1 && value < args.negotiateBribe.amount)) {
+                        return;
+                    }
+                    _this.addPrimaryActionButton({
+                        id: "ask_partial_waive_".concat(value, "_btn"),
+                        text: isRuler_1
+                            ? dojo.string.substitute(_("Demand ".concat(value, " rupee(s)")), { value: value })
+                            : dojo.string.substitute(_("Offer ".concat(value, " rupee(s)")), { value: value }),
+                        callback: function () {
+                            return _this.game.takeAction({
+                                action: 'proposeBribeAmount',
+                                data: {
+                                    amount: value,
+                                },
+                            });
+                        },
+                    });
+                });
+                this.addSecondaryActionButton({
+                    id: 'decline_btn',
+                    text: _('Decline'),
+                    callback: function () { return _this.game.takeAction({ action: 'declineBribe' }); },
+                });
+                break;
             case PLAYER_ACTIONS:
                 this.updateMainTitleTextActions();
                 if (this.activePlayerHasActions()) {
@@ -1902,16 +1952,7 @@ var InteractionManager = /** @class */ (function () {
                     this.setHandCardsSelectable({
                         callback: function (_a) {
                             var cardId = _a.cardId;
-                            _this.playCardNextStep({ cardId: cardId });
-                            // const numberOfCardsInCourt = this.game.playerManager
-                            //   .getPlayer({ playerId: this.game.getPlayerId() })
-                            //   .getCourtZone()
-                            //   .getAllItems().length;
-                            // if (numberOfCardsInCourt === 0) {
-                            //   this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId, firstCard: true, side: 'left' } } });
-                            // } else {
-                            //   this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId } } });
-                            // }
+                            _this.playCardCheckBribe({ cardId: cardId });
                         },
                     });
                     this.setCardActionsSelectable();
@@ -1954,9 +1995,9 @@ var InteractionManager = /** @class */ (function () {
                 dojo.query(".pp_card_in_hand.pp_".concat(args.playCardBribe.cardId)).addClass('pp_selected');
                 this.updatePageTitle({
                     text: substituteKeywords({
-                        string: " ${you} need to pay a bribe to ${playerName}, ruler of ${region} ${".concat(args.playCardBribe.region, "}, or ask to waive."),
+                        string: " ${you} must pay a bribe of ${rupees} rupee(s) to ${playerName} or ask to waive",
                         args: {
-                            region: capitalizeFirstLetter(args.playCardBribe.region),
+                            rupees: args.playCardBribe.rupees,
                         },
                         playerColor: args.playCardBribe.ruler.getColor(),
                     }),
@@ -1965,6 +2006,28 @@ var InteractionManager = /** @class */ (function () {
                         you: '${you}',
                     },
                 });
+                this.addPrimaryActionButton({
+                    id: "pay_bribe_btn",
+                    text: _('Pay bribe'),
+                    callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: args.playCardBribe.rupees }); },
+                });
+                var _loop_1 = function (i) {
+                    this_1.addPrimaryActionButton({
+                        id: "ask_partial_waive_".concat(i, "_btn"),
+                        text: dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
+                        callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: i }); },
+                    });
+                };
+                var this_1 = this;
+                for (var i = args.playCardBribe.rupees - 1; i >= 1; i--) {
+                    _loop_1(i);
+                }
+                this.addPrimaryActionButton({
+                    id: "ask_waive_btn",
+                    text: _('Ask to waive'),
+                    callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: 0 }); },
+                });
+                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
                 break;
             case PLAY_CARD_SELECT_SIDE:
                 dojo.query(".pp_card_in_hand.pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
@@ -1974,8 +2037,15 @@ var InteractionManager = /** @class */ (function () {
                         name: this.getCardInfo({ cardId: args.playCardSelectSide.cardId }).name,
                     },
                 });
-                this.setSideSelectable({ cardId: args.playCardSelectSide.cardId });
-                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
+                this.setSideSelectable({ cardId: args.playCardSelectSide.cardId, bribe: args.playCardSelectSide.bribe });
+                this.addDangerActionButton({
+                    id: 'cancel_btn',
+                    text: _('Cancel'),
+                    callback: function () {
+                        _this.onCancel();
+                        _this.removeSideSelectable();
+                    },
+                });
                 break;
             case PLAY_CARD_CONFIRM:
                 dojo.query("#pp_card_select_".concat(args.playCardConfirm.side)).addClass('pp_selected');
@@ -2003,7 +2073,11 @@ var InteractionManager = /** @class */ (function () {
                     callback: function () {
                         return _this.game.takeAction({
                             action: 'playCard',
-                            data: { cardId: args.playCardConfirm.cardId, leftSide: args.playCardConfirm.side === 'left' },
+                            data: {
+                                cardId: args.playCardConfirm.cardId,
+                                leftSide: args.playCardConfirm.side === 'left',
+                                bribe: args.playCardConfirm.bribe,
+                            },
                         });
                     },
                 });
@@ -2228,31 +2302,35 @@ var InteractionManager = /** @class */ (function () {
             });
         }
     };
-    InteractionManager.prototype.playCardNextStep = function (_a) {
+    InteractionManager.prototype.playCardCheckBribe = function (_a) {
         var cardId = _a.cardId;
         // Check if other player rules the region
         var cardInfo = this.getCardInfo({ cardId: cardId });
         var region = cardInfo.region;
         var rulerId = this.game.map.getRegion({ region: region }).getRuler();
         var playerId = this.game.getPlayerId();
-        console.log('ruler', rulerId);
         if (rulerId !== null && rulerId !== playerId) {
-            console.log('another player rules the region');
+            var rupees = this.game.map.getRegion({ region: region }).getRulerTribes().length;
             this.updateInterface({
                 nextStep: PLAY_CARD_BRIBE,
-                args: { playCardBribe: { cardId: cardId, region: region, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }) } },
+                args: { playCardBribe: { cardId: cardId, region: region, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }), rupees: rupees } },
             });
-            return;
         }
+        else {
+            this.playCardNextStep({ cardId: cardId, bribe: 0 });
+        }
+    };
+    InteractionManager.prototype.playCardNextStep = function (_a) {
+        var cardId = _a.cardId, bribe = _a.bribe;
         var numberOfCardsInCourt = this.game.playerManager
             .getPlayer({ playerId: this.game.getPlayerId() })
             .getCourtZone()
             .getAllItems().length;
         if (numberOfCardsInCourt === 0) {
-            this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left' } } });
+            this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left', bribe: bribe } } });
         }
         else {
-            this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId } } });
+            this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId, bribe: bribe } } });
         }
     };
     InteractionManager.prototype.setCardActionsSelectable = function () {
@@ -2315,16 +2393,19 @@ var InteractionManager = /** @class */ (function () {
     };
     InteractionManager.prototype.setSideSelectable = function (_a) {
         var _this = this;
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, bribe = _a.bribe;
         this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
         dojo.query('#pp_card_select_left').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'left' } } });
+                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'left', bribe: bribe } } });
             });
         });
         dojo.query('#pp_card_select_right').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'right' } } });
+                _this.updateInterface({
+                    nextStep: PLAY_CARD_CONFIRM,
+                    args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'right', bribe: bribe } },
+                });
             });
         });
     };
@@ -2396,7 +2477,7 @@ var InteractionManager = /** @class */ (function () {
     //  ..######.....##....##.....##....##....########
     InteractionManager.prototype.onEnteringState = function (stateName, args) {
         // UI changes for active player
-        if (this.game.isCurrentPlayerActive()) {
+        if (this.game.framework().isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'setup':
                     this.updateInterface({ nextStep: CHOOSE_LOYALTY });
@@ -2412,6 +2493,18 @@ var InteractionManager = /** @class */ (function () {
                 case 'discardHand':
                     this.numberOfDiscards = args.args.numberOfDiscards;
                     this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args } });
+                    break;
+                case 'negotiateBribe':
+                    this.updateInterface({
+                        nextStep: NEGOTIATE_BRIBE,
+                        args: {
+                            negotiateBribe: {
+                                amount: args.args.currentAmount,
+                                ruler: args.args.ruler,
+                                possible: args.args.possible,
+                            },
+                        },
+                    });
                     break;
                 case 'playerActions':
                     var _a = args.args, court = _a.court, favoredSuit = _a.favoredSuit, hand = _a.hand, remainingActions = _a.remainingActions, rupees = _a.rupees, unavailableCards = _a.unavailableCards;
@@ -2434,14 +2527,6 @@ var InteractionManager = /** @class */ (function () {
                 default:
                     break;
             }
-        }
-        // UI changes for all players
-        switch (stateName) {
-            case 'dummmy':
-                break;
-            default:
-                console.log('onEnteringState default');
-                break;
         }
     };
     //  .##.......########....###....##.....##.####.##....##..######..
@@ -2551,6 +2636,7 @@ var NotificationManager = /** @class */ (function () {
         var notifs = [
             ['cardAction', 1],
             ['changeRuler', 1],
+            // ['initiateNegotiation', 1],
             ['chooseLoyalty', 1],
             ['clearTurn', 1],
             ['dominanceCheck', 1],
@@ -2593,6 +2679,10 @@ var NotificationManager = /** @class */ (function () {
             to: to,
         });
     };
+    // notif_initiateNegotiation(notif: Notif<unknown>) {
+    //   const { args } = notif;
+    //   console.log('notif_initiateNegotiation', args);
+    // }
     NotificationManager.prototype.notif_chooseLoyalty = function (notif) {
         var args = notif.args;
         console.log('notif_chooseLoyalty', args);

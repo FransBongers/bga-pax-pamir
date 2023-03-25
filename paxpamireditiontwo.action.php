@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -20,50 +21,68 @@
  * this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/myAction.html", ...)
  *
  */
-  
-  
-  class action_paxpamireditiontwo extends APP_GameAction
-  { 
+
+
+class action_paxpamireditiontwo extends APP_GameAction
+{
     // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
+    public function __default()
+    {
+        if (self::isArg('notifwindow')) {
             $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
+            $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+        } else {
             $this->view = "paxpamireditiontwo_paxpamireditiontwo";
-            self::trace( "Complete reinitialization of board game" );
-      }
-  	} 
-  	
-  	// TODO: defines your action entry points there
+            self::trace("Complete reinitialization of board game");
+        }
+    }
+
+    // TODO: defines your action entry points there
+    public function acceptBribe()
+    {
+        self::setAjaxMode();
+        $result = $this->game->acceptBribe();
+        self::ajaxResponse();
+    }
+
+    public function declineBribe()
+    {
+        self::setAjaxMode();
+        $result = $this->game->declineBribe();
+        self::ajaxResponse();
+    }
+
+    public function proposeBribeAmount() {
+        self::setAjaxMode();
+        $amount = self::getArg("amount", AT_posint, true);
+        $result = $this->game->proposeBribeAmount($amount);
+        self::ajaxResponse();
+    }
+
     public function chooseLoyalty()
     {
-        self::setAjaxMode();     
-        $coalition = self::getArg( "coalition", AT_alphanum, true );
+        self::setAjaxMode();
+        $coalition = self::getArg("coalition", AT_alphanum, true);
         $result = $this->game->chooseLoyalty($coalition);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
-  
+
 
     public function discardCards()
     {
-        self::setAjaxMode();     
-        $cards_raw = self::getArg( "cards", AT_alphanum, true );
-        $from_hand = self::getArg( "fromHand", AT_bool, true );
+        self::setAjaxMode();
+        $cards_raw = self::getArg("cards", AT_alphanum, true);
+        $from_hand = self::getArg("fromHand", AT_bool, true);
 
         $cards_raw = trim($cards_raw);
 
-        if( $cards_raw == '' )
+        if ($cards_raw == '')
             $cards = array();
         else
-            $cards = explode( ' ', $cards_raw );
+            $cards = explode(' ', $cards_raw);
 
         $result = $this->game->discardCards($cards, $from_hand);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
 
@@ -71,57 +90,58 @@
     {
         self::setAjaxMode();
         $result = $this->game->pass();
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     public function restart()
     {
         self::setAjaxMode();
         $result = $this->game->restart();
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     public function placeRoad()
     {
-        self::setAjaxMode();     
-        $border = self::getArg( "border", AT_alphanum, true );
+        self::setAjaxMode();
+        $border = self::getArg("border", AT_alphanum, true);
         $result = $this->game->placeRoad($border);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     public function placeSpy()
     {
-        self::setAjaxMode();     
-        $card_id = self::getArg( "cardId", AT_alphanum, true );
+        self::setAjaxMode();
+        $card_id = self::getArg("cardId", AT_alphanum, true);
         $result = $this->game->placeSpy($card_id);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     public function playCard()
     {
-        self::setAjaxMode();     
-        $card_id = self::getArg( "cardId", AT_alphanum, true );
-        $left_side = self::getArg( "leftSide", AT_bool, true );
-        $result = $this->game->playCard($card_id, $left_side);
-        self::ajaxResponse( );
+        self::setAjaxMode();
+        $card_id = self::getArg("cardId", AT_alphanum, true);
+        $left_side = self::getArg("leftSide", AT_bool, true);
+        $bribe = self::getArg("bribe", AT_posint, true);
+        $result = $this->game->playCard($card_id, $left_side, $bribe);
+        self::ajaxResponse();
     }
 
 
     public function purchaseCard()
     {
-        self::setAjaxMode();     
-        $card_id = self::getArg( "cardId", AT_alphanum, true );
+        self::setAjaxMode();
+        $card_id = self::getArg("cardId", AT_alphanum, true);
         $result = $this->game->purchaseCard($card_id);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     public function selectGift()
     {
-        self::setAjaxMode();     
-        $selected_gift = self::getArg( "selectedGift", AT_alphanum, true );
-        $card_id = self::getArg( "cardId", AT_alphanum, true );
+        self::setAjaxMode();
+        $selected_gift = self::getArg("selectedGift", AT_alphanum, true);
+        $card_id = self::getArg("cardId", AT_alphanum, true);
         $result = $this->game->selectGift($selected_gift, $card_id);
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
 
     /*
@@ -144,7 +164,4 @@
     }
     
     */
-
-  }
-  
-
+}

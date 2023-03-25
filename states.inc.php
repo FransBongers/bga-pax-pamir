@@ -70,6 +70,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CARD_ACTION_MOVE", 44);
     define("STATE_CARD_ACTION_TAX", 45);
     define("STATE_NEXT_PLAYER", 50);
+    define("STATE_NEXT_PLAYER_NEGOTIATE_BRIBE", 51);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
     define("STATE_END_GAME", 99);
@@ -113,6 +114,18 @@ $machinestates = array(
         )
     ),
 
+    STATE_NEXT_PLAYER_NEGOTIATE_BRIBE => array(
+        "name" => "nextPlayerNegotiateBribe",
+        "type" => "game",
+        "action" => "stNextPlayerNegotiateBribe",
+        "updateGameProgression" => true,
+        "transitions" => array( 
+            "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+        )
+    ),
+
     STATE_PREPARE_TURN => array(
         "name" => "prepareTurn",
         "type" => "game",
@@ -125,11 +138,8 @@ $machinestates = array(
 
     STATE_PLAYER_ACTIONS => array(
         "name" => "playerActions",
-        "description" => clienttranslate('${actplayer} may take two actions'),
+        "description" => clienttranslate('${actplayer} may perform actions'),
         "descriptionmyturn" => clienttranslate('${you} '),
-        "descriptionmyturnplaycard" => clienttranslate('${you} must select a card to play'),
-        "descriptionmyturnselectcardaction" => clienttranslate('${you} must select a card action'),
-        "descriptionmyturnselectpurchase" => clienttranslate('${you} must select a card to purchase'),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
         "possibleactions" => array( "purchaseCard", "playCard", "selectGift", "pass", "restart" ),
@@ -137,13 +147,25 @@ $machinestates = array(
             "action" => STATE_PLAYER_ACTIONS,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-            "negotiateBribe" => STATE_NEGOTIATE_BRIBE, 
+            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE, 
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
             "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
             "cardActionBuild" => STATE_CARD_ACTION_BUILD,
             "cardActionMove" => STATE_CARD_ACTION_MOVE,
             "cardActionTax" => STATE_CARD_ACTION_TAX,
             "cleanup" => STATE_CLEANUP,
+        )
+    ),
+
+    STATE_NEGOTIATE_BRIBE => array(
+        "name" => "negotiateBribe",
+        "description" => clienttranslate('${actplayer} must accept or decline bribe'),
+        "descriptionmyturn" => clienttranslate('${you} '),
+        "type" => "activeplayer",
+        "args" => "argNegotiateBribe",
+        "possibleactions" => array( "acceptBribe", "declineBribe", "proposeBribeAmount" ),
+        "transitions" => array( 
+            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE, 
         )
     ),
 

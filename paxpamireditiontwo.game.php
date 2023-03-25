@@ -58,6 +58,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;
+    use PaxPamir\States\PlayCardTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\RefreshMarketTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;

@@ -36,6 +36,7 @@ class NotificationManager {
     const notifs: [id: string, wait: number][] = [
       ['cardAction', 1],
       ['changeRuler', 1],
+      // ['initiateNegotiation', 1],
       ['chooseLoyalty', 1],
       ['clearTurn', 1],
       ['dominanceCheck', 1],
@@ -84,6 +85,11 @@ class NotificationManager {
       to,
     });
   }
+
+  // notif_initiateNegotiation(notif: Notif<unknown>) {
+  //   const { args } = notif;
+  //   console.log('notif_initiateNegotiation', args);
+  // }
 
   notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
     const { args } = notif;

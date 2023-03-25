@@ -127,6 +127,14 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
  */
 const DISCARD = 'discard';
 
+/**
+ * Bribe status
+ */
+
+ const BRIBE_ACCEPTED = 'bribe_accepted';
+ const BRIBE_DECLINED = 'bribe_declined';
+ const BRIBE_UNRESOLVED = null;
+
 /*
  * Game options
  */

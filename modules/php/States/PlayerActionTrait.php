@@ -133,90 +133,6 @@ trait PlayerActionTrait
     $this->gamestate->jumpToState(Globals::getLogState());
   }
 
-  /**
-   * Play card from hand to court
-   */
-  function playCard($cardId, $leftSide = true, $bribe = null)
-  {
-    //
-    // play a card from hand into the court on either the left or right side
-    //
-
-    self::checkAction('playCard');
-
-    $playerId = self::getActivePlayerId();
-    $card = Cards::get($cardId);
-    $card_name = $this->cards[$cardId]['name'];
-
-    // $bribe_card_id = $this->getGameStateValue("bribe_card_id");
-    // $bribe_ruler = Cards::getRegionRulerForCard($bribe_card_id);
-    // $bribe_amount = $this->getGameStateValue("bribe_amount");
-
-    $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
-
-    // TODO (Frans): decide how we want to implement bribes
-    // if (($bribe_ruler != 0) and ($bribe_ruler != $player_id)) {
-    //     if ($bribe_amount == -1) {
-    //         $this->setGameStateValue("bribe_card_id", $cardId);
-    //         $this->gamestate->setPlayersMultiactive( [$bribe_ruler], 'negotiateBribe', $bExclusive = true );
-    //         self::notifyAllPlayers( "playCard", $message, array(
-    //             'player_id' => $player_id,
-    //             'player_name' => self::getActivePlayerName(),
-    //             'card' => $card,
-    //             'card_name' => $card_name,
-    //             'court_cards' => $court_cards,
-    //             'bribe' => true,
-    //         ) );
-    //         return;
-    //     } elseif ($bribe != $bribe_amount) {
-    //         throw new feException( "Bribe is incorrect value" );
-    //         return;
-    //     } else {
-    //         $this->incPlayerCoins($player_id, -$bribe);
-    //     }
-    // }
-
-    if (Globals::getRemainingActions() > 0) {
-      // check if loyaly change
-      $cardLoyalty = $this->cards[$cardId]['loyalty'];
-      if ($cardLoyalty != null) {
-        $this->checkAndHandleLoyaltyChange($cardLoyalty);
-      }
-
-      if ($leftSide) {
-        for ($i = 0; $i < count($courtCards); $i++) {
-          Cards::setState($courtCards[$i]['id'], $i + 2);
-        }
-        Cards::move($cardId, ['court', $playerId], 1);
-        
-      } else {
-        Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
-      }
-      $message = clienttranslate('${player_name} plays ${cardName} ${logTokenCard} to the ${side} side of his court');
-      Globals::incRemainingActions(-1);
-      $court_cards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
-      $card = Cards::get($cardId);
-      self::notifyAllPlayers("playCard", $message, array(
-        'playerId' => $playerId,
-        'player_name' => self::getActivePlayerName(),
-        'card' => $card,
-        'cardName' => $card_name,
-        'courtCards' => $court_cards,
-        'bribe' => false,
-        'logTokenCard' => $cardId,
-        'side' => $leftSide ? clienttranslate('left') : clienttranslate('right')
-      ));
-
-      $this->updatePlayerCounts();
-
-      // $this->setGameStateValue("bribe_card_id", 0);
-      // $this->setGameStateValue("bribe_amount", -1);
-
-      Globals::setResolveImpactIconsCardId($cardId);
-      Globals::setResolveImpactIconsCurrentIcon(0);
-      $this->gamestate->nextState('resolveImpactIcons');
-    }
-  }
 
   /**
    * purchase card from market
@@ -479,34 +395,5 @@ trait PlayerActionTrait
     // $this->gamestate->nextState($next_state);
   }
 
-  /**
-   * checks if coalition is different from current loyalty.
-   * Handles any changes it it is.
-   */
-  function checkAndHandleLoyaltyChange($coalition)
-  {
 
-    $playerId = self::getActivePlayerId();
-    $current_loyaly = Players::get()->getLoyalty();
-    // check of loyalty needs to change. If it does not return
-    if ($current_loyaly == $coalition) {
-      return;
-    }
-
-
-    // TODO:
-    // 1. Return gifts
-    // 2. Discard prizes and patriots
-    // 3. Update loyalty
-    Players::get()->setLoyalty($coalition);
-
-    // Notify
-    $coalition_name = $this->loyalty[$coalition]['name'];
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changes loyalty to ${coalition_name}'), array(
-      'playerId' => $playerId,
-      'player_name' => self::getActivePlayerName(),
-      'coalition' => $coalition,
-      'coalition_name' => $coalition_name
-    ));
-  }
 }

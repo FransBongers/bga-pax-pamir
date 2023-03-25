@@ -197,6 +197,7 @@ class Region {
       nodeId: `pp_${this.region}_tribes`,
       tokenWidth: TRIBE_WIDTH,
       tokenHeight: TRIBE_HEIGHT,
+      itemMargin: 6,
     });
 
     this.tribeZone.instantaneous = true;
@@ -231,6 +232,15 @@ class Region {
 
   getRuler(): number | null {
     return this.ruler;
+  }
+
+  getRulerTribes(): string[] {
+    if(this.ruler) {
+      return this.getTribeZone().getAllItems().filter((id: string) => {
+        return Number(id.split('_')[1]) === this.ruler;
+      })
+    };
+    return [];
   }
 
   setRuler({ playerId }: { playerId: number | null }) {

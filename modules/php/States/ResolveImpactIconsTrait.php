@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -43,6 +44,11 @@ trait ResolveImpactIconsTrait
     $card_region = $card_info['region'];
 
     if ($current_impact_icon_index >= count($impactIcons)) {
+      if (Globals::getBribeClearLogs()) {
+        Globals::setBribeClearLogs(false);
+        Log::enable();
+        Log::clearAll();
+      }
       // $this->setGameStateValue("resolve_impactIcons_card_id", explode("_", $card_id)[1]);
       // $this->setGameStateValue("resolve_impactIcons_current_icon", 0);
       if (in_array(TRIBE, $impactIcons, true) || in_array(ARMY, $impactIcons, true)) {
@@ -184,7 +190,7 @@ trait ResolveImpactIconsTrait
         break;
       case TRIBE:
         $from = "cylinders_" . $player_id;
-        $cylinder = Tokens::getInLocation($from)->first();
+        $cylinder = Tokens::getTopOf($from);
         $to = $this->locations["tribes"][$card_region];
         if ($cylinder != null) {
           Tokens::move($cylinder['id'], $to);
@@ -209,6 +215,11 @@ trait ResolveImpactIconsTrait
 
 
     if ($next_state != null) {
+      if (Globals::getBribeClearLogs()) {
+        Globals::setBribeClearLogs(false);
+        Log::enable();
+        Log::clearAll();
+      }
       $this->gamestate->nextState($next_state);
     } else {
       // increase index for currently resolved icon, then transition to resolveImpactIcons state again

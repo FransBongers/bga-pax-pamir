@@ -14,6 +14,7 @@ const CONFIRM_PURCHASE = 'confirmPurchase';
 const CONFIRM_SELECT_GIFT = 'confirmSelectGift';
 const DISCARD_COURT = 'discardCourt';
 const DISCARD_HAND = 'discardHand';
+const NEGOTIATE_BRIBE = 'negotiateBribe';
 const PLACE_ROAD = 'placeRoad';
 const PLACE_SPY = 'placeSpy';
 const PASS = 'pass';

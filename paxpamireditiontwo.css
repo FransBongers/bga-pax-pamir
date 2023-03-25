@@ -658,11 +658,11 @@
   top: 2px;
 }
 
-.pp_loyalty_dial.pp_british {
+.pp_loyalty_dial.pp_loyalty_british {
   transform: rotate(120deg);
 }
 
-.pp_loyalty_dial.pp_russian {
+.pp_loyalty_dial.pp_loyalty_russian {
   transform: rotate(240deg);
 }
 
@@ -1111,6 +1111,10 @@ html {
 
 .pp_road.pp_russian {
   background-image: url("img/road_russian.svg");
+}
+
+.pp_road.pp_neutral {
+  background-image: url("img/road_neutral.svg");
 }
 
 .pp_cylinder {

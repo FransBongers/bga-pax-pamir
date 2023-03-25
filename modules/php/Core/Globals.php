@@ -14,13 +14,15 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
+    "bribe" => "obj",
+    "bribeClearLogs" => "bool",
     "rulers" => "obj",
-    "rulerHerat" => "int",
-    "rulerKabul" => "int",
-    "rulerKandahar" => "int",
-    "rulerPersia" => "int",
-    "rulerPunjab" => "int",
-    "rulerTranscaspia" => "int",
+    "rulerHerat" => "int", // Can be removed?
+    "rulerKabul" => "int", // Can be removed?
+    "rulerKandahar" => "int", // Can be removed?
+    "rulerPersia" => "int", // Can be removed?
+    "rulerPunjab" => "int", // Can be removed?
+    "rulerTranscaspia" => "int", // Can be removed?
     "setup" => "int",
 
     // TODO: check implementation
@@ -163,5 +165,6 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     ));
     self::setRemainingActions(2);
     self::setSetup(1);
+    self::setBribeClearLogs(true);
   }
 }

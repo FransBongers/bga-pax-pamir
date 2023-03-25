@@ -97,7 +97,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     rulers: {
       [region: string]: number | null;
     };
-  }
+  };
   activeEvents: Token[];
   coalitionBlocks: {
     [coalition: string]: Token[];
@@ -133,7 +133,7 @@ interface PaxPamirGame extends Game {
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
-  returnSpiesFromCard: (props: {cardId: string}) => void;
+  returnSpiesFromCard: (props: { cardId: string }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
 }
@@ -156,10 +156,3 @@ interface PaxPamirPlayer extends BgaPlayer {
   rupees: number;
 }
 
-interface EnteringDiscardCourtArgs {
-  numberOfDiscards: number;
-}
-
-interface EnteringDiscardHandArgs {
-  numberOfDiscards: number;
-}

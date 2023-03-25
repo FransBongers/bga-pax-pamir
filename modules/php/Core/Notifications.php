@@ -1,5 +1,7 @@
 <?php
+
 namespace PaxPamir\Core;
+
 use PaxPamir\Managers\Players;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Globals;
@@ -76,7 +78,7 @@ class Notifications
     if ($newRuler === null) {
       $msg = clienttranslate('${player_name} is no longer ruler of ${region}');
     }
-    self::notifyAll('changeRuler', $msg,[
+    self::notifyAll('changeRuler', $msg, [
       'player_name' => Players::get($newRuler === null ? $oldRuler : $newRuler)->getName(),
       'oldRuler' => $oldRuler,
       'newRuler' => $newRuler,
@@ -89,14 +91,41 @@ class Notifications
     self::notifyAll('moveToken', $message, $args);
   }
 
-  public static function discardEventCardFromMarket($card,$location)
+  public static function discardEventCardFromMarket($card, $location)
   {
 
-    self::notifyAll("discardCard", '${player_name} discards event card from the market: ${logTokenCardLarge}', array(
+    self::notifyAll("discardCard", clienttranslate('${player_name} discards event card from the market: ${logTokenCardLarge}'), array(
       'player' => Players::get(),
       'cardId' => $card['id'],
       'from' => $location,
       'logTokenCardLarge' => $card['id']
+    ));
+  }
+
+  public static function acceptBribe($briberId, $rulerId, $rupees)
+  {
+    self::notifyAll("acceptBribe", clienttranslate('${player_name} accepts bribe of ${rupees} rupee(s)'), array(
+      'player' => Players::get(),
+      'rulerId' => $rulerId,
+      'briberId' => $briberId,
+      'rupees' => $rupees,
+    ));
+  }
+
+  public static function declineBribe($rupees)
+  {
+    self::notifyAll("declineBribe", clienttranslate('${player_name} declines bribe of ${rupees} rupee(s)'), array(
+      'player' => Players::get(),
+      'rupees' => $rupees,
+    ));
+  }
+
+  public static function proposeBribeAmount($rupees, $isRuler)
+  {
+    $msg = $isRuler ? clienttranslate('${player_name} demands bribe of ${rupees} rupee(s)') : clienttranslate('${player_name} offers bribe of ${rupees} rupee(s)');
+    self::notifyAll("proposeBribeAmount", $msg, array(
+      'player' => Players::get(),
+      'rupees' => $rupees,
     ));
   }
 
@@ -133,5 +162,3 @@ class Notifications
     // }
   }
 }
-
-?>

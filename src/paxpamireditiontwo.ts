@@ -235,9 +235,9 @@ class PaxPamir implements PaxPamirGame {
 
   public clearInterface() {
     console.log('clear interface');
-    Object.values(this.spies).forEach((zone) => {
-      dojo.empty(zone.container_div);
-      zone = undefined;
+    Object.keys(this.spies).forEach((key) => {
+      dojo.empty(this.spies[key].container_div);
+      this.spies[key] = undefined;
     });
 
     this.market.clearInterface();

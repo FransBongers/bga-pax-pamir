@@ -110,11 +110,11 @@
   top: 2px;
 }
 
-.pp_loyalty_dial.pp_loyalty_british {
+.pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
 }
 
-.pp_loyalty_dial.pp_loyalty_russian {
+.pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
 }
 
@@ -217,6 +217,37 @@
   word-wrap: break-word;
   margin: 10px;
   margin-right: 220px;
+}
+
+.pp_player_tableau_title {
+  font-weight: bold;
+  font-size: large;
+  word-wrap: break-word;
+  margin: 10px;
+  margin-right: 126px;
+  flex-grow: 1;
+}
+
+.pp_player_tableau_title_container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.pp_player_tableau_icons {
+  width: 94px;
+  // background-color: purple;
+  display: flex;
+  flex-direction: row;
+}
+
+.pp_card_icon_tableau {
+  height: 44px;
+  width: 32px;
+  background-size: 32px 44px;
+  background-image: url(img/temp/cards/back.jpg);
+  /* margin-left: 16px; */
+  border-radius: 3px;
 }
 
 /* .pp_player_board {

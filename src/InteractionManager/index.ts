@@ -575,7 +575,7 @@ class InteractionManager {
   handleDiscardSelect({ cardId }: { cardId: string }) {
     dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
     const numberSelected = dojo.query('.pp_selected').length;
-    console.log('button_check', numberSelected, this.numberOfDiscards);
+    console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
     if (numberSelected === this.numberOfDiscards) {
       dojo.removeClass('confirm_btn', 'pp_disabled');
     } else {
@@ -741,7 +741,8 @@ class InteractionManager {
   setCourtCardsSelectableForDiscard() {
     const playerId = this.game.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
-      const cardId = 'card_' + node.id.split('_')[6];
+      const cardId = 'card_' + node.id.split('_')[1];
+      console.log('cardId in courtcardselect', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => this.handleDiscardSelect({ cardId })));
     }, this);

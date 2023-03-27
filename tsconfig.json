@@ -19,6 +19,7 @@
     "src/constants.ts",
     "src/templates.ts",
     "src/utility.ts",
+    "src/TooltipManager/templates.ts",
     "src/TooltipManager/index.ts",
     "src/ObjectManager/index.ts",
     "src/PlayerManager/index.ts",

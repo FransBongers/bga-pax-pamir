@@ -367,6 +367,99 @@ var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
 };
+// Rupee with counter in right bottom.
+var tplRupeeCount = function (_a) {
+    var id = _a.id;
+    return "<div id=\"rupees_".concat(id, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_").concat(id, "\" class=\"pp_icon_count\"><span id=\"rupee_count_").concat(id, "_counter\"></span></div></div>");
+};
+// Card background with counter in right bottom
+var tplHandCount = function (_a) {
+    var id = _a.id;
+    return "<div id=\"cards_".concat(id, "\" class=\"pp_icon pp_card_icon\"><div id=\"card_count_").concat(id, "\" class=\"pp_icon_count\"><span id=\"card_count_").concat(id, "_counter\"></span></div></div>");
+};
+var capitalizeFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+var getKeywords = function (_a) {
+    var _b = _a.playerColor, playerColor = _b === void 0 ? '#000' : _b;
+    return {
+        you: '${you}',
+        playerName: "<span style=\"font-weight:bold;color:#".concat(playerColor, ";\">${playerName}</span>"),
+        herat: '<div class="pp_keyword_token pp_herat_icon"></div>',
+        kabul: '<div class="pp_keyword_token pp_kabul_icon"></div>',
+        kandahar: '<div class="pp_keyword_token pp_kandahar_icon"></div>',
+        persia: '<div class="pp_keyword_token pp_persia_icon"></div>',
+        punjab: '<div class="pp_keyword_token pp_punjab_icon"></div>',
+        transcaspia: '<div class="pp_keyword_token pp_transcaspia_icon"></div>',
+    };
+};
+var substituteKeywords = function (_a) {
+    var string = _a.string, args = _a.args, playerColor = _a.playerColor;
+    console.log('color', playerColor);
+    return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
+};
+// const placeCard = ({ location, id, order = null }) => {
+//   if (order != null) {
+//     location.changeItemsWeight({
+//       [id]: order,
+//     });
+//   }
+//   location.addToStockWithId(id, id, 'pp_market_deck');
+//   // this.setupCardSpyZone({location, cardId: id});
+//   // this.addTooltip( location.getItemDivId(id), id, '' );
+// };
+// TODO(Frans): detereming jstpl based on id?
+var placeToken = function (_a) {
+    var game = _a.game, location = _a.location, id = _a.id, jstpl = _a.jstpl, jstplProps = _a.jstplProps, _b = _a.weight, weight = _b === void 0 ? 0 : _b, _c = _a.classes, classes = _c === void 0 ? [] : _c, _d = _a.from, from = _d === void 0 ? null : _d;
+    // console.log('from', from)
+    dojo.place(game.framework().format_block(jstpl, jstplProps), from || location.container_div);
+    classes.forEach(function (className) {
+        dojo.addClass(id, className);
+    });
+    location.placeInZone(id, weight);
+};
+// // Function to setup stock components for cards
+// const setupCardsStock = ({ game, stock, nodeId, className }: { game: Game; stock: Stock; nodeId: string; className?: string }) => {
+//   const useLargeCards = false;
+//   stock.create(game, $(nodeId), CARD_WIDTH, CARD_HEIGHT);
+//   // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
+//   const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
+//   stock.image_items_per_row = useLargeCards ? 117 : 118;
+//   stock.item_margin = 10;
+//   // TODO: below is option to customize the created div (and add zones to card for example)
+//   stock.jstpl_stock_item =
+//     '<div id="${id}" class="stockitem pp_card ' +
+//     className +
+//     '" \
+//               style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:' +
+//     backgroundSize +
+//     ";\
+//               background-image:url('${image}');\"></div>";
+//   Object.keys(game.gamedatas.cards).forEach((cardId) => {
+//     const cardFileLocation = useLargeCards
+//       ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg'
+//       : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
+//     stock.addItemType(cardId, 0, cardFileLocation, useLargeCards ? Number(cardId.split('_')[1]) - 1 : Number(cardId.split('_')[1]));
+//   });
+//   stock.extraClasses = `pp_card ${className}`;
+//   stock.setSelectionMode(0);
+//   stock.onItemCreate = dojo.hitch(game, 'setupNewCard');
+// };
+// Function to set up zones for tokens (armies, tribes, cylinders etc.)
+var setupTokenZone = function (_a) {
+    var game = _a.game, zone = _a.zone, nodeId = _a.nodeId, tokenWidth = _a.tokenWidth, tokenHeight = _a.tokenHeight, _b = _a.itemMargin, itemMargin = _b === void 0 ? null : _b, _c = _a.instantaneous, instantaneous = _c === void 0 ? false : _c, _d = _a.pattern, pattern = _d === void 0 ? null : _d, _e = _a.customPattern, customPattern = _e === void 0 ? null : _e;
+    zone.create(game, nodeId, tokenWidth, tokenHeight);
+    if (itemMargin) {
+        zone.item_margin = itemMargin;
+    }
+    zone.instantaneous = instantaneous;
+    if (pattern) {
+        zone.setPattern(pattern);
+    }
+    if (pattern == 'custom' && customPattern) {
+        zone.itemIdToCoords = customPattern;
+    }
+};
 var tplCardTooltipContainer = function (_a) {
     var cardId = _a.cardId, content = _a.content;
     return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n</div>");
@@ -474,89 +567,6 @@ var tplCourtCardTooltip = function (_a) {
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
     return tplCardTooltipContainer({ cardId: cardId, content: "\n    <span class=\"title\">".concat(_('If discarded'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.discarded.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.discarded.description || '', "</span>\n    <span class=\"title\" style=\"margin-top: 32px;\">").concat(_('If purchased'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.purchased.description || '', "</span>\n  ") });
-};
-var capitalizeFirstLetter = function (string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-};
-var getKeywords = function (_a) {
-    var _b = _a.playerColor, playerColor = _b === void 0 ? '#000' : _b;
-    return {
-        you: '${you}',
-        playerName: "<span style=\"font-weight:bold;color:#".concat(playerColor, ";\">${playerName}</span>"),
-        herat: '<div class="pp_keyword_token pp_herat_icon"></div>',
-        kabul: '<div class="pp_keyword_token pp_kabul_icon"></div>',
-        kandahar: '<div class="pp_keyword_token pp_kandahar_icon"></div>',
-        persia: '<div class="pp_keyword_token pp_persia_icon"></div>',
-        punjab: '<div class="pp_keyword_token pp_punjab_icon"></div>',
-        transcaspia: '<div class="pp_keyword_token pp_transcaspia_icon"></div>',
-    };
-};
-var substituteKeywords = function (_a) {
-    var string = _a.string, args = _a.args, playerColor = _a.playerColor;
-    console.log('color', playerColor);
-    return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
-};
-// const placeCard = ({ location, id, order = null }) => {
-//   if (order != null) {
-//     location.changeItemsWeight({
-//       [id]: order,
-//     });
-//   }
-//   location.addToStockWithId(id, id, 'pp_market_deck');
-//   // this.setupCardSpyZone({location, cardId: id});
-//   // this.addTooltip( location.getItemDivId(id), id, '' );
-// };
-// TODO(Frans): detereming jstpl based on id?
-var placeToken = function (_a) {
-    var game = _a.game, location = _a.location, id = _a.id, jstpl = _a.jstpl, jstplProps = _a.jstplProps, _b = _a.weight, weight = _b === void 0 ? 0 : _b, _c = _a.classes, classes = _c === void 0 ? [] : _c, _d = _a.from, from = _d === void 0 ? null : _d;
-    // console.log('from', from)
-    dojo.place(game.framework().format_block(jstpl, jstplProps), from || location.container_div);
-    classes.forEach(function (className) {
-        dojo.addClass(id, className);
-    });
-    location.placeInZone(id, weight);
-};
-// // Function to setup stock components for cards
-// const setupCardsStock = ({ game, stock, nodeId, className }: { game: Game; stock: Stock; nodeId: string; className?: string }) => {
-//   const useLargeCards = false;
-//   stock.create(game, $(nodeId), CARD_WIDTH, CARD_HEIGHT);
-//   // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
-//   const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
-//   stock.image_items_per_row = useLargeCards ? 117 : 118;
-//   stock.item_margin = 10;
-//   // TODO: below is option to customize the created div (and add zones to card for example)
-//   stock.jstpl_stock_item =
-//     '<div id="${id}" class="stockitem pp_card ' +
-//     className +
-//     '" \
-//               style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:' +
-//     backgroundSize +
-//     ";\
-//               background-image:url('${image}');\"></div>";
-//   Object.keys(game.gamedatas.cards).forEach((cardId) => {
-//     const cardFileLocation = useLargeCards
-//       ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg'
-//       : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
-//     stock.addItemType(cardId, 0, cardFileLocation, useLargeCards ? Number(cardId.split('_')[1]) - 1 : Number(cardId.split('_')[1]));
-//   });
-//   stock.extraClasses = `pp_card ${className}`;
-//   stock.setSelectionMode(0);
-//   stock.onItemCreate = dojo.hitch(game, 'setupNewCard');
-// };
-// Function to set up zones for tokens (armies, tribes, cylinders etc.)
-var setupTokenZone = function (_a) {
-    var game = _a.game, zone = _a.zone, nodeId = _a.nodeId, tokenWidth = _a.tokenWidth, tokenHeight = _a.tokenHeight, _b = _a.itemMargin, itemMargin = _b === void 0 ? null : _b, _c = _a.instantaneous, instantaneous = _c === void 0 ? false : _c, _d = _a.pattern, pattern = _d === void 0 ? null : _d, _e = _a.customPattern, customPattern = _e === void 0 ? null : _e;
-    zone.create(game, nodeId, tokenWidth, tokenHeight);
-    if (itemMargin) {
-        zone.item_margin = itemMargin;
-    }
-    zone.instantaneous = instantaneous;
-    if (pattern) {
-        zone.setPattern(pattern);
-    }
-    if (pattern == 'custom' && customPattern) {
-        zone.itemIdToCoords = customPattern;
-    }
 };
 //  .########..#######...#######..##.......########.####.########.      
 //  ....##....##.....##.##.....##.##..........##.....##..##.....##      
@@ -851,6 +861,7 @@ var PPPlayer = /** @class */ (function () {
         this.gifts = {};
         this.counters = {
             cards: new ebg.counter(),
+            cardsTableau: new ebg.counter(),
             cylinders: new ebg.counter(),
             economic: new ebg.counter(),
             influence: new ebg.counter(),
@@ -858,6 +869,7 @@ var PPPlayer = /** @class */ (function () {
             military: new ebg.counter(),
             political: new ebg.counter(),
             rupees: new ebg.counter(),
+            rupeesTableau: new ebg.counter(),
         };
         // console.log("Player", player);
         this.game = game;
@@ -1026,6 +1038,7 @@ var PPPlayer = /** @class */ (function () {
             this.updatePlayerLoyalty({ coalition: this.player.loyalty });
         }
         this.counters.cards.create("card_count_".concat(this.playerId, "_counter"));
+        this.counters.cardsTableau.create("card_count_tableau_".concat(this.playerId, "_counter"));
         this.counters.cylinders.create("cylinder_count_".concat(this.playerId, "_counter"));
         this.counters.economic.create("economic_".concat(this.playerId, "_counter"));
         this.counters.influence.create("influence_".concat(this.playerId, "_counter"));
@@ -1033,6 +1046,7 @@ var PPPlayer = /** @class */ (function () {
         this.counters.military.create("military_".concat(this.playerId, "_counter"));
         this.counters.political.create("political_".concat(this.playerId, "_counter"));
         this.counters.rupees.create("rupee_count_".concat(this.playerId, "_counter"));
+        this.counters.rupeesTableau.create("rupee_count_tableau_".concat(this.playerId, "_counter"));
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
     PPPlayer.prototype.updatePlayerPanel = function (_a) {
@@ -1047,7 +1061,9 @@ var PPPlayer = /** @class */ (function () {
         }
         this.counters.cylinders.setValue(counts.cylinders);
         this.counters.rupees.setValue(playerGamedatas.rupees);
+        this.counters.rupeesTableau.setValue(playerGamedatas.rupees);
         this.counters.cards.setValue(counts.cards);
+        this.counters.cardsTableau.setValue(counts.cards);
         this.counters.economic.setValue(counts.suits.economic);
         this.counters.military.setValue(counts.suits.military);
         this.counters.political.setValue(counts.suits.political);
@@ -1149,11 +1165,33 @@ var PPPlayer = /** @class */ (function () {
     };
     PPPlayer.prototype.setCounter = function (_a) {
         var counter = _a.counter, value = _a.value;
-        this.counters[counter].setValue(value);
+        switch (counter) {
+            case 'cards':
+                this.counters.cards.setValue(value);
+                this.counters.cardsTableau.setValue(value);
+                break;
+            case 'rupees':
+                this.counters.rupees.setValue(value);
+                this.counters.rupeesTableau.setValue(value);
+                break;
+            default:
+                this.counters[counter].setValue(value);
+        }
     };
     PPPlayer.prototype.incCounter = function (_a) {
         var counter = _a.counter, value = _a.value;
-        this.counters[counter].incValue(value);
+        switch (counter) {
+            case 'cards':
+                this.counters.cards.incValue(value);
+                this.counters.cardsTableau.incValue(value);
+                break;
+            case 'rupees':
+                this.counters.rupees.incValue(value);
+                this.counters.rupeesTableau.incValue(value);
+                break;
+            default:
+                this.counters[counter].incValue(value);
+        }
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -2277,7 +2315,7 @@ var InteractionManager = /** @class */ (function () {
         var cardId = _a.cardId;
         dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
         var numberSelected = dojo.query('.pp_selected').length;
-        console.log('button_check', numberSelected, this.numberOfDiscards);
+        console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
         if (numberSelected === this.numberOfDiscards) {
             dojo.removeClass('confirm_btn', 'pp_disabled');
         }
@@ -2440,7 +2478,8 @@ var InteractionManager = /** @class */ (function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
-            var cardId = 'card_' + node.id.split('_')[6];
+            var cardId = 'card_' + node.id.split('_')[1];
+            console.log('cardId in courtcardselect', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
         }, this);
@@ -2784,7 +2823,7 @@ var NotificationManager = /** @class */ (function () {
         var row = Number(marketLocation.split('_')[1]);
         var col = Number(marketLocation.split('_')[2]);
         // Remove all rupees that were on the purchased card
-        this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
+        this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_tableau_".concat(playerId) });
         // Move card from markt
         var cardId = notif.args.card.id;
         if (newLocation == 'active_events') {
@@ -2795,7 +2834,8 @@ var NotificationManager = /** @class */ (function () {
             });
         }
         else if (newLocation == 'discard') {
-            this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
+            this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, false);
+            discardCardAnimation({ cardId: cardId, game: this.game });
         }
         else {
             this.getPlayer({ playerId: playerId }).purchaseCard({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
@@ -2804,7 +2844,7 @@ var NotificationManager = /** @class */ (function () {
         updatedCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_tableau_".concat(playerId) });
         });
     };
     NotificationManager.prototype.notif_refreshMarket = function (notif) {
@@ -2857,7 +2897,7 @@ var NotificationManager = /** @class */ (function () {
                 jstplProps: {
                     id: item.rupee_id,
                 },
-                from: "rupees_".concat(playerId),
+                from: "rupees_tableau_".concat(playerId),
             });
         }, this);
         this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });
@@ -3121,10 +3161,11 @@ var PaxPamir = /** @class */ (function () {
         this.cancelLogs(this.gamedatas.canceledNotifIds);
     };
     PaxPamir.prototype.clearInterface = function () {
+        var _this = this;
         console.log('clear interface');
-        Object.values(this.spies).forEach(function (zone) {
-            dojo.empty(zone.container_div);
-            zone = undefined;
+        Object.keys(this.spies).forEach(function (key) {
+            dojo.empty(_this.spies[key].container_div);
+            _this.spies[key] = undefined;
         });
         this.market.clearInterface();
         this.playerManager.clearInterface();

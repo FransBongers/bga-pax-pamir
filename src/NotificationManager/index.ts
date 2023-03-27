@@ -201,7 +201,7 @@ class NotificationManager {
     const col = Number(marketLocation.split('_')[2]);
 
     // Remove all rupees that were on the purchased card
-    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
+    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_tableau_${playerId}` });
 
     // Move card from markt
     const cardId = notif.args.card.id;
@@ -212,7 +212,8 @@ class NotificationManager {
         to: this.game.activeEvents,
       });
     } else if (newLocation == 'discard') {
-      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, true, 'pp_discard_pile');
+      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
+      discardCardAnimation({cardId, game: this.game});
     } else {
       this.getPlayer({ playerId }).purchaseCard({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     }
@@ -221,7 +222,7 @@ class NotificationManager {
     updatedCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;
       // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_tableau_${playerId}` });
     });
   }
 
@@ -277,7 +278,7 @@ class NotificationManager {
         jstplProps: {
           id: item.rupee_id,
         },
-        from: `rupees_${playerId}`,
+        from: `rupees_tableau_${playerId}`,
       });
     }, this);
     this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });

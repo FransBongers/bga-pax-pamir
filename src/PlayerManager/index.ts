@@ -17,6 +17,7 @@ class PPPlayer {
   private playerName: string;
   private counters: {
     cards: Counter;
+    cardsTableau: Counter;
     cylinders: Counter;
     economic: Counter;
     influence: Counter;
@@ -24,8 +25,10 @@ class PPPlayer {
     military: Counter;
     political: Counter;
     rupees: Counter;
+    rupeesTableau: Counter;
   } = {
     cards: new ebg.counter(),
+    cardsTableau: new ebg.counter(),
     cylinders: new ebg.counter(),
     economic: new ebg.counter(),
     influence: new ebg.counter(),
@@ -33,6 +36,7 @@ class PPPlayer {
     military: new ebg.counter(),
     political: new ebg.counter(),
     rupees: new ebg.counter(),
+    rupeesTableau: new ebg.counter(),
   };
   private player: PaxPamirPlayer;
   private rulerTokens: Zone;
@@ -218,6 +222,7 @@ class PPPlayer {
     }
 
     this.counters.cards.create(`card_count_${this.playerId}_counter`);
+    this.counters.cardsTableau.create(`card_count_tableau_${this.playerId}_counter`);
     this.counters.cylinders.create(`cylinder_count_${this.playerId}_counter`);
     this.counters.economic.create(`economic_${this.playerId}_counter`);
     this.counters.influence.create(`influence_${this.playerId}_counter`);
@@ -225,6 +230,7 @@ class PPPlayer {
     this.counters.military.create(`military_${this.playerId}_counter`);
     this.counters.political.create(`political_${this.playerId}_counter`);
     this.counters.rupees.create(`rupee_count_${this.playerId}_counter`);
+    this.counters.rupeesTableau.create(`rupee_count_tableau_${this.playerId}_counter`);
 
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -240,7 +246,9 @@ class PPPlayer {
     }
     this.counters.cylinders.setValue(counts.cylinders);
     this.counters.rupees.setValue(playerGamedatas.rupees);
+    this.counters.rupeesTableau.setValue(playerGamedatas.rupees);
     this.counters.cards.setValue(counts.cards);
+    this.counters.cardsTableau.setValue(counts.cards);
 
     this.counters.economic.setValue(counts.suits.economic);
     this.counters.military.setValue(counts.suits.military);
@@ -361,7 +369,18 @@ class PPPlayer {
     counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
     value: number;
   }): void {
-    this.counters[counter].setValue(value);
+    switch(counter) {
+      case 'cards':
+        this.counters.cards.setValue(value);
+        this.counters.cardsTableau.setValue(value);
+        break;
+      case 'rupees':
+        this.counters.rupees.setValue(value);
+        this.counters.rupeesTableau.setValue(value);
+        break;
+      default:
+        this.counters[counter].setValue(value);
+    }
   }
 
   incCounter({
@@ -371,7 +390,18 @@ class PPPlayer {
     counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
     value: number;
   }): void {
-    this.counters[counter].incValue(value);
+    switch(counter) {
+      case 'cards':
+        this.counters.cards.incValue(value);
+        this.counters.cardsTableau.incValue(value);
+        break;
+      case 'rupees':
+        this.counters.rupees.incValue(value);
+        this.counters.rupeesTableau.incValue(value);
+        break;
+      default:
+        this.counters[counter].incValue(value);
+    }
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

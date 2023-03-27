@@ -74,7 +74,7 @@ class Notifications
 
   public static function changeRuler($oldRuler, $newRuler, $region)
   {
-    $msg = clienttranslate('${player_name} is the new ruler of ${region}');
+    $msg = clienttranslate('${player_name} becomes ruler of ${region}');
     if ($newRuler === null) {
       $msg = clienttranslate('${player_name} is no longer ruler of ${region}');
     }

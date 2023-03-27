@@ -143,7 +143,13 @@
                 </div>
             </div>
             <div class="pp_player_tableau_right">
-                <div id="pp_tableau_title_player_{player_id}" class="pp_tableau_title"><span>{player_name}'s court</span></div>
+                <div class="pp_player_tableau_title_container">
+                    <div id="pp_tableau_title_player_{player_id}" class="pp_player_tableau_title"><span>{player_name}'s court</span></div>
+                    <div id="pp_tableau_title_icons_player_{player_id}" class="pp_player_tableau_icons">
+                        <div id="rupees_tableau_{player_id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_{player_id}" class="pp_icon_count"><span id="rupee_count_tableau_{player_id}_counter"></span></div></div>
+                        <div id="cards_tableau_{player_id}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_{player_id}" class="pp_icon_count"><span id="card_count_tableau_{player_id}_counter"></span></div></div>
+                    </div>
+                </div>
                 <div class="pp_tableau_inner_container">
                     <div class="pp_tableau_inner_left">
                         <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>

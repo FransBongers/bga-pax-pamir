@@ -176,7 +176,7 @@ trait PlayerActionTrait
       // TODO (Frans): check if this is an event card or court card
       // move card to player hand location and reduce number of remaining actions
       $newLocation = 'hand_' . $playerId;
-      if ($cardInfo['type'] == EVENT_CARD && $cardInfo['purchased']['title'] === ECE_DOMINANCE_CHECK) {
+      if ($cardInfo['type'] == EVENT_CARD && $cardInfo['purchased']['effect'] === ECE_DOMINANCE_CHECK) {
         $newLocation = 'discard';
         $nextState = 'dominanceCheck';
       } else if ($cardInfo['type'] == EVENT_CARD) {

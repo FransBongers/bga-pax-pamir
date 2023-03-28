@@ -109,6 +109,11 @@ class Market {
   removeRupeesFromCard({ row, column, to }: { row: number; column: number; to: string }) {
     this.marketRupees[row][column].getAllItems().forEach((rupeeId) => {
       this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+      const animation = this.game.framework().slideToObject(rupeeId, to);
+      dojo.connect(animation, 'onEnd', () => {
+        dojo.destroy(rupeeId);
+      });
+      animation.play();
     });
   }
 

@@ -194,14 +194,22 @@ class NotificationManager {
 
   notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
     console.log('notif_purchaseCard', notif);
-    const { marketLocation, newLocation, updatedCards } = notif.args;
-    const playerId = Number(notif.args.playerId);
+    const { marketLocation, newLocation, rupeesOnCards, playerId, receivedRupees } = notif.args;
+    // const playerId = Number(notif.args.playerId);
     this.game.interactionManager.resetActionArgs();
     const row = Number(marketLocation.split('_')[1]);
     const col = Number(marketLocation.split('_')[2]);
 
+    // Place paid rupees on market cards
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_tableau_${playerId}` });
+    });
+
     // Remove all rupees that were on the purchased card
     this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_tableau_${playerId}` });
+    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: receivedRupees});
 
     // Move card from markt
     const cardId = notif.args.card.id;
@@ -213,17 +221,10 @@ class NotificationManager {
       });
     } else if (newLocation == 'discard') {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
-      discardCardAnimation({cardId, game: this.game});
+      discardCardAnimation({ cardId, game: this.game });
     } else {
       this.getPlayer({ playerId }).purchaseCard({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     }
-
-    // Place paid rupees on market cards
-    updatedCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_tableau_${playerId}` });
-    });
   }
 
   notif_refreshMarket(notif: Notif<NotifRefreshMarketArgs>) {

@@ -1739,6 +1739,11 @@ var Market = /** @class */ (function () {
         var row = _a.row, column = _a.column, to = _a.to;
         this.marketRupees[row][column].getAllItems().forEach(function (rupeeId) {
             _this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+            var animation = _this.game.framework().slideToObject(rupeeId, to);
+            dojo.connect(animation, 'onEnd', function () {
+                dojo.destroy(rupeeId);
+            });
+            animation.play();
         });
     };
     Market.prototype.placeRupeeOnCard = function (_a) {
@@ -2817,13 +2822,20 @@ var NotificationManager = /** @class */ (function () {
     NotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
         console.log('notif_purchaseCard', notif);
-        var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, updatedCards = _a.updatedCards;
-        var playerId = Number(notif.args.playerId);
+        var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, receivedRupees = _a.receivedRupees;
+        // const playerId = Number(notif.args.playerId);
         this.game.interactionManager.resetActionArgs();
         var row = Number(marketLocation.split('_')[1]);
         var col = Number(marketLocation.split('_')[2]);
+        // Place paid rupees on market cards
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_tableau_".concat(playerId) });
+        });
         // Remove all rupees that were on the purchased card
         this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_tableau_".concat(playerId) });
+        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
         // Move card from markt
         var cardId = notif.args.card.id;
         if (newLocation == 'active_events') {
@@ -2840,12 +2852,6 @@ var NotificationManager = /** @class */ (function () {
         else {
             this.getPlayer({ playerId: playerId }).purchaseCard({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
-        // Place paid rupees on market cards
-        updatedCards.forEach(function (item, index) {
-            var row = item.row, column = item.column, rupeeId = item.rupeeId;
-            // this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_tableau_".concat(playerId) });
-        });
     };
     NotificationManager.prototype.notif_refreshMarket = function (notif) {
         var _this = this;

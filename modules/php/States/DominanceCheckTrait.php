@@ -103,7 +103,7 @@ trait DominanceCheckTrait
     ));
 
     // TODO: Frans: if one player leads by 4 or more end the game
-    $this->gamestate->nextState('action');
+    $this->gamestate->nextState('playerActions');
   }
 
 // .##.....##.########.####.##.......####.########.##....##

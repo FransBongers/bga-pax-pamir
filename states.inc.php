@@ -144,7 +144,7 @@ $machinestates = array(
         "args" => "argPlayerActions",
         "possibleactions" => array( "purchaseCard", "playCard", "selectGift", "pass", "restart" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE, 
@@ -197,7 +197,7 @@ $machinestates = array(
         "action" => "stResolveImpactIcons",
         "updateGameProgression" => false,
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "refreshMarket" => STATE_REFRESH_MARKET,
             "placeRoad" => STATE_PLACE_ROAD,
@@ -224,7 +224,7 @@ $machinestates = array(
         "action" => "stDominanceCheck",
         "updateGameProgression" => false,
         "transitions" => array(
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
             // "nextTurn" => STATE_NEXT_PLAYER,
             // "refreshMarket" => STATE_REFRESH_MARKET,
         )
@@ -286,7 +286,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionBattle" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -298,7 +298,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionBetray" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -310,7 +310,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionBuild" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -322,7 +322,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionMove" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -334,7 +334,7 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array( "cardActionTax" ),
         "transitions" => array( 
-            "action" => STATE_PLAYER_ACTIONS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
     

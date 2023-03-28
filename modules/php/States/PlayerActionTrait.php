@@ -133,106 +133,6 @@ trait PlayerActionTrait
     $this->gamestate->jumpToState(Globals::getLogState());
   }
 
-
-  /**
-   * purchase card from market
-   */
-  function purchaseCard($cardId)
-  {
-    self::dump("purchaseCard", $cardId);
-    self::checkAction('purchaseCard');
-
-    $playerId = self::getActivePlayerId();
-    $card = Cards::get($cardId);
-    $cardInfo = $this->cards[$cardId];
-
-    $baseCost = Globals::getFavoredSuit() === MILITARY ? 2 : 1;
-
-    // Throw error if card is unavailble for purchase
-    if ($card['used'] == 1) {
-      throw new \feException("Card is unavailble");
-    }
-
-    $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
-    $marketLocation = $card['location'];
-    self::dump("purchaseCard", $cardId, $playerId, $card);
-    $row = explode("_", $marketLocation)[1];
-    $rowAlt = ($row == 0) ? 1 : 0;
-    $col = intval(explode("_", $marketLocation)[2]);
-    $cost = $col * $baseCost;
-    self::dump("row", $row);
-
-    $nextState = 'action';
-    if (Globals::getRemainingActions() > 0) {
-
-      // check cost
-      if ($cost > Players::get($playerId)->getRupees()) {
-        throw new \feException("Not enough rupees");
-      } else {
-        // if enough rupees reduce player rupees
-        Players::incRupees($playerId, -$cost);
-      };
-
-      // TODO (Frans): check if this is an event card or court card
-      // move card to player hand location and reduce number of remaining actions
-      $newLocation = 'hand_' . $playerId;
-      if ($cardInfo['type'] == EVENT_CARD && $cardInfo['purchased']['effect'] === ECE_DOMINANCE_CHECK) {
-        $newLocation = 'discard';
-        $nextState = 'dominanceCheck';
-      } else if ($cardInfo['type'] == EVENT_CARD) {
-        $newLocation = 'active_events';
-      }
-      Cards::move($cardId, $newLocation);
-      Globals::incRemainingActions(-1);
-
-      $updatedCards = array();
-
-      for ($i = $col - 1; $i >= 0; $i--) {
-        $location = 'market_' . $row . '_' . $i;
-        $useRowAlt = false;
-        $marketCard = Cards::getInLocation($location)->first();
-        if ($marketCard == NULL) {
-          $useRowAlt = true;
-          $location = 'market_' . $rowAlt . '_' . $i;
-          $marketCard = Cards::getInLocation($location)->first();
-        }
-        if ($marketCard !== NULL) {
-          Cards::setUsed($marketCard["id"], 1); // set unavailable
-          for ($j = 1; $j <= $baseCost; $j++) {
-            $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
-            Tokens::move($rupee['id'], [$location, 'rupees']);
-            $updatedCards[] = array(
-              'row' => intval($useRowAlt ? $rowAlt : $row),
-              'column' => $i,
-              'cardId' => $marketCard["id"],
-              'rupeeId' => $rupee['id']
-            );
-          }
-        }
-      }
-
-      // add rupees on card to player totals. Then put them in rupee_pool location
-      $rupees = Tokens::getInLocation([$marketLocation, 'rupees']);
-      Players::incRupees($playerId, count($rupees));
-      Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
-
-      self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenCardLarge}'), array(
-        'playerId' => $playerId,
-        'player_name' => self::getActivePlayerName(),
-        'card' => $card,
-        'cardName' => $cardName,
-        'logTokenCardLarge' => $card['id'],
-        'marketLocation' => $marketLocation,
-        'newLocation' => $newLocation,
-        'updatedCards' => $updatedCards,
-      ));
-
-      $this->updatePlayerCounts();
-    }
-
-    $this->gamestate->nextState($nextState);
-  }
-
   function placeRupeesInMarketRow($row, $remainingRupees)
   {
     $updatedCards = [];
@@ -330,7 +230,7 @@ trait PlayerActionTrait
       'updatedCounts' => $updatedCounts,
     ));
 
-    $this->gamestate->nextState('action');
+    $this->gamestate->nextState('playerActions');
   }
 
 

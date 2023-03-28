@@ -54,7 +54,7 @@ trait ResolveImpactIconsTrait
       if (in_array(TRIBE, $impactIcons, true) || in_array(ARMY, $impactIcons, true)) {
         Map::checkRulerChange($card_region);
       };
-      $this->gamestate->nextState('action');
+      $this->gamestate->nextState('playerActions');
       return;
     }
 

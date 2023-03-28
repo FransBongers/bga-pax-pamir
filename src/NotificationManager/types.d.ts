@@ -37,13 +37,14 @@ interface NotifPlayCardArgs {
 }
 
 interface NotifPurchaseCardArgs {
-  playerId: string;
+  playerId: number;
   player_name: string;
+  receivedRupees: number;
   card: Token;
   cardName: string;
   marketLocation: string;
   newLocation: string;
-  updatedCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
 interface NotifRefreshMarketArgs {

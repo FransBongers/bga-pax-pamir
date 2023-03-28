@@ -110,12 +110,19 @@
   top: 2px;
 }
 
+.pp_loyalty_dial.pp_afghan {
+  transform: rotate(0deg);
+  transition: transform 2s;
+}
+
 .pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
+  transition: transform 2s;
 }
 
 .pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
+  transition: transform 2s;
 }
 
 .pp_loyalty_dial_cover {

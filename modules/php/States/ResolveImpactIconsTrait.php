@@ -91,22 +91,9 @@ trait ResolveImpactIconsTrait
         }
         // Update favored suit
         Globals::setFavoredSuit(ECONOMIC);
-
         // Suit change notification
-        $message = $this->suits[ECONOMIC]['change'];
         $previous_suit_id = $this->suits[$previous_suit]['id'];
-        $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
-        Notifications::moveToken($message, [
-          'player' => Players::get(),
-          'logTokenFavoredSuit' => ECONOMIC,
-          'moves' => [
-            [
-              'from' => 'favored_suit_' . $previous_suit_id,
-              'to' => 'favored_suit_' . ECONOMIC,
-              'tokenId' => 'favored_suit_marker',
-            ]
-          ]
-        ]);
+        Notifications::changeFavoredSuit($previous_suit_id, ECONOMIC);
         break;
       case INTELLIGENCE_SUIT:
         $previous_suit = Globals::getFavoredSuit();
@@ -117,20 +104,8 @@ trait ResolveImpactIconsTrait
         Globals::setFavoredSuit(INTELLIGENCE);
 
         // Suit change notification
-        $message = $this->suits[INTELLIGENCE]['change'];
         $previous_suit_id = $this->suits[$previous_suit]['id'];
-        $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
-        Notifications::moveToken($message, [
-          'player' => Players::get(),
-          'logTokenFavoredSuit' => INTELLIGENCE,
-          'moves' => [
-            [
-              'from' => 'favored_suit_' . $previous_suit_id,
-              'to' => 'favored_suit_' . INTELLIGENCE,
-              'tokenId' => 'favored_suit_marker',
-            ]
-          ]
-        ]);
+        Notifications::changeFavoredSuit($previous_suit_id, INTELLIGENCE);
         break;
       case MILITARY_SUIT:
         $previous_suit = Globals::getFavoredSuit();
@@ -142,18 +117,7 @@ trait ResolveImpactIconsTrait
 
         // Suit change notification
         $previous_suit_id = $this->suits[$previous_suit]['id'];
-        $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
-        Notifications::moveToken($message, [
-          'player' => Players::get(),
-          'logTokenFavoredSuit' => MILITARY,
-          'moves' => [
-            [
-              'from' => 'favored_suit_' . $previous_suit_id,
-              'to' => 'favored_suit_' . MILITARY,
-              'tokenId' => 'favored_suit_marker',
-            ]
-          ]
-        ]);
+        Notifications::changeFavoredSuit($previous_suit_id, MILITARY);
         break;
       case LEVERAGE:
         Players::incRupees($player_id, 2);
@@ -169,18 +133,7 @@ trait ResolveImpactIconsTrait
 
         // Suit change notificationx§
         $previous_suit_id = $this->suits[$previous_suit]['id'];
-        $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
-        Notifications::moveToken($message, [
-          'player' => Players::get(),
-          'logTokenFavoredSuit' => POLITICAL,
-          'moves' => [
-            [
-              'from' => 'favored_suit_' . $previous_suit_id,
-              'to' => 'favored_suit_' . POLITICAL,
-              'tokenId' => 'favored_suit_marker',
-            ]
-          ]
-        ]);
+        Notifications::changeFavoredSuit($previous_suit_id, POLITICAL);
         break;
       case ROAD:
         $next_state = "placeRoad";

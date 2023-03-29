@@ -34,9 +34,11 @@ class NotificationManager {
   setupNotifications() {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
+      ['acceptBribe', 1],
       ['cardAction', 1],
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
+      ['changeFavoredSuit', 250],
       ['chooseLoyalty', 1],
       ['clearTurn', 1],
       ['dominanceCheck', 1],
@@ -61,8 +63,30 @@ class NotificationManager {
     // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
   }
 
+  notif_acceptBribe(notif: Notif<NotifAcceptBribeArgs>) {
+    const { args } = notif;
+    console.log('notif_acceptBribe', args);
+    const { briberId, rulerId, rupees } = args;
+    this.getPlayer({ playerId: briberId }).payBribe({ rulerId, rupees });
+  }
+
   notif_cardAction(notif) {
     console.log('notif_cardAction', notif);
+  }
+
+  notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
+    console.log('notif_moveToken', notif);
+    const { from, to } = notif.args;
+    const tokenId = 'favored_suit_marker';
+    const fromZone = this.game.getZoneForLocation({ location: `favored_suit_${from}` });
+    const toZone = this.game.getZoneForLocation({ location: `favored_suit_${to}` });
+
+    this.game.objectManager.favoredSuit.change({suit: to});
+    this.game.move({
+      id: tokenId,
+      from: fromZone,
+      to: toZone,
+    });
   }
 
   notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
@@ -203,13 +227,13 @@ class NotificationManager {
     // Place paid rupees on market cards
     rupeesOnCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;
-      this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -1});
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
       this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_tableau_${playerId}` });
     });
 
     // Remove all rupees that were on the purchased card
     this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_tableau_${playerId}` });
-    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: receivedRupees});
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
 
     // Move card from markt
     const cardId = notif.args.card.id;

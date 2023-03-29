@@ -132,7 +132,7 @@ class PaxPamirEditionTwo extends Table
     */
     public function getAllDatas($pId = null)
     {
-        $pId = $pId ?? self::getCurrentPId();
+        $pId = $pId ?? Players::getCurrentId();
 
         $data = [
             // TODO (Frans): data from material.inc.php. We might also replace this?
@@ -151,6 +151,14 @@ class PaxPamirEditionTwo extends Table
             'canceledNotifIds' => Log::getCanceledNotifIds(),
             'discardPile' => Cards::getTopOf(DISCARD),
         ];
+        $activePlayerId = Players::getActiveId();
+        $data['localState'] = [
+            'activePlayer' => $data['players'][$activePlayerId],
+            // 'favoredSuit' => $data['favoredSuit'],
+            'remainingActions' => Globals::getRemainingActions(),
+            'usedCards' => Cards::getUnavailableCards(),
+        ];
+
 
         // TODO: move to SupplyManager class?
         foreach ($this->loyalty as $coalitionId => $coalition) {

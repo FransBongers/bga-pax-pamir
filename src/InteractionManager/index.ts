@@ -19,14 +19,7 @@ class InteractionManager {
   private _connections: unknown[];
 
   // TODO (Frans): check what needs to be converted to number
-  private activePlayer: {
-    court?: Token[];
-    favoredSuit?: string;
-    hand?: Record<string, Token>;
-    remainingActions?: number;
-    rupees?: number;
-    unavailableCards?: string[];
-  };
+  private localState: LocalState;
   // TODO(Frans): we should probably remove below props here since it's used in specific funtion
   private numberOfDiscards: number;
 
@@ -34,7 +27,7 @@ class InteractionManager {
     this.game = game;
     this._connections = [];
     // Will store all data for active player and gets refreshed with entering player actions state
-    this.activePlayer = {};
+    this.localState = game.gamedatas.localState;
   }
 
   clearPossible() {
@@ -179,22 +172,27 @@ class InteractionManager {
             you: '${you}',
           },
         });
-        this.addPrimaryActionButton({
-          id: 'accept_btn',
-          text: _('Accept'),
-          callback: () => this.game.takeAction({ action: 'acceptBribe' }),
-        });
-        const isRuler =args.negotiateBribe.ruler === this.game.getPlayerId();
+        const isRuler = args.negotiateBribe.ruler === this.game.getPlayerId();
+        if (isRuler || (!isRuler && args.negotiateBribe.amount <= this.localState.activePlayer.rupees)) {
+          this.addPrimaryActionButton({
+            id: 'accept_btn',
+            text: _('Accept'),
+            callback: () => this.game.takeAction({ action: 'acceptBribe' }),
+          });
+        }
         args.negotiateBribe.possible.reverse().forEach((value: number) => {
-          if (value == args.negotiateBribe.amount || (isRuler && value < args.negotiateBribe.amount)) {
+          if (
+            value == args.negotiateBribe.amount ||
+            (isRuler && value < args.negotiateBribe.amount) ||
+            (!isRuler && value > this.localState.activePlayer.rupees)
+          ) {
             return;
           }
           this.addPrimaryActionButton({
             id: `ask_partial_waive_${value}_btn`,
-            text:
-              isRuler
-                ? dojo.string.substitute(_(`Demand ${value} rupee(s)`), { value })
-                : dojo.string.substitute(_(`Offer ${value} rupee(s)`), { value }),
+            text: isRuler
+              ? dojo.string.substitute(_(`Demand ${value} rupee(s)`), { value })
+              : dojo.string.substitute(_(`Offer ${value} rupee(s)`), { value }),
             callback: () =>
               this.game.takeAction({
                 action: 'proposeBribeAmount',
@@ -270,12 +268,18 @@ class InteractionManager {
             you: '${you}',
           },
         });
-        this.addPrimaryActionButton({
-          id: `pay_bribe_btn`,
-          text: _('Pay bribe'),
-          callback: () => this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: args.playCardBribe.rupees }),
-        });
+        if (args.playCardBribe.rupees <= this.localState.activePlayer.rupees) {
+          this.addPrimaryActionButton({
+            id: `pay_bribe_btn`,
+            text: _('Pay bribe'),
+            callback: () => this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: args.playCardBribe.rupees }),
+          });
+        }
+
         for (let i = args.playCardBribe.rupees - 1; i >= 1; i--) {
+          if (i > this.localState.activePlayer.rupees) {
+            return;
+          }
           this.addPrimaryActionButton({
             id: `ask_partial_waive_${i}_btn`,
             text: dojo.string.substitute(_(`Offer ${i} rupee(s)`), { i }),
@@ -412,29 +416,30 @@ class InteractionManager {
   //  ..#######.....##....####.########.####....##.......##...
 
   activePlayerHasActions(): boolean {
-    return this.activePlayer.remainingActions > 0 || false;
+    return this.localState.remainingActions > 0 || false;
   }
 
   activePlayerHasCardActions(): boolean {
-    return this.activePlayer.court.some(({ id, used }) => {
+    return this.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
       return used === 0 && Object.keys(cardInfo.actions).length > 0;
     });
   }
 
   activePlayerHasFreeCardActions(): boolean {
-    return this.activePlayer.court.some(({ id, used }) => {
+    return this.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return used === 0 && cardInfo.suit == this.activePlayer.favoredSuit && Object.keys(cardInfo).length > 0;
+      return used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo).length > 0;
     });
   }
 
-  activePlayerHasHandCards(): boolean {
-    return Object.keys(this.activePlayer.hand).length > 0;
+  currentPlayerHasHandCards(): boolean {
+    const currentPlayerId = this.game.getPlayerId();
+    return this.game.playerManager.getPlayer({playerId: currentPlayerId}).getHandZone().getItemNumber() > 0;
   }
 
   activePlayerHasCourtCards(): boolean {
-    return this.activePlayer.court.length > 0;
+    return this.localState.activePlayer.court.cards.length > 0;
   }
 
   /*
@@ -542,9 +547,9 @@ class InteractionManager {
    * 6. Player does not have free actions
    */
   updateMainTitleTextActions() {
-    const remainingActions = this.activePlayer.remainingActions;
+    const remainingActions = this.localState.remainingActions;
     const hasCardActions = this.activePlayerHasCardActions();
-    const hasHandCards = this.activePlayerHasHandCards();
+    const hasHandCards = this.currentPlayerHasHandCards();
     const hasFreeCardActions = this.activePlayerHasFreeCardActions();
     let titleText = '';
     // cibst case = 0;
@@ -633,11 +638,11 @@ class InteractionManager {
     const playerId = this.game.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement) => {
       const cardId = node.id;
-      const used = this.activePlayer.court?.find((card) => card.id === cardId)?.used === 1;
+      const used = this.localState.activePlayer.court.cards?.find((card) => card.id === cardId)?.used === 1;
       if (
         !used &&
-        (this.activePlayer.remainingActions > 0 ||
-          (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.activePlayer.favoredSuit)
+        (this.localState.remainingActions > 0 ||
+          (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.game.objectManager.favoredSuit.get())
       )
         dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {
@@ -671,7 +676,7 @@ class InteractionManager {
             value: giftValue,
           })
           .getAllItems().length > 0;
-      if (!hasGift && giftValue <= this.activePlayer.rupees) {
+      if (!hasGift && giftValue <= this.localState.activePlayer.rupees) {
         dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
           dojo.addClass(node, 'pp_selectable');
           this._connections.push(
@@ -714,12 +719,12 @@ class InteractionManager {
   }
 
   setMarketCardsSelectable() {
-    const baseCardCost = this.activePlayer.favoredSuit === MILITARY ? 2 : 1;
-    console.log('unavailable', this.activePlayer.unavailableCards);
+    const baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
+    console.log('unavailable', this.localState.usedCards);
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
       const cardId = node.id;
-      if (cost <= this.activePlayer.rupees && !this.activePlayer.unavailableCards.includes(cardId)) {
+      if (cost <= this.localState.activePlayer.rupees && !this.localState.usedCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this._connections.push(
           dojo.connect(node, 'onclick', this, () =>
@@ -789,7 +794,7 @@ class InteractionManager {
           this.updateInterface({ nextStep: CHOOSE_LOYALTY });
           break;
         case 'cardActionGift':
-          this.activePlayer.rupees = args.args.rupees;
+          this.localState.activePlayer.rupees = args.args.rupees;
           this.updateInterface({ nextStep: CARD_ACTION_GIFT });
           break;
         case 'discardCourt':
@@ -813,14 +818,11 @@ class InteractionManager {
           });
           break;
         case 'playerActions':
-          const { court, favoredSuit, hand, remainingActions, rupees, unavailableCards } = args.args;
-          this.activePlayer = {
-            court,
-            favoredSuit,
-            hand,
-            remainingActions: Number(remainingActions),
-            rupees: Number(rupees),
-            unavailableCards: unavailableCards,
+          const { activePlayer, remainingActions, usedCards } = args.args;
+          this.localState = {
+            activePlayer,
+            remainingActions,
+            usedCards,
           };
           this.updateInterface({ nextStep: PLAYER_ACTIONS });
           break;
@@ -907,7 +909,7 @@ class InteractionManager {
 
   onPass() {
     if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive()) return;
-    if (Number(this.activePlayer.remainingActions) > 0) {
+    if (Number(this.localState.remainingActions) > 0) {
       this.updateInterface({ nextStep: 'pass' });
       return;
     }

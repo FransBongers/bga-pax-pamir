@@ -46,6 +46,7 @@ class DiscardPile {
 class FavoredSuit {
   private game: PaxPamirGame;
   private favoredSuitZones: Record<string, any>;
+  private favoredSuit: string;
 
   constructor({ game }: { game: PaxPamirGame }) {
     console.log('Constructor Favored Suit');
@@ -69,11 +70,11 @@ class FavoredSuit {
       });
     });
 
-    const suit = gamedatas.favoredSuit;
-    this.favoredSuitZones[suit].instantaneous = true;
+    this.favoredSuit = gamedatas.favoredSuit;
+    this.favoredSuitZones[this.favoredSuit].instantaneous = true;
     placeToken({
       game: this.game,
-      location: this.favoredSuitZones[suit],
+      location: this.favoredSuitZones[this.favoredSuit],
       //location: this.favoredSuit['intelligence'], // for testing change of favored suit
       id: `favored_suit_marker`,
       jstpl: 'jstpl_favored_suit_marker',
@@ -81,7 +82,7 @@ class FavoredSuit {
         id: `favored_suit_marker`,
       },
     });
-    this.favoredSuitZones[suit].instantaneous = false;
+    this.favoredSuitZones[this.favoredSuit].instantaneous = false;
   }
 
   clearInterface() {
@@ -93,6 +94,15 @@ class FavoredSuit {
 
   getFavoredSuitZone({ suit }) {
     return this.favoredSuitZones[suit];
+  }
+
+  get(): string {
+    return this.favoredSuit;
+  }
+
+  change({suit}: {suit: string;}): void {
+    this.favoredSuit = suit;
+    // TODO animation    
   }
 }
 

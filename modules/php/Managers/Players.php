@@ -63,7 +63,7 @@ class Players extends \PaxPamir\Helpers\DB_Manager
     return (int) Game::get()->getActivePlayerId();
   }
 
-  public function getCurrentId()
+  public static function getCurrentId()
   {
     return Game::get()->getCurrentPId();
   }

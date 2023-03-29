@@ -72,6 +72,17 @@ class Notifications
     ]);
   }
 
+  public static function changeFavoredSuit($previousSuit, $newSuit)
+  {
+    $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
+    self::notifyAll('changeFavoredSuit', $message, [
+      'player' => Players::get(),
+      'logTokenFavoredSuit' => $newSuit,
+      'from' => $previousSuit,
+      'to' => $newSuit,
+    ]);
+  }
+
   public static function changeRuler($oldRuler, $newRuler, $region)
   {
     $msg = clienttranslate('${player_name} becomes ruler of ${region}');

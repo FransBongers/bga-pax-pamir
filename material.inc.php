@@ -70,7 +70,7 @@ $this->locations = array (
   )
 );
 
-
+// TODO: delete tooltip / icon here
 $this->loyalty = array(
   'afghan' => array(
       'id' => 'afghan',
@@ -92,6 +92,7 @@ $this->loyalty = array(
   ),
 );
 
+// TODO: delete tooltip / change messages here
 $this->suits = array(
   'political' => array(
       'id' => 'political',

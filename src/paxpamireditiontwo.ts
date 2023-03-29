@@ -63,7 +63,7 @@ class PaxPamir implements PaxPamirGame {
     // const playAreaWidth = document.getElementById('pp_play_area').offsetWidth;
     // console.log('playAreaWidth',playAreaWidth);
     this.gamedatas = gamedatas;
-    console.log('gamedatas', gamedatas);
+    debug('gamedatas', gamedatas);
 
     // Events
     this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
@@ -95,7 +95,7 @@ class PaxPamir implements PaxPamirGame {
       this.addLogClass();
     });
     // this.setupNotifications();
-    console.log('Ending game setup');
+    debug('Ending game setup');
   }
 
   //  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##

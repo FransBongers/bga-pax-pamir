@@ -1,3 +1,11 @@
+interface LocalState {
+  activePlayer: PaxPamirPlayer;
+  // favoredSuit: string;
+  remainingActions: number;
+  // rupees: number;
+  usedCards: string[];
+}
+
 interface UpdateInterfaceArgs {
   cardAction?: {
     cardId: string;

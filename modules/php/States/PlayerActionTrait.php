@@ -25,18 +25,23 @@ trait PlayerActionTrait
 
   function argPlayerActions()
   {
-    $playerId = self::getActivePlayerId();
-    $currentPlayerId = self::getCurrentPlayerId();
-    $player = Players::get($playerId);
+    // $playerId = self::getActivePlayerId();
+    // $currentPlayerId = self::getCurrentPlayerId();
+    // $player = Players::get($playerId);
+    // $uiDate = Players::getUiData();
     return array(
+      // 'remainingActions' => Globals::getRemainingActions(),
+      // 'unavailableCards' => Cards::getUnavailableCards(),
+      // 'hand' => Cards::getInLocation(['hand', $currentPlayerId]),
+      // 'court' => Cards::getInLocationOrdered(['court', $playerId])->toArray(),
+      // 'suits' => $player->getSuitTotals(),
+      // 'rulers' => Map::getRulers(),
+      // 'favoredSuit' => Globals::getFavoredSuit(),
+      // 'rupees' => $player->getRupees(),
+      'activePlayer' => Players::get()->jsonSerialize(null),
+      // 'favoredSuit' => Globals::getFavoredSuit(),
       'remainingActions' => Globals::getRemainingActions(),
-      'unavailableCards' => Cards::getUnavailableCards(),
-      'hand' => Cards::getInLocation(['hand', $currentPlayerId]),
-      'court' => Cards::getInLocationOrdered(['court', $playerId])->toArray(),
-      'suits' => $player->getSuitTotals(),
-      'rulers' => Map::getRulers(),
-      'favoredSuit' => Globals::getFavoredSuit(),
-      'rupees' => $player->getRupees(),
+      'usedCards' => Cards::getUnavailableCards(),
     );
   }
 

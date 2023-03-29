@@ -109,6 +109,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     rupees: Token[];
   };
   players: Record<number, PaxPamirPlayer>;
+  localState: LocalState;
   // rupees: Token[];
 }
 

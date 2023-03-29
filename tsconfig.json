@@ -26,6 +26,7 @@
     "src/Map/index.ts",
     "src/Market/types.d.ts",
     "src/Market/index.ts",
+    "src/InteractionManager/states/PlayerActions.ts",
     "src/InteractionManager/types.d.ts",
     "src/InteractionManager/index.ts",
     "src/NotificationManager/types.d.ts",

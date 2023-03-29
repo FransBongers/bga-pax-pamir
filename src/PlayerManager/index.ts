@@ -369,7 +369,7 @@ class PPPlayer {
     counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
     value: number;
   }): void {
-    switch(counter) {
+    switch (counter) {
       case 'cards':
         this.counters.cards.setValue(value);
         this.counters.cardsTableau.setValue(value);
@@ -390,7 +390,7 @@ class PPPlayer {
     counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
     value: number;
   }): void {
-    switch(counter) {
+    switch (counter) {
       case 'cards':
         this.counters.cards.incValue(value);
         this.counters.cardsTableau.incValue(value);
@@ -434,14 +434,38 @@ class PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  purchaseCard({ cardId, from }: { cardId: string; from: Zone }) {
+  discardCourtCard({ cardId }: { cardId: string }) {
+    // Move all spies back to cylinder pools if there are any
+    this.game.returnSpiesFromCard({ cardId });
+
+    // Move card to discard pile
+    this.court.removeFromZone(cardId, false);
+    discardCardAnimation({ cardId, game: this.game });
+    // TODO: check leverage and check overthrow rule
+  }
+
+  discardHandCard({ cardId }: { cardId: string }) {
     if (this.playerId === this.game.getPlayerId()) {
-      this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
-      this.game.tooltipManager.addTooltipToCard({ cardId });
+      this.hand.removeFromZone(cardId, false);
     } else {
-      dojo.addClass(cardId, 'pp_moving');
-      from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
+      dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
     }
+    discardCardAnimation({ cardId, game: this.game });
+  }
+
+  payBribe({ rulerId, rupees }: { rulerId: number; rupees: number }) {
+    console.log('place', dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${this.playerId}`));
+    attachToNewParentNoDestroy('tempRupee', `rupees_${rulerId}`);
+    // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
+    const animation = this.game.framework().slideToObject('tempRupee', `rupees_${rulerId}`);
+    dojo.connect(animation, 'onEnd', () => {
+      this.incCounter({ counter: 'rupees', value: -rupees });
+    });
+    dojo.connect(animation, 'onEnd', () => {
+      dojo.destroy('tempRupee');
+      this.game.playerManager.getPlayer({ playerId: rulerId }).incCounter({ counter: 'rupees', value: rupees });
+    });
+    animation.play();
   }
 
   playCard({ card }: { card: Token }) {
@@ -476,23 +500,14 @@ class PPPlayer {
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
   }
 
-  discardCourtCard({ cardId }: { cardId: string }) {
-    // Move all spies back to cylinder pools if there are any
-    this.game.returnSpiesFromCard({ cardId });
-
-    // Move card to discard pile
-    this.court.removeFromZone(cardId, false);
-    discardCardAnimation({cardId, game: this.game});
-    // TODO: check leverage and check overthrow rule
-  }
-
-  discardHandCard({ cardId }: { cardId: string }) {
+  purchaseCard({ cardId, from }: { cardId: string; from: Zone }) {
     if (this.playerId === this.game.getPlayerId()) {
-      this.hand.removeFromZone(cardId, false);
+      this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+      this.game.tooltipManager.addTooltipToCard({ cardId });
     } else {
-      dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
+      dojo.addClass(cardId, 'pp_moving');
+      from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
     }
-    discardCardAnimation({cardId, game: this.game});
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

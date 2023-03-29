@@ -133,14 +133,17 @@ trait PlayCardTrait
   function acceptBribe()
   {
     self::checkAction('acceptBribe');
-
     $bribeState = Globals::getBribe();
-    $bribeState['status'] = BRIBE_ACCEPTED;
-    $bribeState['next'] = $bribeState['briber'];
-    Globals::setBribe($bribeState);
     $rulerId = $bribeState['ruler'];
     $briberId = $bribeState['briber'];
     $rupees = $bribeState['currentAmount'];
+    if(Players::get($briberId)->getRupees() < $rupees) {
+      throw new \feException("Not enough rupees available");
+    }
+    $bribeState['status'] = BRIBE_ACCEPTED;
+    $bribeState['next'] = $bribeState['briber'];
+    Globals::setBribe($bribeState);
+
     Players::incRupees($rulerId, $rupees);
     Players::incRupees($briberId, -$rupees);
     Notifications::acceptBribe($briberId, $rulerId, $rupees);

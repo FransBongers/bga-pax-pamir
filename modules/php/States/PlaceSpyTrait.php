@@ -23,12 +23,11 @@ trait PlaceSpyTrait
 
   function argPlaceSpy()
   {
-    $player_id = self::getActivePlayerId();
     $card_id = Globals::getResolveImpactIconsCardId();
     $card_info = $this->cards[$card_id];
     $card_region = $card_info['region'];
     return array(
-      'region' => $card_region,
+      'regionId' => $card_region,
     );
   }
 

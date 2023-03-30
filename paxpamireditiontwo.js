@@ -1822,71 +1822,14 @@ var Market = /** @class */ (function () {
     };
     return Market;
 }());
-var PlayerActionsState = /** @class */ (function () {
-    function PlayerActionsState() {
-    }
-    //  .########.##....##.########.########.########..####.##....##..######..
-    //  .##.......###...##....##....##.......##.....##..##..###...##.##....##.
-    //  .##.......####..##....##....##.......##.....##..##..####..##.##.......
-    //  .######...##.##.##....##....######...########...##..##.##.##.##...####
-    //  .##.......##..####....##....##.......##...##....##..##..####.##....##.
-    //  .##.......##...###....##....##.......##....##...##..##...###.##....##.
-    //  .########.##....##....##....########.##.....##.####.##....##..######..
-    PlayerActionsState.onEnteringState = function (_a) {
-        var interactionManager = _a.interactionManager;
-    };
-    return PlayerActionsState;
-}());
-//  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##
-//  ..##..###...##....##....##.......##.....##...##.##...##....##....##.....##..##.....##.###...##
-//  ..##..####..##....##....##.......##.....##..##...##..##..........##.....##..##.....##.####..##
-//  ..##..##.##.##....##....######...########..##.....##.##..........##.....##..##.....##.##.##.##
-//  ..##..##..####....##....##.......##...##...#########.##..........##.....##..##.....##.##..####
-//  ..##..##...###....##....##.......##....##..##.....##.##....##....##.....##..##.....##.##...###
-//  .####.##....##....##....########.##.....##.##.....##..######.....##....####..#######..##....##
-//  .##.....##....###....##....##....###.....######...########.########.
-//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
-//  .####.####..##...##..####..##..##...##..##........##.......##.....##
-//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
-//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var InteractionManager = /** @class */ (function () {
-    function InteractionManager(game) {
+var ClientPlayCardState = /** @class */ (function () {
+    function ClientPlayCardState(game) {
         this.game = game;
-        this._connections = [];
-        // Will store all data for active player and gets refreshed with entering player actions state
-        this.localState = game.gamedatas.localState;
     }
-    InteractionManager.prototype.clearPossible = function () {
-        this.game.framework().removeActionButtons();
-        dojo.empty('customActions');
-        dojo.forEach(this._connections, dojo.disconnect);
-        this._connections = [];
-        dojo.query('.pp_selectable').removeClass('pp_selectable');
-        dojo.query('.pp_selected').removeClass('pp_selected');
+    ClientPlayCardState.prototype.onEnteringState = function (args) {
+        this.checkBribe(args);
     };
-    InteractionManager.prototype.resetActionArgs = function () {
-        // Remove all selectable / selected classes
-        dojo.query('.pp_selectable').removeClass('pp_selectable');
-        dojo.query('.pp_selected').removeClass('pp_selected');
-        // getElementById used because dojo does not seem to handle svgs well.
-        REGIONS.forEach(function (region) {
-            var element = document.getElementById("pp_region_".concat(region));
-            element.classList.remove('pp_selectable');
-        });
-        document.getElementById('pp_map_areas').classList.remove('pp_selectable');
-        // reset connections
-        dojo.forEach(this._connections, dojo.disconnect);
-        this._connections = [];
-    };
-    // .##.....##.########..########.....###....########.########
-    // .##.....##.##.....##.##.....##...##.##......##....##......
-    // .##.....##.##.....##.##.....##..##...##.....##....##......
-    // .##.....##.########..##.....##.##.....##....##....######..
-    // .##.....##.##........##.....##.#########....##....##......
-    // .##.....##.##........##.....##.##.....##....##....##......
-    // ..#######..##........########..##.....##....##....########
+    ClientPlayCardState.prototype.onLeavingState = function () { };
     //  .####.##....##.########.########.########..########....###.....######..########
     //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
     //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
@@ -1894,351 +1837,128 @@ var InteractionManager = /** @class */ (function () {
     //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
     //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
     //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    InteractionManager.prototype.updateInterface = function (_a) {
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientPlayCardState.prototype.updateInterfacePlayCardBribe = function (_a) {
         var _this = this;
-        var _b;
-        var nextStep = _a.nextStep, args = _a.args;
-        console.log("updateInterface ".concat(nextStep));
-        this.clearPossible();
-        switch (nextStep) {
-            case CARD_ACTION_BATTLE:
-                this.updatePageTitle({
-                    text: _('${you} must select a card or region'),
-                    args: {},
-                });
-                this.setRegionsSelectable();
-                break;
-            case CARD_ACTION_BETRAY:
-                console.log('betray clicked');
-                break;
-            case CARD_ACTION_BUILD:
-                console.log('build clicked');
-                break;
-            case CARD_ACTION_GIFT:
-                this.updatePageTitle({
-                    text: _('${you} must select a gift to purchase'),
-                    args: {
-                        you: '${you}',
-                    },
-                });
-                this.setGiftsSelectable({ cardId: args.cardAction.cardId });
-                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
-                break;
-            case CARD_ACTION_MOVE:
-                console.log('move clicked');
-                break;
-            case CARD_ACTION_TAX:
-                console.log('tax clicked');
-                break;
-            case CHOOSE_LOYALTY:
-                this.addPrimaryActionButton({
-                    id: 'afghan_button',
-                    text: _('Afghan'),
-                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: AFGHAN } }); },
-                    extraClasses: 'loyalty_button',
-                });
-                this.addPrimaryActionButton({
-                    id: 'british_button',
-                    text: _('British'),
-                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: BRITISH } }); },
-                    extraClasses: 'loyalty_button',
-                });
-                this.addPrimaryActionButton({
-                    id: 'russian_button',
-                    text: _('Russian'),
-                    callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }); },
-                    extraClasses: 'loyalty_button',
-                });
-                break;
-            case DISCARD_COURT:
-                this.updatePageTitle({
-                    text: this.numberOfDiscards !== 1
-                        ? _('${you} must discard ${numberOfDiscards} cards')
-                        : _('${you} must discard ${numberOfDiscards} card'),
-                    args: {
-                        numberOfDiscards: this.numberOfDiscards,
-                        you: '${you}',
-                    },
-                });
-                this.addPrimaryActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () { return _this.handleDiscardConfirm({ fromHand: false }); },
-                });
-                dojo.addClass('confirm_btn', 'pp_disabled');
-                this.setCourtCardsSelectableForDiscard();
-                break;
-            case DISCARD_HAND:
-                this.updatePageTitle({
-                    text: _('${you} must discard ${numberOfDiscards} card(s)'),
-                    args: {
-                        numberOfDiscards: this.numberOfDiscards,
-                        you: '${you}',
-                    },
-                });
-                this.addPrimaryActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () { return _this.handleDiscardConfirm({ fromHand: true }); },
-                });
-                dojo.addClass('confirm_btn', 'pp_disabled');
-                this.setHandCardsSelectable({
-                    callback: function (_a) {
-                        var cardId = _a.cardId;
-                        return _this.handleDiscardSelect({ cardId: cardId });
-                    },
-                });
-                break;
-            case NEGOTIATE_BRIBE:
-                this.updatePageTitle({
-                    text: '${you} must accept or decline bribe of ${amount} rupee(s)',
-                    args: {
-                        amount: args.negotiateBribe.amount,
-                        you: '${you}',
-                    },
-                });
-                var isRuler_1 = args.negotiateBribe.ruler === this.game.getPlayerId();
-                if (isRuler_1 || (!isRuler_1 && args.negotiateBribe.amount <= this.localState.activePlayer.rupees)) {
-                    this.addPrimaryActionButton({
-                        id: 'accept_btn',
-                        text: _('Accept'),
-                        callback: function () { return _this.game.takeAction({ action: 'acceptBribe' }); },
-                    });
-                }
-                args.negotiateBribe.possible.reverse().forEach(function (value) {
-                    if (value == args.negotiateBribe.amount ||
-                        (isRuler_1 && value < args.negotiateBribe.amount) ||
-                        (!isRuler_1 && value > _this.localState.activePlayer.rupees)) {
-                        return;
-                    }
-                    _this.addPrimaryActionButton({
-                        id: "ask_partial_waive_".concat(value, "_btn"),
-                        text: isRuler_1
-                            ? dojo.string.substitute(_("Demand ".concat(value, " rupee(s)")), { value: value })
-                            : dojo.string.substitute(_("Offer ".concat(value, " rupee(s)")), { value: value }),
-                        callback: function () {
-                            return _this.game.takeAction({
-                                action: 'proposeBribeAmount',
-                                data: {
-                                    amount: value,
-                                },
-                            });
-                        },
-                    });
-                });
-                this.addSecondaryActionButton({
-                    id: 'decline_btn',
-                    text: _('Decline'),
-                    callback: function () { return _this.game.takeAction({ action: 'declineBribe' }); },
-                });
-                break;
-            case PLAYER_ACTIONS:
-                this.updateMainTitleTextActions();
-                if (this.activePlayerHasActions()) {
-                    this.addSecondaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: function () { return _this.onPass(); } });
-                    this.setMarketCardsSelectable();
-                    this.setHandCardsSelectable({
-                        callback: function (_a) {
-                            var cardId = _a.cardId;
-                            _this.playCardCheckBribe({ cardId: cardId });
-                        },
-                    });
-                    this.setCardActionsSelectable();
-                }
-                else {
-                    if (this.activePlayerHasFreeCardActions()) {
-                        this.setCardActionsSelectable();
-                    }
-                    this.addPrimaryActionButton({ id: 'pass_btn', text: _('End Turn'), callback: function () { return _this.onPass(); } });
-                }
-                this.addDangerActionButton({ id: 'undo_btn', text: _('Undo'), callback: function () { return _this.game.takeAction({ action: 'restart' }); } });
-                break;
-            case CONFIRM_PLACE_SPY:
-                dojo.query(".pp_card_in_court.pp_".concat(args.confirmPlaceSpy.cardId)).addClass('pp_selected');
-                this.updatePageTitle({
-                    text: _('Place a spy on ${cardName}'),
-                    args: {
-                        cardName: this.getCardInfo({ cardId: args.confirmPlaceSpy.cardId }).name,
-                    },
-                });
-                this.addPrimaryActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () { return _this.game.takeAction({ action: 'placeSpy', data: { cardId: args.confirmPlaceSpy.cardId } }); },
-                });
-                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
-            case PLACE_ROAD:
-                (((_b = args === null || args === void 0 ? void 0 : args.placeRoad) === null || _b === void 0 ? void 0 : _b.borders) || []).forEach(function (border) {
-                    _this.addPrimaryActionButton({
-                        id: "".concat(border, "_btn"),
-                        text: _(_this.game.gamedatas.staticData.borders[border].name),
-                        callback: function () { return _this.game.takeAction({ action: 'placeRoad', data: { border: border } }); },
-                    });
-                });
-                break;
-            case PLACE_SPY:
-                this.setPlaceSpyCardsSelectable({ region: args.placeSpy.region });
-                break;
-            case PLAY_CARD_BRIBE:
-                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardBribe.cardId)).addClass('pp_selected');
-                this.updatePageTitle({
-                    text: substituteKeywords({
-                        string: " ${you} must pay a bribe of ${rupees} rupee(s) to ${playerName} or ask to waive",
-                        args: {
-                            rupees: args.playCardBribe.rupees,
-                        },
-                        playerColor: args.playCardBribe.ruler.getColor(),
-                    }),
-                    args: {
-                        playerName: args.playCardBribe.ruler.getName(),
-                        you: '${you}',
-                    },
-                });
-                if (args.playCardBribe.rupees <= this.localState.activePlayer.rupees) {
-                    this.addPrimaryActionButton({
-                        id: "pay_bribe_btn",
-                        text: _('Pay bribe'),
-                        callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: args.playCardBribe.rupees }); },
-                    });
-                }
-                var _loop_1 = function (i) {
-                    if (i > this_1.localState.activePlayer.rupees) {
-                        return { value: void 0 };
-                    }
-                    this_1.addPrimaryActionButton({
-                        id: "ask_partial_waive_".concat(i, "_btn"),
-                        text: dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
-                        callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: i }); },
-                    });
-                };
-                var this_1 = this;
-                for (var i = args.playCardBribe.rupees - 1; i >= 1; i--) {
-                    var state_1 = _loop_1(i);
-                    if (typeof state_1 === "object")
-                        return state_1.value;
-                }
-                this.addPrimaryActionButton({
-                    id: "ask_waive_btn",
-                    text: _('Ask to waive'),
-                    callback: function () { return _this.playCardNextStep({ cardId: args.playCardBribe.cardId, bribe: 0 }); },
-                });
-                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
-                break;
-            case PLAY_CARD_SELECT_SIDE:
-                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardSelectSide.cardId)).addClass('pp_selected');
-                this.updatePageTitle({
-                    text: _("Select which side of court to play '${name}'"),
-                    args: {
-                        name: this.getCardInfo({ cardId: args.playCardSelectSide.cardId }).name,
-                    },
-                });
-                this.setSideSelectable({ cardId: args.playCardSelectSide.cardId, bribe: args.playCardSelectSide.bribe });
-                this.addDangerActionButton({
-                    id: 'cancel_btn',
-                    text: _('Cancel'),
-                    callback: function () {
-                        _this.onCancel();
-                        _this.removeSideSelectable();
-                    },
-                });
-                break;
-            case PLAY_CARD_CONFIRM:
-                dojo.query("#pp_card_select_".concat(args.playCardConfirm.side)).addClass('pp_selected');
-                dojo.query(".pp_card_in_hand.pp_".concat(args.playCardConfirm.cardId)).addClass('pp_selected');
-                if (args.playCardConfirm.firstCard) {
-                    this.updatePageTitle({
-                        text: _("Play '${name}' to court?"),
-                        args: {
-                            name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
-                        },
-                    });
-                }
-                else {
-                    this.updatePageTitle({
-                        text: _("Play '${name}' to ${side} side of court?"),
-                        args: {
-                            name: this.getCardInfo({ cardId: args.playCardConfirm.cardId }).name,
-                            side: args.playCardConfirm.side,
-                        },
-                    });
-                }
-                this.addPrimaryActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () {
-                        return _this.game.takeAction({
-                            action: 'playCard',
-                            data: {
-                                cardId: args.playCardConfirm.cardId,
-                                leftSide: args.playCardConfirm.side === 'left',
-                                bribe: args.playCardConfirm.bribe,
-                            },
-                        });
-                    },
-                });
-                this.addDangerActionButton({
-                    id: 'cancel_btn',
-                    text: _('Cancel'),
-                    callback: function () {
-                        _this.removeSideSelectable();
-                        _this.onCancel();
-                    },
-                });
-                break;
-            case CONFIRM_PURCHASE:
-                var _c = args.confirmPurchase, cardId = _c.cardId, cost = _c.cost;
-                var cpCardInfo = this.getCardInfo({ cardId: cardId });
-                var name_1 = cpCardInfo.type === COURT_CARD ? cpCardInfo.name : cpCardInfo.purchased.title;
-                dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
-                this.updatePageTitle({
-                    text: _("Purchase '${name}' for ${cost} rupee(s)?"),
-                    args: {
-                        name: name_1,
-                        cost: cost,
-                    },
-                });
-                this.addPrimaryActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () { return _this.game.takeAction({ action: 'purchaseCard', data: { cardId: args.confirmPurchase.cardId } }); },
-                });
-                this.addDangerActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
-                break;
-            case CONFIRM_SELECT_GIFT:
-                dojo.query("#pp_gift_".concat(args.confirmSelectGift.value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
-                this.updatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + args.confirmSelectGift.value } });
-                this.addDangerActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () {
-                        return _this.game.takeAction({
-                            action: 'selectGift',
-                            data: { selectedGift: args.confirmSelectGift.value, cardId: args.confirmSelectGift.cardId },
-                        });
-                    },
-                });
-                this.addDangerActionButton({
-                    id: 'cancel_btn',
-                    text: _('Cancel'),
-                    callback: function () {
-                        _this.removeSideSelectable();
-                        _this.onCancel();
-                    },
-                });
-                break;
-            case PASS:
-                this.updatePageTitle({ text: _('Confirm to your end turn'), args: {} });
-                this.addDangerActionButton({
-                    id: 'confirm_btn',
-                    text: _('Confirm'),
-                    callback: function () { return _this.game.takeAction({ action: 'pass' }); },
-                });
-                this.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.onCancel(); } });
-                break;
-            default:
-                console.log("No changes for step ".concat(nextStep));
-                break;
+        var cardId = _a.cardId, ruler = _a.ruler, rupees = _a.rupees;
+        this.game.clearPossible();
+        var localState = this.game.localState;
+        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: substituteKeywords({
+                string: " ${you} must pay a bribe of ${rupees} rupee(s) to ${playerName} or ask to waive",
+                args: {
+                    rupees: rupees,
+                },
+                playerColor: ruler.getColor(),
+            }),
+            args: {
+                playerName: ruler.getName(),
+                you: '${you}',
+            },
+        });
+        if (rupees <= localState.activePlayer.rupees) {
+            this.game.addPrimaryActionButton({
+                id: "pay_bribe_btn",
+                text: _('Pay bribe'),
+                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: rupees }); },
+            });
         }
+        var _loop_1 = function (i) {
+            if (i > localState.activePlayer.rupees) {
+                return { value: void 0 };
+            }
+            this_1.game.addPrimaryActionButton({
+                id: "ask_partial_waive_".concat(i, "_btn"),
+                text: dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
+                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: i }); },
+            });
+        };
+        var this_1 = this;
+        for (var i = rupees - 1; i >= 1; i--) {
+            var state_1 = _loop_1(i);
+            if (typeof state_1 === "object")
+                return state_1.value;
+        }
+        this.game.addPrimaryActionButton({
+            id: "ask_waive_btn",
+            text: _('Ask to waive'),
+            callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
+        });
+        this.game.addCancelButton();
+    };
+    ClientPlayCardState.prototype.updateInterfacePlayCardConfirm = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, side = _a.side, firstCard = _a.firstCard, bribe = _a.bribe;
+        this.game.clearPossible();
+        dojo.query("#pp_card_select_".concat(side)).addClass('pp_selected');
+        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        if (firstCard) {
+            this.game.clientUpdatePageTitle({
+                text: _("Play '${name}' to court?"),
+                args: {
+                    name: this.game.getCardInfo({ cardId: cardId }).name,
+                },
+            });
+        }
+        else {
+            this.game.clientUpdatePageTitle({
+                text: _("Play '${name}' to ${side} side of court?"),
+                args: {
+                    name: this.game.getCardInfo({ cardId: cardId }).name,
+                    side: side,
+                },
+            });
+        }
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'playCard',
+                    data: {
+                        cardId: cardId,
+                        leftSide: side === 'left',
+                        bribe: bribe,
+                    },
+                });
+            },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                _this.removeSideSelectable();
+                _this.game.onCancel();
+            },
+        });
+    };
+    ClientPlayCardState.prototype.updateInterfacePlayCardSelectSide = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, bribe = _a.bribe;
+        this.game.clearPossible();
+        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _("Select which side of court to play '${name}'"),
+            args: {
+                name: this.game.getCardInfo({ cardId: cardId }).name,
+            },
+        });
+        this.setSideSelectable({ cardId: cardId, bribe: bribe });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                _this.game.onCancel();
+                _this.removeSideSelectable();
+            },
+        });
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -2247,79 +1967,595 @@ var InteractionManager = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    InteractionManager.prototype.activePlayerHasActions = function () {
-        return this.localState.remainingActions > 0 || false;
-    };
-    InteractionManager.prototype.activePlayerHasCardActions = function () {
-        var _this = this;
-        return this.localState.activePlayer.court.cards.some(function (_a) {
-            var id = _a.id, used = _a.used;
-            var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return used === 0 && Object.keys(cardInfo.actions).length > 0;
-        });
-    };
-    InteractionManager.prototype.activePlayerHasFreeCardActions = function () {
-        var _this = this;
-        return this.localState.activePlayer.court.cards.some(function (_a) {
-            var id = _a.id, used = _a.used;
-            var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo).length > 0;
-        });
-    };
-    InteractionManager.prototype.currentPlayerHasHandCards = function () {
-        var currentPlayerId = this.game.getPlayerId();
-        return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
-    };
-    InteractionManager.prototype.activePlayerHasCourtCards = function () {
-        return this.localState.activePlayer.court.cards.length > 0;
-    };
-    /*
-     * Add a blue/grey button if it doesn't already exists
-     */
-    InteractionManager.prototype.addActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses, _b = _a.color, color = _b === void 0 ? 'none' : _b;
-        if ($(id)) {
-            return;
-        }
-        this.game.framework().addActionButton(id, text, callback, 'customActions', false, color);
-        if (extraClasses) {
-            dojo.addClass(id, extraClasses);
-        }
-    };
-    InteractionManager.prototype.addPrimaryActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
-        if ($(id)) {
-            return;
-        }
-        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
-        if (extraClasses) {
-            dojo.addClass(id, extraClasses);
-        }
-    };
-    InteractionManager.prototype.addSecondaryActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
-        if ($(id)) {
-            return;
-        }
-        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
-        if (extraClasses) {
-            dojo.addClass(id, extraClasses);
-        }
-    };
-    InteractionManager.prototype.addDangerActionButton = function (_a) {
-        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
-        if ($(id)) {
-            return;
-        }
-        this.game.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
-        if (extraClasses) {
-            dojo.addClass(id, extraClasses);
-        }
-    };
-    InteractionManager.prototype.getCardInfo = function (_a) {
+    ClientPlayCardState.prototype.checkBribe = function (_a) {
         var cardId = _a.cardId;
-        return this.game.gamedatas.staticData.cards[cardId];
+        // Check if other player rules the region
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var region = cardInfo.region;
+        var rulerId = this.game.map.getRegion({ region: region }).getRuler();
+        var playerId = this.game.getPlayerId();
+        if (rulerId !== null && rulerId !== playerId) {
+            var rupees = this.game.map.getRegion({ region: region }).getRulerTribes().length;
+            this.updateInterfacePlayCardBribe({ cardId: cardId, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }), rupees: rupees });
+        }
+        else {
+            this.playCardNextStep({ cardId: cardId, bribe: 0 });
+        }
     };
+    ClientPlayCardState.prototype.playCardNextStep = function (_a) {
+        var cardId = _a.cardId, bribe = _a.bribe;
+        var numberOfCardsInCourt = this.game.playerManager
+            .getPlayer({ playerId: this.game.getPlayerId() })
+            .getCourtZone()
+            .getAllItems().length;
+        if (numberOfCardsInCourt === 0) {
+            this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: true, side: 'left', bribe: bribe });
+        }
+        else {
+            this.updateInterfacePlayCardSelectSide({ cardId: cardId, bribe: bribe });
+        }
+    };
+    ClientPlayCardState.prototype.removeSideSelectable = function () {
+        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
+    };
+    ClientPlayCardState.prototype.setSideSelectable = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, bribe = _a.bribe;
+        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
+        dojo.query('#pp_card_select_left').forEach(function (node) {
+            dojo.connect(node, 'onclick', _this, function () {
+                _this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: false, side: 'left', bribe: bribe });
+            });
+        });
+        dojo.query('#pp_card_select_right').forEach(function (node) {
+            dojo.connect(node, 'onclick', _this, function () {
+                _this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: false, side: 'right', bribe: bribe });
+            });
+        });
+    };
+    return ClientPlayCardState;
+}());
+var ClientPurchaseCardState = /** @class */ (function () {
+    function ClientPurchaseCardState(game) {
+        this.game = game;
+    }
+    ClientPurchaseCardState.prototype.onEnteringState = function (args) {
+        this.updateInterfaceInitialStep(args);
+    };
+    ClientPurchaseCardState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientPurchaseCardState.prototype.updateInterfaceInitialStep = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, cost = _a.cost;
+        this.game.clearPossible();
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
+        dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _("Purchase '${name}' for ${cost} rupee(s)?"),
+            args: {
+                name: name,
+                cost: cost,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'purchaseCard', data: { cardId: cardId } }); },
+        });
+        this.game.addCancelButton();
+    };
+    return ClientPurchaseCardState;
+}());
+var DiscardCourtState = /** @class */ (function () {
+    function DiscardCourtState(game) {
+        this.game = game;
+    }
+    DiscardCourtState.prototype.onEnteringState = function (_a) {
+        var numberOfDiscards = _a.numberOfDiscards;
+        this.numberOfDiscards = numberOfDiscards;
+        this.updateInterfaceInitialStep();
+        // this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args as EnteringDiscardCourtArgs } });
+    };
+    DiscardCourtState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    DiscardCourtState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: this.numberOfDiscards !== 1
+                ? _('${you} must discard ${numberOfDiscards} cards')
+                : _('${you} must discard ${numberOfDiscards} card'),
+            args: {
+                numberOfDiscards: this.numberOfDiscards,
+                you: '${you}',
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.handleDiscardConfirm({ fromHand: false }); },
+        });
+        dojo.addClass('confirm_btn', 'pp_disabled');
+        this.setCourtCardsSelectableForDiscard();
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    DiscardCourtState.prototype.handleDiscardConfirm = function (_a) {
+        var fromHand = _a.fromHand;
+        var nodes = dojo.query('.pp_selected');
+        if (nodes.length === this.numberOfDiscards) {
+            var cards_1 = '';
+            nodes.forEach(function (node, index) {
+                cards_1 += ' ' + node.id;
+            }, this);
+            this.game.takeAction({
+                action: 'discardCards',
+                data: {
+                    cards: cards_1,
+                    fromHand: fromHand,
+                },
+            });
+        }
+    };
+    DiscardCourtState.prototype.setCourtCardsSelectableForDiscard = function () {
+        var _this = this;
+        var playerId = this.game.getPlayerId();
+        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
+            var cardId = 'card_' + node.id.split('_')[1];
+            console.log('cardId in courtcardselect', cardId);
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
+        }, this);
+    };
+    DiscardCourtState.prototype.handleDiscardSelect = function (_a) {
+        var cardId = _a.cardId;
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+        var numberSelected = dojo.query('.pp_selected').length;
+        console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
+        if (numberSelected === this.numberOfDiscards) {
+            dojo.removeClass('confirm_btn', 'pp_disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'pp_disabled');
+        }
+    };
+    return DiscardCourtState;
+}());
+var DiscardHandState = /** @class */ (function () {
+    function DiscardHandState(game) {
+        this.game = game;
+    }
+    DiscardHandState.prototype.onEnteringState = function (_a) {
+        var numberOfDiscards = _a.numberOfDiscards;
+        this.numberOfDiscards = numberOfDiscards;
+        this.updateInterfaceInitialStep();
+        // this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
+    };
+    DiscardHandState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    DiscardHandState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must discard ${numberOfDiscards} card(s)'),
+            args: {
+                numberOfDiscards: this.numberOfDiscards,
+                you: '${you}',
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.handleDiscardConfirm({ fromHand: true }); },
+        });
+        dojo.addClass('confirm_btn', 'pp_disabled');
+        this.game.setHandCardsSelectable({
+            callback: function (_a) {
+                var cardId = _a.cardId;
+                return _this.handleDiscardSelect({ cardId: cardId });
+            },
+        });
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    DiscardHandState.prototype.handleDiscardConfirm = function (_a) {
+        var fromHand = _a.fromHand;
+        var nodes = dojo.query('.pp_selected');
+        if (nodes.length === this.numberOfDiscards) {
+            var cards_2 = '';
+            nodes.forEach(function (node, index) {
+                cards_2 += ' ' + node.id;
+            }, this);
+            this.game.takeAction({
+                action: 'discardCards',
+                data: {
+                    cards: cards_2,
+                    fromHand: fromHand,
+                },
+            });
+        }
+    };
+    DiscardHandState.prototype.handleDiscardSelect = function (_a) {
+        var cardId = _a.cardId;
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+        var numberSelected = dojo.query('.pp_selected').length;
+        console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
+        if (numberSelected === this.numberOfDiscards) {
+            dojo.removeClass('confirm_btn', 'pp_disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'pp_disabled');
+        }
+    };
+    return DiscardHandState;
+}());
+var NegotiateBribeState = /** @class */ (function () {
+    function NegotiateBribeState(game) {
+        this.game = game;
+    }
+    NegotiateBribeState.prototype.onEnteringState = function (_a) {
+        var currentAmount = _a.currentAmount, ruler = _a.ruler, possible = _a.possible;
+        this.updateInterfaceInitialStep({ amount: currentAmount, ruler: ruler, possible: possible });
+    };
+    NegotiateBribeState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    NegotiateBribeState.prototype.updateInterfaceInitialStep = function (_a) {
+        var _this = this;
+        var amount = _a.amount, possible = _a.possible, ruler = _a.ruler;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must accept or decline bribe of ${amount} rupee(s)',
+            args: {
+                amount: amount,
+                you: '${you}',
+            },
+        });
+        var isRuler = ruler === this.game.getPlayerId();
+        if (isRuler || (!isRuler && amount <= this.game.localState.activePlayer.rupees)) {
+            this.game.addPrimaryActionButton({
+                id: 'accept_btn',
+                text: _('Accept'),
+                callback: function () { return _this.game.takeAction({ action: 'acceptBribe' }); },
+            });
+        }
+        possible.reverse().forEach(function (value) {
+            if (value == amount || (isRuler && value < amount) || (!isRuler && value > _this.game.localState.activePlayer.rupees)) {
+                return;
+            }
+            _this.game.addPrimaryActionButton({
+                id: "ask_partial_waive_".concat(value, "_btn"),
+                text: isRuler
+                    ? dojo.string.substitute(_("Demand ".concat(value, " rupee(s)")), { value: value })
+                    : dojo.string.substitute(_("Offer ".concat(value, " rupee(s)")), { value: value }),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'proposeBribeAmount',
+                        data: {
+                            amount: value,
+                        },
+                    });
+                },
+            });
+        });
+        this.game.addSecondaryActionButton({
+            id: 'decline_btn',
+            text: _('Decline'),
+            callback: function () { return _this.game.takeAction({ action: 'declineBribe' }); },
+        });
+    };
+    return NegotiateBribeState;
+}());
+var PlaceRoadState = /** @class */ (function () {
+    function PlaceRoadState(game) {
+        this.game = game;
+    }
+    PlaceRoadState.prototype.onEnteringState = function (_a) {
+        var region = _a.region;
+        this.updateInterfaceInitialStep({ borders: region.borders });
+    };
+    PlaceRoadState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    PlaceRoadState.prototype.updateInterfaceInitialStep = function (_a) {
+        var _this = this;
+        var borders = _a.borders;
+        this.game.clearPossible();
+        borders.forEach(function (border) {
+            _this.game.addPrimaryActionButton({
+                id: "".concat(border, "_btn"),
+                text: _(_this.game.gamedatas.staticData.borders[border].name),
+                callback: function () { return _this.game.takeAction({ action: 'placeRoad', data: { border: border } }); },
+            });
+        });
+    };
+    return PlaceRoadState;
+}());
+var PlaceSpyState = /** @class */ (function () {
+    function PlaceSpyState(game) {
+        this.game = game;
+    }
+    PlaceSpyState.prototype.onEnteringState = function (_a) {
+        var regionId = _a.regionId;
+        this.updateInterfaceInitialStep({ regionId: regionId });
+    };
+    PlaceSpyState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    PlaceSpyState.prototype.updateInterfaceInitialStep = function (_a) {
+        var regionId = _a.regionId;
+        this.game.clearPossible();
+        this.setPlaceSpyCardsSelectable({ regionId: regionId });
+    };
+    PlaceSpyState.prototype.updateInterfaceConfirmPlaceSpy = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        dojo.query(".pp_card_in_court.pp_".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _('Place a spy on ${cardName}'),
+            args: {
+                cardName: this.game.getCardInfo({ cardId: cardId }).name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'placeSpy', data: { cardId: cardId } }); },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () { return _this.game.onCancel(); },
+        });
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    PlaceSpyState.prototype.setPlaceSpyCardsSelectable = function (_a) {
+        var _this = this;
+        var regionId = _a.regionId;
+        dojo.query(".pp_card_in_court.pp_".concat(regionId)).forEach(function (node, index) {
+            var cardId = node.id;
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmPlaceSpy({ cardId: cardId }); }));
+        });
+    };
+    return PlaceSpyState;
+}());
+var PlayerActionsState = /** @class */ (function () {
+    function PlayerActionsState(game) {
+        this.game = game;
+    }
+    PlayerActionsState.prototype.onEnteringState = function (args) {
+        this.game.updateLocalState(args);
+        this.updateInterfaceInitialStep();
+    };
+    PlayerActionsState.prototype.onLeavingState = function () {
+        debug('Leaving PlayerActionsState');
+    };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    PlayerActionsState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.updateMainTitleTextActions();
+        if (this.activePlayerHasActions()) {
+            this.game.addSecondaryActionButton({
+                id: 'pass_btn',
+                text: _('End Turn'),
+                callback: function () { return _this.onPass(); },
+            });
+            this.setMarketCardsSelectable();
+            this.game.setHandCardsSelectable({
+                callback: function (_a) {
+                    var cardId = _a.cardId;
+                    _this.game.framework().setClientState('clientPlayCard', { args: { cardId: cardId } });
+                },
+            });
+            this.setCardActionsSelectable();
+        }
+        else {
+            if (this.activePlayerHasFreeCardActions()) {
+                this.setCardActionsSelectable();
+            }
+            this.game.addPrimaryActionButton({
+                id: 'pass_btn',
+                text: _('End Turn'),
+                callback: function () { return _this.onPass(); },
+            });
+        }
+        this.game.addDangerActionButton({
+            id: 'undo_btn',
+            text: _('Undo'),
+            callback: function () { return _this.game.takeAction({ action: 'restart' }); },
+        });
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionBattleStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select a card or region'),
+            args: {},
+        });
+        this.setRegionsSelectable();
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionBetrayStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        console.log('betray clicked');
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionBuildStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        console.log('build clicked');
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionGiftStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select a gift to purchase'),
+            args: {
+                you: '${you}',
+            },
+        });
+        this.setGiftsSelectable({ cardId: cardId });
+        this.game.addCancelButton();
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionMoveStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        console.log('move clicked');
+    };
+    PlayerActionsState.prototype.updateInterfaceCardActionTaxStart = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        console.log('tax clicked');
+    };
+    PlayerActionsState.prototype.updateInterfaceConfirmSelectGift = function (_a) {
+        var _this = this;
+        var value = _a.value, cardId = _a.cardId;
+        this.game.clearPossible();
+        dojo.query("#pp_gift_".concat(value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + value } });
+        this.game.addDangerActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'selectGift',
+                    data: { selectedGift: value, cardId: cardId },
+                });
+            },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                _this.game.onCancel();
+            },
+        });
+    };
+    PlayerActionsState.prototype.updateInterfacePass = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({ text: _('Confirm to your end turn'), args: {} });
+        this.game.addDangerActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'pass' }); },
+        });
+        this.game.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.game.onCancel(); } });
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
     /**
      * Player had actions remaining
      * 1. Player can only purchase cards (no cards in hand or in court);
@@ -2335,8 +2571,8 @@ var InteractionManager = /** @class */ (function () {
      *    You may perform free card actions
      * 6. Player does not have free actions
      */
-    InteractionManager.prototype.updateMainTitleTextActions = function () {
-        var remainingActions = this.localState.remainingActions;
+    PlayerActionsState.prototype.updateMainTitleTextActions = function () {
+        var remainingActions = this.game.localState.remainingActions;
         var hasCardActions = this.activePlayerHasCardActions();
         var hasHandCards = this.currentPlayerHasHandCards();
         var hasFreeCardActions = this.activePlayerHasFreeCardActions();
@@ -2369,96 +2605,75 @@ var InteractionManager = /** @class */ (function () {
         this.game.gamedatas.gamestate.descriptionmyturn = titleText;
         this.game.framework().updatePageTitle();
     };
-    InteractionManager.prototype.handleDiscardSelect = function (_a) {
-        var cardId = _a.cardId;
-        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
-        var numberSelected = dojo.query('.pp_selected').length;
-        console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
-        if (numberSelected === this.numberOfDiscards) {
-            dojo.removeClass('confirm_btn', 'pp_disabled');
-        }
-        else {
-            dojo.addClass('confirm_btn', 'pp_disabled');
-        }
+    PlayerActionsState.prototype.activePlayerHasActions = function () {
+        return this.game.localState.remainingActions > 0 || false;
     };
-    InteractionManager.prototype.handleDiscardConfirm = function (_a) {
-        var fromHand = _a.fromHand;
-        var nodes = dojo.query('.pp_selected');
-        if (nodes.length === this.numberOfDiscards) {
-            var cards_1 = '';
-            nodes.forEach(function (node, index) {
-                cards_1 += ' ' + node.id;
-            }, this);
-            this.game.takeAction({
-                action: 'discardCards',
-                data: {
-                    cards: cards_1,
-                    fromHand: fromHand,
-                },
-            });
-        }
+    PlayerActionsState.prototype.activePlayerHasCardActions = function () {
+        var _this = this;
+        return this.game.localState.activePlayer.court.cards.some(function (_a) {
+            var id = _a.id, used = _a.used;
+            var cardInfo = _this.game.gamedatas.staticData.cards[id];
+            return used === 0 && Object.keys(cardInfo.actions).length > 0;
+        });
     };
-    InteractionManager.prototype.playCardCheckBribe = function (_a) {
-        var cardId = _a.cardId;
-        // Check if other player rules the region
-        var cardInfo = this.getCardInfo({ cardId: cardId });
-        var region = cardInfo.region;
-        var rulerId = this.game.map.getRegion({ region: region }).getRuler();
-        var playerId = this.game.getPlayerId();
-        if (rulerId !== null && rulerId !== playerId) {
-            var rupees = this.game.map.getRegion({ region: region }).getRulerTribes().length;
-            this.updateInterface({
-                nextStep: PLAY_CARD_BRIBE,
-                args: { playCardBribe: { cardId: cardId, region: region, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }), rupees: rupees } },
-            });
-        }
-        else {
-            this.playCardNextStep({ cardId: cardId, bribe: 0 });
-        }
+    PlayerActionsState.prototype.activePlayerHasFreeCardActions = function () {
+        var _this = this;
+        return this.game.localState.activePlayer.court.cards.some(function (_a) {
+            var id = _a.id, used = _a.used;
+            var cardInfo = _this.game.gamedatas.staticData.cards[id];
+            return (used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo).length > 0);
+        });
     };
-    InteractionManager.prototype.playCardNextStep = function (_a) {
-        var cardId = _a.cardId, bribe = _a.bribe;
-        var numberOfCardsInCourt = this.game.playerManager
-            .getPlayer({ playerId: this.game.getPlayerId() })
-            .getCourtZone()
-            .getAllItems().length;
-        if (numberOfCardsInCourt === 0) {
-            this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: true, side: 'left', bribe: bribe } } });
-        }
-        else {
-            this.updateInterface({ nextStep: PLAY_CARD_SELECT_SIDE, args: { playCardSelectSide: { cardId: cardId, bribe: bribe } } });
-        }
+    PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
+        var currentPlayerId = this.game.getPlayerId();
+        return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
     };
-    InteractionManager.prototype.setCardActionsSelectable = function () {
+    PlayerActionsState.prototype.activePlayerHasCourtCards = function () {
+        return this.game.localState.activePlayer.court.cards.length > 0;
+    };
+    PlayerActionsState.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
         dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node) {
             var _a, _b;
             var cardId = node.id;
-            var used = ((_b = (_a = _this.localState.activePlayer.court.cards) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
+            var used = ((_b = (_a = _this.game.localState.activePlayer.court.cards) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
-                (_this.localState.remainingActions > 0 ||
+                (_this.game.localState.remainingActions > 0 ||
                     _this.game.gamedatas.staticData.cards[cardId].suit === _this.game.objectManager.favoredSuit.get()))
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
-                        var nextStep_1 = "cardAction".concat(capitalizeFirstLetter(child.id.split('_')[0]));
+                        var cardAction_1 = child.id.split('_')[0];
+                        // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
                         dojo.addClass(child, 'pp_selectable');
-                        _this._connections.push(dojo.connect(child, 'onclick', _this, function () { return _this.updateInterface({ nextStep: nextStep_1, args: { cardAction: { cardId: cardId } } }); }));
+                        _this.game._connections.push(dojo.connect(child, 'onclick', _this, function () {
+                            switch (cardAction_1) {
+                                case 'battle':
+                                    _this.updateInterfaceCardActionBattleStart({ cardId: cardId });
+                                    break;
+                                case 'betray':
+                                    _this.updateInterfaceCardActionBetrayStart({ cardId: cardId });
+                                    break;
+                                case 'build':
+                                    _this.updateInterfaceCardActionBuildStart({ cardId: cardId });
+                                    break;
+                                case 'gift':
+                                    _this.updateInterfaceCardActionGiftStart({ cardId: cardId });
+                                    break;
+                                case 'move':
+                                    _this.updateInterfaceCardActionMoveStart({ cardId: cardId });
+                                    break;
+                                case 'tax':
+                                    _this.updateInterfaceCardActionTaxStart({ cardId: cardId });
+                                    break;
+                            }
+                            // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
+                        }));
                     }
                 });
         });
     };
-    InteractionManager.prototype.setRegionsSelectable = function () {
-        var _this = this;
-        var container = document.getElementById("pp_map_areas");
-        container.classList.add('pp_selectable');
-        REGIONS.forEach(function (region) {
-            var element = document.getElementById("pp_region_".concat(region));
-            element.classList.add('pp_selectable');
-            _this._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
-        });
-    };
-    InteractionManager.prototype.setGiftsSelectable = function (_a) {
+    PlayerActionsState.prototype.setGiftsSelectable = function (_a) {
         var _this = this;
         var cardId = _a.cardId;
         var playerId = this.game.getPlayerId();
@@ -2469,206 +2684,41 @@ var InteractionManager = /** @class */ (function () {
                 value: giftValue,
             })
                 .getAllItems().length > 0;
-            if (!hasGift && giftValue <= _this.localState.activePlayer.rupees) {
+            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees) {
                 dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
                     dojo.addClass(node, 'pp_selectable');
-                    _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
-                        return _this.updateInterface({
-                            nextStep: CONFIRM_SELECT_GIFT,
-                            args: {
-                                confirmSelectGift: {
-                                    value: giftValue,
-                                    cardId: cardId,
-                                },
-                            },
-                        });
-                    }));
+                    _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));
                 });
             }
         });
     };
-    InteractionManager.prototype.setSideSelectable = function (_a) {
-        var _this = this;
-        var cardId = _a.cardId, bribe = _a.bribe;
-        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
-        dojo.query('#pp_card_select_left').forEach(function (node) {
-            dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterface({ nextStep: PLAY_CARD_CONFIRM, args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'left', bribe: bribe } } });
-            });
-        });
-        dojo.query('#pp_card_select_right').forEach(function (node) {
-            dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterface({
-                    nextStep: PLAY_CARD_CONFIRM,
-                    args: { playCardConfirm: { cardId: cardId, firstCard: false, side: 'right', bribe: bribe } },
-                });
-            });
-        });
-    };
-    InteractionManager.prototype.removeSideSelectable = function () {
-        this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
-    };
-    InteractionManager.prototype.setMarketCardsSelectable = function () {
+    PlayerActionsState.prototype.setMarketCardsSelectable = function () {
         var _this = this;
         var baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
-        console.log('unavailable', this.localState.usedCards);
         dojo.query('.pp_market_card').forEach(function (node) {
             var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
             var cardId = node.id;
-            if (cost <= _this.localState.activePlayer.rupees && !_this.localState.usedCards.includes(cardId)) {
+            if (cost <= _this.game.localState.activePlayer.rupees &&
+                !_this.game.localState.usedCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
-                _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
-                    return _this.updateInterface({ nextStep: CONFIRM_PURCHASE, args: { confirmPurchase: { cardId: cardId, cost: cost } } });
+                _this.game._connections.push(
+                // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
+                dojo.connect(node, 'onclick', _this, function () {
+                    return _this.game.framework().setClientState('clientPurchaseCard', { args: { cardId: cardId, cost: cost } });
                 }));
             }
-        }, this);
+        });
     };
-    InteractionManager.prototype.setHandCardsSelectable = function (_a) {
+    PlayerActionsState.prototype.setRegionsSelectable = function () {
         var _this = this;
-        var callback = _a.callback;
-        dojo.query('.pp_card_in_hand').forEach(function (node, index) {
-            var cardId = node.id;
-            dojo.addClass(node, 'pp_selectable');
-            _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
-        }, this);
+        var container = document.getElementById("pp_map_areas");
+        container.classList.add('pp_selectable');
+        REGIONS.forEach(function (region) {
+            var element = document.getElementById("pp_region_".concat(region));
+            element.classList.add('pp_selectable');
+            _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
+        });
     };
-    InteractionManager.prototype.setCourtCardsSelectableForDiscard = function () {
-        var _this = this;
-        var playerId = this.game.getPlayerId();
-        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
-            var cardId = 'card_' + node.id.split('_')[1];
-            console.log('cardId in courtcardselect', cardId);
-            dojo.addClass(node, 'pp_selectable');
-            _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
-        }, this);
-    };
-    InteractionManager.prototype.setPlaceSpyCardsSelectable = function (_a) {
-        var _this = this;
-        var region = _a.region;
-        dojo.query(".pp_card_in_court.pp_".concat(region)).forEach(function (node, index) {
-            var cardId = node.id;
-            dojo.addClass(node, 'pp_selectable');
-            _this._connections.push(dojo.connect(node, 'onclick', _this, function () {
-                return _this.updateInterface({ nextStep: CONFIRM_PLACE_SPY, args: { confirmPlaceSpy: { cardId: cardId } } });
-            }));
-        }, this);
-    };
-    InteractionManager.prototype.updatePageTitle = function (_a) {
-        var text = _a.text, args = _a.args;
-        this.game.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
-        this.game.framework().updatePageTitle();
-    };
-    //  .########.##....##.########.########.########..####.##....##..######..
-    //  .##.......###...##....##....##.......##.....##..##..###...##.##....##.
-    //  .##.......####..##....##....##.......##.....##..##..####..##.##.......
-    //  .######...##.##.##....##....######...########...##..##.##.##.##...####
-    //  .##.......##..####....##....##.......##...##....##..##..####.##....##.
-    //  .##.......##...###....##....##.......##....##...##..##...###.##....##.
-    //  .########.##....##....##....########.##.....##.####.##....##..######..
-    //  ..######..########....###....########.########
-    //  .##....##....##......##.##......##....##......
-    //  .##..........##.....##...##.....##....##......
-    //  ..######.....##....##.....##....##....######..
-    //  .......##....##....#########....##....##......
-    //  .##....##....##....##.....##....##....##......
-    //  ..######.....##....##.....##....##....########
-    InteractionManager.prototype.onEnteringState = function (stateName, args) {
-        // UI changes for active player
-        if (this.game.framework().isCurrentPlayerActive()) {
-            switch (stateName) {
-                case 'setup':
-                    this.updateInterface({ nextStep: CHOOSE_LOYALTY });
-                    break;
-                case 'cardActionGift':
-                    this.localState.activePlayer.rupees = args.args.rupees;
-                    this.updateInterface({ nextStep: CARD_ACTION_GIFT });
-                    break;
-                case 'discardCourt':
-                    this.numberOfDiscards = args.args.numberOfDiscards;
-                    this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args } });
-                    break;
-                case 'discardHand':
-                    this.numberOfDiscards = args.args.numberOfDiscards;
-                    this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args } });
-                    break;
-                case 'negotiateBribe':
-                    this.updateInterface({
-                        nextStep: NEGOTIATE_BRIBE,
-                        args: {
-                            negotiateBribe: {
-                                amount: args.args.currentAmount,
-                                ruler: args.args.ruler,
-                                possible: args.args.possible,
-                            },
-                        },
-                    });
-                    break;
-                case 'playerActions':
-                    var _a = args.args, activePlayer = _a.activePlayer, remainingActions = _a.remainingActions, usedCards = _a.usedCards;
-                    this.localState = {
-                        activePlayer: activePlayer,
-                        remainingActions: remainingActions,
-                        usedCards: usedCards,
-                    };
-                    this.updateInterface({ nextStep: PLAYER_ACTIONS });
-                    break;
-                case 'placeRoad':
-                    this.updateInterface({ nextStep: PLACE_ROAD, args: { placeRoad: { borders: args.args.region.borders } } });
-                    break;
-                case 'placeSpy':
-                    this.updateInterface({ nextStep: PLACE_SPY, args: { placeSpy: { region: args.args.region } } });
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-    //  .##.......########....###....##.....##.####.##....##..######..
-    //  .##.......##.........##.##...##.....##..##..###...##.##....##.
-    //  .##.......##........##...##..##.....##..##..####..##.##.......
-    //  .##.......######...##.....##.##.....##..##..##.##.##.##...####
-    //  .##.......##.......#########..##...##...##..##..####.##....##.
-    //  .##.......##.......##.....##...##.##....##..##...###.##....##.
-    //  .########.########.##.....##....###....####.##....##..######..
-    //  ..######..########....###....########.########
-    //  .##....##....##......##.##......##....##......
-    //  .##..........##.....##...##.....##....##......
-    //  ..######.....##....##.....##....##....######..
-    //  .......##....##....#########....##....##......
-    //  .##....##....##....##.....##....##....##......
-    //  ..######.....##....##.....##....##....########
-    InteractionManager.prototype.onLeavingState = function (stateName) {
-        console.log("onLeavingState ".concat(stateName));
-        this.clearPossible();
-        switch (stateName) {
-            /* Example:
-            
-            case 'myGameState':
-            
-                // Hide the HTML block we are displaying only during this game state
-                dojo.style( 'my_html_block_id', 'display', 'none' );
-                
-                break;
-           */
-            case 'dummmy':
-                break;
-        }
-    };
-    // .##.....##.########..########.....###....########.########
-    // .##.....##.##.....##.##.....##...##.##......##....##......
-    // .##.....##.##.....##.##.....##..##...##.....##....##......
-    // .##.....##.########..##.....##.##.....##....##....######..
-    // .##.....##.##........##.....##.#########....##....##......
-    // .##.....##.##........##.....##.##.....##....##....##......
-    // ..#######..##........########..##.....##....##....########
-    //  .########..##.....##.########.########..#######..##....##..######.
-    //  .##.....##.##.....##....##.......##....##.....##.###...##.##....##
-    //  .##.....##.##.....##....##.......##....##.....##.####..##.##......
-    //  .########..##.....##....##.......##....##.....##.##.##.##..######.
-    //  .##.....##.##.....##....##.......##....##.....##.##..####.......##
-    //  .##.....##.##.....##....##.......##....##.....##.##...###.##....##
-    //  .########...#######.....##.......##.....#######..##....##..######.
-    InteractionManager.prototype.onUpdateActionButtons = function (stateName, args) { };
     //  ..######..##.......####..######..##....##
     //  .##....##.##........##..##....##.##...##.
     //  .##.......##........##..##.......##..##..
@@ -2683,20 +2733,63 @@ var InteractionManager = /** @class */ (function () {
     // .##.....##.#########.##..####.##.....##.##.......##.............##
     // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
     // .##.....##.##.....##.##....##.########..########.########..######.
-    InteractionManager.prototype.onPass = function () {
+    PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())
             return;
-        if (Number(this.localState.remainingActions) > 0) {
-            this.updateInterface({ nextStep: 'pass' });
+        if (Number(this.game.localState.remainingActions) > 0) {
+            this.updateInterfacePass();
             return;
         }
         this.game.takeAction({ action: 'pass' });
     };
-    InteractionManager.prototype.onCancel = function () {
-        this.resetActionArgs();
-        this.game.framework().restoreServerGameState();
+    return PlayerActionsState;
+}());
+var SetupState = /** @class */ (function () {
+    function SetupState(game) {
+        this.game = game;
+    }
+    SetupState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+        console.log('onEntering setup');
     };
-    return InteractionManager;
+    SetupState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    SetupState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.addPrimaryActionButton({
+            id: 'afghan_button',
+            text: _('Afghan'),
+            callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: AFGHAN } }); },
+            extraClasses: 'loyalty_button',
+        });
+        this.game.addPrimaryActionButton({
+            id: 'british_button',
+            text: _('British'),
+            callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: BRITISH } }); },
+            extraClasses: 'loyalty_button',
+        });
+        this.game.addPrimaryActionButton({
+            id: 'russian_button',
+            text: _('Russian'),
+            callback: function () { return _this.game.takeAction({ action: 'chooseLoyalty', data: { coalition: RUSSIAN } }); },
+            extraClasses: 'loyalty_button',
+        });
+    };
+    return SetupState;
 }());
 //  .##....##..#######..########.####.########
 //  .###...##.##.....##....##.....##..##......
@@ -2815,35 +2908,18 @@ var NotificationManager = /** @class */ (function () {
     };
     NotificationManager.prototype.notif_discardCard = function (notif) {
         console.log('notif_discardCard', notif);
-        this.game.interactionManager.resetActionArgs();
+        this.game.clearPossible();
         var playerId = Number(notif.args.playerId);
         var from = notif.args.from;
         if (from == 'hand') {
             this.getPlayer({ playerId: playerId }).discardHandCard({ cardId: notif.args.cardId });
-            // TODO (Frans): check how this works for other players than the one whos card gets discarded
-            // this.game.discardCard({
-            //   id: notif.args.cardId,
-            //   order: notif.args.state || undefined,
-            //   from: this.getPlayer({ playerId }).getHandZone(),
-            // });
         }
         else if (from == 'market_0_0' || from == 'market_1_0') {
             var splitFrom = from.split('_');
             this.game.market.discardCard({ cardId: notif.args.cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
-            // this.game.discardCard({
-            //   id: notif.args.cardId,
-            //   from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
-            //   order: notif.args.state || undefined,
-            // });
         }
         else {
             this.getPlayer({ playerId: playerId }).discardCourtCard({ cardId: notif.args.cardId });
-            // this.game.discardCard({
-            //   id: notif.args.cardId,
-            //   order: notif.args.state || undefined,
-            //   from: this.getPlayer({ playerId }).getCourtZone(),
-            // });
-            // TODO: check if it is needed to update weight of cards in zone?
         }
     };
     NotificationManager.prototype.notif_dominanceCheck = function (notif) {
@@ -2876,7 +2952,7 @@ var NotificationManager = /** @class */ (function () {
     };
     NotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
-        this.game.interactionManager.resetActionArgs();
+        this.game.clearPossible();
         var playerId = Number(notif.args.playerId);
         var player = this.getPlayer({ playerId: playerId });
         notif.args.courtCards.forEach(function (card, index) {
@@ -2895,7 +2971,7 @@ var NotificationManager = /** @class */ (function () {
         console.log('notif_purchaseCard', notif);
         var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, receivedRupees = _a.receivedRupees;
         // const playerId = Number(notif.args.playerId);
-        this.game.interactionManager.resetActionArgs();
+        this.game.clearPossible();
         var row = Number(marketLocation.split('_')[1]);
         var col = Number(marketLocation.split('_')[2]);
         // Place paid rupees on market cards
@@ -2927,7 +3003,7 @@ var NotificationManager = /** @class */ (function () {
     NotificationManager.prototype.notif_refreshMarket = function (notif) {
         var _this = this;
         console.log('notif_refreshMarket', notif);
-        this.game.interactionManager.resetActionArgs();
+        this.game.clearPossible();
         notif.args.cardMoves.forEach(function (move, index) {
             var fromRow = Number(move.from.split('_')[1]);
             var fromCol = Number(move.from.split('_')[2]);
@@ -2960,7 +3036,7 @@ var NotificationManager = /** @class */ (function () {
     NotificationManager.prototype.notif_selectGift = function (notif) {
         var _this = this;
         console.log('notif_selectGift', notif);
-        this.game.interactionManager.resetActionArgs();
+        this.game.clearPossible();
         var _a = notif.args, updatedCards = _a.updatedCards, playerId = _a.playerId, rupee_count = _a.rupee_count, updatedCounts = _a.updatedCounts;
         // Place paid rupees on market cards
         updatedCards.forEach(function (item, index) {
@@ -3087,6 +3163,20 @@ var PaxPamir = /** @class */ (function () {
         // console.log('playAreaWidth',playAreaWidth);
         this.gamedatas = gamedatas;
         debug('gamedatas', gamedatas);
+        this._connections = [];
+        // Will store all data for active player and gets refreshed with entering player actions state
+        this.localState = gamedatas.localState;
+        this.activeStates = {
+            clientPlayCard: new ClientPlayCardState(this),
+            clientPurchaseCard: new ClientPurchaseCardState(this),
+            discardCourt: new DiscardCourtState(this),
+            discardHand: new DiscardHandState(this),
+            negotiateBribe: new NegotiateBribeState(this),
+            placeRoad: new PlaceRoadState(this),
+            placeSpy: new PlaceSpyState(this),
+            playerActions: new PlayerActionsState(this),
+            setup: new SetupState(this),
+        };
         // Events
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
         this.activeEvents.instantaneous = true;
@@ -3102,7 +3192,6 @@ var PaxPamir = /** @class */ (function () {
         this.playerManager = new PlayerManager(this);
         this.map = new PPMap(this);
         this.market = new Market(this);
-        this.interactionManager = new InteractionManager(this);
         if (this.notificationManager != undefined) {
             this.notificationManager.destroy();
         }
@@ -3128,22 +3217,25 @@ var PaxPamir = /** @class */ (function () {
     // onEnteringState: this method is called each time we are entering into a new game state.
     //                  You can use this method to perform some user interface changes at this moment.
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
-        console.log('Entering state: ' + stateName, args.args);
-        this.interactionManager.onEnteringState(stateName, args);
+        console.log('Entering state: ' + stateName, args);
+        // UI changes for active player
+        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
+            console.log('inside if');
+            this.activeStates[stateName].onEnteringState(args.args);
+        }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
     PaxPamir.prototype.onLeavingState = function (stateName) {
         console.log('Leaving state: ' + stateName);
-        this.interactionManager.onLeavingState(stateName);
+        this.clearPossible();
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
     PaxPamir.prototype.onUpdateActionButtons = function (stateName, args) {
         console.log('onUpdateActionButtons: ' + stateName);
-        // this.interactionManager.onUpdateActionButtons(stateName, args);
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -3154,6 +3246,130 @@ var PaxPamir = /** @class */ (function () {
     //  ..#######.....##....####.########.####....##.......##...
     ///////////////////////////////////////////////////
     //// Utility methods - add in alphabetical order
+    /*
+     * Add a blue/grey button if it doesn't already exists
+     */
+    PaxPamir.prototype.addActionButtonClient = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses, _b = _a.color, color = _b === void 0 ? 'none' : _b;
+        if ($(id)) {
+            return;
+        }
+        this.framework().addActionButton(id, text, callback, 'customActions', false, color);
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
+    };
+    PaxPamir.prototype.addCancelButton = function () {
+        var _this = this;
+        this.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () { return _this.onCancel(); },
+        });
+    };
+    PaxPamir.prototype.addPrimaryActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
+    };
+    PaxPamir.prototype.addSecondaryActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
+    };
+    PaxPamir.prototype.addDangerActionButton = function (_a) {
+        var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses;
+        if ($(id)) {
+            return;
+        }
+        this.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+        if (extraClasses) {
+            dojo.addClass(id, extraClasses);
+        }
+    };
+    PaxPamir.prototype.clearInterface = function () {
+        var _this = this;
+        console.log('clear interface');
+        Object.keys(this.spies).forEach(function (key) {
+            dojo.empty(_this.spies[key].container_div);
+            _this.spies[key] = undefined;
+        });
+        this.market.clearInterface();
+        this.playerManager.clearInterface();
+        this.map.clearInterface();
+        this.objectManager.clearInterface();
+    };
+    PaxPamir.prototype.clearPossible = function () {
+        this.framework().removeActionButtons();
+        dojo.empty('customActions');
+        dojo.forEach(this._connections, dojo.disconnect);
+        this._connections = [];
+        dojo.query('.pp_selectable').removeClass('pp_selectable');
+        dojo.query('.pp_selected').removeClass('pp_selected');
+        REGIONS.forEach(function (region) {
+            var element = document.getElementById("pp_region_".concat(region));
+            element.classList.remove('pp_selectable');
+        });
+        document.getElementById('pp_map_areas').classList.remove('pp_selectable');
+    };
+    PaxPamir.prototype.getCardInfo = function (_a) {
+        var cardId = _a.cardId;
+        return this.gamedatas.staticData.cards[cardId];
+    };
+    PaxPamir.prototype.getPlayerId = function () {
+        return Number(this.framework().player_id);
+    };
+    /**
+     * Typescript wrapper for framework functions
+     */
+    PaxPamir.prototype.framework = function () {
+        return this;
+    };
+    PaxPamir.prototype.onCancel = function () {
+        this.clearPossible();
+        this.framework().restoreServerGameState();
+    };
+    PaxPamir.prototype.updateLocalState = function (updates) {
+        this.localState = __assign(__assign({}, this.localState), updates);
+    };
+    PaxPamir.prototype.setHandCardsSelectable = function (_a) {
+        var _this = this;
+        var callback = _a.callback;
+        dojo.query('.pp_card_in_hand').forEach(function (node, index) {
+            var cardId = node.id;
+            dojo.addClass(node, 'pp_selectable');
+            _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
+        }, this);
+    };
+    PaxPamir.prototype.clientUpdatePageTitle = function (_a) {
+        var text = _a.text, args = _a.args;
+        this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+        this.framework().updatePageTitle();
+    };
+    // .########.########.....###....##.....##.########.##......##..#######..########..##....##
+    // .##.......##.....##...##.##...###...###.##.......##..##..##.##.....##.##.....##.##...##.
+    // .##.......##.....##..##...##..####.####.##.......##..##..##.##.....##.##.....##.##..##..
+    // .######...########..##.....##.##.###.##.######...##..##..##.##.....##.########..#####...
+    // .##.......##...##...#########.##.....##.##.......##..##..##.##.....##.##...##...##..##..
+    // .##.......##....##..##.....##.##.....##.##.......##..##..##.##.....##.##....##..##...##.
+    // .##.......##.....##.##.....##.##.....##.########..###..###...#######..##.....##.##....##
+    // ..#######..##.....##.########.########..########..####.########..########..######.
+    // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##....##
+    // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##......
+    // .##.....##.##.....##.######...########..########...##..##.....##.######....######.
+    // .##.....##..##...##..##.......##...##...##...##....##..##.....##.##.............##
+    // .##.....##...##.##...##.......##....##..##....##...##..##.....##.##.......##....##
+    // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
     /* @Override */
     PaxPamir.prototype.format_string_recursive = function (log, args) {
         try {
@@ -3237,22 +3453,13 @@ var PaxPamir = /** @class */ (function () {
         // debug('Loading complete');
         this.cancelLogs(this.gamedatas.canceledNotifIds);
     };
-    PaxPamir.prototype.clearInterface = function () {
-        var _this = this;
-        console.log('clear interface');
-        Object.keys(this.spies).forEach(function (key) {
-            dojo.empty(_this.spies[key].container_div);
-            _this.spies[key] = undefined;
-        });
-        this.market.clearInterface();
-        this.playerManager.clearInterface();
-        this.map.clearInterface();
-        this.objectManager.clearInterface();
-    };
-    PaxPamir.prototype.getCardInfo = function (_a) {
-        var cardId = _a.cardId;
-        return this.gamedatas.staticData.cards[cardId];
-    };
+    // .########..#######......######..##.....##.########..######..##....##
+    // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
+    // ....##....##.....##....##.......##.....##.##.......##.......##..##..
+    // ....##....##.....##....##.......#########.######...##.......#####...
+    // ....##....##.....##....##.......##.....##.##.......##.......##..##..
+    // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
+    // ....##.....#######......######..##.....##.########..######..##....##
     PaxPamir.prototype.returnSpiesFromCard = function (_a) {
         var _this = this;
         var _b;
@@ -3277,12 +3484,6 @@ var PaxPamir = /** @class */ (function () {
         from.removeFromZone(id, false);
         attachToNewParentNoDestroy(id, 'pp_discard_pile');
         this.framework().slideToObject(id, 'pp_discard_pile').play();
-    };
-    PaxPamir.prototype.framework = function () {
-        return this;
-    };
-    PaxPamir.prototype.getPlayerId = function () {
-        return Number(this.framework().player_id);
     };
     // returns zone object for given backend location in token database
     PaxPamir.prototype.getZoneForLocation = function (_a) {

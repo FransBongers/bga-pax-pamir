@@ -15,16 +15,9 @@ interface Game {
 
 // TODO (Frans): check if thre is a better way to define these so we don't need to cast.
 interface Framework {
-  addActionButton: (
-    id: string,
-    label: string,
-    method: string | Function,
-    destination?: string,
-    blinking?: boolean,
-    color?: string
-  ) => void;
-  addTooltipHtml: ( nodeId: string, html: string, delay?:number ) => void;
-  addTooltipHtmlToClass: (cssClass: string, html: string, delay?:number ) => void;
+  addActionButton: (id: string, label: string, method: string | Function, destination?: string, blinking?: boolean, color?: string) => void;
+  addTooltipHtml: (nodeId: string, html: string, delay?: number) => void;
+  addTooltipHtmlToClass: (cssClass: string, html: string, delay?: number) => void;
   ajaxcall: (
     url: string,
     parameters: Record<string, unknown>,
@@ -51,10 +44,17 @@ interface Framework {
   scoreCtrl: {
     [playerId: number | string]: Counter;
   };
-  setClientState: (newState: string, args: Record<string, unknown>) => void;
+  setClientState: <T>(newState: string, args: { args: T; descriptionmyturn?: string; [key: string]: unknown; }) => void;
   showMessage: (msg: string, type: string) => void;
   slideToObject: (mobile_obj: HTMLElement | string, target_obj: HTMLElement | string, duration?: number, delay?: number) => Animation;
-  slideToObjectPos: (mobile_obj: HTMLElement | string, target_obj: HTMLElement | string, target_x: number, target_y: number, duration?: number, delay?: number ) => Animation;
+  slideToObjectPos: (
+    mobile_obj: HTMLElement | string,
+    target_obj: HTMLElement | string,
+    target_x: number,
+    target_y: number,
+    duration?: number,
+    delay?: number
+  ) => Animation;
   updatePageTitle: () => void;
 }
 
@@ -68,9 +68,9 @@ interface Notif<T> {
   uid: string;
 }
 
-type DojoBox = { l: number; t: number; w: number; h: number; };
+type DojoBox = { l: number; t: number; w: number; h: number };
 type DojoPosition = 'replace' | 'first' | 'last' | 'before' | 'after' | 'only' | number;
-type CssPosition = 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit';
+type CssPosition = 'static' | 'absolute' | 'fixed' | 'relative' | 'sticky' | 'initial' | 'inherit';
 
 /* TODO repace Function by (..params) => void */
 interface Dojo {
@@ -88,43 +88,29 @@ interface Dojo {
   fadeIn: Function;
   forEach: Function;
   fx: {
-    slideTo: (params: {
-      node: HTMLElement;
-      top: number;
-      left: number;
-      delay: number;
-      duration: number;
-      unit: string;
-    }) => any;
+    slideTo: (params: { node: HTMLElement; top: number; left: number; delay: number; duration: number; unit: string }) => any;
   };
   hasClass: (node: string | HTMLElement, className: string) => boolean;
   hitch: Function;
   map: Function;
   // https://dojotoolkit.org/reference-guide/1.7/dojo/marginBox.html
   marginBox: (node: HTMLElement) => DojoBox;
-  // https://en.doc.boardgamearena.com/Game_interface_logic:_yourgamename.js#Moving_elements 
+  // https://en.doc.boardgamearena.com/Game_interface_logic:_yourgamename.js#Moving_elements
   // https://dojotoolkit.org/reference-guide/1.7/dojo/place.html
   place: (html: string, node: string | HTMLElement, pos?: DojoPosition) => void;
-  position: (
-    obj: HTMLElement,
-    includeScroll?: boolean
-  ) => { w: number; h: number; x: number; y: number };
+  position: (obj: HTMLElement, includeScroll?: boolean) => { w: number; h: number; x: number; y: number };
   query: (query: string) => any; //HTMLElement[]; with some more functions
   removeClass: (node: string | HTMLElement, className?: string) => void;
   stopEvent: (evt) => void;
   string: {
-    pad: (input: string, size: number) => string,
-    rep: (input:string, numberOfRepeats: number) => string;
-    substitute: (input: string, args: Record<string,any>) => string;
+    pad: (input: string, size: number) => string;
+    rep: (input: string, numberOfRepeats: number) => string;
+    substitute: (input: string, args: Record<string, any>) => string;
     trim: (input: string) => string;
   };
   style: Function;
   subscribe: Function;
-  toggleClass: (
-    node: string | HTMLElement,
-    className: string,
-    forceValue?: boolean
-  ) => void;
+  toggleClass: (node: string | HTMLElement, className: string, forceValue?: boolean) => void;
   trim: Function;
   unsubscribe: Function;
 }
@@ -144,7 +130,7 @@ type ActiveGamestate<T> = {
   transitions: Record<string, number>;
   type: string;
   updateGameProgression: number;
-}
+};
 
 // as in gamedates.gamestates
 interface Gamestate {
@@ -154,14 +140,13 @@ interface Gamestate {
   name: string;
   possibleactions?: string[];
   transitions: Record<string, number>;
-  type: 'activeplayer'
+  type: 'activeplayer';
   updateGameProgression?: boolean;
 }
 
 interface Gamedatas {
   gamestate: ActiveGamestate<unknown>;
   gamestates: Record<number, Gamestate>; // Or Record<string, Gamestate>?
-
 }
 
 interface BgaPlayer {

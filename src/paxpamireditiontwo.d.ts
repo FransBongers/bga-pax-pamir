@@ -68,6 +68,12 @@ interface RegionGamedatas {
   tribes: Token[];
 }
 
+interface LocalState {
+  activePlayer: PaxPamirPlayer;
+  remainingActions: number;
+  usedCards: string[];
+}
+
 /**
  * TODO (Frans):
  * - some objects are returned as array by php if there is no data and object if there is data. Check how to handle this.
@@ -113,10 +119,20 @@ interface PaxPamirGamedatas extends Gamedatas {
   // rupees: Token[];
 }
 
+interface AddButtonProps {
+  id: string;
+  text: string;
+  callback: () => void;
+  extraClasses?: string;
+}
+
+interface AddActionButtonProps extends AddButtonProps {
+  color?: 'blue' | 'gray' | 'red' | 'none';
+}
+
 interface PaxPamirGame extends Game {
   activeEvents: Zone;
   gamedatas: PaxPamirGamedatas;
-  interactionManager: InteractionManager;
   map: PPMap;
   market: Market;
   objectManager: ObjectManager;
@@ -126,17 +142,29 @@ interface PaxPamirGame extends Game {
     [cardId: string]: Zone;
   };
   tooltipManager: PPTooltipManager;
+  _connections: unknown[];
+  localState: LocalState;
+  addActionButtonClient: (props: AddActionButtonProps) => void;
+  addCancelButton: () => void;
+  addPrimaryActionButton: (props: AddButtonProps) => void;
+  addSecondaryActionButton: (props: AddButtonProps) => void;
+  addDangerActionButton: (props: AddButtonProps) => void;
   cancelLogs: (notifIds: string[]) => void;
   clearInterface: () => void;
+  clearPossible: () => void;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
+  onCancel: () => void;
   returnSpiesFromCard: (props: { cardId: string }) => void;
+  setHandCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
+  updateLocalState: (updates: Partial<LocalState>) => void;
+  clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
 }
 
 interface PaxPamirPlayer extends BgaPlayer {
@@ -156,4 +184,3 @@ interface PaxPamirPlayer extends BgaPlayer {
   loyalty: string;
   rupees: number;
 }
-

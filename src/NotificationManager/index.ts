@@ -135,34 +135,17 @@ class NotificationManager {
   notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
     console.log('notif_discardCard', notif);
 
-    this.game.interactionManager.resetActionArgs();
+    this.game.clearPossible();
     const playerId = Number(notif.args.playerId);
     const from = notif.args.from;
 
     if (from == 'hand') {
       this.getPlayer({ playerId }).discardHandCard({ cardId: notif.args.cardId });
-      // TODO (Frans): check how this works for other players than the one whos card gets discarded
-      // this.game.discardCard({
-      //   id: notif.args.cardId,
-      //   order: notif.args.state || undefined,
-      //   from: this.getPlayer({ playerId }).getHandZone(),
-      // });
     } else if (from == 'market_0_0' || from == 'market_1_0') {
       const splitFrom = from.split('_');
       this.game.market.discardCard({ cardId: notif.args.cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
-      // this.game.discardCard({
-      //   id: notif.args.cardId,
-      //   from: this.game.market.getMarketCardZone({ row: Number(splitFrom[1]), column: Number(splitFrom[2]) }),
-      //   order: notif.args.state || undefined,
-      // });
     } else {
       this.getPlayer({ playerId }).discardCourtCard({ cardId: notif.args.cardId });
-      // this.game.discardCard({
-      //   id: notif.args.cardId,
-      //   order: notif.args.state || undefined,
-      //   from: this.getPlayer({ playerId }).getCourtZone(),
-      // });
-      // TODO: check if it is needed to update weight of cards in zone?
     }
   }
 
@@ -198,7 +181,7 @@ class NotificationManager {
   notif_playCard(notif: Notif<NotifPlayCardArgs>) {
     console.log('notif_playCard', notif);
 
-    this.game.interactionManager.resetActionArgs();
+    this.game.clearPossible();
     var playerId = Number(notif.args.playerId);
 
     const player = this.getPlayer({ playerId });
@@ -220,7 +203,7 @@ class NotificationManager {
     console.log('notif_purchaseCard', notif);
     const { marketLocation, newLocation, rupeesOnCards, playerId, receivedRupees } = notif.args;
     // const playerId = Number(notif.args.playerId);
-    this.game.interactionManager.resetActionArgs();
+    this.game.clearPossible();
     const row = Number(marketLocation.split('_')[1]);
     const col = Number(marketLocation.split('_')[2]);
 
@@ -254,7 +237,7 @@ class NotificationManager {
   notif_refreshMarket(notif: Notif<NotifRefreshMarketArgs>) {
     console.log('notif_refreshMarket', notif);
 
-    this.game.interactionManager.resetActionArgs();
+    this.game.clearPossible();
 
     notif.args.cardMoves.forEach((move, index) => {
       const fromRow = Number(move.from.split('_')[1]);
@@ -289,7 +272,7 @@ class NotificationManager {
 
   notif_selectGift(notif) {
     console.log('notif_selectGift', notif);
-    this.game.interactionManager.resetActionArgs();
+    this.game.clearPossible();
     const { updatedCards, playerId, rupee_count, updatedCounts } = notif.args;
     // Place paid rupees on market cards
     updatedCards.forEach((item, index) => {

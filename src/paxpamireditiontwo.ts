@@ -25,7 +25,6 @@ declare const playSound;
 
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
-  public interactionManager: InteractionManager;
   public map: PPMap;
   public market: Market;
   private notificationManager: NotificationManager;
@@ -40,6 +39,20 @@ class PaxPamir implements PaxPamirGame {
   public tooltipManager: PPTooltipManager;
   private _notif_uid_to_log_id = {};
   private _last_notif = null;
+  public _connections: unknown[];
+  public localState: LocalState;
+
+  activeStates: {
+    clientPlayCard: ClientPlayCardState;
+    clientPurchaseCard: ClientPurchaseCardState;
+    discardCourt: DiscardCourtState;
+    discardHand: DiscardHandState;
+    negotiateBribe: NegotiateBribeState;
+    placeRoad: PlaceRoadState;
+    placeSpy: PlaceSpyState;
+    playerActions: PlayerActionsState;
+    setup: SetupState;
+  };
 
   constructor() {
     console.log('paxpamireditiontwo constructor');
@@ -65,6 +78,21 @@ class PaxPamir implements PaxPamirGame {
     this.gamedatas = gamedatas;
     debug('gamedatas', gamedatas);
 
+    this._connections = [];
+    // Will store all data for active player and gets refreshed with entering player actions state
+    this.localState = gamedatas.localState;
+    this.activeStates = {
+      clientPlayCard: new ClientPlayCardState(this),
+      clientPurchaseCard: new ClientPurchaseCardState(this),
+      discardCourt: new DiscardCourtState(this),
+      discardHand: new DiscardHandState(this),
+      negotiateBribe: new NegotiateBribeState(this),
+      placeRoad: new PlaceRoadState(this),
+      placeSpy: new PlaceSpyState(this),
+      playerActions: new PlayerActionsState(this),
+      setup: new SetupState(this),
+    };
+
     // Events
     this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
     this.activeEvents.instantaneous = true;
@@ -81,7 +109,6 @@ class PaxPamir implements PaxPamirGame {
     this.playerManager = new PlayerManager(this);
     this.map = new PPMap(this);
     this.market = new Market(this);
-    this.interactionManager = new InteractionManager(this);
 
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
@@ -112,8 +139,12 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
-    console.log('Entering state: ' + stateName, args.args);
-    this.interactionManager.onEnteringState(stateName, args);
+    console.log('Entering state: ' + stateName, args);
+    // UI changes for active player
+    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
+      console.log('inside if')
+      this.activeStates[stateName].onEnteringState(args.args);
+    }
   }
 
   // onLeavingState: this method is called each time we are leaving a game state.
@@ -121,7 +152,7 @@ class PaxPamir implements PaxPamirGame {
   //
   public onLeavingState(stateName: string) {
     console.log('Leaving state: ' + stateName);
-    this.interactionManager.onLeavingState(stateName);
+    this.clearPossible();
   }
 
   // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -129,7 +160,6 @@ class PaxPamir implements PaxPamirGame {
   //
   public onUpdateActionButtons(stateName: string, args: any) {
     console.log('onUpdateActionButtons: ' + stateName);
-    // this.interactionManager.onUpdateActionButtons(stateName, args);
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -142,6 +172,182 @@ class PaxPamir implements PaxPamirGame {
 
   ///////////////////////////////////////////////////
   //// Utility methods - add in alphabetical order
+
+  /*
+   * Add a blue/grey button if it doesn't already exists
+   */
+  addActionButtonClient({
+    id,
+    text,
+    callback,
+    extraClasses,
+    color = 'none',
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+    color?: 'blue' | 'gray' | 'red' | 'none';
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.framework().addActionButton(id, text, callback, 'customActions', false, color);
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
+  }
+
+  addCancelButton() {
+    this.addDangerActionButton({
+      id: 'cancel_btn',
+      text: _('Cancel'),
+      callback: () => this.onCancel(),
+    });
+  }
+
+  addPrimaryActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.framework().addActionButton(id, text, callback, 'customActions', false, 'blue');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
+  }
+
+  addSecondaryActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.framework().addActionButton(id, text, callback, 'customActions', false, 'gray');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
+  }
+
+  addDangerActionButton({
+    id,
+    text,
+    callback,
+    extraClasses,
+  }: {
+    id: string;
+    text: string;
+    callback: Function | string;
+    extraClasses?: string;
+  }) {
+    if ($(id)) {
+      return;
+    }
+    this.framework().addActionButton(id, text, callback, 'customActions', false, 'red');
+    if (extraClasses) {
+      dojo.addClass(id, extraClasses);
+    }
+  }
+
+  public clearInterface() {
+    console.log('clear interface');
+    Object.keys(this.spies).forEach((key) => {
+      dojo.empty(this.spies[key].container_div);
+      this.spies[key] = undefined;
+    });
+
+    this.market.clearInterface();
+    this.playerManager.clearInterface();
+    this.map.clearInterface();
+    this.objectManager.clearInterface();
+  }
+
+  clearPossible() {
+    this.framework().removeActionButtons();
+    dojo.empty('customActions');
+
+    dojo.forEach(this._connections, dojo.disconnect);
+    this._connections = [];
+
+    dojo.query('.pp_selectable').removeClass('pp_selectable');
+    dojo.query('.pp_selected').removeClass('pp_selected');
+
+    REGIONS.forEach((region) => {
+      const element = document.getElementById(`pp_region_${region}`);
+      element.classList.remove('pp_selectable');
+    });
+    document.getElementById('pp_map_areas').classList.remove('pp_selectable');
+  }
+
+  public getCardInfo({ cardId }: { cardId: string }): Card {
+    return this.gamedatas.staticData.cards[cardId];
+  }
+
+  public getPlayerId(): number {
+    return Number(this.framework().player_id);
+  }
+
+  /**
+   * Typescript wrapper for framework functions
+   */
+  public framework(): Framework {
+    return this as unknown as Framework;
+  }
+
+  onCancel() {
+    this.clearPossible();
+    this.framework().restoreServerGameState();
+  }
+
+  updateLocalState(updates: Partial<LocalState>) {
+    this.localState = { ...this.localState, ...updates };
+  }
+
+  setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
+    dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
+      const cardId = node.id;
+      dojo.addClass(node, 'pp_selectable');
+      this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
+    }, this);
+  }
+
+  clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
+    this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+    this.framework().updatePageTitle();
+  }
+
+  // .########.########.....###....##.....##.########.##......##..#######..########..##....##
+  // .##.......##.....##...##.##...###...###.##.......##..##..##.##.....##.##.....##.##...##.
+  // .##.......##.....##..##...##..####.####.##.......##..##..##.##.....##.##.....##.##..##..
+  // .######...########..##.....##.##.###.##.######...##..##..##.##.....##.########..#####...
+  // .##.......##...##...#########.##.....##.##.......##..##..##.##.....##.##...##...##..##..
+  // .##.......##....##..##.....##.##.....##.##.......##..##..##.##.....##.##....##..##...##.
+  // .##.......##.....##.##.....##.##.....##.########..###..###...#######..##.....##.##....##
+
+  // ..#######..##.....##.########.########..########..####.########..########..######.
+  // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##....##
+  // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##......
+  // .##.....##.##.....##.######...########..########...##..##.....##.######....######.
+  // .##.....##..##...##..##.......##...##...##...##....##..##.....##.##.............##
+  // .##.....##...##.##...##.......##....##..##....##...##..##.....##.##.......##....##
+  // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
 
   /* @Override */
   format_string_recursive(log, args) {
@@ -233,24 +439,15 @@ class PaxPamir implements PaxPamirGame {
     this.cancelLogs(this.gamedatas.canceledNotifIds);
   }
 
-  public clearInterface() {
-    console.log('clear interface');
-    Object.keys(this.spies).forEach((key) => {
-      dojo.empty(this.spies[key].container_div);
-      this.spies[key] = undefined;
-    });
+  // .########..#######......######..##.....##.########..######..##....##
+  // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
+  // ....##....##.....##....##.......##.....##.##.......##.......##..##..
+  // ....##....##.....##....##.......#########.######...##.......#####...
+  // ....##....##.....##....##.......##.....##.##.......##.......##..##..
+  // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
+  // ....##.....#######......######..##.....##.########..######..##....##
 
-    this.market.clearInterface();
-    this.playerManager.clearInterface();
-    this.map.clearInterface();
-    this.objectManager.clearInterface();
-  }
-
-  public getCardInfo({ cardId }: { cardId: string }): Card {
-    return this.gamedatas.staticData.cards[cardId];
-  }
-
-  public returnSpiesFromCard({cardId}: {cardId: string;}) {
+  public returnSpiesFromCard({ cardId }: { cardId: string }) {
     if (this.spies?.[cardId]) {
       // ['cylinder_2371052_3']
       const items = this.spies[cardId].getAllItems();
@@ -267,20 +464,11 @@ class PaxPamir implements PaxPamirGame {
 
   public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
     // Move all spies back to cylinder pools
-    this.returnSpiesFromCard({cardId: id});
-
+    this.returnSpiesFromCard({ cardId: id });
 
     from.removeFromZone(id, false);
     attachToNewParentNoDestroy(id, 'pp_discard_pile');
     this.framework().slideToObject(id, 'pp_discard_pile').play();
-  }
-
-  public framework(): Framework {
-    return this as unknown as Framework;
-  }
-
-  public getPlayerId(): number {
-    return Number(this.framework().player_id);
   }
 
   // returns zone object for given backend location in token database
@@ -345,7 +533,7 @@ class PaxPamir implements PaxPamirGame {
     removeClass.forEach((oldClass) => {
       dojo.removeClass(id, oldClass);
     });
-    
+
     dojo.addClass(id, 'pp_moving');
     to.placeInZone(id, weight);
     from.removeFromZone(id, false);
@@ -353,7 +541,7 @@ class PaxPamir implements PaxPamirGame {
     // TODO: check if there is a better way than using setTimeout
     setTimeout(() => {
       dojo.removeClass(id, 'pp_moving');
-    },2000)
+    }, 2000);
   }
 
   createSpyZone({ cardId }: { cardId: string }) {

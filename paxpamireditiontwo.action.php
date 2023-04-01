@@ -135,12 +135,12 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
-    public function selectGift()
+    public function purchaseGift()
     {
         self::setAjaxMode();
-        $selected_gift = self::getArg("selectedGift", AT_alphanum, true);
+        $value = self::getArg("value", AT_alphanum, true);
         $card_id = self::getArg("cardId", AT_alphanum, true);
-        $result = $this->game->selectGift($selected_gift, $card_id);
+        $result = $this->game->purchaseGift($value, $card_id);
         self::ajaxResponse();
     }
 

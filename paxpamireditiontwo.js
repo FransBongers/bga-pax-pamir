@@ -253,27 +253,15 @@ var tplLogTokenRoad = function (_a) {
     var coalition = _a.coalition;
     return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
 };
-// Interface steps
-var CARD_ACTION_BATTLE = 'cardActionBattle';
-var CARD_ACTION_BETRAY = 'cardActionBetray';
-var CARD_ACTION_BUILD = 'cardActionBuild';
-var CARD_ACTION_GIFT = 'cardActionGift';
-var CARD_ACTION_MOVE = 'cardActionMove';
-var CARD_ACTION_TAX = 'cardActionTax';
-var CHOOSE_LOYALTY = 'chooseLoyalty';
-var CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
-var PLAY_CARD_BRIBE = 'playCardBribe';
-var PLAY_CARD_SELECT_SIDE = 'playCardSelectSide';
-var PLAY_CARD_CONFIRM = 'playCardConfirm';
-var CONFIRM_PURCHASE = 'confirmPurchase';
-var CONFIRM_SELECT_GIFT = 'confirmSelectGift';
-var DISCARD_COURT = 'discardCourt';
-var DISCARD_HAND = 'discardHand';
-var NEGOTIATE_BRIBE = 'negotiateBribe';
-var PLACE_ROAD = 'placeRoad';
-var PLACE_SPY = 'placeSpy';
-var PASS = 'pass';
-var PLAYER_ACTIONS = 'playerActions';
+// Client states
+var CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
+var CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
+var CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
+var CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
+var CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
+var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
+var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
+var CLIENT_PLAY_CARD = 'clientPlayCard';
 // size of tokens
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
@@ -1822,6 +1810,252 @@ var Market = /** @class */ (function () {
     };
     return Market;
 }());
+var ClientCardActionBattleState = /** @class */ (function () {
+    function ClientCardActionBattleState(game) {
+        this.game = game;
+    }
+    ClientCardActionBattleState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+    };
+    ClientCardActionBattleState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionBattleState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select a region or court card to start a battle in'),
+            args: {
+                you: '${you}'
+            },
+        });
+        this.setRegionsSelectable();
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    ClientCardActionBattleState.prototype.setRegionsSelectable = function () {
+        var _this = this;
+        debug('setRegionsSelectable');
+        var container = document.getElementById("pp_map_areas");
+        container.classList.add('pp_selectable');
+        REGIONS.forEach(function (region) {
+            var element = document.getElementById("pp_region_".concat(region));
+            element.classList.add('pp_selectable');
+            _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
+        });
+    };
+    return ClientCardActionBattleState;
+}());
+var ClientCardActionBetrayState = /** @class */ (function () {
+    function ClientCardActionBetrayState(game) {
+        this.game = game;
+    }
+    ClientCardActionBetrayState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+    };
+    ClientCardActionBetrayState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionBetrayState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+    };
+    return ClientCardActionBetrayState;
+}());
+var ClientCardActionBuildState = /** @class */ (function () {
+    function ClientCardActionBuildState(game) {
+        this.game = game;
+    }
+    ClientCardActionBuildState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+    };
+    ClientCardActionBuildState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionBuildState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+    };
+    return ClientCardActionBuildState;
+}());
+var ClientCardActionGiftState = /** @class */ (function () {
+    function ClientCardActionGiftState(game) {
+        this.game = game;
+    }
+    ClientCardActionGiftState.prototype.onEnteringState = function (args) {
+        this.updateInterfaceInitialStep(args);
+    };
+    ClientCardActionGiftState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionGiftState.prototype.updateInterfaceInitialStep = function (_a) {
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select a gift to purchase'),
+            args: {
+                you: '${you}',
+            },
+        });
+        this.setGiftsSelectable({ cardId: cardId });
+        this.game.addCancelButton();
+    };
+    ClientCardActionGiftState.prototype.updateInterfaceConfirmSelectGift = function (_a) {
+        var _this = this;
+        var value = _a.value, cardId = _a.cardId;
+        this.game.clearPossible();
+        dojo.query("#pp_gift_".concat(value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + value } });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'purchaseGift',
+                    data: { value: value, cardId: cardId },
+                });
+            },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                _this.game.onCancel();
+            },
+        });
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    ClientCardActionGiftState.prototype.setGiftsSelectable = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        var playerId = this.game.getPlayerId();
+        [2, 4, 6].forEach(function (giftValue) {
+            var hasGift = _this.game.playerManager
+                .getPlayer({ playerId: playerId })
+                .getGiftZone({
+                value: giftValue,
+            })
+                .getAllItems().length > 0;
+            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees) {
+                dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
+                    dojo.addClass(node, 'pp_selectable');
+                    _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));
+                });
+            }
+        });
+    };
+    return ClientCardActionGiftState;
+}());
+var ClientCardActionMoveState = /** @class */ (function () {
+    function ClientCardActionMoveState(game) {
+        this.game = game;
+    }
+    ClientCardActionMoveState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+    };
+    ClientCardActionMoveState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionMoveState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+    };
+    return ClientCardActionMoveState;
+}());
+var ClientCardActionTaxState = /** @class */ (function () {
+    function ClientCardActionTaxState(game) {
+        this.game = game;
+    }
+    ClientCardActionTaxState.prototype.onEnteringState = function () {
+        this.updateInterfaceInitialStep();
+    };
+    ClientCardActionTaxState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    ClientCardActionTaxState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+    };
+    return ClientCardActionTaxState;
+}());
 var ClientPlayCardState = /** @class */ (function () {
     function ClientPlayCardState(game) {
         this.game = game;
@@ -2452,7 +2686,7 @@ var PlayerActionsState = /** @class */ (function () {
             this.game.setHandCardsSelectable({
                 callback: function (_a) {
                     var cardId = _a.cardId;
-                    _this.game.framework().setClientState('clientPlayCard', { args: { cardId: cardId } });
+                    _this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId } });
                 },
             });
             this.setCardActionsSelectable();
@@ -2471,71 +2705,6 @@ var PlayerActionsState = /** @class */ (function () {
             id: 'undo_btn',
             text: _('Undo'),
             callback: function () { return _this.game.takeAction({ action: 'restart' }); },
-        });
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionBattleStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: _('${you} must select a card or region'),
-            args: {},
-        });
-        this.setRegionsSelectable();
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionBetrayStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        console.log('betray clicked');
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionBuildStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        console.log('build clicked');
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionGiftStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: _('${you} must select a gift to purchase'),
-            args: {
-                you: '${you}',
-            },
-        });
-        this.setGiftsSelectable({ cardId: cardId });
-        this.game.addCancelButton();
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionMoveStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        console.log('move clicked');
-    };
-    PlayerActionsState.prototype.updateInterfaceCardActionTaxStart = function (_a) {
-        var cardId = _a.cardId;
-        this.game.clearPossible();
-        console.log('tax clicked');
-    };
-    PlayerActionsState.prototype.updateInterfaceConfirmSelectGift = function (_a) {
-        var _this = this;
-        var value = _a.value, cardId = _a.cardId;
-        this.game.clearPossible();
-        dojo.query("#pp_gift_".concat(value, "_").concat(this.game.getPlayerId())).addClass('pp_selected');
-        this.game.clientUpdatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + value } });
-        this.game.addDangerActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () {
-                return _this.game.takeAction({
-                    action: 'selectGift',
-                    data: { selectedGift: value, cardId: cardId },
-                });
-            },
-        });
-        this.game.addDangerActionButton({
-            id: 'cancel_btn',
-            text: _('Cancel'),
-            callback: function () {
-                _this.game.onCancel();
-            },
         });
     };
     PlayerActionsState.prototype.updateInterfacePass = function () {
@@ -2567,9 +2736,9 @@ var PlayerActionsState = /** @class */ (function () {
      * 4. Player can purchase, play and perform card actions (no cards in hand, card in court)
      *    You may purchase a card, play a card or perform card actions (x actions remaining)
      * Player has no actions remaining
-     * 5. Player can perform free actions (no actions but cards with favored suit in court)
+     * 5. Player can perform bonus actions (no actions but cards with favored suit in court)
      *    You may perform free card actions
-     * 6. Player does not have free actions
+     * 6. Player does not have bonus actions
      */
     PlayerActionsState.prototype.updateMainTitleTextActions = function () {
         var remainingActions = this.game.localState.remainingActions;
@@ -2591,10 +2760,10 @@ var PlayerActionsState = /** @class */ (function () {
             titleText = _('${you} may purchase a card, play a card or perform a card action');
         }
         else if (remainingActions === 0 && hasFreeCardActions) {
-            titleText = _('${you} may perform a free card action');
+            titleText = _('${you} may perform a bonus action');
         }
         else if (remainingActions === 0 && !hasFreeCardActions) {
-            titleText = _('${you} have no remaining actions');
+            titleText = _('${you} have no actions remaining');
         }
         if (remainingActions === 1) {
             titleText += _(' (1 action remaining)');
@@ -2649,47 +2818,28 @@ var PlayerActionsState = /** @class */ (function () {
                         _this.game._connections.push(dojo.connect(child, 'onclick', _this, function () {
                             switch (cardAction_1) {
                                 case 'battle':
-                                    _this.updateInterfaceCardActionBattleStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BATTLE, { args: { cardId: cardId } });
                                     break;
                                 case 'betray':
-                                    _this.updateInterfaceCardActionBetrayStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BETRAY, { args: { cardId: cardId } });
                                     break;
                                 case 'build':
-                                    _this.updateInterfaceCardActionBuildStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BUILD, { args: { cardId: cardId } });
                                     break;
                                 case 'gift':
-                                    _this.updateInterfaceCardActionGiftStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_GIFT, { args: { cardId: cardId } });
                                     break;
                                 case 'move':
-                                    _this.updateInterfaceCardActionMoveStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_MOVE, { args: { cardId: cardId } });
                                     break;
                                 case 'tax':
-                                    _this.updateInterfaceCardActionTaxStart({ cardId: cardId });
+                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_TAX, { args: { cardId: cardId } });
                                     break;
                             }
                             // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
                         }));
                     }
                 });
-        });
-    };
-    PlayerActionsState.prototype.setGiftsSelectable = function (_a) {
-        var _this = this;
-        var cardId = _a.cardId;
-        var playerId = this.game.getPlayerId();
-        [2, 4, 6].forEach(function (giftValue) {
-            var hasGift = _this.game.playerManager
-                .getPlayer({ playerId: playerId })
-                .getGiftZone({
-                value: giftValue,
-            })
-                .getAllItems().length > 0;
-            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees) {
-                dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
-                    dojo.addClass(node, 'pp_selectable');
-                    _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));
-                });
-            }
         });
     };
     PlayerActionsState.prototype.setMarketCardsSelectable = function () {
@@ -2704,19 +2854,9 @@ var PlayerActionsState = /** @class */ (function () {
                 _this.game._connections.push(
                 // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
                 dojo.connect(node, 'onclick', _this, function () {
-                    return _this.game.framework().setClientState('clientPurchaseCard', { args: { cardId: cardId, cost: cost } });
+                    return _this.game.framework().setClientState(CLIENT_PURCHASE_CARD, { args: { cardId: cardId, cost: cost } });
                 }));
             }
-        });
-    };
-    PlayerActionsState.prototype.setRegionsSelectable = function () {
-        var _this = this;
-        var container = document.getElementById("pp_map_areas");
-        container.classList.add('pp_selectable');
-        REGIONS.forEach(function (region) {
-            var element = document.getElementById("pp_region_".concat(region));
-            element.classList.add('pp_selectable');
-            _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
         });
     };
     //  ..######..##.......####..######..##....##
@@ -2833,7 +2973,7 @@ var NotificationManager = /** @class */ (function () {
             ['playCard', 2000],
             ['discardCard', 1000],
             ['refreshMarket', 250],
-            ['selectGift', 1],
+            ['purchaseGift', 1],
             ['smallRefreshHand', 1],
             ['smallRefreshInterface', 1],
             ['moveToken', 250],
@@ -2978,10 +3118,10 @@ var NotificationManager = /** @class */ (function () {
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_tableau_".concat(playerId) });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
         });
         // Remove all rupees that were on the purchased card
-        this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_tableau_".concat(playerId) });
+        this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
         // Move card from markt
         var cardId = notif.args.card.id;
@@ -3033,28 +3173,28 @@ var NotificationManager = /** @class */ (function () {
             });
         });
     };
-    NotificationManager.prototype.notif_selectGift = function (notif) {
+    NotificationManager.prototype.notif_purchaseGift = function (notif) {
         var _this = this;
-        console.log('notif_selectGift', notif);
+        console.log('notif_purchaseGift', notif);
         this.game.clearPossible();
-        var _a = notif.args, updatedCards = _a.updatedCards, playerId = _a.playerId, rupee_count = _a.rupee_count, updatedCounts = _a.updatedCounts;
+        var _a = notif.args, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, tokenMove = _a.tokenMove, influenceChange = _a.influenceChange;
         // Place paid rupees on market cards
-        updatedCards.forEach(function (item, index) {
-            var marketRow = item.location.split('_')[1];
-            var marketColumn = item.location.split('_')[2];
-            placeToken({
-                game: _this.game,
-                location: _this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-                id: item.rupeeId,
-                jstpl: 'jstpl_rupee',
-                jstplProps: {
-                    id: item.rupee_id,
-                },
-                from: "rupees_tableau_".concat(playerId),
-            });
-        }, this);
-        this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });
-        this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'influence', value: updatedCounts.influence });
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+        });
+        // Move cylinder
+        var tokenId = tokenMove.tokenId, from = tokenMove.from, to = tokenMove.to;
+        var fromZone = this.game.getZoneForLocation({ location: from });
+        var toZone = this.game.getZoneForLocation({ location: to });
+        this.game.move({
+            id: tokenId,
+            from: fromZone,
+            to: toZone,
+        });
+        // Update influence
+        this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
     };
     NotificationManager.prototype.notif_smallRefreshHand = function (notif) {
         console.log('notif_smallRefreshHand', notif);
@@ -3156,6 +3296,7 @@ var PaxPamir = /** @class */ (function () {
       "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     PaxPamir.prototype.setup = function (gamedatas) {
+        var _a;
         var _this = this;
         // Create a new div for buttons to avoid BGA auto clearing it
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
@@ -3166,17 +3307,23 @@ var PaxPamir = /** @class */ (function () {
         this._connections = [];
         // Will store all data for active player and gets refreshed with entering player actions state
         this.localState = gamedatas.localState;
-        this.activeStates = {
-            clientPlayCard: new ClientPlayCardState(this),
-            clientPurchaseCard: new ClientPurchaseCardState(this),
-            discardCourt: new DiscardCourtState(this),
-            discardHand: new DiscardHandState(this),
-            negotiateBribe: new NegotiateBribeState(this),
-            placeRoad: new PlaceRoadState(this),
-            placeSpy: new PlaceSpyState(this),
-            playerActions: new PlayerActionsState(this),
-            setup: new SetupState(this),
-        };
+        this.activeStates = (_a = {},
+            _a[CLIENT_CARD_ACTION_BATTLE] = new ClientCardActionBattleState(this),
+            _a[CLIENT_CARD_ACTION_BETRAY] = new ClientCardActionBetrayState(this),
+            _a[CLIENT_CARD_ACTION_BUILD] = new ClientCardActionBuildState(this),
+            _a[CLIENT_CARD_ACTION_GIFT] = new ClientCardActionGiftState(this),
+            _a[CLIENT_CARD_ACTION_MOVE] = new ClientCardActionMoveState(this),
+            _a[CLIENT_CARD_ACTION_TAX] = new ClientCardActionTaxState(this),
+            _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
+            _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
+            _a.discardCourt = new DiscardCourtState(this),
+            _a.discardHand = new DiscardHandState(this),
+            _a.negotiateBribe = new NegotiateBribeState(this),
+            _a.placeRoad = new PlaceRoadState(this),
+            _a.placeSpy = new PlaceSpyState(this),
+            _a.playerActions = new PlayerActionsState(this),
+            _a.setup = new SetupState(this),
+            _a);
         // Events
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
         this.activeEvents.instantaneous = true;

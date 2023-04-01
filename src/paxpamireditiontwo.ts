@@ -43,8 +43,14 @@ class PaxPamir implements PaxPamirGame {
   public localState: LocalState;
 
   activeStates: {
-    clientPlayCard: ClientPlayCardState;
-    clientPurchaseCard: ClientPurchaseCardState;
+    [CLIENT_CARD_ACTION_BATTLE]: ClientCardActionBattleState;
+    [CLIENT_CARD_ACTION_BETRAY]: ClientCardActionBetrayState;
+    [CLIENT_CARD_ACTION_BUILD]: ClientCardActionBuildState;
+    [CLIENT_CARD_ACTION_GIFT]: ClientCardActionGiftState;
+    [CLIENT_CARD_ACTION_MOVE]: ClientCardActionMoveState;
+    [CLIENT_CARD_ACTION_TAX]: ClientCardActionTaxState;
+    [CLIENT_PLAY_CARD]: ClientPlayCardState;
+    [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     discardCourt: DiscardCourtState;
     discardHand: DiscardHandState;
     negotiateBribe: NegotiateBribeState;
@@ -82,8 +88,14 @@ class PaxPamir implements PaxPamirGame {
     // Will store all data for active player and gets refreshed with entering player actions state
     this.localState = gamedatas.localState;
     this.activeStates = {
-      clientPlayCard: new ClientPlayCardState(this),
-      clientPurchaseCard: new ClientPurchaseCardState(this),
+      [CLIENT_CARD_ACTION_BATTLE]: new ClientCardActionBattleState(this),
+      [CLIENT_CARD_ACTION_BETRAY]: new ClientCardActionBetrayState(this),
+      [CLIENT_CARD_ACTION_BUILD]: new ClientCardActionBuildState(this),
+      [CLIENT_CARD_ACTION_GIFT]: new ClientCardActionGiftState(this),
+      [CLIENT_CARD_ACTION_MOVE]: new ClientCardActionMoveState(this),
+      [CLIENT_CARD_ACTION_TAX]: new ClientCardActionTaxState(this),
+      [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
+      [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       discardCourt: new DiscardCourtState(this),
       discardHand: new DiscardHandState(this),
       negotiateBribe: new NegotiateBribeState(this),
@@ -142,7 +154,7 @@ class PaxPamir implements PaxPamirGame {
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
     if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
-      console.log('inside if')
+      console.log('inside if');
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }

@@ -138,30 +138,40 @@ trait PlayerActionTrait
     $this->gamestate->jumpToState(Globals::getLogState());
   }
 
-  function placeRupeesInMarketRow($row, $remainingRupees)
+  // Determines on which cards to place rupees and returns array
+  function payActionCosts($cost)
   {
-    $updatedCards = [];
-    // $remaining_rupees = $number_rupees;
-    for ($i = 5; $i >= 0; $i--) {
-      if ($remainingRupees <= 0) {
-        break;
-      }
-      $location = 'market_' . $row . '_' . $i;
-      $marketCard = Cards::getInLocation($location)->first();
-      if ($marketCard !== NULL) {
-        $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
-        Tokens::move($rupee['id'], [$location, 'rupees']);
-        Cards::setUsed($marketCard["id"], 1); // set unavailable
-        $updatedCards[] = array(
-          'location' => $location,
-          'cardId' => $marketCard["id"],
-          'rupeeId' => $rupee['id']
-        );
-        $remainingRupees--;
+    // Always place rupees on rightmost market cards of both rows. If vacant skip the slot.
+    // If market does not contain enough cards excess rupees are taken out of the game.
+
+    // Cost is always an even amount so we can divide by 2.
+    $numberOfRupeesPerRow = $cost / 2;
+    $rupeesOnCards = [];
+    for ($row = 0; $row <= 1; $row++) {
+      $remainingRupees = $numberOfRupeesPerRow;
+      for ($column = 5; $column >= 0; $column--) {
+        if ($remainingRupees <= 0) {
+          break;
+        }
+        $location = 'market_' . $row . '_' . $column;
+        $marketCard = Cards::getInLocation($location)->first();
+        if ($marketCard !== NULL) {
+          $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
+          Tokens::move($rupee['id'], [$location, 'rupees']);
+          Cards::setUsed($marketCard["id"], 1); // set unavailable
+          $rupeesOnCards[] = array(
+            'row' => $row,
+            'column' => $column,
+            'cardId' => $marketCard["id"],
+            'rupeeId' => $rupee['id']
+          );
+          $remainingRupees--;
+        }
       }
     }
-    return $updatedCards;
+    return $rupeesOnCards;
   }
+
 
   function isCardFavoredSuit($cardId)
   {
@@ -172,42 +182,34 @@ trait PlayerActionTrait
   /**
    * Play card from hand to court
    */
-  function selectGift($selectedGift, $cardId)
+  function purchaseGift($value, $cardId)
   {
-    self::checkAction('selectGift');
-    self::dump("selectedGift", $selectedGift);
+    self::checkAction('purchaseGift');
+    self::dump("gift value", $value);
     if (!$this->isValidCardAction($cardId, 'gift')) {
       return;
     }
 
-    $playerId = self::getActivePlayerId();
-    $rupees = Players::get()->getRupees();
+    $player = Players::get();
+    $playerId = $player->getId();
+    $rupees = $player->getRupees();
     // Player should have enough rupees
-    if ($rupees < $selectedGift) {
+    if ($rupees < $value) {
       throw new \feException("Not enough rupees to pay for the gift.");
     }
-    $location = 'gift_' . $selectedGift . '_' . $playerId;
+    $location = 'gift_' . $value . '_' . $playerId;
     $tokenInLocation = Tokens::getInLocation($location)->first();
     if ($tokenInLocation != null) {
       throw new \feException("Already a cylinder in selected location.");
     }
 
     $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getInLocation($from)->first();
+    $cylinder = Tokens::getTopOf($from);
 
     // If null player needs to select cylinder from somewhere else
     if ($cylinder != null) {
       Tokens::move($cylinder['id'], $location);
       Cards::setUsed($cardId, 1); // unavailable false
-      self::notifyAllPlayers("moveToken", "", array(
-        'moves' => array(
-          0 => array(
-            'from' => $from,
-            'to' => $location,
-            'tokenId' => $cylinder['id'],
-          )
-        )
-      ));
     }
 
     // if not free action reduce remaining actions.
@@ -215,25 +217,34 @@ trait PlayerActionTrait
       Globals::incRemainingActions(-1);
     }
 
-    $numberRupeesPerRow = $selectedGift / 2;
-    $updatedCards = [];
-    $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(0, $numberRupeesPerRow));
-    $updatedCards = array_merge($updatedCards, $this->placeRupeesInMarketRow(1, $numberRupeesPerRow));
-    Players::incRupees($playerId, -intval($selectedGift));
 
-    $updatedCounts = array(
-      'rupees' => $rupees - $selectedGift,
-      'influence' => Players::get($playerId)->getInfluence(),
+    $rupeesOnCards = $this->payActionCosts($value);
+    Players::incRupees($playerId, -intval($value));
+
+    Notifications::purchaseGift(
+      $player,
+      $value,
+      [
+        'from' => $from,
+        'to' => $location,
+        'tokenId' => $cylinder['id'],
+      ],
+      $rupeesOnCards
     );
 
-    self::notifyAllPlayers("selectGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
-      'playerId' => $playerId,
-      'player_name' => self::getActivePlayerName(),
-      'value' => $selectedGift,
-      'updatedCards' => $updatedCards,
-      'rupeeCount' => $rupees - $selectedGift,
-      'updatedCounts' => $updatedCounts,
-    ));
+    // self::notifyAllPlayers("purchaseGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
+    //   'playerId' => $playerId,
+    //   'player_name' => self::getActivePlayerName(),
+    //   'value' => $value,
+    //   'rupeesOnCards' => $rupeesOnCards,
+    //   'rupeeChange' => -$value,
+    //   'influenceChange' => 1,
+    //   'move' =>[
+    //     'from' => $from,
+    //     'to' => $location,
+    //     'tokenId' => $cylinder['id'],
+    //   ]
+    // ));
 
     $this->gamestate->nextState('playerActions');
   }
@@ -299,6 +310,4 @@ trait PlayerActionTrait
     return true;
     // $this->gamestate->nextState($next_state);
   }
-
-
 }

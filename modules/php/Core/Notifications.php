@@ -140,6 +140,18 @@ class Notifications
     ));
   }
 
+  public static function purchaseGift($player, $value, $move, $rupeesOnCards)
+  {
+    self::notifyAll("purchaseGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
+      'player' => $player,
+      'value' => $value,
+      'rupeesOnCards' => $rupeesOnCards,
+      'rupeeChange' => -$value,
+      'influenceChange' => 1,
+      'tokenMove' => $move
+    ));
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

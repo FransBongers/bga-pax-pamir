@@ -42,7 +42,7 @@ class PlayerActionsState implements State {
       this.setMarketCardsSelectable();
       this.game.setHandCardsSelectable({
         callback: ({ cardId }: { cardId: string }) => {
-          this.game.framework().setClientState<ClientPlayCardStateArgs>('clientPlayCard', { args: { cardId } });
+          this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId } });
         },
       });
       this.setCardActionsSelectable();
@@ -60,69 +60,6 @@ class PlayerActionsState implements State {
       id: 'undo_btn',
       text: _('Undo'),
       callback: () => this.game.takeAction({ action: 'restart' }),
-    });
-  }
-
-  private updateInterfaceCardActionBattleStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    this.game.clientUpdatePageTitle({
-      text: _('${you} must select a card or region'),
-      args: {},
-    });
-    this.setRegionsSelectable();
-  }
-
-  private updateInterfaceCardActionBetrayStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    console.log('betray clicked');
-  }
-
-  private updateInterfaceCardActionBuildStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    console.log('build clicked');
-  }
-
-  private updateInterfaceCardActionGiftStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    this.game.clientUpdatePageTitle({
-      text: _('${you} must select a gift to purchase'),
-      args: {
-        you: '${you}',
-      },
-    });
-    this.setGiftsSelectable({ cardId });
-    this.game.addCancelButton();
-  }
-
-  private updateInterfaceCardActionMoveStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    console.log('move clicked');
-  }
-
-  private updateInterfaceCardActionTaxStart({ cardId }: { cardId: string }) {
-    this.game.clearPossible();
-    console.log('tax clicked');
-  }
-
-  private updateInterfaceConfirmSelectGift({ value, cardId }: { value: number; cardId: string }) {
-    this.game.clearPossible();
-    dojo.query(`#pp_gift_${value}_${this.game.getPlayerId()}`).addClass('pp_selected');
-    this.game.clientUpdatePageTitle({ text: _('Purchase gift for ${value} rupees?'), args: { value: '' + value } });
-    this.game.addDangerActionButton({
-      id: 'confirm_btn',
-      text: _('Confirm'),
-      callback: () =>
-        this.game.takeAction({
-          action: 'selectGift',
-          data: { selectedGift: value, cardId },
-        }),
-    });
-    this.game.addDangerActionButton({
-      id: 'cancel_btn',
-      text: _('Cancel'),
-      callback: () => {
-        this.game.onCancel();
-      },
     });
   }
 
@@ -156,9 +93,9 @@ class PlayerActionsState implements State {
    * 4. Player can purchase, play and perform card actions (no cards in hand, card in court)
    *    You may purchase a card, play a card or perform card actions (x actions remaining)
    * Player has no actions remaining
-   * 5. Player can perform free actions (no actions but cards with favored suit in court)
+   * 5. Player can perform bonus actions (no actions but cards with favored suit in court)
    *    You may perform free card actions
-   * 6. Player does not have free actions
+   * 6. Player does not have bonus actions
    */
   private updateMainTitleTextActions() {
     const remainingActions = this.game.localState.remainingActions;
@@ -176,9 +113,9 @@ class PlayerActionsState implements State {
     } else if (remainingActions > 0 && hasHandCards && hasCardActions) {
       titleText = _('${you} may purchase a card, play a card or perform a card action');
     } else if (remainingActions === 0 && hasFreeCardActions) {
-      titleText = _('${you} may perform a free card action');
+      titleText = _('${you} may perform a bonus action');
     } else if (remainingActions === 0 && !hasFreeCardActions) {
-      titleText = _('${you} have no remaining actions');
+      titleText = _('${you} have no actions remaining');
     }
 
     if (remainingActions === 1) {
@@ -239,22 +176,22 @@ class PlayerActionsState implements State {
               dojo.connect(child, 'onclick', this, () => {
                 switch (cardAction) {
                   case 'battle':
-                    this.updateInterfaceCardActionBattleStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BATTLE, { args: { cardId } })
                     break;
                   case 'betray':
-                    this.updateInterfaceCardActionBetrayStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BETRAY, { args: { cardId } })
                     break;
                   case 'build':
-                    this.updateInterfaceCardActionBuildStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BUILD, { args: { cardId } })
                     break;
                   case 'gift':
-                    this.updateInterfaceCardActionGiftStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_GIFT, { args: { cardId } })
                     break;
                   case 'move':
-                    this.updateInterfaceCardActionMoveStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_MOVE, { args: { cardId } })
                     break;
                   case 'tax':
-                    this.updateInterfaceCardActionTaxStart({ cardId });
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_TAX, { args: { cardId } })
                     break;
                 }
                 // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
@@ -265,26 +202,6 @@ class PlayerActionsState implements State {
     });
   }
 
-  setGiftsSelectable({ cardId }: { cardId: string }) {
-    const playerId = this.game.getPlayerId();
-    [2, 4, 6].forEach((giftValue) => {
-      const hasGift =
-        this.game.playerManager
-          .getPlayer({ playerId })
-          .getGiftZone({
-            value: giftValue,
-          })
-          .getAllItems().length > 0;
-      if (!hasGift && giftValue <= this.game.localState.activePlayer.rupees) {
-        dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
-          dojo.addClass(node, 'pp_selectable');
-          this.game._connections.push(
-            dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId }))
-          );
-        });
-      }
-    });
-  }
 
   setMarketCardsSelectable() {
     const baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
@@ -299,22 +216,14 @@ class PlayerActionsState implements State {
         this.game._connections.push(
           // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
           dojo.connect(node, 'onclick', this, () =>
-            this.game.framework().setClientState<ClientPurchaseCardStateArgs>('clientPurchaseCard', { args: { cardId, cost } })
+            this.game.framework().setClientState<ClientPurchaseCardStateArgs>(CLIENT_PURCHASE_CARD, { args: { cardId, cost } })
           )
         );
       }
     });
   }
 
-  setRegionsSelectable() {
-    const container = document.getElementById(`pp_map_areas`);
-    container.classList.add('pp_selectable');
-    REGIONS.forEach((region) => {
-      const element = document.getElementById(`pp_region_${region}`);
-      element.classList.add('pp_selectable');
-      this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('Region', region)));
-    });
-  }
+
 
   //  ..######..##.......####..######..##....##
   //  .##....##.##........##..##....##.##...##.

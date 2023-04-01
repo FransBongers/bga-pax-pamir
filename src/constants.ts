@@ -1,25 +1,12 @@
-// Interface steps
-const CARD_ACTION_BATTLE = 'cardActionBattle';
-const CARD_ACTION_BETRAY = 'cardActionBetray';
-const CARD_ACTION_BUILD = 'cardActionBuild';
-const CARD_ACTION_GIFT = 'cardActionGift';
-const CARD_ACTION_MOVE = 'cardActionMove';
-const CARD_ACTION_TAX = 'cardActionTax';
-const CHOOSE_LOYALTY = 'chooseLoyalty';
-const CONFIRM_PLACE_SPY = 'confirmPlaceSpy';
-const PLAY_CARD_BRIBE = 'playCardBribe';
-const PLAY_CARD_SELECT_SIDE = 'playCardSelectSide';
-const PLAY_CARD_CONFIRM = 'playCardConfirm';
-const CONFIRM_PURCHASE = 'confirmPurchase';
-const CONFIRM_SELECT_GIFT = 'confirmSelectGift';
-const DISCARD_COURT = 'discardCourt';
-const DISCARD_HAND = 'discardHand';
-const NEGOTIATE_BRIBE = 'negotiateBribe';
-const PLACE_ROAD = 'placeRoad';
-const PLACE_SPY = 'placeSpy';
-const PASS = 'pass';
-const PLAYER_ACTIONS = 'playerActions';
-
+// Client states
+const CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
+const CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
+const CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
+const CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
+const CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
+const CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
+const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
+const CLIENT_PLAY_CARD = 'clientPlayCard';
 
 // size of tokens
 const CARD_WIDTH = 150;

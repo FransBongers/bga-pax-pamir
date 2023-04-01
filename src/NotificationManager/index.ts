@@ -46,7 +46,7 @@ class NotificationManager {
       ['playCard', 2000],
       ['discardCard', 1000],
       ['refreshMarket', 250],
-      ['selectGift', 1],
+      ['purchaseGift', 1],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
       ['moveToken', 250],
@@ -81,7 +81,7 @@ class NotificationManager {
     const fromZone = this.game.getZoneForLocation({ location: `favored_suit_${from}` });
     const toZone = this.game.getZoneForLocation({ location: `favored_suit_${to}` });
 
-    this.game.objectManager.favoredSuit.change({suit: to});
+    this.game.objectManager.favoredSuit.change({ suit: to });
     this.game.move({
       id: tokenId,
       from: fromZone,
@@ -211,11 +211,11 @@ class NotificationManager {
     rupeesOnCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;
       this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_tableau_${playerId}` });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
     });
 
     // Remove all rupees that were on the purchased card
-    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_tableau_${playerId}` });
+    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
 
     // Move card from markt
@@ -270,27 +270,30 @@ class NotificationManager {
     });
   }
 
-  notif_selectGift(notif) {
-    console.log('notif_selectGift', notif);
+  notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
+    console.log('notif_purchaseGift', notif);
     this.game.clearPossible();
-    const { updatedCards, playerId, rupee_count, updatedCounts } = notif.args;
+    const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
+
     // Place paid rupees on market cards
-    updatedCards.forEach((item, index) => {
-      const marketRow = item.location.split('_')[1];
-      const marketColumn = item.location.split('_')[2];
-      placeToken({
-        game: this.game,
-        location: this.game.market.getMarketRupeesZone({ row: marketRow, column: marketColumn }),
-        id: item.rupeeId,
-        jstpl: 'jstpl_rupee',
-        jstplProps: {
-          id: item.rupee_id,
-        },
-        from: `rupees_tableau_${playerId}`,
-      });
-    }, this);
-    this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'rupees', value: updatedCounts.rupees });
-    this.getPlayer({ playerId: notif.args.playerId }).setCounter({ counter: 'influence', value: updatedCounts.influence });
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+    });
+
+    // Move cylinder
+    const { tokenId, from, to } = tokenMove;
+    const fromZone = this.game.getZoneForLocation({ location: from });
+    const toZone = this.game.getZoneForLocation({ location: to });
+    this.game.move({
+      id: tokenId,
+      from: fromZone,
+      to: toZone,
+    });
+
+    // Update influence
+    this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
   }
 
   notif_smallRefreshHand(notif) {

@@ -12,7 +12,9 @@ interface ClientPurchaseCardStateArgs {
   cost: number;
 }
 
-
+interface ClientCardActionStateArgs {
+  cardId: string;
+}
 
 
 interface EnteringDiscardCourtArgs {

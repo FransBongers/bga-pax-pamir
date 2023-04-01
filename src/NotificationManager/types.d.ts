@@ -59,6 +59,20 @@ interface NotifPurchaseCardArgs {
   rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
+interface NotifPurchaseGiftArgs {
+  playerId: number;
+  player_name: string;
+  value: number;
+  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+  rupeeChange: number;
+  influenceChange: number;
+  tokenMove: {
+    from: string;
+    to: string;
+    tokenId: string;
+  }
+}
+
 interface NotifRefreshMarketArgs {
   cardMoves: {
     cardId: string;

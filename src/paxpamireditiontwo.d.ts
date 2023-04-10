@@ -66,6 +66,8 @@ interface BorderGamedatas {
 interface RegionGamedatas {
   armies: Token[];
   tribes: Token[];
+  name: string;
+  borders: string[];
 }
 
 interface LocalState {
@@ -86,12 +88,18 @@ interface PaxPamirGamedatas extends Gamedatas {
     borders: {
       [border: string]: {
         name: string;
-        regions: string;
+        regions: string[];
       };
     };
     cards: {
       [cardId: string]: Card;
     };
+    loyalty: Record<string, {
+      icon: number;
+      id: string;
+      name: string;
+    }>;
+    regions: Record<string,{id: string; name: string; borders: string[];}>
     specialAbilities: Record<string, { title: string; description: string }>;
     suits: {
       [suit: string]: Suit;

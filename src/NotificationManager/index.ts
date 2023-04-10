@@ -34,7 +34,7 @@ class NotificationManager {
   setupNotifications() {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
-      ['acceptBribe', 1],
+      ['battle',250],
       ['cardAction', 1],
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
@@ -46,6 +46,7 @@ class NotificationManager {
       ['playCard', 2000],
       ['discardCard', 1000],
       ['refreshMarket', 250],
+      ['payBribe', 1],
       ['purchaseGift', 1],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
@@ -63,11 +64,8 @@ class NotificationManager {
     // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
   }
 
-  notif_acceptBribe(notif: Notif<NotifAcceptBribeArgs>) {
-    const { args } = notif;
-    console.log('notif_acceptBribe', args);
-    const { briberId, rulerId, rupees } = args;
-    this.getPlayer({ playerId: briberId }).payBribe({ rulerId, rupees });
+  notif_battle(notif) {
+    debug('notif_battle',notif)
   }
 
   notif_cardAction(notif) {
@@ -176,6 +174,13 @@ class NotificationManager {
         removeClass: isArmy ? ['pp_army'] : ['pp_road'],
       });
     });
+  }
+
+  notif_payBribe(notif: Notif<NotifPayBribeArgs>) {
+    const { args } = notif;
+    console.log('notif_payBribe', args);
+    const { briberId, rulerId, rupees } = args;
+    this.getPlayer({ playerId: briberId }).payBribe({ rulerId, rupees });
   }
 
   notif_playCard(notif: Notif<NotifPlayCardArgs>) {
@@ -335,30 +340,44 @@ class NotificationManager {
     });
   }
 
-  notif_moveToken(notif) {
+  notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
     console.log('notif_moveToken', notif);
     notif.args.moves.forEach((move) => {
-      const { tokenId, from, to, updates } = move;
+      const { tokenId, from, to, weight } = move;
       const fromZone = this.game.getZoneForLocation({ location: from });
       const toZone = this.game.getZoneForLocation({ location: to });
 
       // TODO: perhaps create separate function for this
-      const addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
-      const removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
+      const addClass = [];
+      const removeClass = [];
+      if (to.startsWith('armies')) {
+        addClass.push('pp_army')
+      } else if (to.startsWith('roads')) {
+        addClass.push('pp_road')
+      } else if (to.startsWith('blocks')) {
+        addClass.push('pp_coalition_block');
+      }
+      if (from.startsWith('blocks')) {
+        removeClass.push('pp_coalition_block');
+      } else if (from.startsWith('armies')) {
+        removeClass.push('pp_army')
+      } else if (from.startsWith('roads')) {
+        removeClass.push('pp_road')
+      }
+
       this.game.move({
         id: tokenId,
         from: fromZone,
         to: toZone,
         addClass,
         removeClass,
+        weight
       });
     });
   }
 
   notif_log(notif) {
     // this is for debugging php side
-    console.log('notif_log', notif);
-    console.log(notif.log);
-    console.log(notif.args);
+    console.log('notif_log', notif.args);
   }
 }

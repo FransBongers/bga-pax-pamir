@@ -303,9 +303,14 @@ class PaxPamir implements PaxPamirGame {
 
     REGIONS.forEach((region) => {
       const element = document.getElementById(`pp_region_${region}`);
-      element.classList.remove('pp_selectable');
+      if (element) {
+        element.classList.remove('pp_selectable');
+      }
     });
-    document.getElementById('pp_map_areas').classList.remove('pp_selectable');
+    const mapArea = document.getElementById('pp_map_areas');
+    if (mapArea) {
+      mapArea.classList.remove('pp_selectable');
+    }
   }
 
   public getCardInfo({ cardId }: { cardId: string }): Card {
@@ -337,7 +342,7 @@ class PaxPamir implements PaxPamirGame {
       const cardId = node.id;
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
-    }, this);
+    });
   }
 
   clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
@@ -367,18 +372,19 @@ class PaxPamir implements PaxPamirGame {
       if (log && args && !args.processed) {
         args.processed = true;
 
-        // list of special keys we want to replace with images
-        const keys = logTokenKeys;
-
-        // list of other known variables
-        //  var keys = this.notification_manager.keys;
-
-        for (var i in keys) {
-          var key = keys[i];
-          if (args[key] != undefined) {
-            args[key] = getLogTokenDiv(key, args);
+        // replace all keys that start with 'logToken'
+        Object.entries(args).forEach(([key, value]) => {
+          if(key.startsWith('logToken')) {
+            args[key] = getLogTokenDiv({logToken: value as string, game: this});
           }
-        }
+        })
+
+        // TODO: check below code. Looks like improved way for text shadows (source ticket to ride) 
+        // ['you', 'actplayer', 'player_name'].forEach((field) => {
+        //   if (typeof args[field] === 'string' && args[field].indexOf('#ffed00;') !== -1 && args[field].indexOf('text-shadow') === -1) {
+        //     args[field] = args[field].replace('#ffed00;', '#ffed00; text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;');
+        //   }
+        // });
       }
     } catch (e) {
       console.error(log, args, 'Exception thrown', e.stack);

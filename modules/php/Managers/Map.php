@@ -20,8 +20,11 @@ class Map
     $game = Game::get();
 
     foreach ($game->regions as $region => $regionInfo) {
+      $regionInfo = self::getRegionInfo($region);
       $data['regions'][$region]['armies'] = Tokens::getInLocation(['armies', $region])->toArray();
       $data['regions'][$region]['tribes'] = Tokens::getInLocation(['tribes', $region])->toArray();
+      $data['regions'][$region]['borders'] = $regionInfo['borders'];
+      $data['regions'][$region]['name'] = $regionInfo['name'];
     }
 
     foreach ($game->borders as $border => $borderInfo) {

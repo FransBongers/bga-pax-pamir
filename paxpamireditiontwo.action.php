@@ -59,6 +59,24 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function battle()
+    {
+        self::setAjaxMode();
+        $removedPiecesString = self::getArg("removedPieces", AT_alphanum, true);
+        $location = self::getArg("location", AT_alphanum, true);
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+
+        $removedPiecesString = trim($removedPiecesString);
+
+        if ($removedPiecesString == '')
+            $removedPieces = array();
+        else
+            $removedPieces = explode(' ', $removedPiecesString);
+
+        $result = $this->game->battle($cardId, $location, $removedPieces);
+        self::ajaxResponse();
+    }
+
     public function chooseLoyalty()
     {
         self::setAjaxMode();
@@ -120,9 +138,9 @@ class action_paxpamireditiontwo extends APP_GameAction
     {
         self::setAjaxMode();
         $card_id = self::getArg("cardId", AT_alphanum, true);
-        $left_side = self::getArg("leftSide", AT_bool, true);
+        $side = self::getArg("side", AT_alphanum, true);
         $bribe = self::getArg("bribe", AT_posint, true);
-        $result = $this->game->playCard($card_id, $left_side, $bribe);
+        $result = $this->game->playCard($card_id, $side, $bribe);
         self::ajaxResponse();
     }
 

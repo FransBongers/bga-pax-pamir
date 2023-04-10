@@ -26,7 +26,7 @@ trait PlayCardTrait
   {
     $bribeState = Globals::getBribe();
     unset($bribeState['next']);
-    unset($bribeState['leftSide']);
+    unset($bribeState['side']);
     $bribeState['active'] = self::getActivePlayerId();
     return $bribeState;
   }
@@ -46,9 +46,9 @@ trait PlayCardTrait
       $this->gamestate->changeActivePlayer($bribeState['next']);
       $playerId = $bribeState['briber'];
       $cardId = $bribeState['cardId'];
-      $leftSide = $bribeState['leftSide'];
+      $side = $bribeState['side'];
       Globals::setBribeClearLogs(true);
-      $this->resolvePlayCard($playerId, $cardId, $leftSide);
+      $this->resolvePlayCard($playerId, $cardId, $side);
     } else if ($bribeState['status'] == BRIBE_DECLINED) {
       $this->gamestate->changeActivePlayer($bribeState['next']);
       Log::clearAll();
@@ -82,7 +82,7 @@ trait PlayCardTrait
   /**
    * Play card from hand to court
    */
-  function playCard($cardId, $leftSide = true, $bribe = 0)
+  function playCard($cardId, $side = 'left', $bribe = 0)
   {
     //
     // play a card from hand into the court on either the left or right side
@@ -90,7 +90,7 @@ trait PlayCardTrait
 
     self::checkAction('playCard');
 
-    $playerId = self::getActivePlayerId();
+    $playerId = Players::getActiveId();
     $card = Cards::get($cardId);
     $bribe = intval($bribe);
     // Check if player owns card and card is in players hand
@@ -104,7 +104,7 @@ trait PlayCardTrait
       Globals::setBribe([
         'briber' => intval($playerId),
         'cardId' => $cardId,
-        'leftSide' => $leftSide,
+        'side' => $side,
         'maxAmount' => $maxAmount,
         'currentAmount' => $bribe,
         'declined' => [],
@@ -113,20 +113,29 @@ trait PlayCardTrait
         'next' => $ruler,
         'status' => BRIBE_UNRESOLVED,
       ]);
-      $message = clienttranslate('${player_name} wants to play ${cardName} and offers bribe of ${bribeAmount} rupee(s) ${logTokenCardLarge}');
+      $message = clienttranslate('${player_name} wants to play ${cardName} and offers bribe of ${bribeAmount} rupee(s) ${logTokenLargeCard}');
 
       self::notifyAllPlayers("initiateNegotiation", $message, array(
         'player_name' => self::getActivePlayerName(),
         'bribeAmount' => $bribe,
         'cardName' => $card['name'],
-        'logTokenCardLarge' => $card['id'],
+        'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
       ));
 
       $this->gamestate->nextState('nextPlayerNegotiateBribe');
       return;
+    } else if ($bribe > 0) {
+      $this->payBribe($playerId, $checkBribeResult['ruler'], $bribe);
     }
 
-    $this->resolvePlayCard($playerId, $cardId, $leftSide);
+    $this->resolvePlayCard($playerId, $cardId, $side);
+  }
+
+  function payBribe($briberId, $rulerId, $rupees)
+  {
+    Players::incRupees($rulerId, $rupees);
+    Players::incRupees($briberId, -$rupees);
+    Notifications::payBribe($briberId, $rulerId, $rupees);
   }
 
 
@@ -144,9 +153,8 @@ trait PlayCardTrait
     $bribeState['next'] = $bribeState['briber'];
     Globals::setBribe($bribeState);
 
-    Players::incRupees($rulerId, $rupees);
-    Players::incRupees($briberId, -$rupees);
     Notifications::acceptBribe($briberId, $rulerId, $rupees);
+    Notifications::payBribe($briberId, $rulerId, $rupees);
 
     $this->gamestate->nextState('nextPlayerNegotiateBribe');
   }
@@ -192,6 +200,7 @@ trait PlayCardTrait
   {
     $rulers = Globals::getRulers();
     $region = $card['region'];
+    self::dump("ruler", $rulers[$region]);
     if ($rulers[$region] !== null && $rulers[$region] !== $playerId) {
       $rulerTribes = array_filter(Tokens::getInLocation(['tribes', $region])->toArray(), function ($cylinder) use ($rulers, $region) {
         return explode('_', $cylinder['id'])[1] == $rulers[$region];
@@ -206,10 +215,9 @@ trait PlayCardTrait
   }
 
   // TODO(Frans): move all playCard related code to separate Trait
-  function resolvePlayCard($playerId, $cardId, $leftSide)
+  function resolvePlayCard($playerId, $cardId, $side)
   {
     $card = Cards::get($cardId);
-    $card_name = $this->cards[$cardId]['name'];
     $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
 
     if (Globals::getRemainingActions() > 0) {
@@ -219,7 +227,7 @@ trait PlayCardTrait
         $this->checkAndHandleLoyaltyChange($cardLoyalty);
       }
 
-      if ($leftSide) {
+      if ($side === 'left') {
         for ($i = 0; $i < count($courtCards); $i++) {
           Cards::setState($courtCards[$i]['id'], $i + 2);
         }
@@ -227,20 +235,23 @@ trait PlayCardTrait
       } else {
         Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
       }
-      $message = clienttranslate('${player_name} plays ${cardName} ${logTokenCard} to the ${side} side of his court');
       Globals::incRemainingActions(-1);
-      $court_cards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+      // We need to fetch data again to get updated state
+      $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
       $card = Cards::get($cardId);
-      self::notifyAllPlayers("playCard", $message, array(
-        'playerId' => $playerId,
-        'player_name' => self::getActivePlayerName(),
-        'card' => $card,
-        'cardName' => $card_name,
-        'courtCards' => $court_cards,
-        'bribe' => false,
-        'logTokenCard' => $cardId,
-        'side' => $leftSide ? clienttranslate('left') : clienttranslate('right')
-      ));
+      Notifications::playCard($card,$courtCards,$side,$playerId);
+
+      // $message = clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to the ${side} side of his court');
+      // self::notifyAllPlayers("playCard", $message, array(
+      //   'playerId' => $playerId,
+      //   'player_name' => self::getActivePlayerName(),
+      //   'card' => $card,
+      //   'logTokenCardName' => implode(':', ['cardName', $card_name]),
+      //   'courtCards' => $court_cards,
+      //   'bribe' => false,
+      //   'logTokenCard' => implode(':', ['card', $cardId]),
+      //   'side' => $leftSide ? clienttranslate('left') : clienttranslate('right')
+      // ));
 
       $this->updatePlayerCounts();
 

@@ -2,7 +2,7 @@
  * Note: we need to keep player_name in snake case, because the framework uses
  * it to add player colors to the log messages.
  */
-interface NotifAcceptBribeArgs {
+interface NotifPayBribeArgs {
   player_name: string;
   rulerId: number;
   briberId: number;
@@ -37,6 +37,15 @@ interface NotifDiscardCardArgs {
   courtCards: Token[];
   from: string;
   state: number;
+}
+
+interface NotifMoveTokenArgs {
+  moves: {
+    tokenId: string;
+    from: string;
+    to: string;
+    weight?: number;
+  }[];
 }
 
 interface NotifPlayCardArgs {

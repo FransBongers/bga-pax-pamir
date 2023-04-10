@@ -143,7 +143,7 @@ class PlayerActionsState implements State {
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
       return (
-        used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo).length > 0
+        used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0
       );
     });
   }

@@ -67,21 +67,32 @@ trait RefreshMarketTrait
     for ($column = 0; $column < 6; $column++) {
       for ($row = 0; $row < 2; $row++) {
         if (count($emptySpaces[$row]) > 0 && $emptySpaces[$row][0] == $column) {
-          $card = Cards::pickOneForLocation('deck', ['market',$row, $column]);
+          $card = Cards::pickOneForLocation('deck', ['market', $row, $column]);
           $newCards[] = array(
             'cardId' => $card['id'],
             'from' => 'deck',
-            'to' => 'market_'.$row.'_' . $column
+            'to' => 'market_' . $row . '_' . $column
           );
           array_shift($emptySpaces[$row]);
         }
       }
     }
+    $message = clienttranslate('The market refills. Added card(s): ${cardLog}');
+    $logs = [];
+    $args = [];
+    // $i = 0;
+    foreach ($newCards as $index => $cardInfo) {
+      $logs[] = '${logTokenLargeCard' . $index . '}';
+      $args['logTokenLargeCard' . $index] = implode(':', ['largeCard', $cardInfo['cardId']]);
+    }
 
-    self::notifyAllPlayers("refreshMarket", clienttranslate('The market is refilled. Added card(s): ${logTokenNewCards}'), array(
+    self::notifyAllPlayers("refreshMarket", $message, array(
       'cardMoves' => $cardMoves,
       'newCards' => $newCards,
-      'logTokenNewCards' => $newCards
+      'cardLog' => [
+        'log' => implode('', $logs),
+        'args' => $args
+      ]
     ));
 
     $this->gamestate->nextState('nextTurn');

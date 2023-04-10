@@ -177,53 +177,52 @@ var positionObjectDirectly = function (mobileObj, x, y) {
     });
     dojo.style(mobileObj, 'left'); // bug? re-compute style
 };
-var LOG_TOKEN_ARMY = 'logTokenArmy';
-var LOG_TOKEN_CARD = 'logTokenCard';
-var LOG_TOKEN_CARD_LARGE = 'logTokenCardLarge';
-var LOG_TOKEN_COALITION = 'logTokenCoalition';
-var LOG_TOKEN_FAVORED_SUIT = 'logTokenFavoredSuit';
-var LOG_TOKEN_NEW_CARDS = 'logTokenNewCards';
-var LOG_TOKEN_ROAD = 'logTokenRoad';
-var LOG_TOKEN_SPY = 'logTokenSpy';
-var LOG_TOKEN_CYLINDER = 'logTokenCylinder';
-var logTokenKeys = [
-    LOG_TOKEN_ARMY,
-    LOG_TOKEN_CARD,
-    LOG_TOKEN_CARD_LARGE,
-    LOG_TOKEN_COALITION,
-    LOG_TOKEN_FAVORED_SUIT,
-    LOG_TOKEN_NEW_CARDS,
-    LOG_TOKEN_ROAD,
-    LOG_TOKEN_SPY,
-    LOG_TOKEN_CYLINDER,
-];
-var getLogTokenDiv = function (key, args) {
-    var data = args[key];
-    // console.log('getLogTokenDiv', key, 'data', data);
-    switch (key) {
+var LOG_TOKEN_ARMY = 'army';
+var LOG_TOKEN_CARD = 'card';
+var LOG_TOKEN_LARGE_CARD = 'largeCard';
+var LOG_TOKEN_CARD_NAME = 'cardName';
+var LOG_TOKEN_COALITION = 'coalition';
+var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
+var LOG_TOKEN_ROAD = 'road';
+var LOG_TOKEN_CYLINDER = 'cylinder';
+var LOG_TOKEN_PLAYER_NAME = 'playerName';
+var LOG_TOKEN_REGION_NAME = 'regionName';
+var getLogTokenDiv = function (_a) {
+    var logToken = _a.logToken, game = _a.game;
+    var _b = logToken.split(':'), type = _b[0], data = _b[1];
+    switch (type) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: data });
         case LOG_TOKEN_CARD:
             return tplLogTokenCard({ cardId: data });
-        case LOG_TOKEN_CARD_LARGE:
+        case LOG_TOKEN_LARGE_CARD:
             return tplLogTokenCard({ cardId: data, large: true });
+        case LOG_TOKEN_CARD_NAME:
+            return tlpLogTokenBoldText({ text: data });
         case LOG_TOKEN_FAVORED_SUIT:
             return tplLogTokenFavoredSuit({ suit: data });
         case LOG_TOKEN_CYLINDER:
-            return tplLogTokenCylinder({ color: data });
+            return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(data) }).getColor() });
         case LOG_TOKEN_COALITION:
             return tplLogTokenCoalition({ coalition: data });
-        case LOG_TOKEN_NEW_CARDS:
-            return tplLogTokenNewCards({ cards: data });
         case LOG_TOKEN_ROAD:
             return tplLogTokenRoad({ coalition: data });
+        case LOG_TOKEN_PLAYER_NAME:
+            var player = game.playerManager.getPlayer({ playerId: Number(data) });
+            return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
+        case LOG_TOKEN_REGION_NAME:
+            return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
         default:
-            return args[key];
+            return type;
     }
 };
 var tplLogTokenArmy = function (_a) {
     var coalition = _a.coalition;
     return "<div class=\"pp_".concat(coalition, " pp_army pp_log_token\"></div>");
+};
+var tlpLogTokenBoldText = function (_a) {
+    var text = _a.text;
+    return "<span style=\"font-weight: 700;\">".concat(_(text), "</span>");
 };
 var tplLogTokenCard = function (_a) {
     var cardId = _a.cardId, large = _a.large;
@@ -248,6 +247,14 @@ var tplLogTokenNewCards = function (_a) {
         newCards += "<div class=\"pp_card pp_log_token pp_".concat(card.cardId, " pp_large\" style=\"display: inline-block; margin-right: 4px;\"></div>");
     });
     return newCards;
+};
+var tplLogTokenPlayerName = function (_a) {
+    var name = _a.name, color = _a.color;
+    return "<span class=\"playername\" style=\"color:#".concat(color, ";\">").concat(name, "</span>");
+};
+var tplLogTokenRegionName = function (_a) {
+    var name = _a.name, regionId = _a.regionId;
+    return "<span style=\"font-weight: 700;\">".concat(_(name), "</span><div class=\"pp_log_token pp_").concat(regionId, " pp_region_icon\"></div>");
 };
 var tplLogTokenRoad = function (_a) {
     var coalition = _a.coalition;
@@ -730,6 +737,7 @@ var Supply = /** @class */ (function () {
                     weight: block.state,
                 });
             });
+            _this.coalitionBlocks[coalition].instantaneous = false;
         });
     };
     Supply.prototype.clearInterface = function () {
@@ -1161,6 +1169,9 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.getPlayerColor = function () {
         return this.playerColor;
     };
+    PPPlayer.prototype.getLoyalty = function () {
+        return this.loyalty;
+    };
     PPPlayer.prototype.setCounter = function (_a) {
         var counter = _a.counter, value = _a.value;
         switch (counter) {
@@ -1296,6 +1307,7 @@ var PPPlayer = /** @class */ (function () {
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
         var coalition = _a.coalition;
+        this.loyalty = coalition;
         dojo
             .query("#loyalty_icon_".concat(this.playerId))
             .removeClass('pp_afghan')
@@ -1340,6 +1352,9 @@ var PlayerManager = /** @class */ (function () {
     PlayerManager.prototype.getPlayer = function (_a) {
         var playerId = _a.playerId;
         return this.players[playerId];
+    };
+    PlayerManager.prototype.getPlayerIds = function () {
+        return Object.keys(this.players).map(Number);
     };
     PlayerManager.prototype.updatePlayers = function (_a) {
         var gamedatas = _a.gamedatas;
@@ -1447,6 +1462,17 @@ var Border = /** @class */ (function () {
     Border.prototype.getRoadZone = function () {
         return this.roadZone;
     };
+    // .##.....##.########.####.##.......####.########.##....##
+    // .##.....##....##.....##..##........##.....##.....##..##.
+    // .##.....##....##.....##..##........##.....##......####..
+    // .##.....##....##.....##..##........##.....##.......##...
+    // .##.....##....##.....##..##........##.....##.......##...
+    // .##.....##....##.....##..##........##.....##.......##...
+    // ..#######.....##....####.########.####....##.......##...
+    Border.prototype.getEnemyRoads = function (_a) {
+        var coalitionId = _a.coalitionId;
+        return this.roadZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
+    };
     return Border;
 }());
 // .########..########..######...####..#######..##....##
@@ -1456,6 +1482,15 @@ var Border = /** @class */ (function () {
 // .##...##...##.......##....##...##..##.....##.##..####
 // .##....##..##.......##....##...##..##.....##.##...###
 // .##.....##.########..######...####..#######..##....##
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var Region = /** @class */ (function () {
     function Region(_a) {
         var game = _a.game, region = _a.region;
@@ -1464,9 +1499,18 @@ var Region = /** @class */ (function () {
         this.region = region;
         this.setupRegion({ gamedatas: game.gamedatas });
     }
+    // ..######..########.########.##.....##.########.
+    // .##....##.##..........##....##.....##.##.....##
+    // .##.......##..........##....##.....##.##.....##
+    // ..######..######......##....##.....##.########.
+    // .......##.##..........##....##.....##.##.......
+    // .##....##.##..........##....##.....##.##.......
+    // ..######..########....##.....#######..##.......
     Region.prototype.setupRegion = function (_a) {
         var gamedatas = _a.gamedatas;
         var regionGamedatas = gamedatas.map.regions[this.region];
+        this.name = regionGamedatas.name;
+        this.borders = regionGamedatas.borders;
         this.setupArmyZone({ regionGamedatas: regionGamedatas });
         this.setupTribeZone({ regionGamedatas: regionGamedatas });
         this.setupRulerZone({ gamedatas: gamedatas });
@@ -1545,7 +1589,7 @@ var Region = /** @class */ (function () {
             nodeId: "pp_".concat(this.region, "_tribes"),
             tokenWidth: TRIBE_WIDTH,
             tokenHeight: TRIBE_HEIGHT,
-            itemMargin: 6,
+            itemMargin: 12,
         });
         this.tribeZone.instantaneous = true;
         // tribes
@@ -1572,6 +1616,20 @@ var Region = /** @class */ (function () {
         dojo.empty(this.tribeZone.container_div);
         this.tribeZone = undefined;
     };
+    // ..######...########.########.########.########.########.
+    // .##....##..##..........##.......##....##.......##.....##
+    // .##........##..........##.......##....##.......##.....##
+    // .##...####.######......##.......##....######...########.
+    // .##....##..##..........##.......##....##.......##...##..
+    // .##....##..##..........##.......##....##.......##....##.
+    // ..######...########....##.......##....########.##.....##
+    // ..######..########.########.########.########.########.
+    // .##....##.##..........##.......##....##.......##.....##
+    // .##.......##..........##.......##....##.......##.....##
+    // ..######..######......##.......##....######...########.
+    // .......##.##..........##.......##....##.......##...##..
+    // .##....##.##..........##.......##....##.......##....##.
+    // ..######..########....##.......##....########.##.....##
     Region.prototype.getArmyZone = function () {
         return this.armyZone;
     };
@@ -1581,11 +1639,12 @@ var Region = /** @class */ (function () {
     Region.prototype.getRulerTribes = function () {
         var _this = this;
         if (this.ruler) {
-            return this.getTribeZone().getAllItems().filter(function (id) {
+            return this.getTribeZone()
+                .getAllItems()
+                .filter(function (id) {
                 return Number(id.split('_')[1]) === _this.ruler;
             });
         }
-        ;
         return [];
     };
     Region.prototype.setRuler = function (_a) {
@@ -1597,6 +1656,49 @@ var Region = /** @class */ (function () {
     };
     Region.prototype.getTribeZone = function () {
         return this.tribeZone;
+    };
+    // .##.....##.########.####.##.......####.########.##....##
+    // .##.....##....##.....##..##........##.....##.....##..##.
+    // .##.....##....##.....##..##........##.....##......####..
+    // .##.....##....##.....##..##........##.....##.......##...
+    // .##.....##....##.....##..##........##.....##.......##...
+    // .##.....##....##.....##..##........##.....##.......##...
+    // ..#######.....##....####.########.####....##.......##...
+    Region.prototype.getEnemyArmies = function (_a) {
+        var coalitionId = _a.coalitionId;
+        return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
+    };
+    ;
+    Region.prototype.getEnemyRoads = function (_a) {
+        var _this = this;
+        var coalitionId = _a.coalitionId;
+        var roads = [];
+        this.borders.forEach(function (border) {
+            var enemyRoads = _this.game.map.getBorder({ border: border }).getEnemyRoads({ coalitionId: coalitionId });
+            roads = roads.concat(enemyRoads);
+        });
+        return roads;
+    };
+    Region.prototype.getEnemyTribes = function (_a) {
+        var _this = this;
+        var coalitionId = _a.coalitionId;
+        return this.tribeZone.getAllItems().filter(function (cylinderId) {
+            var playerId = Number(cylinderId.split('_')[1]);
+            return coalitionId !== _this.game.playerManager.getPlayer({ playerId: playerId }).getLoyalty();
+        });
+    };
+    /**
+     * Returns enemy pieces.
+     * Enemy pieces are
+     * - armies and roads of other coalition
+     * - tribes of player loyal to other coalition
+     */
+    Region.prototype.getEnemyPieces = function (args) {
+        return __spreadArray(__spreadArray(__spreadArray([], this.getEnemyArmies(args), true), this.getEnemyRoads(args), true), this.getEnemyTribes(args), true);
+    };
+    Region.prototype.getCoalitionArmies = function (_a) {
+        var coalitionId = _a.coalitionId;
+        return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
     };
     return Region;
 }());
@@ -1814,7 +1916,9 @@ var ClientCardActionBattleState = /** @class */ (function () {
     function ClientCardActionBattleState(game) {
         this.game = game;
     }
-    ClientCardActionBattleState.prototype.onEnteringState = function () {
+    ClientCardActionBattleState.prototype.onEnteringState = function (_a) {
+        var cardId = _a.cardId;
+        this.cardId = cardId;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBattleState.prototype.onLeavingState = function () { };
@@ -1837,10 +1941,35 @@ var ClientCardActionBattleState = /** @class */ (function () {
         this.game.clientUpdatePageTitle({
             text: _('${you} must select a region or court card to start a battle in'),
             args: {
-                you: '${you}'
+                you: '${you}',
             },
         });
-        this.setRegionsSelectable();
+        this.game.addCancelButton();
+        this.setLocationsSelectable();
+    };
+    ClientCardActionBattleState.prototype.updateInterfaceSelectPiecesInRegion = function (_a) {
+        var _this = this;
+        var regionId = _a.regionId;
+        this.game.clearPossible();
+        this.location = regionId;
+        var region = this.game.map.getRegion({ region: regionId });
+        var coalitionId = this.game.localState.activePlayer.loyalty;
+        var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
+        var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
+        var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
+        var cardRank = cardInfo.rank;
+        this.maxNumberToSelect = Math.min(cardRank, coalitionArmies.length);
+        this.numberSelected = 0;
+        debug('enemyPieces', enemyPieces);
+        this.updatePageTitle();
+        this.setPiecesSelectable({ pieces: enemyPieces });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.confirmBattle(); },
+        });
+        dojo.addClass('confirm_btn', 'disabled');
+        this.game.addCancelButton();
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -1849,15 +1978,105 @@ var ClientCardActionBattleState = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    ClientCardActionBattleState.prototype.setRegionsSelectable = function () {
+    ClientCardActionBattleState.prototype.confirmBattle = function () {
+        debug('confirmBattle');
+        var pieces = [];
+        dojo.query('.pp_selected').forEach(function (node) { return pieces.push(node.id); });
+        debug('pieces', pieces);
+        var numberOfPieces = pieces.length;
+        if (numberOfPieces <= this.maxNumberToSelect && numberOfPieces > 0) {
+            this.game.takeAction({ action: 'battle', data: {
+                    removedPieces: pieces.join(' '),
+                    location: this.location,
+                    cardId: this.cardId,
+                } });
+        }
+    };
+    /**
+     * For all court cards check if there are own and enemy spies
+     */
+    ClientCardActionBattleState.prototype.getCourtCardBattleSites = function () {
         var _this = this;
-        debug('setRegionsSelectable');
+        var battleSites = [];
+        this.game.playerManager.getPlayerIds().forEach(function (playerId) {
+            var courtCards = _this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
+            courtCards.forEach(function (cardId) {
+                var spyZone = _this.game.spies[cardId];
+                if (!spyZone) {
+                    return false;
+                }
+                var cylinderIds = spyZone.getAllItems();
+                var hasEnemySpies = cylinderIds.some(function (cylinderId) { return Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId(); });
+                var hasOwnSpies = cylinderIds.some(function (cylinderId) { return Number(cylinderId.split('_')[1]) === _this.game.getPlayerId(); });
+                if (hasEnemySpies && hasOwnSpies) {
+                    battleSites.push(cardId);
+                }
+            });
+        });
+        return battleSites;
+    };
+    ClientCardActionBattleState.prototype.handlePieceClicked = function (_a) {
+        var pieceId = _a.pieceId;
+        debug('Piece clicked', pieceId);
+        dojo.query("#".concat(pieceId)).toggleClass('pp_selected').toggleClass('pp_selectable');
+        this.numberSelected = dojo.query('.pp_selected').length;
+        if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
+            dojo.removeClass('confirm_btn', 'disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'disabled');
+        }
+        this.updatePageTitle();
+    };
+    ClientCardActionBattleState.prototype.setPiecesSelectable = function (_a) {
+        var _this = this;
+        var pieces = _a.pieces;
+        pieces.forEach(function (pieceId) {
+            dojo.query("#".concat(pieceId)).forEach(function (node, index) {
+                // const cardId = 'card_' + node.id.split('_')[1];
+                // console.log('cardId in courtcardselect', cardId);
+                dojo.addClass(node, 'pp_selectable');
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handlePieceClicked({ pieceId: pieceId }); }));
+            });
+        });
+    };
+    ClientCardActionBattleState.prototype.setLocationsSelectable = function () {
+        var _this = this;
+        debug('setLocationsSelectable');
+        // Regions
         var container = document.getElementById("pp_map_areas");
         container.classList.add('pp_selectable');
-        REGIONS.forEach(function (region) {
-            var element = document.getElementById("pp_region_".concat(region));
-            element.classList.add('pp_selectable');
-            _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return console.log('Region', region); }));
+        REGIONS.forEach(function (regionId) {
+            var region = _this.game.map.getRegion({ region: regionId });
+            var coalitionId = _this.game.localState.activePlayer.loyalty;
+            var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
+            var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
+            if (enemyPieces.length === 0 || coalitionArmies.length === 0) {
+                return;
+            }
+            var element = document.getElementById("pp_region_".concat(regionId));
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceSelectPiecesInRegion({ regionId: regionId }); }));
+            }
+        });
+        // Court cards
+        var courtBattleSites = this.getCourtCardBattleSites();
+        courtBattleSites.forEach(function (cardId) {
+            dojo.query("#".concat(cardId)).forEach(function (node, index) {
+                dojo.addClass(node, 'pp_selectable');
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return console.log('cardId', cardId); }));
+            });
+        });
+    };
+    ClientCardActionBattleState.prototype.updatePageTitle = function () {
+        this.game.clientUpdatePageTitle({
+            text: _('${you} may select tribes, roads or armies to remove') + _(' (${remaining} remaining)'),
+            args: {
+                you: '${you}',
+                number: this.maxNumberToSelect,
+                remaining: this.maxNumberToSelect - this.numberSelected,
+            },
         });
     };
     return ClientCardActionBattleState;
@@ -2158,7 +2377,7 @@ var ClientPlayCardState = /** @class */ (function () {
                     action: 'playCard',
                     data: {
                         cardId: cardId,
-                        leftSide: side === 'left',
+                        side: side,
                         bribe: bribe,
                     },
                 });
@@ -2336,7 +2555,7 @@ var DiscardCourtState = /** @class */ (function () {
             text: _('Confirm'),
             callback: function () { return _this.handleDiscardConfirm({ fromHand: false }); },
         });
-        dojo.addClass('confirm_btn', 'pp_disabled');
+        dojo.addClass('confirm_btn', 'disabled');
         this.setCourtCardsSelectableForDiscard();
     };
     //  .##.....##.########.####.##.......####.########.##....##
@@ -2371,7 +2590,7 @@ var DiscardCourtState = /** @class */ (function () {
             console.log('cardId in courtcardselect', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
-        }, this);
+        });
     };
     DiscardCourtState.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
@@ -2379,10 +2598,10 @@ var DiscardCourtState = /** @class */ (function () {
         var numberSelected = dojo.query('.pp_selected').length;
         console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
         if (numberSelected === this.numberOfDiscards) {
-            dojo.removeClass('confirm_btn', 'pp_disabled');
+            dojo.removeClass('confirm_btn', 'disabled');
         }
         else {
-            dojo.addClass('confirm_btn', 'pp_disabled');
+            dojo.addClass('confirm_btn', 'disabled');
         }
     };
     return DiscardCourtState;
@@ -2427,7 +2646,7 @@ var DiscardHandState = /** @class */ (function () {
             text: _('Confirm'),
             callback: function () { return _this.handleDiscardConfirm({ fromHand: true }); },
         });
-        dojo.addClass('confirm_btn', 'pp_disabled');
+        dojo.addClass('confirm_btn', 'disabled');
         this.game.setHandCardsSelectable({
             callback: function (_a) {
                 var cardId = _a.cardId;
@@ -2465,10 +2684,10 @@ var DiscardHandState = /** @class */ (function () {
         var numberSelected = dojo.query('.pp_selected').length;
         console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
         if (numberSelected === this.numberOfDiscards) {
-            dojo.removeClass('confirm_btn', 'pp_disabled');
+            dojo.removeClass('confirm_btn', 'disabled');
         }
         else {
-            dojo.addClass('confirm_btn', 'pp_disabled');
+            dojo.addClass('confirm_btn', 'disabled');
         }
     };
     return DiscardHandState;
@@ -2790,7 +3009,7 @@ var PlayerActionsState = /** @class */ (function () {
         return this.game.localState.activePlayer.court.cards.some(function (_a) {
             var id = _a.id, used = _a.used;
             var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return (used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo).length > 0);
+            return (used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0);
         });
     };
     PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
@@ -2961,7 +3180,7 @@ var NotificationManager = /** @class */ (function () {
         var _this = this;
         console.log('notifications subscriptions setup');
         var notifs = [
-            ['acceptBribe', 1],
+            ['battle', 250],
             ['cardAction', 1],
             ['changeRuler', 1],
             // ['initiateNegotiation', 1],
@@ -2973,6 +3192,7 @@ var NotificationManager = /** @class */ (function () {
             ['playCard', 2000],
             ['discardCard', 1000],
             ['refreshMarket', 250],
+            ['payBribe', 1],
             ['purchaseGift', 1],
             ['smallRefreshHand', 1],
             ['smallRefreshInterface', 1],
@@ -2987,11 +3207,8 @@ var NotificationManager = /** @class */ (function () {
         // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
         // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
     };
-    NotificationManager.prototype.notif_acceptBribe = function (notif) {
-        var args = notif.args;
-        console.log('notif_acceptBribe', args);
-        var briberId = args.briberId, rulerId = args.rulerId, rupees = args.rupees;
-        this.getPlayer({ playerId: briberId }).payBribe({ rulerId: rulerId, rupees: rupees });
+    NotificationManager.prototype.notif_battle = function (notif) {
+        debug('notif_battle', notif);
     };
     NotificationManager.prototype.notif_cardAction = function (notif) {
         console.log('notif_cardAction', notif);
@@ -3089,6 +3306,12 @@ var NotificationManager = /** @class */ (function () {
                 removeClass: isArmy ? ['pp_army'] : ['pp_road'],
             });
         });
+    };
+    NotificationManager.prototype.notif_payBribe = function (notif) {
+        var args = notif.args;
+        console.log('notif_payBribe', args);
+        var briberId = args.briberId, rulerId = args.rulerId, rupees = args.rupees;
+        this.getPlayer({ playerId: briberId }).payBribe({ rulerId: rulerId, rupees: rupees });
     };
     NotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
@@ -3232,26 +3455,43 @@ var NotificationManager = /** @class */ (function () {
         var _this = this;
         console.log('notif_moveToken', notif);
         notif.args.moves.forEach(function (move) {
-            var tokenId = move.tokenId, from = move.from, to = move.to, updates = move.updates;
+            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
             var fromZone = _this.game.getZoneForLocation({ location: from });
             var toZone = _this.game.getZoneForLocation({ location: to });
             // TODO: perhaps create separate function for this
-            var addClass = to.startsWith('armies') ? ['pp_army'] : to.startsWith('roads') ? ['pp_road'] : undefined;
-            var removeClass = from.startsWith('blocks') ? ['pp_coalition_block'] : undefined;
+            var addClass = [];
+            var removeClass = [];
+            if (to.startsWith('armies')) {
+                addClass.push('pp_army');
+            }
+            else if (to.startsWith('roads')) {
+                addClass.push('pp_road');
+            }
+            else if (to.startsWith('blocks')) {
+                addClass.push('pp_coalition_block');
+            }
+            if (from.startsWith('blocks')) {
+                removeClass.push('pp_coalition_block');
+            }
+            else if (from.startsWith('armies')) {
+                removeClass.push('pp_army');
+            }
+            else if (from.startsWith('roads')) {
+                removeClass.push('pp_road');
+            }
             _this.game.move({
                 id: tokenId,
                 from: fromZone,
                 to: toZone,
                 addClass: addClass,
                 removeClass: removeClass,
+                weight: weight
             });
         });
     };
     NotificationManager.prototype.notif_log = function (notif) {
         // this is for debugging php side
-        console.log('notif_log', notif);
-        console.log(notif.log);
-        console.log(notif.args);
+        console.log('notif_log', notif.args);
     };
     return NotificationManager;
 }());
@@ -3465,9 +3705,14 @@ var PaxPamir = /** @class */ (function () {
         dojo.query('.pp_selected').removeClass('pp_selected');
         REGIONS.forEach(function (region) {
             var element = document.getElementById("pp_region_".concat(region));
-            element.classList.remove('pp_selectable');
+            if (element) {
+                element.classList.remove('pp_selectable');
+            }
         });
-        document.getElementById('pp_map_areas').classList.remove('pp_selectable');
+        var mapArea = document.getElementById('pp_map_areas');
+        if (mapArea) {
+            mapArea.classList.remove('pp_selectable');
+        }
     };
     PaxPamir.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;
@@ -3496,7 +3741,7 @@ var PaxPamir = /** @class */ (function () {
             var cardId = node.id;
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
-        }, this);
+        });
     };
     PaxPamir.prototype.clientUpdatePageTitle = function (_a) {
         var text = _a.text, args = _a.args;
@@ -3519,19 +3764,23 @@ var PaxPamir = /** @class */ (function () {
     // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
     /* @Override */
     PaxPamir.prototype.format_string_recursive = function (log, args) {
+        var _this = this;
         try {
             if (log && args && !args.processed) {
                 args.processed = true;
-                // list of special keys we want to replace with images
-                var keys = logTokenKeys;
-                // list of other known variables
-                //  var keys = this.notification_manager.keys;
-                for (var i in keys) {
-                    var key = keys[i];
-                    if (args[key] != undefined) {
-                        args[key] = getLogTokenDiv(key, args);
+                // replace all keys that start with 'logToken'
+                Object.entries(args).forEach(function (_a) {
+                    var key = _a[0], value = _a[1];
+                    if (key.startsWith('logToken')) {
+                        args[key] = getLogTokenDiv({ logToken: value, game: _this });
                     }
-                }
+                });
+                // TODO: check below code. Looks like improved way for text shadows (source ticket to ride) 
+                // ['you', 'actplayer', 'player_name'].forEach((field) => {
+                //   if (typeof args[field] === 'string' && args[field].indexOf('#ffed00;') !== -1 && args[field].indexOf('text-shadow') === -1) {
+                //     args[field] = args[field].replace('#ffed00;', '#ffed00; text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;');
+                //   }
+                // });
             }
         }
         catch (e) {

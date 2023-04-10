@@ -177,4 +177,19 @@
   background-size: 240px 334px;
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
   border-radius: 10px;
+  // transform: perspective(60em) rotateY(-10deg)// scale(.93);
+  // animation: ea-wiggle 5s infinite alternate;
 }
+
+// // Card detail
+// @keyframes ea-wiggle {
+//   0% {
+//       transform: perspective(60em) rotateY(-12deg) scale(.93);
+//       animation-timing-function: ease-in-out
+//   }
+
+//   to {
+//       transform: perspective(60em) rotateY(-2deg) scale(.93);
+//       animation-timing-function: ease-in-out
+//   }
+// }

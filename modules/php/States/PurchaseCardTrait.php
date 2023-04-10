@@ -51,8 +51,7 @@ trait PurchaseCardTrait
     $cost = $checkData['cost'];
     $rowAlt = $checkData['rowAlt'];
     $marketLocation = $checkData['marketLocation'];
-    $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
-
+    
     $nextState = 'playerActions';
     Players::incRupees($playerId, -$cost);
     Globals::incRemainingActions(-1);
@@ -101,17 +100,19 @@ trait PurchaseCardTrait
     Players::incRupees($playerId, $receivedRupees);
     Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
-    self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenCardLarge}'), array(
-      'playerId' => $playerId,
-      'player_name' => self::getActivePlayerName(),
-      'receivedRupees' => $receivedRupees,
-      'card' => $card,
-      'cardName' => $cardName,
-      'logTokenCardLarge' => $card['id'],
-      'marketLocation' => $marketLocation,
-      'newLocation' => $newLocation,
-      'rupeesOnCards' => $rupeesOnCards,
-    ));
+    Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
+
+    // self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenLargeCard}'), array(
+    //   'playerId' => $playerId,
+    //   'player_name' => self::getActivePlayerName(),
+    //   'receivedRupees' => $receivedRupees,
+    //   'card' => $card,
+    //   'cardName' => $cardName,
+    //   'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
+    //   'marketLocation' => $marketLocation,
+    //   'newLocation' => $newLocation,
+    //   'rupeesOnCards' => $rupeesOnCards,
+    // ));
 
     $this->gamestate->nextState($nextState);
   }

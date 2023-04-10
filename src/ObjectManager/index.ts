@@ -153,6 +153,7 @@ class Supply {
           weight: block.state,
         });
       });
+      this.coalitionBlocks[coalition].instantaneous = false;
     });
   }
 

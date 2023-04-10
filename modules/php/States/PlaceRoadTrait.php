@@ -64,12 +64,12 @@ trait PlaceRoadTrait
       $region0 = explode("_", $border)[0];
       $region1 = explode("_", $border)[1];
       Tokens::move($road['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${region0} and ${region1}');
+      $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
       Notifications::moveToken($message, [
         'player' => Players::get(),
-        'logTokenRoad' =>$loyalty,
-        'region0' => $this->regions[$region0]['name'],
-        'region1' => $this->regions[$region1]['name'],
+        'logTokenRoad' => implode(':', ['road',$loyalty]),
+        'logTokenRegionName0' => implode(':', ['regionName',$region0]),
+        'logTokenRegionName1' => implode(':', ['regionName',$region1]),
         'moves' => [
           [
             'from' => $location,
@@ -78,15 +78,6 @@ trait PlaceRoadTrait
           ]
         ]
       ]);
-      // self::notifyAllPlayers("moveToken", "", array(
-      //   'moves' => array(
-      //     0 => array(
-      //       'from' => $location,
-      //       'to' => $to,
-      //       'tokenId' => $road['id'],
-      //     )
-      //   )
-      // ));
     }
     Globals::incResolveImpactIconsCurrentIcon(1);
     $this->gamestate->nextState('resolveImpactIcons');

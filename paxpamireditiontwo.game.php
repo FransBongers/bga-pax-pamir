@@ -52,6 +52,7 @@ require_once('modules/php/PPUtilityFunctions.php');
  */
 class PaxPamirEditionTwo extends Table
 {
+    use PaxPamir\DebugTrait;
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DominanceCheckTrait;
@@ -139,8 +140,9 @@ class PaxPamirEditionTwo extends Table
             'staticData' => [
                 'borders' => $this->borders,
                 'cards' => $this->cards,
-                'specialAbilities' => $this->specialAbilities,
                 'loyalty' => $this->loyalty,
+                'regions' => $this->regions,
+                'specialAbilities' => $this->specialAbilities,
                 'suits' => $this->suits,
             ],
             'players' => Players::getUiData($pId),

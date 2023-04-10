@@ -118,7 +118,7 @@ class ClientPlayCardState implements State {
           action: 'playCard',
           data: {
             cardId,
-            leftSide: side === 'left',
+            side,
             bribe,
           },
         }),

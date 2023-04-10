@@ -72,12 +72,38 @@ class Notifications
     ]);
   }
 
+  public static function log($message, $data)
+  {
+    // Keep only the thing that matters
+    $fDatas = [
+      // Add data here that needs to be refreshed
+    ];
+
+    self::notifyAll('log', '', [
+      'message' => $message,
+      'data' => $data,
+    ]);
+  }
+
+  /*************************
+   **** GAME METHODS ****
+   *************************/
+
+  public static function battleRegion($regionId)
+  {
+    $message = clienttranslate('${player_name} battles in ${logTokenLocation}');
+    self::notifyAll('battle', $message, [
+      'player' => Players::get(),
+      'logTokenLocation' => implode(':', ['regionName', $regionId]),
+    ]);
+  }
+
   public static function changeFavoredSuit($previousSuit, $newSuit)
   {
     $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
     self::notifyAll('changeFavoredSuit', $message, [
       'player' => Players::get(),
-      'logTokenFavoredSuit' => $newSuit,
+      'logTokenFavoredSuit' => implode(':', ['favoredSuit', $newSuit]),
       'from' => $previousSuit,
       'to' => $newSuit,
     ]);
@@ -105,11 +131,11 @@ class Notifications
   public static function discardEventCardFromMarket($card, $location)
   {
 
-    self::notifyAll("discardCard", clienttranslate('${player_name} discards event card from the market: ${logTokenCardLarge}'), array(
+    self::notifyAll("discardCard", clienttranslate('${player_name} discards event card from the market: ${logTokenLargeCard}'), array(
       'player' => Players::get(),
       'cardId' => $card['id'],
       'from' => $location,
-      'logTokenCardLarge' => $card['id']
+      'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
     ));
   }
 
@@ -117,8 +143,6 @@ class Notifications
   {
     self::notifyAll("acceptBribe", clienttranslate('${player_name} accepts bribe of ${rupees} rupee(s)'), array(
       'player' => Players::get(),
-      'rulerId' => $rulerId,
-      'briberId' => $briberId,
       'rupees' => $rupees,
     ));
   }
@@ -137,6 +161,55 @@ class Notifications
     self::notifyAll("proposeBribeAmount", $msg, array(
       'player' => Players::get(),
       'rupees' => $rupees,
+    ));
+  }
+
+  public static function pass()
+  {
+    self::notifyAll("pass", clienttranslate('${player_name} passes'), array(
+      'player' => Players::get(),
+    ));
+  }
+
+  public static function payBribe($briberId, $rulerId, $rupees)
+  {
+    self::notifyAll("payBribe", clienttranslate('${player_name} pays bribe of ${rupees} rupee(s) to ${logTokenPlayerName}'), array(
+      'player' => Players::get($briberId),
+      'rulerId' => $rulerId,
+      'briberId' => $briberId,
+      'rupees' => $rupees,
+      'logTokenPlayerName' => implode(':', ['playerName', $rulerId,]),
+    ));
+  }
+
+  public static function playCard($card, $courtCards, $side, $playerId)
+  {
+    // Minus 1 because $courtCards includes the card currently being played
+    $message = count($courtCards) - 1 === 0 ? clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to his court') :
+      clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to the ${side} side of his court');
+    self::notifyAll("playCard", $message, array(
+      'player' => Players::get($playerId),
+      'card' => $card,
+      'logTokenCardName' => implode(':', ['cardName', $card['name']]),
+      'courtCards' => $courtCards,
+      'bribe' => false,
+      'logTokenCard' => implode(':', ['card', $card['id']]),
+      'side' => $side === 'left' ? clienttranslate('left') : clienttranslate('right')
+    ));
+  }
+
+  public static function purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards)
+  {
+    $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
+    self::notifyAll("purchaseCard",  clienttranslate('${player_name} purchases ${logTokenCardName} ${logTokenLargeCard}'), array(
+      'player' => Players::get(),
+      'receivedRupees' => $receivedRupees,
+      'card' => $card,
+      'logTokenCardName' => implode(':', ['cardName', $cardName,]),
+      'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
+      'marketLocation' => $marketLocation,
+      'newLocation' => $newLocation,
+      'rupeesOnCards' => $rupeesOnCards,
     ));
   }
 

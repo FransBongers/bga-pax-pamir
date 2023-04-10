@@ -11,5 +11,6 @@ trait DebugTrait
 {
   function test()
   {
+    Notifications::log('test DebugTrait',['whoop whoop']);
   }
 }

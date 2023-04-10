@@ -488,12 +488,14 @@ class Pieces extends DB_Manager
   {
     $pos = self::getExtremePosition(true, $location);
     self::insertAt($id, $location, $pos + 1);
+    return $pos + 1;
   }
 
   public static function insertAtBottom($id, $location)
   {
     $pos = self::getExtremePosition(false, $location);
     self::insertAt($id, $location, $pos - 1);
+    return $pos - 1;
   }
 
   /************************************

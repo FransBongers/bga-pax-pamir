@@ -62,12 +62,6 @@ trait CleanupTrait
       $state = Cards::getExtremePosition(true, DISCARD);
       Cards::move($card['id'], DISCARD, $state + 1);
       Notifications::discardEventCardFromMarket($card, $location);
-      // self::notifyAllPlayers("discardCard", '${player_name} discards event card from the market: ${logTokenCardLarge}', array(
-      //   'player_name' => self::getActivePlayerName(),
-      //   'cardId' => $card['id'],
-      //   'from' => $location,
-      //   'logTokenCardLarge' => $card['id']
-      // ));
     };
   }
 

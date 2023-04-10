@@ -62,12 +62,12 @@ trait PlaceSpyTrait
     if ($cylinder != null) {
       $to = 'spies_' . $cardId;
       Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${cardName}${logTokenCardLarge}');
+      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
       Notifications::moveToken($message, [
         'player' => Players::get(),
-        'logTokenCardLarge' => $cardId,
-        'logTokenCylinder' => Players::get()->getColor(),
-        'cardName' => Cards::get($cardId)['name'],
+        'logTokenLargeCard' => implode(':', ['largeCard', $cardId]),
+        'logTokenCylinder' => implode(':', ['cylinder', Players::get()->getId()]),
+        'logTokenCardName' => implode(':', ['cardName', Cards::get($cardId)['name']]),
         'moves' => [
           [
             'from' => $from,

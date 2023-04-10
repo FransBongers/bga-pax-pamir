@@ -1,51 +1,46 @@
-const LOG_TOKEN_ARMY = 'logTokenArmy';
-const LOG_TOKEN_CARD = 'logTokenCard';
-const LOG_TOKEN_CARD_LARGE = 'logTokenCardLarge';
-const LOG_TOKEN_COALITION = 'logTokenCoalition';
-const LOG_TOKEN_FAVORED_SUIT = 'logTokenFavoredSuit';
-const LOG_TOKEN_NEW_CARDS = 'logTokenNewCards';
-const LOG_TOKEN_ROAD = 'logTokenRoad';
-const LOG_TOKEN_SPY = 'logTokenSpy';
-const LOG_TOKEN_CYLINDER = 'logTokenCylinder';
+const LOG_TOKEN_ARMY = 'army';
+const LOG_TOKEN_CARD = 'card';
+const LOG_TOKEN_LARGE_CARD = 'largeCard';
+const LOG_TOKEN_CARD_NAME = 'cardName';
+const LOG_TOKEN_COALITION = 'coalition';
+const LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
+const LOG_TOKEN_ROAD = 'road';
+const LOG_TOKEN_CYLINDER = 'cylinder';
+const LOG_TOKEN_PLAYER_NAME = 'playerName';
+const LOG_TOKEN_REGION_NAME = 'regionName';
 
-const logTokenKeys = [
-  LOG_TOKEN_ARMY,
-  LOG_TOKEN_CARD,
-  LOG_TOKEN_CARD_LARGE,
-  LOG_TOKEN_COALITION,
-  LOG_TOKEN_FAVORED_SUIT,
-  LOG_TOKEN_NEW_CARDS,
-  LOG_TOKEN_ROAD,
-  LOG_TOKEN_SPY,
-  LOG_TOKEN_CYLINDER,
-];
-
-const getLogTokenDiv = (key: string, args: Record<string, string | number | Record<string, any>>) => {
-  const data = args[key];
-  // console.log('getLogTokenDiv', key, 'data', data);
-  switch (key) {
+const getLogTokenDiv = ({logToken, game}: {logToken: string; game: PaxPamirGame}) => {
+  const [type,data] = logToken.split(':');
+  switch (type) {
     case LOG_TOKEN_ARMY:
-      return tplLogTokenArmy({ coalition: data as string });
+      return tplLogTokenArmy({ coalition: data });
     case LOG_TOKEN_CARD:
-      return tplLogTokenCard({ cardId: data as string });
-    case LOG_TOKEN_CARD_LARGE:
-      return tplLogTokenCard({ cardId: data as string, large: true });
+      return tplLogTokenCard({ cardId: data });
+    case LOG_TOKEN_LARGE_CARD:
+      return tplLogTokenCard({ cardId: data, large: true });
+    case LOG_TOKEN_CARD_NAME:
+      return tlpLogTokenBoldText({text: data})
     case LOG_TOKEN_FAVORED_SUIT:
-      return tplLogTokenFavoredSuit({ suit: data as string });
+      return tplLogTokenFavoredSuit({ suit: data });
     case LOG_TOKEN_CYLINDER:
-      return tplLogTokenCylinder({ color: data as string });
+      return tplLogTokenCylinder({ color: game.playerManager.getPlayer({playerId: Number(data)}).getColor() });
     case LOG_TOKEN_COALITION:
-      return tplLogTokenCoalition({ coalition: data as string });
-    case LOG_TOKEN_NEW_CARDS:
-      return tplLogTokenNewCards({ cards: data as { cardId: string }[] });
+      return tplLogTokenCoalition({ coalition: data });
     case LOG_TOKEN_ROAD:
-      return tplLogTokenRoad({ coalition: data as string });
+      return tplLogTokenRoad({ coalition: data });
+    case LOG_TOKEN_PLAYER_NAME:
+      const player = game.playerManager.getPlayer({playerId: Number(data)})
+      return tplLogTokenPlayerName({name: player.getName(), color: player.getColor()});
+    case LOG_TOKEN_REGION_NAME:
+      return tplLogTokenRegionName({name: game.gamedatas.staticData.regions[data].name, regionId: data});
     default:
-      return args[key];
+      return type;
   }
 };
 
 const tplLogTokenArmy = ({ coalition }: { coalition: string }) => `<div class="pp_${coalition} pp_army pp_log_token"></div>`;
+
+const tlpLogTokenBoldText = ({text}) => `<span style="font-weight: 700;">${_(text)}</span>`
 
 const tplLogTokenCard = ({ cardId, large }: { cardId: string; large?: boolean }) =>
   `<div class="pp_card pp_log_token pp_${cardId}${large ? ' pp_large' : ''}"></div>`;
@@ -63,5 +58,9 @@ const tplLogTokenNewCards = ({ cards }: { cards: { cardId: string }[] }) => {
   });
   return newCards;
 };
+
+const tplLogTokenPlayerName = ({name, color}:{name: string; color: string;}) => `<span class="playername" style="color:#${color};">${name}</span>`;
+
+const tplLogTokenRegionName = ({name, regionId}:{name: string; regionId: string;}) => `<span style="font-weight: 700;">${_(name)}</span><div class="pp_log_token pp_${regionId} pp_region_icon"></div>`;
 
 const tplLogTokenRoad = ({ coalition }: { coalition: string }) => `<div class="pp_${coalition} pp_road pp_log_token"></div>`;

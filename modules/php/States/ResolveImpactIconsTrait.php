@@ -69,11 +69,11 @@ trait ResolveImpactIconsTrait
         if ($army != null) {
           $to = $this->locations['armies'][$card_region];
           Tokens::move($army['id'], $this->locations['armies'][$card_region]);
-          $message = clienttranslate('${player_name} places ${logTokenArmy} in ${region}');
+          $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
           Notifications::moveToken($message, [
             'player' => Players::get(),
-            'logTokenArmy' => $loyalty,
-            'region' => Map::getRegionInfo($card_region)['name'],
+            'logTokenArmy' => implode(':', ['army',$loyalty]),
+            'logTokenRegionName' => implode(':', ['regionName',$card_region]),
             'moves' => [
               [
                 'from' => $location,
@@ -147,11 +147,11 @@ trait ResolveImpactIconsTrait
         $to = $this->locations["tribes"][$card_region];
         if ($cylinder != null) {
           Tokens::move($cylinder['id'], $to);
-          $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${region}');
+          $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
           Notifications::moveToken($message, [
             'player' => Players::get(),
-            'logTokenCylinder' => Players::get()->getColor(),
-            'region' => Map::getRegionInfo($card_region)['name'],
+            'logTokenCylinder' => implode(':', ['cylinder', Players::get()->getId()]),
+            'logTokenRegionName' => implode(':', ['regionName',$card_region]),
             'moves' => [
               [
                 'from' => $from,

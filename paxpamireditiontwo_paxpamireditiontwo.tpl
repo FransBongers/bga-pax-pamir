@@ -27,6 +27,11 @@
 
 <div id="pp_play_area">
     <div id="pp_map">
+        <!-- alternative solution with clip-path
+        <div id="pp_map_areas">
+            <div id="pp_region_herat" class="pp_region"></div>
+        </div>
+        -->
         <svg id="pp_map_areas">
             <path id="pp_region_herat" class="pp_region" d="M 438,400 c 10,-30 12,-50 14,-70 c 0,-20 2,-40 4,-60 c 3,-24 0,-50 -30, -62 c -20,-10 -20,-11 -40,-25 c -60,-50 -72,-40 -97,-20 c -14,14 -32,22 -43,30 c -30,24 -50,47 -46,70 c 0,40, -1,60 3,80 C 210,380 209,390 209,400 Z" />
             <path id="pp_region_kabul" class="pp_region" d="M 353,2 c -1,60 -9,120 -23,136 c 10,3 20,8 30,16 c 10,7 20,15 30,21 c 20,17 30,22 40,26 c 15,8 21,13 25,18 c 15,-7 35,-4 50,-2 c 10,2 25,3 35,8 c 15,7 30,7 40,3 c 15,-3 20,-2 40,-6 c 18,-2 36,-9 54,-32 c 15,-40 25,-80 46,-109 C 740,60 748,38 756,2 Z" />

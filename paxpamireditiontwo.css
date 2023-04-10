@@ -41,6 +41,15 @@
   margin-right: 2px;
 }
 
+.pp_log_token.pp_region_icon {
+  width: 20px;
+  height: 20px;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  margin-bottom: -3px;
+  margin-top: 5px;
+}
+
 .pp_log_token.pp_loyalty_icon.pp_afghan {
   height: 20px;
   width: 38px;
@@ -152,11 +161,17 @@
 }
 
 .pp_region.pp_selectable {
-  fill: green;
+  fill: yellow;
   fill-opacity: 25%;
-  stroke: green;
+  stroke: yellow;
   stroke-width: 4;
   cursor: pointer;
+  z-index: 50;
+}
+
+.pp_region.pp_selectable:hover {
+  fill: blue;
+  stroke: blue;
 }
 
 .pp_location {
@@ -1113,6 +1128,15 @@ html {
   filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
+.pp_army.pp_selectable, .pp_road.pp_selectable {
+  filter: drop-shadow(2px 0px 0px yellow) drop-shadow(-2px 0px 0px yellow) drop-shadow(0px 2px 0px yellow) drop-shadow(0px -2px 0px yellow);
+}
+
+.pp_army.pp_selectable:hover, .pp_army.pp_selected, .pp_road.pp_selectable:hover, .pp_road.pp_selected {
+  filter: drop-shadow(2px 0px 0px blue) drop-shadow(-2px 0px 0px blue) drop-shadow(0px 2px 0px blue) drop-shadow(0px -2px 0px blue);
+  cursor: pointer;
+}
+
 .pp_army.pp_afghan {
   background-image: url("img/army_afghan.svg");
 }
@@ -1161,6 +1185,15 @@ html {
   width: 30px;
   z-index: 1;
   filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+.pp_cylinder.pp_selectable {
+  filter: drop-shadow(2px 0px 0px yellow) drop-shadow(-2px 0px 0px yellow) drop-shadow(0px 2px 0px yellow) drop-shadow(0px -2px 0px yellow);
+}
+
+.pp_cylinder.pp_selectable:hover, .pp_cylinder.pp_selected {
+  filter: drop-shadow(2px 0px 0px blue) drop-shadow(-2px 0px 0px blue) drop-shadow(0px 2px 0px blue) drop-shadow(0px -2px 0px blue);
+  cursor: pointer;
 }
 
 .pp_cylinder.pp_player_color_98B3C0 {
@@ -1313,11 +1346,6 @@ html {
   margin-top: -16px;
 }
 
-.pp_disabled {
-  opacity: 0.5;
-  cursor: none;
-}
-
 .pp_card_in_court:hover, .pp_card_in_court:active {
   z-index: 100 !important;
   /* border: 2px blue solid; */
@@ -1351,27 +1379,27 @@ html {
   pointer-events: none;
 }
 
-.pp_herat_icon {
+.pp_herat_icon, .pp_herat.pp_region_icon {
   background-image: url("img/region_herat.svg");
 }
 
-.pp_kabul_icon {
+.pp_kabul_icon, .pp_kabul.pp_region_icon {
   background-image: url("img/region_kabul.svg");
 }
 
-.pp_kandahar_icon {
+.pp_kandahar_icon, .pp_kandahar.pp_region_icon {
   background-image: url("img/region_kandahar.svg");
 }
 
-.pp_persia_icon {
+.pp_persia_icon, .pp_persia.pp_region_icon {
   background-image: url("img/region_persia.svg");
 }
 
-.pp_punjab_icon {
+.pp_punjab_icon, .pp_punjab.pp_region_icon {
   background-image: url("img/region_punjab.svg");
 }
 
-.pp_transcaspia_icon {
+.pp_transcaspia_icon, .pp_transcaspia.pp_region_icon {
   background-image: url("img/region_transcaspia.svg");
 }
 

@@ -157,39 +157,39 @@ $this->regions = array(
 $this->borders = array (
   'herat_kabul' => array(
     'name' => clienttranslate("Herat-Kabul border"),
-    'regions' => 'kabul, herat',
+    'regions' => ['kabul', 'herat']
   ),
   'herat_kandahar' => array(
     'name' => clienttranslate("Herat-Kandahar border"),
-    'regions' => 'herat, kandahar',
+    'regions' => ['herat', 'kandahar']
   ),
   'herat_persia' => array(
     'name' => clienttranslate("Persia-Herat border"),
-    'regions' => 'herat, persia',
+    'regions' => ['herat', 'persia']
   ),
   'herat_transcaspia' => array(
     'name' => clienttranslate("Herat-Transcaspia border"),
-    'regions' => 'transcaspia, herat',
+    'regions' => ['transcaspia', 'herat']
   ),
   'kabul_kandahar' => array(
     'name' => clienttranslate("Kabul-Kandahar border"),
-    'regions' => 'kabul, kandahar',
+    'regions' => ['kabul', 'kandahar']
   ),
   'kabul_punjab' => array(
     'name' => clienttranslate("Kabul-Punjab border"),
-    'regions' => 'kabul, punjab',
+    'regions' => ['kabul', 'punjab']
   ),
   'kabul_transcaspia' => array(
     'name' => clienttranslate("Kabul-Transcaspia border"),
-    'regions' => 'transcaspia, kabul',
+    'regions' => ['transcaspia', 'kabul']
   ),
   'kandahar_punjab' => array(
     'name' => clienttranslate("Kandahar-Punjab border"),
-    'regions' => 'kandahar, punjab',
+    'regions' => ['kandahar', 'punjab'],
   ),
   'persia_transcaspia' => array(
     'name' => clienttranslate("Persia-Transcaspia border"),
-    'regions' => 'transcaspia, persia',
+    'regions' => ['transcaspia', 'persia'],
   ),
 );
 

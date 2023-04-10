@@ -45,7 +45,7 @@ class DiscardHandState implements State {
       text: _('Confirm'),
       callback: () => this.handleDiscardConfirm({ fromHand: true }),
     });
-    dojo.addClass('confirm_btn', 'pp_disabled');
+    dojo.addClass('confirm_btn', 'disabled');
     this.game.setHandCardsSelectable({
       callback: ({ cardId }: { cardId: string }) => this.handleDiscardSelect({ cardId }),
     });
@@ -81,9 +81,9 @@ class DiscardHandState implements State {
     const numberSelected = dojo.query('.pp_selected').length;
     console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
     if (numberSelected === this.numberOfDiscards) {
-      dojo.removeClass('confirm_btn', 'pp_disabled');
+      dojo.removeClass('confirm_btn', 'disabled');
     } else {
-      dojo.addClass('confirm_btn', 'pp_disabled');
+      dojo.addClass('confirm_btn', 'disabled');
     }
   }
 }

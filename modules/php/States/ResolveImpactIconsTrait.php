@@ -72,8 +72,8 @@ trait ResolveImpactIconsTrait
           $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
           Notifications::moveToken($message, [
             'player' => Players::get(),
-            'logTokenArmy' => implode(':', ['army',$loyalty]),
-            'logTokenRegionName' => implode(':', ['regionName',$card_region]),
+            'logTokenArmy' => Utils::logTokenArmy($loyalty),
+            'logTokenRegionName' => Utils::logTokenRegionName($card_region),
             'moves' => [
               [
                 'from' => $location,
@@ -150,8 +150,8 @@ trait ResolveImpactIconsTrait
           $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
           Notifications::moveToken($message, [
             'player' => Players::get(),
-            'logTokenCylinder' => implode(':', ['cylinder', Players::get()->getId()]),
-            'logTokenRegionName' => implode(':', ['regionName',$card_region]),
+            'logTokenCylinder' => Utils::logTokenCylinder(Players::get()->getId()),
+            'logTokenRegionName' => Utils::logTokenRegionName($card_region),
             'moves' => [
               [
                 'from' => $from,

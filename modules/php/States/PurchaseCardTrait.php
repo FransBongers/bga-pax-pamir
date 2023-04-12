@@ -102,18 +102,6 @@ trait PurchaseCardTrait
 
     Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
 
-    // self::notifyAllPlayers("purchaseCard", clienttranslate('${player_name} purchases ${cardName} ${logTokenLargeCard}'), array(
-    //   'playerId' => $playerId,
-    //   'player_name' => self::getActivePlayerName(),
-    //   'receivedRupees' => $receivedRupees,
-    //   'card' => $card,
-    //   'cardName' => $cardName,
-    //   'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
-    //   'marketLocation' => $marketLocation,
-    //   'newLocation' => $newLocation,
-    //   'rupeesOnCards' => $rupeesOnCards,
-    // ));
-
     $this->gamestate->nextState($nextState);
   }
 
@@ -136,7 +124,7 @@ trait PurchaseCardTrait
       throw new \feException("Card is unavailble");
     }
     // Card should be in the market
-    if (!$this->startsWith($card['location'], "market")) {
+    if (!Utils::startsWith($card['location'], "market")) {
       throw new \feException("Card is not in the market");
     }
     $marketLocation = $card['location'];

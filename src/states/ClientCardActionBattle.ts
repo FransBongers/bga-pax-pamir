@@ -57,8 +57,28 @@ class ClientCardActionBattleState implements State {
     this.numberSelected = 0;
     debug('enemyPieces', enemyPieces);
 
-    this.updatePageTitle();
+    this.updatePageTitle('region');
     this.setPiecesSelectable({ pieces: enemyPieces });
+    this.game.addPrimaryActionButton({
+      id: 'confirm_btn',
+      text: _('Confirm'),
+      callback: () => this.confirmBattle(),
+    });
+    dojo.addClass('confirm_btn', 'disabled');
+    this.game.addCancelButton();
+  }
+
+  private updateInterfaceSelectPiecesOnCard({ cardId }: { cardId: string }) {
+    this.game.clearPossible();
+    this.location = cardId;
+    const cardInfo = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
+    const cardRank = cardInfo.rank;
+    const { enemy, own } = this.getSpies({ cardId });
+    this.maxNumberToSelect = Math.min(cardRank, own.length);
+    this.numberSelected = 0;
+
+    this.updatePageTitle('card');
+    this.setPiecesSelectable({ pieces: enemy });
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
@@ -83,11 +103,14 @@ class ClientCardActionBattleState implements State {
     debug('pieces', pieces);
     const numberOfPieces = pieces.length;
     if (numberOfPieces <= this.maxNumberToSelect && numberOfPieces > 0) {
-      this.game.takeAction({action: 'battle', data: {
-        removedPieces: pieces.join(' '),
-        location: this.location,
-        cardId: this.cardId,
-      }})
+      this.game.takeAction({
+        action: 'battle',
+        data: {
+          removedPieces: pieces.join(' '),
+          location: this.location,
+          cardId: this.cardId,
+        },
+      });
     }
   }
 
@@ -100,21 +123,29 @@ class ClientCardActionBattleState implements State {
       const courtCards = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
 
       courtCards.forEach((cardId: string) => {
-        const spyZone = this.game.spies[cardId];
-        if (!spyZone) {
-          return false;
-        }
+        const { enemy, own } = this.getSpies({ cardId });
 
-        const cylinderIds = spyZone.getAllItems();
-        const hasEnemySpies = cylinderIds.some((cylinderId: string) => Number(cylinderId.split('_')[1]) !== this.game.getPlayerId());
-        const hasOwnSpies = cylinderIds.some((cylinderId: string) => Number(cylinderId.split('_')[1]) === this.game.getPlayerId());
-
-        if (hasEnemySpies && hasOwnSpies) {
+        if (enemy.length > 0 && own.length > 0) {
           battleSites.push(cardId);
         }
       });
     });
     return battleSites;
+  }
+
+  getSpies({ cardId }: { cardId: string }): { enemy: string[]; own: string[] } {
+    const spyZone = this.game.spies[cardId];
+    if (!spyZone) {
+      return {
+        enemy: [],
+        own: [],
+      };
+    }
+    const cylinderIds = spyZone.getAllItems();
+    return {
+      enemy: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()),
+      own: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) === this.game.getPlayerId()),
+    };
   }
 
   handlePieceClicked({ pieceId }: { pieceId: string }) {
@@ -126,7 +157,7 @@ class ClientCardActionBattleState implements State {
     } else {
       dojo.addClass('confirm_btn', 'disabled');
     }
-    this.updatePageTitle();
+    this.updatePageTitle(this.location.startsWith('card') ? 'card' : 'region');
   }
 
   setPiecesSelectable({ pieces }: { pieces: string[] }) {
@@ -169,14 +200,24 @@ class ClientCardActionBattleState implements State {
     courtBattleSites.forEach((cardId: string) => {
       dojo.query(`#${cardId}`).forEach((node: HTMLElement, index: number) => {
         dojo.addClass(node, 'pp_selectable');
-        this.game._connections.push(dojo.connect(node, 'onclick', this, () => console.log('cardId', cardId)));
+        this.game._connections.push(
+          dojo.connect(node, 'onclick', this, () => {
+            console.log('select court card click');
+            this.updateInterfaceSelectPiecesOnCard({ cardId });
+          })
+        );
       });
     });
   }
 
-  updatePageTitle() {
+  updatePageTitle(location: 'region' | 'card') {
+    const mainText = {
+      card: _('${you} may select spies to remove'),
+      region: _('${you} may select tribes, roads or armies to remove'),
+    };
+
     this.game.clientUpdatePageTitle({
-      text: _('${you} may select tribes, roads or armies to remove') + _(' (${remaining} remaining)'),
+      text: mainText[location] + _(' (${remaining} remaining)'),
       args: {
         you: '${you}',
         number: this.maxNumberToSelect,

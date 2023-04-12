@@ -1961,8 +1961,28 @@ var ClientCardActionBattleState = /** @class */ (function () {
         this.maxNumberToSelect = Math.min(cardRank, coalitionArmies.length);
         this.numberSelected = 0;
         debug('enemyPieces', enemyPieces);
-        this.updatePageTitle();
+        this.updatePageTitle('region');
         this.setPiecesSelectable({ pieces: enemyPieces });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.confirmBattle(); },
+        });
+        dojo.addClass('confirm_btn', 'disabled');
+        this.game.addCancelButton();
+    };
+    ClientCardActionBattleState.prototype.updateInterfaceSelectPiecesOnCard = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        this.location = cardId;
+        var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
+        var cardRank = cardInfo.rank;
+        var _b = this.getSpies({ cardId: cardId }), enemy = _b.enemy, own = _b.own;
+        this.maxNumberToSelect = Math.min(cardRank, own.length);
+        this.numberSelected = 0;
+        this.updatePageTitle('card');
+        this.setPiecesSelectable({ pieces: enemy });
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
@@ -1985,11 +2005,14 @@ var ClientCardActionBattleState = /** @class */ (function () {
         debug('pieces', pieces);
         var numberOfPieces = pieces.length;
         if (numberOfPieces <= this.maxNumberToSelect && numberOfPieces > 0) {
-            this.game.takeAction({ action: 'battle', data: {
+            this.game.takeAction({
+                action: 'battle',
+                data: {
                     removedPieces: pieces.join(' '),
                     location: this.location,
                     cardId: this.cardId,
-                } });
+                },
+            });
         }
     };
     /**
@@ -2001,19 +2024,29 @@ var ClientCardActionBattleState = /** @class */ (function () {
         this.game.playerManager.getPlayerIds().forEach(function (playerId) {
             var courtCards = _this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
             courtCards.forEach(function (cardId) {
-                var spyZone = _this.game.spies[cardId];
-                if (!spyZone) {
-                    return false;
-                }
-                var cylinderIds = spyZone.getAllItems();
-                var hasEnemySpies = cylinderIds.some(function (cylinderId) { return Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId(); });
-                var hasOwnSpies = cylinderIds.some(function (cylinderId) { return Number(cylinderId.split('_')[1]) === _this.game.getPlayerId(); });
-                if (hasEnemySpies && hasOwnSpies) {
+                var _a = _this.getSpies({ cardId: cardId }), enemy = _a.enemy, own = _a.own;
+                if (enemy.length > 0 && own.length > 0) {
                     battleSites.push(cardId);
                 }
             });
         });
         return battleSites;
+    };
+    ClientCardActionBattleState.prototype.getSpies = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        var spyZone = this.game.spies[cardId];
+        if (!spyZone) {
+            return {
+                enemy: [],
+                own: [],
+            };
+        }
+        var cylinderIds = spyZone.getAllItems();
+        return {
+            enemy: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId(); }),
+            own: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) === _this.game.getPlayerId(); }),
+        };
     };
     ClientCardActionBattleState.prototype.handlePieceClicked = function (_a) {
         var pieceId = _a.pieceId;
@@ -2026,7 +2059,7 @@ var ClientCardActionBattleState = /** @class */ (function () {
         else {
             dojo.addClass('confirm_btn', 'disabled');
         }
-        this.updatePageTitle();
+        this.updatePageTitle(this.location.startsWith('card') ? 'card' : 'region');
     };
     ClientCardActionBattleState.prototype.setPiecesSelectable = function (_a) {
         var _this = this;
@@ -2065,13 +2098,20 @@ var ClientCardActionBattleState = /** @class */ (function () {
         courtBattleSites.forEach(function (cardId) {
             dojo.query("#".concat(cardId)).forEach(function (node, index) {
                 dojo.addClass(node, 'pp_selectable');
-                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return console.log('cardId', cardId); }));
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
+                    console.log('select court card click');
+                    _this.updateInterfaceSelectPiecesOnCard({ cardId: cardId });
+                }));
             });
         });
     };
-    ClientCardActionBattleState.prototype.updatePageTitle = function () {
+    ClientCardActionBattleState.prototype.updatePageTitle = function (location) {
+        var mainText = {
+            card: _('${you} may select spies to remove'),
+            region: _('${you} may select tribes, roads or armies to remove'),
+        };
         this.game.clientUpdatePageTitle({
-            text: _('${you} may select tribes, roads or armies to remove') + _(' (${remaining} remaining)'),
+            text: mainText[location] + _(' (${remaining} remaining)'),
             args: {
                 you: '${you}',
                 number: this.maxNumberToSelect,
@@ -3034,7 +3074,9 @@ var PlayerActionsState = /** @class */ (function () {
                         var cardAction_1 = child.id.split('_')[0];
                         // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
                         dojo.addClass(child, 'pp_selectable');
-                        _this.game._connections.push(dojo.connect(child, 'onclick', _this, function () {
+                        _this.game._connections.push(dojo.connect(child, 'onclick', _this, function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
                             switch (cardAction_1) {
                                 case 'battle':
                                     _this.game.framework().setClientState(CLIENT_CARD_ACTION_BATTLE, { args: { cardId: cardId } });
@@ -3230,16 +3272,15 @@ var NotificationManager = /** @class */ (function () {
         var args = notif.args;
         console.log('notif_changeRuler', args);
         var oldRuler = args.oldRuler, newRuler = args.newRuler, region = args.region;
-        var lowerCaseRegion = region.toLowerCase();
         var from = oldRuler === null
-            ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+            ? this.game.map.getRegion({ region: region }).getRulerZone()
             : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
         var to = newRuler === null
-            ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+            ? this.game.map.getRegion({ region: region }).getRulerZone()
             : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
-        this.game.map.getRegion({ region: lowerCaseRegion }).setRuler({ playerId: newRuler });
+        this.game.map.getRegion({ region: region }).setRuler({ playerId: newRuler });
         this.game.move({
-            id: "pp_ruler_token_".concat(lowerCaseRegion),
+            id: "pp_ruler_token_".concat(region),
             from: from,
             to: to,
         });

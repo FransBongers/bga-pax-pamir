@@ -54,7 +54,11 @@ trait PlaceSpyTrait
   {
     self::checkAction('placeSpy');
     self::dump("placeSpy on ", $cardId);
-
+    $card = Cards::get($cardId);
+    if(!Utils::startsWith($card['location'], "court")) {
+      throw new \feException("Selected card is not in a court");
+    };
+    // TODO: check if $cardId is in court?
     $playerId = self::getActivePlayerId();
     $from = "cylinders_" . $playerId;
     $cylinder = Tokens::getTopOf($from);
@@ -65,9 +69,9 @@ trait PlaceSpyTrait
       $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
       Notifications::moveToken($message, [
         'player' => Players::get(),
-        'logTokenLargeCard' => implode(':', ['largeCard', $cardId]),
-        'logTokenCylinder' => implode(':', ['cylinder', Players::get()->getId()]),
-        'logTokenCardName' => implode(':', ['cardName', Cards::get($cardId)['name']]),
+        'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+        'logTokenCylinder' => Utils::logTokenCylinder(Players::get()->getId()),
+        'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
         'moves' => [
           [
             'from' => $from,

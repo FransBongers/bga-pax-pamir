@@ -178,7 +178,7 @@ trait DominanceCheckTrait
     // return all coalition blocks to their pools
     $afghanBlocks = Tokens::getInLocation(BLOCKS_AFGHAN_SUPPLY);
     foreach ($afghanBlocks as $tokenId => $tokenInfo) {
-      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
+      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
           'tokenId' => $tokenId,
           'from' => $tokenInfo['location'],
@@ -190,7 +190,7 @@ trait DominanceCheckTrait
 
     $russianBlocks = Tokens::getInLocation(BLOCKS_RUSSIAN_SUPPLY);
     foreach ($russianBlocks as $tokenId => $tokenInfo) {
-      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
+      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
           'tokenId' => $tokenId,
           'from' => $tokenInfo['location'],
@@ -202,7 +202,7 @@ trait DominanceCheckTrait
 
     $britishBlocks = Tokens::getInLocation(BLOCKS_BRITISH_SUPPLY);
     foreach ($britishBlocks as $tokenId => $tokenInfo) {
-      if (!$this->startsWith($tokenInfo['location'], "blocks")) {
+      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
           'tokenId' => $tokenId,
           'from' => $tokenInfo['location'],

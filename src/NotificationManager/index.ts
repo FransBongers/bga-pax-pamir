@@ -91,18 +91,17 @@ class NotificationManager {
     const { args } = notif;
     console.log('notif_changeRuler', args);
     const { oldRuler, newRuler, region } = args;
-    const lowerCaseRegion = region.toLowerCase();
     const from =
       oldRuler === null
-        ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+        ? this.game.map.getRegion({ region }).getRulerZone()
         : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
     const to: Zone =
       newRuler === null
-        ? this.game.map.getRegion({ region: lowerCaseRegion }).getRulerZone()
+        ? this.game.map.getRegion({ region }).getRulerZone()
         : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
-    this.game.map.getRegion({ region: lowerCaseRegion }).setRuler({ playerId: newRuler });
+    this.game.map.getRegion({ region }).setRuler({ playerId: newRuler });
     this.game.move({
-      id: `pp_ruler_token_${lowerCaseRegion}`,
+      id: `pp_ruler_token_${region}`,
       from,
       to,
     });

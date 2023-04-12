@@ -62,128 +62,6 @@ trait PlayerActionTrait
   // .##.....##..######.....##....####..#######..##....##..######.
 
   /**
-   * Play card from hand to court
-   */
-  function battle($cardId, $location, $removedPieces)
-  {
-    self::checkAction('battle');
-    self::dump("battle", $location);
-    $cardInfo = Cards::get($cardId);
-
-    $this->isValidCardAction($cardInfo, BATTLE);
-
-    // Should not remove more pieces than allowed by rank
-    if (count($removedPieces) > $cardInfo['rank']) {
-      throw new \feException("More pieces to remove than allowed by rank of card");
-    }
-
-    $player = Players::get();
-    $loyalty = $player->getLoyalty();
-    $loyalPieces = $this->getLoyalPiecesInLocation($player, $location);
-
-    // Needs loyal pieces to remove enemy pieces
-    Notifications::log('battle debug', [$loyalPieces]);
-    if (count($loyalPieces) < count($removedPieces)) {
-      throw new \feException("Not enough loyal pieces");
-    }
-
-    foreach ($removedPieces as $index => $tokenId) {
-      $splitTokenId = explode("_", $tokenId);
-      // enemy pieces may not have the same loyalty
-      if ($this->startsWith($tokenId, "block") && $splitTokenId[1] === $loyalty) {
-        throw new \feException("Piece to remove has same loyalty as active player");
-      };
-      if ($this->startsWith($tokenId, "cylinder") && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
-        throw new \feException("Piece to remove has same loyalty as active player");
-      }
-      $tokenInfo = Tokens::get($tokenId);
-      $tokenLocation = $tokenInfo['location'];
-      $explodedTokenLocation = explode("_", $tokenLocation);
-      if (($this->startsWith($tokenLocation, "armies") || $this->startsWith($tokenLocation, "tribes")) && $explodedTokenLocation[1] !== $location) {
-        throw new \feException("Piece is not in the same region as the battle");
-      }
-      if ($this->startsWith($tokenLocation, "roads") && !in_array($location, $this->borders[$explodedTokenLocation[1] . '_' . $explodedTokenLocation[2]]['regions'])) {
-        throw new \feException("Piece is not on a border connected to the region of the battle");
-      }
-    };
-
-
-
-
-    foreach ($removedPieces as $index => $tokenId) {
-      $splitTokenId = explode("_", $tokenId);
-      // enemy pieces may not have the same loyalty
-      if ($this->startsWith($tokenId, "block") && $splitTokenId[1] === $loyalty) {
-        throw new \feException("Piece to remove has same loyalty as active player");
-      };
-      if ($this->startsWith($tokenId, "cylinder") && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
-        throw new \feException("Piece to remove has same loyalty as active player");
-      }
-      $tokenInfo = Tokens::get($tokenId);
-      $tokenLocation = $tokenInfo['location'];
-      $explodedTokenLocation = explode("_", $tokenLocation);
-      if (($this->startsWith($tokenLocation, "armies") || $this->startsWith($tokenLocation, "tribes")) && $explodedTokenLocation[1] !== $location) {
-        throw new \feException("Piece is not in the same region as the battle");
-      }
-      if ($this->startsWith($tokenLocation, "roads") && !in_array($location, $this->borders[$explodedTokenLocation[1] . '_' . $explodedTokenLocation[2]]['regions'])) {
-        throw new \feException("Piece is not on a border connected to the region of the battle");
-      }
-    };
-
-    // tokenMove: {
-    //   from: string;
-    //   to: string;
-    //   tokenId: string;
-    // }
-    // if not bonus action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
-      Globals::incRemainingActions(-1);
-    }
-    Notifications::battleRegion($location);
-    foreach ($removedPieces as $index => $tokenId) {
-      $splitTokenId = explode("_", $tokenId);
-      $tokenInfo = Tokens::get($tokenId);
-      $from = $tokenInfo['location'];
-      $to = '';
-      $logTokenType = '';
-      $logTokenData = '';
-      if ($this->startsWith($tokenId, "block")) {
-        $to = implode('_', ['blocks', $splitTokenId[1]]);
-        $logTokenData = $splitTokenId[1];
-        if ($this->startsWith($from, "armies")) {
-          $logTokenType = 'army';
-        }
-        if ($this->startsWith($from, "roads")) {
-          $logTokenType = 'road';
-        }
-      };
-      if ($this->startsWith($tokenId, "cylinder")) {
-        $to = implode('_', ['cylinders', $splitTokenId[1]]);
-        $logTokenType = 'cylinder';
-        $logTokenData = $splitTokenId[1];
-      }
-      $state = Tokens::insertOnTop($tokenId, $to);
-      $message = clienttranslate('${player_name} removes ${logTokenRemoved}');
-
-
-      Notifications::moveToken($message, [
-        'player' => Players::get(),
-        'logTokenRemoved' => implode(':', [$logTokenType, $logTokenData]),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $tokenId,
-            'weight' => $state,
-          ]
-        ]
-      ]);
-    };
-
-    $this->gamestate->nextState('playerActions');
-  }
-
-  /**
    * Part of set up when players need to select loyalty.
    */
   function chooseLoyalty($coalition)
@@ -202,7 +80,7 @@ trait PlayerActionTrait
       'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,
       'coalitionName' => $coalitionName,
-      'logTokenCoalition' => implode(':', ['coalition', $coalition]),
+      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
     ));
 
     $this->gamestate->nextState('next');
@@ -292,7 +170,7 @@ trait PlayerActionTrait
     // If null player needs to select cylinder from somewhere else
     if ($cylinder != null) {
       Tokens::move($cylinder['id'], $location);
-      Cards::setUsed($cardId, 1); // unavailable false
+      Cards::setUsed($cardId, 1); // unavailable
     }
 
     // if not free action reduce remaining actions.
@@ -325,24 +203,6 @@ trait PlayerActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
-
-  function getLoyalPiecesInLocation($player, $location)
-  {
-    // $locationInfo = explode("_", $location);
-    if ($this->startsWith($location, "card")) {
-      // Battle on card, get player tribes
-      return [];
-    } else {
-      $loyalty = $player->getLoyalty();
-      // Battle in region, get coalition armies
-      $armiesInLocation = Tokens::getInLocation(['armies', $location])->toArray();
-      $loyalArmies = array_values(array_filter($armiesInLocation, function ($army) use ($loyalty) {
-        return explode("_", $army['id'])[1] === $loyalty;
-      }));
-      return $loyalArmies;
-    }
-  }
-
 
   function isCardFavoredSuit($cardId)
   {

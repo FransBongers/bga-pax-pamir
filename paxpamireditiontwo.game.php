@@ -60,12 +60,12 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayCardTrait;
+    use PaxPamir\States\PlayerActionBattleTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
     use PaxPamir\States\RefreshMarketTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\States\TurnTrait;
-    use PaxPamir\PPUtilityFunctionsTrait;
 
     public static $instance = null;
     function __construct()

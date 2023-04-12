@@ -2,6 +2,7 @@
 
 namespace PaxPamir\Core;
 
+use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Globals;
@@ -89,12 +90,22 @@ class Notifications
    **** GAME METHODS ****
    *************************/
 
+   public static function battleCard($cardId)
+   {
+     $message = clienttranslate('${player_name} battles on ${logTokenCardName}${logTokenLargeCard}');
+     self::notifyAll('battle', $message, [
+       'player' => Players::get(),
+       'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+     ]);
+   }
+
   public static function battleRegion($regionId)
   {
     $message = clienttranslate('${player_name} battles in ${logTokenLocation}');
     self::notifyAll('battle', $message, [
       'player' => Players::get(),
-      'logTokenLocation' => implode(':', ['regionName', $regionId]),
+      'logTokenLocation' => Utils::logTokenRegionName($regionId),
     ]);
   }
 
@@ -103,7 +114,7 @@ class Notifications
     $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
     self::notifyAll('changeFavoredSuit', $message, [
       'player' => Players::get(),
-      'logTokenFavoredSuit' => implode(':', ['favoredSuit', $newSuit]),
+      'logTokenFavoredSuit' => Utils::logFavoredSuit($newSuit),
       'from' => $previousSuit,
       'to' => $newSuit,
     ]);
@@ -111,15 +122,16 @@ class Notifications
 
   public static function changeRuler($oldRuler, $newRuler, $region)
   {
-    $msg = clienttranslate('${player_name} becomes ruler of ${region}');
+    $msg = clienttranslate('${player_name} becomes ruler of ${logTokenRegionName}');
     if ($newRuler === null) {
-      $msg = clienttranslate('${player_name} is no longer ruler of ${region}');
+      $msg = clienttranslate('${player_name} no longer rules ${logTokenRegionName}');
     }
     self::notifyAll('changeRuler', $msg, [
       'player_name' => Players::get($newRuler === null ? $oldRuler : $newRuler)->getName(),
       'oldRuler' => $oldRuler,
       'newRuler' => $newRuler,
-      'region' => ucfirst($region),
+      'logTokenRegionName' => Utils::logTokenRegionName($region),
+      'region' => $region,
     ]);
   }
 
@@ -135,7 +147,7 @@ class Notifications
       'player' => Players::get(),
       'cardId' => $card['id'],
       'from' => $location,
-      'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
     ));
   }
 
@@ -178,7 +190,7 @@ class Notifications
       'rulerId' => $rulerId,
       'briberId' => $briberId,
       'rupees' => $rupees,
-      'logTokenPlayerName' => implode(':', ['playerName', $rulerId,]),
+      'logTokenPlayerName' => Utils::logTokenPlayerName($rulerId),
     ));
   }
 
@@ -190,11 +202,12 @@ class Notifications
     self::notifyAll("playCard", $message, array(
       'player' => Players::get($playerId),
       'card' => $card,
-      'logTokenCardName' => implode(':', ['cardName', $card['name']]),
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
       'courtCards' => $courtCards,
       'bribe' => false,
-      'logTokenCard' => implode(':', ['card', $card['id']]),
-      'side' => $side === 'left' ? clienttranslate('left') : clienttranslate('right')
+      'logTokenCard' => Utils::logTokenCard($card['id']),
+      'side' => $side === 'left' ? clienttranslate('left') : clienttranslate('right'),
+      'i18n' => ['side'],
     ));
   }
 
@@ -205,8 +218,8 @@ class Notifications
       'player' => Players::get(),
       'receivedRupees' => $receivedRupees,
       'card' => $card,
-      'logTokenCardName' => implode(':', ['cardName', $cardName,]),
-      'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
+      'logTokenCardName' => Utils::logTokenCardName($cardName,),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
       'marketLocation' => $marketLocation,
       'newLocation' => $newLocation,
       'rupeesOnCards' => $rupeesOnCards,

@@ -119,7 +119,7 @@ trait PlayCardTrait
         'player_name' => self::getActivePlayerName(),
         'bribeAmount' => $bribe,
         'cardName' => $card['name'],
-        'logTokenLargeCard' => implode(':', ['largeCard', $card['id']]),
+        'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
       ));
 
       $this->gamestate->nextState('nextPlayerNegotiateBribe');
@@ -241,22 +241,7 @@ trait PlayCardTrait
       $card = Cards::get($cardId);
       Notifications::playCard($card,$courtCards,$side,$playerId);
 
-      // $message = clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to the ${side} side of his court');
-      // self::notifyAllPlayers("playCard", $message, array(
-      //   'playerId' => $playerId,
-      //   'player_name' => self::getActivePlayerName(),
-      //   'card' => $card,
-      //   'logTokenCardName' => implode(':', ['cardName', $card_name]),
-      //   'courtCards' => $court_cards,
-      //   'bribe' => false,
-      //   'logTokenCard' => implode(':', ['card', $cardId]),
-      //   'side' => $leftSide ? clienttranslate('left') : clienttranslate('right')
-      // ));
-
       $this->updatePlayerCounts();
-
-      // $this->setGameStateValue("bribe_card_id", 0);
-      // $this->setGameStateValue("bribe_amount", -1);
 
       Globals::setResolveImpactIconsCardId($cardId);
       Globals::setResolveImpactIconsCurrentIcon(0);

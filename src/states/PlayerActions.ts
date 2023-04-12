@@ -173,7 +173,9 @@ class PlayerActionsState implements State {
             // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
             dojo.addClass(child, 'pp_selectable');
             this.game._connections.push(
-              dojo.connect(child, 'onclick', this, () => {
+              dojo.connect(child, 'onclick', this, (event: PointerEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
                 switch (cardAction) {
                   case 'battle':
                     this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BATTLE, { args: { cardId } })

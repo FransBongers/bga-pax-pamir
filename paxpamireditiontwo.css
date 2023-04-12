@@ -710,7 +710,7 @@
   cursor: pointer !important;
 }
 
-.pp_gift.pp_selected {
+.pp_gift.pp_selected, .pp_gift.pp_selectable:hover {
   box-shadow: 0px 0px 0px 3px blue !important;
 }
 
@@ -1890,5 +1890,3 @@ html {
 }
 
 /* ------- CARDS END ------- */
-
-/*# sourceMappingURL=paxpamireditiontwo.css.map */

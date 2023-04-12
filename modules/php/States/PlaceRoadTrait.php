@@ -67,9 +67,9 @@ trait PlaceRoadTrait
       $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
       Notifications::moveToken($message, [
         'player' => Players::get(),
-        'logTokenRoad' => implode(':', ['road',$loyalty]),
-        'logTokenRegionName0' => implode(':', ['regionName',$region0]),
-        'logTokenRegionName1' => implode(':', ['regionName',$region1]),
+        'logTokenRoad' => Utils::logTokenRoad($loyalty),
+        'logTokenRegionName0' => Utils::logTokenRegionName($region0),
+        'logTokenRegionName1' => Utils::logTokenRegionName($region1),
         'moves' => [
           [
             'from' => $location,

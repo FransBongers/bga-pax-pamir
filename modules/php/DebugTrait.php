@@ -1,4 +1,5 @@
 <?php
+
 namespace PaxPamir;
 
 
@@ -16,16 +17,16 @@ trait DebugTrait
 {
   function test()
   {
-    Notifications::log('test DebugTrait',['whoop']);
+    Notifications::log('test DebugTrait', ['whoop']);
   }
 
-  function debugCreateArmy($region,$coalition = null)
+  function debugCreateArmy($region, $coalition = null)
   {
     $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
-    if(!($this->regions[$region] && $this->loyalty[$coalition])) {
+    if (!($this->regions[$region] && $this->loyalty[$coalition])) {
       return;
     }
-    
+
     $location = $this->locations['pools'][$coalition];
     $army = Tokens::getTopOf($location);
     if ($army != null) {
@@ -48,9 +49,10 @@ trait DebugTrait
     }
   }
 
-  function debugCreateRoad($border,$coalition)
+  function debugCreateRoad($border, $coalition = null)
   {
-    if(!($this->borders[$border] && $this->loyalty[$coalition])) {
+    $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
+    if (!($this->borders[$border] && $this->loyalty[$coalition])) {
       return;
     }
     $location = $this->locations['pools'][$coalition];
@@ -79,7 +81,7 @@ trait DebugTrait
 
   function debugCreateTribe($region, $playerId = null)
   {
-    if(!($this->regions[$region])) {
+    if (!($this->regions[$region])) {
       return;
     }
     $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
@@ -105,10 +107,10 @@ trait DebugTrait
     }
   }
 
-  function debugCreateSpy($cardId,$playerId = null)
+  function debugCreateSpy($cardId, $playerId = null)
   {
     $card = Cards::get($cardId);
-    if(!Utils::startsWith($card['location'], "court")) {
+    if (!Utils::startsWith($card['location'], "court")) {
       return;
     };
 
@@ -136,10 +138,17 @@ trait DebugTrait
     }
   }
 
-  function debugIncPlayerRupees($rupees,$playerId = null)
+  function debugIncPlayerRupees($rupees, $playerId = null)
   {
     $rupees = intval($rupees);
     $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
-    Players::incRupees($playerId,$rupees);
+    Players::incRupees($playerId, $rupees);
+  }
+
+  function debugSetFavoredSuit($suitId)
+  {
+    $previous_suit_id = Globals::getFavoredSuit();
+    Globals::setFavoredSuit($suitId);
+    Notifications::changeFavoredSuit($previous_suit_id, $suitId);
   }
 }

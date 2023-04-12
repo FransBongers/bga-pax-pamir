@@ -61,6 +61,6 @@ const tplLogTokenNewCards = ({ cards }: { cards: { cardId: string }[] }) => {
 
 const tplLogTokenPlayerName = ({name, color}:{name: string; color: string;}) => `<span class="playername" style="color:#${color};">${name}</span>`;
 
-const tplLogTokenRegionName = ({name, regionId}:{name: string; regionId: string;}) => `<span style="font-weight: 700;">${_(name)}</span><div class="pp_log_token pp_${regionId} pp_region_icon"></div>`;
+const tplLogTokenRegionName = ({name, regionId}:{name: string; regionId: string;}) => `<div style="display: inline-block;"><span style="font-weight: 700;">${_(name)}</span><div class="pp_log_token pp_${regionId} pp_region_icon"></div></div>`;
 
 const tplLogTokenRoad = ({ coalition }: { coalition: string }) => `<div class="pp_${coalition} pp_road pp_log_token"></div>`;

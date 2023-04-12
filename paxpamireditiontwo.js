@@ -254,7 +254,7 @@ var tplLogTokenPlayerName = function (_a) {
 };
 var tplLogTokenRegionName = function (_a) {
     var name = _a.name, regionId = _a.regionId;
-    return "<span style=\"font-weight: 700;\">".concat(_(name), "</span><div class=\"pp_log_token pp_").concat(regionId, " pp_region_icon\"></div>");
+    return "<div style=\"display: inline-block;\"><span style=\"font-weight: 700;\">".concat(_(name), "</span><div class=\"pp_log_token pp_").concat(regionId, " pp_region_icon\"></div></div>");
 };
 var tplLogTokenRoad = function (_a) {
     var coalition = _a.coalition;

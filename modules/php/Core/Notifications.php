@@ -214,7 +214,7 @@ class Notifications
   public static function purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards)
   {
     $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
-    self::notifyAll("purchaseCard",  clienttranslate('${player_name} purchases ${logTokenCardName} ${logTokenLargeCard}'), array(
+    self::notifyAll("purchaseCard",  clienttranslate('${player_name} purchases ${logTokenCardName} from the market ${logTokenLargeCard}'), array(
       'player' => Players::get(),
       'receivedRupees' => $receivedRupees,
       'card' => $card,

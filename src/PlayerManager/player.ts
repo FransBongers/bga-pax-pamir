@@ -355,6 +355,10 @@ class PPPlayer {
     return this.playerName;
   }
 
+  getRupees(): number {
+    return this.counters.rupees.getValue();
+  }
+
   getRulerTokensZone(): Zone {
     return this.rulerTokens;
   }
@@ -365,6 +369,16 @@ class PPPlayer {
 
   getLoyalty(): string {
     return this.loyalty;
+  }
+
+  getTaxShelter(): number {
+    return this.court
+      .getAllItems()
+      .map((cardId) => this.game.getCardInfo({ cardId }))
+      .filter((card: CourtCard) => card.suit === ECONOMIC)
+      .reduce((total: number, current: CourtCard) => {
+        return total + current.rank;
+      }, 0);
   }
 
   setCounter({
@@ -458,17 +472,17 @@ class PPPlayer {
     discardCardAnimation({ cardId, game: this.game });
   }
 
-  payBribe({ rulerId, rupees }: { rulerId: number; rupees: number }) {
+  payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
     console.log('place', dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${this.playerId}`));
-    attachToNewParentNoDestroy('tempRupee', `rupees_${rulerId}`);
+    attachToNewParentNoDestroy('tempRupee', `rupees_${playerId}`);
     // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
-    const animation = this.game.framework().slideToObject('tempRupee', `rupees_${rulerId}`);
+    const animation = this.game.framework().slideToObject('tempRupee', `rupees_${playerId}`);
     dojo.connect(animation, 'onEnd', () => {
       this.incCounter({ counter: 'rupees', value: -rupees });
     });
     dojo.connect(animation, 'onEnd', () => {
       dojo.destroy('tempRupee');
-      this.game.playerManager.getPlayer({ playerId: rulerId }).incCounter({ counter: 'rupees', value: rupees });
+      this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
     });
     animation.play();
   }
@@ -513,6 +527,13 @@ class PPPlayer {
       dojo.addClass(cardId, 'pp_moving');
       from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
     }
+  }
+
+  removeTaxCounter() {
+    const taxCounter = dojo.byId(`rupees_tableau_${this.playerId}_tax_counter`);
+      if(taxCounter) {
+        dojo.destroy(taxCounter.id);
+      }
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

@@ -147,7 +147,7 @@ trait PlayerActionTrait
     self::checkAction('purchaseGift');
     self::dump("gift value", $value);
     $cardInfo = Cards::get($cardId);
-    if (!$this->isValidCardAction($cardInfo, 'gift')) {
+    if (!$this->isValidCardAction($cardInfo, GIFT)) {
       return;
     }
 
@@ -196,6 +196,112 @@ trait PlayerActionTrait
     $this->gamestate->nextState('playerActions');
   }
 
+  function tax($cardId, $market, $players)
+  {
+    self::checkAction('tax');
+
+    $cardInfo = Cards::get($cardId);
+    $this->isValidCardAction($cardInfo, TAX);
+    $selectedFromMarket = explode(' ', $market);
+    $selectedPlayers = explode(' ', $players);
+
+
+
+    $numberOfRupeesSelectedFromMarket = 0;
+    $numberOfRupeesSelectedFromPlayers = 0;
+    // Check if rupee is in market
+    foreach ($selectedFromMarket as $index => $rupeeId) {
+      if (strlen($rupeeId) == 0) {
+        continue;
+      };
+      $rupee = Tokens::get($rupeeId);
+      $location = $rupee['location'];
+
+      if (!Utils::startsWith($location, 'market')) {
+        throw new \feException("Selected rupee is not in the market");
+      };
+      $numberOfRupeesSelectedFromMarket += 1;
+    }
+    $activePlayer = Players::get();
+    $activePlayerId = $activePlayer->getId();
+    $rulers = Globals::getRulers();
+
+    // Checks for selected players
+    foreach ($selectedPlayers as $index => $selectedPlayer) {
+      if (strlen($selectedPlayer) == 0) {
+        continue;
+      };
+      $playerInput = explode('_', $selectedPlayer);
+      $playerId = $playerInput[0];
+      $selectedRupees = intval($playerInput[1]);
+      $player = Players::get($playerId);
+
+      // Player owns card of region ruled by active player
+      $courtCards = $player->getCourtCards();
+
+      $hasCardRuledByActivePlayer = Utils::array_some($courtCards, function ($courtCard) use ($activePlayerId, $rulers) {
+        return $rulers[$courtCard['region']] === $activePlayerId;
+      });
+      if (!$hasCardRuledByActivePlayer) {
+        throw new \feException("Seelcted player does not have a court card ruled by active player");
+      }
+
+      // Amount taxed from player is allowed
+      $playerRupees = $player->getRupees();
+      $taxShelter = $player->getSuitTotals()[ECONOMIC];
+      $maxTaxable = $playerRupees - $taxShelter;
+      if ($selectedRupees > $maxTaxable) {
+        throw new \feException("More rupees selected for player than allowed");
+      };
+      $numberOfRupeesSelectedFromPlayers += $selectedRupees;
+    }
+    $totalSelected = $numberOfRupeesSelectedFromMarket + $numberOfRupeesSelectedFromPlayers;
+    // Total number of rupees selected does not exceed card rank
+    if ($totalSelected > $cardInfo['rank']) {
+      throw new \feException("More rupees selected for player than allowed by card rank");
+    }
+
+    Cards::setUsed($cardId, 1);
+    // if not free action reduce remaining actions.
+    if (!$this->isCardFavoredSuit($cardId)) {
+      Globals::incRemainingActions(-1);
+    }
+    Notifications::tax($cardId, $activePlayer);
+
+    $rupeesInMarket = [];
+    // Check if rupee is in market
+    foreach ($selectedFromMarket as $index => $rupeeId) {
+      if (strlen($rupeeId) == 0) {
+        continue;
+      };
+      $rupee = Tokens::get($rupeeId);
+      $location = explode('_', $rupee['location']);
+      $rupeesInMarket[] = [
+        'rupeeId' => $rupeeId,
+        'row' => intval($location[1]),
+        'column' => intval($location[2])
+      ];
+      Tokens::move($rupeeId, RUPEE_SUPPLY);
+    };
+    if ($numberOfRupeesSelectedFromMarket > 0) {
+      Notifications::taxMarket($numberOfRupeesSelectedFromMarket, $activePlayer, $rupeesInMarket);
+    }
+
+    foreach ($selectedPlayers as $index => $selectedPlayer) {
+      if (strlen($selectedPlayer) == 0) {
+        continue;
+      };
+      $playerInput = explode('_', $selectedPlayer);
+      $playerId = $playerInput[0];
+      $numberOfRupees = intval($playerInput[1]);
+
+      Players::incRupees($playerId, -$numberOfRupees);
+      Notifications::taxPlayer($numberOfRupees, $activePlayer, $playerId);
+    };
+
+    $this->gamestate->nextState('playerActions');
+  }
+
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
   // .##.....##....##.....##..##........##.....##......####..
@@ -221,20 +327,20 @@ trait PlayerActionTrait
     // Checks to determine if it is a valid action
     // Card should be in players court
     if ($location_info[0] != 'court' || $location_info[1] != $playerId) {
-      throw new \feException("Not a valid card action for player.");
+      throw new \feException("Not a valid card action for player");
     }
     // Card should not have been used yet
     if ($cardInfo['used'] != 0) {
-      throw new \feException("Card has already been used this turn.");
+      throw new \feException("Card has already been used this turn");
     }
     // Card should have the card action
     if (!isset($cardInfo['actions'][$cardAction])) {
-      throw new \feException("Action does not exist on selected card.");
+      throw new \feException("Action does not exist on selected card");
     }
 
     // Player should have remaining actions or actions needs to be a bonus action
     if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $cardInfo['suit'])) {
-      throw new \feException("No remaining actions and not a free action.");
+      throw new \feException("No remaining actions and not a free action");
     };
     return true;
   }

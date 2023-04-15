@@ -162,6 +162,16 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function tax()
+    {
+        self::setAjaxMode();
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $market = self::getArg("market", AT_alphanum, true);
+        $players = self::getArg("players", AT_alphanum, true);
+        $result = $this->game->tax($cardId, $market, $players);
+        self::ajaxResponse();
+    }
+
     /*
     
     Example:

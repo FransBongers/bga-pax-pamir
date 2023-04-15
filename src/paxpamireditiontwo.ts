@@ -171,7 +171,7 @@ class PaxPamir implements PaxPamirGame {
   //                        action status bar (ie: the HTML links in the status bar).
   //
   public onUpdateActionButtons(stateName: string, args: any) {
-    console.log('onUpdateActionButtons: ' + stateName);
+    // console.log('onUpdateActionButtons: ' + stateName);
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

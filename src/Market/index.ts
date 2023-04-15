@@ -106,14 +106,18 @@ class Market {
     return this.marketRupees[row][column];
   }
 
+  removeSingleRupeeFromCard({row, column, to, rupeeId}: { row: number; column: number; to: string; rupeeId: string; }) {
+    this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+    const animation = this.game.framework().slideToObject(rupeeId, to);
+    dojo.connect(animation, 'onEnd', () => {
+      dojo.destroy(rupeeId);
+    });
+    animation.play();
+  }
+
   removeRupeesFromCard({ row, column, to }: { row: number; column: number; to: string }) {
     this.marketRupees[row][column].getAllItems().forEach((rupeeId) => {
-      this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
-      const animation = this.game.framework().slideToObject(rupeeId, to);
-      dojo.connect(animation, 'onEnd', () => {
-        dojo.destroy(rupeeId);
-      });
-      animation.play();
+      this.removeSingleRupeeFromCard({row, column, to, rupeeId});
     });
   }
 

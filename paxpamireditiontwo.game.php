@@ -42,8 +42,8 @@ use PaxPamir\Managers\Market;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
-// Todo check why PPPlayer import is needed
-require_once('modules/php/PPUtilityFunctions.php');
+// // Todo check why PPPlayer import is needed
+// require_once('modules/php/PPUtilityFunctions.php');
 
 
 /*

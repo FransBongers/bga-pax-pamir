@@ -160,4 +160,9 @@ abstract class Utils extends \APP_DbObject
   {
     return implode(':', [LOG_TOKEN_REGION_NAME, $regionId]);
   }
+
+  public static function logTokenRupee()
+  {
+    return implode(':', [LOG_TOKEN_RUPEE,'']);
+  }
 }

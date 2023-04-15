@@ -79,7 +79,7 @@ interface NotifPurchaseGiftArgs {
     from: string;
     to: string;
     tokenId: string;
-  }
+  };
 }
 
 interface NotifRefreshMarketArgs {
@@ -93,6 +93,27 @@ interface NotifRefreshMarketArgs {
     from: string;
     to: string;
   }[];
+}
+
+interface NotifTaxMarketArgs {
+  playerId: number;
+  player_name: string;
+  amount: number;
+  logTokenRupee: string;
+  selectedRupees: {
+    rupeeId: string;
+    row: number;
+    column: number;
+  }[];
+}
+
+interface NotifTaxPlayerArgs {
+  playerId: number;
+  player_name: string;
+  amount: number;
+  taxedPlayerId: number;
+  logTokenRupee: string;
+  logTokenPlayerName: string;
 }
 
 type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;

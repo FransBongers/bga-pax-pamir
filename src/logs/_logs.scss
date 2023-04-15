@@ -25,6 +25,16 @@
   margin-right: 2px;
 }
 
+.pp_log_token.pp_log_token_rupee {
+  background-image: url("img/rupee.svg");
+  width: 25px;
+  height: 25px;
+  background-size: 25px 25px;
+  border-radius: 50%;
+  margin-bottom: -5px;
+  background-repeat: no-repeat;
+}
+
 .pp_log_token.pp_region_icon {
   width: 15px;
   height: 15px;

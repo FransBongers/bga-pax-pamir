@@ -34,7 +34,7 @@ class NotificationManager {
   setupNotifications() {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
-      ['battle',250],
+      ['battle', 250],
       ['cardAction', 1],
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
@@ -53,6 +53,8 @@ class NotificationManager {
       ['moveToken', 250],
       ['updatePlayerCounts', 1],
       ['log', 1],
+      ['taxMarket', 250],
+      ['taxPlayer', 250],
     ];
 
     notifs.forEach((notif) => {
@@ -65,7 +67,7 @@ class NotificationManager {
   }
 
   notif_battle(notif) {
-    debug('notif_battle',notif)
+    debug('notif_battle', notif);
   }
 
   notif_cardAction(notif) {
@@ -179,7 +181,7 @@ class NotificationManager {
     const { args } = notif;
     console.log('notif_payBribe', args);
     const { briberId, rulerId, rupees } = args;
-    this.getPlayer({ playerId: briberId }).payBribe({ rulerId, rupees });
+    this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees });
   }
 
   notif_playCard(notif: Notif<NotifPlayCardArgs>) {
@@ -350,18 +352,18 @@ class NotificationManager {
       const addClass = [];
       const removeClass = [];
       if (to.startsWith('armies')) {
-        addClass.push('pp_army')
+        addClass.push('pp_army');
       } else if (to.startsWith('roads')) {
-        addClass.push('pp_road')
+        addClass.push('pp_road');
       } else if (to.startsWith('blocks')) {
         addClass.push('pp_coalition_block');
       }
       if (from.startsWith('blocks')) {
         removeClass.push('pp_coalition_block');
       } else if (from.startsWith('armies')) {
-        removeClass.push('pp_army')
+        removeClass.push('pp_army');
       } else if (from.startsWith('roads')) {
-        removeClass.push('pp_road')
+        removeClass.push('pp_road');
       }
 
       this.game.move({
@@ -370,9 +372,27 @@ class NotificationManager {
         to: toZone,
         addClass,
         removeClass,
-        weight
+        weight,
       });
     });
+  }
+
+  notif_taxMarket(notif: Notif<NotifTaxMarketArgs>) {
+    debug('notif_taxMarket', notif.args);
+    const { selectedRupees, playerId, amount } = notif.args;
+    selectedRupees.forEach((rupee) => {
+      const { row, column, rupeeId } = rupee;
+      this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}` });
+    });
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
+  }
+
+  notif_taxPlayer(notif: Notif<NotifTaxPlayerArgs>) {
+    debug('notif_taxPlayer', notif.args);
+    const { playerId, taxedPlayerId, amount } = notif.args;
+    const player = this.getPlayer({ playerId: taxedPlayerId });
+    player.removeTaxCounter();
+    player.payToPlayer({ playerId, rupees: amount });
   }
 
   notif_log(notif) {

@@ -238,6 +238,36 @@ class Notifications
     ));
   }
 
+  public static function tax($cardId,$player)
+  {
+    self::notifyAll("tax", clienttranslate('${player_name} taxes with ${logTokenCardName}${logTokenLargeCard}'), array(
+      'player' => $player,
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+    ));
+  }
+
+  public static function taxMarket($amount,$player,$selectedRupees)
+  {
+    self::notifyAll("taxMarket", clienttranslate('${player_name} takes ${amount}${logTokenRupee} from the market'), array(
+      'player' => $player,
+      'amount' => $amount,
+      'logTokenRupee' => Utils::logTokenRupee(),
+      'selectedRupees' => $selectedRupees
+    ));
+  }
+
+  public static function taxPlayer($amount,$player,$taxedPlayerId)
+  {
+    self::notifyAll("taxPlayer", clienttranslate('${player_name} takes ${amount}${logTokenRupee} from ${logTokenPlayerName}'), array(
+      'player' => $player,
+      'amount' => $amount,
+      'taxedPlayerId' => $taxedPlayerId,
+      'logTokenRupee' => Utils::logTokenRupee(),
+      'logTokenPlayerName' => Utils::logTokenPlayerName($taxedPlayerId)
+    ));
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

@@ -41,6 +41,16 @@
   margin-right: 2px;
 }
 
+.pp_log_token.pp_log_token_rupee {
+  background-image: url("img/rupee.svg");
+  width: 25px;
+  height: 25px;
+  background-size: 25px 25px;
+  border-radius: 50%;
+  margin-bottom: -5px;
+  background-repeat: no-repeat;
+}
+
 .pp_log_token.pp_region_icon {
   width: 15px;
   height: 15px;
@@ -552,6 +562,7 @@
   height: 44px;
   background-size: 44px;
   background-image: url("img/rupee.svg");
+  border-radius: 50%;
 }
 
 .pp_card_icon {
@@ -1351,6 +1362,13 @@ html {
   /* border: 2px blue solid; */
 }
 
+.pp_tax_counter {
+  color: blue;
+  font-size: xx-large;
+  font-weight: 700;
+  text-shadow: -1px -1px 0px rgb(255, 255, 255), 1px 1px 0px rgb(255, 255, 255), -1px 1px 0px rgb(255, 255, 255), 1px -1px 0px rgb(255, 255, 255);
+}
+
 .pp_rupee {
   width: 50px;
   height: 50px;
@@ -1358,6 +1376,19 @@ html {
   border-radius: 25px;
   box-shadow: 1px 1px 4px;
   z-index: 1;
+}
+
+.pp_rupee.pp_selectable, .pp_player_board_rupee.pp_selectable {
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 3px yellow !important;
+}
+
+.pp_rupee.pp_selectable:hover,
+.pp_player_board_rupee.pp_selectable:hover,
+.pp_rupee.pp_selected,
+.pp_player_board_rupee.pp_selected {
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 3px blue !important;
 }
 
 .pp_rupee_inner {

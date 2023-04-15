@@ -179,14 +179,15 @@ var positionObjectDirectly = function (mobileObj, x, y) {
 };
 var LOG_TOKEN_ARMY = 'army';
 var LOG_TOKEN_CARD = 'card';
-var LOG_TOKEN_LARGE_CARD = 'largeCard';
 var LOG_TOKEN_CARD_NAME = 'cardName';
 var LOG_TOKEN_COALITION = 'coalition';
-var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
-var LOG_TOKEN_ROAD = 'road';
 var LOG_TOKEN_CYLINDER = 'cylinder';
+var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
+var LOG_TOKEN_LARGE_CARD = 'largeCard';
 var LOG_TOKEN_PLAYER_NAME = 'playerName';
 var LOG_TOKEN_REGION_NAME = 'regionName';
+var LOG_TOKEN_ROAD = 'road';
+var LOG_TOKEN_RUPEE = 'rupee';
 var getLogTokenDiv = function (_a) {
     var logToken = _a.logToken, game = _a.game;
     var _b = logToken.split(':'), type = _b[0], data = _b[1];
@@ -210,6 +211,8 @@ var getLogTokenDiv = function (_a) {
         case LOG_TOKEN_PLAYER_NAME:
             var player = game.playerManager.getPlayer({ playerId: Number(data) });
             return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
+        case LOG_TOKEN_RUPEE:
+            return tplLogTokenRupee();
         case LOG_TOKEN_REGION_NAME:
             return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
         default:
@@ -260,6 +263,7 @@ var tplLogTokenRoad = function (_a) {
     var coalition = _a.coalition;
     return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
 };
+var tplLogTokenRupee = function () { return "<div class=\"pp_log_token_rupee pp_log_token\"></div>"; };
 // Client states
 var CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
 var CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
@@ -1163,6 +1167,9 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.getName = function () {
         return this.playerName;
     };
+    PPPlayer.prototype.getRupees = function () {
+        return this.counters.rupees.getValue();
+    };
     PPPlayer.prototype.getRulerTokensZone = function () {
         return this.rulerTokens;
     };
@@ -1171,6 +1178,16 @@ var PPPlayer = /** @class */ (function () {
     };
     PPPlayer.prototype.getLoyalty = function () {
         return this.loyalty;
+    };
+    PPPlayer.prototype.getTaxShelter = function () {
+        var _this = this;
+        return this.court
+            .getAllItems()
+            .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
+            .filter(function (card) { return card.suit === ECONOMIC; })
+            .reduce(function (total, current) {
+            return total + current.rank;
+        }, 0);
     };
     PPPlayer.prototype.setCounter = function (_a) {
         var counter = _a.counter, value = _a.value;
@@ -1247,19 +1264,19 @@ var PPPlayer = /** @class */ (function () {
         }
         discardCardAnimation({ cardId: cardId, game: this.game });
     };
-    PPPlayer.prototype.payBribe = function (_a) {
+    PPPlayer.prototype.payToPlayer = function (_a) {
         var _this = this;
-        var rulerId = _a.rulerId, rupees = _a.rupees;
+        var playerId = _a.playerId, rupees = _a.rupees;
         console.log('place', dojo.place(tplRupee({ rupeeId: 'tempRupee' }), "rupees_".concat(this.playerId)));
-        attachToNewParentNoDestroy('tempRupee', "rupees_".concat(rulerId));
+        attachToNewParentNoDestroy('tempRupee', "rupees_".concat(playerId));
         // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
-        var animation = this.game.framework().slideToObject('tempRupee', "rupees_".concat(rulerId));
+        var animation = this.game.framework().slideToObject('tempRupee', "rupees_".concat(playerId));
         dojo.connect(animation, 'onEnd', function () {
             _this.incCounter({ counter: 'rupees', value: -rupees });
         });
         dojo.connect(animation, 'onEnd', function () {
             dojo.destroy('tempRupee');
-            _this.game.playerManager.getPlayer({ playerId: rulerId }).incCounter({ counter: 'rupees', value: rupees });
+            _this.game.playerManager.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: rupees });
         });
         animation.play();
     };
@@ -1302,6 +1319,12 @@ var PPPlayer = /** @class */ (function () {
         else {
             dojo.addClass(cardId, 'pp_moving');
             from.removeFromZone(cardId, true, "player_board_".concat(this.playerId));
+        }
+    };
+    PPPlayer.prototype.removeTaxCounter = function () {
+        var taxCounter = dojo.byId("rupees_tableau_".concat(this.playerId, "_tax_counter"));
+        if (taxCounter) {
+            dojo.destroy(taxCounter.id);
         }
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
@@ -1850,16 +1873,20 @@ var Market = /** @class */ (function () {
         var row = _a.row, column = _a.column;
         return this.marketRupees[row][column];
     };
+    Market.prototype.removeSingleRupeeFromCard = function (_a) {
+        var row = _a.row, column = _a.column, to = _a.to, rupeeId = _a.rupeeId;
+        this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
+        var animation = this.game.framework().slideToObject(rupeeId, to);
+        dojo.connect(animation, 'onEnd', function () {
+            dojo.destroy(rupeeId);
+        });
+        animation.play();
+    };
     Market.prototype.removeRupeesFromCard = function (_a) {
         var _this = this;
         var row = _a.row, column = _a.column, to = _a.to;
         this.marketRupees[row][column].getAllItems().forEach(function (rupeeId) {
-            _this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
-            var animation = _this.game.framework().slideToObject(rupeeId, to);
-            dojo.connect(animation, 'onEnd', function () {
-                dojo.destroy(rupeeId);
-            });
-            animation.play();
+            _this.removeSingleRupeeFromCard({ row: row, column: column, to: to, rupeeId: rupeeId });
         });
     };
     Market.prototype.placeRupeeOnCard = function (_a) {
@@ -2292,7 +2319,19 @@ var ClientCardActionTaxState = /** @class */ (function () {
     function ClientCardActionTaxState(game) {
         this.game = game;
     }
-    ClientCardActionTaxState.prototype.onEnteringState = function () {
+    /**
+     * Steps
+     * 1. Determine which rupees can be taxed
+     *  => everything in market, players with card for which taxer is ruler minus tax protection
+     * 2. Let player select rupees
+     * 3. Send to backens
+     */
+    ClientCardActionTaxState.prototype.onEnteringState = function (args) {
+        this.cardId = args.cardId;
+        var cardInfo = this.game.getCardInfo(args);
+        this.maxNumberToSelect = cardInfo.rank;
+        this.numberSelected = 0;
+        this.maxPerPlayer = {};
         this.updateInterfaceInitialStep();
     };
     ClientCardActionTaxState.prototype.onLeavingState = function () { };
@@ -2311,7 +2350,192 @@ var ClientCardActionTaxState = /** @class */ (function () {
     // .##....##....##....##.......##........##....##
     // ..######.....##....########.##.........######.
     ClientCardActionTaxState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
         this.game.clearPossible();
+        this.updatePageTitle();
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.confirmTax(); },
+        });
+        dojo.addClass('confirm_btn', 'disabled');
+        this.game.addCancelButton();
+        this.setRupeesSelectable();
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    ClientCardActionTaxState.prototype.confirmTax = function () {
+        var marketRupees = [];
+        var playerRupees = [];
+        dojo.query('.pp_selected').forEach(function (node) {
+            if (!node.id.startsWith('rupees_tableau')) {
+                marketRupees.push(node.id);
+            }
+        });
+        Object.keys(this.maxPerPlayer).forEach(function (playerId) {
+            var taxCounter = dojo.byId("rupees_tableau_".concat(playerId, "_tax_counter"));
+            if (taxCounter) {
+                playerRupees.push("".concat(playerId, "_").concat(Number(taxCounter.innerText)));
+            }
+        });
+        this.game.takeAction({ action: 'tax', data: {
+                cardId: this.cardId,
+                market: marketRupees.join(' '),
+                players: playerRupees.join(' '),
+            } });
+    };
+    ClientCardActionTaxState.prototype.handleMarketRupeeClicked = function (_a) {
+        var rupeeId = _a.rupeeId;
+        var node = dojo.byId("".concat(rupeeId));
+        var hasSelectableClass = node.classList.contains('pp_selectable');
+        if (hasSelectableClass && this.numberSelected >= this.maxNumberToSelect) {
+            debug('max selected reached');
+            return;
+        }
+        this.toggleSelected(node);
+        this.updateNumberSelected();
+        this.updateConfirmButton();
+        this.updatePageTitle();
+        this.updateSelectableStatePlayers();
+    };
+    ClientCardActionTaxState.prototype.handlePlayerRupeeClicked = function (_a) {
+        var rupeeId = _a.rupeeId;
+        var node = dojo.byId("".concat(rupeeId));
+        var taxCounter = dojo.byId("".concat(node.id, "_tax_counter"));
+        var hasSelectableClass = node.classList.contains('pp_selectable');
+        if (hasSelectableClass && this.numberSelected >= this.maxNumberToSelect && !taxCounter) {
+            debug('max selected reached');
+            return;
+        }
+        if (!taxCounter) {
+            dojo.place("<span id=\"".concat(node.id, "_tax_counter\" class=\"pp_tax_counter\">1</span>"), node);
+        }
+        else {
+            var playerId = Number(node.id.split('_')[2]);
+            var currentValue = Number(taxCounter.innerText);
+            if (this.numberSelected >= this.maxNumberToSelect ||
+                currentValue >= this.maxNumberToSelect ||
+                currentValue >= this.maxPerPlayer[playerId]) {
+                dojo.destroy("".concat(node.id, "_tax_counter"));
+            }
+            else {
+                taxCounter.innerText = "".concat(currentValue + 1);
+            }
+        }
+        this.updateNumberSelected();
+        this.updateConfirmButton();
+        this.updatePageTitle();
+        this.updateSelectableStatePlayers();
+    };
+    ClientCardActionTaxState.prototype.toggleSelected = function (node) {
+        node.classList.toggle('pp_selected');
+        node.classList.toggle('pp_selectable');
+    };
+    ClientCardActionTaxState.prototype.setRupeesSelectable = function () {
+        var _this = this;
+        // Market
+        dojo.query('.pp_rupee').forEach(function (node) {
+            var parentId = node.parentElement.id;
+            if (parentId.startsWith('pp_market')) {
+                dojo.addClass(node, 'pp_selectable');
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
+                    event.stopPropagation();
+                    _this.handleMarketRupeeClicked({ rupeeId: node.id });
+                }));
+            }
+        });
+        // Players
+        this.game.playerManager.getPlayerIds().forEach(function (playerId) {
+            if (playerId === _this.game.getPlayerId()) {
+                return;
+            }
+            var player = _this.game.playerManager.getPlayer({ playerId: playerId });
+            var hasCardRuledByPlayer = player
+                .getCourtZone()
+                .getAllItems()
+                .some(function (cardId) {
+                var cardRegion = _this.game.getCardInfo({ cardId: cardId }).region;
+                if (_this.game.map.getRegion({ region: cardRegion }).getRuler() === _this.game.getPlayerId()) {
+                    return true;
+                }
+            });
+            if (!hasCardRuledByPlayer) {
+                return;
+            }
+            var taxShelter = player.getTaxShelter();
+            var playerRupees = player.getRupees();
+            if (playerRupees <= taxShelter) {
+                return;
+            }
+            _this.maxPerPlayer[playerId] = playerRupees - taxShelter;
+            var node = dojo.byId("rupees_tableau_".concat(playerId));
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
+                event.stopPropagation();
+                _this.handlePlayerRupeeClicked({ rupeeId: node.id });
+            }));
+        });
+    };
+    ClientCardActionTaxState.prototype.updateConfirmButton = function () {
+        if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
+            dojo.removeClass('confirm_btn', 'disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'disabled');
+        }
+    };
+    ClientCardActionTaxState.prototype.updateNumberSelected = function () {
+        var numberSelected = 0;
+        dojo.query('.pp_selected').forEach(function (node) {
+            if (!node.id.startsWith('rupees_tableau')) {
+                numberSelected += 1;
+            }
+        });
+        Object.keys(this.maxPerPlayer).forEach(function (playerId) {
+            var taxCounter = dojo.byId("rupees_tableau_".concat(playerId, "_tax_counter"));
+            if (taxCounter) {
+                numberSelected += Number(taxCounter.innerText);
+            }
+        });
+        this.numberSelected = numberSelected;
+    };
+    ClientCardActionTaxState.prototype.updatePageTitle = function () {
+        this.game.clientUpdatePageTitle({
+            text: _('${you} may take ${number} rupee(s) (${remaining} remaining)'),
+            args: {
+                you: '${you}',
+                number: this.maxNumberToSelect,
+                remaining: this.maxNumberToSelect - this.numberSelected,
+            },
+        });
+    };
+    ClientCardActionTaxState.prototype.updateSelectableStatePlayers = function () {
+        var _this = this;
+        Object.keys(this.maxPerPlayer).forEach(function (playerId) {
+            var taxCounter = dojo.byId("rupees_tableau_".concat(playerId, "_tax_counter"));
+            var rupeeNode = dojo.byId("rupees_tableau_".concat(playerId));
+            var hasSelectableClass = rupeeNode.classList.contains('pp_selectable');
+            if (!taxCounter && !hasSelectableClass) {
+                _this.toggleSelected(rupeeNode);
+            }
+            ;
+            if (!taxCounter) {
+                return;
+            }
+            var currentValue = taxCounter ? Number(taxCounter.innerText) : 0;
+            var playerMax = _this.maxPerPlayer[playerId];
+            if (hasSelectableClass && (_this.maxNumberToSelect <= _this.numberSelected || currentValue >= playerMax)) {
+                _this.toggleSelected(rupeeNode);
+            }
+            else if (!hasSelectableClass && _this.maxNumberToSelect > _this.numberSelected && currentValue < playerMax) {
+                _this.toggleSelected(rupeeNode);
+            }
+        });
     };
     return ClientCardActionTaxState;
 }());
@@ -3056,9 +3280,9 @@ var PlayerActionsState = /** @class */ (function () {
         var currentPlayerId = this.game.getPlayerId();
         return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
     };
-    PlayerActionsState.prototype.activePlayerHasCourtCards = function () {
-        return this.game.localState.activePlayer.court.cards.length > 0;
-    };
+    // private activePlayerHasCourtCards(): boolean {
+    //   return this.game.localState.activePlayer.court.cards.length > 0;
+    // }
     PlayerActionsState.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
@@ -3241,6 +3465,8 @@ var NotificationManager = /** @class */ (function () {
             ['moveToken', 250],
             ['updatePlayerCounts', 1],
             ['log', 1],
+            ['taxMarket', 250],
+            ['taxPlayer', 250],
         ];
         notifs.forEach(function (notif) {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, "notif_".concat(notif[0])));
@@ -3352,7 +3578,7 @@ var NotificationManager = /** @class */ (function () {
         var args = notif.args;
         console.log('notif_payBribe', args);
         var briberId = args.briberId, rulerId = args.rulerId, rupees = args.rupees;
-        this.getPlayer({ playerId: briberId }).payBribe({ rulerId: rulerId, rupees: rupees });
+        this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees: rupees });
     };
     NotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
@@ -3526,9 +3752,26 @@ var NotificationManager = /** @class */ (function () {
                 to: toZone,
                 addClass: addClass,
                 removeClass: removeClass,
-                weight: weight
+                weight: weight,
             });
         });
+    };
+    NotificationManager.prototype.notif_taxMarket = function (notif) {
+        var _this = this;
+        debug('notif_taxMarket', notif.args);
+        var _a = notif.args, selectedRupees = _a.selectedRupees, playerId = _a.playerId, amount = _a.amount;
+        selectedRupees.forEach(function (rupee) {
+            var row = rupee.row, column = rupee.column, rupeeId = rupee.rupeeId;
+            _this.game.market.removeSingleRupeeFromCard({ row: row, column: column, rupeeId: rupeeId, to: "rupees_".concat(playerId) });
+        });
+        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: amount });
+    };
+    NotificationManager.prototype.notif_taxPlayer = function (notif) {
+        debug('notif_taxPlayer', notif.args);
+        var _a = notif.args, playerId = _a.playerId, taxedPlayerId = _a.taxedPlayerId, amount = _a.amount;
+        var player = this.getPlayer({ playerId: taxedPlayerId });
+        player.removeTaxCounter();
+        player.payToPlayer({ playerId: playerId, rupees: amount });
     };
     NotificationManager.prototype.notif_log = function (notif) {
         // this is for debugging php side
@@ -3663,7 +3906,7 @@ var PaxPamir = /** @class */ (function () {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     PaxPamir.prototype.onUpdateActionButtons = function (stateName, args) {
-        console.log('onUpdateActionButtons: ' + stateName);
+        // console.log('onUpdateActionButtons: ' + stateName);
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.

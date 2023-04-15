@@ -153,9 +153,9 @@ class PlayerActionsState implements State {
     return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
   }
 
-  private activePlayerHasCourtCards(): boolean {
-    return this.game.localState.activePlayer.court.cards.length > 0;
-  }
+  // private activePlayerHasCourtCards(): boolean {
+  //   return this.game.localState.activePlayer.court.cards.length > 0;
+  // }
 
   private setCardActionsSelectable() {
     const playerId = this.game.getPlayerId();

@@ -90,15 +90,15 @@ class Notifications
    **** GAME METHODS ****
    *************************/
 
-   public static function battleCard($cardId)
-   {
-     $message = clienttranslate('${player_name} battles on ${logTokenCardName}${logTokenLargeCard}');
-     self::notifyAll('battle', $message, [
-       'player' => Players::get(),
-       'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-     ]);
-   }
+  public static function battleCard($cardId)
+  {
+    $message = clienttranslate('${player_name} battles on ${logTokenCardName}${logTokenLargeCard}');
+    self::notifyAll('battle', $message, [
+      'player' => Players::get(),
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+    ]);
+  }
 
   public static function battleRegion($regionId)
   {
@@ -106,6 +106,16 @@ class Notifications
     self::notifyAll('battle', $message, [
       'player' => Players::get(),
       'logTokenLocation' => Utils::logTokenRegionName($regionId),
+    ]);
+  }
+
+  public static function betray($card, $player)
+  {
+    $message = clienttranslate('${player_name} betrays ${logTokenCardName}${logTokenLargeCard}');
+    self::notifyAll('betray', $message, [
+      'player' => Players::get(),
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
     ]);
   }
 
@@ -140,10 +150,78 @@ class Notifications
     self::notifyAll('moveToken', $message, $args);
   }
 
+  public static function discardFromCourt($card,$player,$moves = [])
+  {
+    $message =  clienttranslate('${player_name} discards ${logTokenCardName} from court ${returnedSpiesLog}${logTokenLargeCard}');
+    $hasSpies = count($moves) > 0;
+    $logs = [];
+    $args = [];
+    foreach ($moves as $index => $move) {
+      $playerId = explode("_", $move['tokenId'])[1];
+      $logs[] = '${logTokenCylinder' . $index . '}';
+      $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
+    }
+
+    self::notifyAll("discardFromCourt", $message, array(
+      'player' => $player,
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+      'cardId' => $card['id'],
+      'moves' => $moves,
+      'returnedSpiesLog' => $hasSpies ? [
+        'log' => clienttranslate('and returns ${spies}'),
+        'args' => [
+          'spies' => [
+            'log' => implode('', $logs),
+            'args' => $args
+          ]
+        ],
+      ] : '',
+    ));
+  }
+
+  public static function removeSpies($cardId, $spies, $moves)
+  {
+    $message = clienttranslate('${player_name} returns ${spiesLog} from ${logTokenCardName}${logTokenLargeCard}');
+    $logs = [];
+    $args = [];
+    foreach ($spies as $index => $spy) {
+      $playerId = explode("_", $spy['id'])[1];
+      $logs[] = '${logTokenCylinder' . $index . '}';
+      $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
+    }
+
+    self::notifyAll('removeSpies', $message, array(
+      'player' => Players::get(),
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'spiesLog' => [
+        'log' => implode('', $logs),
+        'args' => $args
+      ],
+    ));
+
+    self::moveToken('', [
+      'moves' => $moves
+    ]);
+  }
+
+  public static function discardFromHand($card, $player)
+  {
+    $message = clienttranslate('${player_name} discards ${logTokenCardName} from hand ${logTokenLargeCard}');
+
+    self::notifyAll("discardFromHand", $message, array(
+      'player' => $player,
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+      'cardId' => $card['id'],
+    ));
+  }
+
   public static function discardEventCardFromMarket($card, $location)
   {
 
-    self::notifyAll("discardCard", clienttranslate('${player_name} discards event card from the market: ${logTokenLargeCard}'), array(
+    self::notifyAll("discardFromMarket", clienttranslate('${player_name} discards event card from the market: ${logTokenLargeCard}'), array(
       'player' => Players::get(),
       'cardId' => $card['id'],
       'from' => $location,
@@ -238,7 +316,7 @@ class Notifications
     ));
   }
 
-  public static function tax($cardId,$player)
+  public static function tax($cardId, $player)
   {
     self::notifyAll("tax", clienttranslate('${player_name} taxes with ${logTokenCardName}${logTokenLargeCard}'), array(
       'player' => $player,
@@ -247,9 +325,9 @@ class Notifications
     ));
   }
 
-  public static function taxMarket($amount,$player,$selectedRupees)
+  public static function taxMarket($amount, $player, $selectedRupees)
   {
-    self::notifyAll("taxMarket", clienttranslate('${player_name} takes ${amount}${logTokenRupee} from the market'), array(
+    self::notifyAll("taxMarket", clienttranslate('${player_name} takes ${amount} ${logTokenRupee} from the market'), array(
       'player' => $player,
       'amount' => $amount,
       'logTokenRupee' => Utils::logTokenRupee(),
@@ -257,14 +335,22 @@ class Notifications
     ));
   }
 
-  public static function taxPlayer($amount,$player,$taxedPlayerId)
+  public static function taxPlayer($amount, $player, $taxedPlayerId)
   {
-    self::notifyAll("taxPlayer", clienttranslate('${player_name} takes ${amount}${logTokenRupee} from ${logTokenPlayerName}'), array(
+    self::notifyAll("taxPlayer", clienttranslate('${player_name} takes ${amount} ${logTokenRupee} from ${logTokenPlayerName}'), array(
       'player' => $player,
       'amount' => $amount,
       'taxedPlayerId' => $taxedPlayerId,
       'logTokenRupee' => Utils::logTokenRupee(),
       'logTokenPlayerName' => Utils::logTokenPlayerName($taxedPlayerId)
+    ));
+  }
+
+  public static function updateCourtCardStates($cardStates, $playerId)
+  {
+    self::notifyAll("updateCourtCardStates", '', array(
+      'playerId' => $playerId,
+      'cardStates' => $cardStates,
     ));
   }
 

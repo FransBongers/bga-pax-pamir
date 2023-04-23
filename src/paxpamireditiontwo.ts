@@ -465,29 +465,29 @@ class PaxPamir implements PaxPamirGame {
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
   // ....##.....#######......######..##.....##.########..######..##....##
 
-  public returnSpiesFromCard({ cardId }: { cardId: string }) {
-    if (this.spies?.[cardId]) {
-      // ['cylinder_2371052_3']
-      const items = this.spies[cardId].getAllItems();
-      items.forEach((cylinderId) => {
-        const playerId = Number(cylinderId.split('_')[1]);
-        this.move({
-          id: cylinderId,
-          to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
-          from: this.spies[cardId],
-        });
-      });
-    }
-  }
+  // public returnSpiesFromCard({ cardId }: { cardId: string }) {
+  //   if (this.spies?.[cardId]) {
+  //     // ['cylinder_2371052_3']
+  //     const items = this.spies[cardId].getAllItems();
+  //     items.forEach((cylinderId) => {
+  //       const playerId = Number(cylinderId.split('_')[1]);
+  //       this.move({
+  //         id: cylinderId,
+  //         to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
+  //         from: this.spies[cardId],
+  //       });
+  //     });
+  //   }
+  // }
 
-  public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
-    // Move all spies back to cylinder pools
-    this.returnSpiesFromCard({ cardId: id });
+  // public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
+  //   // Move all spies back to cylinder pools
+  //   this.returnSpiesFromCard({ cardId: id });
 
-    from.removeFromZone(id, false);
-    attachToNewParentNoDestroy(id, 'pp_discard_pile');
-    this.framework().slideToObject(id, 'pp_discard_pile').play();
-  }
+  //   from.removeFromZone(id, false);
+  //   attachToNewParentNoDestroy(id, 'pp_discard_pile');
+  //   this.framework().slideToObject(id, 'pp_discard_pile').play();
+  // }
 
   // returns zone object for given backend location in token database
   getZoneForLocation({ location }: { location: string }): Zone {

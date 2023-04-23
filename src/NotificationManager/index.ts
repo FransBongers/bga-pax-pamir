@@ -41,20 +41,23 @@ class NotificationManager {
       ['changeFavoredSuit', 250],
       ['chooseLoyalty', 1],
       ['clearTurn', 1],
+      ['discardFromCourt', 1000],
+      ['discardFromHand', 250],
+      ['discardFromMarket', 250],
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
       ['playCard', 2000],
-      ['discardCard', 1000],
       ['refreshMarket', 250],
       ['payBribe', 1],
       ['purchaseGift', 1],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
-      ['moveToken', 250],
+      ['moveToken', 1000],
       ['updatePlayerCounts', 1],
       ['log', 1],
       ['taxMarket', 250],
       ['taxPlayer', 250],
+      ['updateCourtCardStates', 1],
     ];
 
     notifs.forEach((notif) => {
@@ -131,21 +134,51 @@ class NotificationManager {
     this.game.cancelLogs(notifIds);
   }
 
-  notif_discardCard(notif: Notif<NotifDiscardCardArgs>) {
+  notif_discardFromCourt(notif: Notif<NotifDiscardFromCourtArgs>) {
     console.log('notif_discardCard', notif);
 
+    // TODO: check to execute animations one after another
+    // Decrease counters based on card rank
     this.game.clearPossible();
     const playerId = Number(notif.args.playerId);
-    const from = notif.args.from;
+    const { cardId, moves } = notif.args;
+    moves.forEach((move: TokenMove) => {
+      const { tokenId, from, to, weight } = move;
+      const fromZone = this.game.getZoneForLocation({ location: from });
+      const toZone = this.game.getZoneForLocation({ location: to });
 
-    if (from == 'hand') {
-      this.getPlayer({ playerId }).discardHandCard({ cardId: notif.args.cardId });
-    } else if (from == 'market_0_0' || from == 'market_1_0') {
-      const splitFrom = from.split('_');
-      this.game.market.discardCard({ cardId: notif.args.cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
-    } else {
-      this.getPlayer({ playerId }).discardCourtCard({ cardId: notif.args.cardId });
-    }
+      this.game.move({
+        id: tokenId,
+        from: fromZone,
+        to: toZone,
+        weight,
+      });
+      const spyOwnerId = Number(tokenId.split('_')[1]);
+      this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
+    });
+    const player = this.getPlayer({ playerId });
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    player.discardCourtCard({ cardId });
+    player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+  }
+
+  notif_discardFromHand(notif: Notif<NotifDiscardFromHandArgs>) {
+    debug('notif_discardFromHand', notif);
+    this.game.clearPossible();
+    const playerId = Number(notif.args.playerId);
+    const player = this.getPlayer({ playerId });
+    player.discardHandCard({ cardId: notif.args.cardId });
+    player.incCounter({ counter: 'cards', value: -1 });
+  }
+
+  notif_discardFromMarket(notif: Notif<NotifDiscardFromMarketArgs>) {
+    debug('notif_discardFromMarket', notif);
+
+    this.game.clearPossible();
+    const { from, cardId } = notif.args;
+
+    const splitFrom = from.split('_');
+    this.game.market.discardCard({ cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
   }
 
   notif_dominanceCheck(notif) {
@@ -393,6 +426,19 @@ class NotificationManager {
     const player = this.getPlayer({ playerId: taxedPlayerId });
     player.removeTaxCounter();
     player.payToPlayer({ playerId, rupees: amount });
+  }
+
+  notif_updateCourtCardStates(notif: Notif<NotifUpdateCourtCardStatesArgs>) {
+    debug('notif_updateCourtCardStates', notif.args);
+    const { playerId, cardStates } = notif.args;
+    const player = this.getPlayer({ playerId });
+    cardStates.forEach(({ cardId, state }, index) => {
+      const item = player.getCourtZone().items.find((item) => item.id === cardId);
+      if (item) {
+        item.weight = state;
+      }
+    });
+    this.getPlayer({ playerId }).getCourtZone().updateDisplay();
   }
 
   notif_log(notif) {

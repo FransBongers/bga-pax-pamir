@@ -119,14 +119,14 @@ class ClientCardActionBattleState implements State {
    */
   getCourtCardBattleSites() {
     const battleSites: string[] = [];
-    this.game.playerManager.getPlayerIds().forEach((playerId) => {
-      const courtCards = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
+    this.game.playerManager.getPlayers().forEach((player: PPPlayer) => {
+      const courtCards = player.getCourtCards();
 
-      courtCards.forEach((cardId: string) => {
-        const { enemy, own } = this.getSpies({ cardId });
+      courtCards.forEach((card: CourtCard) => {
+        const { enemy, own } = this.getSpies({ cardId: card.id });
 
         if (enemy.length > 0 && own.length > 0) {
-          battleSites.push(cardId);
+          battleSites.push(card.id);
         }
       });
     });

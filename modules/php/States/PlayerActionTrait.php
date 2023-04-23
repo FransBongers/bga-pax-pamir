@@ -61,6 +61,50 @@ trait PlayerActionTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  function betray($cardId, $betrayedCardId)
+  {
+    self::checkAction('betray');
+
+    $cardInfo = Cards::get($cardId);
+    $this->isValidCardAction($cardInfo, BETRAY);
+
+    $betrayedCardInfo = Cards::get($betrayedCardId);
+    $betrayedPlayerId = explode('_',$betrayedCardInfo['location'][1]);
+    // Card should be in a player's court
+    if(!Utils::startsWith($betrayedCardInfo['location'],'court')) {
+      throw new \feException("Card is not in a players court");
+    }
+    $spiesOnCard = Tokens::getInLocation(['spies',$betrayedCardId])->toArray();
+    // Notifications::log('spies',[$spiesOnCard[0]]);
+    $player = Players::get();
+    $playerId = $player->getId();
+    // Card should have spy of active player
+    if(!Utils::array_some($spiesOnCard,function ($cylinder) use ($playerId) {
+      return intval(explode('_',$cylinder['id'])[1]) === $playerId;
+    })) {
+      throw new \feException("No spy on selected card");
+    }
+
+    Cards::setUsed($cardId, 1);
+    // if not free action reduce remaining actions.
+    if (!$this->isCardFavoredSuit($cardId)) {
+      Globals::incRemainingActions(-1);
+    }
+    Notifications::betray($betrayedCardInfo,$player);
+    $this->removeSpiesFromCard($betrayedCardId);
+    $state = Cards::insertOnTop($betrayedCardId,DISCARD);
+    self::notifyAllPlayers("discardCard",'', array(
+      'playerId' => intval($betrayedPlayerId),
+      'cardId' => $betrayedCardId,
+      'state' => $state,
+      'from' => 'court',
+    ));
+
+
+    // // Take prize?
+    // $this->gamestate->nextState('playerActions');
+  }
+
   /**
    * Part of set up when players need to select loyalty.
    */
@@ -267,6 +311,7 @@ trait PlayerActionTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::tax($cardId, $activePlayer);
+    Players::incRupees($activePlayerId,$totalSelected);
 
     $rupeesInMarket = [];
     // Check if rupee is in market

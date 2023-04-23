@@ -35,9 +35,13 @@ class PlayerManager {
     return this.players[playerId];
   }
 
+  getPlayers(): PPPlayer[] {
+    return Object.values(this.players);
+  }
+
   getPlayerIds(): number[] {
     return Object.keys(this.players).map(Number);
-  } 
+  }
 
   updatePlayers({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     for (const playerId in gamedatas.players) {

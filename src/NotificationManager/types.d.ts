@@ -2,6 +2,18 @@
  * Note: we need to keep player_name in snake case, because the framework uses
  * it to add player colors to the log messages.
  */
+interface TokenMove {
+  tokenId: string;
+  from: string;
+  to: string;
+  weight?: number;
+}
+
+interface Log {
+  log: string;
+  args: Record<string,unknown>;
+}
+
 interface NotifPayBribeArgs {
   player_name: string;
   rulerId: number;
@@ -29,23 +41,34 @@ interface NotifChooseLoyaltyArgs {
   coalitionName: string;
 }
 
-interface NotifDiscardCardArgs {
+interface NotifDiscardFromCourtArgs {
   cardId: string;
   playerId: string;
   player_name: string;
-  cardName: string;
-  courtCards: Token[];
+  logTokenCardName: string;
+  logTokenLargeCard: string;
+  moves: TokenMove[];
+  returnedSpiesLog: Log | '';
+}
+
+interface NotifDiscardFromHandArgs {
+  cardId: string;
+  playerId: string;
+  player_name: string;
+  logTokenCardName: string;
+  logTokenLargeCard: string;
+}
+
+interface NotifDiscardFromMarketArgs {
+  cardId: string;
+  playerId: string;
+  player_name: string;
   from: string;
-  state: number;
+  logTokenLargeCard: string;
 }
 
 interface NotifMoveTokenArgs {
-  moves: {
-    tokenId: string;
-    from: string;
-    to: string;
-    weight?: number;
-  }[];
+  moves: TokenMove[];
 }
 
 interface NotifPlayCardArgs {
@@ -114,6 +137,14 @@ interface NotifTaxPlayerArgs {
   taxedPlayerId: number;
   logTokenRupee: string;
   logTokenPlayerName: string;
+}
+
+interface NotifUpdateCourtCardStatesArgs {
+  playerId: number;
+  cardStates: {
+    cardId: string;
+    state: number;
+  }[];
 }
 
 type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;

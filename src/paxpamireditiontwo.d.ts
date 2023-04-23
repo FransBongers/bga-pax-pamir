@@ -24,7 +24,7 @@ interface CourtCard {
   rank: number;
   region: string;
   specialAbility: string;
-  suit: string;
+  suit: 'economic' | 'military' | 'political' | 'intelligence';
   type: 'courtCard';
 }
 
@@ -164,10 +164,10 @@ interface PaxPamirGame extends Game {
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
-  discardCard: (props: { id: string; from: Zone; order?: number }) => void;
+  // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   onCancel: () => void;
-  returnSpiesFromCard: (props: { cardId: string }) => void;
+  // returnSpiesFromCard: (props: { cardId: string }) => void;
   setHandCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;

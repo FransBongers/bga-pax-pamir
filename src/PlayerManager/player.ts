@@ -331,6 +331,13 @@ class PPPlayer {
   // .##....##.##..........##.......##....##.......##....##..##....##
   // ..######..########....##.......##....########.##.....##..######.
 
+  getCourtCards(): CourtCard[] {
+    const cardsInZone = this.court.getAllItems();
+    return cardsInZone.map((cardId: string) => this.game.getCardInfo({cardId})) as CourtCard[];
+
+ 
+  }
+
   getCourtZone(): Zone {
     return this.court;
   }
@@ -454,12 +461,15 @@ class PPPlayer {
   // .##.....##..######.....##....####..#######..##....##..######.
 
   discardCourtCard({ cardId }: { cardId: string }) {
-    // Move all spies back to cylinder pools if there are any
-    this.game.returnSpiesFromCard({ cardId });
-
+    // // Move all spies back to cylinder pools if there are any
+    // this.game.returnSpiesFromCard({ cardId });
+    const node = dojo.byId(cardId);
+    node.classList.remove('pp_card_in_court');
+    node.classList.remove(`pp_player_${this.playerId}`);
     // Move card to discard pile
     this.court.removeFromZone(cardId, false);
     discardCardAnimation({ cardId, game: this.game });
+    
     // TODO: check leverage and check overthrow rule
   }
 

@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
@@ -61,76 +62,95 @@ trait DiscardTrait
   /**
    * Discard cards action when needed at end of a players turn
    */
-  function discardCards($cards, $fromHand)
+  function discardCards($cardIds, $fromHand)
   {
     self::checkAction('discardCards');
 
     $player = Players::get();
     $playerId = $player->getId();
     $discards = $player->checkDiscards();
-    $state = Cards::getExtremePosition(true, DISCARD);
-    if ($fromHand) {
-      if (count($cards) !== $discards['hand'])
-        throw new \feException("Incorrect number of discards");
 
-      foreach ($cards as $cardId) {
-        $state += 1;
-        Cards::move($cardId, DISCARD, $state);
-        $cardName = $this->cards[$cardId]['name'];
-        $removed_card = Cards::get($cardId);
-        $courtCards = $player->getCourtCards();
-
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from his hand.', array(
-          'playerId' => $player->getId(),
-          'player_name' => self::getActivePlayerName(),
-          'cardName' => $cardName,
-          'courtCards' => $courtCards,
-          'cardId' => $cardId,
-          'state' => $state,
-          'from' => 'hand'
-        ));
+    if (($fromHand && count($cardIds) !== $discards['hand']) || (!$fromHand && count($cardIds) != $discards['court'])) {
+      throw new \feException("Incorrect number of discards");
+    };
+    $cards = [];
+    foreach ($cardIds as $cardId) {
+      $card = Cards::get($cardId);
+      if (($fromHand && $card['location'] !== 'hand_' . $playerId) || (!$fromHand && $card['location'] !== 'court_' . $playerId)) {
+        throw new \feException("Card is not in the discard location");
       }
-    } else {
-      if (count($cards) != $discards['court'])
-        throw new \feException("Incorrect number of discards");
-
-      foreach ($cards as $cardId) {
-        // Move all spies back to players cylinder pool
-        $spiesOnCard = Tokens::getInLocation(['spies', $cardId]);
-        self::dump("spiesOnCard", $spiesOnCard);
-        foreach ($spiesOnCard as $spy) {
-          $spyOwner = explode("_", $spy['id'])[1];
-          Tokens::move($spy['id'], ['cylinders', $spyOwner]);
-        }
-        $state += 1;
-        // move card to discard location
-        Cards::move($cardId, DISCARD, $state);
-        $cardName = $this->cards[$cardId]['name'];
-        $removedCard = Cards::get($cardId);
-        $courtCards = Cards::getInLocation(['court', $playerId]);
-
-        // slide card positions down to fill in gap
-        foreach ($courtCards as $c) {
-          if ($c['state'] > $removedCard['state'])
-            Cards::setState($c['id'], $c['state'] - 1);
-        }
-
-        $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
-
-        self::notifyAllPlayers("discardCard", '${player_name} discarded ${cardName} from his court.', array(
-          'playerId' => $playerId,
-          'player_name' => self::getActivePlayerName(),
-          'cardName' => $cardName,
-          'courtCards' => $courtCards,
-          'cardId' => $cardId,
-          'state' => $state,
-          'from' => 'court'
-        ));
-      }
+      $cards[] = $card;
     }
 
-    $this->updatePlayerCounts();
+
+    $state = Cards::getExtremePosition(true, DISCARD);
+    foreach ($cards as $card) {
+      $cardId = $card['id'];
+      $spyMoves = [];
+      if (Utils::startsWith($card['location'], 'court')) {
+        $spyMoves = $this->removeSpiesFromCard($cardId);
+      }
+      $state += 1;
+      Cards::move($cardId, DISCARD, $state);
+
+      if ($fromHand) {
+        Notifications::discardFromHand($card, $player);
+      } else {
+        Notifications::discardFromCourt($card, $player, $spyMoves);
+      };
+    }
+
+    $this->reassignCourtState();
 
     $this->gamestate->nextState('cleanup');
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function removeSpiesFromCard($cardId)
+  {
+    $from = 'spies_' . $cardId;
+    $spiesOnCard = Tokens::getInLocation($from)->toArray();
+    $moves = [];
+    if (count($spiesOnCard) === 0) {
+      return $moves;
+    }
+
+    foreach ($spiesOnCard as $index => $spy) {
+      $spyOwner = explode("_", $spy['id'])[1];
+      $to = 'cylinders_' . $spyOwner;
+      $state = Tokens::insertOnTop($spy['id'], $to);
+      $moves[] =  [
+        'from' => $from,
+        'to' => $to,
+        'tokenId' => $spy['id'],
+        'weight' => $state,
+      ];
+    };
+
+    return $moves;
+  }
+
+  function reassignCourtState($playerId = null)
+  {
+    $player = Players::get($playerId);
+    $courtCards = $player->getCourtCards();
+    $courtCardStates = [];
+    foreach ($courtCards as $index => $card) {
+      $cardId = $card['id'];
+      $state = $index + 1;
+      Cards::setState($cardId, $state);
+      $courtCardStates[] = [
+        'cardId' => $cardId,
+        'state' => $state,
+      ];
+    };
+    Notifications::updateCourtCardStates($courtCardStates, $player->getId());
   }
 }

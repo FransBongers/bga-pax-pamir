@@ -88,7 +88,7 @@ class DiscardCourtState implements State {
   }
 
   handleDiscardSelect({ cardId }: { cardId: string }) {
-    dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_discard').toggleClass('pp_selectable');
+    dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_selectable');//.toggleClass('pp_discard');
     const numberSelected = dojo.query('.pp_selected').length;
     console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
     if (numberSelected === this.numberOfDiscards) {

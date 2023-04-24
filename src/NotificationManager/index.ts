@@ -35,12 +35,14 @@ class NotificationManager {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
       ['battle', 250],
+      ['betray', 250],
       ['cardAction', 1],
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
       ['changeFavoredSuit', 250],
       ['chooseLoyalty', 1],
       ['clearTurn', 1],
+      ['discardAndTakePrize', 1000],
       ['discardFromCourt', 1000],
       ['discardFromHand', 250],
       ['discardFromMarket', 250],
@@ -71,6 +73,17 @@ class NotificationManager {
 
   notif_battle(notif) {
     debug('notif_battle', notif);
+  }
+
+  notif_betray(notif: Notif<NotifBetrayArgs>) {
+    debug('notif_betray', notif);
+    const { playerId, rupeesOnCards } = notif.args;
+    // Place paid rupees on market cards
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+    });
   }
 
   notif_cardAction(notif) {
@@ -134,13 +147,42 @@ class NotificationManager {
     this.game.cancelLogs(notifIds);
   }
 
+  notif_discardAndTakePrize(notif: Notif<NotifDiscardAndTakePrizeArgs>) {
+    console.log('notif_discardAndTakePrize', notif);
+
+    // TODO: check to execute animations one after another
+    // Decrease counters based on card rank
+    this.game.clearPossible();
+    const courtOwnerPlayerId = Number(notif.args.courtOwnerPlayerId);
+    const { cardId, moves, playerId } = notif.args;
+    moves.forEach((move: TokenMove) => {
+      const { tokenId, from, to, weight } = move;
+      const fromZone = this.game.getZoneForLocation({ location: from });
+      const toZone = this.game.getZoneForLocation({ location: to });
+
+      this.game.move({
+        id: tokenId,
+        from: fromZone,
+        to: toZone,
+        weight,
+      });
+      const spyOwnerId = Number(tokenId.split('_')[1]);
+      this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
+    });
+    const player = this.getPlayer({ playerId: courtOwnerPlayerId });
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    // player.discardCourtCard({ cardId });
+    this.game.playerManager.getPlayer({ playerId }).takePrize({ cardOwnerId: courtOwnerPlayerId, cardId });
+    player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+  }
+
   notif_discardFromCourt(notif: Notif<NotifDiscardFromCourtArgs>) {
     console.log('notif_discardCard', notif);
 
     // TODO: check to execute animations one after another
     // Decrease counters based on card rank
     this.game.clearPossible();
-    const playerId = Number(notif.args.playerId);
+    const playerId = Number(notif.args.courtOwnerPlayerId);
     const { cardId, moves } = notif.args;
     moves.forEach((move: TokenMove) => {
       const { tokenId, from, to, weight } = move;

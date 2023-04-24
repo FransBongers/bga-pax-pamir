@@ -354,6 +354,8 @@ var TYPE_BUILD = 'build';
 var TYPE_GIFT = 'gift';
 var TYPE_MOVE = 'move';
 var TYPE_TAX = 'tax';
+var CARD_ACTIONS_WITH_COST = [TYPE_BETRAY, TYPE_BUILD, TYPE_GIFT];
+var CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE, TYPE_MOVE, TYPE_TAX];
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
@@ -902,6 +904,7 @@ var PPPlayer = /** @class */ (function () {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
+        this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
@@ -913,6 +916,7 @@ var PPPlayer = /** @class */ (function () {
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupHand({ playerGamedatas: playerGamedatas });
         this.setupCourt({ playerGamedatas: playerGamedatas });
+        this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
@@ -924,7 +928,6 @@ var PPPlayer = /** @class */ (function () {
         this.court = new ebg.zone();
         this.court.create(this.game, "pp_court_player_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
         this.court.item_margin = 16;
-        this.court.instantaneous = true;
         this.court.instantaneous = true;
         playerGamedatas.court.cards.forEach(function (card) {
             var cardId = card.id;
@@ -1079,6 +1082,39 @@ var PPPlayer = /** @class */ (function () {
         this.counters.political.setValue(counts.suits.political);
         this.counters.intelligence.setValue(counts.suits.intelligence);
     };
+    PPPlayer.prototype.setupPrizes = function (_a) {
+        var _this = this;
+        var playerGamedatas = _a.playerGamedatas;
+        this.prizes = new ebg.zone();
+        this.prizes.create(this.game, "pp_prizes_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
+        this.prizes.setPattern('verticalfit');
+        // const node = dojo.byId(`pp_prizes_${this.playerId}`);
+        var numberOfPrizes = playerGamedatas.prizes.length;
+        // if (numberOfPrizes > 0) {
+        //   // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
+        //   // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
+        //   dojo.style(node, 'margin-bottom', `-194px`);
+        //   dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
+        // }
+        this.updatePrizesStyle({ numberOfPrizes: numberOfPrizes });
+        this.prizes.instantaneous = true;
+        playerGamedatas.prizes.forEach(function (card) {
+            var cardId = card.id;
+            dojo.place(tplCard({ cardId: cardId, extraClasses: "pp_prize" }), "pp_prizes_".concat(_this.playerId));
+            _this.prizes.placeInZone(cardId, card.state);
+        });
+        this.prizes.instantaneous = false;
+    };
+    PPPlayer.prototype.updatePrizesStyle = function (_a) {
+        var numberOfPrizes = _a.numberOfPrizes;
+        if (numberOfPrizes > 0) {
+            var node = dojo.byId("pp_prizes_".concat(this.playerId));
+            // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
+            // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
+            dojo.style(node, 'margin-bottom', "-194px");
+            dojo.style(node, 'height', "".concat(CARD_HEIGHT + (numberOfPrizes - 1) * 25, "px"));
+        }
+    };
     PPPlayer.prototype.setupRulerTokens = function (_a) {
         var _this = this;
         var gamedatas = _a.gamedatas;
@@ -1171,6 +1207,9 @@ var PPPlayer = /** @class */ (function () {
     };
     PPPlayer.prototype.getName = function () {
         return this.playerName;
+    };
+    PPPlayer.prototype.getPrizeZone = function () {
+        return this.prizes;
     };
     PPPlayer.prototype.getRupees = function () {
         return this.counters.rupees.getValue();
@@ -1334,6 +1373,19 @@ var PPPlayer = /** @class */ (function () {
         if (taxCounter) {
             dojo.destroy(taxCounter.id);
         }
+    };
+    PPPlayer.prototype.takePrize = function (_a) {
+        var cardId = _a.cardId, cardOwnerId = _a.cardOwnerId;
+        debug('item number', this.prizes.getItemNumber());
+        this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
+        this.game.move({
+            id: cardId,
+            from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
+            to: this.getPrizeZone(),
+            addClass: ['pp_prize'],
+            // weight,
+        });
+        this.incCounter({ counter: 'influence', value: 1 });
     };
     // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
@@ -2163,7 +2215,9 @@ var ClientCardActionBetrayState = /** @class */ (function () {
     function ClientCardActionBetrayState(game) {
         this.game = game;
     }
-    ClientCardActionBetrayState.prototype.onEnteringState = function () {
+    ClientCardActionBetrayState.prototype.onEnteringState = function (_a) {
+        var cardId = _a.cardId;
+        this.cardId = cardId;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBetrayState.prototype.onLeavingState = function () { };
@@ -2197,13 +2251,37 @@ var ClientCardActionBetrayState = /** @class */ (function () {
         this.setCourtCardsSelectable();
         this.game.addCancelButton();
     };
+    ClientCardActionBetrayState.prototype.updateInterfaceAcceptPrize = function (_a) {
+        var _this = this;
+        var betrayedCardId = _a.betrayedCardId;
+        this.game.clearPossible();
+        var card = this.game.getCardInfo({ cardId: betrayedCardId });
+        var node = dojo.byId(betrayedCardId);
+        dojo.addClass(node, 'pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _('Accept ${cardName} as a prize?'),
+            args: {
+                cardName: _(card.name),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'accept_prize_btn',
+            text: _('Accept as prize'),
+            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: true }); },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'no_prize_btn',
+            text: _('Decline prize'),
+            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: false }); },
+        });
+        this.game.addCancelButton();
+    };
     ClientCardActionBetrayState.prototype.updateInterfaceConfirm = function (_a) {
         var _this = this;
-        var cardId = _a.cardId;
-        debug('updateInterfaceConfirm', cardId);
+        var betrayedCardId = _a.betrayedCardId, acceptPrize = _a.acceptPrize;
         this.game.clearPossible();
-        var card = this.game.getCardInfo({ cardId: cardId });
-        var node = dojo.byId(cardId);
+        var card = this.game.getCardInfo({ cardId: betrayedCardId });
+        var node = dojo.byId(betrayedCardId);
         dojo.addClass(node, 'pp_selected');
         this.game.clientUpdatePageTitle({
             text: _('Betray ${cardName}?'),
@@ -2214,7 +2292,7 @@ var ClientCardActionBetrayState = /** @class */ (function () {
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
-            callback: function () { return _this.handleConfirm({ cardId: cardId }); },
+            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: acceptPrize }); },
         });
         this.game.addCancelButton();
     };
@@ -2243,22 +2321,35 @@ var ClientCardActionBetrayState = /** @class */ (function () {
         };
     };
     ClientCardActionBetrayState.prototype.handleConfirm = function (_a) {
-        var cardId = _a.cardId;
-        debug('handleConfirm', cardId);
+        var betrayedCardId = _a.betrayedCardId, acceptPrize = _a.acceptPrize;
+        debug('handleConfirm', betrayedCardId);
+        this.game.takeAction({ action: 'betray', data: {
+                cardId: this.cardId,
+                betrayedCardId: betrayedCardId,
+                acceptPrize: acceptPrize
+            } });
     };
     ClientCardActionBetrayState.prototype.setCourtCardsSelectable = function () {
         var _this = this;
         this.game.playerManager.getPlayers().forEach(function (player) {
             player.getCourtCards().forEach(function (card) {
+                debug('card', card);
                 var _a = _this.getSpies({ cardId: card.id }), enemy = _a.enemy, own = _a.own;
                 if (!(own.length > 0)) {
                     return;
                 }
                 var node = dojo.byId(card.id);
                 dojo.addClass(node, 'pp_selectable');
-                dojo.connect(node, 'onclick', _this, function () {
-                    _this.updateInterfaceConfirm({ cardId: card.id });
-                });
+                if (card.prize) {
+                    dojo.connect(node, 'onclick', _this, function () {
+                        _this.updateInterfaceAcceptPrize({ betrayedCardId: card.id });
+                    });
+                }
+                else {
+                    dojo.connect(node, 'onclick', _this, function () {
+                        _this.updateInterfaceConfirm({ betrayedCardId: card.id, acceptPrize: false });
+                    });
+                }
             });
         });
     };
@@ -3349,12 +3440,19 @@ var PlayerActionsState = /** @class */ (function () {
     PlayerActionsState.prototype.activePlayerHasActions = function () {
         return this.game.localState.remainingActions > 0 || false;
     };
+    // TODO: check value of purchased gifts
     PlayerActionsState.prototype.activePlayerHasCardActions = function () {
         var _this = this;
+        var rupees = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getRupees();
         return this.game.localState.activePlayer.court.cards.some(function (_a) {
             var id = _a.id, used = _a.used;
             var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return used === 0 && Object.keys(cardInfo.actions).length > 0;
+            var cardHasActions = Object.keys(cardInfo.actions).length > 0;
+            var hasEnoughRupees = rupees >= 2 || Object.values(cardInfo.actions).some(function (_a) {
+                var type = _a.type;
+                return CARD_ACTIONS_WITHOUT_COST.includes(type);
+            });
+            return used === 0 && cardHasActions && hasEnoughRupees;
         });
     };
     PlayerActionsState.prototype.activePlayerHasFreeCardActions = function () {
@@ -3362,7 +3460,7 @@ var PlayerActionsState = /** @class */ (function () {
         return this.game.localState.activePlayer.court.cards.some(function (_a) {
             var id = _a.id, used = _a.used;
             var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return (used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0);
+            return used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0;
         });
     };
     PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
@@ -3381,10 +3479,15 @@ var PlayerActionsState = /** @class */ (function () {
             var used = ((_b = (_a = _this.game.localState.activePlayer.court.cards) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
                 (_this.game.localState.remainingActions > 0 ||
-                    _this.game.gamedatas.staticData.cards[cardId].suit === _this.game.objectManager.favoredSuit.get()))
+                    _this.game.gamedatas.staticData.cards[cardId].suit === _this.game.objectManager.favoredSuit.get())) {
+                var rupees_1 = _this.game.playerManager.getPlayer({ playerId: playerId }).getRupees();
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
                         var cardAction_1 = child.id.split('_')[0];
+                        // TODO: check value of purchased gifts
+                        if (CARD_ACTIONS_WITH_COST.includes(cardAction_1) && rupees_1 < 2) {
+                            return;
+                        }
                         // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
                         dojo.addClass(child, 'pp_selectable');
                         _this.game._connections.push(dojo.connect(child, 'onclick', _this, function (event) {
@@ -3414,6 +3517,7 @@ var PlayerActionsState = /** @class */ (function () {
                         }));
                     }
                 });
+            }
         });
     };
     PlayerActionsState.prototype.setMarketCardsSelectable = function () {
@@ -3422,8 +3526,7 @@ var PlayerActionsState = /** @class */ (function () {
         dojo.query('.pp_market_card').forEach(function (node) {
             var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
             var cardId = node.id;
-            if (cost <= _this.game.localState.activePlayer.rupees &&
-                !_this.game.localState.usedCards.includes(cardId)) {
+            if (cost <= _this.game.localState.activePlayer.rupees && !_this.game.localState.usedCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
                 _this.game._connections.push(
                 // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
@@ -3536,12 +3639,14 @@ var NotificationManager = /** @class */ (function () {
         console.log('notifications subscriptions setup');
         var notifs = [
             ['battle', 250],
+            ['betray', 250],
             ['cardAction', 1],
             ['changeRuler', 1],
             // ['initiateNegotiation', 1],
             ['changeFavoredSuit', 250],
             ['chooseLoyalty', 1],
             ['clearTurn', 1],
+            ['discardAndTakePrize', 1000],
             ['discardFromCourt', 1000],
             ['discardFromHand', 250],
             ['discardFromMarket', 250],
@@ -3569,6 +3674,17 @@ var NotificationManager = /** @class */ (function () {
     };
     NotificationManager.prototype.notif_battle = function (notif) {
         debug('notif_battle', notif);
+    };
+    NotificationManager.prototype.notif_betray = function (notif) {
+        var _this = this;
+        debug('notif_betray', notif);
+        var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
+        // Place paid rupees on market cards
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+        });
     };
     NotificationManager.prototype.notif_cardAction = function (notif) {
         console.log('notif_cardAction', notif);
@@ -3622,13 +3738,40 @@ var NotificationManager = /** @class */ (function () {
         console.log('notif_clearTurn notifIds', notifIds);
         this.game.cancelLogs(notifIds);
     };
+    NotificationManager.prototype.notif_discardAndTakePrize = function (notif) {
+        var _this = this;
+        console.log('notif_discardAndTakePrize', notif);
+        // TODO: check to execute animations one after another
+        // Decrease counters based on card rank
+        this.game.clearPossible();
+        var courtOwnerPlayerId = Number(notif.args.courtOwnerPlayerId);
+        var _a = notif.args, cardId = _a.cardId, moves = _a.moves, playerId = _a.playerId;
+        moves.forEach(function (move) {
+            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
+            var fromZone = _this.game.getZoneForLocation({ location: from });
+            var toZone = _this.game.getZoneForLocation({ location: to });
+            _this.game.move({
+                id: tokenId,
+                from: fromZone,
+                to: toZone,
+                weight: weight,
+            });
+            var spyOwnerId = Number(tokenId.split('_')[1]);
+            _this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
+        });
+        var player = this.getPlayer({ playerId: courtOwnerPlayerId });
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        // player.discardCourtCard({ cardId });
+        this.game.playerManager.getPlayer({ playerId: playerId }).takePrize({ cardOwnerId: courtOwnerPlayerId, cardId: cardId });
+        player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+    };
     NotificationManager.prototype.notif_discardFromCourt = function (notif) {
         var _this = this;
         console.log('notif_discardCard', notif);
         // TODO: check to execute animations one after another
         // Decrease counters based on card rank
         this.game.clearPossible();
-        var playerId = Number(notif.args.playerId);
+        var playerId = Number(notif.args.courtOwnerPlayerId);
         var _a = notif.args, cardId = _a.cardId, moves = _a.moves;
         moves.forEach(function (move) {
             var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;

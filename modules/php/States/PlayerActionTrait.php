@@ -61,7 +61,7 @@ trait PlayerActionTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function betray($cardId, $betrayedCardId)
+  function betray($cardId, $betrayedCardId, $acceptPrize = false)
   {
     self::checkAction('betray');
 
@@ -69,20 +69,29 @@ trait PlayerActionTrait
     $this->isValidCardAction($cardInfo, BETRAY);
 
     $betrayedCardInfo = Cards::get($betrayedCardId);
-    $betrayedPlayerId = explode('_',$betrayedCardInfo['location'][1]);
+    $betrayedPlayerId = intval(explode('_', $betrayedCardInfo['location'])[1]);
+
+    Notifications::log('acceptPrize', [
+      'acceptPrize' => $acceptPrize
+    ]);
+
     // Card should be in a player's court
-    if(!Utils::startsWith($betrayedCardInfo['location'],'court')) {
+    if (!Utils::startsWith($betrayedCardInfo['location'], 'court')) {
       throw new \feException("Card is not in a players court");
     }
-    $spiesOnCard = Tokens::getInLocation(['spies',$betrayedCardId])->toArray();
+    $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
     // Notifications::log('spies',[$spiesOnCard[0]]);
     $player = Players::get();
     $playerId = $player->getId();
     // Card should have spy of active player
-    if(!Utils::array_some($spiesOnCard,function ($cylinder) use ($playerId) {
-      return intval(explode('_',$cylinder['id'])[1]) === $playerId;
+    if (!Utils::array_some($spiesOnCard, function ($cylinder) use ($playerId) {
+      return intval(explode('_', $cylinder['id'])[1]) === $playerId;
     })) {
       throw new \feException("No spy on selected card");
+    }
+
+    if ($player->getRupees() < 2) {
+      throw new \feException("Player does not have enough rupees to pay for action");
     }
 
     Cards::setUsed($cardId, 1);
@@ -90,19 +99,30 @@ trait PlayerActionTrait
     if (!$this->isCardFavoredSuit($cardId)) {
       Globals::incRemainingActions(-1);
     }
-    Notifications::betray($betrayedCardInfo,$player);
-    $this->removeSpiesFromCard($betrayedCardId);
-    $state = Cards::insertOnTop($betrayedCardId,DISCARD);
-    self::notifyAllPlayers("discardCard",'', array(
-      'playerId' => intval($betrayedPlayerId),
-      'cardId' => $betrayedCardId,
-      'state' => $state,
-      'from' => 'court',
-    ));
+    $rupeesOnCards = $this->payActionCosts(2);
+    Players::incRupees($playerId, -2);
+    Notifications::betray($betrayedCardInfo, $player,$rupeesOnCards);
+    $spyMoves = $this->removeSpiesFromCard($betrayedCardId);
+    
+
+    if ($betrayedCardInfo['prize'] !== null && $acceptPrize) {
+      Cards::insertOnTop($betrayedCardId, 'prizes_'.$playerId);
+      Notifications::discardAndTakePrize($betrayedCardInfo, $player,$spyMoves, $betrayedPlayerId === $playerId ? null : $betrayedPlayerId);
+    } else {
+      Cards::insertOnTop($betrayedCardId, DISCARD);
+      Notifications::discardFromCourt($betrayedCardInfo, $player, $spyMoves, $betrayedPlayerId === $playerId ? null : $betrayedPlayerId);
+    }
+
+    // self::notifyAllPlayers("discardCard",'', array(
+    //   'playerId' => intval($betrayedPlayerId),
+    //   'cardId' => $betrayedCardId,
+    //   'state' => $state,
+    //   'from' => 'court',
+    // ));
 
 
     // // Take prize?
-    // $this->gamestate->nextState('playerActions');
+    $this->gamestate->nextState('playerActions');
   }
 
   /**
@@ -311,7 +331,7 @@ trait PlayerActionTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::tax($cardId, $activePlayer);
-    Players::incRupees($activePlayerId,$totalSelected);
+    Players::incRupees($activePlayerId, $totalSelected);
 
     $rupeesInMarket = [];
     // Check if rupee is in market

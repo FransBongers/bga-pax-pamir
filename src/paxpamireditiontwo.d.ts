@@ -191,4 +191,5 @@ interface PaxPamirPlayer extends BgaPlayer {
   hand: Token[]; // Will only contain cards if player is current player (or with open hands variant?)
   loyalty: string;
   rupees: number;
+  prizes: CourtCard[];
 }

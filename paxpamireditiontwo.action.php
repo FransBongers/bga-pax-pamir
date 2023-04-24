@@ -77,6 +77,17 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function betray()
+    {
+        self::setAjaxMode();
+        $acceptPrize = self::getArg("acceptPrize", AT_bool, true);
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $betrayedCardId = self::getArg("betrayedCardId", AT_alphanum, true);
+
+        $result = $this->game->betray($cardId, $betrayedCardId, $acceptPrize);
+        self::ajaxResponse();
+    }
+
     public function chooseLoyalty()
     {
         self::setAjaxMode();

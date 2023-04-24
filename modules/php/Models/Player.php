@@ -56,7 +56,8 @@ class Player extends \PaxPamir\Helpers\DB_Model
         'cylinders' => 10 - count($cylinders),
         'influence' => $this->getInfluence(),
         'suits' => $this->getSuitTotals()
-      ]
+      ],
+      'prizes' => $this->getPrizes()
     ]);
 
     foreach ($data['court']['cards'] as $card) {
@@ -87,6 +88,11 @@ class Player extends \PaxPamir\Helpers\DB_Model
   function getCourtCards()
   {
     return Cards::getInLocationOrdered(['court', $this->id])->toArray();
+  }
+
+  function getPrizes()
+  {
+    return Cards::getInLocationOrdered(['prizes', $this->id])->toArray();
   }
 
   function getHandCards()

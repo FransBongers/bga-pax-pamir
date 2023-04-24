@@ -15,6 +15,7 @@ class PPPlayer {
   private playerColor: string;
   private playerId: number;
   private playerName: string;
+  private prizes: Zone;
   private counters: {
     cards: Counter;
     cardsTableau: Counter;
@@ -67,6 +68,7 @@ class PPPlayer {
     const playerGamedatas = gamedatas.players[this.playerId];
 
     this.setupCourt({ playerGamedatas });
+    this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
@@ -79,6 +81,7 @@ class PPPlayer {
 
     this.setupHand({ playerGamedatas });
     this.setupCourt({ playerGamedatas });
+    this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
@@ -89,7 +92,6 @@ class PPPlayer {
     this.court = new ebg.zone();
     this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
     this.court.item_margin = 16;
-    this.court.instantaneous = true;
 
     this.court.instantaneous = true;
     playerGamedatas.court.cards.forEach((card: Token) => {
@@ -257,6 +259,41 @@ class PPPlayer {
     this.counters.intelligence.setValue(counts.suits.intelligence);
   }
 
+  setupPrizes({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    this.prizes = new ebg.zone();
+    this.prizes.create(this.game, `pp_prizes_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
+    this.prizes.setPattern('verticalfit');
+    // const node = dojo.byId(`pp_prizes_${this.playerId}`);
+    const numberOfPrizes = playerGamedatas.prizes.length;
+    // if (numberOfPrizes > 0) {
+    //   // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
+    //   // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
+    //   dojo.style(node, 'margin-bottom', `-194px`);
+    //   dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
+    // }
+    this.updatePrizesStyle({numberOfPrizes})
+
+
+    this.prizes.instantaneous = true;
+    playerGamedatas.prizes.forEach((card: CourtCard & Token) => {
+      const cardId = card.id;
+
+      dojo.place(tplCard({ cardId, extraClasses: `pp_prize` }), `pp_prizes_${this.playerId}`);
+      this.prizes.placeInZone(cardId, card.state);
+    });
+    this.prizes.instantaneous = false;
+  }
+
+  updatePrizesStyle({numberOfPrizes}:{numberOfPrizes: number;}) {
+    if (numberOfPrizes > 0) {
+      const node = dojo.byId(`pp_prizes_${this.playerId}`);
+      // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
+      // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
+      dojo.style(node, 'margin-bottom', `-194px`);
+      dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
+    }
+  }
+
   setupRulerTokens({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     if (!this.rulerTokens) {
       this.rulerTokens = new ebg.zone();
@@ -333,9 +370,7 @@ class PPPlayer {
 
   getCourtCards(): CourtCard[] {
     const cardsInZone = this.court.getAllItems();
-    return cardsInZone.map((cardId: string) => this.game.getCardInfo({cardId})) as CourtCard[];
-
- 
+    return cardsInZone.map((cardId: string) => this.game.getCardInfo({ cardId })) as CourtCard[];
   }
 
   getCourtZone(): Zone {
@@ -360,6 +395,10 @@ class PPPlayer {
 
   getName(): string {
     return this.playerName;
+  }
+
+  getPrizeZone(): Zone {
+    return this.prizes;
   }
 
   getRupees(): number {
@@ -469,7 +508,7 @@ class PPPlayer {
     // Move card to discard pile
     this.court.removeFromZone(cardId, false);
     discardCardAnimation({ cardId, game: this.game });
-    
+
     // TODO: check leverage and check overthrow rule
   }
 
@@ -541,9 +580,22 @@ class PPPlayer {
 
   removeTaxCounter() {
     const taxCounter = dojo.byId(`rupees_tableau_${this.playerId}_tax_counter`);
-      if(taxCounter) {
-        dojo.destroy(taxCounter.id);
-      }
+    if (taxCounter) {
+      dojo.destroy(taxCounter.id);
+    }
+  }
+
+  takePrize({ cardId, cardOwnerId }: { cardId: string; cardOwnerId: number; }): void {
+    debug('item number',this.prizes.getItemNumber());
+    this.updatePrizesStyle({numberOfPrizes: this.prizes.getItemNumber() + 1})
+    this.game.move({
+      id: cardId,
+      from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
+      to: this.getPrizeZone(),
+      addClass: ['pp_prize'],
+      // weight,
+    });
+    this.incCounter({counter: 'influence', value: 1});
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

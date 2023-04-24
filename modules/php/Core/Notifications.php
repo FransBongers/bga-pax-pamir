@@ -109,11 +109,12 @@ class Notifications
     ]);
   }
 
-  public static function betray($card, $player)
+  public static function betray($card, $player, $rupeesOnCards)
   {
     $message = clienttranslate('${player_name} betrays ${logTokenCardName}${logTokenLargeCard}');
     self::notifyAll('betray', $message, [
-      'player' => Players::get(),
+      'player' => $player,
+      'rupeesOnCards' => $rupeesOnCards,
       'logTokenCardName' => Utils::logTokenCardName($card['name']),
       'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
     ]);
@@ -150,9 +151,10 @@ class Notifications
     self::notifyAll('moveToken', $message, $args);
   }
 
-  public static function discardFromCourt($card,$player,$moves = [])
+  public static function discardFromCourt($card,$player,$moves = [],$courtOwnerPlayerId = null)
   {
-    $message =  clienttranslate('${player_name} discards ${logTokenCardName} from court ${returnedSpiesLog}${logTokenLargeCard}');
+    $messageOwnCourt =  clienttranslate('${player_name} discards ${logTokenCardName} from court ${returnedSpiesLog}${logTokenLargeCard}');
+    $messageOtherCourt =  clienttranslate('${player_name} discards ${logTokenCardName} from ${logTokenOtherPlayerName}\'s court ${returnedSpiesLog}${logTokenLargeCard}');
     $hasSpies = count($moves) > 0;
     $logs = [];
     $args = [];
@@ -162,8 +164,40 @@ class Notifications
       $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
     }
 
-    self::notifyAll("discardFromCourt", $message, array(
+    self::notifyAll("discardFromCourt", $courtOwnerPlayerId === null ? $messageOwnCourt : $messageOtherCourt, array(
       'player' => $player,
+      'courtOwnerPlayerId' => $courtOwnerPlayerId === null ? $player->getId() : $courtOwnerPlayerId,
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+      'logTokenOtherPlayerName' => $courtOwnerPlayerId === null ? '' : Utils::logTokenPlayerName($courtOwnerPlayerId),
+      'cardId' => $card['id'],
+      'moves' => $moves,
+      'returnedSpiesLog' => $hasSpies ? [
+        'log' => clienttranslate('and returns ${spies}'),
+        'args' => [
+          'spies' => [
+            'log' => implode('', $logs),
+            'args' => $args
+          ]
+        ],
+      ] : '',
+    ));
+  }
+
+  public static function discardAndTakePrize($card,$player,$moves = [],$courtOwnerPlayerId = null)
+  {
+    $message =  clienttranslate('${player_name} takes ${logTokenCardName} as a prize ${returnedSpiesLog}${logTokenLargeCard}');
+    $hasSpies = count($moves) > 0;
+    $logs = [];
+    $args = [];
+    foreach ($moves as $index => $move) {
+      $playerId = explode("_", $move['tokenId'])[1];
+      $logs[] = '${logTokenCylinder' . $index . '}';
+      $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
+    }
+    self::notifyAll("discardAndTakePrize", $message, array(
+      'player' => $player,
+      'courtOwnerPlayerId' => $courtOwnerPlayerId === null ? $player->getId() : $courtOwnerPlayerId,
       'logTokenCardName' => Utils::logTokenCardName($card['name']),
       'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
       'cardId' => $card['id'],

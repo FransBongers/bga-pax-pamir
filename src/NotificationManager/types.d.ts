@@ -14,6 +14,14 @@ interface Log {
   args: Record<string,unknown>;
 }
 
+interface NotifBetrayArgs {
+  player_name: string;
+  playerId: number;
+  logTokenCardName: string;
+  logTokenLargeCard: string;
+  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+}
+
 interface NotifPayBribeArgs {
   player_name: string;
   rulerId: number;
@@ -41,9 +49,21 @@ interface NotifChooseLoyaltyArgs {
   coalitionName: string;
 }
 
+interface NotifDiscardAndTakePrizeArgs {
+  cardId: string;
+  courtOwnerPlayerId: string;
+  playerId: number;
+  player_name: string;
+  logTokenCardName: string;
+  logTokenLargeCard: string;
+  moves: TokenMove[];
+  returnedSpiesLog: Log | '';
+}
+
 interface NotifDiscardFromCourtArgs {
   cardId: string;
-  playerId: string;
+  courtOwnerPlayerId: string;
+  playerId: number;
   player_name: string;
   logTokenCardName: string;
   logTokenLargeCard: string;

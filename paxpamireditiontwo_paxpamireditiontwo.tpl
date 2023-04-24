@@ -133,17 +133,20 @@
         <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
             <div class="pp_tableau_left">
                 <div id="pp_ruler_tokens_player_{player_id}" class="pp_ruler_tokens_player"></div>
-                <div class="pp_loyalty_dial_container">
-                    <div id="pp_loyalty_dial_{player_id}" class="pp_loyalty_dial"></div>
-                    <div class="pp_loyalty_dial_cover pp_player_color_{player_color}"></div>
-                    <div id="pp_gift_2_{player_id}" class="pp_gift pp_gift_2">
-                        <div id="pp_gift_2_zone_{player_id}" class="pp_gift_zone"></div>
-                    </div>
-                    <div id="pp_gift_4_{player_id}" class="pp_gift pp_gift_4">
-                        <div id="pp_gift_4_zone_{player_id}" class="pp_gift_zone"></div>
-                    </div>
-                    <div id="pp_gift_6_{player_id}" class="pp_gift pp_gift_6">
-                        <div id="pp_gift_6_zone_{player_id}" class="pp_gift_zone"></div>
+                <div class="pp_loyalty_dial_section">
+                    <div id="pp_prizes_{player_id}" class="pp_prizes"></div>
+                    <div class="pp_loyalty_dial_container">
+                        <div id="pp_loyalty_dial_{player_id}" class="pp_loyalty_dial"></div>
+                        <div class="pp_loyalty_dial_cover pp_player_color_{player_color}"></div>
+                        <div id="pp_gift_2_{player_id}" class="pp_gift pp_gift_2">
+                            <div id="pp_gift_2_zone_{player_id}" class="pp_gift_zone"></div>
+                        </div>
+                        <div id="pp_gift_4_{player_id}" class="pp_gift pp_gift_4">
+                            <div id="pp_gift_4_zone_{player_id}" class="pp_gift_zone"></div>
+                        </div>
+                        <div id="pp_gift_6_{player_id}" class="pp_gift pp_gift_6">
+                            <div id="pp_gift_6_zone_{player_id}" class="pp_gift_zone"></div>
+                        </div>
                     </div>
                 </div>
             </div>

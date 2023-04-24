@@ -132,19 +132,21 @@ class PlayerActionsState implements State {
     return this.game.localState.remainingActions > 0 || false;
   }
 
+  // TODO: check value of purchased gifts
   private activePlayerHasCardActions(): boolean {
+    const rupees = this.game.playerManager.getPlayer({playerId: this.game.getPlayerId()}).getRupees();
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return used === 0 && Object.keys(cardInfo.actions).length > 0;
+      const cardHasActions = Object.keys(cardInfo.actions).length > 0;
+      const hasEnoughRupees = rupees >=2 || Object.values(cardInfo.actions).some(({type}) => CARD_ACTIONS_WITHOUT_COST.includes(type));
+      return used === 0 && cardHasActions && hasEnoughRupees;
     });
   }
 
   private activePlayerHasFreeCardActions(): boolean {
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return (
-        used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0
-      );
+      return used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0;
     });
   }
 
@@ -166,10 +168,17 @@ class PlayerActionsState implements State {
         !used &&
         (this.game.localState.remainingActions > 0 ||
           (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.game.objectManager.favoredSuit.get())
-      )
+      ) {
+        const rupees = this.game.playerManager.getPlayer({ playerId }).getRupees();
         dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {
             const cardAction = child.id.split('_')[0];
+
+            // TODO: check value of purchased gifts
+            if (CARD_ACTIONS_WITH_COST.includes(cardAction) && rupees < 2) {
+              return;
+            }
+
             // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
             dojo.addClass(child, 'pp_selectable');
             this.game._connections.push(
@@ -178,22 +187,22 @@ class PlayerActionsState implements State {
                 event.stopPropagation();
                 switch (cardAction) {
                   case 'battle':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BATTLE, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BATTLE, { args: { cardId } });
                     break;
                   case 'betray':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BETRAY, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BETRAY, { args: { cardId } });
                     break;
                   case 'build':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BUILD, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BUILD, { args: { cardId } });
                     break;
                   case 'gift':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_GIFT, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_GIFT, { args: { cardId } });
                     break;
                   case 'move':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_MOVE, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_MOVE, { args: { cardId } });
                     break;
                   case 'tax':
-                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_TAX, { args: { cardId } })
+                    this.game.framework().setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_TAX, { args: { cardId } });
                     break;
                 }
                 // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
@@ -201,19 +210,16 @@ class PlayerActionsState implements State {
             );
           }
         });
+      }
     });
   }
-
 
   setMarketCardsSelectable() {
     const baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
       const cardId = node.id;
-      if (
-        cost <= this.game.localState.activePlayer.rupees &&
-        !this.game.localState.usedCards.includes(cardId)
-      ) {
+      if (cost <= this.game.localState.activePlayer.rupees && !this.game.localState.usedCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(
           // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
@@ -224,8 +230,6 @@ class PlayerActionsState implements State {
       }
     });
   }
-
-
 
   //  ..######..##.......####..######..##....##
   //  .##....##.##........##..##....##.##...##.

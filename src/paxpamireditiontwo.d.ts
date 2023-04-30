@@ -168,6 +168,7 @@ interface PaxPamirGame extends Game {
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   onCancel: () => void;
   // returnSpiesFromCard: (props: { cardId: string }) => void;
+  setCourtCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
   setHandCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;

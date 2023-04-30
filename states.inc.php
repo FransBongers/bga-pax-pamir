@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -57,6 +58,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
     define("STATE_DISCARD_COURT", 7);
     define("STATE_DISCARD_HAND", 8);
+    define("STATE_DISCARD_LEVERAGE",13);
     define("STATE_PLACE_ROAD", 9);
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
@@ -73,9 +75,10 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_NEXT_PLAYER_NEGOTIATE_BRIBE", 51);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
+    define("ST_CHANGE_ACTIVE_PLAYER",95);
     define("STATE_END_GAME", 99);
 }
- 
+
 $machinestates = array(
 
     // The initial state. Please do not modify.
@@ -84,11 +87,11 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( 
-            "" => STATE_SETUP 
+        "transitions" => array(
+            "" => STATE_SETUP
         )
     ),
-    
+
     // Note: ID=2 => your first state
 
     STATE_SETUP => array(
@@ -96,8 +99,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must choose a loyalty'),
         "descriptionmyturn" => clienttranslate('${you} must choose a loyalty'),
         "type" => "activeplayer",
-        "possibleactions" => array( "chooseLoyalty" ),
-        "transitions" => array( 
+        "possibleactions" => array("chooseLoyalty"),
+        "transitions" => array(
             "next" => STATE_NEXT_PLAYER
         )
     ),
@@ -107,10 +110,10 @@ $machinestates = array(
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
-        "transitions" => array( 
+        "transitions" => array(
             "prepareNextTurn" => STATE_PREPARE_TURN,
             "setup" => STATE_SETUP,
-            "final" => STATE_FINAL 
+            "final" => STATE_FINAL
         )
     ),
 
@@ -119,7 +122,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "stNextPlayerNegotiateBribe",
         "updateGameProgression" => true,
-        "transitions" => array( 
+        "transitions" => array(
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "playerActions" => STATE_PLAYER_ACTIONS,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
@@ -131,7 +134,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "stPrepareTurn",
         "updateGameProgression" => true,
-        "transitions" => array( 
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
@@ -142,12 +145,13 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array( "purchaseCard", "playCard", "purchaseGift", "pass", "restart","battle", "tax","betray" ),
-        "transitions" => array( 
+        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "tax", "betray"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
+            "discardLeverage" => STATE_DISCARD_LEVERAGE,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE, 
+            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
             "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
             "cardActionBuild" => STATE_CARD_ACTION_BUILD,
@@ -163,9 +167,9 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argNegotiateBribe",
-        "possibleactions" => array( "acceptBribe", "declineBribe", "proposeBribeAmount" ),
-        "transitions" => array( 
-            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE, 
+        "possibleactions" => array("acceptBribe", "declineBribe", "proposeBribeAmount"),
+        "transitions" => array(
+            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
         )
     ),
 
@@ -175,8 +179,8 @@ $machinestates = array(
         "action" => "stCleanup",
         "updateGameProgression" => false,
         "transitions" => array(
-            "discardCourt" => STATE_DISCARD_COURT, 
-            "discardHand" => STATE_DISCARD_HAND, 
+            "discardCourt" => STATE_DISCARD_COURT,
+            "discardHand" => STATE_DISCARD_HAND,
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
         )
     ),
@@ -196,13 +200,13 @@ $machinestates = array(
         "type" => "game",
         "action" => "stResolveImpactIcons",
         "updateGameProgression" => false,
-        "transitions" => array( 
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "refreshMarket" => STATE_REFRESH_MARKET,
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
-            "discardCourt" => STATE_DISCARD_COURT, 
+            "discardCourt" => STATE_DISCARD_COURT,
             "discardHand" => STATE_DISCARD_HAND,
         )
     ),
@@ -212,7 +216,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "stRefreshMarket",
         "updateGameProgression" => false,
-        "transitions" => array( 
+        "transitions" => array(
             "nextTurn" => STATE_NEXT_PLAYER,
             "refreshMarket" => STATE_REFRESH_MARKET,
         )
@@ -236,8 +240,9 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
         "args" => "argDiscardCourt",
-        "possibleactions" => array( "discardCards" ),
+        "possibleactions" => array("discardCards"),
         "transitions" => array(
+            "discardLeverage" => STATE_DISCARD_LEVERAGE,
             "cleanup" => STATE_CLEANUP,
         )
     ),
@@ -248,9 +253,24 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
         "args" => "argDiscardHand",
-        "possibleactions" => array( "discardCards" ),
-        "transitions" => array( 
+        "possibleactions" => array("discardCards"),
+        "transitions" => array(
             "cleanup" => STATE_CLEANUP,
+        )
+    ),
+
+    STATE_DISCARD_LEVERAGE => array(
+        "name" => "discardLeverage",
+        "description" => clienttranslate('${actplayer} must discard cards'),
+        "descriptionmyturn" => clienttranslate('${you} must discard '),
+        "type" => "activeplayer",
+        "args" => "argDiscardLeverage",
+        "possibleactions" => array("discardCards"),
+        // TODO check all possible transitions? Or use jumpToState?
+        "transitions" => array(
+            "cleanup" => STATE_CLEANUP,
+            "discardLeverage" => STATE_DISCARD_LEVERAGE,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -260,8 +280,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must place a road'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "placeRoad" ),
-        "transitions" => array( 
+        "possibleactions" => array("placeRoad"),
+        "transitions" => array(
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
@@ -272,8 +292,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must place a spy'),
         "type" => "activeplayer",
         "args" => "argPlaceSpy",
-        "possibleactions" => array( "placeSpy" ),
-        "transitions" => array( 
+        "possibleactions" => array("placeSpy"),
+        "transitions" => array(
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
@@ -284,8 +304,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must select a place to battle'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionBattle" ),
-        "transitions" => array( 
+        "possibleactions" => array("cardActionBattle"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
@@ -296,8 +316,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must select a card'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionBetray" ),
-        "transitions" => array( 
+        "possibleactions" => array("cardActionBetray"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
@@ -308,8 +328,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must build'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionBuild" ),
-        "transitions" => array( 
+        "possibleactions" => array("cardActionBuild"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
@@ -320,8 +340,8 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must move an army or a spy'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionMove" ),
-        "transitions" => array( 
+        "possibleactions" => array("cardActionMove"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
@@ -332,36 +352,22 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must tax market or player'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
-        "possibleactions" => array( "cardActionTax" ),
-        "transitions" => array( 
+        "possibleactions" => array("cardActionTax"),
+        "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
-    
-    
-/*
-    Examples:
-    
-    2 => array(
-        "name" => "nextPlayer",
-        "description" => '',
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
 
-*/    
-   
+
+    // Generic state to change player
+    ST_CHANGE_ACTIVE_PLAYER => [
+        'name' => 'changeActivePlayer',
+        'description' => '',
+        'descriptionmyturn' => '',
+        'type' => 'game',
+        'action' => 'stChangeActivePlayer',
+    ],
+
     // Final state.
     // Please do not modify (and do not overload action/args methods).
     STATE_END_GAME => array(
@@ -373,6 +379,3 @@ $machinestates = array(
     )
 
 );
-
-
-

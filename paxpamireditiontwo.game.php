@@ -50,6 +50,7 @@ use PaxPamir\Managers\Tokens;
  * Game main class.
  * For readability, main sections (util, action, state, args) have been splited into Traits with the section name on modules/php directory.
  */
+
 class PaxPamirEditionTwo extends Table
 {
     use PaxPamir\DebugTrait;
@@ -229,6 +230,63 @@ class PaxPamirEditionTwo extends Table
         self::notifyAllPlayers("updatePlayerCounts", '', array(
             'counts' => $counts
         ));
+    }
+
+    /**
+     * Generic state to handle change of active player in the middle of a transition
+     */
+    function stChangeActivePlayer()
+    {
+        $t = Globals::getChangeActivePlayer();
+        $this->gamestate->changeActivePlayer($t['pId']);
+        $this->gamestate->jumpToState($t['st']);
+    }
+
+    /**
+     * $pId can be either playerId or player
+     */
+    function changeActivePlayerAndJumpTo($pId, $state)
+    {
+        // Should probably always clear logs here?
+        if (Globals::getLogState() == -1) {
+            Globals::setLogState($state);
+            // Globals::setActionCount(0);
+            Log::clearAll();
+        }
+
+        Globals::setChangeActivePlayer([
+            'pId' => is_int($pId) ? $pId : $pId->getId(),
+            'st' => $state,
+        ]);
+        $this->gamestate->jumpToState(ST_CHANGE_ACTIVE_PLAYER);
+    }
+
+    /**
+     * $pId can be either playerId or player
+     */
+    function nextState($transition, $pId = null)
+    {
+        // gets current game state to check if it is game or player gamestate
+        $state = $this->gamestate->state(true, false, true);
+        $st = $state['transitions'][$transition];
+
+        if (Globals::getLogState() == -1) {
+            Globals::setLogState($st);
+            // Globals::setActionCount(0);
+            Log::clearAll();
+        }
+
+        $pId = is_null($pId) || is_int($pId) ? $pId : $pId->getId();
+        if (is_null($pId) || $pId == $this->getActivePlayerId()) {
+            $this->gamestate->nextState($transition);
+        } else {
+            if ($state['type'] == 'game') {
+                $this->gamestate->changeActivePlayer($pId);
+                $this->gamestate->nextState($transition);
+            } else {
+                $this->changeActivePlayerAndJumpTo($pId, $st);
+            }
+        }
     }
 
     /////////////////////////////////////////////////////////////

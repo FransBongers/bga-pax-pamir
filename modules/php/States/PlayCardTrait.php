@@ -227,6 +227,7 @@ trait PlayCardTrait
         $this->checkAndHandleLoyaltyChange($cardLoyalty);
       }
 
+      // To check: we could probably just do 100 / +100 and then call reallign?
       if ($side === 'left') {
         for ($i = 0; $i < count($courtCards); $i++) {
           Cards::setState($courtCards[$i]['id'], $i + 2);

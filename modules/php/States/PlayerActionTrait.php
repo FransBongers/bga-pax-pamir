@@ -25,21 +25,8 @@ trait PlayerActionTrait
 
   function argPlayerActions()
   {
-    // $playerId = self::getActivePlayerId();
-    // $currentPlayerId = self::getCurrentPlayerId();
-    // $player = Players::get($playerId);
-    // $uiDate = Players::getUiData();
     return array(
-      // 'remainingActions' => Globals::getRemainingActions(),
-      // 'unavailableCards' => Cards::getUnavailableCards(),
-      // 'hand' => Cards::getInLocation(['hand', $currentPlayerId]),
-      // 'court' => Cards::getInLocationOrdered(['court', $playerId])->toArray(),
-      // 'suits' => $player->getSuitTotals(),
-      // 'rulers' => Map::getRulers(),
-      // 'favoredSuit' => Globals::getFavoredSuit(),
-      // 'rupees' => $player->getRupees(),
       'activePlayer' => Players::get()->jsonSerialize(null),
-      // 'favoredSuit' => Globals::getFavoredSuit(),
       'remainingActions' => Globals::getRemainingActions(),
       'usedCards' => Cards::getUnavailableCards(),
     );
@@ -113,16 +100,28 @@ trait PlayerActionTrait
       Notifications::discardFromCourt($betrayedCardInfo, $player, $spyMoves, $betrayedPlayerId === $playerId ? null : $betrayedPlayerId);
     }
 
-    // self::notifyAllPlayers("discardCard",'', array(
-    //   'playerId' => intval($betrayedPlayerId),
-    //   'cardId' => $betrayedCardId,
-    //   'state' => $state,
-    //   'from' => 'court',
-    // ));
-
-
-    // // Take prize?
-    $this->gamestate->nextState('playerActions');
+    // TODO: check if we can reuse this from DiscardTrait.php
+    $numberCardsToDiscard = $this->checkAndHandleLeverage($betrayedCardId,$betrayedPlayerId);
+    if ($numberCardsToDiscard > 0) {
+      $betrayedPlayer = Players::get($betrayedPlayerId);
+      $playerCourtCards = $betrayedPlayer->getCourtCards();
+      $playerHandCards = $betrayedPlayer->getHandCards();
+      $totalCards = count($playerCourtCards) + count($playerHandCards);
+      if ($totalCards > 0 && $totalCards <= $numberCardsToDiscard) {
+        Notifications::leveragedDiscardRemaining($betrayedPlayer);
+        $this->resolveDiscardCards(array_merge($playerCourtCards,$playerHandCards),$betrayedPlayer);
+        $this->gamestate->nextState('playerActions');
+      } else {
+        Globals::setLeverageData([
+          'numberOfDiscards' => $numberCardsToDiscard,
+          'playerIdWhenDone' => $playerId,
+          'transition' => 'playerActions'
+      ]);
+      $this->nextState('discardLeverage',$betrayedPlayerId);
+      }
+    } else {
+      $this->gamestate->nextState('playerActions');
+    }
   }
 
   /**
@@ -169,10 +168,6 @@ trait PlayerActionTrait
     }
     // Notify
     Notifications::pass();
-    // self::notifyAllPlayers("pass", clienttranslate('${player_name} passes'), array(
-    //   'playerId' => $playerId,
-    //   'player_name' => self::getActivePlayerName(),
-    // ));
 
     $this->gamestate->nextState('cleanup');
   }

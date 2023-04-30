@@ -121,7 +121,7 @@ trait ResolveImpactIconsTrait
         break;
       case LEVERAGE:
         Players::incRupees($player_id, 2);
-        $this->updatePlayerCounts();
+        Notifications::leveragedCardPlay(Players::get(),2);
         break;
       case POLITICAL_SUIT:
         $previous_suit = Globals::getFavoredSuit();

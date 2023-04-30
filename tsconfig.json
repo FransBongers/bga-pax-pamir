@@ -40,6 +40,7 @@
     "src/states/ClientPurchaseCard.ts",
     "src/states/DiscardCourt.ts",
     "src/states/DiscardHand.ts",
+    "src/states/DiscardLeverage.ts",
     "src/states/NegotiateBribe.ts",
     "src/states/PlaceRoad.ts",
     "src/states/PlaceSpy.ts",

@@ -522,7 +522,7 @@ class PPPlayer {
   }
 
   payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
-    console.log('place', dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${this.playerId}`));
+    dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${this.playerId}`);
     attachToNewParentNoDestroy('tempRupee', `rupees_${playerId}`);
     // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
     const animation = this.game.framework().slideToObject('tempRupee', `rupees_${playerId}`);

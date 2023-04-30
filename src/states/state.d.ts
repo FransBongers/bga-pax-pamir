@@ -25,6 +25,10 @@ interface EnteringDiscardHandArgs {
   numberOfDiscards: number;
 }
 
+interface EnteringDiscardLeverageArgs {
+  numberOfDiscards: number;
+}
+
 interface OnEnteringNegotiateBribeArgs {
   active: number;
   briber: number;

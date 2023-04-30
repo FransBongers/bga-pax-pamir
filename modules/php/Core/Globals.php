@@ -10,19 +10,21 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
 {
   protected static $initialized = false;
   protected static $variables = [
+    'changeActivePlayer' => 'obj', // Used for the generic "changeActivePlayer" state
     'logState' => 'int', // Used to store state id when enabling the log
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
     "bribe" => "obj",
     "bribeClearLogs" => "bool",
+    "leverageData" => "obj",
     "rulers" => "obj",
-    "rulerHerat" => "int", // Can be removed?
-    "rulerKabul" => "int", // Can be removed?
-    "rulerKandahar" => "int", // Can be removed?
-    "rulerPersia" => "int", // Can be removed?
-    "rulerPunjab" => "int", // Can be removed?
-    "rulerTranscaspia" => "int", // Can be removed?
+    // "rulerHerat" => "int", // Can be removed?
+    // "rulerKabul" => "int", // Can be removed?
+    // "rulerKandahar" => "int", // Can be removed?
+    // "rulerPersia" => "int", // Can be removed?
+    // "rulerPunjab" => "int", // Can be removed?
+    // "rulerTranscaspia" => "int", // Can be removed?
     "setup" => "int",
 
     // TODO: check implementation

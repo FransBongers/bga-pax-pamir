@@ -50,6 +50,8 @@ class NotificationManager {
       ['purchaseCard', 2000],
       ['playCard', 2000],
       ['refreshMarket', 250],
+      ['returnRupeesToSupply',250],
+      ['takeRupeesFromSupply',250],
       ['payBribe', 1],
       ['purchaseGift', 1],
       ['smallRefreshHand', 1],
@@ -315,6 +317,32 @@ class NotificationManager {
     }
   }
 
+  notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
+    console.log('notif_purchaseGift', notif);
+    this.game.clearPossible();
+    const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
+
+    // Place paid rupees on market cards
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+    });
+
+    // Move cylinder
+    const { tokenId, from, to } = tokenMove;
+    const fromZone = this.game.getZoneForLocation({ location: from });
+    const toZone = this.game.getZoneForLocation({ location: to });
+    this.game.move({
+      id: tokenId,
+      from: fromZone,
+      to: toZone,
+    });
+
+    // Update influence
+    this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
+  }
+
   notif_refreshMarket(notif: Notif<NotifRefreshMarketArgs>) {
     console.log('notif_refreshMarket', notif);
 
@@ -351,30 +379,10 @@ class NotificationManager {
     });
   }
 
-  notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
-    console.log('notif_purchaseGift', notif);
-    this.game.clearPossible();
-    const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
-
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
-
-    // Move cylinder
-    const { tokenId, from, to } = tokenMove;
-    const fromZone = this.game.getZoneForLocation({ location: from });
-    const toZone = this.game.getZoneForLocation({ location: to });
-    this.game.move({
-      id: tokenId,
-      from: fromZone,
-      to: toZone,
-    });
-
-    // Update influence
-    this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
+  notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {
+    debug('notif_returnRupeesToSupply', notif.args);
+    const {playerId, amount} = notif.args;
+    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -amount});
   }
 
   notif_smallRefreshHand(notif) {
@@ -395,6 +403,12 @@ class NotificationManager {
     this.game.map.updateMap({ gamedatas: updatedGamedatas });
     this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
     // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+  }
+
+  notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
+    debug('notif_takeRupeesFromSupply', notif.args);
+    const {playerId, amount} = notif.args;
+    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: amount});
   }
 
   notif_updatePlayerCounts(notif) {

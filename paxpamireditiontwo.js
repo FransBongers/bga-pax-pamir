@@ -184,6 +184,7 @@ var LOG_TOKEN_COALITION = 'coalition';
 var LOG_TOKEN_CYLINDER = 'cylinder';
 var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
 var LOG_TOKEN_LARGE_CARD = 'largeCard';
+var LOG_TOKEN_LEVERAGE = 'leverage';
 var LOG_TOKEN_PLAYER_NAME = 'playerName';
 var LOG_TOKEN_REGION_NAME = 'regionName';
 var LOG_TOKEN_ROAD = 'road';
@@ -206,6 +207,8 @@ var getLogTokenDiv = function (_a) {
             return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(data) }).getColor() });
         case LOG_TOKEN_COALITION:
             return tplLogTokenCoalition({ coalition: data });
+        case LOG_TOKEN_LEVERAGE:
+            return tplLogTokenLeverage();
         case LOG_TOKEN_ROAD:
             return tplLogTokenRoad({ coalition: data });
         case LOG_TOKEN_PLAYER_NAME:
@@ -243,6 +246,7 @@ var tplLogTokenFavoredSuit = function (_a) {
     var suit = _a.suit;
     return "<div class=\"pp_log_token pp_impact_icon_suit ".concat(suit, "\"></div>");
 };
+var tplLogTokenLeverage = function () { return "<div class=\"pp_leverage pp_log_token\"></div>"; };
 var tplLogTokenNewCards = function (_a) {
     var cards = _a.cards;
     var newCards = '';
@@ -1314,7 +1318,7 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.payToPlayer = function (_a) {
         var _this = this;
         var playerId = _a.playerId, rupees = _a.rupees;
-        console.log('place', dojo.place(tplRupee({ rupeeId: 'tempRupee' }), "rupees_".concat(this.playerId)));
+        dojo.place(tplRupee({ rupeeId: 'tempRupee' }), "rupees_".concat(this.playerId));
         attachToNewParentNoDestroy('tempRupee', "rupees_".concat(playerId));
         // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
         var animation = this.game.framework().slideToObject('tempRupee', "rupees_".concat(playerId));
@@ -2997,10 +3001,14 @@ var DiscardCourtState = /** @class */ (function () {
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
-            callback: function () { return _this.handleDiscardConfirm({ fromHand: false }); },
+            callback: function () { return _this.handleDiscardConfirm(); },
         });
         dojo.addClass('confirm_btn', 'disabled');
-        this.setCourtCardsSelectableForDiscard();
+        // this.setCourtCardsSelectableForDiscard();
+        this.game.setCourtCardsSelectable({ callback: function (_a) {
+                var cardId = _a.cardId;
+                return _this.handleDiscardSelect({ cardId: cardId });
+            } });
     };
     //  .##.....##.########.####.##.......####.########.##....##
     //  .##.....##....##.....##..##........##.....##.....##..##.
@@ -3009,8 +3017,7 @@ var DiscardCourtState = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    DiscardCourtState.prototype.handleDiscardConfirm = function (_a) {
-        var fromHand = _a.fromHand;
+    DiscardCourtState.prototype.handleDiscardConfirm = function () {
         var nodes = dojo.query('.pp_selected');
         if (nodes.length === this.numberOfDiscards) {
             var cards_1 = '';
@@ -3021,21 +3028,20 @@ var DiscardCourtState = /** @class */ (function () {
                 action: 'discardCards',
                 data: {
                     cards: cards_1,
-                    fromHand: fromHand,
                 },
             });
         }
     };
-    DiscardCourtState.prototype.setCourtCardsSelectableForDiscard = function () {
-        var _this = this;
-        var playerId = this.game.getPlayerId();
-        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
-            var cardId = 'card_' + node.id.split('_')[1];
-            console.log('cardId in courtcardselect', cardId);
-            dojo.addClass(node, 'pp_selectable');
-            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handleDiscardSelect({ cardId: cardId }); }));
-        });
-    };
+    // // TODO: remove and use generic function
+    // private setCourtCardsSelectableForDiscard() {
+    //   const playerId = this.game.getPlayerId();
+    //   dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
+    //     const cardId = 'card_' + node.id.split('_')[1];
+    //     console.log('cardId in courtcardselect', cardId);
+    //     dojo.addClass(node, 'pp_selectable');
+    //     this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.handleDiscardSelect({ cardId })));
+    //   });
+    // }
     DiscardCourtState.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
         dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
@@ -3088,7 +3094,7 @@ var DiscardHandState = /** @class */ (function () {
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
-            callback: function () { return _this.handleDiscardConfirm({ fromHand: true }); },
+            callback: function () { return _this.handleDiscardConfirm(); },
         });
         dojo.addClass('confirm_btn', 'disabled');
         this.game.setHandCardsSelectable({
@@ -3105,8 +3111,7 @@ var DiscardHandState = /** @class */ (function () {
     //  .##.....##....##.....##..##........##.....##.......##...
     //  .##.....##....##.....##..##........##.....##.......##...
     //  ..#######.....##....####.########.####....##.......##...
-    DiscardHandState.prototype.handleDiscardConfirm = function (_a) {
-        var fromHand = _a.fromHand;
+    DiscardHandState.prototype.handleDiscardConfirm = function () {
         var nodes = dojo.query('.pp_selected');
         if (nodes.length === this.numberOfDiscards) {
             var cards_2 = '';
@@ -3117,7 +3122,6 @@ var DiscardHandState = /** @class */ (function () {
                 action: 'discardCards',
                 data: {
                     cards: cards_2,
-                    fromHand: fromHand,
                 },
             });
         }
@@ -3135,6 +3139,92 @@ var DiscardHandState = /** @class */ (function () {
         }
     };
     return DiscardHandState;
+}());
+var DiscardLeverageState = /** @class */ (function () {
+    function DiscardLeverageState(game) {
+        this.game = game;
+    }
+    DiscardLeverageState.prototype.onEnteringState = function (_a) {
+        var numberOfDiscards = _a.numberOfDiscards;
+        this.numberOfDiscards = numberOfDiscards;
+        this.updateInterfaceInitialStep();
+    };
+    DiscardLeverageState.prototype.onLeavingState = function () { };
+    //  .####.##....##.########.########.########..########....###.....######..########
+    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+    // ..######..########.########.########...######.
+    // .##....##....##....##.......##.....##.##....##
+    // .##..........##....##.......##.....##.##......
+    // ..######.....##....######...########...######.
+    // .......##....##....##.......##..............##
+    // .##....##....##....##.......##........##....##
+    // ..######.....##....########.##.........######.
+    DiscardLeverageState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must discard ${numberOfDiscards} card(s)'),
+            args: {
+                numberOfDiscards: this.numberOfDiscards,
+                you: '${you}',
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.handleDiscardConfirm(); },
+        });
+        dojo.addClass('confirm_btn', 'disabled');
+        this.game.setCourtCardsSelectable({ callback: function (_a) {
+                var cardId = _a.cardId;
+                return _this.handleDiscardSelect({ cardId: cardId });
+            } });
+        this.game.setHandCardsSelectable({ callback: function (_a) {
+                var cardId = _a.cardId;
+                return _this.handleDiscardSelect({ cardId: cardId });
+            } });
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    DiscardLeverageState.prototype.handleDiscardConfirm = function () {
+        debug('handleDiscardConfirm');
+        var nodes = dojo.query('.pp_selected');
+        if (nodes.length === this.numberOfDiscards) {
+            var cards_3 = '';
+            nodes.forEach(function (node, index) {
+                cards_3 += ' ' + node.id;
+            }, this);
+            this.game.takeAction({
+                action: 'discardCards',
+                data: {
+                    cards: cards_3,
+                },
+            });
+        }
+    };
+    DiscardLeverageState.prototype.handleDiscardSelect = function (_a) {
+        var cardId = _a.cardId;
+        debug('card clicked', cardId);
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
+        var numberSelected = dojo.query('.pp_selected').length;
+        if (numberSelected === this.numberOfDiscards) {
+            dojo.removeClass('confirm_btn', 'disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'disabled');
+        }
+    };
+    return DiscardLeverageState;
 }());
 var NegotiateBribeState = /** @class */ (function () {
     function NegotiateBribeState(game) {
@@ -3654,6 +3744,8 @@ var NotificationManager = /** @class */ (function () {
             ['purchaseCard', 2000],
             ['playCard', 2000],
             ['refreshMarket', 250],
+            ['returnRupeesToSupply', 250],
+            ['takeRupeesFromSupply', 250],
             ['payBribe', 1],
             ['purchaseGift', 1],
             ['smallRefreshHand', 1],
@@ -3890,6 +3982,29 @@ var NotificationManager = /** @class */ (function () {
             this.getPlayer({ playerId: playerId }).purchaseCard({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
     };
+    NotificationManager.prototype.notif_purchaseGift = function (notif) {
+        var _this = this;
+        console.log('notif_purchaseGift', notif);
+        this.game.clearPossible();
+        var _a = notif.args, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, tokenMove = _a.tokenMove, influenceChange = _a.influenceChange;
+        // Place paid rupees on market cards
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+        });
+        // Move cylinder
+        var tokenId = tokenMove.tokenId, from = tokenMove.from, to = tokenMove.to;
+        var fromZone = this.game.getZoneForLocation({ location: from });
+        var toZone = this.game.getZoneForLocation({ location: to });
+        this.game.move({
+            id: tokenId,
+            from: fromZone,
+            to: toZone,
+        });
+        // Update influence
+        this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
+    };
     NotificationManager.prototype.notif_refreshMarket = function (notif) {
         var _this = this;
         console.log('notif_refreshMarket', notif);
@@ -3923,28 +4038,10 @@ var NotificationManager = /** @class */ (function () {
             });
         });
     };
-    NotificationManager.prototype.notif_purchaseGift = function (notif) {
-        var _this = this;
-        console.log('notif_purchaseGift', notif);
-        this.game.clearPossible();
-        var _a = notif.args, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, tokenMove = _a.tokenMove, influenceChange = _a.influenceChange;
-        // Place paid rupees on market cards
-        rupeesOnCards.forEach(function (item, index) {
-            var row = item.row, column = item.column, rupeeId = item.rupeeId;
-            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
-        });
-        // Move cylinder
-        var tokenId = tokenMove.tokenId, from = tokenMove.from, to = tokenMove.to;
-        var fromZone = this.game.getZoneForLocation({ location: from });
-        var toZone = this.game.getZoneForLocation({ location: to });
-        this.game.move({
-            id: tokenId,
-            from: fromZone,
-            to: toZone,
-        });
-        // Update influence
-        this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
+    NotificationManager.prototype.notif_returnRupeesToSupply = function (notif) {
+        debug('notif_returnRupeesToSupply', notif.args);
+        var _a = notif.args, playerId = _a.playerId, amount = _a.amount;
+        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -amount });
     };
     NotificationManager.prototype.notif_smallRefreshHand = function (notif) {
         console.log('notif_smallRefreshHand', notif);
@@ -3960,6 +4057,11 @@ var NotificationManager = /** @class */ (function () {
         this.game.map.updateMap({ gamedatas: updatedGamedatas });
         this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
         // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+    };
+    NotificationManager.prototype.notif_takeRupeesFromSupply = function (notif) {
+        debug('notif_takeRupeesFromSupply', notif.args);
+        var _a = notif.args, playerId = _a.playerId, amount = _a.amount;
+        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: amount });
     };
     NotificationManager.prototype.notif_updatePlayerCounts = function (notif) {
         var _this = this;
@@ -4115,6 +4217,7 @@ var PaxPamir = /** @class */ (function () {
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a.discardCourt = new DiscardCourtState(this),
             _a.discardHand = new DiscardHandState(this),
+            _a.discardLeverage = new DiscardLeverageState(this),
             _a.negotiateBribe = new NegotiateBribeState(this),
             _a.placeRoad = new PlaceRoadState(this),
             _a.placeSpy = new PlaceSpyState(this),
@@ -4290,6 +4393,16 @@ var PaxPamir = /** @class */ (function () {
     };
     PaxPamir.prototype.updateLocalState = function (updates) {
         this.localState = __assign(__assign({}, this.localState), updates);
+    };
+    PaxPamir.prototype.setCourtCardsSelectable = function (_a) {
+        var _this = this;
+        var callback = _a.callback;
+        var playerId = this.getPlayerId();
+        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
+            var cardId = 'card_' + node.id.split('_')[1];
+            dojo.addClass(node, 'pp_selectable');
+            _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
+        });
     };
     PaxPamir.prototype.setHandCardsSelectable = function (_a) {
         var _this = this;

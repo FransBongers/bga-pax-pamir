@@ -103,12 +103,12 @@ class Players extends \PaxPamir\Helpers\DB_Manager
     return $players;
   }
 
-  public function getActive()
+  public static function getActive()
   {
     return self::get();
   }
 
-  public function getCurrent()
+  public static function getCurrent()
   {
     return self::get(self::getCurrentId());
   }

@@ -279,6 +279,35 @@ class Notifications
     ));
   }
 
+  public static function leveragedCardPlay($player,$amount)
+  {
+    self::notifyAll("takeRupeesFromSupply", clienttranslate('${player_name} gets ${amount} ${logTokenRupee} for ${logTokenLeverage}'), array(
+      'player' => $player,
+      'amount' => $amount,
+      'logTokenRupee' => Utils::logTokenRupee(),
+      'logTokenLeverage' => Utils::logTokenLeverage(),
+    ));
+  }
+
+  public static function leveragedCardDiscard($card, $player,$amount)
+  {
+    self::notifyAll("returnRupeesToSupply", clienttranslate('${player_name} returns ${amount} ${logTokenRupee} to the supply because ${logTokenCardName} was leveraged ${logTokenCardLarge}'), array(
+      'player' => $player,
+      'amount' => $amount,
+      'logTokenRupee' => Utils::logTokenRupee(),
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenCardLarge' => Utils::logTokenLargeCard($card['id'])
+    ));
+  }
+
+  public static function leveragedDiscardRemaining($player)
+  {
+    self::notifyAll("leveragedDiscardRemaining", clienttranslate('${player_name} discards remaining cards due to ${logTokenLeverage}'), array(
+      'player' => $player,
+      'logTokenLeverage' => Utils::logTokenLeverage(),
+    ));
+  }
+
   public static function proposeBribeAmount($rupees, $isRuler)
   {
     $msg = $isRuler ? clienttranslate('${player_name} demands bribe of ${rupees} rupee(s)') : clienttranslate('${player_name} offers bribe of ${rupees} rupee(s)');

@@ -51,6 +51,15 @@
   background-repeat: no-repeat;
 }
 
+.pp_log_token.pp_leverage {
+  background-image: url("img/impact_leverage.svg");
+  width: 25px;
+  height: 25px;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+  margin-bottom: -5px;
+}
+
 .pp_log_token.pp_region_icon {
   width: 15px;
   height: 15px;

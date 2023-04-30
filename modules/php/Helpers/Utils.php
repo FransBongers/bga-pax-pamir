@@ -146,6 +146,11 @@ abstract class Utils extends \APP_DbObject
     return implode(':', [LOG_TOKEN_FAVORED_SUIT, $suitId]);
   }
 
+  public static function logTokenLeverage()
+  {
+    return implode(':', [LOG_TOKEN_LEVERAGE,'']);
+  }
+
   public static function logTokenPlayerName($playerId)
   {
     return implode(':', [LOG_TOKEN_PLAYER_NAME, $playerId]);

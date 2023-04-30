@@ -101,7 +101,6 @@ class action_paxpamireditiontwo extends APP_GameAction
     {
         self::setAjaxMode();
         $cards_raw = self::getArg("cards", AT_alphanum, true);
-        $from_hand = self::getArg("fromHand", AT_bool, true);
 
         $cards_raw = trim($cards_raw);
 
@@ -110,7 +109,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         else
             $cards = explode(' ', $cards_raw);
 
-        $result = $this->game->discardCards($cards, $from_hand);
+        $result = $this->game->discardCards($cards);
         self::ajaxResponse();
     }
 

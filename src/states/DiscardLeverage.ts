@@ -1,4 +1,4 @@
-class DiscardHandState implements State {
+class DiscardLeverageState implements State {
   private game: PaxPamirGame;
   private numberOfDiscards: number;
 
@@ -6,11 +6,9 @@ class DiscardHandState implements State {
     this.game = game;
   }
 
-  onEnteringState({ numberOfDiscards }: EnteringDiscardHandArgs) {
+  onEnteringState({ numberOfDiscards }: EnteringDiscardLeverageArgs) {
     this.numberOfDiscards = numberOfDiscards;
     this.updateInterfaceInitialStep();
-    
-    // this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
   }
 
   onLeavingState() {}
@@ -46,9 +44,8 @@ class DiscardHandState implements State {
       callback: () => this.handleDiscardConfirm(),
     });
     dojo.addClass('confirm_btn', 'disabled');
-    this.game.setHandCardsSelectable({
-      callback: ({ cardId }: { cardId: string }) => this.handleDiscardSelect({ cardId }),
-    });
+    this.game.setCourtCardsSelectable({ callback: ({ cardId }: { cardId: string }) => this.handleDiscardSelect({ cardId }) });
+    this.game.setHandCardsSelectable({ callback: ({ cardId }: { cardId: string }) => this.handleDiscardSelect({ cardId }) });
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -60,6 +57,7 @@ class DiscardHandState implements State {
   //  ..#######.....##....####.########.####....##.......##...
 
   private handleDiscardConfirm() {
+    debug('handleDiscardConfirm');
     const nodes = dojo.query('.pp_selected');
     if (nodes.length === this.numberOfDiscards) {
       let cards = '';
@@ -76,9 +74,9 @@ class DiscardHandState implements State {
   }
 
   handleDiscardSelect({ cardId }: { cardId: string }) {
-    dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_selectable');//.toggleClass('pp_discard');
+    debug('card clicked', cardId);
+    dojo.query(`.pp_card_in_zone.pp_${cardId}`).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
     const numberSelected = dojo.query('.pp_selected').length;
-    console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
     if (numberSelected === this.numberOfDiscards) {
       dojo.removeClass('confirm_btn', 'disabled');
     } else {

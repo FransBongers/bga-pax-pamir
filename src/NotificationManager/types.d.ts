@@ -138,6 +138,18 @@ interface NotifRefreshMarketArgs {
   }[];
 }
 
+interface NotifReturnRupeesToSupplyArgs {
+  playerId: number;
+  player_name: string;
+  amount: number;
+}
+
+interface NotifTakeRupeesFromSupplyArgs {
+  playerId: number;
+  player_name: string;
+  amount: number;
+}
+
 interface NotifTaxMarketArgs {
   playerId: number;
   player_name: string;

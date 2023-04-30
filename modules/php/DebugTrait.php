@@ -20,6 +20,14 @@ trait DebugTrait
     Notifications::log('test DebugTrait', ['whoop']);
   }
 
+  function debugAddCardToCourt($cardId, $playerId = null)
+  {
+    $card = Cards::get($cardId);
+    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    Cards::move($cardId, ['court', $playerId]);
+    $this->reassignCourtState($playerId);
+  }
+
   function debugCreateArmy($region, $coalition = null)
   {
     $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
@@ -151,4 +159,11 @@ trait DebugTrait
     Globals::setFavoredSuit($suitId);
     Notifications::changeFavoredSuit($previous_suit_id, $suitId);
   }
+
+  function debugGetState()
+  {
+    $state = $this->gamestate->state(true, false, true);
+    Notifications::log('state',$state);
+  }
+
 }

@@ -53,6 +53,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     discardCourt: DiscardCourtState;
     discardHand: DiscardHandState;
+    discardLeverage: DiscardLeverageState;
     negotiateBribe: NegotiateBribeState;
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;
@@ -98,6 +99,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       discardCourt: new DiscardCourtState(this),
       discardHand: new DiscardHandState(this),
+      discardLeverage: new DiscardLeverageState(this),
       negotiateBribe: new NegotiateBribeState(this),
       placeRoad: new PlaceRoadState(this),
       placeSpy: new PlaceSpyState(this),
@@ -335,6 +337,15 @@ class PaxPamir implements PaxPamirGame {
 
   updateLocalState(updates: Partial<LocalState>) {
     this.localState = { ...this.localState, ...updates };
+  }
+
+  setCourtCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
+    const playerId = this.getPlayerId();
+    dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
+      const cardId = 'card_' + node.id.split('_')[1];
+      dojo.addClass(node, 'pp_selectable');
+      this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
+    });
   }
 
   setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {

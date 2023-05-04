@@ -6,6 +6,7 @@ namespace PaxPamir;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -163,7 +164,43 @@ trait DebugTrait
   function debugGetState()
   {
     $state = $this->gamestate->state(true, false, true);
-    Notifications::log('state',$state);
+    Notifications::log('state', $state);
   }
 
+  function debugCreateGift($value, $playerId = null)
+  {
+    $playerId = $this->debugGetPlayerId($playerId);
+    $value = intval($value);
+    $to = 'gift_' . $value . '_' . $playerId;
+    $current = Tokens::getTopOf($to);
+    if ($current !== null) {
+      return;
+    }
+    $from = "cylinders_" . $playerId;
+    $cylinder = Tokens::getTopOf($from);
+    if ($cylinder === null) {
+      return;
+    }
+    Tokens::move($cylinder['id'], $to);
+  }
+
+  function debugCreatePrize($cardId,$playerId = null)
+  {
+    $playerId = $this->debugGetPlayerId($playerId);
+    Cards::move($cardId, Locations::prizes($playerId));
+  }
+
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function debugGetPlayerId($playerId = null)
+  {
+    return $playerId === null ? Players::get()->getId() : intval($playerId);
+  }
 }

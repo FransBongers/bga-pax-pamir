@@ -42,7 +42,7 @@ interface NotifChangeRulerArgs {
   region: string;
 }
 
-interface NotifChooseLoyaltyArgs {
+interface NotifChangeLoyaltyArgs {
   playerId: string;
   player_name: string;
   coalition: string;
@@ -85,6 +85,12 @@ interface NotifDiscardFromMarketArgs {
   player_name: string;
   from: string;
   logTokenLargeCard: string;
+}
+
+interface NotifDiscardPrizesArgs {
+  cardIds: string[];
+  playerId: string;
+  player_name: string;
 }
 
 interface NotifMoveTokenArgs {

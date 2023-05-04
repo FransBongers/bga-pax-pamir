@@ -131,6 +131,17 @@ class Notifications
     ]);
   }
 
+  public static function changeLoyalty($coalition)
+  {
+    $coalition_name = Game::get()->loyalty[$coalition]['name'];
+    self::notifyAll("changeLoyalty", clienttranslate('${player_name} changes loyalty to ${coalition_name} ${logTokenCoalition}'), array(
+      'player' => Players::get(),
+      'coalition' => $coalition,
+      'coalition_name' => $coalition_name,
+      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
+    ));
+  }
+
   public static function changeRuler($oldRuler, $newRuler, $region)
   {
     $msg = clienttranslate('${player_name} becomes ruler of ${logTokenRegionName}');
@@ -214,6 +225,17 @@ class Notifications
     ));
   }
 
+  public static function discardPrizes($moves)
+  {
+    $message = clienttranslate('${player_name} discards ${numberOfPrizes} prize(s)');
+
+    self::notifyAll('discardPrizes', $message, [
+      'cardIds' => $moves,
+      'player' => Players::get(),
+      'numberOfPrizes' => count($moves),
+    ]);
+  }
+
   public static function removeSpies($cardId, $spies, $moves)
   {
     $message = clienttranslate('${player_name} returns ${spiesLog} from ${logTokenCardName}${logTokenLargeCard}');
@@ -225,6 +247,7 @@ class Notifications
       $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
     }
 
+    // To check: we can probably combine both notifications in one?
     self::notifyAll('removeSpies', $message, array(
       'player' => Players::get(),
       'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
@@ -237,6 +260,27 @@ class Notifications
 
     self::moveToken('', [
       'moves' => $moves
+    ]);
+  }
+
+  public static function returnGifts($cylinders, $moves)
+  {
+    $message = clienttranslate('${player_name} returns gifts ${cylindersLog}');
+    $logs = [];
+    $args = [];
+    foreach ($cylinders as $index => $cylinder) {
+      $playerId = explode("_", $cylinder['id'])[1];
+      $logs[] = '${logTokenCylinder' . $index . '}';
+      $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
+    }
+
+    self::moveToken($message, [
+      'moves' => $moves,
+      'player' => Players::get(),
+      'cylindersLog' => [
+        'log' => implode('', $logs),
+        'args' => $args
+      ],
     ]);
   }
 

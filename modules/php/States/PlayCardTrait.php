@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -146,7 +147,7 @@ trait PlayCardTrait
     $rulerId = $bribeState['ruler'];
     $briberId = $bribeState['briber'];
     $rupees = $bribeState['currentAmount'];
-    if(Players::get($briberId)->getRupees() < $rupees) {
+    if (Players::get($briberId)->getRupees() < $rupees) {
       throw new \feException("Not enough rupees available");
     }
     $bribeState['status'] = BRIBE_ACCEPTED;
@@ -240,7 +241,7 @@ trait PlayCardTrait
       // We need to fetch data again to get updated state
       $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
       $card = Cards::get($cardId);
-      Notifications::playCard($card,$courtCards,$side,$playerId);
+      Notifications::playCard($card, $courtCards, $side, $playerId);
 
       $this->updatePlayerCounts();
 
@@ -256,28 +257,71 @@ trait PlayCardTrait
    */
   function checkAndHandleLoyaltyChange($coalition)
   {
-
-    $playerId = self::getActivePlayerId();
-    $current_loyaly = Players::get()->getLoyalty();
+    $player = Players::get();
+    $playerId = $player->getId();
+    $current_loyaly = $player->getLoyalty();
     // check of loyalty needs to change. If it does not return
     if ($current_loyaly == $coalition) {
       return;
     }
 
-
     // TODO:
-    // 1. Return gifts
-    // 2. Discard prizes and patriots
+    // 2. Discard prizes 
+    // 3. Discard patriots
     // 3. Update loyalty
     Players::get()->setLoyalty($coalition);
 
-    // Notify
-    $coalition_name = $this->loyalty[$coalition]['name'];
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} changes loyalty to ${coalition_name}'), array(
-      'playerId' => $playerId,
-      'player_name' => self::getActivePlayerName(),
-      'coalition' => $coalition,
-      'coalition_name' => $coalition_name
-    ));
+    Notifications::changeLoyalty($coalition);
+    $this->returnGifts($playerId);
+    $this->discardPrizes($playerId);
+    $this->discardPatriots($playerId);
+  }
+
+  function returnGifts($playerId)
+  {
+    $giftValues = [2, 4, 6];
+    $moves = [];
+    $cylinders = [];
+    foreach ($giftValues as $index => $value) {
+      $location = 'gift_' . $value . '_' . $playerId;
+      $tokenInLocation = Tokens::getInLocation($location)->first();
+      if ($tokenInLocation === null) {
+        continue;
+      }
+      $cylinders[] = $tokenInLocation;
+      $to = 'cylinders_' . $playerId;
+      $state = Tokens::insertOnTop($tokenInLocation['id'], $to);
+      $moves[] =  [
+        'from' => $location,
+        'to' => $to,
+        'tokenId' => $tokenInLocation['id'],
+        'weight' => $state,
+      ];
+      Notifications::log('in location', $tokenInLocation);
+    };
+    if (count($moves) > 0) {
+      Notifications::returnGifts($cylinders,$moves);
+    }
+  }
+
+  function discardPrizes($playerId)
+  {
+    $from = Locations::prizes($playerId);
+    $prizes = Cards::getInLocation($from)->toArray();
+    $cardIds = [];
+    foreach ($prizes as $index => $card) {
+      $to = Locations::discardPile();
+
+      Cards::insertOnTop($card['id'], $to);
+      $cardIds[] = $card['id'];
+    };
+    if (count($cardIds) > 0) {
+      Notifications::discardPrizes($cardIds);
+    }
+  }
+
+  function discardPatriots($playerId)
+  {
+    $courtCards = Players::get($playerId)->getCourtCards();
   }
 }

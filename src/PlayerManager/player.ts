@@ -368,6 +368,10 @@ class PPPlayer {
   // .##....##.##..........##.......##....##.......##....##..##....##
   // ..######..########....##.......##....########.##.....##..######.
 
+  getColor(): string {
+    return this.playerColor;
+  }
+
   getCourtCards(): CourtCard[] {
     const cardsInZone = this.court.getAllItems();
     return cardsInZone.map((cardId: string) => this.game.getCardInfo({ cardId })) as CourtCard[];
@@ -389,8 +393,8 @@ class PPPlayer {
     return this.gifts[value];
   }
 
-  getColor(): string {
-    return this.playerColor;
+  getInfluence(): number {
+    return this.counters.influence.getValue();
   }
 
   getName(): string {
@@ -508,8 +512,6 @@ class PPPlayer {
     // Move card to discard pile
     this.court.removeFromZone(cardId, false);
     discardCardAnimation({ cardId, game: this.game });
-
-    // TODO: check leverage and check overthrow rule
   }
 
   discardHandCard({ cardId }: { cardId: string }) {
@@ -518,6 +520,14 @@ class PPPlayer {
     } else {
       dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
     }
+    discardCardAnimation({ cardId, game: this.game });
+  }
+
+  discardPrize({ cardId }: { cardId: string }) {
+    const node = dojo.byId(cardId);
+    node.classList.remove('pp_prize');
+    // Move card to discard pile
+    this.prizes.removeFromZone(cardId, false);
     discardCardAnimation({ cardId, game: this.game });
   }
 
@@ -593,6 +603,7 @@ class PPPlayer {
       from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
       to: this.getPrizeZone(),
       addClass: ['pp_prize'],
+      removeClass: ['pp_card_in_court',`pp_player_${cardOwnerId}`],
       // weight,
     });
     this.incCounter({counter: 'influence', value: 1});

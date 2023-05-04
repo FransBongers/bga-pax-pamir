@@ -156,7 +156,6 @@ class PaxPamir implements PaxPamirGame {
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
     if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
-      console.log('inside if');
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }

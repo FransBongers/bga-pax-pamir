@@ -1188,6 +1188,9 @@ var PPPlayer = /** @class */ (function () {
     // .......##.##..........##.......##....##.......##...##.........##
     // .##....##.##..........##.......##....##.......##....##..##....##
     // ..######..########....##.......##....########.##.....##..######.
+    PPPlayer.prototype.getColor = function () {
+        return this.playerColor;
+    };
     PPPlayer.prototype.getCourtCards = function () {
         var _this = this;
         var cardsInZone = this.court.getAllItems();
@@ -1206,8 +1209,8 @@ var PPPlayer = /** @class */ (function () {
         var value = _a.value;
         return this.gifts[value];
     };
-    PPPlayer.prototype.getColor = function () {
-        return this.playerColor;
+    PPPlayer.prototype.getInfluence = function () {
+        return this.counters.influence.getValue();
     };
     PPPlayer.prototype.getName = function () {
         return this.playerName;
@@ -1303,7 +1306,6 @@ var PPPlayer = /** @class */ (function () {
         // Move card to discard pile
         this.court.removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
-        // TODO: check leverage and check overthrow rule
     };
     PPPlayer.prototype.discardHandCard = function (_a) {
         var cardId = _a.cardId;
@@ -1313,6 +1315,14 @@ var PPPlayer = /** @class */ (function () {
         else {
             dojo.place(tplCard({ cardId: cardId }), "cards_".concat(this.playerId));
         }
+        discardCardAnimation({ cardId: cardId, game: this.game });
+    };
+    PPPlayer.prototype.discardPrize = function (_a) {
+        var cardId = _a.cardId;
+        var node = dojo.byId(cardId);
+        node.classList.remove('pp_prize');
+        // Move card to discard pile
+        this.prizes.removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
     };
     PPPlayer.prototype.payToPlayer = function (_a) {
@@ -1387,6 +1397,7 @@ var PPPlayer = /** @class */ (function () {
             from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
             to: this.getPrizeZone(),
             addClass: ['pp_prize'],
+            removeClass: ['pp_card_in_court', "pp_player_".concat(cardOwnerId)],
             // weight,
         });
         this.incCounter({ counter: 'influence', value: 1 });
@@ -3734,12 +3745,13 @@ var NotificationManager = /** @class */ (function () {
             ['changeRuler', 1],
             // ['initiateNegotiation', 1],
             ['changeFavoredSuit', 250],
-            ['chooseLoyalty', 1],
+            ['changeLoyalty', 1],
             ['clearTurn', 1],
             ['discardAndTakePrize', 1000],
             ['discardFromCourt', 1000],
             ['discardFromHand', 250],
             ['discardFromMarket', 250],
+            ['discardPrizes', 250],
             ['dominanceCheck', 1],
             ['purchaseCard', 2000],
             ['playCard', 2000],
@@ -3794,6 +3806,17 @@ var NotificationManager = /** @class */ (function () {
             to: toZone,
         });
     };
+    NotificationManager.prototype.notif_changeLoyalty = function (notif) {
+        debug('notif_changeLoyalty', notif.args);
+        var args = notif.args;
+        var playerId = Number(args.playerId);
+        this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
+        var player = this.getPlayer({ playerId: playerId });
+        // Influence value will be 0 when player chooses loyalty for the first time
+        if (player.getInfluence() === 0) {
+            player.setCounter({ counter: 'influence', value: 1 });
+        }
+    };
     NotificationManager.prototype.notif_changeRuler = function (notif) {
         var args = notif.args;
         console.log('notif_changeRuler', args);
@@ -3810,18 +3833,6 @@ var NotificationManager = /** @class */ (function () {
             from: from,
             to: to,
         });
-    };
-    // notif_initiateNegotiation(notif: Notif<unknown>) {
-    //   const { args } = notif;
-    //   console.log('notif_initiateNegotiation', args);
-    // }
-    NotificationManager.prototype.notif_chooseLoyalty = function (notif) {
-        var args = notif.args;
-        console.log('notif_chooseLoyalty', args);
-        var playerId = Number(args.playerId);
-        this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
-        // TODO (make this notif more generic for loyalty changes?)
-        this.getPlayer({ playerId: playerId }).setCounter({ counter: 'influence', value: 1 });
     };
     NotificationManager.prototype.notif_clearTurn = function (notif) {
         var args = notif.args;
@@ -3898,6 +3909,16 @@ var NotificationManager = /** @class */ (function () {
         var splitFrom = from.split('_');
         this.game.market.discardCard({ cardId: cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
     };
+    NotificationManager.prototype.notif_discardPrizes = function (notif) {
+        debug('notif_discardPrizes', notif);
+        this.game.clearPossible();
+        var playerId = Number(notif.args.playerId);
+        var player = this.getPlayer({ playerId: playerId });
+        notif.args.cardIds.forEach(function (cardId) {
+            player.discardPrize({ cardId: cardId });
+            player.incCounter({ counter: 'influence', value: -1 });
+        });
+    };
     NotificationManager.prototype.notif_dominanceCheck = function (notif) {
         var _this = this;
         console.log('notif_dominanceCheck', notif);
@@ -3923,6 +3944,44 @@ var NotificationManager = /** @class */ (function () {
                     : _this.game.map.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone(),
                 addClass: ['pp_coalition_block'],
                 removeClass: isArmy ? ['pp_army'] : ['pp_road'],
+            });
+        });
+    };
+    NotificationManager.prototype.notif_moveToken = function (notif) {
+        var _this = this;
+        console.log('notif_moveToken', notif);
+        notif.args.moves.forEach(function (move) {
+            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
+            var fromZone = _this.game.getZoneForLocation({ location: from });
+            var toZone = _this.game.getZoneForLocation({ location: to });
+            // TODO: perhaps create separate function for this
+            var addClass = [];
+            var removeClass = [];
+            if (to.startsWith('armies')) {
+                addClass.push('pp_army');
+            }
+            else if (to.startsWith('roads')) {
+                addClass.push('pp_road');
+            }
+            else if (to.startsWith('blocks')) {
+                addClass.push('pp_coalition_block');
+            }
+            if (from.startsWith('blocks')) {
+                removeClass.push('pp_coalition_block');
+            }
+            else if (from.startsWith('armies')) {
+                removeClass.push('pp_army');
+            }
+            else if (from.startsWith('roads')) {
+                removeClass.push('pp_road');
+            }
+            _this.game.move({
+                id: tokenId,
+                from: fromZone,
+                to: toZone,
+                addClass: addClass,
+                removeClass: removeClass,
+                weight: weight,
             });
         });
     };
@@ -4080,44 +4139,6 @@ var NotificationManager = /** @class */ (function () {
             player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
         });
     };
-    NotificationManager.prototype.notif_moveToken = function (notif) {
-        var _this = this;
-        console.log('notif_moveToken', notif);
-        notif.args.moves.forEach(function (move) {
-            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
-            var fromZone = _this.game.getZoneForLocation({ location: from });
-            var toZone = _this.game.getZoneForLocation({ location: to });
-            // TODO: perhaps create separate function for this
-            var addClass = [];
-            var removeClass = [];
-            if (to.startsWith('armies')) {
-                addClass.push('pp_army');
-            }
-            else if (to.startsWith('roads')) {
-                addClass.push('pp_road');
-            }
-            else if (to.startsWith('blocks')) {
-                addClass.push('pp_coalition_block');
-            }
-            if (from.startsWith('blocks')) {
-                removeClass.push('pp_coalition_block');
-            }
-            else if (from.startsWith('armies')) {
-                removeClass.push('pp_army');
-            }
-            else if (from.startsWith('roads')) {
-                removeClass.push('pp_road');
-            }
-            _this.game.move({
-                id: tokenId,
-                from: fromZone,
-                to: toZone,
-                addClass: addClass,
-                removeClass: removeClass,
-                weight: weight,
-            });
-        });
-    };
     NotificationManager.prototype.notif_taxMarket = function (notif) {
         var _this = this;
         debug('notif_taxMarket', notif.args);
@@ -4267,7 +4288,6 @@ var PaxPamir = /** @class */ (function () {
         console.log('Entering state: ' + stateName, args);
         // UI changes for active player
         if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
-            console.log('inside if');
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };

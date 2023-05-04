@@ -5,7 +5,6 @@
 ### General
 - Event cards
 - Special abilities
-- Leverage when discarding cards
 - Loyualty change (discard everything including prizes / gifts)
 - Select tokens when supply is empty
 - End of game
@@ -24,6 +23,7 @@
 ### Improvements
 - Only highlight card actions that are possible based on rupees, ruled regions etc?
 - For bribes: should ruler be able to demand higher amount than briber has available even though briber can never accept?
+- For discard: instead of moving card div change discard background to show certain card and remove the card div?
 
 ## Bugs
 - 

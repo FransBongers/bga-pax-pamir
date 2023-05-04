@@ -40,12 +40,13 @@ class NotificationManager {
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
       ['changeFavoredSuit', 250],
-      ['chooseLoyalty', 1],
+      ['changeLoyalty', 1],
       ['clearTurn', 1],
       ['discardAndTakePrize', 1000],
       ['discardFromCourt', 1000],
       ['discardFromHand', 250],
       ['discardFromMarket', 250],
+      ['discardPrizes',250],
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
       ['playCard', 2000],
@@ -107,6 +108,18 @@ class NotificationManager {
     });
   }
 
+  notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
+    debug('notif_changeLoyalty',notif.args);
+    const { args } = notif;
+    const playerId = Number(args.playerId);
+    this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
+    const player = this.getPlayer({ playerId });
+    // Influence value will be 0 when player chooses loyalty for the first time
+    if(player.getInfluence() === 0) {
+      player.setCounter({ counter: 'influence', value: 1 });
+    } 
+  }
+
   notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
     const { args } = notif;
     console.log('notif_changeRuler', args);
@@ -125,20 +138,6 @@ class NotificationManager {
       from,
       to,
     });
-  }
-
-  // notif_initiateNegotiation(notif: Notif<unknown>) {
-  //   const { args } = notif;
-  //   console.log('notif_initiateNegotiation', args);
-  // }
-
-  notif_chooseLoyalty(notif: Notif<NotifChooseLoyaltyArgs>) {
-    const { args } = notif;
-    console.log('notif_chooseLoyalty', args);
-    const playerId = Number(args.playerId);
-    this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
-    // TODO (make this notif more generic for loyalty changes?)
-    this.getPlayer({ playerId }).setCounter({ counter: 'influence', value: 1 });
   }
 
   notif_clearTurn(notif) {
@@ -225,6 +224,17 @@ class NotificationManager {
     this.game.market.discardCard({ cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
   }
 
+  notif_discardPrizes(notif: Notif<NotifDiscardPrizesArgs>) {
+    debug('notif_discardPrizes', notif);
+    this.game.clearPossible();
+    const playerId = Number(notif.args.playerId);
+    const player = this.getPlayer({ playerId });
+    notif.args.cardIds.forEach((cardId) => {
+      player.discardPrize({ cardId });
+      player.incCounter({ counter: 'influence', value: -1 });
+    })
+  }
+
   notif_dominanceCheck(notif) {
     console.log('notif_dominanceCheck', notif);
     const { scores, moves } = notif.args;
@@ -250,6 +260,42 @@ class NotificationManager {
           : this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
         addClass: ['pp_coalition_block'],
         removeClass: isArmy ? ['pp_army'] : ['pp_road'],
+      });
+    });
+  }
+
+  notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
+    console.log('notif_moveToken', notif);
+    notif.args.moves.forEach((move) => {
+      const { tokenId, from, to, weight } = move;
+      const fromZone = this.game.getZoneForLocation({ location: from });
+      const toZone = this.game.getZoneForLocation({ location: to });
+
+      // TODO: perhaps create separate function for this
+      const addClass = [];
+      const removeClass = [];
+      if (to.startsWith('armies')) {
+        addClass.push('pp_army');
+      } else if (to.startsWith('roads')) {
+        addClass.push('pp_road');
+      } else if (to.startsWith('blocks')) {
+        addClass.push('pp_coalition_block');
+      }
+      if (from.startsWith('blocks')) {
+        removeClass.push('pp_coalition_block');
+      } else if (from.startsWith('armies')) {
+        removeClass.push('pp_army');
+      } else if (from.startsWith('roads')) {
+        removeClass.push('pp_road');
+      }
+
+      this.game.move({
+        id: tokenId,
+        from: fromZone,
+        to: toZone,
+        addClass,
+        removeClass,
+        weight,
       });
     });
   }
@@ -427,42 +473,6 @@ class NotificationManager {
       player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
       player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
       player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
-    });
-  }
-
-  notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
-    console.log('notif_moveToken', notif);
-    notif.args.moves.forEach((move) => {
-      const { tokenId, from, to, weight } = move;
-      const fromZone = this.game.getZoneForLocation({ location: from });
-      const toZone = this.game.getZoneForLocation({ location: to });
-
-      // TODO: perhaps create separate function for this
-      const addClass = [];
-      const removeClass = [];
-      if (to.startsWith('armies')) {
-        addClass.push('pp_army');
-      } else if (to.startsWith('roads')) {
-        addClass.push('pp_road');
-      } else if (to.startsWith('blocks')) {
-        addClass.push('pp_coalition_block');
-      }
-      if (from.startsWith('blocks')) {
-        removeClass.push('pp_coalition_block');
-      } else if (from.startsWith('armies')) {
-        removeClass.push('pp_army');
-      } else if (from.startsWith('roads')) {
-        removeClass.push('pp_road');
-      }
-
-      this.game.move({
-        id: tokenId,
-        from: fromZone,
-        to: toZone,
-        addClass,
-        removeClass,
-        weight,
-      });
     });
   }
 

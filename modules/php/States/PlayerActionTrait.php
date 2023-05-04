@@ -2,10 +2,12 @@
 
 namespace PaxPamir\States;
 
+use Locale;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -89,39 +91,12 @@ trait PlayerActionTrait
     $rupeesOnCards = $this->payActionCosts(2);
     Players::incRupees($playerId, -2);
     Notifications::betray($betrayedCardInfo, $player,$rupeesOnCards);
-    $spyMoves = $this->removeSpiesFromCard($betrayedCardId);
-    
 
-    if ($betrayedCardInfo['prize'] !== null && $acceptPrize) {
-      Cards::insertOnTop($betrayedCardId, 'prizes_'.$playerId);
-      Notifications::discardAndTakePrize($betrayedCardInfo, $player,$spyMoves, $betrayedPlayerId === $playerId ? null : $betrayedPlayerId);
-    } else {
-      Cards::insertOnTop($betrayedCardId, DISCARD);
-      Notifications::discardFromCourt($betrayedCardInfo, $player, $spyMoves, $betrayedPlayerId === $playerId ? null : $betrayedPlayerId);
-    }
-
-    // TODO: check if we can reuse this from DiscardTrait.php
-    $numberCardsToDiscard = $this->checkAndHandleLeverage($betrayedCardId,$betrayedPlayerId);
-    if ($numberCardsToDiscard > 0) {
-      $betrayedPlayer = Players::get($betrayedPlayerId);
-      $playerCourtCards = $betrayedPlayer->getCourtCards();
-      $playerHandCards = $betrayedPlayer->getHandCards();
-      $totalCards = count($playerCourtCards) + count($playerHandCards);
-      if ($totalCards > 0 && $totalCards <= $numberCardsToDiscard) {
-        Notifications::leveragedDiscardRemaining($betrayedPlayer);
-        $this->resolveDiscardCards(array_merge($playerCourtCards,$playerHandCards),$betrayedPlayer);
-        $this->gamestate->nextState('playerActions');
-      } else {
-        Globals::setLeverageData([
-          'numberOfDiscards' => $numberCardsToDiscard,
-          'playerIdWhenDone' => $playerId,
-          'transition' => 'playerActions'
-      ]);
-      $this->nextState('discardLeverage',$betrayedPlayerId);
-      }
-    } else {
-      $this->gamestate->nextState('playerActions');
-    }
+    $prizeTaker = $betrayedCardInfo['prize'] !== null && $acceptPrize ? $player : null;
+    $this->executeDiscards([$betrayedCardInfo], Players::get($betrayedPlayerId), [
+      'activePlayerId' => $playerId,
+      'transition' => 'playerActions'
+    ], $prizeTaker);
   }
 
   /**
@@ -138,7 +113,7 @@ trait PlayerActionTrait
 
     // Notify
     // TODO (Frans): check i18n for coalition name
-    self::notifyAllPlayers("chooseLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
+    self::notifyAllPlayers("changeLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
       'playerId' => $playerId,
       'player_name' => Game::get()->getActivePlayerName(),
       'coalition' => $coalition,

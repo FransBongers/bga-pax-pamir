@@ -63,26 +63,27 @@ trait ResolveImpactIconsTrait
 
     switch ($current_icon) {
       case ARMY:
-        $loyalty = Players::get()->getLoyalty();
-        $location = $this->locations['pools'][$loyalty];
-        $army = Tokens::getTopOf($location);
-        if ($army != null) {
-          $to = $this->locations['armies'][$card_region];
-          Tokens::move($army['id'], $this->locations['armies'][$card_region]);
-          $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
-          Notifications::moveToken($message, [
-            'player' => Players::get(),
-            'logTokenArmy' => Utils::logTokenArmy($loyalty),
-            'logTokenRegionName' => Utils::logTokenRegionName($card_region),
-            'moves' => [
-              [
-                'from' => $location,
-                'to' => $to,
-                'tokenId' => $army['id'],
-              ]
-            ]
-          ]);
-        }
+        $this->resolvePlaceArmy($card_region);
+        // $loyalty = Players::get()->getLoyalty();
+        // $location = $this->locations['pools'][$loyalty];
+        // $army = Tokens::getTopOf($location);
+        // if ($army != null) {
+        //   $to = $this->locations['armies'][$card_region];
+        //   Tokens::move($army['id'], $this->locations['armies'][$card_region]);
+        //   $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+        //   Notifications::moveToken($message, [
+        //     'player' => Players::get(),
+        //     'logTokenArmy' => Utils::logTokenArmy($loyalty),
+        //     'logTokenRegionName' => Utils::logTokenRegionName($card_region),
+        //     'moves' => [
+        //       [
+        //         'from' => $location,
+        //         'to' => $to,
+        //         'tokenId' => $army['id'],
+        //       ]
+        //     ]
+        //   ]);
+        // }
         break;
       case ECONOMIC_SUIT:
         $previous_suit = Globals::getFavoredSuit();
@@ -121,7 +122,7 @@ trait ResolveImpactIconsTrait
         break;
       case LEVERAGE:
         Players::incRupees($player_id, 2);
-        Notifications::leveragedCardPlay(Players::get(),2);
+        Notifications::leveragedCardPlay(Players::get(), 2);
         break;
       case POLITICAL_SUIT:
         $previous_suit = Globals::getFavoredSuit();
@@ -179,6 +180,37 @@ trait ResolveImpactIconsTrait
       // to check if there are more that need to be resolved.
       Globals::setResolveImpactIconsCurrentIcon($current_impact_icon_index + 1);
       $this->gamestate->nextState('resolveImpactIcons');
+    }
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function resolvePlaceArmy($regionId) {
+    $loyalty = Players::get()->getLoyalty();
+    $location = $this->locations['pools'][$loyalty];
+    $army = Tokens::getTopOf($location);
+    if ($army != null) {
+      $to = $this->locations['armies'][$regionId];
+      Tokens::move($army['id'], $this->locations['armies'][$regionId]);
+      $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+      Notifications::moveToken($message, [
+        'player' => Players::get(),
+        'logTokenArmy' => Utils::logTokenArmy($loyalty),
+        'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+        'moves' => [
+          [
+            'from' => $location,
+            'to' => $to,
+            'tokenId' => $army['id'],
+          ]
+        ]
+      ]);
     }
   }
 }

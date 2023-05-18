@@ -188,6 +188,15 @@
   z-index: 50;
 }
 
+.pp_region.pp_selected {
+  fill: blue;
+  fill-opacity: 25%;
+  stroke: blue;
+  stroke-width: 4;
+  cursor: pointer;
+  z-index: 50;
+}
+
 .pp_region.pp_selectable:hover {
   fill: blue;
   stroke: blue;
@@ -309,6 +318,21 @@
 
 .pp_ruler_token.pp_transcaspia {
   background-image: url("img/ruler_token_transcaspia.svg");
+}
+
+.pp_location.pp_selectable {
+  /* border: 2px blue solid; */
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 4px yellow !important;
+}
+
+.pp_location.pp_selectable:hover {
+  box-shadow: 0px 0px 0px 4px blue !important;
+}
+
+.pp_location.pp_selected {
+  cursor: pointer;
+  box-shadow: 0px 0px 0px 4px blue !important;
 }
 
 #pp_herat_armies {
@@ -1158,6 +1182,10 @@ html {
   width: 25px;
   z-index: 1;
   filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+.pp_army.pp_temporary, .pp_road.pp_temporary {
+  opacity: 0.5;
 }
 
 .pp_army.pp_selectable, .pp_road.pp_selectable {

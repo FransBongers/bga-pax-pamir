@@ -16,7 +16,7 @@ class Region {
   // clienttranslated name of region
   private name: string;
   // array with ids of all connected borders
-  private borders: string[];
+  public borders: string[];
 
   constructor({ game, region }: { game: PaxPamirGame; region: string }) {
     // console.log('constructor Region ', region);
@@ -199,6 +199,27 @@ class Region {
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  public addTempArmy({coalition, index}:{coalition: string; index: number;}) {
+    this.armyZone.instantaneous = true;
+    const id = `temp_army_${index}`
+    placeToken({
+      game: this.game,
+      location: this.armyZone,
+      id,
+      jstpl: 'jstpl_army',
+      jstplProps: {
+        id,
+        coalition,
+      },
+      classes: ['pp_temporary']
+    });
+    this.armyZone.instantaneous = false;
+  }
+
+  public removeTempArmy({index}: {index:number}) {
+    this.armyZone.removeFromZone(`temp_army_${index}`,true);
+  }
 
   private getEnemyArmies({coalitionId}: {coalitionId: string;}): string[] {
     return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);

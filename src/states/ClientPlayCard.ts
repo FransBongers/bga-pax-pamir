@@ -103,7 +103,7 @@ class ClientPlayCardState implements State {
       });
     } else {
       this.game.clientUpdatePageTitle({
-        text: _("Play '${name}' to ${side} side of court?"),
+        text: _("Play '${name}' to ${side} end of court?"),
         args: {
           name: (this.game.getCardInfo({ cardId }) as CourtCard).name,
           side,
@@ -137,7 +137,7 @@ class ClientPlayCardState implements State {
     this.game.clearPossible();
     dojo.query(`.pp_card_in_hand.pp_${cardId}`).addClass('pp_selected');
     this.game.clientUpdatePageTitle({
-      text: _("Select which side of court to play '${name}'"),
+      text: _("Select which end of court to play '${name}'"),
       args: {
         name: (this.game.getCardInfo({ cardId }) as CourtCard).name,
       },

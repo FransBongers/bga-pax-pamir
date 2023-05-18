@@ -29,6 +29,17 @@ interface NotifPayBribeArgs {
   rupees: number;
 }
 
+interface NotifBuildArgs {
+  player_name: string;
+  playerId: number;
+  numberOfRupees: number;
+  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+  logTokenCardName: string;
+  logTokenLargeCard: string;
+  logTokenRupee: string;
+  
+}
+
 interface NotifChangeFavoredSuitArgs {
   logTokenFavoredSuit: string;
   from: string;

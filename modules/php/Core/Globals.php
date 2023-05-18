@@ -19,6 +19,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "bribeClearLogs" => "bool",
     "leverageData" => "obj",
     "rulers" => "obj",
+    "loyaltyChangeInput" => "obj",
     // "rulerHerat" => "int", // Can be removed?
     // "rulerKabul" => "int", // Can be removed?
     // "rulerKandahar" => "int", // Can be removed?

@@ -1,11 +1,13 @@
 class ClientCardActionMoveState implements State {
   private game: PaxPamirGame;
-
+  private cardId: string;
+  
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState() {
+  onEnteringState({ cardId }: ClientCardActionStateArgs) {
+    this.cardId = cardId;
     this.updateInterfaceInitialStep();
   }
 

@@ -129,6 +129,7 @@ trait PlayCardTrait
       $this->payBribe($playerId, $checkBribeResult['ruler'], $bribe);
     }
 
+    // TODO create separate state to resolve play card. First handle potential loyalty change.
     $this->resolvePlayCard($playerId, $cardId, $side);
   }
 
@@ -224,7 +225,7 @@ trait PlayCardTrait
     if (Globals::getRemainingActions() > 0) {
       // check if loyaly change
       $cardLoyalty = $this->cards[$cardId]['loyalty'];
-      if ($cardLoyalty != null) {
+      if ($cardLoyalty != null ) {
         $this->checkAndHandleLoyaltyChange($cardLoyalty);
       }
 
@@ -251,77 +252,4 @@ trait PlayCardTrait
     }
   }
 
-  /**
-   * checks if coalition is different from current loyalty.
-   * Handles any changes it it is.
-   */
-  function checkAndHandleLoyaltyChange($coalition)
-  {
-    $player = Players::get();
-    $playerId = $player->getId();
-    $current_loyaly = $player->getLoyalty();
-    // check of loyalty needs to change. If it does not return
-    if ($current_loyaly == $coalition) {
-      return;
-    }
-
-    // TODO:
-    // 2. Discard prizes 
-    // 3. Discard patriots
-    // 3. Update loyalty
-    Players::get()->setLoyalty($coalition);
-
-    Notifications::changeLoyalty($coalition);
-    $this->returnGifts($playerId);
-    $this->discardPrizes($playerId);
-    $this->discardPatriots($playerId);
-  }
-
-  function returnGifts($playerId)
-  {
-    $giftValues = [2, 4, 6];
-    $moves = [];
-    $cylinders = [];
-    foreach ($giftValues as $index => $value) {
-      $location = 'gift_' . $value . '_' . $playerId;
-      $tokenInLocation = Tokens::getInLocation($location)->first();
-      if ($tokenInLocation === null) {
-        continue;
-      }
-      $cylinders[] = $tokenInLocation;
-      $to = 'cylinders_' . $playerId;
-      $state = Tokens::insertOnTop($tokenInLocation['id'], $to);
-      $moves[] =  [
-        'from' => $location,
-        'to' => $to,
-        'tokenId' => $tokenInLocation['id'],
-        'weight' => $state,
-      ];
-      Notifications::log('in location', $tokenInLocation);
-    };
-    if (count($moves) > 0) {
-      Notifications::returnGifts($cylinders,$moves);
-    }
-  }
-
-  function discardPrizes($playerId)
-  {
-    $from = Locations::prizes($playerId);
-    $prizes = Cards::getInLocation($from)->toArray();
-    $cardIds = [];
-    foreach ($prizes as $index => $card) {
-      $to = Locations::discardPile();
-
-      Cards::insertOnTop($card['id'], $to);
-      $cardIds[] = $card['id'];
-    };
-    if (count($cardIds) > 0) {
-      Notifications::discardPrizes($cardIds);
-    }
-  }
-
-  function discardPatriots($playerId)
-  {
-    $courtCards = Players::get($playerId)->getCourtCards();
-  }
 }

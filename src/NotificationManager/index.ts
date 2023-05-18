@@ -36,6 +36,7 @@ class NotificationManager {
     const notifs: [id: string, wait: number][] = [
       ['battle', 250],
       ['betray', 250],
+      ['build', 250],
       ['cardAction', 1],
       ['changeRuler', 1],
       // ['initiateNegotiation', 1],
@@ -81,6 +82,20 @@ class NotificationManager {
   notif_betray(notif: Notif<NotifBetrayArgs>) {
     debug('notif_betray', notif);
     const { playerId, rupeesOnCards } = notif.args;
+    // Place paid rupees on market cards
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+    });
+  }
+
+  notif_build(notif: Notif<NotifBuildArgs>) {
+    debug('notif_build', notif);
+    const { playerId, rupeesOnCards } = notif.args;
+    if (this.game.framework().isCurrentPlayerActive()) {
+      this.game.activeStates.clientCardActionBuild.clearTemporaryTokens();
+    }
     // Place paid rupees on market cards
     rupeesOnCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;

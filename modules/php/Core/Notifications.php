@@ -120,6 +120,18 @@ class Notifications
     ]);
   }
 
+  public static function build($cardId, $player,$rupeesOnCards)
+  {
+    self::notifyAll("build", clienttranslate('${player_name} builds with ${logTokenCardName} and pays ${numberOfRupees} ${logTokenRupee} ${logTokenLargeCard}'), array(
+      'player' => $player,
+      'numberOfRupees' => count($rupeesOnCards),
+      'rupeesOnCards' => $rupeesOnCards,
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'logTokenRupee' => Utils::logTokenRupee(),
+    ));
+  }
+
   public static function changeFavoredSuit($previousSuit, $newSuit)
   {
     $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
@@ -223,6 +235,15 @@ class Notifications
         ],
       ] : '',
     ));
+  }
+
+  public static function discardPatriots($player)
+  {
+    $message = clienttranslate('${player_name} discards patriots');
+
+    self::notifyAll('discardPatriots', $message, [
+      'player' => $player,
+    ]);
   }
 
   public static function discardPrizes($moves)
@@ -383,7 +404,7 @@ class Notifications
   {
     // Minus 1 because $courtCards includes the card currently being played
     $message = count($courtCards) - 1 === 0 ? clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to his court') :
-      clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to the ${side} side of his court');
+      clienttranslate('${player_name} plays ${logTokenCardName} ${logTokenCard} to the ${side} end of his court');
     self::notifyAll("playCard", $message, array(
       'player' => Players::get($playerId),
       'card' => $card,

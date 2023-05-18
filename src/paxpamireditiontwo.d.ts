@@ -140,6 +140,24 @@ interface AddActionButtonProps extends AddButtonProps {
 
 interface PaxPamirGame extends Game {
   activeEvents: Zone;
+  activeStates: {
+    clientCardActionBattle: ClientCardActionBattleState;
+    clientCardActionBetray: ClientCardActionBetrayState;
+    clientCardActionBuild: ClientCardActionBuildState;
+    clientCardActionGift: ClientCardActionGiftState;
+    clientCardActionMove: ClientCardActionMoveState;
+    clientCardActionTax: ClientCardActionTaxState;
+    clientPlayCard: ClientPlayCardState;
+    clientPurchaseCard: ClientPurchaseCardState;
+    discardCourt: DiscardCourtState;
+    discardHand: DiscardHandState;
+    discardLeverage: DiscardLeverageState;
+    negotiateBribe: NegotiateBribeState;
+    placeRoad: PlaceRoadState;
+    placeSpy: PlaceSpyState;
+    playerActions: PlayerActionsState;
+    setup: SetupState;
+  };
   gamedatas: PaxPamirGamedatas;
   map: PPMap;
   market: Market;
@@ -161,6 +179,7 @@ interface PaxPamirGame extends Game {
   clearInterface: () => void;
   clearPossible: () => void;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
+  getCurrentPlayer: () => PPPlayer;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;

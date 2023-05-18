@@ -102,4 +102,25 @@ class Border {
   getEnemyRoads({ coalitionId }: { coalitionId: string }): string[] {
     return this.roadZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
   }
+
+  public addTempRoad({coalition, index}:{coalition: string; index: number;}) {
+    this.roadZone.instantaneous = true;
+    const id = `temp_road_${index}`
+    placeToken({
+      game: this.game,
+      location: this.roadZone,
+      id,
+      jstpl: 'jstpl_road',
+      jstplProps: {
+        id,
+        coalition,
+      },
+      classes: ['pp_temporary']
+    });
+    this.roadZone.instantaneous = false;
+  }
+
+  public removeTempRoad({index}: {index:number}) {
+    this.roadZone.removeFromZone(`temp_road_${index}`,true);
+  }
 }

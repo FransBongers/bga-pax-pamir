@@ -58,7 +58,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
     define("STATE_DISCARD_COURT", 7);
     define("STATE_DISCARD_HAND", 8);
-    define("STATE_DISCARD_LEVERAGE",13);
+    define("STATE_DISCARD_LEVERAGE", 13);
     define("STATE_PLACE_ROAD", 9);
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
@@ -73,9 +73,10 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CARD_ACTION_TAX", 45);
     define("STATE_NEXT_PLAYER", 50);
     define("STATE_NEXT_PLAYER_NEGOTIATE_BRIBE", 51);
+    define("STATE_CHANGE_LOYALTY", 52);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
-    define("ST_CHANGE_ACTIVE_PLAYER",95);
+    define("ST_CHANGE_ACTIVE_PLAYER", 95);
     define("STATE_END_GAME", 99);
 }
 
@@ -145,7 +146,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "tax", "betray"),
+        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "tax", "betray"),
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "discardLeverage" => STATE_DISCARD_LEVERAGE,
@@ -358,6 +359,16 @@ $machinestates = array(
         )
     ),
 
+    STATE_CHANGE_LOYALTY => [
+        'name' => 'changeLoyalty',
+        'description' => '',
+        'descriptionmyturn' => '',
+        'type' => 'game',
+        'action' => 'stChangeLoyalty',
+        "transitions" => array(
+            "playerActions" => STATE_PLAYER_ACTIONS,
+        )
+    ],
 
     // Generic state to change player
     ST_CHANGE_ACTIVE_PLAYER => [

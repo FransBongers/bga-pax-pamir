@@ -30,11 +30,15 @@
 
 
 ## To check
+- Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
 
 ### UI
 - Matching colors for selectable / selected
 
 ### Rules
 - What is the order for declaring card actions / holding cards hostage. Does a player declare he wants to use a card action from a card or needs to mention the specific card action?
+- What is the formal order for betray action, leverage and loyalty change
+  - Discard betrayed card, handle leverage (ie return rupees / discard additional cards)
+  - Handle loyalty change for taking prize, discard patriots, handle leverage (return rupees / more cards)
 
 

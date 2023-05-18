@@ -68,6 +68,9 @@ trait PlayerActionTrait
     if (!Utils::startsWith($betrayedCardInfo['location'], 'court')) {
       throw new \feException("Card is not in a players court");
     }
+    if ($acceptPrize && $betrayedCardInfo['loyalty'] === null) {
+      
+    }
     $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
     // Notifications::log('spies',[$spiesOnCard[0]]);
     $player = Players::get();
@@ -97,6 +100,76 @@ trait PlayerActionTrait
       'activePlayerId' => $playerId,
       'transition' => 'playerActions'
     ], $prizeTaker);
+  }
+
+  /**
+   * cardId: card with build action
+   * locations: locations to build: roads on borders, armies in regions
+   */
+  function build($cardId, $locations)
+  {
+    $locations = explode(' ',trim($locations));
+
+    self::checkAction('build');
+    Notifications::log('build',$locations);
+    $cardInfo = Cards::get($cardId);
+    $this->isValidCardAction($cardInfo, BUILD);
+
+    $numberOfTokens = count($locations);
+    Notifications::log('numberOfTokens',$numberOfTokens);
+    // max number to build is 3
+    if ($numberOfTokens > 3) {
+      throw new \feException("Too many tokens selected");
+    };
+    $cost = $numberOfTokens * 2;
+    $player = Players::get();
+    // player should have rupees
+    if ($cost > $player->getRupees()) {
+      throw new \feException("Player does not have enough rupees to pay for action");
+    }
+
+    $borders = [];
+    $regions = [];
+    $playerId = $player->getId();
+    //player should rule region or an adjacent region in case of a border
+    foreach($locations as $index => $location) {
+      $isBorder = str_contains($location, '_');
+      $rulers = Globals::getRulers();
+      if($isBorder) {
+        $borderRegions = explode('_',$location);
+        if (!($rulers[$borderRegions[0]] === $playerId || $rulers[$borderRegions[1]] === $playerId)) {
+          throw new \feException("Player does not rule an adjacent region");
+        };
+        $borders[] = $location;
+      } else {  
+        if (!($rulers[$location] === $playerId)) {
+          throw new \feException("Player does not rule region");
+        }
+        $regions[] = $location;
+      }
+    }
+    Notifications::log('build',[
+      'borders' => $borders,
+      'regions' => $regions
+    ]);
+
+    Cards::setUsed($cardId, 1);
+
+    if (!$this->isCardFavoredSuit($cardId)) {
+      Globals::incRemainingActions(-1);
+    }
+    $rupeesOnCards = $this->payActionCosts($cost);
+    Players::incRupees($playerId, -$cost);
+    Notifications::build($cardId, $player,$rupeesOnCards);
+    // Move tokens
+    foreach($regions as $index => $regionId) {
+      $this->resolvePlaceArmy($regionId);
+    }
+    foreach($borders as $index => $borderId) {
+      $this->resolvePlaceRoad($borderId);
+    }
+
+    $this->gamestate->nextState('playerActions');
   }
 
   /**
@@ -352,7 +425,11 @@ trait PlayerActionTrait
   }
 
   /**
-   * Performs default validation needed for every card action
+   * Performs default validation needed for every card action:
+   * - is the card used for the card action in the players court
+   * - the card has not been used this turn yet
+   * - the card should have the card action
+   * - player should haver acionts remaining or actions is a bonus action
    */
   function isValidCardAction($cardInfo, $cardAction)
   {

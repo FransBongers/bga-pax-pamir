@@ -5,8 +5,8 @@ const CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
 const CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
 const CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 const CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
-const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 const CLIENT_PLAY_CARD = 'clientPlayCard';
+const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 
 // size of tokens
 const CARD_WIDTH = 150;

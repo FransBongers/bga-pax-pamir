@@ -42,7 +42,7 @@ class PaxPamir implements PaxPamirGame {
   public _connections: unknown[];
   public localState: LocalState;
 
-  activeStates: {
+  public activeStates: {
     [CLIENT_CARD_ACTION_BATTLE]: ClientCardActionBattleState;
     [CLIENT_CARD_ACTION_BETRAY]: ClientCardActionBetrayState;
     [CLIENT_CARD_ACTION_BUILD]: ClientCardActionBuildState;
@@ -320,6 +320,10 @@ class PaxPamir implements PaxPamirGame {
 
   public getPlayerId(): number {
     return Number(this.framework().player_id);
+  }
+
+  public getCurrentPlayer(): PPPlayer {
+    return this.playerManager.getPlayer({playerId: this.getPlayerId()});
   }
 
   /**

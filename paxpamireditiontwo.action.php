@@ -88,6 +88,15 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function build()
+    {
+        self::setAjaxMode();
+        $locations = self::getArg("locations", AT_alphanum, true);
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $result = $this->game->build($cardId, $locations);
+        self::ajaxResponse();
+    }
+
     public function chooseLoyalty()
     {
         self::setAjaxMode();

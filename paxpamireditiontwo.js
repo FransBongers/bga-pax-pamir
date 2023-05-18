@@ -275,8 +275,8 @@ var CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
 var CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
 var CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
-var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
+var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 // size of tokens
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
@@ -1574,6 +1574,27 @@ var Border = /** @class */ (function () {
         var coalitionId = _a.coalitionId;
         return this.roadZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
     };
+    Border.prototype.addTempRoad = function (_a) {
+        var coalition = _a.coalition, index = _a.index;
+        this.roadZone.instantaneous = true;
+        var id = "temp_road_".concat(index);
+        placeToken({
+            game: this.game,
+            location: this.roadZone,
+            id: id,
+            jstpl: 'jstpl_road',
+            jstplProps: {
+                id: id,
+                coalition: coalition,
+            },
+            classes: ['pp_temporary']
+        });
+        this.roadZone.instantaneous = false;
+    };
+    Border.prototype.removeTempRoad = function (_a) {
+        var index = _a.index;
+        this.roadZone.removeFromZone("temp_road_".concat(index), true);
+    };
     return Border;
 }());
 // .########..########..######...####..#######..##....##
@@ -1765,6 +1786,27 @@ var Region = /** @class */ (function () {
     // .##.....##....##.....##..##........##.....##.......##...
     // .##.....##....##.....##..##........##.....##.......##...
     // ..#######.....##....####.########.####....##.......##...
+    Region.prototype.addTempArmy = function (_a) {
+        var coalition = _a.coalition, index = _a.index;
+        this.armyZone.instantaneous = true;
+        var id = "temp_army_".concat(index);
+        placeToken({
+            game: this.game,
+            location: this.armyZone,
+            id: id,
+            jstpl: 'jstpl_army',
+            jstplProps: {
+                id: id,
+                coalition: coalition,
+            },
+            classes: ['pp_temporary']
+        });
+        this.armyZone.instantaneous = false;
+    };
+    Region.prototype.removeTempArmy = function (_a) {
+        var index = _a.index;
+        this.armyZone.removeFromZone("temp_army_".concat(index), true);
+    };
     Region.prototype.getEnemyArmies = function (_a) {
         var coalitionId = _a.coalitionId;
         return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
@@ -2374,7 +2416,12 @@ var ClientCardActionBuildState = /** @class */ (function () {
     function ClientCardActionBuildState(game) {
         this.game = game;
     }
-    ClientCardActionBuildState.prototype.onEnteringState = function () {
+    ClientCardActionBuildState.prototype.onEnteringState = function (_a) {
+        var cardId = _a.cardId;
+        this.cardId = cardId;
+        this.tempTokens = [];
+        var playerRupees = this.game.getCurrentPlayer().getRupees();
+        this.maxNumberTopPlace = Math.min(Math.floor(playerRupees / 2), 3);
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
@@ -2393,7 +2440,156 @@ var ClientCardActionBuildState = /** @class */ (function () {
     // .##....##....##....##.......##........##....##
     // ..######.....##....########.##.........######.
     ClientCardActionBuildState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
         this.game.clearPossible();
+        // Determine max numner of items player can build based on number of rupees
+        // Set regions selectable where player is ruler
+        // Let player select roads / armies
+        this.updatePageTitle();
+        this.setLocationsSelectable();
+        this.game.addPrimaryActionButton({
+            id: 'done_button',
+            text: _('Done'),
+            callback: function () { return _this.updateInterfaceConfirm(); },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () { return _this.onCancel(); },
+        });
+    };
+    ClientCardActionBuildState.prototype.updateInterfaceConfirm = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('Place x for a cost of ${amount} rupees?'),
+            args: {
+                amount: this.tempTokens.length * 2,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.onConfirm(); },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () { return _this.onCancel(); },
+        });
+    };
+    // ..######..##.......####..######..##....##
+    // .##....##.##........##..##....##.##...##.
+    // .##.......##........##..##.......##..##..
+    // .##.......##........##..##.......#####...
+    // .##.......##........##..##.......##..##..
+    // .##....##.##........##..##....##.##...##.
+    // ..######..########.####..######..##....##
+    // .##.....##....###....##....##.########..##.......########.########...######.
+    // .##.....##...##.##...###...##.##.....##.##.......##.......##.....##.##....##
+    // .##.....##..##...##..####..##.##.....##.##.......##.......##.....##.##......
+    // .#########.##.....##.##.##.##.##.....##.##.......######...########...######.
+    // .##.....##.#########.##..####.##.....##.##.......##.......##...##.........##
+    // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##..##....##
+    // .##.....##.##.....##.##....##.########..########.########.##.....##..######.
+    ClientCardActionBuildState.prototype.onLocationClick = function (_a) {
+        var location = _a.location;
+        if (this.maxNumberTopPlace - this.tempTokens.length <= 0) {
+            return;
+        }
+        debug('onLocationClick', location);
+        var player = this.game.getCurrentPlayer();
+        var coalition = player.getLoyalty();
+        if (location.endsWith('armies')) {
+            var regionId = location.split('_')[1];
+            var region = this.game.map.getRegion({ region: regionId });
+            region.addTempArmy({ coalition: coalition, index: this.tempTokens.length });
+            this.tempTokens.push({
+                location: regionId,
+                type: 'army',
+            });
+        }
+        else if (location.endsWith('border')) {
+            var split = location.split('_');
+            var borderId = "".concat(split[1], "_").concat(split[2]);
+            var border = this.game.map.getBorder({ border: borderId });
+            border.addTempRoad({ coalition: coalition, index: this.tempTokens.length });
+            this.tempTokens.push({
+                location: borderId,
+                type: 'road',
+            });
+        }
+        this.updatePageTitle();
+    };
+    ClientCardActionBuildState.prototype.onCancel = function () {
+        this.clearTemporaryTokens();
+        this.game.onCancel();
+    };
+    ClientCardActionBuildState.prototype.onConfirm = function () {
+        debug('handleConfirm');
+        if (this.tempTokens.length > 0) {
+            this.game.takeAction({ action: 'build', data: { cardId: this.cardId, locations: this.tempTokens.map(function (token) { return token.location; }).join(' ') } });
+        }
+    };
+    //  .##.....##.########.####.##.......####.########.##....##
+    //  .##.....##....##.....##..##........##.....##.....##..##.
+    //  .##.....##....##.....##..##........##.....##......####..
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  .##.....##....##.....##..##........##.....##.......##...
+    //  ..#######.....##....####.########.####....##.......##...
+    ClientCardActionBuildState.prototype.clearTemporaryTokens = function () {
+        var _this = this;
+        debug('inside clearTemporaryTokens');
+        this.tempTokens.forEach(function (token, index) {
+            var location = token.location, type = token.type;
+            if (type === 'army') {
+                _this.game.map.getRegion({ region: location }).removeTempArmy({ index: index });
+            }
+            else if (type === 'road') {
+                _this.game.map.getBorder({ border: location }).removeTempRoad({ index: index });
+            }
+        });
+        this.tempTokens = [];
+    };
+    ClientCardActionBuildState.prototype.setLocationsSelectable = function () {
+        var _this = this;
+        debug('setRegionsSelectable');
+        // Regions
+        // const container = document.getElementById(`pp_map_areas`);
+        // container.classList.add('pp_selectable');
+        REGIONS.forEach(function (regionId) {
+            var region = _this.game.map.getRegion({ region: regionId });
+            var ruler = region.getRuler();
+            // console.log('region', region, ruler);
+            if (ruler !== _this.game.getPlayerId()) {
+                return;
+            }
+            var armyLocation = "pp_".concat(regionId, "_armies");
+            var element = document.getElementById(armyLocation);
+            console.log('element', element);
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ location: armyLocation }); }));
+            }
+            region.borders.forEach(function (borderId) {
+                var borderLocation = "pp_".concat(borderId, "_border");
+                var element = document.getElementById(borderLocation);
+                if (element && !element.classList.contains('pp_selectable')) {
+                    element.classList.add('pp_selectable');
+                    _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ location: borderLocation }); }));
+                }
+            });
+        });
+    };
+    ClientCardActionBuildState.prototype.updatePageTitle = function () {
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
+            args: {
+                you: '${you}',
+                number: this.maxNumberTopPlace - this.tempTokens.length,
+            },
+        });
     };
     return ClientCardActionBuildState;
 }());
@@ -2487,7 +2683,9 @@ var ClientCardActionMoveState = /** @class */ (function () {
     function ClientCardActionMoveState(game) {
         this.game = game;
     }
-    ClientCardActionMoveState.prototype.onEnteringState = function () {
+    ClientCardActionMoveState.prototype.onEnteringState = function (_a) {
+        var cardId = _a.cardId;
+        this.cardId = cardId;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionMoveState.prototype.onLeavingState = function () { };
@@ -2821,7 +3019,7 @@ var ClientPlayCardState = /** @class */ (function () {
         }
         else {
             this.game.clientUpdatePageTitle({
-                text: _("Play '${name}' to ${side} side of court?"),
+                text: _("Play '${name}' to ${side} end of court?"),
                 args: {
                     name: this.game.getCardInfo({ cardId: cardId }).name,
                     side: side,
@@ -2857,7 +3055,7 @@ var ClientPlayCardState = /** @class */ (function () {
         this.game.clearPossible();
         dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
         this.game.clientUpdatePageTitle({
-            text: _("Select which side of court to play '${name}'"),
+            text: _("Select which end of court to play '${name}'"),
             args: {
                 name: this.game.getCardInfo({ cardId: cardId }).name,
             },
@@ -3741,6 +3939,7 @@ var NotificationManager = /** @class */ (function () {
         var notifs = [
             ['battle', 250],
             ['betray', 250],
+            ['build', 250],
             ['cardAction', 1],
             ['changeRuler', 1],
             // ['initiateNegotiation', 1],
@@ -3783,6 +3982,20 @@ var NotificationManager = /** @class */ (function () {
         var _this = this;
         debug('notif_betray', notif);
         var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
+        // Place paid rupees on market cards
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+        });
+    };
+    NotificationManager.prototype.notif_build = function (notif) {
+        var _this = this;
+        debug('notif_build', notif);
+        var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.game.activeStates.clientCardActionBuild.clearTemporaryTokens();
+        }
         // Place paid rupees on market cards
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
@@ -4400,6 +4613,9 @@ var PaxPamir = /** @class */ (function () {
     };
     PaxPamir.prototype.getPlayerId = function () {
         return Number(this.framework().player_id);
+    };
+    PaxPamir.prototype.getCurrentPlayer = function () {
+        return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
     };
     /**
      * Typescript wrapper for framework functions

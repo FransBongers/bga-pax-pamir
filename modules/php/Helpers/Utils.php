@@ -18,9 +18,9 @@ abstract class Utils extends \APP_DbObject
    * Array functions
    */
 
-  public static function filter(&$data, $filter)
+  public static function filter($data, $filter)
   {
-    $data = array_values(array_filter($data, $filter));
+    return array_values(array_filter($data, $filter));
   }
 
 

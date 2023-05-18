@@ -54,6 +54,7 @@ use PaxPamir\Managers\Tokens;
 class PaxPamirEditionTwo extends Table
 {
     use PaxPamir\DebugTrait;
+    use PaxPamir\States\ChangeLoyaltyTrait;
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DominanceCheckTrait;

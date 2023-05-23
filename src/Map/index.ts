@@ -49,4 +49,19 @@ class PPMap {
   getRegion({ region }: { region: string }): Region {
     return this.regions[region];
   }
+
+  setSelectable() {
+    const container = document.getElementById(`pp_map_areas`);
+    container.classList.add('pp_selectable');
+  }
+
+  clearSelectable() {
+    REGIONS.forEach((region) => {
+      this.regions[region].clearSelectable();
+    });
+    const mapArea = document.getElementById('pp_map_areas');
+    if (mapArea) {
+      mapArea.classList.remove('pp_selectable');
+    }
+  }
 }

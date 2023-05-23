@@ -63,6 +63,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayCardTrait;
     use PaxPamir\States\PlayerActionBattleTrait;
+    use PaxPamir\States\PlayerActionMoveTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
     use PaxPamir\States\RefreshMarketTrait;

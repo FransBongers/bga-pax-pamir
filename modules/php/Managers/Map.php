@@ -4,6 +4,7 @@ namespace PaxPamir\Managers;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Notifications;
 
 class Map
@@ -29,7 +30,7 @@ class Map
 
     foreach ($game->borders as $border => $borderInfo) {
       $data['borders'][$border]['roads'] = Tokens::getInLocation(['roads', $border])->toArray();
-  }
+    }
 
     return $data;
   }
@@ -98,5 +99,13 @@ class Map
       return $playersWithHighestStrength[0];
     };
     return null;
+  }
+
+  public static function borderHasRoadForCoalition($border, $coalition)
+  {
+    $roads = Tokens::getInLocation(['roads',$border])->toArray();
+    return Utils::array_some($roads, function ($road) use ($coalition) {
+      return explode('_', $road['id'])[1] === $coalition;
+    });
   }
 }

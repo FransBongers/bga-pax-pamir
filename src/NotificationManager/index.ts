@@ -47,13 +47,13 @@ class NotificationManager {
       ['discardFromCourt', 1000],
       ['discardFromHand', 250],
       ['discardFromMarket', 250],
-      ['discardPrizes',250],
+      ['discardPrizes', 250],
       ['dominanceCheck', 1],
       ['purchaseCard', 2000],
       ['playCard', 2000],
       ['refreshMarket', 250],
-      ['returnRupeesToSupply',250],
-      ['takeRupeesFromSupply',250],
+      ['returnRupeesToSupply', 250],
+      ['takeRupeesFromSupply', 250],
       ['payBribe', 1],
       ['purchaseGift', 1],
       ['smallRefreshHand', 1],
@@ -109,7 +109,7 @@ class NotificationManager {
   }
 
   notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
-    console.log('notif_moveToken', notif);
+    console.log('notif_changeFavoredSuit', notif);
     const { from, to } = notif.args;
     const tokenId = 'favored_suit_marker';
     const fromZone = this.game.getZoneForLocation({ location: `favored_suit_${from}` });
@@ -124,15 +124,15 @@ class NotificationManager {
   }
 
   notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
-    debug('notif_changeLoyalty',notif.args);
+    debug('notif_changeLoyalty', notif.args);
     const { args } = notif;
     const playerId = Number(args.playerId);
     this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition: args.coalition });
     const player = this.getPlayer({ playerId });
     // Influence value will be 0 when player chooses loyalty for the first time
-    if(player.getInfluence() === 0) {
+    if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
-    } 
+    }
   }
 
   notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
@@ -247,7 +247,7 @@ class NotificationManager {
     notif.args.cardIds.forEach((cardId) => {
       player.discardPrize({ cardId });
       player.incCounter({ counter: 'influence', value: -1 });
-    })
+    });
   }
 
   notif_dominanceCheck(notif) {
@@ -286,6 +286,17 @@ class NotificationManager {
       const fromZone = this.game.getZoneForLocation({ location: from });
       const toZone = this.game.getZoneForLocation({ location: to });
 
+      // Player is active player and moves have already been executed in client state.
+      // Still send notification so it is handled during replays
+      if (
+        this.game.framework().isCurrentPlayerActive() &&
+        !fromZone.getAllItems().includes(tokenId) &&
+        ((from.startsWith('armies') && to.startsWith('armies')) || (from.startsWith('spies') && to.startsWith('spies')))
+      ) {
+        debug('no need to execute move');
+        return;
+      }
+
       // TODO: perhaps create separate function for this
       const addClass = [];
       const removeClass = [];
@@ -298,7 +309,7 @@ class NotificationManager {
       }
       if (from.startsWith('blocks')) {
         removeClass.push('pp_coalition_block');
-      } else if (from.startsWith('armies')) {
+      } else if (from.startsWith('armies') && !to.startsWith('armies')) {
         removeClass.push('pp_army');
       } else if (from.startsWith('roads')) {
         removeClass.push('pp_road');
@@ -442,8 +453,8 @@ class NotificationManager {
 
   notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {
     debug('notif_returnRupeesToSupply', notif.args);
-    const {playerId, amount} = notif.args;
-    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: -amount});
+    const { playerId, amount } = notif.args;
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -amount });
   }
 
   notif_smallRefreshHand(notif) {
@@ -468,8 +479,8 @@ class NotificationManager {
 
   notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
     debug('notif_takeRupeesFromSupply', notif.args);
-    const {playerId, amount} = notif.args;
-    this.getPlayer({playerId}).incCounter({counter: 'rupees', value: amount});
+    const { playerId, amount } = notif.args;
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
   notif_updatePlayerCounts(notif) {

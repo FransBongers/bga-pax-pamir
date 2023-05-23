@@ -69,7 +69,6 @@ trait PlayerActionTrait
       throw new \feException("Card is not in a players court");
     }
     if ($acceptPrize && $betrayedCardInfo['loyalty'] === null) {
-      
     }
     $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
     // Notifications::log('spies',[$spiesOnCard[0]]);
@@ -93,7 +92,7 @@ trait PlayerActionTrait
     }
     $rupeesOnCards = $this->payActionCosts(2);
     Players::incRupees($playerId, -2);
-    Notifications::betray($betrayedCardInfo, $player,$rupeesOnCards);
+    Notifications::betray($betrayedCardInfo, $player, $rupeesOnCards);
 
     $prizeTaker = $betrayedCardInfo['prize'] !== null && $acceptPrize ? $player : null;
     $this->executeDiscards([$betrayedCardInfo], Players::get($betrayedPlayerId), [
@@ -108,15 +107,15 @@ trait PlayerActionTrait
    */
   function build($cardId, $locations)
   {
-    $locations = explode(' ',trim($locations));
+    $locations = explode(' ', trim($locations));
 
     self::checkAction('build');
-    Notifications::log('build',$locations);
+    Notifications::log('build', $locations);
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, BUILD);
 
     $numberOfTokens = count($locations);
-    Notifications::log('numberOfTokens',$numberOfTokens);
+    Notifications::log('numberOfTokens', $numberOfTokens);
     // max number to build is 3
     if ($numberOfTokens > 3) {
       throw new \feException("Too many tokens selected");
@@ -132,23 +131,23 @@ trait PlayerActionTrait
     $regions = [];
     $playerId = $player->getId();
     //player should rule region or an adjacent region in case of a border
-    foreach($locations as $index => $location) {
+    foreach ($locations as $index => $location) {
       $isBorder = str_contains($location, '_');
       $rulers = Globals::getRulers();
-      if($isBorder) {
-        $borderRegions = explode('_',$location);
+      if ($isBorder) {
+        $borderRegions = explode('_', $location);
         if (!($rulers[$borderRegions[0]] === $playerId || $rulers[$borderRegions[1]] === $playerId)) {
           throw new \feException("Player does not rule an adjacent region");
         };
         $borders[] = $location;
-      } else {  
+      } else {
         if (!($rulers[$location] === $playerId)) {
           throw new \feException("Player does not rule region");
         }
         $regions[] = $location;
       }
     }
-    Notifications::log('build',[
+    Notifications::log('build', [
       'borders' => $borders,
       'regions' => $regions
     ]);
@@ -160,12 +159,12 @@ trait PlayerActionTrait
     }
     $rupeesOnCards = $this->payActionCosts($cost);
     Players::incRupees($playerId, -$cost);
-    Notifications::build($cardId, $player,$rupeesOnCards);
+    Notifications::build($cardId, $player, $rupeesOnCards);
     // Move tokens
-    foreach($regions as $index => $regionId) {
+    foreach ($regions as $index => $regionId) {
       $this->resolvePlaceArmy($regionId);
     }
-    foreach($borders as $index => $borderId) {
+    foreach ($borders as $index => $borderId) {
       $this->resolvePlaceRoad($borderId);
     }
 

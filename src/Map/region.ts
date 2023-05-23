@@ -217,13 +217,23 @@ class Region {
     this.armyZone.instantaneous = false;
   }
 
-  public removeTempArmy({index}: {index:number}) {
-    this.armyZone.removeFromZone(`temp_army_${index}`,true);
+  getCoalitionArmies({coalitionId}: {coalitionId: string;}): string[] {
+    return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
   }
 
   private getEnemyArmies({coalitionId}: {coalitionId: string;}): string[] {
     return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
   };
+
+    /**
+   * Returns enemy pieces.
+   * Enemy pieces are
+   * - armies and roads of other coalition
+   * - tribes of player loyal to other coalition
+   */
+    getEnemyPieces(args: {coalitionId: string;}): string[] {
+      return [...this.getEnemyArmies(args), ...this.getEnemyRoads(args),...this.getEnemyTribes(args)];
+    }
 
   private getEnemyRoads({coalitionId}: {coalitionId: string;}): string[] {
     let roads = [];
@@ -241,17 +251,22 @@ class Region {
     })
   }
 
-  /**
-   * Returns enemy pieces.
-   * Enemy pieces are
-   * - armies and roads of other coalition
-   * - tribes of player loyal to other coalition
-   */
-  getEnemyPieces(args: {coalitionId: string;}): string[] {
-    return [...this.getEnemyArmies(args), ...this.getEnemyRoads(args),...this.getEnemyTribes(args)];
+  public removeTempArmy({index}: {index:number}) {
+    this.armyZone.removeFromZone(`temp_army_${index}`,true);
   }
 
-  getCoalitionArmies({coalitionId}: {coalitionId: string;}): string[] {
-    return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
+  public setSelectable({callback}: {callback: (props: { regionId: string }) => void;}) {
+    const element = document.getElementById(`pp_region_${this.region}`);
+    if (element) {
+      element.classList.add('pp_selectable');
+      this.game._connections.push(dojo.connect(element, 'onclick', this, () => callback({ regionId: this.region })));
+    }
+  }
+
+  public clearSelectable() {
+    const element = document.getElementById(`pp_region_${this.region}`);
+    if (element) {
+      element.classList.remove('pp_selectable');
+    }
   }
 }

@@ -14,9 +14,13 @@ abstract class Utils extends \APP_DbObject
     throw new \BgaVisibleSystemException(json_encode($args));
   }
 
-  /**
-   * Array functions
-   */
+  // ....###....########..########.....###....##....##
+  // ...##.##...##.....##.##.....##...##.##....##..##.
+  // ..##...##..##.....##.##.....##..##...##....####..
+  // .##.....##.########..########..##.....##....##...
+  // .#########.##...##...##...##...#########....##...
+  // .##.....##.##....##..##....##..##.....##....##...
+  // .##.....##.##.....##.##.....##.##.....##....##...
 
   public static function filter($data, $filter)
   {
@@ -126,6 +130,7 @@ abstract class Utils extends \APP_DbObject
     return implode(':', [LOG_TOKEN_LARGE_CARD, $cardId]);
   }
 
+  // TODO: replace with cardId as input?
   public static function logTokenCardName($cardName)
   {
     return implode(':', [LOG_TOKEN_CARD_NAME, $cardName]);
@@ -148,7 +153,12 @@ abstract class Utils extends \APP_DbObject
 
   public static function logTokenLeverage()
   {
-    return implode(':', [LOG_TOKEN_LEVERAGE,'']);
+    return implode(':', [LOG_TOKEN_LEVERAGE, '']);
+  }
+
+  public static function logTokenNewLine()
+  {
+    return implode(':', [LOG_TOKEN_NEW_LINE, '']);
   }
 
   public static function logTokenPlayerName($playerId)
@@ -168,6 +178,51 @@ abstract class Utils extends \APP_DbObject
 
   public static function logTokenRupee()
   {
-    return implode(':', [LOG_TOKEN_RUPEE,'']);
+    return implode(':', [LOG_TOKEN_RUPEE, '']);
+  }
+
+  // .##.....##.########.##.......########..########.########...######.
+  // .##.....##.##.......##.......##.....##.##.......##.....##.##....##
+  // .##.....##.##.......##.......##.....##.##.......##.....##.##......
+  // .#########.######...##.......########..######...########...######.
+  // .##.....##.##.......##.......##........##.......##...##.........##
+  // .##.....##.##.......##.......##........##.......##....##..##....##
+  // .##.....##.########.########.##........########.##.....##..######.
+
+  public static function isBlock($pieceId)
+  {
+    return Utils::startsWith($pieceId, "block");
+  }
+
+  public static function isCylinder($pieceId)
+  {
+    return Utils::startsWith($pieceId, "cylinder");
+  }
+
+  // .##.....##....###....##.......####.########.....###....########.####..#######..##....##
+  // .##.....##...##.##...##........##..##.....##...##.##......##.....##..##.....##.###...##
+  // .##.....##..##...##..##........##..##.....##..##...##.....##.....##..##.....##.####..##
+  // .##.....##.##.....##.##........##..##.....##.##.....##....##.....##..##.....##.##.##.##
+  // ..##...##..#########.##........##..##.....##.#########....##.....##..##.....##.##..####
+  // ...##.##...##.....##.##........##..##.....##.##.....##....##.....##..##.....##.##...###
+  // ....###....##.....##.########.####.########..##.....##....##....####..#######..##....##
+
+  public static function validateJSonAlphaNum($value, $argName = 'unknown')
+  {
+    if (is_array($value)) {
+      foreach ($value as $key => $v) {
+        Utils::validateJSonAlphaNum($key, $argName);
+        Utils::validateJSonAlphaNum($v, $argName);
+      }
+      return true;
+    }
+    if (is_int($value)) {
+      return true;
+    }
+    $bValid = preg_match("/^[_0-9a-zA-Z- ]*$/", $value) === 1;
+    if (!$bValid) {
+      throw new BgaSystemException("Bad value for: $argName", true, true, FEX_bad_input_argument);
+    }
+    return true;
   }
 }

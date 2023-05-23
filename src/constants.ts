@@ -103,3 +103,9 @@ const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 
  const CARD_ACTIONS_WITH_COST = [TYPE_BETRAY,TYPE_BUILD,TYPE_GIFT];
  const CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE,TYPE_MOVE,TYPE_TAX];
+
+ /**
+  * Class names
+  */
+ const PP_SELECTABLE = 'pp_selectable';
+ const PP_SELECTED = 'pp_selected';

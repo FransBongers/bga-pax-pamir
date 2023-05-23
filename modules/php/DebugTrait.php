@@ -16,9 +16,28 @@ use PaxPamir\Models\Player;
 
 trait DebugTrait
 {
+  function debugSetupCourt()
+  {
+    $this->debugAddCardToCourt('card_32');
+    $this->debugAddCardToCourt('card_19');
+    $this->debugAddCardToCourt('card_27','2371052');
+    $this->debugAddCardToCourt('card_52','2371052');
+  }
+
+  function debugSetupTokens()
+  {
+    $this->debugCreateArmy(KABUL);
+    $this->debugCreateArmy(PERSIA);
+    $this->debugCreateRoad('herat_kabul');
+    $this->debugCreateRoad('herat_persia');
+    $this->debugCreateRoad('kabul_punjab');
+    $this->debugCreateSpy('card_32');
+    $this->debugCreateSpy('card_27');
+  }
+
   function test()
   {
-    Notifications::log('test DebugTrait', ['whoop']);
+
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)

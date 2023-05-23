@@ -19,10 +19,6 @@ var discardCardAnimation = function (_a) {
     });
     animation.play();
 };
-/**
- * This method will attach mobile to a new_parent without destroying, unlike original attachToNewParent which destroys mobile and
- * all its connectors (onClick, etc)
- */
 var attachToNewParentNoDestroy = function (mobileEltId, newParentId, pos, placePosition) {
     var mobile = $(mobileEltId);
     var new_parent = $(newParentId);
@@ -30,7 +26,7 @@ var attachToNewParentNoDestroy = function (mobileEltId, newParentId, pos, placeP
     if (placePosition)
         mobile.style.position = placePosition;
     dojo.place(mobile, new_parent, pos);
-    mobile.offsetTop; //force re-flow
+    mobile.offsetTop;
     var tgt = dojo.position(mobile);
     var box = dojo.marginBox(mobile);
     var cbox = dojo.contentBox(mobile);
@@ -41,11 +37,10 @@ var attachToNewParentNoDestroy = function (mobileEltId, newParentId, pos, placeP
     mobile.style.top = top + 'px';
     box.l += box.w - cbox.w;
     box.t += box.h - cbox.h;
-    mobile.offsetTop; //force re-flow
+    mobile.offsetTop;
     return box;
 };
 var isFastMode = function () {
-    // return this.instantaneousMode;
     return false;
 };
 var slide = function (_a) {
@@ -54,41 +49,30 @@ var slide = function (_a) {
     var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true, zIndex: null }, options);
     config.phantomStart = config.phantomStart || config.phantom;
     config.phantomEnd = config.phantomEnd || config.phantom;
-    // Mobile elt
     mobileElt = $(mobileElt);
     var mobile = mobileElt;
-    // Target elt
     targetElt = $(targetElt);
     var targetId = targetElt;
     var newParent = config.attach ? targetId : $(mobile).parentNode;
-    // Handle fast mode
     if (isFastMode() && (config.destroy || config.clearPos)) {
         if (config.destroy)
             dojo.destroy(mobile);
         else
             dojo.place(mobile, targetElt);
         return new Promise(function (resolve, reject) {
-            // @ts-ignore
             resolve();
         });
     }
-    // Handle phantom at start
     if (config.phantomStart && config.from == null) {
         mobile = dojo.clone(mobileElt);
-        // @ts-ignore
         dojo.attr(mobile, 'id', mobileElt.id + '_animated');
         dojo.place(mobile, 'game_play_area');
-        // @ts-ignore
         game.framework().placeOnObject(mobile, mobileElt);
         dojo.addClass(mobileElt, 'phantom');
         config.from = mobileElt;
     }
-    // Handle phantom at end
-    // @ts-ignore
     if (config.phantomEnd) {
-        // @ts-ignore
         targetId = dojo.clone(mobileElt);
-        // @ts-ignore
         dojo.attr(targetId, 'id', mobileElt.id + '_afterSlide');
         dojo.addClass(targetId, 'phantom');
         if (config.beforeBrother != null) {
@@ -111,14 +95,12 @@ var slide = function (_a) {
         dojo.connect(animation, 'onEnd', function () {
             dojo.style(mobile, 'zIndex', null);
             dojo.removeClass(mobile, config.className);
-            // @ts-ignore
             if (config.phantomStart) {
                 dojo.place(mobileElt, mobile, 'replace');
                 dojo.removeClass(mobileElt, 'phantom');
                 mobile = mobileElt;
             }
             if (config.changeParent) {
-                // @ts-ignore
                 if (config.phantomEnd)
                     dojo.place(mobile, targetId, 'replace');
                 else
@@ -128,7 +110,6 @@ var slide = function (_a) {
                 dojo.destroy(mobile);
             if (config.clearPos && !config.destroy)
                 dojo.style(mobile, { top: null, left: null, position: null });
-            // @ts-ignore
             resolve();
         });
         animation.play();
@@ -161,21 +142,17 @@ var changeParent = function (mobile, new_parent, relation) {
     var left = box.l + src.x - tgt.x;
     var top = box.t + src.y - tgt.y;
     positionObjectDirectly(mobile, left, top);
-    // @ts-ignore
     box.l += box.w - cbox.w;
-    // @ts-ignore
     box.t += box.h - cbox.h;
     return box;
 };
 var positionObjectDirectly = function (mobileObj, x, y) {
-    // do not remove this "dead" code some-how it makes difference
-    dojo.style(mobileObj, 'left'); // bug? re-compute style
-    // console.log("place " + x + "," + y);
+    dojo.style(mobileObj, 'left');
     dojo.style(mobileObj, {
         left: x + 'px',
         top: y + 'px',
     });
-    dojo.style(mobileObj, 'left'); // bug? re-compute style
+    dojo.style(mobileObj, 'left');
 };
 var LOG_TOKEN_ARMY = 'army';
 var LOG_TOKEN_CARD = 'card';
@@ -185,6 +162,7 @@ var LOG_TOKEN_CYLINDER = 'cylinder';
 var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
 var LOG_TOKEN_LARGE_CARD = 'largeCard';
 var LOG_TOKEN_LEVERAGE = 'leverage';
+var LOG_TOKEN_NEW_LINE = 'newLine';
 var LOG_TOKEN_PLAYER_NAME = 'playerName';
 var LOG_TOKEN_REGION_NAME = 'regionName';
 var LOG_TOKEN_ROAD = 'road';
@@ -209,15 +187,17 @@ var getLogTokenDiv = function (_a) {
             return tplLogTokenCoalition({ coalition: data });
         case LOG_TOKEN_LEVERAGE:
             return tplLogTokenLeverage();
-        case LOG_TOKEN_ROAD:
-            return tplLogTokenRoad({ coalition: data });
+        case LOG_TOKEN_NEW_LINE:
+            return '<br>';
         case LOG_TOKEN_PLAYER_NAME:
             var player = game.playerManager.getPlayer({ playerId: Number(data) });
             return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
-        case LOG_TOKEN_RUPEE:
-            return tplLogTokenRupee();
         case LOG_TOKEN_REGION_NAME:
             return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
+        case LOG_TOKEN_ROAD:
+            return tplLogTokenRoad({ coalition: data });
+        case LOG_TOKEN_RUPEE:
+            return tplLogTokenRupee();
         default:
             return type;
     }
@@ -268,7 +248,6 @@ var tplLogTokenRoad = function (_a) {
     return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
 };
 var tplLogTokenRupee = function () { return "<div class=\"pp_log_token_rupee pp_log_token\"></div>"; };
-// Client states
 var CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
 var CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
 var CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
@@ -277,7 +256,6 @@ var CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
-// size of tokens
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
 var ARMY_HEIGHT = 40;
@@ -296,21 +274,16 @@ var FAVORED_SUIT_MARKER_WIDTH = 22;
 var FAVORED_SUIT_MARKER_HEIGHT = 50;
 var RULER_TOKEN_WIDTH = 50;
 var RULER_TOKEN_HEIGHT = 50;
-// names etc.
-// card types
 var EVENT_CARD = 'eventCard';
 var COURT_CARD = 'courtCard';
-// suits
 var ECONOMIC = 'economic';
 var MILITARY = 'military';
 var POLITICAL = 'political';
 var INTELLIGENCE = 'intelligence';
-// coalitions
 var AFGHAN = 'afghan';
 var BRITISH = 'british';
 var RUSSIAN = 'russian';
 var COALITIONS = [AFGHAN, BRITISH, RUSSIAN];
-// regions
 var HERAT = 'herat';
 var KABUL = 'kabul';
 var KANDAHAR = 'kandahar';
@@ -318,7 +291,6 @@ var PERSIA = 'persia';
 var PUNJAB = 'punjab';
 var TRANSCASPIA = 'transcaspia';
 var REGIONS = [HERAT, KABUL, KANDAHAR, PERSIA, PUNJAB, TRANSCASPIA];
-// borders (for all borders regions are in alphabetical order)
 var HERAT_KABUL = 'herat_kabul';
 var HERAT_KANDAHAR = 'herat_kandahar';
 var HERAT_PERSIA = 'herat_persia';
@@ -339,7 +311,6 @@ var BORDERS = [
     KANDAHAR_PUNJAB,
     PERSIA_TRANSCASPIA,
 ];
-// impact icons
 var IMPACT_ICON_ROAD = 'road';
 var IMPACT_ICON_ARMY = 'army';
 var IMPACT_ICON_LEVERAGE = 'leverage';
@@ -349,9 +320,6 @@ var IMPACT_ICON_ECONOMIC_SUIT = 'economic';
 var IMPACT_ICON_MILITARY_SUIT = 'military';
 var IMPACT_ICON_POLITICAL_SUIT = 'political';
 var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
-/**
- * Card actions types
- */
 var TYPE_BATTLE = 'battle';
 var TYPE_BETRAY = 'betray';
 var TYPE_BUILD = 'build';
@@ -360,6 +328,8 @@ var TYPE_MOVE = 'move';
 var TYPE_TAX = 'tax';
 var CARD_ACTIONS_WITH_COST = [TYPE_BETRAY, TYPE_BUILD, TYPE_GIFT];
 var CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE, TYPE_MOVE, TYPE_TAX];
+var PP_SELECTABLE = 'pp_selectable';
+var PP_SELECTED = 'pp_selected';
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
@@ -372,12 +342,10 @@ var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
     return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
 };
-// Rupee with counter in right bottom.
 var tplRupeeCount = function (_a) {
     var id = _a.id;
     return "<div id=\"rupees_".concat(id, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_").concat(id, "\" class=\"pp_icon_count\"><span id=\"rupee_count_").concat(id, "_counter\"></span></div></div>");
 };
-// Card background with counter in right bottom
 var tplHandCount = function (_a) {
     var id = _a.id;
     return "<div id=\"cards_".concat(id, "\" class=\"pp_icon pp_card_icon\"><div id=\"card_count_").concat(id, "\" class=\"pp_icon_count\"><span id=\"card_count_").concat(id, "_counter\"></span></div></div>");
@@ -405,54 +373,14 @@ var substituteKeywords = function (_a) {
     console.log('color', playerColor);
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
-// const placeCard = ({ location, id, order = null }) => {
-//   if (order != null) {
-//     location.changeItemsWeight({
-//       [id]: order,
-//     });
-//   }
-//   location.addToStockWithId(id, id, 'pp_market_deck');
-//   // this.setupCardSpyZone({location, cardId: id});
-//   // this.addTooltip( location.getItemDivId(id), id, '' );
-// };
-// TODO(Frans): detereming jstpl based on id?
 var placeToken = function (_a) {
     var game = _a.game, location = _a.location, id = _a.id, jstpl = _a.jstpl, jstplProps = _a.jstplProps, _b = _a.weight, weight = _b === void 0 ? 0 : _b, _c = _a.classes, classes = _c === void 0 ? [] : _c, _d = _a.from, from = _d === void 0 ? null : _d;
-    // console.log('from', from)
     dojo.place(game.framework().format_block(jstpl, jstplProps), from || location.container_div);
     classes.forEach(function (className) {
         dojo.addClass(id, className);
     });
     location.placeInZone(id, weight);
 };
-// // Function to setup stock components for cards
-// const setupCardsStock = ({ game, stock, nodeId, className }: { game: Game; stock: Stock; nodeId: string; className?: string }) => {
-//   const useLargeCards = false;
-//   stock.create(game, $(nodeId), CARD_WIDTH, CARD_HEIGHT);
-//   // const backgroundSize = useLargeCards ? '17550px 209px' : '17700px';
-//   const backgroundSize = useLargeCards ? '11700% 100%' : '11800% 100%';
-//   stock.image_items_per_row = useLargeCards ? 117 : 118;
-//   stock.item_margin = 10;
-//   // TODO: below is option to customize the created div (and add zones to card for example)
-//   stock.jstpl_stock_item =
-//     '<div id="${id}" class="stockitem pp_card ' +
-//     className +
-//     '" \
-//               style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;z-index:${position};background-size:' +
-//     backgroundSize +
-//     ";\
-//               background-image:url('${image}');\"></div>";
-//   Object.keys(game.gamedatas.cards).forEach((cardId) => {
-//     const cardFileLocation = useLargeCards
-//       ? g_gamethemeurl + 'img/temp/cards/cards_tileset_original_495_692.jpg'
-//       : g_gamethemeurl + 'img/temp/cards_medium/cards_tileset_medium_215_300.jpg';
-//     stock.addItemType(cardId, 0, cardFileLocation, useLargeCards ? Number(cardId.split('_')[1]) - 1 : Number(cardId.split('_')[1]));
-//   });
-//   stock.extraClasses = `pp_card ${className}`;
-//   stock.setSelectionMode(0);
-//   stock.onItemCreate = dojo.hitch(game, 'setupNewCard');
-// };
-// Function to set up zones for tokens (armies, tribes, cylinders etc.)
 var setupTokenZone = function (_a) {
     var game = _a.game, zone = _a.zone, nodeId = _a.nodeId, tokenWidth = _a.tokenWidth, tokenHeight = _a.tokenHeight, _b = _a.itemMargin, itemMargin = _b === void 0 ? null : _b, _c = _a.instantaneous, instantaneous = _c === void 0 ? false : _c, _d = _a.pattern, pattern = _d === void 0 ? null : _d, _e = _a.customPattern, customPattern = _e === void 0 ? null : _e;
     zone.create(game, nodeId, tokenWidth, tokenHeight);
@@ -575,21 +503,7 @@ var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
     return tplCardTooltipContainer({ cardId: cardId, content: "\n    <span class=\"title\">".concat(_('If discarded'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.discarded.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.discarded.description || '', "</span>\n    <span class=\"title\" style=\"margin-top: 32px;\">").concat(_('If purchased'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.purchased.description || '', "</span>\n  ") });
 };
-//  .########..#######...#######..##.......########.####.########.      
-//  ....##....##.....##.##.....##.##..........##.....##..##.....##      
-//  ....##....##.....##.##.....##.##..........##.....##..##.....##      
-//  ....##....##.....##.##.....##.##..........##.....##..########.      
-//  ....##....##.....##.##.....##.##..........##.....##..##.......      
-//  ....##....##.....##.##.....##.##..........##.....##..##.......      
-//  ....##.....#######...#######..########....##....####.##.......      
-//  .##.....##....###....##....##....###.....######...########.########.
-//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
-//  .####.####..##...##..####..##..##...##..##........##.......##.....##
-//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
-//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var PPTooltipManager = /** @class */ (function () {
+var PPTooltipManager = (function () {
     function PPTooltipManager(game) {
         this.game = game;
     }
@@ -607,14 +521,7 @@ var PPTooltipManager = /** @class */ (function () {
     };
     return PPTooltipManager;
 }());
-// .########..####..######...######.....###....########..########.
-// .##.....##..##..##....##.##....##...##.##...##.....##.##.....##
-// .##.....##..##..##.......##........##...##..##.....##.##.....##
-// .##.....##..##...######..##.......##.....##.########..##.....##
-// .##.....##..##........##.##.......#########.##...##...##.....##
-// .##.....##..##..##....##.##....##.##.....##.##....##..##.....##
-// .########..####..######...######..##.....##.##.....##.########.
-var DiscardPile = /** @class */ (function () {
+var DiscardPile = (function () {
     function DiscardPile(_a) {
         var game = _a.game;
         console.log('Constructor DiscardPile');
@@ -632,21 +539,7 @@ var DiscardPile = /** @class */ (function () {
     };
     return DiscardPile;
 }());
-// .########....###....##.....##..#######..########..########.########.
-// .##.........##.##...##.....##.##.....##.##.....##.##.......##.....##
-// .##........##...##..##.....##.##.....##.##.....##.##.......##.....##
-// .######...##.....##.##.....##.##.....##.########..######...##.....##
-// .##.......#########..##...##..##.....##.##...##...##.......##.....##
-// .##.......##.....##...##.##...##.....##.##....##..##.......##.....##
-// .##.......##.....##....###.....#######..##.....##.########.########.
-// ..######..##.....##.####.########
-// .##....##.##.....##..##.....##...
-// .##.......##.....##..##.....##...
-// ..######..##.....##..##.....##...
-// .......##.##.....##..##.....##...
-// .##....##.##.....##..##.....##...
-// ..######...#######..####....##...
-var FavoredSuit = /** @class */ (function () {
+var FavoredSuit = (function () {
     function FavoredSuit(_a) {
         var game = _a.game;
         console.log('Constructor Favored Suit');
@@ -657,7 +550,6 @@ var FavoredSuit = /** @class */ (function () {
         var _this = this;
         var gamedatas = _a.gamedatas;
         this.favoredSuitZones = {};
-        // Setup zones for favored suit marker
         Object.keys(this.game.gamedatas.staticData.suits).forEach(function (suit) {
             _this.favoredSuitZones[suit] = new ebg.zone();
             setupTokenZone({
@@ -673,7 +565,6 @@ var FavoredSuit = /** @class */ (function () {
         placeToken({
             game: this.game,
             location: this.favoredSuitZones[this.favoredSuit],
-            //location: this.favoredSuit['intelligence'], // for testing change of favored suit
             id: "favored_suit_marker",
             jstpl: 'jstpl_favored_suit_marker',
             jstplProps: {
@@ -699,18 +590,10 @@ var FavoredSuit = /** @class */ (function () {
     FavoredSuit.prototype.change = function (_a) {
         var suit = _a.suit;
         this.favoredSuit = suit;
-        // TODO animation    
     };
     return FavoredSuit;
 }());
-// ..######..##.....##.########..########..##.......##....##
-// .##....##.##.....##.##.....##.##.....##.##........##..##.
-// .##.......##.....##.##.....##.##.....##.##.........####..
-// ..######..##.....##.########..########..##..........##...
-// .......##.##.....##.##........##........##..........##...
-// .##....##.##.....##.##........##........##..........##...
-// ..######...#######..##........##........########....##...
-var Supply = /** @class */ (function () {
+var Supply = (function () {
     function Supply(_a) {
         var game = _a.game;
         console.log('Constructor Supply');
@@ -720,9 +603,7 @@ var Supply = /** @class */ (function () {
     Supply.prototype.setup = function (_a) {
         var _this = this;
         var gamedatas = _a.gamedatas;
-        // blocks per coalition (supply)
         this.coalitionBlocks = {};
-        // Setup supply of coalition blocks
         COALITIONS.forEach(function (coalition) {
             _this.coalitionBlocks[coalition] = new ebg.zone();
             setupTokenZone({
@@ -763,14 +644,7 @@ var Supply = /** @class */ (function () {
     };
     return Supply;
 }());
-// .##.....##.########.....########.########.....###.....######..##....##
-// .##.....##.##.....##.......##....##.....##...##.##...##....##.##...##.
-// .##.....##.##.....##.......##....##.....##..##...##..##.......##..##..
-// .##.....##.########........##....########..##.....##.##.......#####...
-// ..##...##..##..............##....##...##...#########.##.......##..##..
-// ...##.##...##..............##....##....##..##.....##.##....##.##...##.
-// ....###....##..............##....##.....##.##.....##..######..##....##
-var VpTrack = /** @class */ (function () {
+var VpTrack = (function () {
     function VpTrack(_a) {
         var game = _a.game;
         console.log('VpTrack');
@@ -786,7 +660,6 @@ var VpTrack = /** @class */ (function () {
     VpTrack.prototype.setupVpTrack = function (_a) {
         var gamedatas = _a.gamedatas;
         this.vpTrackZones = {};
-        // Create VP track
         for (var i = 0; i <= 23; i++) {
             if (this.vpTrackZones[i]) {
                 this.vpTrackZones[i].removeAll();
@@ -803,7 +676,6 @@ var VpTrack = /** @class */ (function () {
                 this.vpTrackZones[i].setPattern('ellipticalfit');
             }
         }
-        // Add cylinders
         for (var playerId in gamedatas.players) {
             var player = gamedatas.players[playerId];
             var zone = this.getZone(player.score);
@@ -826,21 +698,7 @@ var VpTrack = /** @class */ (function () {
     };
     return VpTrack;
 }());
-//  ..#######..########........##.########..######..########
-//  .##.....##.##.....##.......##.##.......##....##....##...
-//  .##.....##.##.....##.......##.##.......##..........##...
-//  .##.....##.########........##.######...##..........##...
-//  .##.....##.##.....##.##....##.##.......##..........##...
-//  .##.....##.##.....##.##....##.##.......##....##....##...
-//  ..#######..########...######..########..######.....##...
-//  .##.....##....###....##....##....###.....######...########.########.
-//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
-//  .####.####..##...##..####..##..##...##..##........##.......##.....##
-//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
-//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var ObjectManager = /** @class */ (function () {
+var ObjectManager = (function () {
     function ObjectManager(game) {
         console.log('ObjectManager');
         this.game = game;
@@ -864,14 +722,7 @@ var ObjectManager = /** @class */ (function () {
     };
     return ObjectManager;
 }());
-//  .########..##..........###....##....##.########.########.
-//  .##.....##.##.........##.##....##..##..##.......##.....##
-//  .##.....##.##........##...##....####...##.......##.....##
-//  .########..##.......##.....##....##....######...########.
-//  .##........##.......#########....##....##.......##...##..
-//  .##........##.......##.....##....##....##.......##....##.
-//  .##........########.##.....##....##....########.##.....##
-var PPPlayer = /** @class */ (function () {
+var PPPlayer = (function () {
     function PPPlayer(_a) {
         var game = _a.game, player = _a.player;
         this.gifts = {};
@@ -887,7 +738,6 @@ var PPPlayer = /** @class */ (function () {
             rupees: new ebg.counter(),
             rupeesTableau: new ebg.counter(),
         };
-        // console.log("Player", player);
         this.game = game;
         var playerId = player.id;
         this.playerId = Number(playerId);
@@ -897,13 +747,6 @@ var PPPlayer = /** @class */ (function () {
         var gamedatas = game.gamedatas;
         this.setupPlayer({ gamedatas: gamedatas });
     }
-    // ..######..########.########.##.....##.########.
-    // .##....##.##..........##....##.....##.##.....##
-    // .##.......##..........##....##.....##.##.....##
-    // ..######..######......##....##.....##.########.
-    // .......##.##..........##....##.....##.##.......
-    // .##....##.##..........##....##.....##.##.......
-    // ..######..########....##.....#######..##.......
     PPPlayer.prototype.updatePlayer = function (_a) {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
@@ -914,7 +757,6 @@ var PPPlayer = /** @class */ (function () {
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
-    // Setup functions
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
@@ -940,7 +782,6 @@ var PPPlayer = /** @class */ (function () {
             _this.setupCourtCard({ cardId: cardId });
             _this.court.placeInZone(cardId, card.state);
             _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-            // Add spies
             (playerGamedatas.court.spies[cardId] || []).forEach(function (cylinder) {
                 var playerId = cylinder.id.split('_')[1];
                 placeToken({
@@ -970,7 +811,6 @@ var PPPlayer = /** @class */ (function () {
             itemMargin: 8,
         });
         this.cylinders.instantaneous = true;
-        // Add cylinders to zone
         playerGamedatas.cylinders.forEach(function (cylinder) {
             placeToken({
                 game: _this.game,
@@ -989,7 +829,6 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.setupGifts = function (_a) {
         var _this = this;
         var playerGamedatas = _a.playerGamedatas;
-        // Set up gift zones
         ['2', '4', '6'].forEach(function (value) {
             _this.gifts[value] = new ebg.zone();
             setupTokenZone({
@@ -998,14 +837,12 @@ var PPPlayer = /** @class */ (function () {
                 nodeId: "pp_gift_".concat(value, "_zone_").concat(_this.playerId),
                 tokenWidth: 40,
                 tokenHeight: 40,
-                // itemMargin: 10,
                 pattern: 'custom',
                 customPattern: function () {
                     return { x: 5, y: 5, w: 30, h: 30 };
                 },
             });
         });
-        // Add gifts to zones
         var playerGifts = playerGamedatas.gifts;
         Object.keys(playerGifts).forEach(function (giftValue) {
             Object.keys(playerGifts[giftValue]).forEach(function (cylinderId) {
@@ -1046,11 +883,9 @@ var PPPlayer = /** @class */ (function () {
     };
     PPPlayer.prototype.setupPlayerPanel = function (_a) {
         var playerGamedatas = _a.playerGamedatas;
-        // Set up panels
         var player_board_div = $('player_board_' + this.playerId);
         dojo.place(this.game.format_block('jstpl_player_board', __assign(__assign({}, this.player), { p_color: this.playerColor })), player_board_div);
         $("cylinders_".concat(this.playerId)).classList.add("pp_player_color_".concat(this.playerColor));
-        // TODO: check how player loyalty is returned with new setup. Seems to be empty string?
         if (this.player.loyalty && this.player.loyalty !== 'null') {
             this.updatePlayerLoyalty({ coalition: this.player.loyalty });
         }
@@ -1069,7 +904,6 @@ var PPPlayer = /** @class */ (function () {
     PPPlayer.prototype.updatePlayerPanel = function (_a) {
         var playerGamedatas = _a.playerGamedatas;
         var counts = playerGamedatas.counts;
-        // Set all values in player panels
         if (this.player.loyalty && this.player.loyalty !== 'null') {
             this.counters.influence.setValue(playerGamedatas.counts.influence);
         }
@@ -1092,14 +926,7 @@ var PPPlayer = /** @class */ (function () {
         this.prizes = new ebg.zone();
         this.prizes.create(this.game, "pp_prizes_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
         this.prizes.setPattern('verticalfit');
-        // const node = dojo.byId(`pp_prizes_${this.playerId}`);
         var numberOfPrizes = playerGamedatas.prizes.length;
-        // if (numberOfPrizes > 0) {
-        //   // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
-        //   // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
-        //   dojo.style(node, 'margin-bottom', `-194px`);
-        //   dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
-        // }
         this.updatePrizesStyle({ numberOfPrizes: numberOfPrizes });
         this.prizes.instantaneous = true;
         playerGamedatas.prizes.forEach(function (card) {
@@ -1113,8 +940,6 @@ var PPPlayer = /** @class */ (function () {
         var numberOfPrizes = _a.numberOfPrizes;
         if (numberOfPrizes > 0) {
             var node = dojo.byId("pp_prizes_".concat(this.playerId));
-            // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
-            // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
             dojo.style(node, 'margin-bottom', "-194px");
             dojo.style(node, 'height', "".concat(CARD_HEIGHT + (numberOfPrizes - 1) * 25, "px"));
         }
@@ -1124,7 +949,6 @@ var PPPlayer = /** @class */ (function () {
         var gamedatas = _a.gamedatas;
         if (!this.rulerTokens) {
             this.rulerTokens = new ebg.zone();
-            // Create rulerTokens zone
             setupTokenZone({
                 game: this.game,
                 zone: this.rulerTokens,
@@ -1174,20 +998,6 @@ var PPPlayer = /** @class */ (function () {
             _this.gifts[value] = undefined;
         });
     };
-    // ..######...########.########.########.########.########...######.
-    // .##....##..##..........##.......##....##.......##.....##.##....##
-    // .##........##..........##.......##....##.......##.....##.##......
-    // .##...####.######......##.......##....######...########...######.
-    // .##....##..##..........##.......##....##.......##...##.........##
-    // .##....##..##..........##.......##....##.......##....##..##....##
-    // ..######...########....##.......##....########.##.....##..######.
-    // ..######..########.########.########.########.########...######.
-    // .##....##.##..........##.......##....##.......##.....##.##....##
-    // .##.......##..........##.......##....##.......##.....##.##......
-    // ..######..######......##.......##....######...########...######.
-    // .......##.##..........##.......##....##.......##...##.........##
-    // .##....##.##..........##.......##....##.......##....##..##....##
-    // ..######..########....##.......##....########.##.....##..######.
     PPPlayer.prototype.getColor = function () {
         return this.playerColor;
     };
@@ -1270,13 +1080,6 @@ var PPPlayer = /** @class */ (function () {
                 this.counters[counter].incValue(value);
         }
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     PPPlayer.prototype.addSideSelectToCourt = function () {
         this.court.instantaneous = true;
         dojo.place(tplCardSelect({ side: 'left' }), "pp_court_player_".concat(this.playerId));
@@ -1289,21 +1092,11 @@ var PPPlayer = /** @class */ (function () {
         this.court.removeFromZone('pp_card_select_right', true);
         this.court.instantaneous = false;
     };
-    // ....###.....######..########.####..#######..##....##..######.
-    // ...##.##...##....##....##.....##..##.....##.###...##.##....##
-    // ..##...##..##..........##.....##..##.....##.####..##.##......
-    // .##.....##.##..........##.....##..##.....##.##.##.##..######.
-    // .#########.##..........##.....##..##.....##.##..####.......##
-    // .##.....##.##....##....##.....##..##.....##.##...###.##....##
-    // .##.....##..######.....##....####..#######..##....##..######.
     PPPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId;
-        // // Move all spies back to cylinder pools if there are any
-        // this.game.returnSpiesFromCard({ cardId });
         var node = dojo.byId(cardId);
         node.classList.remove('pp_card_in_court');
         node.classList.remove("pp_player_".concat(this.playerId));
-        // Move card to discard pile
         this.court.removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
     };
@@ -1321,7 +1114,6 @@ var PPPlayer = /** @class */ (function () {
         var cardId = _a.cardId;
         var node = dojo.byId(cardId);
         node.classList.remove('pp_prize');
-        // Move card to discard pile
         this.prizes.removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
     };
@@ -1330,7 +1122,6 @@ var PPPlayer = /** @class */ (function () {
         var playerId = _a.playerId, rupees = _a.rupees;
         dojo.place(tplRupee({ rupeeId: 'tempRupee' }), "rupees_".concat(this.playerId));
         attachToNewParentNoDestroy('tempRupee', "rupees_".concat(playerId));
-        // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
         var animation = this.game.framework().slideToObject('tempRupee', "rupees_".concat(playerId));
         dojo.connect(animation, 'onEnd', function () {
             _this.incCounter({ counter: 'rupees', value: -rupees });
@@ -1398,11 +1189,9 @@ var PPPlayer = /** @class */ (function () {
             to: this.getPrizeZone(),
             addClass: ['pp_prize'],
             removeClass: ['pp_card_in_court', "pp_player_".concat(cardOwnerId)],
-            // weight,
         });
         this.incCounter({ counter: 'influence', value: 1 });
     };
-    // TODO (remove cards of other loyalties, remove gifts, remove prizes)
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
         var coalition = _a.coalition;
         this.loyalty = coalition;
@@ -1421,31 +1210,15 @@ var PPPlayer = /** @class */ (function () {
     };
     return PPPlayer;
 }());
-//  .########..##..........###....##....##.########.########.
-//  .##.....##.##.........##.##....##..##..##.......##.....##
-//  .##.....##.##........##...##....####...##.......##.....##
-//  .########..##.......##.....##....##....######...########.
-//  .##........##.......#########....##....##.......##...##..
-//  .##........##.......##.....##....##....##.......##....##.
-//  .##........########.##.....##....##....########.##.....##
-//  .##.....##....###....##....##....###.....######...########.########.
-//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
-//  .####.####..##...##..####..##..##...##..##........##.......##.....##
-//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
-//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var PlayerManager = /** @class */ (function () {
+var PlayerManager = (function () {
     function PlayerManager(game) {
         console.log('Constructor PlayerManager');
         this.game = game;
         this.players = {};
         for (var playerId in game.gamedatas.players) {
             var player = game.gamedatas.players[playerId];
-            // console.log("playerManager", playerId, player);
             this.players[playerId] = new PPPlayer({ player: player, game: this.game });
         }
-        // console.log("players", this.players);
     }
     PlayerManager.prototype.getPlayer = function (_a) {
         var playerId = _a.playerId;
@@ -1471,14 +1244,7 @@ var PlayerManager = /** @class */ (function () {
     };
     return PlayerManager;
 }());
-// .########...#######..########..########..########.########.
-// .##.....##.##.....##.##.....##.##.....##.##.......##.....##
-// .##.....##.##.....##.##.....##.##.....##.##.......##.....##
-// .########..##.....##.########..##.....##.######...########.
-// .##.....##.##.....##.##...##...##.....##.##.......##...##..
-// .##.....##.##.....##.##....##..##.....##.##.......##....##.
-// .########...#######..##.....##.########..########.##.....##
-var Border = /** @class */ (function () {
+var Border = (function () {
     function Border(_a) {
         var game = _a.game, border = _a.border;
         this.game = game;
@@ -1512,10 +1278,6 @@ var Border = /** @class */ (function () {
     Border.prototype.createBorderZone = function (_a) {
         var border = _a.border, zone = _a.zone;
         zone.create(this.game, "pp_".concat(border, "_border"), ROAD_WIDTH, ROAD_HEIGHT);
-        // this[`${border}_border`].item_margin = -10;
-        // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-        // TODO (Frans): at some point we need to update this so it looks nice,
-        // probably do a lot more custom
         var borderPattern = {
             herat_kabul: 'horizontalfit',
             herat_kandahar: 'verticalfit',
@@ -1563,13 +1325,10 @@ var Border = /** @class */ (function () {
     Border.prototype.getRoadZone = function () {
         return this.roadZone;
     };
-    // .##.....##.########.####.##.......####.########.##....##
-    // .##.....##....##.....##..##........##.....##.....##..##.
-    // .##.....##....##.....##..##........##.....##......####..
-    // .##.....##....##.....##..##........##.....##.......##...
-    // .##.....##....##.....##..##........##.....##.......##...
-    // .##.....##....##.....##..##........##.....##.......##...
-    // ..#######.....##....####.########.####....##.......##...
+    Border.prototype.getCoalitionRoads = function (_a) {
+        var coalitionId = _a.coalitionId;
+        return this.roadZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
+    };
     Border.prototype.getEnemyRoads = function (_a) {
         var coalitionId = _a.coalitionId;
         return this.roadZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
@@ -1597,13 +1356,6 @@ var Border = /** @class */ (function () {
     };
     return Border;
 }());
-// .########..########..######...####..#######..##....##
-// .##.....##.##.......##....##...##..##.....##.###...##
-// .##.....##.##.......##.........##..##.....##.####..##
-// .########..######...##...####..##..##.....##.##.##.##
-// .##...##...##.......##....##...##..##.....##.##..####
-// .##....##..##.......##....##...##..##.....##.##...###
-// .##.....##.########..######...####..#######..##....##
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -1613,21 +1365,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-var Region = /** @class */ (function () {
+var Region = (function () {
     function Region(_a) {
         var game = _a.game, region = _a.region;
-        // console.log('constructor Region ', region);
         this.game = game;
         this.region = region;
         this.setupRegion({ gamedatas: game.gamedatas });
     }
-    // ..######..########.########.##.....##.########.
-    // .##....##.##..........##....##.....##.##.....##
-    // .##.......##..........##....##.....##.##.....##
-    // ..######..######......##....##.....##.########.
-    // .......##.##..........##....##.....##.##.......
-    // .##....##.##..........##....##.....##.##.......
-    // ..######..########....##.....#######..##.......
     Region.prototype.setupRegion = function (_a) {
         var gamedatas = _a.gamedatas;
         var regionGamedatas = gamedatas.map.regions[this.region];
@@ -1643,7 +1387,6 @@ var Region = /** @class */ (function () {
         if (!this.armyZone) {
             this.armyZone = new ebg.zone();
         }
-        // Setup army zone
         setupTokenZone({
             game: this.game,
             zone: this.armyZone,
@@ -1653,7 +1396,6 @@ var Region = /** @class */ (function () {
             itemMargin: -5,
         });
         this.armyZone.instantaneous = true;
-        // place armies
         regionGamedatas.armies.forEach(function (_a) {
             var id = _a.id;
             placeToken({
@@ -1674,7 +1416,6 @@ var Region = /** @class */ (function () {
         if (!this.rulerZone) {
             this.rulerZone = new ebg.zone();
         }
-        // Ruler
         setupTokenZone({
             game: this.game,
             zone: this.rulerZone,
@@ -1704,7 +1445,6 @@ var Region = /** @class */ (function () {
         if (!this.tribeZone) {
             this.tribeZone = new ebg.zone();
         }
-        // tribe zone
         setupTokenZone({
             game: this.game,
             zone: this.tribeZone,
@@ -1714,7 +1454,6 @@ var Region = /** @class */ (function () {
             itemMargin: 12,
         });
         this.tribeZone.instantaneous = true;
-        // tribes
         regionGamedatas.tribes.forEach(function (_a) {
             var id = _a.id;
             placeToken({
@@ -1738,20 +1477,6 @@ var Region = /** @class */ (function () {
         dojo.empty(this.tribeZone.container_div);
         this.tribeZone = undefined;
     };
-    // ..######...########.########.########.########.########.
-    // .##....##..##..........##.......##....##.......##.....##
-    // .##........##..........##.......##....##.......##.....##
-    // .##...####.######......##.......##....######...########.
-    // .##....##..##..........##.......##....##.......##...##..
-    // .##....##..##..........##.......##....##.......##....##.
-    // ..######...########....##.......##....########.##.....##
-    // ..######..########.########.########.########.########.
-    // .##....##.##..........##.......##....##.......##.....##
-    // .##.......##..........##.......##....##.......##.....##
-    // ..######..######......##.......##....######...########.
-    // .......##.##..........##.......##....##.......##...##..
-    // .##....##.##..........##.......##....##.......##....##.
-    // ..######..########....##.......##....########.##.....##
     Region.prototype.getArmyZone = function () {
         return this.armyZone;
     };
@@ -1779,13 +1504,6 @@ var Region = /** @class */ (function () {
     Region.prototype.getTribeZone = function () {
         return this.tribeZone;
     };
-    // .##.....##.########.####.##.......####.########.##....##
-    // .##.....##....##.....##..##........##.....##.....##..##.
-    // .##.....##....##.....##..##........##.....##......####..
-    // .##.....##....##.....##..##........##.....##.......##...
-    // .##.....##....##.....##..##........##.....##.......##...
-    // .##.....##....##.....##..##........##.....##.......##...
-    // ..#######.....##....####.########.####....##.......##...
     Region.prototype.addTempArmy = function (_a) {
         var coalition = _a.coalition, index = _a.index;
         this.armyZone.instantaneous = true;
@@ -1803,15 +1521,18 @@ var Region = /** @class */ (function () {
         });
         this.armyZone.instantaneous = false;
     };
-    Region.prototype.removeTempArmy = function (_a) {
-        var index = _a.index;
-        this.armyZone.removeFromZone("temp_army_".concat(index), true);
+    Region.prototype.getCoalitionArmies = function (_a) {
+        var coalitionId = _a.coalitionId;
+        return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
     };
     Region.prototype.getEnemyArmies = function (_a) {
         var coalitionId = _a.coalitionId;
         return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
     };
     ;
+    Region.prototype.getEnemyPieces = function (args) {
+        return __spreadArray(__spreadArray(__spreadArray([], this.getEnemyArmies(args), true), this.getEnemyRoads(args), true), this.getEnemyTribes(args), true);
+    };
     Region.prototype.getEnemyRoads = function (_a) {
         var _this = this;
         var coalitionId = _a.coalitionId;
@@ -1830,29 +1551,28 @@ var Region = /** @class */ (function () {
             return coalitionId !== _this.game.playerManager.getPlayer({ playerId: playerId }).getLoyalty();
         });
     };
-    /**
-     * Returns enemy pieces.
-     * Enemy pieces are
-     * - armies and roads of other coalition
-     * - tribes of player loyal to other coalition
-     */
-    Region.prototype.getEnemyPieces = function (args) {
-        return __spreadArray(__spreadArray(__spreadArray([], this.getEnemyArmies(args), true), this.getEnemyRoads(args), true), this.getEnemyTribes(args), true);
+    Region.prototype.removeTempArmy = function (_a) {
+        var index = _a.index;
+        this.armyZone.removeFromZone("temp_army_".concat(index), true);
     };
-    Region.prototype.getCoalitionArmies = function (_a) {
-        var coalitionId = _a.coalitionId;
-        return this.armyZone.getAllItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
+    Region.prototype.setSelectable = function (_a) {
+        var _this = this;
+        var callback = _a.callback;
+        var element = document.getElementById("pp_region_".concat(this.region));
+        if (element) {
+            element.classList.add('pp_selectable');
+            this.game._connections.push(dojo.connect(element, 'onclick', this, function () { return callback({ regionId: _this.region }); }));
+        }
+    };
+    Region.prototype.clearSelectable = function () {
+        var element = document.getElementById("pp_region_".concat(this.region));
+        if (element) {
+            element.classList.remove('pp_selectable');
+        }
     };
     return Region;
 }());
-// .##.....##....###....########.....##.....##....###....##....##....###.....######...########.########.
-// .###...###...##.##...##.....##....###...###...##.##...###...##...##.##...##....##..##.......##.....##
-// .####.####..##...##..##.....##....####.####..##...##..####..##..##...##..##........##.......##.....##
-// .##.###.##.##.....##.########.....##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-// .##.....##.#########.##...........##.....##.#########.##..####.#########.##....##..##.......##...##..
-// .##.....##.##.....##.##...........##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-// .##.....##.##.....##.##...........##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var PPMap = /** @class */ (function () {
+var PPMap = (function () {
     function PPMap(game) {
         var _this = this;
         this.game = game;
@@ -1890,16 +1610,23 @@ var PPMap = /** @class */ (function () {
         var region = _a.region;
         return this.regions[region];
     };
+    PPMap.prototype.setSelectable = function () {
+        var container = document.getElementById("pp_map_areas");
+        container.classList.add('pp_selectable');
+    };
+    PPMap.prototype.clearSelectable = function () {
+        var _this = this;
+        REGIONS.forEach(function (region) {
+            _this.regions[region].clearSelectable();
+        });
+        var mapArea = document.getElementById('pp_map_areas');
+        if (mapArea) {
+            mapArea.classList.remove('pp_selectable');
+        }
+    };
     return PPMap;
 }());
-//  .##.....##....###....########..##....##.########.########
-//  .###...###...##.##...##.....##.##...##..##..........##...
-//  .####.####..##...##..##.....##.##..##...##..........##...
-//  .##.###.##.##.....##.########..#####....######......##...
-//  .##.....##.#########.##...##...##..##...##..........##...
-//  .##.....##.##.....##.##....##..##...##..##..........##...
-//  .##.....##.##.....##.##.....##.##....##.########....##...
-var Market = /** @class */ (function () {
+var Market = (function () {
     function Market(game) {
         this.game = game;
         this.marketCards = [];
@@ -1910,7 +1637,6 @@ var Market = /** @class */ (function () {
     Market.prototype.setupMarket = function (_a) {
         var gamedatas = _a.gamedatas;
         console.log('marketCards', this.marketCards);
-        // Set up market
         for (var row = 0; row <= 1; row++) {
             if (!this.marketCards[row]) {
                 this.marketCards[row] = [];
@@ -1930,14 +1656,12 @@ var Market = /** @class */ (function () {
         dojo.place("<div id=\"pp_market_".concat(row, "_").concat(column, "_rupees\" class=\"pp_market_rupees\"></div>"), containerId);
         if (this.marketCards[row][column]) {
             this.marketCards[row][column].removeAll();
-            // return;
         }
         else {
             this.marketCards[row][column] = new ebg.zone();
             this.marketCards[row][column].create(this.game, containerId, CARD_WIDTH, CARD_HEIGHT);
         }
         this.marketCards[row][column].instantaneous = true;
-        // add cards
         var cardInMarket = gamedatas.market.cards[row][column];
         if (cardInMarket) {
             var cardId = cardInMarket.id;
@@ -1950,7 +1674,6 @@ var Market = /** @class */ (function () {
     Market.prototype.setupMarketRupeeZone = function (_a) {
         var _this = this;
         var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
-        // Set up zone for all rupees in the market
         var rupeeContainerId = "pp_market_".concat(row, "_").concat(column, "_rupees");
         if (this.marketRupees[row][column]) {
             this.marketRupees[row][column].removeAll();
@@ -2026,9 +1749,6 @@ var Market = /** @class */ (function () {
         this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
         this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
-    /**
-     * Move card and all rupees on it.
-     */
     Market.prototype.moveCard = function (_a) {
         var _this = this;
         var cardId = _a.cardId, from = _a.from, to = _a.to;
@@ -2037,8 +1757,6 @@ var Market = /** @class */ (function () {
             from: this.getMarketCardZone({ row: from.row, column: from.column }),
             to: this.getMarketCardZone({ row: to.row, column: to.column }),
         });
-        // TODO (Frans): check why in case of moving multiple rupees at the same time
-        // they overlap
         this.getMarketRupeesZone({ row: from.row, column: from.column })
             .getAllItems()
             .forEach(function (rupeeId) {
@@ -2052,14 +1770,12 @@ var Market = /** @class */ (function () {
     };
     Market.prototype.discardCard = function (_a) {
         var cardId = _a.cardId, row = _a.row, column = _a.column;
-        // Move card to discard pile
         this.getMarketCardZone({ row: row, column: column }).removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
-        // this.game.framework().slideToObject(cardId, 'pp_discard_pile').play();
     };
     return Market;
 }());
-var ClientCardActionBattleState = /** @class */ (function () {
+var ClientCardActionBattleState = (function () {
     function ClientCardActionBattleState(game) {
         this.game = game;
     }
@@ -2069,20 +1785,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBattleState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionBattleState.prototype.updateInterfaceInitialStep = function () {
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
@@ -2138,13 +1840,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
         dojo.addClass('confirm_btn', 'disabled');
         this.game.addCancelButton();
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     ClientCardActionBattleState.prototype.confirmBattle = function () {
         debug('confirmBattle');
         var pieces = [];
@@ -2162,9 +1857,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
             });
         }
     };
-    /**
-     * For all court cards check if there are own and enemy spies
-     */
     ClientCardActionBattleState.prototype.getCourtCardBattleSites = function () {
         var _this = this;
         var battleSites = [];
@@ -2213,8 +1905,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
         var pieces = _a.pieces;
         pieces.forEach(function (pieceId) {
             dojo.query("#".concat(pieceId)).forEach(function (node, index) {
-                // const cardId = 'card_' + node.id.split('_')[1];
-                // console.log('cardId in courtcardselect', cardId);
                 dojo.addClass(node, 'pp_selectable');
                 _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.handlePieceClicked({ pieceId: pieceId }); }));
             });
@@ -2223,7 +1913,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
     ClientCardActionBattleState.prototype.setLocationsSelectable = function () {
         var _this = this;
         debug('setLocationsSelectable');
-        // Regions
         var container = document.getElementById("pp_map_areas");
         container.classList.add('pp_selectable');
         REGIONS.forEach(function (regionId) {
@@ -2240,7 +1929,6 @@ var ClientCardActionBattleState = /** @class */ (function () {
                 _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceSelectPiecesInRegion({ regionId: regionId }); }));
             }
         });
-        // Court cards
         var courtBattleSites = this.getCourtCardBattleSites();
         courtBattleSites.forEach(function (cardId) {
             dojo.query("#".concat(cardId)).forEach(function (node, index) {
@@ -2268,7 +1956,7 @@ var ClientCardActionBattleState = /** @class */ (function () {
     };
     return ClientCardActionBattleState;
 }());
-var ClientCardActionBetrayState = /** @class */ (function () {
+var ClientCardActionBetrayState = (function () {
     function ClientCardActionBetrayState(game) {
         this.game = game;
     }
@@ -2278,27 +1966,8 @@ var ClientCardActionBetrayState = /** @class */ (function () {
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBetrayState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionBetrayState.prototype.updateInterfaceInitialStep = function () {
         this.game.clearPossible();
-        /**
-         * 1. Get all courtcards with spy of active player
-         * 2. Set selecteable
-         * 3. Ask for confirmatiom
-         */
         this.game.clientUpdatePageTitle({
             text: _('${you} must select a court card to betray'),
             args: {
@@ -2353,14 +2022,6 @@ var ClientCardActionBetrayState = /** @class */ (function () {
         });
         this.game.addCancelButton();
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
-    // TODO (centralize spy functionality)
     ClientCardActionBetrayState.prototype.getSpies = function (_a) {
         var _this = this;
         var cardId = _a.cardId;
@@ -2412,7 +2073,7 @@ var ClientCardActionBetrayState = /** @class */ (function () {
     };
     return ClientCardActionBetrayState;
 }());
-var ClientCardActionBuildState = /** @class */ (function () {
+var ClientCardActionBuildState = (function () {
     function ClientCardActionBuildState(game) {
         this.game = game;
     }
@@ -2425,26 +2086,9 @@ var ClientCardActionBuildState = /** @class */ (function () {
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionBuildState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
-        // Determine max numner of items player can build based on number of rupees
-        // Set regions selectable where player is ruler
-        // Let player select roads / armies
         this.updatePageTitle();
         this.setLocationsSelectable();
         this.game.addPrimaryActionButton({
@@ -2478,20 +2122,6 @@ var ClientCardActionBuildState = /** @class */ (function () {
             callback: function () { return _this.onCancel(); },
         });
     };
-    // ..######..##.......####..######..##....##
-    // .##....##.##........##..##....##.##...##.
-    // .##.......##........##..##.......##..##..
-    // .##.......##........##..##.......#####...
-    // .##.......##........##..##.......##..##..
-    // .##....##.##........##..##....##.##...##.
-    // ..######..########.####..######..##....##
-    // .##.....##....###....##....##.########..##.......########.########...######.
-    // .##.....##...##.##...###...##.##.....##.##.......##.......##.....##.##....##
-    // .##.....##..##...##..####..##.##.....##.##.......##.......##.....##.##......
-    // .#########.##.....##.##.##.##.##.....##.##.......######...########...######.
-    // .##.....##.#########.##..####.##.....##.##.......##.......##...##.........##
-    // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##..##....##
-    // .##.....##.##.....##.##....##.########..########.########.##.....##..######.
     ClientCardActionBuildState.prototype.onLocationClick = function (_a) {
         var location = _a.location;
         if (this.maxNumberTopPlace - this.tempTokens.length <= 0) {
@@ -2531,13 +2161,6 @@ var ClientCardActionBuildState = /** @class */ (function () {
             this.game.takeAction({ action: 'build', data: { cardId: this.cardId, locations: this.tempTokens.map(function (token) { return token.location; }).join(' ') } });
         }
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     ClientCardActionBuildState.prototype.clearTemporaryTokens = function () {
         var _this = this;
         debug('inside clearTemporaryTokens');
@@ -2555,13 +2178,9 @@ var ClientCardActionBuildState = /** @class */ (function () {
     ClientCardActionBuildState.prototype.setLocationsSelectable = function () {
         var _this = this;
         debug('setRegionsSelectable');
-        // Regions
-        // const container = document.getElementById(`pp_map_areas`);
-        // container.classList.add('pp_selectable');
         REGIONS.forEach(function (regionId) {
             var region = _this.game.map.getRegion({ region: regionId });
             var ruler = region.getRuler();
-            // console.log('region', region, ruler);
             if (ruler !== _this.game.getPlayerId()) {
                 return;
             }
@@ -2593,7 +2212,7 @@ var ClientCardActionBuildState = /** @class */ (function () {
     };
     return ClientCardActionBuildState;
 }());
-var ClientCardActionGiftState = /** @class */ (function () {
+var ClientCardActionGiftState = (function () {
     function ClientCardActionGiftState(game) {
         this.game = game;
     }
@@ -2601,20 +2220,6 @@ var ClientCardActionGiftState = /** @class */ (function () {
         this.updateInterfaceInitialStep(args);
     };
     ClientCardActionGiftState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionGiftState.prototype.updateInterfaceInitialStep = function (_a) {
         var cardId = _a.cardId;
         this.game.clearPossible();
@@ -2651,13 +2256,6 @@ var ClientCardActionGiftState = /** @class */ (function () {
             },
         });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     ClientCardActionGiftState.prototype.setGiftsSelectable = function (_a) {
         var _this = this;
         var cardId = _a.cardId;
@@ -2679,46 +2277,344 @@ var ClientCardActionGiftState = /** @class */ (function () {
     };
     return ClientCardActionGiftState;
 }());
-var ClientCardActionMoveState = /** @class */ (function () {
+var ClientCardActionMoveState = (function () {
     function ClientCardActionMoveState(game) {
+        var _this = this;
+        this.getPlayerOrder = function () {
+            return _this.game.gamedatas.playerorder.map(function (id) { return Number(id); });
+        };
         this.game = game;
     }
     ClientCardActionMoveState.prototype.onEnteringState = function (_a) {
         var cardId = _a.cardId;
         this.cardId = cardId;
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        this.maxNumberOfMoves = cardInfo.rank;
+        this.moves = {};
         this.updateInterfaceInitialStep();
     };
     ClientCardActionMoveState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionMoveState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
         this.game.clearPossible();
+        this.updatePageTitle();
+        this.setArmiesSelectable();
+        this.setSpiesSelectable();
+        if (this.totalNumberOfMoves() > 0) {
+            this.game.addPrimaryActionButton({
+                id: 'confirm_btn',
+                text: _('Confirm'),
+                callback: function () { return _this.onConfirm(); },
+            });
+        }
+        this.addCancelButton();
+    };
+    ClientCardActionMoveState.prototype.updateInterfaceArmySelected = function (_a) {
+        var pieceId = _a.pieceId, regionId = _a.regionId;
+        this.game.clearPossible();
+        dojo.query("#".concat(pieceId)).addClass(PP_SELECTED).removeClass(PP_SELECTABLE);
+        this.setDestinationRegionsSelectable({ pieceId: pieceId, regionId: regionId });
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select the region to move the army to'),
+            args: {
+                you: '${you}',
+            },
+        });
+        this.addCancelButton();
+    };
+    ClientCardActionMoveState.prototype.updateIntefaceSpySelected = function (_a) {
+        var pieceId = _a.pieceId, cardId = _a.cardId;
+        debug('updateIntefaceSpySelected', pieceId, cardId);
+        this.game.clearPossible();
+        dojo.query("#".concat(pieceId)).addClass(PP_SELECTED).removeClass(PP_SELECTABLE);
+        this.setDestinationCardsSelectable({ pieceId: pieceId, cardId: cardId });
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select the card to move the spy to'),
+            args: {
+                you: '${you}',
+            },
+        });
+        this.addCancelButton();
+    };
+    ClientCardActionMoveState.prototype.updateInterfaceConfirmMoves = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('Confirm moves?'),
+            args: {},
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.onConfirm(); },
+        });
+        this.addCancelButton();
+    };
+    ClientCardActionMoveState.prototype.onCardClick = function (_a) {
+        var toCardId = _a.toCardId, fromCardId = _a.fromCardId, pieceId = _a.pieceId;
+        debug('onCardClick', pieceId, fromCardId, toCardId);
+        this.game.clearPossible();
+        this.addMove({ from: fromCardId, to: toCardId, pieceId: pieceId });
+        this.game.move({
+            id: pieceId,
+            from: this.game.spies[fromCardId],
+            to: this.game.spies[toCardId],
+            removeClass: [PP_SELECTED],
+        });
+        this.nextStepAfterMove();
+    };
+    ClientCardActionMoveState.prototype.onConfirm = function () {
+        debug('onConfirm', this.moves);
+        if (this.totalNumberOfMoves() > 0) {
+            this.game.takeAction({
+                action: 'move',
+                data: {
+                    cardId: this.cardId,
+                    moves: JSON.stringify(this.moves),
+                },
+            });
+        }
+    };
+    ClientCardActionMoveState.prototype.onRegionClick = function (_a) {
+        var fromRegionId = _a.fromRegionId, toRegionId = _a.toRegionId, pieceId = _a.pieceId;
+        debug('onRegionClick', fromRegionId, toRegionId, pieceId);
+        this.game.clearPossible();
+        this.addMove({ from: fromRegionId, to: toRegionId, pieceId: pieceId });
+        this.game.move({
+            id: pieceId,
+            from: this.game.map.getRegion({ region: fromRegionId }).getArmyZone(),
+            to: this.game.map.getRegion({ region: toRegionId }).getArmyZone(),
+            removeClass: [PP_SELECTED],
+        });
+        this.nextStepAfterMove();
+    };
+    ClientCardActionMoveState.prototype.nextStepAfterMove = function () {
+        var _this = this;
+        setTimeout(function () {
+            if (_this.maxNumberOfMoves > _this.totalNumberOfMoves()) {
+                _this.updateInterfaceInitialStep();
+            }
+            else {
+                _this.updateInterfaceConfirmMoves();
+            }
+        }, 1000);
+    };
+    ClientCardActionMoveState.prototype.addMove = function (_a) {
+        var pieceId = _a.pieceId, from = _a.from, to = _a.to;
+        if (this.moves[pieceId]) {
+            this.moves[pieceId].push({
+                from: from,
+                to: to,
+            });
+        }
+        else {
+            this.moves[pieceId] = [
+                {
+                    from: from,
+                    to: to,
+                },
+            ];
+        }
+    };
+    ClientCardActionMoveState.prototype.addCancelButton = function () {
+        var _this = this;
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                _this.returnPiecesToOriginalPosition();
+                _this.game.onCancel();
+            },
+        });
+    };
+    ClientCardActionMoveState.prototype.getNextCardId = function (_a) {
+        var cardId = _a.cardId, playerId = _a.playerId;
+        var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
+        var index = cardIds.indexOf(cardId);
+        if (index !== cardIds.length - 1) {
+            return cardIds[index + 1];
+        }
+        var currentPlayerId = playerId;
+        while (true) {
+            var nextPlayerId = this.getNextPlayer({ playerId: currentPlayerId });
+            var nextPlayerCardsIds = this.game.playerManager.getPlayer({ playerId: nextPlayerId }).getCourtZone().getAllItems();
+            if (nextPlayerCardsIds.length > 0) {
+                return nextPlayerCardsIds[0];
+            }
+            else {
+                currentPlayerId = nextPlayerId;
+            }
+        }
+    };
+    ClientCardActionMoveState.prototype.getPreviousCardId = function (_a) {
+        var cardId = _a.cardId, playerId = _a.playerId;
+        var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
+        var index = cardIds.indexOf(cardId);
+        if (index !== 0) {
+            return cardIds[index - 1];
+        }
+        var currentPlayerId = playerId;
+        while (true) {
+            var previousPlayerId = this.getPreviousPlayer({ playerId: currentPlayerId });
+            var previousPlayerCardIds = this.game.playerManager.getPlayer({ playerId: previousPlayerId }).getCourtZone().getAllItems();
+            if (previousPlayerCardIds.length > 0) {
+                return previousPlayerCardIds[previousPlayerCardIds.length - 1];
+            }
+            else {
+                currentPlayerId = previousPlayerId;
+            }
+        }
+    };
+    ClientCardActionMoveState.prototype.getNextPlayer = function (_a) {
+        var playerId = _a.playerId;
+        var playerOrder = this.getPlayerOrder();
+        var playerIndex = playerOrder.indexOf(playerId);
+        if (playerIndex === playerOrder.length - 1) {
+            return playerOrder[0];
+        }
+        else {
+            return playerOrder[playerIndex + 1];
+        }
+    };
+    ClientCardActionMoveState.prototype.getPreviousPlayer = function (_a) {
+        var playerId = _a.playerId;
+        var playerOrder = this.getPlayerOrder();
+        var playerIndex = playerOrder.indexOf(playerId);
+        if (playerIndex === 0) {
+            return playerOrder[playerOrder.length - 1];
+        }
+        else {
+            return playerOrder[playerIndex - 1];
+        }
+    };
+    ClientCardActionMoveState.prototype.returnPiecesToOriginalPosition = function () {
+        var _this = this;
+        Object.entries(this.moves).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
+            if (value.length === 0) {
+                return;
+            }
+            debug('return', key, value);
+            var from = value[value.length - 1].to;
+            var to = value[0].from;
+            if (from === to) {
+                return;
+            }
+            if (key.includes('block')) {
+                _this.game.move({
+                    id: key,
+                    from: _this.game.map.getRegion({ region: from }).getArmyZone(),
+                    to: _this.game.map.getRegion({ region: to }).getArmyZone(),
+                });
+            }
+            else if (key.includes('cylinder')) {
+                _this.game.move({
+                    id: key,
+                    from: _this.game.spies[from],
+                    to: _this.game.spies[to],
+                });
+            }
+        });
+    };
+    ClientCardActionMoveState.prototype.setArmiesSelectable = function () {
+        var _this = this;
+        REGIONS.forEach(function (regionId) {
+            var region = _this.game.map.getRegion({ region: regionId });
+            var coalitionId = _this.game.localState.activePlayer.loyalty;
+            var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
+            debug('coalitionArmies', regionId, coalitionArmies);
+            if (coalitionArmies.length === 0) {
+                return;
+            }
+            var hasCoalitionRoads = region.borders.some(function (borderId) {
+                var border = _this.game.map.getBorder({ border: borderId });
+                return border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0;
+            });
+            if (!hasCoalitionRoads) {
+                return;
+            }
+            coalitionArmies.forEach(function (pieceId) {
+                console.log('selectable army', pieceId);
+                var element = dojo.byId(pieceId);
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceArmySelected({ pieceId: pieceId, regionId: regionId }); }));
+            });
+        });
+    };
+    ClientCardActionMoveState.prototype.setDestinationCardsSelectable = function (_a) {
+        var _this = this;
+        var _b;
+        var pieceId = _a.pieceId, cardId = _a.cardId;
+        debug('setDestinationCardsSelectable', pieceId, cardId);
+        var node = dojo.byId(pieceId);
+        var courtCardOwnerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
+        if (!courtCardOwnerId) {
+            return;
+        }
+        var nextCardId = this.getNextCardId({ cardId: cardId, playerId: courtCardOwnerId });
+        var previousCardId = this.getPreviousCardId({ cardId: cardId, playerId: courtCardOwnerId });
+        console.log('nextCardId', nextCardId);
+        [nextCardId, previousCardId]
+            .filter(function (id) { return id !== cardId; })
+            .forEach(function (toCardId) {
+            var destinationCardNode = dojo.byId(toCardId);
+            destinationCardNode.classList.add(PP_SELECTABLE);
+            _this.game._connections.push(dojo.connect(destinationCardNode, 'onclick', _this, function () { return _this.onCardClick({ toCardId: toCardId, fromCardId: cardId, pieceId: pieceId }); }));
+        });
+    };
+    ClientCardActionMoveState.prototype.setDestinationRegionsSelectable = function (_a) {
+        var _this = this;
+        var pieceId = _a.pieceId, regionId = _a.regionId;
+        debug('setDestinationRegionsSelectable', pieceId, regionId);
+        this.game.map.setSelectable();
+        var region = this.game.map.getRegion({ region: regionId });
+        var coalitionId = this.game.localState.activePlayer.loyalty;
+        region.borders.forEach(function (borderId) {
+            var border = _this.game.map.getBorder({ border: borderId });
+            if (border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0) {
+                var toRegionId_1 = borderId.split('_').filter(function (borderRegionId) { return borderRegionId !== regionId; })[0];
+                _this.game.map
+                    .getRegion({ region: toRegionId_1 })
+                    .setSelectable({ callback: function () { return _this.onRegionClick({ fromRegionId: regionId, toRegionId: toRegionId_1, pieceId: pieceId }); } });
+            }
+        });
+    };
+    ClientCardActionMoveState.prototype.setSpiesSelectable = function () {
+        var _this = this;
+        Object.entries(this.game.spies).forEach(function (_a) {
+            var cardId = _a[0], zone = _a[1];
+            zone.getAllItems().forEach(function (cylinderId) {
+                if (Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId()) {
+                    return;
+                }
+                var node = dojo.byId(cylinderId);
+                node.classList.add(PP_SELECTABLE);
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId: cardId }); }));
+            });
+        });
+    };
+    ClientCardActionMoveState.prototype.totalNumberOfMoves = function () {
+        var total = 0;
+        Object.values(this.moves).forEach(function (movesForSinglePiece) {
+            total += movesForSinglePiece.length;
+        });
+        return total;
+    };
+    ClientCardActionMoveState.prototype.updatePageTitle = function () {
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must select an army or spy to move (${number} remaining)'),
+            args: {
+                you: '${you}',
+                number: this.maxNumberOfMoves - this.totalNumberOfMoves(),
+            },
+        });
     };
     return ClientCardActionMoveState;
 }());
-var ClientCardActionTaxState = /** @class */ (function () {
+var ClientCardActionTaxState = (function () {
     function ClientCardActionTaxState(game) {
         this.game = game;
     }
-    /**
-     * Steps
-     * 1. Determine which rupees can be taxed
-     *  => everything in market, players with card for which taxer is ruler minus tax protection
-     * 2. Let player select rupees
-     * 3. Send to backens
-     */
     ClientCardActionTaxState.prototype.onEnteringState = function (args) {
         this.cardId = args.cardId;
         var cardInfo = this.game.getCardInfo(args);
@@ -2728,20 +2624,6 @@ var ClientCardActionTaxState = /** @class */ (function () {
         this.updateInterfaceInitialStep();
     };
     ClientCardActionTaxState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientCardActionTaxState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -2755,13 +2637,6 @@ var ClientCardActionTaxState = /** @class */ (function () {
         this.game.addCancelButton();
         this.setRupeesSelectable();
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     ClientCardActionTaxState.prototype.confirmTax = function () {
         var marketRupees = [];
         var playerRupees = [];
@@ -2831,7 +2706,6 @@ var ClientCardActionTaxState = /** @class */ (function () {
     };
     ClientCardActionTaxState.prototype.setRupeesSelectable = function () {
         var _this = this;
-        // Market
         dojo.query('.pp_rupee').forEach(function (node) {
             var parentId = node.parentElement.id;
             if (parentId.startsWith('pp_market')) {
@@ -2842,7 +2716,6 @@ var ClientCardActionTaxState = /** @class */ (function () {
                 }));
             }
         });
-        // Players
         this.game.playerManager.getPlayerIds().forEach(function (playerId) {
             if (playerId === _this.game.getPlayerId()) {
                 return;
@@ -2932,7 +2805,7 @@ var ClientCardActionTaxState = /** @class */ (function () {
     };
     return ClientCardActionTaxState;
 }());
-var ClientPlayCardState = /** @class */ (function () {
+var ClientPlayCardState = (function () {
     function ClientPlayCardState(game) {
         this.game = game;
     }
@@ -2940,20 +2813,6 @@ var ClientPlayCardState = /** @class */ (function () {
         this.checkBribe(args);
     };
     ClientPlayCardState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientPlayCardState.prototype.updateInterfacePlayCardBribe = function (_a) {
         var _this = this;
         var cardId = _a.cardId, ruler = _a.ruler, rupees = _a.rupees;
@@ -3070,16 +2929,8 @@ var ClientPlayCardState = /** @class */ (function () {
             },
         });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     ClientPlayCardState.prototype.checkBribe = function (_a) {
         var cardId = _a.cardId;
-        // Check if other player rules the region
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         var region = cardInfo.region;
         var rulerId = this.game.map.getRegion({ region: region }).getRuler();
@@ -3125,7 +2976,7 @@ var ClientPlayCardState = /** @class */ (function () {
     };
     return ClientPlayCardState;
 }());
-var ClientPurchaseCardState = /** @class */ (function () {
+var ClientPurchaseCardState = (function () {
     function ClientPurchaseCardState(game) {
         this.game = game;
     }
@@ -3133,20 +2984,6 @@ var ClientPurchaseCardState = /** @class */ (function () {
         this.updateInterfaceInitialStep(args);
     };
     ClientPurchaseCardState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     ClientPurchaseCardState.prototype.updateInterfaceInitialStep = function (_a) {
         var _this = this;
         var cardId = _a.cardId, cost = _a.cost;
@@ -3170,7 +3007,7 @@ var ClientPurchaseCardState = /** @class */ (function () {
     };
     return ClientPurchaseCardState;
 }());
-var DiscardCourtState = /** @class */ (function () {
+var DiscardCourtState = (function () {
     function DiscardCourtState(game) {
         this.game = game;
     }
@@ -3178,23 +3015,8 @@ var DiscardCourtState = /** @class */ (function () {
         var numberOfDiscards = _a.numberOfDiscards;
         this.numberOfDiscards = numberOfDiscards;
         this.updateInterfaceInitialStep();
-        // this.updateInterface({ nextStep: DISCARD_COURT, args: { discardCourt: args.args as EnteringDiscardCourtArgs } });
     };
     DiscardCourtState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     DiscardCourtState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -3213,19 +3035,11 @@ var DiscardCourtState = /** @class */ (function () {
             callback: function () { return _this.handleDiscardConfirm(); },
         });
         dojo.addClass('confirm_btn', 'disabled');
-        // this.setCourtCardsSelectableForDiscard();
         this.game.setCourtCardsSelectable({ callback: function (_a) {
                 var cardId = _a.cardId;
                 return _this.handleDiscardSelect({ cardId: cardId });
             } });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     DiscardCourtState.prototype.handleDiscardConfirm = function () {
         var nodes = dojo.query('.pp_selected');
         if (nodes.length === this.numberOfDiscards) {
@@ -3241,19 +3055,9 @@ var DiscardCourtState = /** @class */ (function () {
             });
         }
     };
-    // // TODO: remove and use generic function
-    // private setCourtCardsSelectableForDiscard() {
-    //   const playerId = this.game.getPlayerId();
-    //   dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
-    //     const cardId = 'card_' + node.id.split('_')[1];
-    //     console.log('cardId in courtcardselect', cardId);
-    //     dojo.addClass(node, 'pp_selectable');
-    //     this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.handleDiscardSelect({ cardId })));
-    //   });
-    // }
     DiscardCourtState.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
-        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable');
         var numberSelected = dojo.query('.pp_selected').length;
         console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
         if (numberSelected === this.numberOfDiscards) {
@@ -3265,7 +3069,7 @@ var DiscardCourtState = /** @class */ (function () {
     };
     return DiscardCourtState;
 }());
-var DiscardHandState = /** @class */ (function () {
+var DiscardHandState = (function () {
     function DiscardHandState(game) {
         this.game = game;
     }
@@ -3273,23 +3077,8 @@ var DiscardHandState = /** @class */ (function () {
         var numberOfDiscards = _a.numberOfDiscards;
         this.numberOfDiscards = numberOfDiscards;
         this.updateInterfaceInitialStep();
-        // this.updateInterface({ nextStep: DISCARD_HAND, args: { discardHand: args.args as EnteringDiscardHandArgs } });
     };
     DiscardHandState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     DiscardHandState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -3313,13 +3102,6 @@ var DiscardHandState = /** @class */ (function () {
             },
         });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     DiscardHandState.prototype.handleDiscardConfirm = function () {
         var nodes = dojo.query('.pp_selected');
         if (nodes.length === this.numberOfDiscards) {
@@ -3337,7 +3119,7 @@ var DiscardHandState = /** @class */ (function () {
     };
     DiscardHandState.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
-        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable');
         var numberSelected = dojo.query('.pp_selected').length;
         console.log('button_check', cardId, numberSelected, this.numberOfDiscards);
         if (numberSelected === this.numberOfDiscards) {
@@ -3349,7 +3131,7 @@ var DiscardHandState = /** @class */ (function () {
     };
     return DiscardHandState;
 }());
-var DiscardLeverageState = /** @class */ (function () {
+var DiscardLeverageState = (function () {
     function DiscardLeverageState(game) {
         this.game = game;
     }
@@ -3359,20 +3141,6 @@ var DiscardLeverageState = /** @class */ (function () {
         this.updateInterfaceInitialStep();
     };
     DiscardLeverageState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     DiscardLeverageState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -3398,13 +3166,6 @@ var DiscardLeverageState = /** @class */ (function () {
                 return _this.handleDiscardSelect({ cardId: cardId });
             } });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     DiscardLeverageState.prototype.handleDiscardConfirm = function () {
         debug('handleDiscardConfirm');
         var nodes = dojo.query('.pp_selected');
@@ -3424,7 +3185,7 @@ var DiscardLeverageState = /** @class */ (function () {
     DiscardLeverageState.prototype.handleDiscardSelect = function (_a) {
         var cardId = _a.cardId;
         debug('card clicked', cardId);
-        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable'); //.toggleClass('pp_discard');
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable');
         var numberSelected = dojo.query('.pp_selected').length;
         if (numberSelected === this.numberOfDiscards) {
             dojo.removeClass('confirm_btn', 'disabled');
@@ -3435,7 +3196,7 @@ var DiscardLeverageState = /** @class */ (function () {
     };
     return DiscardLeverageState;
 }());
-var NegotiateBribeState = /** @class */ (function () {
+var NegotiateBribeState = (function () {
     function NegotiateBribeState(game) {
         this.game = game;
     }
@@ -3444,20 +3205,6 @@ var NegotiateBribeState = /** @class */ (function () {
         this.updateInterfaceInitialStep({ amount: currentAmount, ruler: ruler, possible: possible });
     };
     NegotiateBribeState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     NegotiateBribeState.prototype.updateInterfaceInitialStep = function (_a) {
         var _this = this;
         var amount = _a.amount, possible = _a.possible, ruler = _a.ruler;
@@ -3504,7 +3251,7 @@ var NegotiateBribeState = /** @class */ (function () {
     };
     return NegotiateBribeState;
 }());
-var PlaceRoadState = /** @class */ (function () {
+var PlaceRoadState = (function () {
     function PlaceRoadState(game) {
         this.game = game;
     }
@@ -3513,20 +3260,6 @@ var PlaceRoadState = /** @class */ (function () {
         this.updateInterfaceInitialStep({ borders: region.borders });
     };
     PlaceRoadState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     PlaceRoadState.prototype.updateInterfaceInitialStep = function (_a) {
         var _this = this;
         var borders = _a.borders;
@@ -3541,7 +3274,7 @@ var PlaceRoadState = /** @class */ (function () {
     };
     return PlaceRoadState;
 }());
-var PlaceSpyState = /** @class */ (function () {
+var PlaceSpyState = (function () {
     function PlaceSpyState(game) {
         this.game = game;
     }
@@ -3550,20 +3283,6 @@ var PlaceSpyState = /** @class */ (function () {
         this.updateInterfaceInitialStep({ regionId: regionId });
     };
     PlaceSpyState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     PlaceSpyState.prototype.updateInterfaceInitialStep = function (_a) {
         var regionId = _a.regionId;
         this.game.clearPossible();
@@ -3591,13 +3310,6 @@ var PlaceSpyState = /** @class */ (function () {
             callback: function () { return _this.game.onCancel(); },
         });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
     PlaceSpyState.prototype.setPlaceSpyCardsSelectable = function (_a) {
         var _this = this;
         var regionId = _a.regionId;
@@ -3609,7 +3321,7 @@ var PlaceSpyState = /** @class */ (function () {
     };
     return PlaceSpyState;
 }());
-var PlayerActionsState = /** @class */ (function () {
+var PlayerActionsState = (function () {
     function PlayerActionsState(game) {
         this.game = game;
     }
@@ -3620,20 +3332,6 @@ var PlayerActionsState = /** @class */ (function () {
     PlayerActionsState.prototype.onLeavingState = function () {
         debug('Leaving PlayerActionsState');
     };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     PlayerActionsState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -3680,35 +3378,12 @@ var PlayerActionsState = /** @class */ (function () {
         });
         this.game.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.game.onCancel(); } });
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
-    /**
-     * Player had actions remaining
-     * 1. Player can only purchase cards (no cards in hand or in court);
-     *    You may purchase a card (x actions remaining)
-     * 2. Player can purchase and play cards (cards in hand, no card in court)
-     *    You may purchase a card or play a card (x actions remaining)
-     * 3. Player can purchase and perform card actions (no cards in hand, card in court)
-     *    You may purchase a card or perform a card action
-     * 4. Player can purchase, play and perform card actions (no cards in hand, card in court)
-     *    You may purchase a card, play a card or perform card actions (x actions remaining)
-     * Player has no actions remaining
-     * 5. Player can perform bonus actions (no actions but cards with favored suit in court)
-     *    You may perform free card actions
-     * 6. Player does not have bonus actions
-     */
     PlayerActionsState.prototype.updateMainTitleTextActions = function () {
         var remainingActions = this.game.localState.remainingActions;
         var hasCardActions = this.activePlayerHasCardActions();
         var hasHandCards = this.currentPlayerHasHandCards();
         var hasFreeCardActions = this.activePlayerHasFreeCardActions();
         var titleText = '';
-        // cibst case = 0;
         if (remainingActions > 0 && !hasHandCards && !hasCardActions) {
             titleText = _('${you} may purchase a card');
         }
@@ -3739,7 +3414,6 @@ var PlayerActionsState = /** @class */ (function () {
     PlayerActionsState.prototype.activePlayerHasActions = function () {
         return this.game.localState.remainingActions > 0 || false;
     };
-    // TODO: check value of purchased gifts
     PlayerActionsState.prototype.activePlayerHasCardActions = function () {
         var _this = this;
         var rupees = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getRupees();
@@ -3766,9 +3440,6 @@ var PlayerActionsState = /** @class */ (function () {
         var currentPlayerId = this.game.getPlayerId();
         return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
     };
-    // private activePlayerHasCourtCards(): boolean {
-    //   return this.game.localState.activePlayer.court.cards.length > 0;
-    // }
     PlayerActionsState.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
@@ -3783,11 +3454,9 @@ var PlayerActionsState = /** @class */ (function () {
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
                         var cardAction_1 = child.id.split('_')[0];
-                        // TODO: check value of purchased gifts
                         if (CARD_ACTIONS_WITH_COST.includes(cardAction_1) && rupees_1 < 2) {
                             return;
                         }
-                        // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
                         dojo.addClass(child, 'pp_selectable');
                         _this.game._connections.push(dojo.connect(child, 'onclick', _this, function (event) {
                             event.preventDefault();
@@ -3812,7 +3481,6 @@ var PlayerActionsState = /** @class */ (function () {
                                     _this.game.framework().setClientState(CLIENT_CARD_ACTION_TAX, { args: { cardId: cardId } });
                                     break;
                             }
-                            // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
                         }));
                     }
                 });
@@ -3823,32 +3491,16 @@ var PlayerActionsState = /** @class */ (function () {
         var _this = this;
         var baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
         dojo.query('.pp_market_card').forEach(function (node) {
-            var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
+            var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost;
             var cardId = node.id;
             if (cost <= _this.game.localState.activePlayer.rupees && !_this.game.localState.usedCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
-                _this.game._connections.push(
-                // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
-                dojo.connect(node, 'onclick', _this, function () {
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
                     return _this.game.framework().setClientState(CLIENT_PURCHASE_CARD, { args: { cardId: cardId, cost: cost } });
                 }));
             }
         });
     };
-    //  ..######..##.......####..######..##....##
-    //  .##....##.##........##..##....##.##...##.
-    //  .##.......##........##..##.......##..##..
-    //  .##.......##........##..##.......#####...
-    //  .##.......##........##..##.......##..##..
-    //  .##....##.##........##..##....##.##...##.
-    //  ..######..########.####..######..##....##
-    // .##.....##....###....##....##.########..##.......########..######.
-    // .##.....##...##.##...###...##.##.....##.##.......##.......##....##
-    // .##.....##..##...##..####..##.##.....##.##.......##.......##......
-    // .#########.##.....##.##.##.##.##.....##.##.......######....######.
-    // .##.....##.#########.##..####.##.....##.##.......##.............##
-    // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
-    // .##.....##.##.....##.##....##.########..########.########..######.
     PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())
             return;
@@ -3860,7 +3512,7 @@ var PlayerActionsState = /** @class */ (function () {
     };
     return PlayerActionsState;
 }());
-var SetupState = /** @class */ (function () {
+var SetupState = (function () {
     function SetupState(game) {
         this.game = game;
     }
@@ -3869,20 +3521,6 @@ var SetupState = /** @class */ (function () {
         console.log('onEntering setup');
     };
     SetupState.prototype.onLeavingState = function () { };
-    //  .####.##....##.########.########.########..########....###.....######..########
-    //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
-    //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
-    //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
-    //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
-    //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
-    //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
-    // ..######..########.########.########...######.
-    // .##....##....##....##.......##.....##.##....##
-    // .##..........##....##.......##.....##.##......
-    // ..######.....##....######...########...######.
-    // .......##....##....##.......##..............##
-    // .##....##....##....##.......##........##....##
-    // ..######.....##....########.##.........######.
     SetupState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
@@ -3907,21 +3545,7 @@ var SetupState = /** @class */ (function () {
     };
     return SetupState;
 }());
-//  .##....##..#######..########.####.########
-//  .###...##.##.....##....##.....##..##......
-//  .####..##.##.....##....##.....##..##......
-//  .##.##.##.##.....##....##.....##..######..
-//  .##..####.##.....##....##.....##..##......
-//  .##...###.##.....##....##.....##..##......
-//  .##....##..#######.....##....####.##......
-//  .##.....##....###....##....##....###.....######...########.########.
-//  .###...###...##.##...###...##...##.##...##....##..##.......##.....##
-//  .####.####..##...##..####..##..##...##..##........##.......##.....##
-//  .##.###.##.##.....##.##.##.##.##.....##.##...####.######...########.
-//  .##.....##.#########.##..####.#########.##....##..##.......##...##..
-//  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
-//  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
-var NotificationManager = /** @class */ (function () {
+var NotificationManager = (function () {
     function NotificationManager(game) {
         this.game = game;
         this.subscriptions = [];
@@ -3942,7 +3566,6 @@ var NotificationManager = /** @class */ (function () {
             ['build', 250],
             ['cardAction', 1],
             ['changeRuler', 1],
-            // ['initiateNegotiation', 1],
             ['changeFavoredSuit', 250],
             ['changeLoyalty', 1],
             ['clearTurn', 1],
@@ -3972,8 +3595,6 @@ var NotificationManager = /** @class */ (function () {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, "notif_".concat(notif[0])));
             _this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
         });
-        // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
-        // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
     };
     NotificationManager.prototype.notif_battle = function (notif) {
         debug('notif_battle', notif);
@@ -3982,7 +3603,6 @@ var NotificationManager = /** @class */ (function () {
         var _this = this;
         debug('notif_betray', notif);
         var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
-        // Place paid rupees on market cards
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
@@ -3996,7 +3616,6 @@ var NotificationManager = /** @class */ (function () {
         if (this.game.framework().isCurrentPlayerActive()) {
             this.game.activeStates.clientCardActionBuild.clearTemporaryTokens();
         }
-        // Place paid rupees on market cards
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
@@ -4007,7 +3626,7 @@ var NotificationManager = /** @class */ (function () {
         console.log('notif_cardAction', notif);
     };
     NotificationManager.prototype.notif_changeFavoredSuit = function (notif) {
-        console.log('notif_moveToken', notif);
+        console.log('notif_changeFavoredSuit', notif);
         var _a = notif.args, from = _a.from, to = _a.to;
         var tokenId = 'favored_suit_marker';
         var fromZone = this.game.getZoneForLocation({ location: "favored_suit_".concat(from) });
@@ -4025,7 +3644,6 @@ var NotificationManager = /** @class */ (function () {
         var playerId = Number(args.playerId);
         this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
         var player = this.getPlayer({ playerId: playerId });
-        // Influence value will be 0 when player chooses loyalty for the first time
         if (player.getInfluence() === 0) {
             player.setCounter({ counter: 'influence', value: 1 });
         }
@@ -4057,8 +3675,6 @@ var NotificationManager = /** @class */ (function () {
     NotificationManager.prototype.notif_discardAndTakePrize = function (notif) {
         var _this = this;
         console.log('notif_discardAndTakePrize', notif);
-        // TODO: check to execute animations one after another
-        // Decrease counters based on card rank
         this.game.clearPossible();
         var courtOwnerPlayerId = Number(notif.args.courtOwnerPlayerId);
         var _a = notif.args, cardId = _a.cardId, moves = _a.moves, playerId = _a.playerId;
@@ -4077,15 +3693,12 @@ var NotificationManager = /** @class */ (function () {
         });
         var player = this.getPlayer({ playerId: courtOwnerPlayerId });
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
-        // player.discardCourtCard({ cardId });
         this.game.playerManager.getPlayer({ playerId: playerId }).takePrize({ cardOwnerId: courtOwnerPlayerId, cardId: cardId });
         player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
     };
     NotificationManager.prototype.notif_discardFromCourt = function (notif) {
         var _this = this;
         console.log('notif_discardCard', notif);
-        // TODO: check to execute animations one after another
-        // Decrease counters based on card rank
         this.game.clearPossible();
         var playerId = Number(notif.args.courtOwnerPlayerId);
         var _a = notif.args, cardId = _a.cardId, moves = _a.moves;
@@ -4167,7 +3780,12 @@ var NotificationManager = /** @class */ (function () {
             var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
             var fromZone = _this.game.getZoneForLocation({ location: from });
             var toZone = _this.game.getZoneForLocation({ location: to });
-            // TODO: perhaps create separate function for this
+            if (_this.game.framework().isCurrentPlayerActive() &&
+                !fromZone.getAllItems().includes(tokenId) &&
+                ((from.startsWith('armies') && to.startsWith('armies')) || (from.startsWith('spies') && to.startsWith('spies')))) {
+                debug('no need to execute move');
+                return;
+            }
             var addClass = [];
             var removeClass = [];
             if (to.startsWith('armies')) {
@@ -4182,7 +3800,7 @@ var NotificationManager = /** @class */ (function () {
             if (from.startsWith('blocks')) {
                 removeClass.push('pp_coalition_block');
             }
-            else if (from.startsWith('armies')) {
+            else if (from.startsWith('armies') && !to.startsWith('armies')) {
                 removeClass.push('pp_army');
             }
             else if (from.startsWith('roads')) {
@@ -4224,20 +3842,16 @@ var NotificationManager = /** @class */ (function () {
         var _this = this;
         console.log('notif_purchaseCard', notif);
         var _a = notif.args, marketLocation = _a.marketLocation, newLocation = _a.newLocation, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, receivedRupees = _a.receivedRupees;
-        // const playerId = Number(notif.args.playerId);
         this.game.clearPossible();
         var row = Number(marketLocation.split('_')[1]);
         var col = Number(marketLocation.split('_')[2]);
-        // Place paid rupees on market cards
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
             _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
         });
-        // Remove all rupees that were on the purchased card
         this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
-        // Move card from markt
         var cardId = notif.args.card.id;
         if (newLocation == 'active_events') {
             this.game.move({
@@ -4259,13 +3873,11 @@ var NotificationManager = /** @class */ (function () {
         console.log('notif_purchaseGift', notif);
         this.game.clearPossible();
         var _a = notif.args, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, tokenMove = _a.tokenMove, influenceChange = _a.influenceChange;
-        // Place paid rupees on market cards
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
             _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
         });
-        // Move cylinder
         var tokenId = tokenMove.tokenId, from = tokenMove.from, to = tokenMove.to;
         var fromZone = this.game.getZoneForLocation({ location: from });
         var toZone = this.game.getZoneForLocation({ location: to });
@@ -4274,7 +3886,6 @@ var NotificationManager = /** @class */ (function () {
             from: fromZone,
             to: toZone,
         });
-        // Update influence
         this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
     };
     NotificationManager.prototype.notif_refreshMarket = function (notif) {
@@ -4328,7 +3939,6 @@ var NotificationManager = /** @class */ (function () {
         this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
         this.game.map.updateMap({ gamedatas: updatedGamedatas });
         this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
-        // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
     };
     NotificationManager.prototype.notif_takeRupeesFromSupply = function (notif) {
         debug('notif_takeRupeesFromSupply', notif.args);
@@ -4383,62 +3993,28 @@ var NotificationManager = /** @class */ (function () {
         this.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
     NotificationManager.prototype.notif_log = function (notif) {
-        // this is for debugging php side
         console.log('notif_log', notif.args);
     };
     return NotificationManager;
 }());
-/**
- *------
- * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com>
- *
- * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
- * See http://en.boardgamearena.com/#!doc/Studio for more information.
- * -----
- *
- * paxpamireditiontwo.js
- *
- * PaxPamirEditionTwo user interface script
- *
- * In this file, you are describing the logic of your user interface, in Javascript language.
- *
- */
-var PaxPamir = /** @class */ (function () {
+var PaxPamir = (function () {
     function PaxPamir() {
-        // global variables
         this.defaultWeightZone = 0;
-        this.playerEvents = {}; // events per player
-        this.activeEvents = new ebg.zone(); // active events
-        this.spies = {}; // spies per cards
-        this.playerCounts = {}; // rename to playerTotals?
+        this.playerEvents = {};
+        this.activeEvents = new ebg.zone();
+        this.spies = {};
+        this.playerCounts = {};
         this._notif_uid_to_log_id = {};
         this._last_notif = null;
         console.log('paxpamireditiontwo constructor');
     }
-    /*
-      setup:
-      
-      This method must set up the game user interface according to current game situation specified
-      in parameters.
-      
-      The method is called each time the game interface is displayed to a player, ie:
-      _ when the game starts
-      _ when a player refreshes the game page (F5)
-      
-      "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
-    */
     PaxPamir.prototype.setup = function (gamedatas) {
         var _a;
         var _this = this;
-        // Create a new div for buttons to avoid BGA auto clearing it
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
-        // const playAreaWidth = document.getElementById('pp_play_area').offsetWidth;
-        // console.log('playAreaWidth',playAreaWidth);
         this.gamedatas = gamedatas;
         debug('gamedatas', gamedatas);
         this._connections = [];
-        // Will store all data for active player and gets refreshed with entering player actions state
         this.localState = gamedatas.localState;
         this.activeStates = (_a = {},
             _a[CLIENT_CARD_ACTION_BATTLE] = new ClientCardActionBattleState(this),
@@ -4458,11 +4034,9 @@ var PaxPamir = /** @class */ (function () {
             _a.playerActions = new PlayerActionsState(this),
             _a.setup = new SetupState(this),
             _a);
-        // Events
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
         this.activeEvents.instantaneous = true;
         this.activeEvents.item_margin = 16;
-        // Add current event cards
         gamedatas.activeEvents.forEach(function (card) {
             dojo.place(tplCard({ cardId: card.id }), 'pp_active_events');
             _this.activeEvents.placeInZone(card.id);
@@ -4477,58 +4051,25 @@ var PaxPamir = /** @class */ (function () {
             this.notificationManager.destroy();
         }
         this.notificationManager = new NotificationManager(this);
-        // // Setup game notifications to handle (see "setupNotifications" method below)
         this.notificationManager.setupNotifications();
         dojo.connect(this.framework().notifqueue, 'addToLog', function () {
             _this.checkLogCancel(_this._last_notif == null ? null : _this._last_notif.msg.uid);
             _this.addLogClass();
         });
-        // this.setupNotifications();
         debug('Ending game setup');
     };
-    //  .####.##....##.########.########.########.....###.....######..########.####..#######..##....##
-    //  ..##..###...##....##....##.......##.....##...##.##...##....##....##.....##..##.....##.###...##
-    //  ..##..####..##....##....##.......##.....##..##...##..##..........##.....##..##.....##.####..##
-    //  ..##..##.##.##....##....######...########..##.....##.##..........##.....##..##.....##.##.##.##
-    //  ..##..##..####....##....##.......##...##...#########.##..........##.....##..##.....##.##..####
-    //  ..##..##...###....##....##.......##....##..##.....##.##....##....##.....##..##.....##.##...###
-    //  .####.##....##....##....########.##.....##.##.....##..######.....##....####..#######..##....##
-    ///////////////////////////////////////////////////
-    //// Game & client states
-    // onEnteringState: this method is called each time we are entering into a new game state.
-    //                  You can use this method to perform some user interface changes at this moment.
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
         console.log('Entering state: ' + stateName, args);
-        // UI changes for active player
         if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };
-    // onLeavingState: this method is called each time we are leaving a game state.
-    //                 You can use this method to perform some user interface changes at this moment.
-    //
     PaxPamir.prototype.onLeavingState = function (stateName) {
         console.log('Leaving state: ' + stateName);
         this.clearPossible();
     };
-    // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
-    //                        action status bar (ie: the HTML links in the status bar).
-    //
     PaxPamir.prototype.onUpdateActionButtons = function (stateName, args) {
-        // console.log('onUpdateActionButtons: ' + stateName);
     };
-    //  .##.....##.########.####.##.......####.########.##....##
-    //  .##.....##....##.....##..##........##.....##.....##..##.
-    //  .##.....##....##.....##..##........##.....##......####..
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  .##.....##....##.....##..##........##.....##.......##...
-    //  ..#######.....##....####.########.####....##.......##...
-    ///////////////////////////////////////////////////
-    //// Utility methods - add in alphabetical order
-    /*
-     * Add a blue/grey button if it doesn't already exists
-     */
     PaxPamir.prototype.addActionButtonClient = function (_a) {
         var id = _a.id, text = _a.text, callback = _a.callback, extraClasses = _a.extraClasses, _b = _a.color, color = _b === void 0 ? 'none' : _b;
         if ($(id)) {
@@ -4596,16 +4137,7 @@ var PaxPamir = /** @class */ (function () {
         this._connections = [];
         dojo.query('.pp_selectable').removeClass('pp_selectable');
         dojo.query('.pp_selected').removeClass('pp_selected');
-        REGIONS.forEach(function (region) {
-            var element = document.getElementById("pp_region_".concat(region));
-            if (element) {
-                element.classList.remove('pp_selectable');
-            }
-        });
-        var mapArea = document.getElementById('pp_map_areas');
-        if (mapArea) {
-            mapArea.classList.remove('pp_selectable');
-        }
+        this.map.clearSelectable();
     };
     PaxPamir.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;
@@ -4617,9 +4149,6 @@ var PaxPamir = /** @class */ (function () {
     PaxPamir.prototype.getCurrentPlayer = function () {
         return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
     };
-    /**
-     * Typescript wrapper for framework functions
-     */
     PaxPamir.prototype.framework = function () {
         return this;
     };
@@ -4654,39 +4183,17 @@ var PaxPamir = /** @class */ (function () {
         this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
         this.framework().updatePageTitle();
     };
-    // .########.########.....###....##.....##.########.##......##..#######..########..##....##
-    // .##.......##.....##...##.##...###...###.##.......##..##..##.##.....##.##.....##.##...##.
-    // .##.......##.....##..##...##..####.####.##.......##..##..##.##.....##.##.....##.##..##..
-    // .######...########..##.....##.##.###.##.######...##..##..##.##.....##.########..#####...
-    // .##.......##...##...#########.##.....##.##.......##..##..##.##.....##.##...##...##..##..
-    // .##.......##....##..##.....##.##.....##.##.......##..##..##.##.....##.##....##..##...##.
-    // .##.......##.....##.##.....##.##.....##.########..###..###...#######..##.....##.##....##
-    // ..#######..##.....##.########.########..########..####.########..########..######.
-    // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##....##
-    // .##.....##.##.....##.##.......##.....##.##.....##..##..##.....##.##.......##......
-    // .##.....##.##.....##.######...########..########...##..##.....##.######....######.
-    // .##.....##..##...##..##.......##...##...##...##....##..##.....##.##.............##
-    // .##.....##...##.##...##.......##....##..##....##...##..##.....##.##.......##....##
-    // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
-    /* @Override */
     PaxPamir.prototype.format_string_recursive = function (log, args) {
         var _this = this;
         try {
             if (log && args && !args.processed) {
                 args.processed = true;
-                // replace all keys that start with 'logToken'
                 Object.entries(args).forEach(function (_a) {
                     var key = _a[0], value = _a[1];
                     if (key.startsWith('logToken')) {
                         args[key] = getLogTokenDiv({ logToken: value, game: _this });
                     }
                 });
-                // TODO: check below code. Looks like improved way for text shadows (source ticket to ride) 
-                // ['you', 'actplayer', 'player_name'].forEach((field) => {
-                //   if (typeof args[field] === 'string' && args[field].indexOf('#ffed00;') !== -1 && args[field].indexOf('text-shadow') === -1) {
-                //     args[field] = args[field].replace('#ffed00;', '#ffed00; text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;');
-                //   }
-                // });
             }
         }
         catch (e) {
@@ -4694,12 +4201,7 @@ var PaxPamir = /** @class */ (function () {
         }
         return this.inherited(arguments);
     };
-    /*
-     * [Undocumented] Called by BGA framework on any notification message
-     * Handle cancelling log messages for restart turn
-     */
     PaxPamir.prototype.onPlaceLogOnChannel = function (msg) {
-        // console.log('msg', msg);
         var currentLogId = this.framework().notifqueue.next_log_id;
         var res = this.framework().inherited(arguments);
         this._notif_uid_to_log_id[msg.uid] = currentLogId;
@@ -4707,13 +4209,8 @@ var PaxPamir = /** @class */ (function () {
             logId: currentLogId,
             msg: msg,
         };
-        // console.log('_notif_uid_to_log_id', this._notif_uid_to_log_id);
         return res;
     };
-    /*
-     * cancelLogs:
-     *   strikes all log messages related to the given array of notif ids
-     */
     PaxPamir.prototype.checkLogCancel = function (notifId) {
         if (this.gamedatas.canceledNotifIds != null && this.gamedatas.canceledNotifIds.includes(notifId)) {
             this.cancelLogs([notifId]);
@@ -4741,9 +4238,6 @@ var PaxPamir = /** @class */ (function () {
             dojo.addClass('log_' + notif.logId, 'notif_' + type);
         }
     };
-    /*
-     * [Undocumented] Override BGA framework functions to call onLoadingComplete when loading is done
-     */
     PaxPamir.prototype.setLoader = function (value, max) {
         this.framework().inherited(arguments);
         if (!this.framework().isLoadingComplete && value >= 100) {
@@ -4752,71 +4246,33 @@ var PaxPamir = /** @class */ (function () {
         }
     };
     PaxPamir.prototype.onLoadingComplete = function () {
-        // debug('Loading complete');
         this.cancelLogs(this.gamedatas.canceledNotifIds);
     };
-    // .########..#######......######..##.....##.########..######..##....##
-    // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
-    // ....##....##.....##....##.......##.....##.##.......##.......##..##..
-    // ....##....##.....##....##.......#########.######...##.......#####...
-    // ....##....##.....##....##.......##.....##.##.......##.......##..##..
-    // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
-    // ....##.....#######......######..##.....##.########..######..##....##
-    // public returnSpiesFromCard({ cardId }: { cardId: string }) {
-    //   if (this.spies?.[cardId]) {
-    //     // ['cylinder_2371052_3']
-    //     const items = this.spies[cardId].getAllItems();
-    //     items.forEach((cylinderId) => {
-    //       const playerId = Number(cylinderId.split('_')[1]);
-    //       this.move({
-    //         id: cylinderId,
-    //         to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
-    //         from: this.spies[cardId],
-    //       });
-    //     });
-    //   }
-    // }
-    // public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
-    //   // Move all spies back to cylinder pools
-    //   this.returnSpiesFromCard({ cardId: id });
-    //   from.removeFromZone(id, false);
-    //   attachToNewParentNoDestroy(id, 'pp_discard_pile');
-    //   this.framework().slideToObject(id, 'pp_discard_pile').play();
-    // }
-    // returns zone object for given backend location in token database
     PaxPamir.prototype.getZoneForLocation = function (_a) {
         var location = _a.location;
         var splitLocation = location.split('_');
         switch (splitLocation[0]) {
             case 'armies':
-                // armies_kabul
                 return this.map.getRegion({ region: splitLocation[1] }).getArmyZone();
             case 'blocks':
-                // blocks_russian
                 return this.objectManager.supply.getCoalitionBlocksZone({
                     coalition: splitLocation[1],
                 });
             case 'cylinders':
-                // cylinders_playerId
                 return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
             case 'gift':
-                // gift_2_playerId
                 return this.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
             case 'favored':
-                // favored_suit_economic
                 return this.objectManager.favoredSuit.getFavoredSuitZone({
                     suit: splitLocation[2],
                 });
             case 'roads':
-                // roads_herat_kabul
                 var border = "".concat(splitLocation[1], "_").concat(splitLocation[2]);
                 return this.map.getBorder({ border: border }).getRoadZone();
             case 'spies':
-                // spies_card_38
                 var cardId = "".concat(splitLocation[1], "_").concat(splitLocation[2]);
                 return this.spies[cardId];
             case 'tribes':
-                // tribes_kabul
                 return this.map.getRegion({ region: splitLocation[1] }).getTribeZone();
             default:
                 console.log('no zone determined');
@@ -4834,7 +4290,6 @@ var PaxPamir = /** @class */ (function () {
         dojo.addClass(id, 'pp_moving');
         to.placeInZone(id, weight);
         from.removeFromZone(id, false);
-        // TODO: check if there is a better way than using setTimeout
         setTimeout(function () {
             dojo.removeClass(id, 'pp_moving');
         }, 2000);
@@ -4845,60 +4300,22 @@ var PaxPamir = /** @class */ (function () {
         dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), cardId);
         this.setupCardSpyZone({ nodeId: spyZoneId, cardId: cardId });
     };
-    // // Function that gets called every time a card is added to a stock component
-    // setupNewCard(cardDiv, cardId, divId) {
-    //   dojo.addClass(cardDiv, `pp_${cardId}`);
-    //   // if card is played to a court
-    //   if (divId.startsWith('pp_court_player')) {
-    //     const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
-    //     // add region class for selectable functions
-    //     // const region = this.gamedatas.cards[cardId].region;
-    //     dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
-    //     const spyZoneId = 'spies_' + cardId;
-    //     dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
-    //     this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
-    //     // TODO (add spy zone here)
-    //     // TODO (add card actions)
-    //     Object.keys(actions).forEach((action, index) => {
-    //       const actionId = action + '_' + cardId;
-    //       dojo.place(
-    //         `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
-    //         divId
-    //       );
-    //     });
-    //   }
-    // }
-    // Every time a card is moved or placed in court this function will be called to set up zone.
     PaxPamir.prototype.setupCardSpyZone = function (_a) {
         var nodeId = _a.nodeId, cardId = _a.cardId;
-        // Note (Frans): we probably need to remove spies before moving / placing card
         if (!this.spies[cardId]) {
-            // ** setup for zone
             this.spies[cardId] = new ebg.zone();
             this.spies[cardId].create(this, nodeId, CYLINDER_WIDTH, CYLINDER_HEIGHT);
             this.spies[cardId].item_margin = 4;
         }
     };
-    // Updates weight of item in the stock component for ordering purposes
     PaxPamir.prototype.updateCard = function (_a) {
         var _b;
         var location = _a.location, id = _a.id, order = _a.order;
         location.changeItemsWeight((_b = {}, _b[id] = order, _b));
     };
-    // public setupNotifications() {}
-    //....###..........##....###....##.....##
-    //...##.##.........##...##.##....##...##.
-    //..##...##........##..##...##....##.##..
-    //.##.....##.......##.##.....##....###...
-    //.#########.##....##.#########...##.##..
-    //.##.....##.##....##.##.....##..##...##.
-    //.##.....##..######..##.....##.##.....##
     PaxPamir.prototype.actionError = function (actionName) {
         this.framework().showMessage("cannot take ".concat(actionName, " action"), 'error');
     };
-    /*
-     * Make an AJAX call with automatic lock
-     */
     PaxPamir.prototype.takeAction = function (_a) {
         var action = _a.action, _b = _a.data, data = _b === void 0 ? {} : _b;
         console.log("takeAction ".concat(action), data);

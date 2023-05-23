@@ -99,6 +99,10 @@ class Border {
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
+  getCoalitionRoads({coalitionId}: {coalitionId: string;}): string[] {
+    return this.roadZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
+  }
+
   getEnemyRoads({ coalitionId }: { coalitionId: string }): string[] {
     return this.roadZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
   }

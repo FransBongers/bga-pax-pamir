@@ -1,5 +1,6 @@
 <?php
 
+use PaxPamir\Helpers\Utils;
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -122,6 +123,17 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function move()
+    {
+        self::setAjaxMode();
+        $moves = self::getArg("moves", AT_json, true);
+        // $args = self::getArg('actionArgs', AT_json, true);
+        Utils::validateJSonAlphaNum($moves, 'moves');
+        // $this->validateJSonAlphaNum($args, 'actionArgs');
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $result = $this->game->move($cardId, $moves);
+        self::ajaxResponse();
+    }
 
     public function pass()
     {

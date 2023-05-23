@@ -31,6 +31,7 @@
 
 ## To check
 - Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
+- Check totals in player panels. Seem to be off for cylinders
 
 ### UI
 - Matching colors for selectable / selected
@@ -42,3 +43,6 @@
   - Handle loyalty change for taking prize, discard patriots, handle leverage (return rupees / more cards)
 
 
+### Ideas
+- Slot events cards under 'player tableau' of player who purchased
+- Add counters to roads / armies to show the number in a region (in case total numner exceeds a certain amount)

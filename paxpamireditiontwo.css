@@ -97,7 +97,7 @@
 }
 
 .pp_log_token.pp_card.pp_large {
-  display: block;
+  display: inline-block;
   width: 75px;
   height: 104px;
   background-size: 75px 104px;
@@ -1307,7 +1307,7 @@ html {
 }
 
 .pp_spy_zone {
-  width: 136px;
+  width: 140px;
   height: 30px;
   left: 8px;
   top: 78px;

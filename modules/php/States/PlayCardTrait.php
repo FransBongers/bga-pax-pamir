@@ -114,13 +114,14 @@ trait PlayCardTrait
         'next' => $ruler,
         'status' => BRIBE_UNRESOLVED,
       ]);
-      $message = clienttranslate('${player_name} wants to play ${cardName} and offers bribe of ${bribeAmount} rupee(s) ${logTokenLargeCard}');
+      $message = clienttranslate('${player_name} wants to play ${cardName} and offers bribe of ${bribeAmount} rupee(s)${logTokenNewLine}${logTokenLargeCard}');
 
       self::notifyAllPlayers("initiateNegotiation", $message, array(
         'player_name' => self::getActivePlayerName(),
         'bribeAmount' => $bribe,
         'cardName' => $card['name'],
         'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+        'logTokenNewLine' => Utils::logTokenNewLine(),
       ));
 
       $this->gamestate->nextState('nextPlayerNegotiateBribe');
@@ -226,7 +227,8 @@ trait PlayCardTrait
       // check if loyaly change
       $cardLoyalty = $this->cards[$cardId]['loyalty'];
       if ($cardLoyalty != null ) {
-        $this->checkAndHandleLoyaltyChange($cardLoyalty);
+        // TODO: fix loyalty change
+        // $this->checkAndHandleLoyaltyChange($cardLoyalty);
       }
 
       // To check: we could probably just do 100 / +100 and then call reallign?

@@ -49,6 +49,8 @@
 */
 
 //    !! It is not a good idea to modify this file when a game is running !!
+
+// require_once 'modules/php/constants.inc.php';
 // define contants for state ids
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
@@ -146,7 +148,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "tax", "betray"),
+        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "move", "tax", "betray"),
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "discardLeverage" => STATE_DISCARD_LEVERAGE,

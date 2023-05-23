@@ -147,6 +147,7 @@ interface Gamestate {
 interface Gamedatas {
   gamestate: ActiveGamestate<unknown>;
   gamestates: Record<number, Gamestate>; // Or Record<string, Gamestate>?
+  playerorder: (string | number)[];
 }
 
 interface BgaPlayer {

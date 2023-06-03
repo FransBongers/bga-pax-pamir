@@ -20,12 +20,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "leverageData" => "obj",
     "rulers" => "obj",
     "loyaltyChangeInput" => "obj",
-    // "rulerHerat" => "int", // Can be removed?
-    // "rulerKabul" => "int", // Can be removed?
-    // "rulerKandahar" => "int", // Can be removed?
-    // "rulerPersia" => "int", // Can be removed?
-    // "rulerPunjab" => "int", // Can be removed?
-    // "rulerTranscaspia" => "int", // Can be removed?
+    "currentEvent" => "obj",
     "setup" => "int",
 
     // TODO: check implementation

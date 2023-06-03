@@ -15,13 +15,13 @@ trait ChangeLoyaltyTrait
 {
 
 
-// ..######......###....##.....##.########
-// .##....##....##.##...###...###.##......
-// .##.........##...##..####.####.##......
-// .##...####.##.....##.##.###.##.######..
-// .##....##..#########.##.....##.##......
-// .##....##..##.....##.##.....##.##......
-// ..######...##.....##.##.....##.########
+  // ..######......###....##.....##.########
+  // .##....##....##.##...###...###.##......
+  // .##.........##...##..####.####.##......
+  // .##...####.##.....##.##.###.##.######..
+  // .##....##..#########.##.....##.##......
+  // .##....##..##.....##.##.....##.##......
+  // ..######...##.....##.##.....##.########
 
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
@@ -73,8 +73,8 @@ trait ChangeLoyaltyTrait
 
     Notifications::changeLoyalty($coalition);
     $this->returnGifts($playerId);
-    $this->discardPrizes($playerId,$coalition);
-    $this->discardPatriots($playerId,$coalition);
+    $this->discardPrizes($playerId, $coalition);
+    $this->discardPatriots($playerId, $coalition);
   }
 
   function returnGifts($playerId)
@@ -100,38 +100,38 @@ trait ChangeLoyaltyTrait
       Notifications::log('in location', $tokenInLocation);
     };
     if (count($moves) > 0) {
-      Notifications::returnGifts($cylinders,$moves);
+      Notifications::returnGifts($cylinders, $moves);
     }
   }
 
-  function discardPrizes($playerId,$coalition)
+  function discardPrizes($playerId, $coalition)
   {
     $from = Locations::prizes($playerId);
     $prizes = Cards::getInLocation($from)->toArray();
+    // TODO: check if this filter is needed?
     $prizes = Utils::filter($prizes, function ($prize) use ($coalition) {
       return $prize['loyalty'] !== $coalition;
     });
-    $cardIds = [];
+
     foreach ($prizes as $index => $card) {
       $to = Locations::discardPile();
 
       Cards::insertOnTop($card['id'], $to);
-      $cardIds[] = $card['id'];
     };
-    if (count($cardIds) > 0) {
-      Notifications::discardPrizes($cardIds);
+    if (count($prizes) > 0) {
+      Notifications::discardPrizes($prizes, $playerId);
     }
   }
 
-  function discardPatriots($playerId,$coalition)
+  function discardPatriots($playerId, $coalition)
   {
     $playerId = intval($playerId);
     $courtCards = Players::get($playerId)->getCourtCards();
-    Notifications::log('courtCards',$courtCards);
+    Notifications::log('courtCards', $courtCards);
     $patriots = Utils::filter($courtCards, function ($card) use ($coalition) {
       return $card['loyalty'] !== null && $card['loyalty'] !== $coalition;
     });
-    Notifications::log('patriots',$patriots);
+    Notifications::log('patriots', $patriots);
     if (count($patriots) > 0) {
       $player = Players::get($playerId);
       Notifications::discardPatriots($player);
@@ -143,5 +143,4 @@ trait ChangeLoyaltyTrait
       $this->nextState('playerActions', $playerId);
     }
   }
-
 }

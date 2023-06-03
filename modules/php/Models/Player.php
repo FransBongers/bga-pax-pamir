@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
 
@@ -122,17 +123,23 @@ class Player extends \PaxPamir\Helpers\DB_Model
         $influence += 1;
       }
     }
-    for ($i = 1; $i <= 3; $i++) {
-      $value = $i * 2;
-      $tokens_in_location = Tokens::getInLocation(['gift', $value, $this->id]);
-      if (count($tokens_in_location) > 0) {
-        $influence += 1;
+
+    $isEmbarrassementOfRichesActive = Events::isEmbarrassementOfRichesActive();
+    Notifications::log('isEmbarrassementOfRichesActive',$isEmbarrassementOfRichesActive);
+    // Gifts
+    if (!$isEmbarrassementOfRichesActive) {
+      Notifications::log('calculateGifts',[]);
+      for ($i = 1; $i <= 3; $i++) {
+        $value = $i * 2;
+        $tokens_in_location = Tokens::getInLocation(['gift', $value, $this->id]);
+        if (count($tokens_in_location) > 0) {
+          $influence += 1;
+        }
       }
     }
 
-    // Tokens::getInLocation('cylinder', 'court_'.$player_id, null, 'state');
-    // TODO (Frans): get information about courd cards and add influence if patriot
-    // Add number of prizes
+    $prizes = $this->getPrizes();
+    $influence += count($prizes);
 
     return $influence;
   }

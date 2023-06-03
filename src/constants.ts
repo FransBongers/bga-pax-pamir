@@ -7,6 +7,8 @@ const CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 const CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 const CLIENT_PLAY_CARD = 'clientPlayCard';
 const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
+const CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
+const CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 
 // size of tokens
 const CARD_WIDTH = 150;
@@ -109,3 +111,39 @@ const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
   */
  const PP_SELECTABLE = 'pp_selectable';
  const PP_SELECTED = 'pp_selected';
+ const PP_CARD_IN_HAND = 'pp_card_in_hand';
+ const PP_CARD_IN_ZONE = 'pp_card_in_zone';
+ const PP_MARKET_CARD = 'pp_market_card';
+ 
+
+ /**
+  * Events
+  */
+/**
+ * Event card effects
+ */
+const ECE_DOMINANCE_CHECK = 'dominanceCheck';
+const ECE_MILITARY_SUIT = 'militarySuit';
+const ECE_NEW_TACTICS = 'newTactics';
+const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
+const ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+const ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
+const ECE_COURTLY_MANNERS = 'courtlyManners';
+const ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
+const ECE_RUMOR = 'rumor';
+const ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
+const ECE_CONFLICT_FATIGUE = 'conflictFatigue';
+const ECE_RIOTS_IN_HERAT = 'riotsInHerat';
+const ECE_NATIONALISM = 'nationalism';
+const ECE_NO_EFFECT = 'noEffect';
+const ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
+const ECE_RIOTS_IN_KABUL = 'riotsInKabul';
+const ECE_NATION_BUILDING = 'nationBuilding';
+const ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
+const ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backingOfPersianAristocracy';
+const ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
+const ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
+const ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
+const ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
+const ECE_POLITICAL_SUIT = 'politicalSuit';
+const ECE_REBUKE = 'rebuke';

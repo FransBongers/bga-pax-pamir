@@ -61,6 +61,20 @@ class PlayerActionsState implements State {
       text: _('Undo'),
       callback: () => this.game.takeAction({ action: 'restart' }),
     });
+    // this.game.addPrimaryActionButton({
+    //   id: 'test_btn',
+    //   text: _('Test'),
+    //   callback: () => {
+    //     const node = dojo.byId(`pp_player_events_container${this.game.getPlayerId()}`);
+    //     node.style.marginTop = '-144px'
+    //     console.log('marketZone', this.game.market.getMarketCardZone({row: 0, column: 5}));
+    //     this.game.move({
+    //       id: 'card_115',
+    //       from: this.game.market.getMarketCardZone({row: 0, column: 5}),
+    //       to: this.game.playerManager.getPlayer({playerId: this.game.getPlayerId()}).getEventsZone(),
+    //     })
+    //   },
+    // });
   }
 
   private updateInterfacePass() {

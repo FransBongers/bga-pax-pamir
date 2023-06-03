@@ -126,6 +126,7 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
  * Card locations
  */
 const DISCARD = 'discard';
+const ACTIVE_EVENTS = 'active_events';
 
 /**
  * Bribe status

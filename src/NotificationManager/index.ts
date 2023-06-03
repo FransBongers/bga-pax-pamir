@@ -47,8 +47,9 @@ class NotificationManager {
       ['discardFromCourt', 1000],
       ['discardFromHand', 250],
       ['discardFromMarket', 250],
-      ['discardPrizes', 250],
+      ['discardPrizes', 1000],
       ['dominanceCheck', 1],
+      ['publicWithdrawal', 1000],
       ['purchaseCard', 2000],
       ['playCard', 2000],
       ['refreshMarket', 250],
@@ -64,6 +65,7 @@ class NotificationManager {
       ['taxMarket', 250],
       ['taxPlayer', 250],
       ['updateCourtCardStates', 1],
+      ['updateInfluence', 1],
     ];
 
     notifs.forEach((notif) => {
@@ -73,7 +75,45 @@ class NotificationManager {
 
     // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
     // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
+
+    // Use below to add tooltips to add tooltips to the log
+    // dojo.connect(this.game.framework().notifqueue, 'addToLog', () => {
+    //   // do stuff here
+    // });
   }
+
+  // Example of making notif work with promises - https://github.com/thoun/knarr/blob/main/src/knarr.ts
+  //   setupNotifications() {
+  //     const notifs = [
+  //         // ...
+  //         ['recruit', 500], // fixed duration
+  //         ['cardDeckReset', undefined], // unknown duration
+  //         ['lastTurn', 1], // (almost) no duration
+  //     ];
+
+  //     notifs.forEach((notif) => {
+  //         dojo.subscribe(notif[0], this, notifDetails => {
+  //             log(`notif_${notif[0]}`, notifDetails.args); // log notif params (with Tisaac log method, so only studio side)
+
+  //             const promise = this[`notif_${notif[0]}`](notifDetails.args);
+
+  //             // tell the UI notification ends
+  //             promise?.then(() => this.notifqueue.onSynchronousNotificationEnd());
+  //         });
+  //         // make all notif as synchronous
+  //         this.notifqueue.setSynchronous(notif[0], notif[1]);
+  //     });
+  // }
+
+  // // ...
+
+  // notif_cardDeckReset(args) {
+  //     this.tableCenter.cardDeck.setCardNumber(args.cardDeckCount, args.cardDeckTop);
+  //     this.tableCenter.setDiscardCount(args.cardDiscardCount);
+
+  //     // make sure the function returns a promise ! (here, the end of the shuffle animation of the deck)
+  //     return this.tableCenter.cardDeck.shuffle();
+  // }
 
   notif_battle(notif) {
     debug('notif_battle', notif);
@@ -223,6 +263,11 @@ class NotificationManager {
   notif_discardFromHand(notif: Notif<NotifDiscardFromHandArgs>) {
     debug('notif_discardFromHand', notif);
     this.game.clearPossible();
+    const node = dojo.byId(notif.args.cardId);
+    console.log('discarded card', node);
+    if (node) {
+      node.classList.remove(PP_CARD_IN_HAND);
+    }
     const playerId = Number(notif.args.playerId);
     const player = this.getPlayer({ playerId });
     player.discardHandCard({ cardId: notif.args.cardId });
@@ -233,10 +278,19 @@ class NotificationManager {
     debug('notif_discardFromMarket', notif);
 
     this.game.clearPossible();
-    const { from, cardId } = notif.args;
-
+    const { from, cardId, to } = notif.args;
     const splitFrom = from.split('_');
-    this.game.market.discardCard({ cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
+    const row = Number(splitFrom[1]);
+    const column = Number(splitFrom[2]);
+    if (to === 'discard') {
+      this.game.market.discardCard({ cardId, row, column });
+    } else if (to === 'active_events') {
+      this.game.move({
+        id: cardId,
+        from: this.game.market.getMarketCardZone({ row, column }),
+        to: this.game.activeEvents,
+      });
+    }
   }
 
   notif_discardPrizes(notif: Notif<NotifDiscardPrizesArgs>) {
@@ -244,8 +298,8 @@ class NotificationManager {
     this.game.clearPossible();
     const playerId = Number(notif.args.playerId);
     const player = this.getPlayer({ playerId });
-    notif.args.cardIds.forEach((cardId) => {
-      player.discardPrize({ cardId });
+    notif.args.prizes.forEach((prize) => {
+      player.discardPrize({ cardId: prize.id });
       player.incCounter({ counter: 'influence', value: -1 });
     });
   }
@@ -354,6 +408,14 @@ class NotificationManager {
     this.getPlayer({ playerId }).getCourtZone().updateDisplay();
   }
 
+  notif_publicWithdrawal(notif: Notif<NotifPublicWithdrawalArgs>) {
+    debug('notif_publicWithdrawal', notif);
+    const { marketLocation } = notif.args;
+    const row = Number(marketLocation.split('_')[1]);
+    const column = Number(marketLocation.split('_')[2]);
+    this.game.market.getMarketRupeesZone({row, column}).removeAll()
+  }
+
   notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
     console.log('notif_purchaseCard', notif);
     const { marketLocation, newLocation, rupeesOnCards, playerId, receivedRupees } = notif.args;
@@ -375,12 +437,13 @@ class NotificationManager {
 
     // Move card from markt
     const cardId = notif.args.card.id;
-    if (newLocation == 'active_events') {
-      this.game.move({
-        id: cardId,
-        from: this.game.market.getMarketCardZone({ row, column: col }),
-        to: this.game.activeEvents,
-      });
+    if (newLocation.startsWith('events_')) {
+      // this.game.move({
+      //   id: cardId,
+      //   from: this.game.market.getMarketCardZone({ row, column: col }),
+      //   to: this.game.activeEvents,
+      // });
+      this.getPlayer({ playerId }).purchaseEvent({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     } else if (newLocation == 'discard') {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
       discardCardAnimation({ cardId, game: this.game });
@@ -531,6 +594,13 @@ class NotificationManager {
       }
     });
     this.getPlayer({ playerId }).getCourtZone().updateDisplay();
+  }
+
+  notif_updateInfluence({ args }: Notif<NotifUpdateInterfaceArgs>) {
+    debug('notif_updateInfluence', args);
+    args.updates.forEach(({ playerId, value }) => {
+      this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
+    });
   }
 
   notif_log(notif) {

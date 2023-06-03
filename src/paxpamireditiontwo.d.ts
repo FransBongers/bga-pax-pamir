@@ -193,6 +193,7 @@ interface PaxPamirGame extends Game {
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
   updateLocalState: (updates: Partial<LocalState>) => void;
   clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
+  clientUpdatePageTitleOtherPlayers: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
 }
 
 interface PaxPamirPlayer extends BgaPlayer {

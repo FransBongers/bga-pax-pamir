@@ -8,6 +8,7 @@
 
 class PPPlayer {
   private court: Zone;
+  private events: Zone;
   private cylinders: Zone;
   private hand: Zone;
   private game: PaxPamirGame;
@@ -68,6 +69,7 @@ class PPPlayer {
     const playerGamedatas = gamedatas.players[this.playerId];
 
     this.setupCourt({ playerGamedatas });
+    this.setupEvents();
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
@@ -81,6 +83,7 @@ class PPPlayer {
 
     this.setupHand({ playerGamedatas });
     this.setupCourt({ playerGamedatas });
+    this.setupEvents();
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
@@ -121,6 +124,12 @@ class PPPlayer {
       });
     });
     this.court.instantaneous = false;
+  }
+
+  setupEvents() {
+    this.events = new ebg.zone();
+    this.events.create(this.game, `player_tableau_events_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
+    this.court.item_margin = 16;
   }
 
   setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -271,8 +280,7 @@ class PPPlayer {
     //   dojo.style(node, 'margin-bottom', `-194px`);
     //   dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
     // }
-    this.updatePrizesStyle({numberOfPrizes})
-
+    this.updatePrizesStyle({ numberOfPrizes });
 
     this.prizes.instantaneous = true;
     playerGamedatas.prizes.forEach((card: CourtCard & Token) => {
@@ -284,7 +292,7 @@ class PPPlayer {
     this.prizes.instantaneous = false;
   }
 
-  updatePrizesStyle({numberOfPrizes}:{numberOfPrizes: number;}) {
+  updatePrizesStyle({ numberOfPrizes }: { numberOfPrizes: number }) {
     if (numberOfPrizes > 0) {
       const node = dojo.byId(`pp_prizes_${this.playerId}`);
       // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
@@ -381,6 +389,10 @@ class PPPlayer {
     return this.court;
   }
 
+  getEventsZone(): Zone {
+    return this.events;
+  }
+
   getHandZone(): Zone {
     return this.hand;
   }
@@ -470,6 +482,27 @@ class PPPlayer {
         break;
       default:
         this.counters[counter].incValue(value);
+    }
+  }
+
+  toValueCounter({
+    counter,
+    value,
+  }: {
+    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
+    value: number;
+  }): void {
+    switch (counter) {
+      case 'cards':
+        this.counters.cards.toValue(value);
+        this.counters.cardsTableau.toValue(value);
+        break;
+      case 'rupees':
+        this.counters.rupees.toValue(value);
+        this.counters.rupeesTableau.toValue(value);
+        break;
+      default:
+        this.counters[counter].toValue(value);
     }
   }
 
@@ -588,6 +621,20 @@ class PPPlayer {
     }
   }
 
+  purchaseEvent({ cardId, from }: { cardId: string; from: Zone }) {
+    if (this.events.getItemNumber() === 0) {
+      const node = dojo.byId(`pp_player_events_container${this.playerId}`);
+      node.style.marginTop = '-144px';
+      this.game.tooltipManager.addTooltipToCard({ cardId });
+    }
+    this.game.move({
+      id: cardId,
+      from,
+      to: this.getEventsZone(),
+      removeClass: [PP_MARKET_CARD]
+    });
+  }
+
   removeTaxCounter() {
     const taxCounter = dojo.byId(`rupees_tableau_${this.playerId}_tax_counter`);
     if (taxCounter) {
@@ -595,18 +642,18 @@ class PPPlayer {
     }
   }
 
-  takePrize({ cardId, cardOwnerId }: { cardId: string; cardOwnerId: number; }): void {
-    debug('item number',this.prizes.getItemNumber());
-    this.updatePrizesStyle({numberOfPrizes: this.prizes.getItemNumber() + 1})
+  takePrize({ cardId, cardOwnerId }: { cardId: string; cardOwnerId: number }): void {
+    debug('item number', this.prizes.getItemNumber());
+    this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
     this.game.move({
       id: cardId,
       from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
       to: this.getPrizeZone(),
       addClass: ['pp_prize'],
-      removeClass: ['pp_card_in_court',`pp_player_${cardOwnerId}`],
+      removeClass: ['pp_card_in_court', `pp_player_${cardOwnerId}`],
       // weight,
     });
-    this.incCounter({counter: 'influence', value: 1});
+    this.incCounter({ counter: 'influence', value: 1 });
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)

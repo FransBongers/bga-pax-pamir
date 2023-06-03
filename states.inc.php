@@ -65,7 +65,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
     define("STATE_CLEANUP_DISCARD_EVENTS", 12);
-    // define("STATE_RESOLVE_EVENT", 20);
+    define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("STATE_DOMINANCE_CHECK", 30);
     define("STATE_CARD_ACTION_BATTLE", 40);
@@ -153,6 +153,7 @@ $machinestates = array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "discardLeverage" => STATE_DISCARD_LEVERAGE,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
+            "resolveEvent" => STATE_RESOLVE_EVENT,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
@@ -195,6 +196,8 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "refreshMarket" => STATE_REFRESH_MARKET,
+            "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
+            "resolveEvent" => STATE_RESOLVE_EVENT,
         )
     ),
 
@@ -370,6 +373,21 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
         )
+    ],
+
+    STATE_RESOLVE_EVENT => [
+        "name" => "resolveEvent",
+        "description" => '',
+        "descriptionmyturn" => '',
+        "type" => "activeplayer",
+        "args" => "argResolveEvent",
+        "possibleactions" => ["eventChoice"],
+        "transitions" => [
+            // "cleanup" => STATE_CLEANUP,
+            "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "resolveEvent" => STATE_RESOLVE_EVENT,
+        ]
     ],
 
     // Generic state to change player

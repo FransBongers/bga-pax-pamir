@@ -10,6 +10,7 @@
 - End of game
 - Instability rule: resolve dominance check when two are in the market
 - Overthrow rule: linnk between political cards and ruled regions
+- Check states file
 
 ### Card Actions
 - Battle

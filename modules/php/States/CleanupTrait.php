@@ -7,6 +7,8 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -55,22 +57,106 @@ trait CleanupTrait
     }
   }
 
+  function stCleanupDiscardEvents()
+  {
+    // Discard events at front of market
+    $interrupt = $this->checkAndDiscardIfEvent('market_0_0');
+    if ($interrupt) {
+      return;
+    }
+    $interrupt = $this->checkAndDiscardIfEvent('market_1_0');
+    if ($interrupt) {
+      return;
+    }
+    $this->gamestate->nextState('refreshMarket');
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
   function checkAndDiscardIfEvent($location)
   {
     $card = Cards::getInLocation($location)->first();
     if ($card != null && $card['type'] == EVENT_CARD) {
-      $state = Cards::getExtremePosition(true, DISCARD);
-      Cards::move($card['id'], DISCARD, $state + 1);
-      Notifications::discardEventCardFromMarket($card, $location);
+      $cardId = $card['id'];
+      $to = in_array($cardId,['card_106','card_107']) ? ACTIVE_EVENTS : DISCARD;
+      Cards::insertOnTop($card['id'], $to);
+      Notifications::discardEventCardFromMarket($card, $location,$to);
+      $this->resolveEventEffect($card['discarded']['effect'],$location);
+
+      // Only card that can interrupt flow while discard event cards from market
+      if($cardId === 'card_114') {
+        return true;
+      }
     };
+    return false;
   }
 
-  function stCleanupDiscardEvents()
+  function resolveEventEffect($event,$location)
   {
-    // Discard events at front of market
-    $this->checkAndDiscardIfEvent('market_0_0');
-    $this->checkAndDiscardIfEvent('market_1_0');
-
-    $this->gamestate->nextState('refreshMarket');
+    Notifications::log('event',$event);
+    switch($event) {
+      // cards 101-104
+      case ECE_DOMINANCE_CHECK:
+        break;
+      // card 105
+      case ECE_MILITARY_SUIT:
+        $this->resolveFavoredSuitChange(MILITARY,false);
+        break;
+      // card 106
+      case ECE_EMBARRASSEMENT_OF_RICHES:
+        Events::embarrassementOfRiches();
+        break;
+      // card 107
+      case ECE_DISREGARD_FOR_CUSTOMS:
+        // No additional action needed at this point
+        break;
+      // card 108
+      case ECE_FAILURE_TO_IMPRESS:
+        Events::failureToImpress();
+        break;
+      // card 109
+      case ECE_RIOTS_IN_PUNJAB:
+        Events::riot(PUNJAB);
+        break;
+      // card 110
+      case ECE_RIOTS_IN_HERAT:
+        Events::riot(HERAT);
+        break;
+      // card 111
+      case ECE_NO_EFFECT:
+        // Event has a discard effect instead of purchasse effect
+        Events::publicWithdrawal($location);
+        break;
+      // card 112
+      case ECE_RIOTS_IN_KABUL:
+        Events::riot(KABUL);
+        break;
+      // card 113
+      case ECE_RIOTS_IN_PERSIA:
+        Events::riot(PERSIA);
+        break;
+      // card 114
+      case ECE_CONFIDENCE_FAILURE:
+        Events::confidenceFailure();
+        break;
+      // card 115
+      case ECE_INTELLIGENCE_SUIT:
+        $this->resolveFavoredSuitChange(INTELLIGENCE,false);
+        break;
+      // card 116
+      case ECE_POLITICAL_SUIT:
+        $this->resolveFavoredSuitChange(POLITICAL,false);
+        break;
+      default:
+        Notifications::log('no match for event',[]);
+    }
   }
+
+
 }

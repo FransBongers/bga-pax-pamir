@@ -123,6 +123,17 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function eventChoice()
+    {
+        self::setAjaxMode();
+        $data = self::getArg("data", AT_json, true);
+        // $args = self::getArg('actionArgs', AT_json, true);
+        Utils::validateJSonAlphaNum($data, 'data');
+        // $this->validateJSonAlphaNum($args, 'actionArgs');
+        $result = $this->game->eventChoice($data);
+        self::ajaxResponse();
+    }
+
     public function move()
     {
         self::setAjaxMode();

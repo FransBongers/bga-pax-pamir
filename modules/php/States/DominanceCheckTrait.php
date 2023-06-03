@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
@@ -81,7 +82,7 @@ trait DominanceCheckTrait
       $scores = $this->determineVictoryPoints($loyalPlayers, $availablePoints);
       $moves = $this->handleSuccessfulDominanceCheck();
     } else {
-      // Determine numer of cylinders in play by each player
+      // Determine number of cylinders in play by each player
       $cylinderCounts = $this->getCylindersInPlayPerPlayer();
 
       // Sort array so player with highest number is at 0.
@@ -177,6 +178,7 @@ trait DominanceCheckTrait
     $moves = array();
     // return all coalition blocks to their pools
     $afghanBlocks = Tokens::getInLocation(BLOCKS_AFGHAN_SUPPLY);
+    Notifications::log('afghanBlocks',$afghanBlocks);
     foreach ($afghanBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
@@ -189,6 +191,7 @@ trait DominanceCheckTrait
     };
 
     $russianBlocks = Tokens::getInLocation(BLOCKS_RUSSIAN_SUPPLY);
+    Notifications::log('russianBlocks',$russianBlocks);
     foreach ($russianBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
@@ -201,6 +204,7 @@ trait DominanceCheckTrait
     };
 
     $britishBlocks = Tokens::getInLocation(BLOCKS_BRITISH_SUPPLY);
+    Notifications::log('britishBlocks',$britishBlocks);
     foreach ($britishBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(

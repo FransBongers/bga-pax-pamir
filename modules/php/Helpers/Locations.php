@@ -14,4 +14,14 @@ abstract class Locations extends \APP_DbObject
   {
     return 'prizes_'.$playerId;
   }
+
+  public static function hand($playerId)
+  {
+    return 'hand_' . $playerId;
+  }
+
+  public static function playerEvent($playerId)
+  {
+    return 'events_'.$playerId;
+  }
 }

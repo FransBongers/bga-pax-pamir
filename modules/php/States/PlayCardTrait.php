@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -126,7 +127,7 @@ trait PlayCardTrait
 
       $this->gamestate->nextState('nextPlayerNegotiateBribe');
       return;
-    } else if ($bribe > 0) {
+    } else if ($checkBribeResult !== null && $bribe > 0) {
       $this->payBribe($playerId, $checkBribeResult['ruler'], $bribe);
     }
 
@@ -201,6 +202,9 @@ trait PlayCardTrait
 
   function checkBribe($card, $playerId)
   {
+    if (Events::isDisregardForCustomsActive()) {
+      return null;
+    };
     $rulers = Globals::getRulers();
     $region = $card['region'];
     self::dump("ruler", $rulers[$region]);

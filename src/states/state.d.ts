@@ -16,6 +16,9 @@ interface ClientCardActionStateArgs {
   cardId: string;
 }
 
+interface ClientResolveEventStateArgs {
+  event: string;
+}
 
 interface EnteringDiscardCourtArgs {
   numberOfDiscards: number;
@@ -46,6 +49,10 @@ interface OnEnteringPlaceRoadArgs {
     name: string;
     borders: string[];
   };
+}
+
+interface OnEnteringResolveEventArgs {
+  event: string;
 }
 
 interface OnEnteringPlaceSpyArgs {

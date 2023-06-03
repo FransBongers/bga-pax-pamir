@@ -9,6 +9,7 @@ use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
@@ -37,7 +38,22 @@ trait DebugTrait
 
   function test()
   {
-
+    // Cards::move('card_107',ACTIVE_EVENTS);
+    // Cards::move('card_116','market_0_1');
+    Cards::move('card_116','market_1_2');
+    // $rupee = Tokens::getTopOf(RUPEE_SUPPLY);
+    // Tokens::move($rupee['id'],['market_0_0','rupees']);
+    // Cards::move('card_106','market_1_0');
+    // Events::failureToImpress();
+    // Notifications::log('isActive',$result);
+    // $this->debugCreateArmy(PERSIA,BRITISH);
+    // $this->debugCreateArmy(PERSIA,BRITISH);
+    // $this->debugCreateArmy(PERSIA,AFGHAN);
+    // $this->debugCreateArmy(PERSIA,AFGHAN);
+    // $this->debugCreateArmy(PERSIA,RUSSIAN);
+    // $this->debugCreateTribe(PERSIA);
+    // $this->debugCreateTribe(PERSIA);
+    // Map::removeTribesFromRegion(PERSIA);
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)
@@ -177,7 +193,7 @@ trait DebugTrait
   {
     $previous_suit_id = Globals::getFavoredSuit();
     Globals::setFavoredSuit($suitId);
-    Notifications::changeFavoredSuit($previous_suit_id, $suitId);
+    Notifications::changeFavoredSuit($previous_suit_id, $suitId,false);
   }
 
   function debugGetState()

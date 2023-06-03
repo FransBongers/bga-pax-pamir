@@ -30,7 +30,7 @@ html {
 }
 
 #pp_play_area {
-    grid-gap: 15px;
+    grid-gap: 16px;
     display: grid;
     grid-auto-flow: dense;
     @media (max-width: 2080px) {
@@ -55,7 +55,8 @@ html {
     background-color: ivory;
     position: relative;
     /* width: 1000px; */
-    box-shadow: rgb(0 0 0) 2px 2px 8px;
+    box-shadow: 1px 1px 5px #000;
+    // box-shadow: rgb(0 0 0) 2px 2px 8px;
     /* padding: 10px; */
     display: flex;
     padding: 16px;
@@ -237,7 +238,8 @@ html {
     grid-column: 1 / span 1;
     grid-row: span 1;
     width: 1000px;
-    box-shadow: rgb(0 0 0) 2px 2px 8px;
+    // box-shadow: rgb(0 0 0) 2px 2px 8px;
+    box-shadow: 1px 1px 5px #000;
     height: 492px;
     position: relative;
 }
@@ -296,7 +298,8 @@ html {
     width: 150px;
     height: 209px;
     background-size: 150px 209px;
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+    // box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+    box-shadow: 2px 2px 5px -1px #000;
     border-radius: 10px;
 }
 

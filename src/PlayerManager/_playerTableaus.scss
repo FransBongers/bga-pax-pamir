@@ -13,6 +13,16 @@
   margin: 10px 20px;
 }
 
+.pp_player_events_container {
+  height: 209px;
+  padding-left: 8px;
+  // background-color: white;
+  margin-bottom: 16px;
+  margin-top: -209px;
+  z-index: 0;
+  transition: margin-top 1s;
+}
+
 #pp_player_tableaus {
   grid-column: span 1;
   grid-row: span 4;
@@ -22,13 +32,15 @@
 }
 
 .pp_player_tableau {
+  position: relative;
   /* box-shadow: rgb(0 0 0) 2px 2px 8px; */
+  box-shadow: 1px 1px 5px #000;
   /* position: relative; */
   display: flex;
   flex-direction: row;
   min-height: 270px;
-  margin-bottom: 15px;
   padding-bottom: 16px;
+  z-index: 1;
 }
 
 .pp_player_tableau_right {
@@ -112,7 +124,8 @@
   // background-color: white;
   border-radius: 50%;
   margin: 5px;
-  box-shadow: rgb(0 0 0 / 40%) 5px 5px 5px 0px;
+  // box-shadow: rgb(0 0 0 / 40%) 5px 5px 5px 0px;
+  box-shadow: 2px 2px 5px -1px #000;
   border: 1px solid black;
 }
 

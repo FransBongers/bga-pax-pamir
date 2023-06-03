@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -51,28 +52,16 @@ trait PurchaseCardTrait
     $cost = $checkData['cost'];
     $rowAlt = $checkData['rowAlt'];
     $marketLocation = $checkData['marketLocation'];
-    
-    $nextState = 'playerActions';
+
     Players::incRupees($playerId, -$cost);
     Globals::incRemainingActions(-1);
 
-    // move card based on card type
-    // TODO (event cards)
-    $newLocation = 'hand_' . $playerId;
-    if ($card['type'] == EVENT_CARD && $card['purchased']['effect'] === ECE_DOMINANCE_CHECK) {
-      $newLocation = 'discard';
-      $nextState = 'dominanceCheck';
-    } else if ($card['type'] == EVENT_CARD) {
-      $newLocation = 'active_events';
-    }
-    Cards::move($cardId, $newLocation);
-    
 
     $rupeesOnCards = array();
 
     // Place rupees on market cards
     for ($i = $column - 1; $i >= 0; $i--) {
-      $location = ['market',$row,$i];
+      $location = ['market', $row, $i];
       $marketCard = Cards::getInLocation($location)->first();
       // If location is empty put rupee(s) on the other row
       if ($marketCard == NULL) {
@@ -84,7 +73,7 @@ trait PurchaseCardTrait
         // Add rupees base on card cost (ie add two if favored suit is military)
         for ($j = 1; $j <= $baseCost; $j++) {
           $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
-          Tokens::move($rupee['id'], [implode('_',$location), 'rupees']);
+          Tokens::move($rupee['id'], [implode('_', $location), 'rupees']);
           $rupeesOnCards[] = array(
             'row' => $location[1],
             'column' => $i,
@@ -100,9 +89,22 @@ trait PurchaseCardTrait
     Players::incRupees($playerId, $receivedRupees);
     Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
+    $isEventCard = $card['type'] == EVENT_CARD;
+    // move card based on card type
+    // TODO (event cards)
+    $newLocation = 'hand_' . $playerId;
+    if ($isEventCard) {
+      $newLocation = Events::getPurchasedEventLocation($card['purchased']['effect'], $playerId);
+    };
+    Cards::move($cardId, $newLocation);
+
     Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
 
-    $this->gamestate->nextState($nextState);
+    if ($isEventCard) {
+      $this->resolvePurchasedEventEffect($card['purchased']['effect']);
+    } else {
+      $this->gamestate->nextState('playerActions');
+    }
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -122,6 +124,9 @@ trait PurchaseCardTrait
     // Card should be available
     if ($card['used'] == 1) {
       throw new \feException("Card is unavailble");
+    }
+    if ($card['id'] == 'card_111') {
+      throw new \feException("Not allowed to purchase Public Withdrawal");
     }
     // Card should be in the market
     if (!Utils::startsWith($card['location'], "market")) {
@@ -144,5 +149,55 @@ trait PurchaseCardTrait
       'cost' => $cost,
       'marketLocation' => $marketLocation,
     ];
+  }
+
+  function resolvePurchasedEventEffect($event)
+  {
+    switch ($event) {
+      case ECE_DOMINANCE_CHECK:
+        $this->gamestate->nextState('dominanceCheck');
+        break;
+      case ECE_NEW_TACTICS: // card_105
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_KOH_I_NOOR_RECOVERED: // card_106
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_COURTLY_MANNERS: // card_107
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_RUMOR: // card_108
+        Events::setCurrentEventGlobalState(ECE_RUMOR);
+        $this->nextState("resolveEvent");
+        break;
+      case ECE_CONFLICT_FATIGUE: // card_109
+        break;
+      case ECE_NATIONALISM: // card_110
+        break;
+      case ECE_PUBLIC_WITHDRAWAL: // card_111
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_NATION_BUILDING: // card_112
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_BACKING_OF_PERSIAN_ARISTOCRACY: // card_113
+        Events::backingOfPersianAristocracy();
+        $this->gamestate->nextState('playerActions');
+        break;
+      case ECE_OTHER_PERSUASIVE_METHODS: // card_114
+        Events::setCurrentEventGlobalState(ECE_OTHER_PERSUASIVE_METHODS);
+        $this->nextState("resolveEvent");
+        break;
+      case ECE_PASHTUNWALI_VALUES: // card_115
+        Events::setCurrentEventGlobalState(ECE_PASHTUNWALI_VALUES);
+        $this->nextState("resolveEvent");
+        break;
+      case ECE_REBUKE: // card_116
+        Events::setCurrentEventGlobalState(ECE_REBUKE);
+        $this->nextState("resolveEvent");
+        break;
+      default:
+        $this->gamestate->nextState('playerActions');
+    }
   }
 }

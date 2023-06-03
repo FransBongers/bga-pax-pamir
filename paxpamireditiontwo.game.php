@@ -67,6 +67,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
     use PaxPamir\States\RefreshMarketTrait;
+    use PaxPamir\States\ResolveEventTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\States\TurnTrait;
 
@@ -169,7 +170,7 @@ class PaxPamirEditionTwo extends Table
         foreach ($this->loyalty as $coalitionId => $coalition) {
             $data['coalitionBlocks'][$coalitionId] = Tokens::getInLocation(['blocks', $coalitionId])->toArray();
         }
-        $data['activeEvents'] = Cards::getInLocation('active_events')->toArray();
+        $data['activeEvents'] = Cards::getInLocation(ACTIVE_EVENTS)->toArray();
 
         return $data;
     }

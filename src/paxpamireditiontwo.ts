@@ -51,6 +51,8 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_CARD_ACTION_TAX]: ClientCardActionTaxState;
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
+    [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
+    [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
     discardCourt: DiscardCourtState;
     discardHand: DiscardHandState;
     discardLeverage: DiscardLeverageState;
@@ -58,6 +60,7 @@ class PaxPamir implements PaxPamirGame {
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;
     playerActions: PlayerActionsState;
+    resolveEvent: ResolveEventState;
     setup: SetupState;
   };
 
@@ -97,6 +100,8 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_CARD_ACTION_TAX]: new ClientCardActionTaxState(this),
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
+      [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
+      [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
       discardCourt: new DiscardCourtState(this),
       discardHand: new DiscardHandState(this),
       discardLeverage: new DiscardLeverageState(this),
@@ -104,6 +109,7 @@ class PaxPamir implements PaxPamirGame {
       placeRoad: new PlaceRoadState(this),
       placeSpy: new PlaceSpyState(this),
       playerActions: new PlayerActionsState(this),
+      resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
     };
 
@@ -131,6 +137,7 @@ class PaxPamir implements PaxPamirGame {
     // // Setup game notifications to handle (see "setupNotifications" method below)
     this.notificationManager.setupNotifications();
 
+    // TO CHECK: add tooltips to log here?
     dojo.connect(this.framework().notifqueue, 'addToLog', () => {
       this.checkLogCancel(this._last_notif == null ? null : this._last_notif.msg.uid);
       this.addLogClass();
@@ -155,7 +162,7 @@ class PaxPamir implements PaxPamirGame {
   public onEnteringState(stateName: string, args: any) {
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
-    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
+    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || stateName === 'resolveEvent') {
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }
@@ -361,8 +368,15 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
+  // TODO: check if we can make below functions a single function and just update both since framework
+  // will only show one?
   clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
     this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+    this.framework().updatePageTitle();
+  }
+
+  clientUpdatePageTitleOtherPlayers({ text, args }: { text: string; args: Record<string, string | number> }) {
+    this.gamedatas.gamestate.description = dojo.string.substitute(_(text), args);
     this.framework().updatePageTitle();
   }
 

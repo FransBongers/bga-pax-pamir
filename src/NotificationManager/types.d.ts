@@ -95,11 +95,12 @@ interface NotifDiscardFromMarketArgs {
   playerId: string;
   player_name: string;
   from: string;
+  to: string;
   logTokenLargeCard: string;
 }
 
 interface NotifDiscardPrizesArgs {
-  cardIds: string[];
+  prizes: CourtCard[];
   playerId: string;
   player_name: string;
 }
@@ -115,6 +116,10 @@ interface NotifPlayCardArgs {
   cardName: string;
   courtCards: Token[];
   bribe: boolean;
+}
+
+interface NotifPublicWithdrawalArgs {
+  marketLocation: string;
 }
 
 interface NotifPurchaseCardArgs {
@@ -193,6 +198,13 @@ interface NotifUpdateCourtCardStatesArgs {
   cardStates: {
     cardId: string;
     state: number;
+  }[];
+}
+
+interface NotifUpdateInterfaceArgs {
+  updates: {
+    playerId: number;
+    value: number;
   }[];
 }
 

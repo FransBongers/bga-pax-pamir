@@ -40,27 +40,13 @@ class Map
     return Game::get()->regions[$region];
   }
 
-  /*
-    Returns rulers for all regions. Value will either be 0 (no ruler) or
-    the playerId of the player ruling the region
-  */
-  public static function getRulers()
+  public static function borderHasRoadForCoalition($border, $coalition)
   {
-    return Globals::getRulers();
+    $roads = Tokens::getInLocation(['roads', $border])->toArray();
+    return Utils::array_some($roads, function ($road) use ($coalition) {
+      return explode('_', $road['id'])[1] === $coalition;
+    });
   }
-
-  public static function checkRulerChange($region)
-  {
-    $newRuler = self::determineRuler($region);
-    $rulers = Globals::getRulers();
-    $currentRuler = $rulers[$region];
-    if ($newRuler !== $currentRuler) {
-      $rulers[$region] = $newRuler;
-      Globals::setRulers($rulers);
-      Notifications::changeRuler($currentRuler, $newRuler, $region);
-    };
-  }
-
 
   /**
    * Returns playerId if there is a ruler. Otherwise returns 0.
@@ -101,11 +87,75 @@ class Map
     return null;
   }
 
-  public static function borderHasRoadForCoalition($border, $coalition)
+
+  /*
+    Returns rulers for all regions. Value will either be 0 (no ruler) or
+    the playerId of the player ruling the region
+  */
+  public static function getRulers()
   {
-    $roads = Tokens::getInLocation(['roads',$border])->toArray();
-    return Utils::array_some($roads, function ($road) use ($coalition) {
-      return explode('_', $road['id'])[1] === $coalition;
-    });
+    return Globals::getRulers();
+  }
+
+  public static function checkRulerChange($region)
+  {
+    $newRuler = self::determineRuler($region);
+    $rulers = Globals::getRulers();
+    $currentRuler = $rulers[$region];
+    if ($newRuler !== $currentRuler) {
+      $rulers[$region] = $newRuler;
+      Globals::setRulers($rulers);
+      Notifications::changeRuler($currentRuler, $newRuler, $region);
+    };
+  }
+
+  /**
+   * Moves all armies in region to supply. Returns array of moves
+   * that can be used for notification
+   */
+  public static function removeArmiesFromRegion($regionId) {
+    $moves = [];
+    $from = "armies_".$regionId;
+    $armies = Tokens::getInLocation($from)->toArray();
+    foreach($armies as $index => $army) {
+      
+      $tokenId = $army['id'];
+      $coalition = explode('_',$tokenId)[1];
+      $to = 'blocks_'.$coalition;
+      $weight = Tokens::insertOnTop($tokenId,$to);
+      $moves[] =  [
+        'from' => $from,
+        'to' => $to,
+        'tokenId' => $tokenId,
+        'weight' => $weight,
+      ];
+    }
+    Notifications::log('moves',$moves);
+    return $moves;
+  }
+
+    /**
+   * Moves all armies in region to supply. Returns array of moves
+   * that can be used for notification
+   */
+  public static function removeTribesFromRegion($regionId) {
+    $moves = [];
+    $from = "tribes_".$regionId;
+    $tribes = Tokens::getInLocation($from)->toArray();
+    foreach($tribes as $index => $tribe) {
+      
+      $tokenId = $tribe['id'];
+      $playerId = explode('_',$tokenId)[1];
+      $to = 'cylinders_'.$playerId;
+      $weight = Tokens::insertOnTop($tokenId,$to);
+      $moves[] =  [
+        'from' => $from,
+        'to' => $to,
+        'tokenId' => $tokenId,
+        'weight' => $weight,
+      ];
+    }
+    Notifications::log('moves',$moves);
+    return $moves;
   }
 }

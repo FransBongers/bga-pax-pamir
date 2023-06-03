@@ -130,41 +130,47 @@
         </div>
         <!-- END player_hand -->
         <!-- BEGIN player_tableau -->
-        <div id="player_tableau_{player_id}" class="pp_player_tableau pp_player_color_{player_color}">
-            <div class="pp_tableau_left">
-                <div id="pp_ruler_tokens_player_{player_id}" class="pp_ruler_tokens_player"></div>
-                <div class="pp_loyalty_dial_section">
-                    <div id="pp_prizes_{player_id}" class="pp_prizes"></div>
-                    <div class="pp_loyalty_dial_container">
-                        <div id="pp_loyalty_dial_{player_id}" class="pp_loyalty_dial"></div>
-                        <div class="pp_loyalty_dial_cover pp_player_color_{player_color}"></div>
-                        <div id="pp_gift_2_{player_id}" class="pp_gift pp_gift_2">
-                            <div id="pp_gift_2_zone_{player_id}" class="pp_gift_zone"></div>
+        <div id="player_tableau_{player_id}" >
+            <div class="pp_player_tableau pp_player_color_{player_color}">
+                <div class="pp_tableau_left">
+                    <div id="pp_ruler_tokens_player_{player_id}" class="pp_ruler_tokens_player"></div>
+                    <div class="pp_loyalty_dial_section">
+                        <div id="pp_prizes_{player_id}" class="pp_prizes"></div>
+                        <div class="pp_loyalty_dial_container">
+                            <div id="pp_loyalty_dial_{player_id}" class="pp_loyalty_dial"></div>
+                            <div class="pp_loyalty_dial_cover pp_player_color_{player_color}"></div>
+                            <div id="pp_gift_2_{player_id}" class="pp_gift pp_gift_2">
+                                <div id="pp_gift_2_zone_{player_id}" class="pp_gift_zone"></div>
+                            </div>
+                            <div id="pp_gift_4_{player_id}" class="pp_gift pp_gift_4">
+                                <div id="pp_gift_4_zone_{player_id}" class="pp_gift_zone"></div>
+                            </div>
+                            <div id="pp_gift_6_{player_id}" class="pp_gift pp_gift_6">
+                                <div id="pp_gift_6_zone_{player_id}" class="pp_gift_zone"></div>
+                            </div>
                         </div>
-                        <div id="pp_gift_4_{player_id}" class="pp_gift pp_gift_4">
-                            <div id="pp_gift_4_zone_{player_id}" class="pp_gift_zone"></div>
+                    </div>
+                </div>
+                <div class="pp_player_tableau_right">
+                    <div class="pp_player_tableau_title_container">
+                        <div id="pp_tableau_title_player_{player_id}" class="pp_player_tableau_title"><span>{player_name}'s court</span></div>
+                        <div id="pp_tableau_title_icons_player_{player_id}" class="pp_player_tableau_icons">
+                            <div id="rupees_tableau_{player_id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_{player_id}" class="pp_icon_count"><span id="rupee_count_tableau_{player_id}_counter"></span></div></div>
+                            <div id="cards_tableau_{player_id}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_{player_id}" class="pp_icon_count"><span id="card_count_tableau_{player_id}_counter"></span></div></div>
                         </div>
-                        <div id="pp_gift_6_{player_id}" class="pp_gift pp_gift_6">
-                            <div id="pp_gift_6_zone_{player_id}" class="pp_gift_zone"></div>
+                    </div>
+                    <div class="pp_tableau_inner_container">
+                        <div class="pp_tableau_inner_left">
+                            <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
+                        </div>
+                        <div class="pp_tableau_inner_right">
+                            <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="pp_player_tableau_right">
-                <div class="pp_player_tableau_title_container">
-                    <div id="pp_tableau_title_player_{player_id}" class="pp_player_tableau_title"><span>{player_name}'s court</span></div>
-                    <div id="pp_tableau_title_icons_player_{player_id}" class="pp_player_tableau_icons">
-                        <div id="rupees_tableau_{player_id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_{player_id}" class="pp_icon_count"><span id="rupee_count_tableau_{player_id}_counter"></span></div></div>
-                        <div id="cards_tableau_{player_id}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_{player_id}" class="pp_icon_count"><span id="card_count_tableau_{player_id}_counter"></span></div></div>
-                    </div>
-                </div>
-                <div class="pp_tableau_inner_container">
-                    <div class="pp_tableau_inner_left">
-                        <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
-                    </div>
-                    <div class="pp_tableau_inner_right">
-                        <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
-                    </div>
+            <div id="pp_player_events_container{player_id}" class="pp_player_events_container">
+                <div id="player_tableau_events_{player_id}">
                 </div>
             </div>
         </div>

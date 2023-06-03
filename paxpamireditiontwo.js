@@ -256,6 +256,8 @@ var CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
+var CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
+var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
 var ARMY_HEIGHT = 40;
@@ -330,6 +332,34 @@ var CARD_ACTIONS_WITH_COST = [TYPE_BETRAY, TYPE_BUILD, TYPE_GIFT];
 var CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE, TYPE_MOVE, TYPE_TAX];
 var PP_SELECTABLE = 'pp_selectable';
 var PP_SELECTED = 'pp_selected';
+var PP_CARD_IN_HAND = 'pp_card_in_hand';
+var PP_CARD_IN_ZONE = 'pp_card_in_zone';
+var PP_MARKET_CARD = 'pp_market_card';
+var ECE_DOMINANCE_CHECK = 'dominanceCheck';
+var ECE_MILITARY_SUIT = 'militarySuit';
+var ECE_NEW_TACTICS = 'newTactics';
+var ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
+var ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+var ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
+var ECE_COURTLY_MANNERS = 'courtlyManners';
+var ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
+var ECE_RUMOR = 'rumor';
+var ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
+var ECE_CONFLICT_FATIGUE = 'conflictFatigue';
+var ECE_RIOTS_IN_HERAT = 'riotsInHerat';
+var ECE_NATIONALISM = 'nationalism';
+var ECE_NO_EFFECT = 'noEffect';
+var ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
+var ECE_RIOTS_IN_KABUL = 'riotsInKabul';
+var ECE_NATION_BUILDING = 'nationBuilding';
+var ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
+var ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backingOfPersianAristocracy';
+var ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
+var ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
+var ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
+var ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
+var ECE_POLITICAL_SUIT = 'politicalSuit';
+var ECE_REBUKE = 'rebuke';
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
@@ -751,6 +781,7 @@ var PPPlayer = (function () {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
+        this.setupEvents();
         this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
@@ -762,6 +793,7 @@ var PPPlayer = (function () {
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupHand({ playerGamedatas: playerGamedatas });
         this.setupCourt({ playerGamedatas: playerGamedatas });
+        this.setupEvents();
         this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
@@ -797,6 +829,11 @@ var PPPlayer = (function () {
             });
         });
         this.court.instantaneous = false;
+    };
+    PPPlayer.prototype.setupEvents = function () {
+        this.events = new ebg.zone();
+        this.events.create(this.game, "player_tableau_events_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
+        this.court.item_margin = 16;
     };
     PPPlayer.prototype.setupCylinders = function (_a) {
         var _this = this;
@@ -1009,6 +1046,9 @@ var PPPlayer = (function () {
     PPPlayer.prototype.getCourtZone = function () {
         return this.court;
     };
+    PPPlayer.prototype.getEventsZone = function () {
+        return this.events;
+    };
     PPPlayer.prototype.getHandZone = function () {
         return this.hand;
     };
@@ -1078,6 +1118,21 @@ var PPPlayer = (function () {
                 break;
             default:
                 this.counters[counter].incValue(value);
+        }
+    };
+    PPPlayer.prototype.toValueCounter = function (_a) {
+        var counter = _a.counter, value = _a.value;
+        switch (counter) {
+            case 'cards':
+                this.counters.cards.toValue(value);
+                this.counters.cardsTableau.toValue(value);
+                break;
+            case 'rupees':
+                this.counters.rupees.toValue(value);
+                this.counters.rupeesTableau.toValue(value);
+                break;
+            default:
+                this.counters[counter].toValue(value);
         }
     };
     PPPlayer.prototype.addSideSelectToCourt = function () {
@@ -1172,6 +1227,20 @@ var PPPlayer = (function () {
             dojo.addClass(cardId, 'pp_moving');
             from.removeFromZone(cardId, true, "player_board_".concat(this.playerId));
         }
+    };
+    PPPlayer.prototype.purchaseEvent = function (_a) {
+        var cardId = _a.cardId, from = _a.from;
+        if (this.events.getItemNumber() === 0) {
+            var node = dojo.byId("pp_player_events_container".concat(this.playerId));
+            node.style.marginTop = '-144px';
+            this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+        }
+        this.game.move({
+            id: cardId,
+            from: from,
+            to: this.getEventsZone(),
+            removeClass: [PP_MARKET_CARD]
+        });
     };
     PPPlayer.prototype.removeTaxCounter = function () {
         var taxCounter = dojo.byId("rupees_tableau_".concat(this.playerId, "_tax_counter"));
@@ -1565,9 +1634,10 @@ var Region = (function () {
         }
     };
     Region.prototype.clearSelectable = function () {
+        console.log('clearSelectable region', this.region);
         var element = document.getElementById("pp_region_".concat(this.region));
         if (element) {
-            element.classList.remove('pp_selectable');
+            element.classList.remove(PP_SELECTABLE, PP_SELECTED);
         }
     };
     return Region;
@@ -1621,7 +1691,7 @@ var PPMap = (function () {
         });
         var mapArea = document.getElementById('pp_map_areas');
         if (mapArea) {
-            mapArea.classList.remove('pp_selectable');
+            mapArea.classList.remove(PP_SELECTABLE);
         }
     };
     return PPMap;
@@ -1770,6 +1840,10 @@ var Market = (function () {
     };
     Market.prototype.discardCard = function (_a) {
         var cardId = _a.cardId, row = _a.row, column = _a.column;
+        var node = dojo.byId(cardId);
+        if (node) {
+            node.classList.remove(PP_MARKET_CARD);
+        }
         this.getMarketCardZone({ row: row, column: column }).removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game });
     };
@@ -2931,6 +3005,12 @@ var ClientPlayCardState = (function () {
     };
     ClientPlayCardState.prototype.checkBribe = function (_a) {
         var cardId = _a.cardId;
+        console.log('disregardForCustoms', this.game.activeEvents.getAllItems().includes('card_107'));
+        if (this.game.activeEvents.getAllItems().includes('card_107')) {
+            this.playCardNextStep({ cardId: cardId, bribe: 0 });
+            return;
+        }
+        ;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         var region = cardInfo.region;
         var rulerId = this.game.map.getRegion({ region: region }).getRuler();
@@ -3006,6 +3086,150 @@ var ClientPurchaseCardState = (function () {
         this.game.addCancelButton();
     };
     return ClientPurchaseCardState;
+}());
+var ClientResolveEventConfidenceFailureState = (function () {
+    function ClientResolveEventConfidenceFailureState(game) {
+        this.game = game;
+    }
+    ClientResolveEventConfidenceFailureState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.updateInterfaceInitialStep();
+        }
+        else {
+            this.updateInterfaceOtherPlayers();
+        }
+    };
+    ClientResolveEventConfidenceFailureState.prototype.onLeavingState = function () { };
+    ClientResolveEventConfidenceFailureState.prototype.updateInterfaceOtherPlayers = function () {
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitleOtherPlayers({
+            text: _('${actplayer} must discard a card from hand'),
+            args: {
+                actplayer: '${actplayer}',
+            },
+        });
+    };
+    ClientResolveEventConfidenceFailureState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must discard a card from hand',
+            args: {
+                you: '${you}',
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.handleDiscardConfirm(); },
+        });
+        dojo.addClass('confirm_btn', 'disabled');
+        this.game.setHandCardsSelectable({
+            callback: function (_a) {
+                var cardId = _a.cardId;
+                return _this.handleDiscardSelect({ cardId: cardId });
+            },
+        });
+    };
+    ClientResolveEventConfidenceFailureState.prototype.handleDiscardConfirm = function () {
+        var nodes = dojo.query('.pp_selected');
+        if (nodes.length === 1) {
+            var cardId = nodes[0].id;
+            this.game.takeAction({
+                action: 'eventChoice',
+                data: {
+                    data: JSON.stringify({
+                        cardId: cardId,
+                    }),
+                },
+            });
+        }
+    };
+    ClientResolveEventConfidenceFailureState.prototype.handleDiscardSelect = function (_a) {
+        var cardId = _a.cardId;
+        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable');
+        var numberSelected = dojo.query('.pp_selected').length;
+        if (numberSelected === 1) {
+            dojo.removeClass('confirm_btn', 'disabled');
+        }
+        else {
+            dojo.addClass('confirm_btn', 'disabled');
+        }
+    };
+    return ClientResolveEventConfidenceFailureState;
+}());
+var ClientResolveEventRebukeState = (function () {
+    function ClientResolveEventRebukeState(game) {
+        this.game = game;
+    }
+    ClientResolveEventRebukeState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        debug('clientState rebuke');
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.updateInterfaceInitialStep();
+        }
+        else {
+            this.updateInterfaceOtherPlayers();
+        }
+    };
+    ClientResolveEventRebukeState.prototype.onLeavingState = function () { };
+    ClientResolveEventRebukeState.prototype.updateInterfaceOtherPlayers = function () {
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitleOtherPlayers({
+            text: _('${actplayer} must select a region'),
+            args: {
+                actplayer: '${actplayer}',
+            },
+        });
+    };
+    ClientResolveEventRebukeState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a region',
+            args: {
+                you: '${you}',
+            },
+        });
+        this.game.map.setSelectable();
+        REGIONS.forEach(function (regionId) {
+            var element = document.getElementById("pp_region_".concat(regionId));
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceRegionSelected({ regionId: regionId }); }));
+            }
+        });
+    };
+    ClientResolveEventRebukeState.prototype.updateInterfaceRegionSelected = function (_a) {
+        var _this = this;
+        var regionId = _a.regionId;
+        this.game.clearPossible();
+        this.game.map.setSelectable();
+        var element = document.getElementById("pp_region_".concat(regionId));
+        if (element) {
+            element.classList.add(PP_SELECTED);
+        }
+        this.game.clientUpdatePageTitle({
+            text: 'Remove all tribes and armies from ${regionName}?',
+            args: {
+                regionName: this.game.gamedatas.staticData.regions[regionId].name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventChoice',
+                    data: {
+                        data: JSON.stringify({ regionId: regionId }),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ClientResolveEventRebukeState;
 }());
 var DiscardCourtState = (function () {
     function DiscardCourtState(game) {
@@ -3512,6 +3736,26 @@ var PlayerActionsState = (function () {
     };
     return PlayerActionsState;
 }());
+var ResolveEventState = (function () {
+    function ResolveEventState(game) {
+        this.game = game;
+    }
+    ResolveEventState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        switch (event) {
+            case ECE_CONFIDENCE_FAILURE:
+                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, { args: { event: event } });
+                break;
+            case ECE_REBUKE:
+                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event: event } });
+                break;
+            default:
+                debug('unrecognized event', event);
+        }
+    };
+    ResolveEventState.prototype.onLeavingState = function () { };
+    return ResolveEventState;
+}());
 var SetupState = (function () {
     function SetupState(game) {
         this.game = game;
@@ -3573,8 +3817,9 @@ var NotificationManager = (function () {
             ['discardFromCourt', 1000],
             ['discardFromHand', 250],
             ['discardFromMarket', 250],
-            ['discardPrizes', 250],
+            ['discardPrizes', 1000],
             ['dominanceCheck', 1],
+            ['publicWithdrawal', 1000],
             ['purchaseCard', 2000],
             ['playCard', 2000],
             ['refreshMarket', 250],
@@ -3590,6 +3835,7 @@ var NotificationManager = (function () {
             ['taxMarket', 250],
             ['taxPlayer', 250],
             ['updateCourtCardStates', 1],
+            ['updateInfluence', 1],
         ];
         notifs.forEach(function (notif) {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, "notif_".concat(notif[0])));
@@ -3723,6 +3969,11 @@ var NotificationManager = (function () {
     NotificationManager.prototype.notif_discardFromHand = function (notif) {
         debug('notif_discardFromHand', notif);
         this.game.clearPossible();
+        var node = dojo.byId(notif.args.cardId);
+        console.log('discarded card', node);
+        if (node) {
+            node.classList.remove(PP_CARD_IN_HAND);
+        }
         var playerId = Number(notif.args.playerId);
         var player = this.getPlayer({ playerId: playerId });
         player.discardHandCard({ cardId: notif.args.cardId });
@@ -3731,17 +3982,28 @@ var NotificationManager = (function () {
     NotificationManager.prototype.notif_discardFromMarket = function (notif) {
         debug('notif_discardFromMarket', notif);
         this.game.clearPossible();
-        var _a = notif.args, from = _a.from, cardId = _a.cardId;
+        var _a = notif.args, from = _a.from, cardId = _a.cardId, to = _a.to;
         var splitFrom = from.split('_');
-        this.game.market.discardCard({ cardId: cardId, row: Number(splitFrom[1]), column: Number(splitFrom[2]) });
+        var row = Number(splitFrom[1]);
+        var column = Number(splitFrom[2]);
+        if (to === 'discard') {
+            this.game.market.discardCard({ cardId: cardId, row: row, column: column });
+        }
+        else if (to === 'active_events') {
+            this.game.move({
+                id: cardId,
+                from: this.game.market.getMarketCardZone({ row: row, column: column }),
+                to: this.game.activeEvents,
+            });
+        }
     };
     NotificationManager.prototype.notif_discardPrizes = function (notif) {
         debug('notif_discardPrizes', notif);
         this.game.clearPossible();
         var playerId = Number(notif.args.playerId);
         var player = this.getPlayer({ playerId: playerId });
-        notif.args.cardIds.forEach(function (cardId) {
-            player.discardPrize({ cardId: cardId });
+        notif.args.prizes.forEach(function (prize) {
+            player.discardPrize({ cardId: prize.id });
             player.incCounter({ counter: 'influence', value: -1 });
         });
     };
@@ -3838,6 +4100,13 @@ var NotificationManager = (function () {
         });
         this.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
+    NotificationManager.prototype.notif_publicWithdrawal = function (notif) {
+        debug('notif_publicWithdrawal', notif);
+        var marketLocation = notif.args.marketLocation;
+        var row = Number(marketLocation.split('_')[1]);
+        var column = Number(marketLocation.split('_')[2]);
+        this.game.market.getMarketRupeesZone({ row: row, column: column }).removeAll();
+    };
     NotificationManager.prototype.notif_purchaseCard = function (notif) {
         var _this = this;
         console.log('notif_purchaseCard', notif);
@@ -3853,12 +4122,8 @@ var NotificationManager = (function () {
         this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) });
         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
         var cardId = notif.args.card.id;
-        if (newLocation == 'active_events') {
-            this.game.move({
-                id: cardId,
-                from: this.game.market.getMarketCardZone({ row: row, column: col }),
-                to: this.game.activeEvents,
-            });
+        if (newLocation.startsWith('events_')) {
+            this.getPlayer({ playerId: playerId }).purchaseEvent({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
         else if (newLocation == 'discard') {
             this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, false);
@@ -3992,6 +4257,15 @@ var NotificationManager = (function () {
         });
         this.getPlayer({ playerId: playerId }).getCourtZone().updateDisplay();
     };
+    NotificationManager.prototype.notif_updateInfluence = function (_a) {
+        var _this = this;
+        var args = _a.args;
+        debug('notif_updateInfluence', args);
+        args.updates.forEach(function (_a) {
+            var playerId = _a.playerId, value = _a.value;
+            _this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value: value });
+        });
+    };
     NotificationManager.prototype.notif_log = function (notif) {
         console.log('notif_log', notif.args);
     };
@@ -4025,6 +4299,8 @@ var PaxPamir = (function () {
             _a[CLIENT_CARD_ACTION_TAX] = new ClientCardActionTaxState(this),
             _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
+            _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
+            _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
             _a.discardCourt = new DiscardCourtState(this),
             _a.discardHand = new DiscardHandState(this),
             _a.discardLeverage = new DiscardLeverageState(this),
@@ -4032,6 +4308,7 @@ var PaxPamir = (function () {
             _a.placeRoad = new PlaceRoadState(this),
             _a.placeSpy = new PlaceSpyState(this),
             _a.playerActions = new PlayerActionsState(this),
+            _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
             _a);
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
@@ -4060,7 +4337,7 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
         console.log('Entering state: ' + stateName, args);
-        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
+        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || stateName === 'resolveEvent') {
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };
@@ -4181,6 +4458,11 @@ var PaxPamir = (function () {
     PaxPamir.prototype.clientUpdatePageTitle = function (_a) {
         var text = _a.text, args = _a.args;
         this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+        this.framework().updatePageTitle();
+    };
+    PaxPamir.prototype.clientUpdatePageTitleOtherPlayers = function (_a) {
+        var text = _a.text, args = _a.args;
+        this.gamedatas.gamestate.description = dojo.string.substitute(_(text), args);
         this.framework().updatePageTitle();
     };
     PaxPamir.prototype.format_string_recursive = function (log, args) {

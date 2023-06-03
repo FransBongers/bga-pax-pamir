@@ -61,7 +61,7 @@ class PPMap {
     });
     const mapArea = document.getElementById('pp_map_areas');
     if (mapArea) {
-      mapArea.classList.remove('pp_selectable');
+      mapArea.classList.remove(PP_SELECTABLE);
     }
   }
 }

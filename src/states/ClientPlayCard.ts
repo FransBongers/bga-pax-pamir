@@ -162,6 +162,12 @@ class ClientPlayCardState implements State {
   //  ..#######.....##....####.########.####....##.......##...
 
   private checkBribe({ cardId }: { cardId: string }) {
+    console.log('disregardForCustoms',this.game.activeEvents.getAllItems().includes('card_107'))
+    if (this.game.activeEvents.getAllItems().includes('card_107')) {
+      // Disregard for customs is active so all bribes are ignored
+      this.playCardNextStep({ cardId, bribe: 0 });
+      return;
+    };
     // Check if other player rules the region
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     const { region } = cardInfo;

@@ -13,6 +13,9 @@ class ResolveEventState implements State {
       case ECE_REBUKE:
         this.game.framework().setClientState<ClientResolveEventStateArgs>(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event } });
         break;
+      case ECE_RUMOR:
+        this.game.framework().setClientState<ClientResolveEventStateArgs>(CLIENT_RESOLVE_EVENT_RUMOR, { args: { event } });
+        break;
       default:
         debug('unrecognized event', event);
     }

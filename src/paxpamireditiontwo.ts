@@ -53,6 +53,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
     [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
+    [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
     discardCourt: DiscardCourtState;
     discardHand: DiscardHandState;
     discardLeverage: DiscardLeverageState;
@@ -102,6 +103,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
       [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
+      [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
       discardCourt: new DiscardCourtState(this),
       discardHand: new DiscardHandState(this),
       discardLeverage: new DiscardLeverageState(this),
@@ -534,6 +536,8 @@ class PaxPamir implements PaxPamirGame {
       case 'cylinders':
         // cylinders_playerId
         return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
+      case 'events':
+        return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getEventsZone();
       case 'gift':
         // gift_2_playerId
         return this.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });

@@ -264,7 +264,6 @@ class Region {
   }
 
   public clearSelectable() {
-    console.log('clearSelectable region',this.region)
     const element = document.getElementById(`pp_region_${this.region}`);
     if (element) {
       element.classList.remove(PP_SELECTABLE,PP_SELECTED);

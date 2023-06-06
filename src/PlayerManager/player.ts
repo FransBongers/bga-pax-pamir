@@ -69,7 +69,7 @@ class PPPlayer {
     const playerGamedatas = gamedatas.players[this.playerId];
 
     this.setupCourt({ playerGamedatas });
-    this.setupEvents();
+    this.setupEvents({ playerGamedatas });
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
@@ -83,7 +83,7 @@ class PPPlayer {
 
     this.setupHand({ playerGamedatas });
     this.setupCourt({ playerGamedatas });
-    this.setupEvents();
+    this.setupEvents({ playerGamedatas });
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
@@ -126,10 +126,25 @@ class PPPlayer {
     this.court.instantaneous = false;
   }
 
-  setupEvents() {
+  setupEvents({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     this.events = new ebg.zone();
     this.events.create(this.game, `player_tableau_events_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
     this.court.item_margin = 16;
+    this.events.instantaneous = true;
+    if (playerGamedatas.events.length > 0) {
+      const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
+      node.style.marginTop = '-57px';
+    }
+    playerGamedatas.events.forEach((card: EventCard & Token) => {
+      const cardId = card.id;
+      dojo.place(
+        tplCard({ cardId }),
+        `player_tableau_events_${this.playerId}`
+      );
+      this.events.placeInZone(cardId, card.state);
+      this.game.tooltipManager.addTooltipToCard({ cardId });
+    });
+    this.events.instantaneous = false;
   }
 
   setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -358,6 +373,8 @@ class PPPlayer {
       dojo.empty(this.gifts[value].container_div);
       this.gifts[value] = undefined;
     });
+    dojo.empty(this.events.container_div);
+    this.events = undefined;
   }
 
   // ..######...########.########.########.########.########...######.
@@ -411,6 +428,10 @@ class PPPlayer {
 
   getName(): string {
     return this.playerName;
+  }
+
+  getPlayerId(): number {
+    return this.playerId;
   }
 
   getPrizeZone(): Zone {
@@ -522,6 +543,15 @@ class PPPlayer {
     this.court.placeInZone('pp_card_select_right', 1000);
   }
 
+  checkEventContainerHeight() {
+    const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
+    if (this.events.getItemNumber() === 0) {
+      node.style.marginTop = '-209px';
+    } else {
+      node.style.marginTop = '-57px';
+    }
+  }
+
   removeSideSelectFromCourt() {
     this.court.removeFromZone('pp_card_select_left', true);
     this.court.removeFromZone('pp_card_select_right', true);
@@ -621,11 +651,10 @@ class PPPlayer {
     }
   }
 
-  purchaseEvent({ cardId, from }: { cardId: string; from: Zone }) {
+  addEvent({ cardId, from }: { cardId: string; from: Zone }) {
     if (this.events.getItemNumber() === 0) {
-      const node = dojo.byId(`pp_player_events_container${this.playerId}`);
-      node.style.marginTop = '-144px';
-      this.game.tooltipManager.addTooltipToCard({ cardId });
+      const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
+      node.style.marginTop = '-57px';
     }
     this.game.move({
       id: cardId,
@@ -633,6 +662,7 @@ class PPPlayer {
       to: this.getEventsZone(),
       removeClass: [PP_MARKET_CARD]
     });
+    this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
   removeTaxCounter() {

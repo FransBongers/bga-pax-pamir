@@ -189,6 +189,15 @@ class Events
     return Events::isGlobalEventActive(ECE_DISREGARD_FOR_CUSTOMS);
   }
 
+  public static function isRumorActive($player)
+  {
+    $isActive = Utils::array_some($player->getEventCards(), function ($card) {
+      return $card['purchased']['effect'] === ECE_RUMOR;
+    });
+    return $isActive;
+  }
+  
+
   /**
    * Global events are events that have an effect on all players in the game.
    */

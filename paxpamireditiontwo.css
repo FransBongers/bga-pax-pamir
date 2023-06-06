@@ -1195,15 +1195,20 @@ html {
   filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
-.pp_army.pp_temporary, .pp_road.pp_temporary {
+.pp_army.pp_temporary,
+.pp_road.pp_temporary {
   opacity: 0.5;
 }
 
-.pp_army.pp_selectable, .pp_road.pp_selectable {
+.pp_army.pp_selectable,
+.pp_road.pp_selectable {
   filter: drop-shadow(2px 0px 0px yellow) drop-shadow(-2px 0px 0px yellow) drop-shadow(0px 2px 0px yellow) drop-shadow(0px -2px 0px yellow);
 }
 
-.pp_army.pp_selectable:hover, .pp_army.pp_selected, .pp_road.pp_selectable:hover, .pp_road.pp_selected {
+.pp_army.pp_selectable:hover,
+.pp_army.pp_selected,
+.pp_road.pp_selectable:hover,
+.pp_road.pp_selected {
   filter: drop-shadow(2px 0px 0px blue) drop-shadow(-2px 0px 0px blue) drop-shadow(0px 2px 0px blue) drop-shadow(0px -2px 0px blue);
   cursor: pointer;
 }
@@ -1262,7 +1267,8 @@ html {
   filter: drop-shadow(2px 0px 0px yellow) drop-shadow(-2px 0px 0px yellow) drop-shadow(0px 2px 0px yellow) drop-shadow(0px -2px 0px yellow);
 }
 
-.pp_cylinder.pp_selectable:hover, .pp_cylinder.pp_selected {
+.pp_cylinder.pp_selectable:hover,
+.pp_cylinder.pp_selected {
   filter: drop-shadow(2px 0px 0px blue) drop-shadow(-2px 0px 0px blue) drop-shadow(0px 2px 0px blue) drop-shadow(0px -2px 0px blue);
   cursor: pointer;
 }
@@ -1365,7 +1371,8 @@ html {
   box-sizing: border-box;
 }
 
-.pp_card_select_side:hover, .pp_card_select_side.pp_selected {
+.pp_card_select_side:hover,
+.pp_card_select_side.pp_selected {
   border-color: blue !important;
   cursor: pointer;
 }
@@ -1417,7 +1424,8 @@ html {
   margin-top: -16px;
 }
 
-.pp_card_in_court:hover, .pp_card_in_court:active {
+.pp_card_in_court:hover,
+.pp_card_in_court:active {
   z-index: 100 !important;
   /* border: 2px blue solid; */
 }
@@ -1438,7 +1446,8 @@ html {
   z-index: 1;
 }
 
-.pp_rupee.pp_selectable, .pp_player_board_rupee.pp_selectable {
+.pp_rupee.pp_selectable,
+.pp_player_board_rupee.pp_selectable {
   cursor: pointer !important;
   box-shadow: 0px 0px 0px 3px yellow !important;
 }
@@ -1470,27 +1479,33 @@ html {
   pointer-events: none;
 }
 
-.pp_herat_icon, .pp_herat.pp_region_icon {
+.pp_herat_icon,
+.pp_herat.pp_region_icon {
   background-image: url("img/region_herat.svg");
 }
 
-.pp_kabul_icon, .pp_kabul.pp_region_icon {
+.pp_kabul_icon,
+.pp_kabul.pp_region_icon {
   background-image: url("img/region_kabul.svg");
 }
 
-.pp_kandahar_icon, .pp_kandahar.pp_region_icon {
+.pp_kandahar_icon,
+.pp_kandahar.pp_region_icon {
   background-image: url("img/region_kandahar.svg");
 }
 
-.pp_persia_icon, .pp_persia.pp_region_icon {
+.pp_persia_icon,
+.pp_persia.pp_region_icon {
   background-image: url("img/region_persia.svg");
 }
 
-.pp_punjab_icon, .pp_punjab.pp_region_icon {
+.pp_punjab_icon,
+.pp_punjab.pp_region_icon {
   background-image: url("img/region_punjab.svg");
 }
 
-.pp_transcaspia_icon, .pp_transcaspia.pp_region_icon {
+.pp_transcaspia_icon,
+.pp_transcaspia.pp_region_icon {
   background-image: url("img/region_transcaspia.svg");
 }
 
@@ -1508,6 +1523,36 @@ html {
 }
 
 .loyalty_button {
+  text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
+}
+
+/* Blue */
+.pp_player_button.pp_player_color_98B3C0 {
+  background-color: #98b3c0;
+}
+
+/* Gray */
+.pp_player_button.pp_player_color_B9B6B1 {
+  background-color: #b9b6b1;
+}
+
+/* Yellow / tan */
+.pp_player_button.pp_player_color_DFCFB6 {
+  background-color: #dfcfb6;
+}
+
+/* Red */
+.pp_player_button.pp_player_color_C19B9E {
+  background-color: #c19b9e;
+}
+
+/* Black */
+.pp_player_button.pp_player_color_807F7F {
+  background-color: #807f7f;
+}
+
+.pp_player_button {
+  border: 1px solid black;
   text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
 }
 

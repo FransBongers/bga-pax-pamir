@@ -59,6 +59,7 @@ class NotificationManager {
       ['purchaseGift', 1],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
+      ['moveCard', 1000],
       ['moveToken', 1000],
       ['updatePlayerCounts', 1],
       ['log', 1],
@@ -333,8 +334,26 @@ class NotificationManager {
     });
   }
 
+  notif_moveCard(notif: Notif<NotifMoveCardArgs>) {
+    debug('notif_moveCard', notif.args);
+    const { moves, action } = notif.args;
+    moves.forEach((move) => {
+      const { tokenId: cardId, from, to } = move;
+      const fromZone = this.game.getZoneForLocation({ location: from });
+      // const toZone = this.game.getZoneForLocation({ location: to });
+      switch (action) {
+        case 'MOVE_EVENT':
+          this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addEvent({ cardId, from: fromZone });
+          this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight();
+          break;
+        default:
+          debug('unknown action for moveCard');
+      }
+    });
+  }
+
   notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
-    console.log('notif_moveToken', notif);
+    debug('notif_moveToken', notif);
     notif.args.moves.forEach((move) => {
       const { tokenId, from, to, weight } = move;
       const fromZone = this.game.getZoneForLocation({ location: from });
@@ -413,7 +432,7 @@ class NotificationManager {
     const { marketLocation } = notif.args;
     const row = Number(marketLocation.split('_')[1]);
     const column = Number(marketLocation.split('_')[2]);
-    this.game.market.getMarketRupeesZone({row, column}).removeAll()
+    this.game.market.getMarketRupeesZone({ row, column }).removeAll();
   }
 
   notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
@@ -443,7 +462,7 @@ class NotificationManager {
       //   from: this.game.market.getMarketCardZone({ row, column: col }),
       //   to: this.game.activeEvents,
       // });
-      this.getPlayer({ playerId }).purchaseEvent({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      this.getPlayer({ playerId }).addEvent({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     } else if (newLocation == 'discard') {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
       discardCardAnimation({ cardId, game: this.game });

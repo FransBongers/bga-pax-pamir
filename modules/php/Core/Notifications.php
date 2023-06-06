@@ -122,7 +122,7 @@ class Notifications
     ]);
   }
 
-  public static function build($cardId, $player,$rupeesOnCards)
+  public static function build($cardId, $player, $rupeesOnCards)
   {
     self::notifyAll("build", clienttranslate('${player_name} uses ${logTokenCardName} to build and pays ${numberOfRupees} ${logTokenRupee}${logTokenNewLine}${logTokenLargeCard}'), array(
       'player' => $player,
@@ -175,12 +175,24 @@ class Notifications
     ]);
   }
 
+  public static function moveCard($message, $messageArgs, $action, $moves)
+  {
+    self::notifyAll(
+      'moveCard',
+      $message,
+      array_merge($messageArgs, [
+        'moves' => $moves,
+        'action' => $action,
+      ])
+    );
+  }
+
   public static function moveToken($message, $args)
   {
     self::notifyAll('moveToken', $message, $args);
   }
 
-  public static function discardFromCourt($card,$player,$moves = [],$courtOwnerPlayerId = null)
+  public static function discardFromCourt($card, $player, $moves = [], $courtOwnerPlayerId = null)
   {
     $messageOwnCourt =  clienttranslate('${player_name} discards ${logTokenCardName} from court ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
     $messageOtherCourt =  clienttranslate('${player_name} discards ${logTokenCardName} from ${logTokenOtherPlayerName}\'s court ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
@@ -214,7 +226,7 @@ class Notifications
     ));
   }
 
-  public static function discardAndTakePrize($card,$player,$moves = [],$courtOwnerPlayerId = null)
+  public static function discardAndTakePrize($card, $player, $moves = [], $courtOwnerPlayerId = null)
   {
     $message =  clienttranslate('${player_name} takes ${logTokenCardName} as a prize ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
     $hasSpies = count($moves) > 0;
@@ -254,10 +266,10 @@ class Notifications
     ]);
   }
 
-  public static function discardPrizes($prizes,$playerId)
+  public static function discardPrizes($prizes, $playerId)
   {
     $message = clienttranslate('${player_name} discards ${numberOfPrizes} prize(s)${logTokenNewLine}${cardLog}');
-    Notifications::log('prizes',$prizes);
+    Notifications::log('prizes', $prizes);
     $logs = [];
     $args = [];
     foreach ($prizes as $index => $cardInfo) {
@@ -338,7 +350,7 @@ class Notifications
     ));
   }
 
-  public static function discardEventCardFromMarket($card, $location,$to)
+  public static function discardEventCardFromMarket($card, $location, $to)
   {
 
     self::notifyAll("discardFromMarket", clienttranslate('${player_name} discards event card from the market:${logTokenNewLine}${logTokenLargeCard}'), array(
@@ -359,7 +371,7 @@ class Notifications
     ));
   }
 
-  public static function takeRupeesFromSupply($player,$amount)
+  public static function takeRupeesFromSupply($player, $amount)
   {
     self::notifyAll("takeRupeesFromSupply", clienttranslate('${player_name} takes ${amount} ${logTokenRupee} from the supply'), array(
       'player' => $player,
@@ -377,7 +389,7 @@ class Notifications
     ));
   }
 
-  public static function leveragedCardPlay($player,$amount)
+  public static function leveragedCardPlay($player, $amount)
   {
     self::notifyAll("takeRupeesFromSupply", clienttranslate('${player_name} gets ${amount} ${logTokenRupee} for ${logTokenLeverage}'), array(
       'player' => $player,
@@ -387,7 +399,7 @@ class Notifications
     ));
   }
 
-  public static function leveragedCardDiscard($card, $player,$amount)
+  public static function leveragedCardDiscard($card, $player, $amount)
   {
     self::notifyAll("returnRupeesToSupply", clienttranslate('${player_name} returns ${amount} ${logTokenRupee} to the supply because ${logTokenCardName} was leveraged${logTokenNewLine}${logTokenCardLarge}'), array(
       'player' => $player,
@@ -542,7 +554,6 @@ class Notifications
     self::notifyAll("updateInfluence", '', array(
       'updates' => $updates,
     ));
-    
   }
 
   /*********************

@@ -40,7 +40,7 @@ trait DebugTrait
   {
     // Cards::move('card_107',ACTIVE_EVENTS);
     // Cards::move('card_116','market_0_1');
-    Cards::move('card_116','market_1_2');
+    Cards::move('card_108','market_0_1');
     // $rupee = Tokens::getTopOf(RUPEE_SUPPLY);
     // Tokens::move($rupee['id'],['market_0_0','rupees']);
     // Cards::move('card_106','market_1_0');

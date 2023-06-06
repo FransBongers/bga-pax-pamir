@@ -105,6 +105,11 @@ interface NotifDiscardPrizesArgs {
   player_name: string;
 }
 
+interface NotifMoveCardArgs {
+  action: 'PURCHASE_CARD' | 'MOVE_EVENT';
+  moves: TokenMove[];
+}
+
 interface NotifMoveTokenArgs {
   moves: TokenMove[];
 }

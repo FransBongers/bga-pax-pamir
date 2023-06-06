@@ -169,7 +169,7 @@
                     </div>
                 </div>
             </div>
-            <div id="pp_player_events_container{player_id}" class="pp_player_events_container">
+            <div id="pp_player_events_container_{player_id}" class="pp_player_events_container">
                 <div id="player_tableau_events_{player_id}">
                 </div>
             </div>

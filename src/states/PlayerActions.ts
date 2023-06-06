@@ -66,7 +66,7 @@ class PlayerActionsState implements State {
     //   text: _('Test'),
     //   callback: () => {
     //     const node = dojo.byId(`pp_player_events_container${this.game.getPlayerId()}`);
-    //     node.style.marginTop = '-144px'
+    //     node.style.marginTop = '-57px'
     //     console.log('marketZone', this.game.market.getMarketCardZone({row: 0, column: 5}));
     //     this.game.move({
     //       id: 'card_115',

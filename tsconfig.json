@@ -41,6 +41,7 @@
     "src/states/ClientPurchaseCard.ts",
     "src/states/ClientResolveEventConfidenceFailure.ts",
     "src/states/ClientResolveEventRebuke.ts",
+    "src/states/ClientResolveEventRumor.ts",
     "src/states/DiscardCourt.ts",
     "src/states/DiscardHand.ts",
     "src/states/DiscardLeverage.ts",

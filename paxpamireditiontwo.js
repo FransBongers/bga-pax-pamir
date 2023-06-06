@@ -258,6 +258,7 @@ var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 var CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
 var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
+var CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
 var ARMY_HEIGHT = 40;
@@ -781,7 +782,7 @@ var PPPlayer = (function () {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
-        this.setupEvents();
+        this.setupEvents({ playerGamedatas: playerGamedatas });
         this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
@@ -793,7 +794,7 @@ var PPPlayer = (function () {
         var playerGamedatas = gamedatas.players[this.playerId];
         this.setupHand({ playerGamedatas: playerGamedatas });
         this.setupCourt({ playerGamedatas: playerGamedatas });
-        this.setupEvents();
+        this.setupEvents({ playerGamedatas: playerGamedatas });
         this.setupPrizes({ playerGamedatas: playerGamedatas });
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
@@ -830,10 +831,24 @@ var PPPlayer = (function () {
         });
         this.court.instantaneous = false;
     };
-    PPPlayer.prototype.setupEvents = function () {
+    PPPlayer.prototype.setupEvents = function (_a) {
+        var _this = this;
+        var playerGamedatas = _a.playerGamedatas;
         this.events = new ebg.zone();
         this.events.create(this.game, "player_tableau_events_".concat(this.playerId), CARD_WIDTH, CARD_HEIGHT);
         this.court.item_margin = 16;
+        this.events.instantaneous = true;
+        if (playerGamedatas.events.length > 0) {
+            var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
+            node.style.marginTop = '-57px';
+        }
+        playerGamedatas.events.forEach(function (card) {
+            var cardId = card.id;
+            dojo.place(tplCard({ cardId: cardId }), "player_tableau_events_".concat(_this.playerId));
+            _this.events.placeInZone(cardId, card.state);
+            _this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+        });
+        this.events.instantaneous = false;
     };
     PPPlayer.prototype.setupCylinders = function (_a) {
         var _this = this;
@@ -1034,6 +1049,8 @@ var PPPlayer = (function () {
             dojo.empty(_this.gifts[value].container_div);
             _this.gifts[value] = undefined;
         });
+        dojo.empty(this.events.container_div);
+        this.events = undefined;
     };
     PPPlayer.prototype.getColor = function () {
         return this.playerColor;
@@ -1064,6 +1081,9 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.getName = function () {
         return this.playerName;
+    };
+    PPPlayer.prototype.getPlayerId = function () {
+        return this.playerId;
     };
     PPPlayer.prototype.getPrizeZone = function () {
         return this.prizes;
@@ -1141,6 +1161,15 @@ var PPPlayer = (function () {
         this.court.placeInZone('pp_card_select_left', -1000);
         dojo.place(tplCardSelect({ side: 'right' }), "pp_court_player_".concat(this.playerId));
         this.court.placeInZone('pp_card_select_right', 1000);
+    };
+    PPPlayer.prototype.checkEventContainerHeight = function () {
+        var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
+        if (this.events.getItemNumber() === 0) {
+            node.style.marginTop = '-209px';
+        }
+        else {
+            node.style.marginTop = '-57px';
+        }
     };
     PPPlayer.prototype.removeSideSelectFromCourt = function () {
         this.court.removeFromZone('pp_card_select_left', true);
@@ -1228,12 +1257,11 @@ var PPPlayer = (function () {
             from.removeFromZone(cardId, true, "player_board_".concat(this.playerId));
         }
     };
-    PPPlayer.prototype.purchaseEvent = function (_a) {
+    PPPlayer.prototype.addEvent = function (_a) {
         var cardId = _a.cardId, from = _a.from;
         if (this.events.getItemNumber() === 0) {
-            var node = dojo.byId("pp_player_events_container".concat(this.playerId));
-            node.style.marginTop = '-144px';
-            this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+            var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
+            node.style.marginTop = '-57px';
         }
         this.game.move({
             id: cardId,
@@ -1241,6 +1269,7 @@ var PPPlayer = (function () {
             to: this.getEventsZone(),
             removeClass: [PP_MARKET_CARD]
         });
+        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
     PPPlayer.prototype.removeTaxCounter = function () {
         var taxCounter = dojo.byId("rupees_tableau_".concat(this.playerId, "_tax_counter"));
@@ -1634,7 +1663,6 @@ var Region = (function () {
         }
     };
     Region.prototype.clearSelectable = function () {
-        console.log('clearSelectable region', this.region);
         var element = document.getElementById("pp_region_".concat(this.region));
         if (element) {
             element.classList.remove(PP_SELECTABLE, PP_SELECTED);
@@ -3231,6 +3259,81 @@ var ClientResolveEventRebukeState = (function () {
     };
     return ClientResolveEventRebukeState;
 }());
+var ClientResolveEventRumorState = (function () {
+    function ClientResolveEventRumorState(game) {
+        this.game = game;
+    }
+    ClientResolveEventRumorState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.updateInterfaceInitialStep();
+        }
+        else {
+            this.updateInterfaceOtherPlayers();
+        }
+    };
+    ClientResolveEventRumorState.prototype.onLeavingState = function () { };
+    ClientResolveEventRumorState.prototype.updateInterfaceOtherPlayers = function () {
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitleOtherPlayers({
+            text: _('${actplayer} must select a player'),
+            args: {
+                actplayer: '${actplayer}',
+            },
+        });
+    };
+    ClientResolveEventRumorState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a player',
+            args: {
+                you: '${you}',
+            },
+        });
+        var players = this.game.playerManager.getPlayers();
+        players.forEach(function (player) {
+            _this.addPlayerButton({
+                player: player,
+            });
+        });
+    };
+    ClientResolveEventRumorState.prototype.updateInterfaceConfirmPlayer = function (_a) {
+        var _this = this;
+        var player = _a.player;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${player_name}?',
+            args: {
+                player_name: player.getName(),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventChoice',
+                    data: {
+                        data: JSON.stringify({ playerId: player.getPlayerId() }),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    ClientResolveEventRumorState.prototype.addPlayerButton = function (_a) {
+        var _this = this;
+        var player = _a.player;
+        this.game.addPrimaryActionButton({
+            id: "select_".concat(player.getPlayerId()),
+            text: player.getName(),
+            callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
+            extraClasses: "pp_player_button pp_player_color_".concat(player.getColor()),
+        });
+    };
+    return ClientResolveEventRumorState;
+}());
 var DiscardCourtState = (function () {
     function DiscardCourtState(game) {
         this.game = game;
@@ -3749,6 +3852,9 @@ var ResolveEventState = (function () {
             case ECE_REBUKE:
                 this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event: event } });
                 break;
+            case ECE_RUMOR:
+                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_RUMOR, { args: { event: event } });
+                break;
             default:
                 debug('unrecognized event', event);
         }
@@ -3829,6 +3935,7 @@ var NotificationManager = (function () {
             ['purchaseGift', 1],
             ['smallRefreshHand', 1],
             ['smallRefreshInterface', 1],
+            ['moveCard', 1000],
             ['moveToken', 1000],
             ['updatePlayerCounts', 1],
             ['log', 1],
@@ -4035,9 +4142,26 @@ var NotificationManager = (function () {
             });
         });
     };
+    NotificationManager.prototype.notif_moveCard = function (notif) {
+        var _this = this;
+        debug('notif_moveCard', notif.args);
+        var _a = notif.args, moves = _a.moves, action = _a.action;
+        moves.forEach(function (move) {
+            var cardId = move.tokenId, from = move.from, to = move.to;
+            var fromZone = _this.game.getZoneForLocation({ location: from });
+            switch (action) {
+                case 'MOVE_EVENT':
+                    _this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addEvent({ cardId: cardId, from: fromZone });
+                    _this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight();
+                    break;
+                default:
+                    debug('unknown action for moveCard');
+            }
+        });
+    };
     NotificationManager.prototype.notif_moveToken = function (notif) {
         var _this = this;
-        console.log('notif_moveToken', notif);
+        debug('notif_moveToken', notif);
         notif.args.moves.forEach(function (move) {
             var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
             var fromZone = _this.game.getZoneForLocation({ location: from });
@@ -4123,7 +4247,7 @@ var NotificationManager = (function () {
         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
         var cardId = notif.args.card.id;
         if (newLocation.startsWith('events_')) {
-            this.getPlayer({ playerId: playerId }).purchaseEvent({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
+            this.getPlayer({ playerId: playerId }).addEvent({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
         else if (newLocation == 'discard') {
             this.game.market.getMarketCardZone({ row: row, column: col }).removeFromZone(cardId, false);
@@ -4301,6 +4425,7 @@ var PaxPamir = (function () {
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
             _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
+            _a[CLIENT_RESOLVE_EVENT_RUMOR] = new ClientResolveEventRumorState(this),
             _a.discardCourt = new DiscardCourtState(this),
             _a.discardHand = new DiscardHandState(this),
             _a.discardLeverage = new DiscardLeverageState(this),
@@ -4542,6 +4667,8 @@ var PaxPamir = (function () {
                 });
             case 'cylinders':
                 return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
+            case 'events':
+                return this.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getEventsZone();
             case 'gift':
                 return this.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
             case 'favored':

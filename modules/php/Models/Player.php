@@ -51,6 +51,7 @@ class Player extends \PaxPamir\Helpers\DB_Model
       'court' => [
         'cards' => $this->getCourtCards()
       ],
+      'events' => $this->getEventCards(),
       'cylinders' => $cylinders,
       'counts' => [
         'cards' => count($hand),
@@ -91,6 +92,11 @@ class Player extends \PaxPamir\Helpers\DB_Model
     return Cards::getInLocationOrdered(['court', $this->id])->toArray();
   }
 
+  function getEventCards()
+  {
+    return Cards::getInLocationOrdered(['events', $this->id])->toArray();
+  }
+
   function getPrizes()
   {
     return Cards::getInLocationOrdered(['prizes', $this->id])->toArray();
@@ -116,19 +122,22 @@ class Player extends \PaxPamir\Helpers\DB_Model
     $player_loyalty = $this->getLoyalty();
 
     // Patriots
-    $court_cards = $this->getCourtCards();
-    foreach ($court_cards as $card) {
-      $card_loyalty = Game::get()->getCardInfo($card)['loyalty'];
-      if ($card_loyalty === $player_loyalty) {
-        $influence += 1;
+    $isRumorActive = Events::isRumorActive($this);
+    if (!$isRumorActive) {
+      $court_cards = $this->getCourtCards();
+      foreach ($court_cards as $card) {
+        $card_loyalty = Game::get()->getCardInfo($card)['loyalty'];
+        if ($card_loyalty === $player_loyalty) {
+          $influence += 1;
+        }
       }
     }
 
     $isEmbarrassementOfRichesActive = Events::isEmbarrassementOfRichesActive();
-    Notifications::log('isEmbarrassementOfRichesActive',$isEmbarrassementOfRichesActive);
+    Notifications::log('isEmbarrassementOfRichesActive', $isEmbarrassementOfRichesActive);
     // Gifts
     if (!$isEmbarrassementOfRichesActive) {
-      Notifications::log('calculateGifts',[]);
+      Notifications::log('calculateGifts', []);
       for ($i = 1; $i <= 3; $i++) {
         $value = $i * 2;
         $tokens_in_location = Tokens::getInLocation(['gift', $value, $this->id]);

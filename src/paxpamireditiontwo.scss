@@ -22,336 +22,343 @@
 @use 'TooltipManager/tooltip';
 
 html {
-    background: url("") rgb(192, 192, 192);
+  background: url('') rgb(192, 192, 192);
 }
 
 .player-board {
-    background-color: antiquewhite;
+  background-color: antiquewhite;
 }
 
 #pp_play_area {
-    grid-gap: 16px;
-    display: grid;
-    grid-auto-flow: dense;
-    @media (max-width: 2080px) {
-        grid-template-columns: repeat(auto-fill, 1000px);
-    }
-    @media (min-width: 2080px) {
-        grid-template-columns: repeat(auto-fill, 1000px minmax(840px,1fr));
-    }
-    grid-template-rows: repeat(auto-fill, 581px 241px 492px);
-    justify-content: center;
-    position: relative;
-    text-align: center;
-    top: 5px;
+  grid-gap: 16px;
+  display: grid;
+  grid-auto-flow: dense;
+  @media (max-width: 2080px) {
+    grid-template-columns: repeat(auto-fill, 1000px);
+  }
+  @media (min-width: 2080px) {
+    grid-template-columns: repeat(auto-fill, 1000px minmax(840px, 1fr));
+  }
+  grid-template-rows: repeat(auto-fill, 581px 241px 492px);
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  top: 5px;
 }
 
 /* ------- SUPPLY ------- */
 
 #pp_supply {
-    grid-column: 1 / span 1;
-    grid-row: span 1;
-    height: 241px;
-    background-color: ivory;
-    position: relative;
-    /* width: 1000px; */
-    box-shadow: 1px 1px 5px #000;
-    // box-shadow: rgb(0 0 0) 2px 2px 8px;
-    /* padding: 10px; */
-    display: flex;
-    padding: 16px;
-    box-sizing: border-box;
+  grid-column: 1 / span 1;
+  grid-row: span 1;
+  height: 241px;
+  background-color: ivory;
+  position: relative;
+  /* width: 1000px; */
+  box-shadow: 1px 1px 5px #000;
+  // box-shadow: rgb(0 0 0) 2px 2px 8px;
+  /* padding: 10px; */
+  display: flex;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 #pp_coalition_blocks_container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    width: 360px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width: 360px;
 }
 
 #pp_market_deck_container {
-    display: flex;
+  display: flex;
 }
 
 #pp_discard_pile {
-    width: 149px;
-    height: 208px;
-    border-radius: 10px;
-    border: 4px dashed black;
-    box-sizing: border-box;
-    margin-right: 10px;
-    position: relative;
+  width: 149px;
+  height: 208px;
+  border-radius: 10px;
+  border: 4px dashed black;
+  box-sizing: border-box;
+  margin-right: 10px;
+  position: relative;
 }
 
 #pp_discard_pile > .pp_card {
-    top: -5px;
-    left: -5px;
-    position: absolute;
+  top: -5px;
+  left: -5px;
+  position: absolute;
 }
 
 #pp_market_deck {
-    width: 150px;
-    height: 209px;
-    background-size: 150px 209px;
-    background-image: url('img/temp/cards/back.jpg');
-    box-shadow: 1px 1px 4px;
-    border-radius: 10px;
+  width: 150px;
+  height: 209px;
+  background-size: 150px 209px;
+  background-image: url('img/temp/cards/back.jpg');
+  box-shadow: 1px 1px 4px;
+  border-radius: 10px;
 }
 
-
-
 .pp_coalition_blocks {
-    box-sizing: border-box;
-    height: 40px;
-    width: 650px;
-    /* border: 2px solid blue; */
+  box-sizing: border-box;
+  height: 40px;
+  width: 650px;
+  /* border: 2px solid blue; */
 }
 
 .pp_coalition_block {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 40px;
-    width: 25px;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 40px;
+  width: 25px;
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .pp_coalition_block.pp_afghan {
-    background-image: url('img/block_afghan.svg');
+  background-image: url('img/block_afghan.svg');
 }
 
 .pp_coalition_block.pp_british {
-    background-image: url('img/block_british.svg');
+  background-image: url('img/block_british.svg');
 }
 
 .pp_coalition_block.pp_russian {
-    background-image: url('img/block_russian.svg');
+  background-image: url('img/block_russian.svg');
 }
 
 .pp_army {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 40px;
-    width: 25px;
-    z-index: 1;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 40px;
+  width: 25px;
+  z-index: 1;
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
-.pp_army.pp_temporary, .pp_road.pp_temporary {
-    opacity: 0.5;
+.pp_army.pp_temporary,
+.pp_road.pp_temporary {
+  opacity: 0.5;
 }
 
-.pp_army.pp_selectable, .pp_road.pp_selectable {
-    filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color) drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
+.pp_army.pp_selectable,
+.pp_road.pp_selectable {
+  filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
+    drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
 }
 
-.pp_army.pp_selectable:hover, .pp_army.pp_selected, .pp_road.pp_selectable:hover, .pp_road.pp_selected {
-    filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color) drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
-    cursor: pointer;
+.pp_army.pp_selectable:hover,
+.pp_army.pp_selected,
+.pp_road.pp_selectable:hover,
+.pp_road.pp_selected {
+  filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color)
+    drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
+  cursor: pointer;
 }
 
 .pp_army.pp_afghan {
-    background-image: url('img/army_afghan.svg');
+  background-image: url('img/army_afghan.svg');
 }
 
 .pp_army.pp_british {
-    background-image: url('img/army_british.svg');
+  background-image: url('img/army_british.svg');
 }
 
 .pp_army.pp_russian {
-    background-image: url('img/army_russian.svg');
+  background-image: url('img/army_russian.svg');
 }
 
 .pp_army.pp_neutral {
-    background-image: url('img/army_neutral.svg');
+  background-image: url('img/army_neutral.svg');
 }
 
 .pp_road {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 27px;
-    width: 40px;
-    z-index: 1;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 27px;
+  width: 40px;
+  z-index: 1;
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .pp_road.pp_afghan {
-    background-image: url('img/road_afghan.svg');
+  background-image: url('img/road_afghan.svg');
 }
 
 .pp_road.pp_british {
-    background-image: url('img/road_british.svg');
+  background-image: url('img/road_british.svg');
 }
 
 .pp_road.pp_russian {
-    background-image: url('img/road_russian.svg');
+  background-image: url('img/road_russian.svg');
 }
 
 .pp_road.pp_neutral {
-    background-image: url('img/road_neutral.svg');
+  background-image: url('img/road_neutral.svg');
 }
 
 .pp_cylinder {
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 30px;
-    width: 30px;
-    z-index: 1;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 30px;
+  width: 30px;
+  z-index: 1;
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .pp_cylinder.pp_selectable {
-    filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color) drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
+  filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
+    drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
 }
 
-.pp_cylinder.pp_selectable:hover, .pp_cylinder.pp_selected {
-    filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color) drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
-    cursor: pointer;
+.pp_cylinder.pp_selectable:hover,
+.pp_cylinder.pp_selected {
+  filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color)
+    drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
+  cursor: pointer;
 }
 
 .pp_cylinder.pp_player_color_98B3C0 {
-    background-image: url('img/cylinder_blue.svg');
+  background-image: url('img/cylinder_blue.svg');
 }
 
 .pp_cylinder.pp_player_color_B9B6B1 {
-    background-image: url('img/cylinder_grey.svg');
+  background-image: url('img/cylinder_grey.svg');
 }
 
 .pp_cylinder.pp_player_color_DFCFB6 {
-    background-image: url('img/cylinder_yellow.svg');
+  background-image: url('img/cylinder_yellow.svg');
 }
 
 .pp_cylinder.pp_player_color_C19B9E {
-    background-image: url('img/cylinder_red.svg');
+  background-image: url('img/cylinder_red.svg');
 }
 
 .pp_cylinder.pp_player_color_807F7F {
-    background-image: url('img/cylinder_black.svg');
+  background-image: url('img/cylinder_black.svg');
 }
 
-
 #pp_market_board {
-    background-image: url('img/temp/paxpamir_market.jpg');
-    background-size: 1000px 492px;
-    background-repeat: no-repeat;
-    grid-column: 1 / span 1;
-    grid-row: span 1;
-    width: 1000px;
-    // box-shadow: rgb(0 0 0) 2px 2px 8px;
-    box-shadow: 1px 1px 5px #000;
-    height: 492px;
-    position: relative;
+  background-image: url('img/temp/paxpamir_market.jpg');
+  background-size: 1000px 492px;
+  background-repeat: no-repeat;
+  grid-column: 1 / span 1;
+  grid-row: span 1;
+  width: 1000px;
+  // box-shadow: rgb(0 0 0) 2px 2px 8px;
+  box-shadow: 1px 1px 5px #000;
+  height: 492px;
+  position: relative;
 }
 
 .pp_market {
-    width: 150px;
-    height: 209px;
-    /* background-color: red; */
-    position: absolute;
-    /* border: 1px blue solid; */
+  width: 150px;
+  height: 209px;
+  /* background-color: red; */
+  position: absolute;
+  /* border: 1px blue solid; */
 }
 
 .pp_market_rupees {
-    width: 120px;
-    height: 50px;
-    left: 8px;
-    top: 52px;
-    position: absolute;
-    /* border: 2px black solid; */
-    /* z-index: 1; */
+  width: 120px;
+  height: 50px;
+  left: 8px;
+  top: 52px;
+  position: absolute;
+  /* border: 2px black solid; */
+  /* z-index: 1; */
 }
 
 .pp_spy_zone {
-    width: 140px;
-    height: 30px;
-    left: 8px;
-    top: 78px;
-    position: absolute;
-    /* background-color: purple; */
-    /* border: 2px black solid; */
-    /* z-index: 10; */
+  width: 140px;
+  height: 30px;
+  left: 8px;
+  top: 78px;
+  position: absolute;
+  /* background-color: purple; */
+  /* border: 2px black solid; */
+  /* z-index: 10; */
 }
 
 #pp_active_events_container {
-    display: flex;
-    flex-direction: column;
-    min-height: 280px;
-    margin-bottom: 15px;
-    background-color: darkgray;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  margin-bottom: 15px;
+  background-color: darkgray;
 }
 
 #pp_active_events_title {
-    margin-left: 220px;
+  margin-left: 220px;
 }
 
 #pp_player_hand_title {
-    margin-left: 220px;
+  margin-left: 220px;
 }
 
 #pp_active_events {
-    flex-grow: 1;
-    margin: 10px 20px;
+  flex-grow: 1;
+  margin: 10px 20px;
 }
 
 .pp_card_in_zone {
-    width: 150px;
-    height: 209px;
-    background-size: 150px 209px;
-    // box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
-    box-shadow: 2px 2px 5px -1px #000;
-    border-radius: 10px;
+  width: 150px;
+  height: 209px;
+  background-size: 150px 209px;
+  // box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+  box-shadow: 2px 2px 5px -1px #000;
+  border-radius: 10px;
 }
 
 .pp_card_select_side {
-    width: 150px;
-    height: 209px;
-    border-radius: 10px;
-    border: 4px dashed base.$selectable-color;
-    box-sizing: border-box;
+  width: 150px;
+  height: 209px;
+  border-radius: 10px;
+  border: 4px dashed base.$selectable-color;
+  box-sizing: border-box;
 }
 
-.pp_card_select_side:hover,.pp_card_select_side.pp_selected {
-    border-color: base.$selected-color !important;
-    cursor: pointer;
+.pp_card_select_side:hover,
+.pp_card_select_side.pp_selected {
+  border-color: base.$selected-color !important;
+  cursor: pointer;
 }
 
 .pp_card {
-    background-repeat: no-repeat;
-    border: 1px black solid;
-    
+  background-repeat: no-repeat;
+  border: 1px black solid;
 }
 
 .pp_card_action {
-    /* box-shadow: 0px 0px 0px 2px blue !important; */
-    border-radius: 4px;
-    position: absolute;
-    width: 32px;
-    height: 32px;
+  /* box-shadow: 0px 0px 0px 2px blue !important; */
+  border-radius: 4px;
+  position: absolute;
+  width: 32px;
+  height: 32px;
 }
 
 .pp_card_action.pp_selectable {
-    box-shadow: 0px 0px 0px 2px base.$selectable-color !important;
-    cursor: pointer !important;
+  box-shadow: 0px 0px 0px 2px base.$selectable-color !important;
+  cursor: pointer !important;
 }
 
 .pp_card_action.pp_selectable:hover {
-    box-shadow: 0px 0px 0px 2px base.$selected-color !important;
+  box-shadow: 0px 0px 0px 2px base.$selected-color !important;
 }
 
 .pp_card.pp_selectable {
-    /* border: 2px blue solid; */
-    cursor: pointer !important;
-    box-shadow: 0px 0px 0px 4px base.$selectable-color !important;
+  /* border: 2px blue solid; */
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 4px base.$selectable-color !important;
 }
 
 .pp_card.pp_selectable:hover {
-	box-shadow: 0px 0px 0px 4px base.$selected-color !important;
+  box-shadow: 0px 0px 0px 4px base.$selected-color !important;
 }
 
 .pp_card.pp_selected {
-    cursor: pointer;
-    box-shadow: 0px 0px 0px 4px base.$selected-color !important;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px 4px base.$selected-color !important;
 }
 
 /* .pp_selected {
@@ -360,121 +367,159 @@ html {
 } */
 
 .pp_discard {
-    /* opacity: 0.5; */
-    cursor: pointer !important;
-    margin-top: -16px;
+  /* opacity: 0.5; */
+  cursor: pointer !important;
+  margin-top: -16px;
 }
 
-.pp_card_in_court:hover, .pp_card_in_court:active {
-    z-index: 100 !important;
-    /* border: 2px blue solid; */
+.pp_card_in_court:hover,
+.pp_card_in_court:active {
+  z-index: 100 !important;
+  /* border: 2px blue solid; */
 }
 
 .pp_tax_counter {
-    // color: white;
-    color: base.$selected-color;
-    font-size: xx-large;
-    font-weight: 700;
-    // text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
-    text-shadow: -1px -1px 0px rgba(255, 255, 255, 1), 1px 1px 0px rgba(255, 255, 255, 1), -1px 1px 0px rgba(255, 255, 255, 1), 1px -1px 0px rgba(255, 255, 255, 1);
-    // text-shadow: -2px -2px 0px base.$selected-color, 2px 2px 0px base.$selected-color, -2px 2px 0px base.$selected-color, 2px -2px 0px base.$selected-color;
-    // text-shadow: -2px -2px 2px base.$selected-color, 2px 2px 2px base.$selected-color, -2px 2px 2px base.$selected-color, 2px -2px 2px base.$selected-color;
+  // color: white;
+  color: base.$selected-color;
+  font-size: xx-large;
+  font-weight: 700;
+  // text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
+  text-shadow: -1px -1px 0px rgba(255, 255, 255, 1), 1px 1px 0px rgba(255, 255, 255, 1), -1px 1px 0px rgba(255, 255, 255, 1),
+    1px -1px 0px rgba(255, 255, 255, 1);
+  // text-shadow: -2px -2px 0px base.$selected-color, 2px 2px 0px base.$selected-color, -2px 2px 0px base.$selected-color, 2px -2px 0px base.$selected-color;
+  // text-shadow: -2px -2px 2px base.$selected-color, 2px 2px 2px base.$selected-color, -2px 2px 2px base.$selected-color, 2px -2px 2px base.$selected-color;
 }
 
 .pp_rupee {
-    width: 50px;
-    height: 50px;
-    /* background-image: url('img/temp/rupee.png'); */
-    border-radius: 25px;
-    box-shadow: 1px 1px 4px;
-    z-index: 1;
+  width: 50px;
+  height: 50px;
+  /* background-image: url('img/temp/rupee.png'); */
+  border-radius: 25px;
+  box-shadow: 1px 1px 4px;
+  z-index: 1;
 }
 
-.pp_rupee.pp_selectable, .pp_player_board_rupee.pp_selectable {
-    cursor: pointer !important;
-    box-shadow: 0px 0px 0px 3px base.$selectable-color !important;
+.pp_rupee.pp_selectable,
+.pp_player_board_rupee.pp_selectable {
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 3px base.$selectable-color !important;
 }
 
 .pp_rupee.pp_selectable:hover,
-.pp_player_board_rupee.pp_selectable:hover, 
+.pp_player_board_rupee.pp_selectable:hover,
 .pp_rupee.pp_selected,
 .pp_player_board_rupee.pp_selected {
-    cursor: pointer !important;
-    box-shadow: 0px 0px 0px 3px base.$selected-color !important;
+  cursor: pointer !important;
+  box-shadow: 0px 0px 0px 3px base.$selected-color !important;
 }
 
 .pp_rupee_inner {
-    background-size: 100%;
-    background-image: url('img/rupee.svg');
-    width: 100%;
-    height: 100%;
+  background-size: 100%;
+  background-image: url('img/rupee.svg');
+  width: 100%;
+  height: 100%;
 }
 
 .pp_keyword_token {
-    width: 20px;
-    height: 20px;
-    background-image: url("img/tokens.png");
-    background-size: 20px 20px;
-    background-repeat: no-repeat;
-    display: inline-block;
-    position: relative;
-    top: 4px;
-    pointer-events: none;
+  width: 20px;
+  height: 20px;
+  background-image: url('img/tokens.png');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  display: inline-block;
+  position: relative;
+  top: 4px;
+  pointer-events: none;
 }
 
-.pp_herat_icon, .pp_herat.pp_region_icon {
-    background-image: url("img/region_herat.svg");
+.pp_herat_icon,
+.pp_herat.pp_region_icon {
+  background-image: url('img/region_herat.svg');
 }
 
-.pp_kabul_icon, .pp_kabul.pp_region_icon {
-    background-image: url("img/region_kabul.svg");
+.pp_kabul_icon,
+.pp_kabul.pp_region_icon {
+  background-image: url('img/region_kabul.svg');
 }
 
-.pp_kandahar_icon, .pp_kandahar.pp_region_icon {
-    background-image: url("img/region_kandahar.svg");
+.pp_kandahar_icon,
+.pp_kandahar.pp_region_icon {
+  background-image: url('img/region_kandahar.svg');
 }
 
-.pp_persia_icon, .pp_persia.pp_region_icon {
-    background-image: url("img/region_persia.svg");
+.pp_persia_icon,
+.pp_persia.pp_region_icon {
+  background-image: url('img/region_persia.svg');
 }
 
-.pp_punjab_icon, .pp_punjab.pp_region_icon {
-    background-image: url("img/region_punjab.svg");
+.pp_punjab_icon,
+.pp_punjab.pp_region_icon {
+  background-image: url('img/region_punjab.svg');
 }
 
-.pp_transcaspia_icon, .pp_transcaspia.pp_region_icon {
-    background-image: url("img/region_transcaspia.svg");
+.pp_transcaspia_icon,
+.pp_transcaspia.pp_region_icon {
+  background-image: url('img/region_transcaspia.svg');
 }
 
 /* BUTTONS */
 
 #afghan_button {
-    background-color: base.$afghan-color;
+  background-color: base.$afghan-color;
 }
 
 #british_button {
-    background-color: base.$british-color;
+  background-color: base.$british-color;
 }
 
 #russian_button {
-    background-color: base.$russian-color;
+  background-color: base.$russian-color;
 }
 
 .loyalty_button {
-    text-shadow: -1px -1px 0px #00000099,1px 1px 0px#00000099,-1px 1px 0px #00000099,1px -1px 0px #00000099;
+  text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
+}
+
+/* Blue */
+.pp_player_button.pp_player_color_98B3C0 {
+  background-color: #98b3c0;
+}
+
+/* Gray */
+.pp_player_button.pp_player_color_B9B6B1 {
+  background-color: #b9b6b1;
+}
+
+/* Yellow / tan */
+.pp_player_button.pp_player_color_DFCFB6 {
+  background-color: #dfcfb6;
+}
+
+/* Red */
+.pp_player_button.pp_player_color_C19B9E {
+  background-color: #c19b9e;
+}
+
+/* Black */
+.pp_player_button.pp_player_color_807F7F {
+  background-color: #807f7f;
+}
+
+.pp_player_button {
+  border: 1px solid black;
+  text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
 }
 
 /* ------- CARDS START ------- */
 
 @for $i from 1 through 116 {
-    .pp_card_#{$i} {
-        background-image: url('img/temp/cards/#{$i}.jpg'); 
-    }
+  .pp_card_#{$i} {
+    background-image: url('img/temp/cards/#{$i}.jpg');
+  }
 }
 
 .pp_card_back {
-    background-image: url('img/temp/cards/back.jpg');
+  background-image: url('img/temp/cards/back.jpg');
 }
-
 
 /* ------- CARDS END ------- */

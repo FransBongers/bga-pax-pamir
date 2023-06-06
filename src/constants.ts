@@ -9,6 +9,7 @@ const CLIENT_PLAY_CARD = 'clientPlayCard';
 const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 const CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
 const CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
+const CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
 
 // size of tokens
 const CARD_WIDTH = 150;

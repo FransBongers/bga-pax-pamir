@@ -185,23 +185,42 @@ class Events
     return Events::isGlobalEventActive(ECE_EMBARRASSEMENT_OF_RICHES);
   }
 
+  public static function isConflictFatigueActive()
+  {
+    $card = Cards::get(ECE_CONFLICT_FATIGUE_CARD_ID);
+    return Utils::startsWith($card['location'], 'events_');
+  }
+
+  public static function isCourtlyMannersActive($player)
+  {
+    return self::isPlayerEventActive(ECE_COURTLY_MANNERS, $player);
+  }
+
   public static function isDisregardForCustomsActive()
   {
     return Events::isGlobalEventActive(ECE_DISREGARD_FOR_CUSTOMS);
   }
 
+  public static function isKohINoorRecoveredActive($player)
+  {
+    return self::isPlayerEventActive(ECE_KOH_I_NOOR_RECOVERED, $player);
+  }
+
+  public static function isNationalismActive($player)
+  {
+    $card = Cards::get(ECE_NATIONALISM_CARD_ID);
+    return $card['location'] === 'events_'.$player->getId();
+  }
+
+  public static function isNewTacticsActive($player)
+  {
+    return self::isPlayerEventActive(ECE_NEW_TACTICS, $player);
+  }
+
   public static function isPashtunwaliValuesActive()
   {
-    $players = Players::getAll();
-    foreach ($players as $playerId => $player) {
-      $isActive = Utils::array_some($player->getEventCards(), function ($card) {
-        return $card['purchased']['effect'] === ECE_PASHTUNWALI_VALUES;
-      });
-      if ($isActive) {
-        return $isActive;
-      }
-    }
-    return false;
+    $card = Cards::get(ECE_PASHTUNWALI_VALUES_CARD_ID);
+    return Utils::startsWith($card['location'], 'events_');
   }
 
   public static function isRumorActive($player)
@@ -221,6 +240,17 @@ class Events
     $globalEvents = Cards::getInLocation(ACTIVE_EVENTS)->toArray();
     $isActive = Utils::array_some($globalEvents, function ($event) use ($eventId) {
       return $event['discarded']['effect'] === $eventId;
+    });
+    return $isActive;
+  }
+
+  /**
+   * Player events are purchased event card effects that have been purchased by the player.
+   */
+  public static function isPlayerEventActive($eventId, $player)
+  {
+    $isActive = Utils::array_some($player->getEventCards(), function ($card) use ($eventId) {
+      return $card['purchased']['effect'] === $eventId;
     });
     return $isActive;
   }

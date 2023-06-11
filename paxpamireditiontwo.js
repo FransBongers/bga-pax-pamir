@@ -338,31 +338,34 @@ var PP_SELECTED = 'pp_selected';
 var PP_CARD_IN_HAND = 'pp_card_in_hand';
 var PP_CARD_IN_ZONE = 'pp_card_in_zone';
 var PP_MARKET_CARD = 'pp_market_card';
-var ECE_DOMINANCE_CHECK = 'dominanceCheck';
-var ECE_MILITARY_SUIT = 'militarySuit';
-var ECE_NEW_TACTICS = 'newTactics';
-var ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
-var ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
-var ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
-var ECE_COURTLY_MANNERS = 'courtlyManners';
-var ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
-var ECE_RUMOR = 'rumor';
-var ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
-var ECE_CONFLICT_FATIGUE = 'conflictFatigue';
-var ECE_RIOTS_IN_HERAT = 'riotsInHerat';
-var ECE_NATIONALISM = 'nationalism';
-var ECE_NO_EFFECT = 'noEffect';
-var ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
-var ECE_RIOTS_IN_KABUL = 'riotsInKabul';
-var ECE_NATION_BUILDING = 'nationBuilding';
-var ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
 var ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backingOfPersianAristocracy';
 var ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
-var ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
+var ECE_CONFLICT_FATIGUE = 'conflictFatigue';
+var ECE_CONFLICT_FATIGUE_CARD_ID = 'card_109';
+var ECE_COURTLY_MANNERS = 'courtlyManners';
+var ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
+var ECE_DOMINANCE_CHECK = 'dominanceCheck';
+var ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
+var ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
 var ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
+var ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+var ECE_MILITARY_SUIT = 'militarySuit';
+var ECE_NATION_BUILDING = 'nationBuilding';
+var ECE_NATIONALISM = 'nationalism';
+var ECE_NATIONALISM_CARD_ID = 'card_110';
+var ECE_NEW_TACTICS = 'newTactics';
+var ECE_NO_EFFECT = 'noEffect';
+var ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
 var ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
+var ECE_PASHTUNWALI_VALUES_CARD_ID = 'card_115';
 var ECE_POLITICAL_SUIT = 'politicalSuit';
+var ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
 var ECE_REBUKE = 'rebuke';
+var ECE_RIOTS_IN_HERAT = 'riotsInHerat';
+var ECE_RIOTS_IN_KABUL = 'riotsInKabul';
+var ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
+var ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
+var ECE_RUMOR = 'rumor';
 var tplCard = function (_a) {
     var cardId = _a.cardId, extraClasses = _a.extraClasses;
     return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
@@ -1178,6 +1181,10 @@ var PPPlayer = (function () {
         this.court.removeFromZone('pp_card_select_right', true);
         this.court.instantaneous = false;
     };
+    PPPlayer.prototype.ownsEventCard = function (_a) {
+        var cardId = _a.cardId;
+        return this.events.getAllItems().includes(cardId);
+    };
     PPPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId;
         var node = dojo.byId(cardId);
@@ -1651,6 +1658,13 @@ var Region = (function () {
             return coalitionId !== _this.game.playerManager.getPlayer({ playerId: playerId }).getLoyalty();
         });
     };
+    Region.prototype.getPlayerTribes = function (_a) {
+        var playerId = _a.playerId;
+        return this.tribeZone.getAllItems().filter(function (cylinderId) {
+            var cylinderPlayerId = Number(cylinderId.split('_')[1]);
+            return cylinderPlayerId === playerId;
+        });
+    };
     Region.prototype.removeTempArmy = function (_a) {
         var index = _a.index;
         this.armyZone.removeFromZone("temp_army_".concat(index), true);
@@ -1908,10 +1922,9 @@ var ClientCardActionBattleState = (function () {
         var region = this.game.map.getRegion({ region: regionId });
         var coalitionId = this.game.localState.activePlayer.loyalty;
         var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
-        var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
         var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
         var cardRank = cardInfo.rank;
-        this.maxNumberToSelect = Math.min(cardRank, coalitionArmies.length);
+        this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }));
         this.numberSelected = 0;
         debug('enemyPieces', enemyPieces);
         this.updatePageTitle('region');
@@ -1943,6 +1956,15 @@ var ClientCardActionBattleState = (function () {
         });
         dojo.addClass('confirm_btn', 'disabled');
         this.game.addCancelButton();
+    };
+    ClientCardActionBattleState.prototype.getNumberOfFriendlyArmiesInRegion = function (_a) {
+        var coalitionId = _a.coalitionId, region = _a.region;
+        var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
+        var player = this.game.getCurrentPlayer();
+        var tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
+            ? region.getPlayerTribes({ playerId: player.getPlayerId() }).length
+            : 0;
+        return coalitionArmies.length + tribesNationalism;
     };
     ClientCardActionBattleState.prototype.confirmBattle = function () {
         debug('confirmBattle');
@@ -2023,8 +2045,7 @@ var ClientCardActionBattleState = (function () {
             var region = _this.game.map.getRegion({ region: regionId });
             var coalitionId = _this.game.localState.activePlayer.loyalty;
             var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
-            var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
-            if (enemyPieces.length === 0 || coalitionArmies.length === 0) {
+            if (enemyPieces.length === 0 || _this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }) === 0) {
                 return;
             }
             var element = document.getElementById("pp_region_".concat(regionId));
@@ -2483,11 +2504,14 @@ var ClientCardActionMoveState = (function () {
         var fromRegionId = _a.fromRegionId, toRegionId = _a.toRegionId, pieceId = _a.pieceId;
         debug('onRegionClick', fromRegionId, toRegionId, pieceId);
         this.game.clearPossible();
+        var fromRegion = this.game.map.getRegion({ region: fromRegionId });
+        var toRegion = this.game.map.getRegion({ region: toRegionId });
+        var isPieceArmy = pieceId.startsWith('block');
         this.addMove({ from: fromRegionId, to: toRegionId, pieceId: pieceId });
         this.game.move({
             id: pieceId,
-            from: this.game.map.getRegion({ region: fromRegionId }).getArmyZone(),
-            to: this.game.map.getRegion({ region: toRegionId }).getArmyZone(),
+            from: isPieceArmy ? fromRegion.getArmyZone() : fromRegion.getTribeZone(),
+            to: isPieceArmy ? toRegion.getArmyZone() : toRegion.getTribeZone(),
             removeClass: [PP_SELECTED],
         });
         this.nextStepAfterMove();
@@ -2611,6 +2635,13 @@ var ClientCardActionMoveState = (function () {
                     to: _this.game.map.getRegion({ region: to }).getArmyZone(),
                 });
             }
+            else if (key.includes('cylinder') && !from.startsWith('card')) {
+                _this.game.move({
+                    id: key,
+                    from: _this.game.map.getRegion({ region: from }).getTribeZone(),
+                    to: _this.game.map.getRegion({ region: to }).getTribeZone(),
+                });
+            }
             else if (key.includes('cylinder')) {
                 _this.game.move({
                     id: key,
@@ -2626,8 +2657,12 @@ var ClientCardActionMoveState = (function () {
             var region = _this.game.map.getRegion({ region: regionId });
             var coalitionId = _this.game.localState.activePlayer.loyalty;
             var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
+            var player = _this.game.getCurrentPlayer();
+            var tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
+                ? region.getPlayerTribes({ playerId: player.getPlayerId() })
+                : [];
             debug('coalitionArmies', regionId, coalitionArmies);
-            if (coalitionArmies.length === 0) {
+            if (coalitionArmies.length + tribesNationalism.length === 0) {
                 return;
             }
             var hasCoalitionRoads = region.borders.some(function (borderId) {
@@ -2637,7 +2672,7 @@ var ClientCardActionMoveState = (function () {
             if (!hasCoalitionRoads) {
                 return;
             }
-            coalitionArmies.forEach(function (pieceId) {
+            coalitionArmies.concat(tribesNationalism).forEach(function (pieceId) {
                 console.log('selectable army', pieceId);
                 var element = dojo.byId(pieceId);
                 element.classList.add('pp_selectable');
@@ -2959,11 +2994,21 @@ var ClientPlayCardState = (function () {
             if (typeof state_1 === "object")
                 return state_1.value;
         }
-        this.game.addPrimaryActionButton({
-            id: "ask_waive_btn",
-            text: _('Ask to waive'),
-            callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
-        });
+        ;
+        if (this.game.getCurrentPlayer().ownsEventCard({ cardId: 'card_107' })) {
+            this.game.addPrimaryActionButton({
+                id: "do_not_pay_btn",
+                text: _('Do not pay'),
+                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
+            });
+        }
+        else {
+            this.game.addPrimaryActionButton({
+                id: "ask_waive_btn",
+                text: _('Ask to waive'),
+                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
+            });
+        }
         this.game.addCancelButton();
     };
     ClientPlayCardState.prototype.updateInterfacePlayCardConfirm = function (_a) {
@@ -4258,7 +4303,9 @@ var NotificationManager = (function () {
             var toZone = _this.game.getZoneForLocation({ location: to });
             if (_this.game.framework().isCurrentPlayerActive() &&
                 !fromZone.getAllItems().includes(tokenId) &&
-                ((from.startsWith('armies') && to.startsWith('armies')) || (from.startsWith('spies') && to.startsWith('spies')))) {
+                ((from.startsWith('armies') && to.startsWith('armies')) ||
+                    (from.startsWith('spies') && to.startsWith('spies')) ||
+                    (from.startsWith('tribes') && to.startsWith('tribes')))) {
                 debug('no need to execute move');
                 return;
             }

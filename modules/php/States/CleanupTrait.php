@@ -103,6 +103,7 @@ trait CleanupTrait
     switch($event) {
       // cards 101-104
       case ECE_DOMINANCE_CHECK:
+        $this->resolveDominanceCheck();
         break;
       // card 105
       case ECE_MILITARY_SUIT:

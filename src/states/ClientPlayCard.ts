@@ -71,12 +71,20 @@ class ClientPlayCardState implements State {
         text: dojo.string.substitute(_(`Offer ${i} rupee(s)`), { i }),
         callback: () => this.playCardNextStep({ cardId, bribe: i }),
       });
+    };
+    if (this.game.getCurrentPlayer().ownsEventCard({cardId: 'card_107'})) {
+      this.game.addPrimaryActionButton({
+        id: `do_not_pay_btn`,
+        text: _('Do not pay'),
+        callback: () => this.playCardNextStep({ cardId, bribe: 0 }),
+      });
+    } else {
+      this.game.addPrimaryActionButton({
+        id: `ask_waive_btn`,
+        text: _('Ask to waive'),
+        callback: () => this.playCardNextStep({ cardId, bribe: 0 }),
+      });
     }
-    this.game.addPrimaryActionButton({
-      id: `ask_waive_btn`,
-      text: _('Ask to waive'),
-      callback: () => this.playCardNextStep({ cardId, bribe: 0 }),
-    });
     this.game.addCancelButton();
   }
 

@@ -199,6 +199,11 @@ abstract class Utils extends \APP_DbObject
     return Utils::startsWith($pieceId, "cylinder");
   }
 
+  public static function getPlayerIdForCylinderId($cylinderId)
+  {
+    return intval(explode('_',$cylinderId)[1]);
+  }
+
   // .##.....##....###....##.......####.########.....###....########.####..#######..##....##
   // .##.....##...##.##...##........##..##.....##...##.##......##.....##..##.....##.###...##
   // .##.....##..##...##..##........##..##.....##..##...##.....##.....##..##.....##.####..##

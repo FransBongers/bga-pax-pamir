@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -50,6 +51,9 @@ trait PlayerActionMoveTrait
       // Validate all moves per piece
       if (Utils::isBlock($pieceId)) {
         $this->validateArmyMoves($pieceId, $pieceMoves, $player);
+      } else if (Utils::isCylinder($pieceId) && !Utils::startsWith($pieceMoves[0]['from'], 'card')) {
+        // Allowed tribe moved
+        $this->validateTribeMoves($pieceId, $pieceMoves, $player);
       } else if (Utils::isCylinder($pieceId)) {
         $this->validateSpyMoves($pieceId, $pieceMoves, $player);
       }
@@ -80,7 +84,7 @@ trait PlayerActionMoveTrait
       if (Utils::isBlock($pieceId)) {
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
-        $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegioTo}');
+        $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
           'moves' => [
@@ -92,8 +96,31 @@ trait PlayerActionMoveTrait
           ],
           'logTokenArmy' => Utils::logTokenArmy(explode('_', $pieceId)[1]),
           'logTokenRegionFrom' => Utils::logTokenRegionName($source),
-          'logTokenRegioTo' => Utils::logTokenRegionName($destination),
+          'logTokenRegionTo' => Utils::logTokenRegionName($destination),
         ]);
+      } else if (Utils::isCylinder($pieceId) && !Utils::startsWith($pieceMoves[0]['from'], 'card')) {
+
+        $from = 'tribes_' . $source;
+        $to = 'tribes_' . $destination;
+        Notifications::log('locations',[
+          'from' => $from,
+          'to' => $to
+        ]);
+        $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        Notifications::moveToken($message, [
+          'player' => $player,
+          'moves' => [
+            [
+              'from' => $from,
+              'to' => $to,
+              'tokenId' => $pieceId,
+            ]
+          ],
+          'logTokenCylinder' => Utils::logTokenCylinder(explode('_', $pieceId)[1]),
+          'logTokenRegionFrom' => Utils::logTokenRegionName($source),
+          'logTokenRegionTo' => Utils::logTokenRegionName($destination),
+        ]);
+
       } else if (Utils::isCylinder($pieceId)) {
         $from = 'spies_' . $source;
         $to = 'spies_' . $destination;
@@ -146,6 +173,33 @@ trait PlayerActionMoveTrait
       // block should be in db location for first move or in destination of previous move
       if (($index === 0 && $tokenInfo['location'] !== 'armies_' . $move['from']) || ($index > 0 && $move['from'] !== $moves[$index - 1]['to'])) {
         throw new \feException("Army is not in the specified location");
+      }
+      // loyal road needed between regions
+      $border = [$move['from'], $move['to']];
+      sort($border);
+      $border = implode('_', $border);
+      if (!Map::borderHasRoadForCoalition($border, $playerLoyalty)) {
+        throw new \feException("No road of same coalition on border");
+      }
+    }
+  }
+
+  function validateTribeMoves($pieceId, $moves, $player)
+  {
+    if (!Events::isNationalismActive($player)) {
+      throw new \feException("Not allowed to move tribes");
+    }
+
+    $tokenInfo = Tokens::get($pieceId);
+    $playerLoyalty = $player->getLoyalty();
+    // Piece should be loyal to players coalition
+    if (Utils::getPlayerIdForCylinderId($pieceId) !== $player->getId()) {
+      throw new \feException("Not allowed to move tribe from another player");
+    }
+    foreach ($moves as $index => $move) {
+      // block should be in db location for first move or in destination of previous move
+      if (($index === 0 && $tokenInfo['location'] !== 'tribes_' . $move['from']) || ($index > 0 && $move['from'] !== $moves[$index - 1]['to'])) {
+        throw new \feException("Tribe is not in the specified location");
       }
       // loyal road needed between regions
       $border = [$move['from'], $move['to']];

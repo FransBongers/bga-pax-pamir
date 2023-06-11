@@ -558,6 +558,10 @@ class PPPlayer {
     this.court.instantaneous = false;
   }
 
+  ownsEventCard({cardId}: {cardId: string;}): boolean {
+    return this.events.getAllItems().includes(cardId);
+  }
+
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
   // ..##...##..##..........##.....##..##.....##.####..##.##......

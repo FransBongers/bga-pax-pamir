@@ -87,6 +87,16 @@ class Map
     return null;
   }
 
+  public static function getPlayerTribesInRegion($region,$player) {
+    $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
+    $playerId = $player->getId();
+    $playerTribes = Utils::filter($tribes,function ($cylinder) use ($playerId) {
+      return Utils::getPlayerIdForCylinderId($cylinder['id']) === $playerId;
+    });
+    Notifications::log('playerTribes',$playerTribes);
+    return $playerTribes;
+  }
+
 
   /*
     Returns rulers for all regions. Value will either be 0 (no ruler) or

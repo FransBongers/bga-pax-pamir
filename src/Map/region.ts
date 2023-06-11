@@ -251,6 +251,13 @@ class Region {
     })
   }
 
+  public getPlayerTribes({playerId}: {playerId: number }) {
+    return this.tribeZone.getAllItems().filter((cylinderId: string) => {
+      const cylinderPlayerId = Number(cylinderId.split('_')[1]);
+      return cylinderPlayerId === playerId;
+    })
+  }
+
   public removeTempArmy({index}: {index:number}) {
     this.armyZone.removeFromZone(`temp_army_${index}`,true);
   }

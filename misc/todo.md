@@ -22,16 +22,8 @@
 - Pay for hostage cards
 
 ### Event cards purchase
-- card 106
-- card 107
-- card 108
-- card 109
-- card 110
 - card 112
-- card 113
 - card 114
-- card 115
-- card 116
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market
@@ -43,7 +35,7 @@
 - For discard: instead of moving card div change discard background to show certain card and remove the card div?
 
 ## Bugs
-- 
+- Return all coalition blocks from map after succesfull dominance check
 
 
 ## To check

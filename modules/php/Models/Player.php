@@ -134,15 +134,15 @@ class Player extends \PaxPamir\Helpers\DB_Model
     }
 
     $isEmbarrassementOfRichesActive = Events::isEmbarrassementOfRichesActive();
-    Notifications::log('isEmbarrassementOfRichesActive', $isEmbarrassementOfRichesActive);
     // Gifts
     if (!$isEmbarrassementOfRichesActive) {
-      Notifications::log('calculateGifts', []);
+      $isKohINoorRecoveredActive = Events::isKohINoorRecoveredActive($this);
+      $influencePerGift = $isKohINoorRecoveredActive ? 2 : 1;
       for ($i = 1; $i <= 3; $i++) {
         $value = $i * 2;
         $tokens_in_location = Tokens::getInLocation(['gift', $value, $this->id]);
         if (count($tokens_in_location) > 0) {
-          $influence += 1;
+          $influence += $influencePerGift;
         }
       }
     }

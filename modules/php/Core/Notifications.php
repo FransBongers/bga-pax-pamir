@@ -3,6 +3,7 @@
 namespace PaxPamir\Core;
 
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Players;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Globals;
@@ -371,7 +372,7 @@ class Notifications
 
   public static function takeRupeesFromSupply($player, $amount)
   {
-    self::notifyAll("takeRupeesFromSupply", clienttranslate('${player_name} takes ${amount} ${logTokenRupee} from the supply'), array(
+    self::notifyAll("takeRupeesFromSupply", clienttranslate('${player_name} takes ${amount} ${logTokenRupee} from the bank'), array(
       'player' => $player,
       'amount' => $amount,
       'logTokenRupee' => Utils::logTokenRupee(),
@@ -503,7 +504,7 @@ class Notifications
       'value' => $value,
       'rupeesOnCards' => $rupeesOnCards,
       'rupeeChange' => -$value,
-      'influenceChange' => 1,
+      'influenceChange' => Events::isKohINoorRecoveredActive($player) ? 2 : 1,
       'tokenMove' => $move
     ));
   }

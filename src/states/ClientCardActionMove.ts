@@ -159,12 +159,15 @@ class ClientCardActionMoveState implements State {
   private onRegionClick({ fromRegionId, toRegionId, pieceId }: { fromRegionId: string; toRegionId: string; pieceId: string }) {
     debug('onRegionClick', fromRegionId, toRegionId, pieceId);
     this.game.clearPossible();
+    const fromRegion = this.game.map.getRegion({ region: fromRegionId });
+    const toRegion = this.game.map.getRegion({ region: toRegionId });
+    const isPieceArmy = pieceId.startsWith('block');
 
     this.addMove({ from: fromRegionId, to: toRegionId, pieceId });
     this.game.move({
       id: pieceId,
-      from: this.game.map.getRegion({ region: fromRegionId }).getArmyZone(),
-      to: this.game.map.getRegion({ region: toRegionId }).getArmyZone(),
+      from: isPieceArmy ? fromRegion.getArmyZone() : fromRegion.getTribeZone(),
+      to: isPieceArmy ? toRegion.getArmyZone() : toRegion.getTribeZone(),
       removeClass: [PP_SELECTED],
     });
 
@@ -334,6 +337,13 @@ class ClientCardActionMoveState implements State {
           from: this.game.map.getRegion({ region: from }).getArmyZone(),
           to: this.game.map.getRegion({ region: to }).getArmyZone(),
         });
+      } else if (key.includes('cylinder') && !from.startsWith('card')) {
+        // Moved cylinders with nationalism
+        this.game.move({
+          id: key,
+          from: this.game.map.getRegion({ region: from }).getTribeZone(),
+          to: this.game.map.getRegion({ region: to }).getTribeZone(),
+        });
       } else if (key.includes('cylinder')) {
         this.game.move({
           id: key,
@@ -355,8 +365,14 @@ class ClientCardActionMoveState implements State {
       const coalitionId = this.game.localState.activePlayer.loyalty;
       // const enemyPieces = region.getEnemyPieces({ coalitionId });
       const coalitionArmies = region.getCoalitionArmies({ coalitionId });
+
+      const player = this.game.getCurrentPlayer();
+      const tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
+        ? region.getPlayerTribes({ playerId: player.getPlayerId() })
+        : [];
+
       debug('coalitionArmies', regionId, coalitionArmies);
-      if (coalitionArmies.length === 0) {
+      if (coalitionArmies.length + tribesNationalism.length === 0) {
         return;
       }
 
@@ -367,7 +383,7 @@ class ClientCardActionMoveState implements State {
       if (!hasCoalitionRoads) {
         return;
       }
-      coalitionArmies.forEach((pieceId: string) => {
+      coalitionArmies.concat(tribesNationalism).forEach((pieceId: string) => {
         console.log('selectable army', pieceId);
         const element = dojo.byId(pieceId);
         element.classList.add('pp_selectable');

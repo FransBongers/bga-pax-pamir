@@ -10,6 +10,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -423,11 +424,9 @@ trait PlayerActionTrait
     if ($isFavoredSuit) {
       return true;
     };
-    $playerEventCards = Players::get()->getEventCards();
-    $playerOwnsNewTactics = Utils::array_some($playerEventCards, function ($card) {
-      return $card['purchased']['effect'] === ECE_NEW_TACTICS;
-    });
-    if ($cardInfo['suit'] === MILITARY && $playerOwnsNewTactics) {
+    $player = Players::get();
+    $isNewTacticsActive = Events::isNewTacticsActive($player);
+    if ($cardInfo['suit'] === MILITARY && $isNewTacticsActive) {
       return true;
     };
     return false;

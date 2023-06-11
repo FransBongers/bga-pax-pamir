@@ -38,13 +38,17 @@ trait DebugTrait
 
   function test()
   {
+    Globals::setRemainingActions(2);
     // Cards::move('card_107',ACTIVE_EVENTS);
-    // Cards::move('card_115','market_0_0');
-    Cards::move('card_105','market_0_1');
+    // Cards::move('card_110','market_0_0');
+    // Cards::move('card_107','market_1_0');
+    
+    // Notifications::log('isConflictFatigueActive',Events::isConflictFatigueActive());
+    // Cards::move('card_38','deck');
     // $rupee = Tokens::getTopOf(RUPEE_SUPPLY);
     // Tokens::move($rupee['id'],['market_0_0','rupees']);
     // Cards::move('card_106','market_1_0');
-    // Notifications::log('isPashtunwaliValuesActive',Events::isPashtunwaliValuesActive());
+    Notifications::log('isNationalismActive',Events::isNationalismActive(Players::get()));
     // Notifications::log('isActive',$result);
     // $this->debugCreateArmy(PERSIA,BRITISH);
     // $this->debugCreateArmy(PERSIA,BRITISH);

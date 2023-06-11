@@ -97,7 +97,7 @@ trait PlayCardTrait
     $bribe = intval($bribe);
     // Check if player owns card and card is in players hand
     // Check if player needs to pay bribe
-    $checkBribeResult = $this->checkBribe($card, $playerId);
+    $checkBribeResult = $this->checkBribe($card, $playerId,$bribe);
 
     // active player has suggested partial bribe. Ruler of region needs to confirm or deny
     if ($checkBribeResult !== null && $checkBribeResult['amount'] > $bribe) {
@@ -200,9 +200,12 @@ trait PlayCardTrait
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  function checkBribe($card, $playerId)
+  function checkBribe($card, $playerId,$bribe)
   {
     if (Events::isDisregardForCustomsActive()) {
+      return null;
+    };
+    if (Events::isCourtlyMannersActive(Players::get()) && $bribe === 0) {
       return null;
     };
     $rulers = Globals::getRulers();

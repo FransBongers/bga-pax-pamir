@@ -124,30 +124,33 @@ const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
   * Events
   */
 /**
- * Event card effects
+ * Event card effects & cardIds
  */
-const ECE_DOMINANCE_CHECK = 'dominanceCheck';
-const ECE_MILITARY_SUIT = 'militarySuit';
-const ECE_NEW_TACTICS = 'newTactics';
-const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
-const ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
-const ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
-const ECE_COURTLY_MANNERS = 'courtlyManners';
-const ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
-const ECE_RUMOR = 'rumor';
-const ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
-const ECE_CONFLICT_FATIGUE = 'conflictFatigue';
-const ECE_RIOTS_IN_HERAT = 'riotsInHerat';
-const ECE_NATIONALISM = 'nationalism';
-const ECE_NO_EFFECT = 'noEffect';
-const ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
-const ECE_RIOTS_IN_KABUL = 'riotsInKabul';
-const ECE_NATION_BUILDING = 'nationBuilding';
-const ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
 const ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backingOfPersianAristocracy';
 const ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
-const ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
+const ECE_CONFLICT_FATIGUE = 'conflictFatigue';
+const ECE_CONFLICT_FATIGUE_CARD_ID = 'card_109';
+const ECE_COURTLY_MANNERS = 'courtlyManners';
+const ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
+const ECE_DOMINANCE_CHECK = 'dominanceCheck';
+const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
+const ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
 const ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
+const ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+const ECE_MILITARY_SUIT = 'militarySuit';
+const ECE_NATION_BUILDING = 'nationBuilding';
+const ECE_NATIONALISM = 'nationalism';
+const ECE_NATIONALISM_CARD_ID = 'card_110';
+const ECE_NEW_TACTICS = 'newTactics';
+const ECE_NO_EFFECT = 'noEffect';
+const ECE_OTHER_PERSUASIVE_METHODS = 'otherPersuasiveMethods';
 const ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
+const ECE_PASHTUNWALI_VALUES_CARD_ID = 'card_115';
 const ECE_POLITICAL_SUIT = 'politicalSuit';
+const ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
 const ECE_REBUKE = 'rebuke';
+const ECE_RIOTS_IN_HERAT = 'riotsInHerat';
+const ECE_RIOTS_IN_KABUL = 'riotsInKabul';
+const ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
+const ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
+const ECE_RUMOR = 'rumor';

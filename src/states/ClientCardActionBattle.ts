@@ -47,13 +47,15 @@ class ClientCardActionBattleState implements State {
   private updateInterfaceSelectPiecesInRegion({ regionId }: { regionId: string }) {
     this.game.clearPossible();
     this.location = regionId;
+
     const region = this.game.map.getRegion({ region: regionId });
     const coalitionId = this.game.localState.activePlayer.loyalty;
+
     const enemyPieces = region.getEnemyPieces({ coalitionId });
-    const coalitionArmies = region.getCoalitionArmies({ coalitionId });
     const cardInfo = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
     const cardRank = cardInfo.rank;
-    this.maxNumberToSelect = Math.min(cardRank, coalitionArmies.length);
+
+    this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({region, coalitionId}));
     this.numberSelected = 0;
     debug('enemyPieces', enemyPieces);
 
@@ -95,6 +97,16 @@ class ClientCardActionBattleState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  getNumberOfFriendlyArmiesInRegion({ coalitionId, region}: {coalitionId: string; region: Region; }) {
+    const coalitionArmies = region.getCoalitionArmies({ coalitionId });
+    const player = this.game.getCurrentPlayer();
+    const tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
+      ? region.getPlayerTribes({ playerId: player.getPlayerId() }).length
+      : 0;
+
+      return coalitionArmies.length + tribesNationalism;
+  }
 
   confirmBattle() {
     debug('confirmBattle');
@@ -182,9 +194,9 @@ class ClientCardActionBattleState implements State {
       const region = this.game.map.getRegion({ region: regionId });
       const coalitionId = this.game.localState.activePlayer.loyalty;
       const enemyPieces = region.getEnemyPieces({ coalitionId });
-      const coalitionArmies = region.getCoalitionArmies({ coalitionId });
 
-      if (enemyPieces.length === 0 || coalitionArmies.length === 0) {
+
+      if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({region, coalitionId}) === 0) {
         return;
       }
 

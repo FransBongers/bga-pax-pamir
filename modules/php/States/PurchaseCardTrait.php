@@ -171,8 +171,10 @@ trait PurchaseCardTrait
         $this->nextState("resolveEvent");
         break;
       case ECE_CONFLICT_FATIGUE: // card_109
+        $this->gamestate->nextState('playerActions');
         break;
       case ECE_NATIONALISM: // card_110
+        $this->gamestate->nextState('playerActions');
         break;
       case ECE_PUBLIC_WITHDRAWAL: // card_111
         $this->gamestate->nextState('playerActions');

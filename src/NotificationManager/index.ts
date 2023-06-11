@@ -364,7 +364,9 @@ class NotificationManager {
       if (
         this.game.framework().isCurrentPlayerActive() &&
         !fromZone.getAllItems().includes(tokenId) &&
-        ((from.startsWith('armies') && to.startsWith('armies')) || (from.startsWith('spies') && to.startsWith('spies')))
+        ((from.startsWith('armies') && to.startsWith('armies')) ||
+          (from.startsWith('spies') && to.startsWith('spies')) ||
+          (from.startsWith('tribes') && to.startsWith('tribes')))
       ) {
         debug('no need to execute move');
         return;

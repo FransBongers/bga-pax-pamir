@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -31,6 +32,22 @@ trait DominanceCheckTrait
 
   function stDominanceCheck()
   {
+    $this->resolveDominanceCheck();
+
+    // TODO: Frans: if one player leads by 4 or more end the game
+    $this->gamestate->nextState('playerActions');
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function resolveDominanceCheck()
+  {
     // TODO: increase by 2 in case of instability
     Globals::incDominanceChecksResolved(1);
     // Determine if check is successful
@@ -49,7 +66,9 @@ trait DominanceCheckTrait
     usort($coalitionBlockCounts, function ($a, $b) {
       return $a['count'] - $b['count'];
     });
-    $checkSuccessful = $coalitionBlockCounts[1]['count'] - $coalitionBlockCounts[0]['count'] >= 4;
+
+    $requiredDifferenceToBeDominant = Events::isConflictFatigueActive() ? 2 : 4;
+    $checkSuccessful = $coalitionBlockCounts[1]['count'] - $coalitionBlockCounts[0]['count'] >= $requiredDifferenceToBeDominant;
 
     // scores object which will be returned with notification
     $scores = array();
@@ -102,18 +121,7 @@ trait DominanceCheckTrait
       'successful' => $checkSuccessful,
       'moves' => $moves,
     ));
-
-    // TODO: Frans: if one player leads by 4 or more end the game
-    $this->gamestate->nextState('playerActions');
   }
-
-  // .##.....##.########.####.##.......####.########.##....##
-  // .##.....##....##.....##..##........##.....##.....##..##.
-  // .##.....##....##.....##..##........##.....##......####..
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // ..#######.....##....####.########.####....##.......##...
 
   function getCylindersInPlayPerPlayer()
   {
@@ -178,7 +186,7 @@ trait DominanceCheckTrait
     $moves = array();
     // return all coalition blocks to their pools
     $afghanBlocks = Tokens::getInLocation(BLOCKS_AFGHAN_SUPPLY);
-    Notifications::log('afghanBlocks',$afghanBlocks);
+    Notifications::log('afghanBlocks', $afghanBlocks);
     foreach ($afghanBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
@@ -191,7 +199,7 @@ trait DominanceCheckTrait
     };
 
     $russianBlocks = Tokens::getInLocation(BLOCKS_RUSSIAN_SUPPLY);
-    Notifications::log('russianBlocks',$russianBlocks);
+    Notifications::log('russianBlocks', $russianBlocks);
     foreach ($russianBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(
@@ -204,7 +212,7 @@ trait DominanceCheckTrait
     };
 
     $britishBlocks = Tokens::getInLocation(BLOCKS_BRITISH_SUPPLY);
-    Notifications::log('britishBlocks',$britishBlocks);
+    Notifications::log('britishBlocks', $britishBlocks);
     foreach ($britishBlocks as $tokenId => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $moves[] = array(

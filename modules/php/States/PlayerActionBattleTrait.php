@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -49,10 +50,10 @@ trait PlayerActionBattleTrait
 
     $player = Players::get();
     $loyalty = $player->getLoyalty();
-    $loyalPieces = $this->getLoyalPiecesInLocation($player, $location);
+    $numberOfLoyalPieces = $this->getNumberLoyalPiecesInLocation($player, $location);
     // Needs loyal pieces to remove enemy pieces
     // Notifications::log('battle debug', [$loyalPieces,$removedPieces]);
-    if (count($loyalPieces) < count($removedPieces)) {
+    if ($numberOfLoyalPieces < count($removedPieces)) {
       throw new \feException("Not enough loyal pieces");
     }
 
@@ -151,7 +152,7 @@ trait PlayerActionBattleTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function getLoyalPiecesInLocation($player, $location)
+  function getNumberLoyalPiecesInLocation($player, $location)
   {
     // $locationInfo = explode("_", $location);
     if (Utils::startsWith($location, "card")) {
@@ -161,7 +162,7 @@ trait PlayerActionBattleTrait
       $loyalSpies = array_values(array_filter($spiesOnCard, function ($cylinder) use ($playerId) {
         return intval(explode("_", $cylinder['id'])[1]) === $playerId;
       }));
-      return $loyalSpies;
+      return count($loyalSpies);
     } else {
       $loyalty = $player->getLoyalty();
       // Battle in region, get coalition armies
@@ -169,7 +170,17 @@ trait PlayerActionBattleTrait
       $loyalArmies = array_values(array_filter($armiesInLocation, function ($army) use ($loyalty) {
         return explode("_", $army['id'])[1] === $loyalty;
       }));
-      return $loyalArmies;
+      $player = Players::get();
+      $extraPiecesActive = 0;
+      if (Events::isNationalismActive($player)) {
+        $extraPiecesActive += count(Map::getPlayerTribesInRegion($location,$player));
+      }
+
+      // const tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
+      // ? region.getPlayerTribes({ playerId: player.getPlayerId() }).length
+      // : 0;
+
+      return count($loyalArmies) + $extraPiecesActive;
     }
   }
 }

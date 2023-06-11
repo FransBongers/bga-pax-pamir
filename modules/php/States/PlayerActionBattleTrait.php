@@ -86,7 +86,7 @@ trait PlayerActionBattleTrait
 
     Cards::setUsed($cardId, 1);
     // if not bonus action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
     if ($isBattleInRegion) {

@@ -87,7 +87,7 @@ trait CleanupTrait
       $to = in_array($cardId,['card_106','card_107']) ? ACTIVE_EVENTS : DISCARD;
       Cards::insertOnTop($card['id'], $to);
       Notifications::discardEventCardFromMarket($card, $location,$to);
-      $this->resolveEventEffect($card['discarded']['effect'],$location);
+      $this->resolveEventDiscardEffect($card['discarded']['effect'],$location);
 
       // Only card that can interrupt flow while discard event cards from market
       if($cardId === 'card_114') {
@@ -97,7 +97,7 @@ trait CleanupTrait
     return false;
   }
 
-  function resolveEventEffect($event,$location)
+  function resolveEventDiscardEffect($event,$location)
   {
     Notifications::log('event',$event);
     switch($event) {
@@ -106,7 +106,7 @@ trait CleanupTrait
         break;
       // card 105
       case ECE_MILITARY_SUIT:
-        $this->resolveFavoredSuitChange(MILITARY,false);
+        $this->resolveFavoredSuitChange(MILITARY,ECE_MILITARY_SUIT);
         break;
       // card 106
       case ECE_EMBARRASSEMENT_OF_RICHES:
@@ -147,11 +147,11 @@ trait CleanupTrait
         break;
       // card 115
       case ECE_INTELLIGENCE_SUIT:
-        $this->resolveFavoredSuitChange(INTELLIGENCE,false);
+        $this->resolveFavoredSuitChange(INTELLIGENCE,ECE_INTELLIGENCE_SUIT);
         break;
       // card 116
       case ECE_POLITICAL_SUIT:
-        $this->resolveFavoredSuitChange(POLITICAL,false);
+        $this->resolveFavoredSuitChange(POLITICAL,ECE_POLITICAL_SUIT);
         break;
       default:
         Notifications::log('no match for event',[]);

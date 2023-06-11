@@ -21,6 +21,22 @@
 - Move
 - Pay for hostage cards
 
+### Event cards purchase
+- card 106
+- card 107
+- card 108
+- card 109
+- card 110
+- card 112
+- card 113
+- card 114
+- card 115
+- card 116
+
+### Dominance Checks
+- Perform check when 2nd dominance check enters te market
+- Remove active events after check is resolved
+
 ### Improvements
 - Only highlight card actions that are possible based on rupees, ruled regions etc?
 - For bribes: should ruler be able to demand higher amount than briber has available even though briber can never accept?

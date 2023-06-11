@@ -24,7 +24,7 @@ class Events
   // .########....###....########.##....##....##.....######.
 
   // card_113 - purchase
-  public static function backingOfPersianAristocracy ()
+  public static function backingOfPersianAristocracy()
   {
     $player = Players::get();
     Players::incRupees($player->getId(), 3);
@@ -82,8 +82,9 @@ class Events
     }
   }
 
-  public static function publicWithdrawal ($location) {
-    Tokens::moveAllInLocation([$location,'rupees'],RUPEE_SUPPLY);
+  public static function publicWithdrawal($location)
+  {
+    Tokens::moveAllInLocation([$location, 'rupees'], RUPEE_SUPPLY);
     Notifications::publicWithdrawalEvent($location);
   }
 
@@ -189,6 +190,20 @@ class Events
     return Events::isGlobalEventActive(ECE_DISREGARD_FOR_CUSTOMS);
   }
 
+  public static function isPashtunwaliValuesActive()
+  {
+    $players = Players::getAll();
+    foreach ($players as $playerId => $player) {
+      $isActive = Utils::array_some($player->getEventCards(), function ($card) {
+        return $card['purchased']['effect'] === ECE_PASHTUNWALI_VALUES;
+      });
+      if ($isActive) {
+        return $isActive;
+      }
+    }
+    return false;
+  }
+
   public static function isRumorActive($player)
   {
     $isActive = Utils::array_some($player->getEventCards(), function ($card) {
@@ -196,7 +211,7 @@ class Events
     });
     return $isActive;
   }
-  
+
 
   /**
    * Global events are events that have an effect on all players in the game.
@@ -210,7 +225,7 @@ class Events
     return $isActive;
   }
 
-  public static function setCurrentEventGlobalState($eventId,$args = null) 
+  public static function setCurrentEventGlobalState($eventId, $args = null)
   {
     $currentEvent = [
       'event' => $eventId,

@@ -87,7 +87,7 @@ trait PlayerActionTrait
 
     Cards::setUsed($cardId, 1);
     // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
     $rupeesOnCards = $this->payActionCosts(2);
@@ -154,7 +154,7 @@ trait PlayerActionTrait
 
     Cards::setUsed($cardId, 1);
 
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
     $rupeesOnCards = $this->payActionCosts($cost);
@@ -280,7 +280,7 @@ trait PlayerActionTrait
     }
 
     // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
 
@@ -369,7 +369,7 @@ trait PlayerActionTrait
 
     Cards::setUsed($cardId, 1);
     // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
     Notifications::tax($cardId, $activePlayer);
@@ -417,10 +417,20 @@ trait PlayerActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function isCardFavoredSuit($cardId)
+  function isCardFavoredSuit($cardInfo)
   {
-    $cardInfo = $this->cards[$cardId];
-    return Globals::getFavoredSuit() == $cardInfo['suit'];
+    $isFavoredSuit = Globals::getFavoredSuit() == $cardInfo['suit'];
+    if ($isFavoredSuit) {
+      return true;
+    };
+    $playerEventCards = Players::get()->getEventCards();
+    $playerOwnsNewTactics = Utils::array_some($playerEventCards, function ($card) {
+      return $card['purchased']['effect'] === ECE_NEW_TACTICS;
+    });
+    if ($cardInfo['suit'] === MILITARY && $playerOwnsNewTactics) {
+      return true;
+    };
+    return false;
   }
 
   /**
@@ -450,7 +460,7 @@ trait PlayerActionTrait
     }
 
     // Player should have remaining actions or actions needs to be a bonus action
-    if (!(Globals::getRemainingActions() > 0 || Globals::getFavoredSuit() == $cardInfo['suit'])) {
+    if (!(Globals::getRemainingActions() > 0 || $this->isCardFavoredSuit($cardInfo))) {
       throw new \feException("No remaining actions and not a free action");
     };
     return true;

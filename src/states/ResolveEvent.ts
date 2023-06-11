@@ -10,6 +10,9 @@ class ResolveEventState implements State {
       case ECE_CONFIDENCE_FAILURE:
         this.game.framework().setClientState<ClientResolveEventStateArgs>(CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, { args: { event } });
         break;
+      case ECE_PASHTUNWALI_VALUES:
+        this.game.framework().setClientState<ClientResolveEventStateArgs>(CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, { args: { event } });
+        break;
       case ECE_REBUKE:
         this.game.framework().setClientState<ClientResolveEventStateArgs>(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event } });
         break;

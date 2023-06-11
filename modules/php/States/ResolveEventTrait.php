@@ -57,11 +57,14 @@ trait ResolveEventTrait
       case ECE_CONFIDENCE_FAILURE:
         $this->resolveConfidenceFailure($currentEvent, $data);
         break;
+      case ECE_PASHTUNWALI_VALUES:
+        $this->resolvePashtunwaliValues($data);
+        break;
       case ECE_REBUKE:
-        $this->resolveRebuke($currentEvent, $data);
+        $this->resolveRebuke($data);
         break;
       case ECE_RUMOR:
-        $this->resolveRumor($currentEvent, $data);
+        $this->resolveRumor($data);
         break;
       default:
         throw new \feException("Unable to resolve event");
@@ -96,7 +99,13 @@ trait ResolveEventTrait
     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
   }
 
-  private function resolveRebuke($currentEvent, $data)
+  private function resolvePashtunwaliValues($data)
+  {
+    $this->resolveFavoredSuitChange($data['suit'],ECE_PASHTUNWALI_VALUES);
+    $this->nextState("playerActions");
+  }
+
+  private function resolveRebuke($data)
   {
     $regionId = $data['regionId'];
     $tribeMoves = Map::removeTribesFromRegion($regionId);
@@ -111,7 +120,7 @@ trait ResolveEventTrait
     $this->nextState("playerActions");
   }
 
-  private function resolveRumor($currentEvent, $data)
+  private function resolveRumor($data)
   {
     $player = Players::get();
     $playerId = $player->getId();

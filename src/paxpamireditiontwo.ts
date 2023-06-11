@@ -52,6 +52,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
+    [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: ClientResolveEventPashtunwaliValuesState;
     [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
     [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
     discardCourt: DiscardCourtState;
@@ -102,6 +103,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
+      [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: new ClientResolveEventPashtunwaliValuesState(this),
       [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
       [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
       discardCourt: new DiscardCourtState(this),
@@ -162,9 +164,10 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
+    const ALWAYS_ENTER = ['resolveEvent', CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, CLIENT_RESOLVE_EVENT_REBUKE, CLIENT_RESOLVE_EVENT_RUMOR];
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
-    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || stateName === 'resolveEvent') {
+    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || ALWAYS_ENTER.includes(stateName)) {
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }

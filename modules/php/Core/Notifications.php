@@ -135,12 +135,10 @@ class Notifications
     ));
   }
 
-  public static function changeFavoredSuit($previousSuit, $newSuit, $playerAction)
+  public static function changeFavoredSuit($previousSuit, $newSuit, $customMessage = null)
   {
     $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');
-    if (!$playerAction) {
-      $message = clienttranslate('The favored suit changes to ${logTokenFavoredSuit}');
-    }
+    $message = $customMessage ? $customMessage : $message;
     self::notifyAll('changeFavoredSuit', $message, [
       'player' => Players::get(),
       'logTokenFavoredSuit' => Utils::logFavoredSuit($newSuit),

@@ -61,20 +61,6 @@ class PlayerActionsState implements State {
       text: _('Undo'),
       callback: () => this.game.takeAction({ action: 'restart' }),
     });
-    // this.game.addPrimaryActionButton({
-    //   id: 'test_btn',
-    //   text: _('Test'),
-    //   callback: () => {
-    //     const node = dojo.byId(`pp_player_events_container${this.game.getPlayerId()}`);
-    //     node.style.marginTop = '-57px'
-    //     console.log('marketZone', this.game.market.getMarketCardZone({row: 0, column: 5}));
-    //     this.game.move({
-    //       id: 'card_115',
-    //       from: this.game.market.getMarketCardZone({row: 0, column: 5}),
-    //       to: this.game.playerManager.getPlayer({playerId: this.game.getPlayerId()}).getEventsZone(),
-    //     })
-    //   },
-    // });
   }
 
   private updateInterfacePass() {
@@ -95,6 +81,16 @@ class PlayerActionsState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private isCardFavoredSuit({ cardId }: { cardId: string }) {
+    debug('isCardFavoredSuit', cardId);
+    const cardSuit = (this.game.getCardInfo({ cardId }) as CourtCard).suit;
+    const player = this.game.getCurrentPlayer();
+    const isFavoredSuit = cardSuit === this.game.objectManager.favoredSuit.get();
+    // card 105
+    const isAffectedByNewTactics = cardSuit === MILITARY && player.getEventsZone().getAllItems().includes('card_105');
+    return isFavoredSuit || isAffectedByNewTactics;
+  }
 
   /**
    * Player had actions remaining
@@ -148,11 +144,11 @@ class PlayerActionsState implements State {
 
   // TODO: check value of purchased gifts
   private activePlayerHasCardActions(): boolean {
-    const rupees = this.game.playerManager.getPlayer({playerId: this.game.getPlayerId()}).getRupees();
+    const rupees = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getRupees();
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
       const cardHasActions = Object.keys(cardInfo.actions).length > 0;
-      const hasEnoughRupees = rupees >=2 || Object.values(cardInfo.actions).some(({type}) => CARD_ACTIONS_WITHOUT_COST.includes(type));
+      const hasEnoughRupees = rupees >= 2 || Object.values(cardInfo.actions).some(({ type }) => CARD_ACTIONS_WITHOUT_COST.includes(type));
       return used === 0 && cardHasActions && hasEnoughRupees;
     });
   }
@@ -160,7 +156,10 @@ class PlayerActionsState implements State {
   private activePlayerHasFreeCardActions(): boolean {
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return used === 0 && cardInfo.suit == this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0;
+      return used === 0 && 
+      this.isCardFavoredSuit({cardId: id})
+      // cardInfo.suit == this.game.objectManager.favoredSuit.get() && 
+      Object.keys(cardInfo.actions).length > 0;
     });
   }
 
@@ -180,8 +179,8 @@ class PlayerActionsState implements State {
       const used = this.game.localState.activePlayer.court.cards?.find((card) => card.id === cardId)?.used === 1;
       if (
         !used &&
-        (this.game.localState.remainingActions > 0 ||
-          (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.game.objectManager.favoredSuit.get())
+        (this.game.localState.remainingActions > 0 || this.isCardFavoredSuit({ cardId }))
+        // (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.game.objectManager.favoredSuit.get())
       ) {
         const rupees = this.game.playerManager.getPlayer({ playerId }).getRupees();
         dojo.map(node.children, (child: HTMLElement) => {
@@ -233,6 +232,10 @@ class PlayerActionsState implements State {
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
       const cardId = node.id;
+      const cardInfo = this.game.getCardInfo({ cardId });
+      if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
+        return;
+      }
       if (cost <= this.game.localState.activePlayer.rupees && !this.game.localState.usedCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(

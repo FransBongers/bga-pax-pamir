@@ -8,6 +8,7 @@ const CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 const CLIENT_PLAY_CARD = 'clientPlayCard';
 const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 const CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
+const CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 const CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 const CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
 
@@ -42,6 +43,8 @@ const ECONOMIC = 'economic';
 const MILITARY = 'military';
 const POLITICAL = 'political';
 const INTELLIGENCE = 'intelligence';
+
+const SUITS = [POLITICAL, INTELLIGENCE,ECONOMIC,MILITARY];
 
 // coalitions
 const AFGHAN = 'afghan';

@@ -39,12 +39,12 @@ trait DebugTrait
   function test()
   {
     // Cards::move('card_107',ACTIVE_EVENTS);
-    // Cards::move('card_116','market_0_1');
-    Cards::move('card_108','market_0_1');
+    // Cards::move('card_115','market_0_0');
+    Cards::move('card_105','market_0_1');
     // $rupee = Tokens::getTopOf(RUPEE_SUPPLY);
     // Tokens::move($rupee['id'],['market_0_0','rupees']);
     // Cards::move('card_106','market_1_0');
-    // Events::failureToImpress();
+    // Notifications::log('isPashtunwaliValuesActive',Events::isPashtunwaliValuesActive());
     // Notifications::log('isActive',$result);
     // $this->debugCreateArmy(PERSIA,BRITISH);
     // $this->debugCreateArmy(PERSIA,BRITISH);

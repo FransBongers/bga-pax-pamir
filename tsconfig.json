@@ -40,6 +40,7 @@
     "src/states/ClientPlayCard.ts",
     "src/states/ClientPurchaseCard.ts",
     "src/states/ClientResolveEventConfidenceFailure.ts",
+    "src/states/ClientResolveEventPashtunwaliValues.ts",
     "src/states/ClientResolveEventRebuke.ts",
     "src/states/ClientResolveEventRumor.ts",
     "src/states/DiscardCourt.ts",

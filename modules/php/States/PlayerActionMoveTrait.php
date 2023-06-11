@@ -65,7 +65,7 @@ trait PlayerActionMoveTrait
 
     Cards::setUsed($cardId, 1);
     // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardId)) {
+    if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
     Notifications::move($cardId, $player);

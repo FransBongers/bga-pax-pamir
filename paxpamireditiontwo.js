@@ -257,6 +257,7 @@ var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 var CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
+var CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 var CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
 var CARD_WIDTH = 150;
@@ -283,6 +284,7 @@ var ECONOMIC = 'economic';
 var MILITARY = 'military';
 var POLITICAL = 'political';
 var INTELLIGENCE = 'intelligence';
+var SUITS = [POLITICAL, INTELLIGENCE, ECONOMIC, MILITARY];
 var AFGHAN = 'afghan';
 var BRITISH = 'british';
 var RUSSIAN = 'russian';
@@ -3187,6 +3189,77 @@ var ClientResolveEventConfidenceFailureState = (function () {
     };
     return ClientResolveEventConfidenceFailureState;
 }());
+var ClientResolveEventPashtunwaliValuesState = (function () {
+    function ClientResolveEventPashtunwaliValuesState(game) {
+        this.game = game;
+    }
+    ClientResolveEventPashtunwaliValuesState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        console.log('other player pashtunwali values');
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.updateInterfaceInitialStep();
+        }
+        else {
+            this.updateInterfaceOtherPlayers();
+        }
+    };
+    ClientResolveEventPashtunwaliValuesState.prototype.onLeavingState = function () { };
+    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceOtherPlayers = function () {
+        this.game.clearPossible();
+        console.log('other player pashtunwali values');
+        this.game.clientUpdatePageTitleOtherPlayers({
+            text: _('${actplayer} must select a suit to favor'),
+            args: {
+                actplayer: '${actplayer}',
+            },
+        });
+    };
+    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a suit to favor',
+            args: {
+                you: '${you}',
+            },
+        });
+        SUITS.forEach(function (suit) {
+            var name = _this.game.gamedatas.staticData.suits[suit].name;
+            _this.game.addPrimaryActionButton({
+                id: "".concat(suit, "_btn"),
+                text: _(name),
+                callback: function () {
+                    return _this.updateInterfaceConfirmSuit({ suit: suit, name: name });
+                },
+            });
+        });
+    };
+    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceConfirmSuit = function (_a) {
+        var _this = this;
+        var suit = _a.suit, name = _a.name;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${name}?',
+            args: {
+                name: name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventChoice',
+                    data: {
+                        data: JSON.stringify({ suit: suit }),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ClientResolveEventPashtunwaliValuesState;
+}());
 var ClientResolveEventRebukeState = (function () {
     function ClientResolveEventRebukeState(game) {
         this.game = game;
@@ -3705,6 +3778,15 @@ var PlayerActionsState = (function () {
         });
         this.game.addSecondaryActionButton({ id: 'cancel_btn', text: _('Cancel'), callback: function () { return _this.game.onCancel(); } });
     };
+    PlayerActionsState.prototype.isCardFavoredSuit = function (_a) {
+        var cardId = _a.cardId;
+        debug('isCardFavoredSuit', cardId);
+        var cardSuit = this.game.getCardInfo({ cardId: cardId }).suit;
+        var player = this.game.getCurrentPlayer();
+        var isFavoredSuit = cardSuit === this.game.objectManager.favoredSuit.get();
+        var isAffectedByNewTactics = cardSuit === MILITARY && player.getEventsZone().getAllItems().includes('card_105');
+        return isFavoredSuit || isAffectedByNewTactics;
+    };
     PlayerActionsState.prototype.updateMainTitleTextActions = function () {
         var remainingActions = this.game.localState.remainingActions;
         var hasCardActions = this.activePlayerHasCardActions();
@@ -3760,7 +3842,9 @@ var PlayerActionsState = (function () {
         return this.game.localState.activePlayer.court.cards.some(function (_a) {
             var id = _a.id, used = _a.used;
             var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return used === 0 && cardInfo.suit == _this.game.objectManager.favoredSuit.get() && Object.keys(cardInfo.actions).length > 0;
+            return used === 0 &&
+                _this.isCardFavoredSuit({ cardId: id });
+            Object.keys(cardInfo.actions).length > 0;
         });
     };
     PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
@@ -3775,8 +3859,7 @@ var PlayerActionsState = (function () {
             var cardId = node.id;
             var used = ((_b = (_a = _this.game.localState.activePlayer.court.cards) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
             if (!used &&
-                (_this.game.localState.remainingActions > 0 ||
-                    _this.game.gamedatas.staticData.cards[cardId].suit === _this.game.objectManager.favoredSuit.get())) {
+                (_this.game.localState.remainingActions > 0 || _this.isCardFavoredSuit({ cardId: cardId }))) {
                 var rupees_1 = _this.game.playerManager.getPlayer({ playerId: playerId }).getRupees();
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
@@ -3820,6 +3903,10 @@ var PlayerActionsState = (function () {
         dojo.query('.pp_market_card').forEach(function (node) {
             var cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost;
             var cardId = node.id;
+            var cardInfo = _this.game.getCardInfo({ cardId: cardId });
+            if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
+                return;
+            }
             if (cost <= _this.game.localState.activePlayer.rupees && !_this.game.localState.usedCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
                 _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
@@ -3848,6 +3935,9 @@ var ResolveEventState = (function () {
         switch (event) {
             case ECE_CONFIDENCE_FAILURE:
                 this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, { args: { event: event } });
+                break;
+            case ECE_PASHTUNWALI_VALUES:
+                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, { args: { event: event } });
                 break;
             case ECE_REBUKE:
                 this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event: event } });
@@ -4424,6 +4514,7 @@ var PaxPamir = (function () {
             _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
+            _a[CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES] = new ClientResolveEventPashtunwaliValuesState(this),
             _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
             _a[CLIENT_RESOLVE_EVENT_RUMOR] = new ClientResolveEventRumorState(this),
             _a.discardCourt = new DiscardCourtState(this),
@@ -4461,8 +4552,9 @@ var PaxPamir = (function () {
         debug('Ending game setup');
     };
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
+        var ALWAYS_ENTER = ['resolveEvent', CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, CLIENT_RESOLVE_EVENT_REBUKE, CLIENT_RESOLVE_EVENT_RUMOR];
         console.log('Entering state: ' + stateName, args);
-        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || stateName === 'resolveEvent') {
+        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || ALWAYS_ENTER.includes(stateName)) {
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };

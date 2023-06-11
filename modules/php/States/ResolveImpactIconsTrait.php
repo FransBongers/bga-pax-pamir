@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -219,16 +220,22 @@ trait ResolveImpactIconsTrait
     }
   }
 
-  function resolveFavoredSuitChange($newSuit, $playerAction = true)
+  function resolveFavoredSuitChange($newSuit, $source = null)
   {
     $currentSuit = Globals::getFavoredSuit();
-    if ($currentSuit === $newSuit) {
+    if ($currentSuit === $newSuit || ($source !== ECE_PASHTUNWALI_VALUES && Events::isPashtunwaliValuesActive())) {
       return;
     }
+    $customMessage = null;
+    if (in_array($source,[ECE_MILITARY_SUIT, ECE_INTELLIGENCE_SUIT, ECE_POLITICAL_SUIT])) {
+      $customMessage = clienttranslate('The favored suit changes to ${logTokenFavoredSuit}');
+    } else if ($source === ECE_PASHTUNWALI_VALUES) {
+      $customMessage = clienttranslate('${player_name} chooses ${logTokenFavoredSuit}');
+    };
     // Update favored suit
     Globals::setFavoredSuit($newSuit);
     // Suit change notification
     $currentSuitId = $this->suits[$currentSuit]['id'];
-    Notifications::changeFavoredSuit($currentSuitId, $newSuit, $playerAction);
+    Notifications::changeFavoredSuit($currentSuitId, $newSuit, $customMessage);
   }
 }

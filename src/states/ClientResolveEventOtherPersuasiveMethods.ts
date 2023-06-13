@@ -1,4 +1,4 @@
-class ClientResolveEventRumorState implements State {
+class ClientResolveEventOtherPersuasiveMethodsState implements State {
   private game: PaxPamirGame;
 
   constructor(game: PaxPamirGame) {
@@ -35,7 +35,7 @@ class ClientResolveEventRumorState implements State {
     this.game.clearPossible();
 
     this.game.clientUpdatePageTitleOtherPlayers({
-      text: _('${actplayer} must select a player'),
+      text: _('${actplayer} must exchange hand with another player'),
       args: {
         actplayer: '${actplayer}',
       },
@@ -45,18 +45,20 @@ class ClientResolveEventRumorState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a player',
+      text: '${you} must select a player to exchange your hand with',
       args: {
         you: '${you}',
       },
     });
     const players = this.game.playerManager.getPlayers();
-    players.forEach((player) => {
-      this.game.addPlayerButton({
-        callback: () => this.updateInterfaceConfirmPlayer({ player }),
-        player,
+    players
+      .filter((player) => player.getPlayerId() !== this.game.getPlayerId())
+      .forEach((player) => {
+        this.game.addPlayerButton({
+          callback: () => this.updateInterfaceConfirmPlayer({ player }),
+          player,
+        });
       });
-    });
   }
 
   private updateInterfaceConfirmPlayer({ player }: { player: PPPlayer }) {
@@ -88,13 +90,4 @@ class ClientResolveEventRumorState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
-
-  // private addPlayerButton({ player }: { player: PPPlayer }) {
-  //   this.game.addPrimaryActionButton({
-  //     id: `select_${player.getPlayerId()}`,
-  //     text: player.getName(),
-  //     callback: () => this.updateInterfaceConfirmPlayer({ player }),
-  //     extraClasses: `pp_player_button pp_player_color_${player.getColor()}`,
-  //   });
-  // }
 }

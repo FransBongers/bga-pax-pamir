@@ -212,6 +212,12 @@ class Events
     return $card['location'] === 'events_'.$player->getId();
   }
 
+  public static function isNationBuildingActive($player)
+  {
+    $card = Cards::get(ECE_NATION_BUILDING_CARD_ID);
+    return $card['location'] === 'events_'.$player->getId();
+  }
+
   public static function isNewTacticsActive($player)
   {
     return self::isPlayerEventActive(ECE_NEW_TACTICS, $player);

@@ -57,6 +57,9 @@ trait ResolveEventTrait
       case ECE_CONFIDENCE_FAILURE:
         $this->resolveConfidenceFailure($currentEvent, $data);
         break;
+      case ECE_OTHER_PERSUASIVE_METHODS:
+        $this->resolveOtherPersuasiveMethods($data);
+        break;
       case ECE_PASHTUNWALI_VALUES:
         $this->resolvePashtunwaliValues($data);
         break;
@@ -99,9 +102,42 @@ trait ResolveEventTrait
     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
   }
 
+  private function resolveOtherPersuasiveMethods($data)
+  {
+
+    $selectedPlayer = Players::get($data['playerId']);
+    $player = Players::get();
+    if ($player->getId() === $selectedPlayer->getId()) {
+      throw new \feException("Player must select another player");
+    };
+    $selectedPlayerHand = $selectedPlayer->getHandCards();
+    $playerHand = $player->getHandCards();
+
+
+    Cards::move(array_map(function ($card) {
+      return $card['id'];
+    }, $selectedPlayerHand), Locations::hand($player->getId()));
+    Cards::move(array_map(function ($card) {
+      return $card['id'];
+    }, $playerHand), Locations::hand($selectedPlayer->getId()));
+
+    Notifications::log('resolveOtherPersuasiveMethods', [
+      'selectedPlayerHand'  => $selectedPlayerHand,
+      'playerHand' => $playerHand,
+    ]);
+    Notifications::exchangeHandAllPlayers($player, $selectedPlayer, [
+      $player->getId() => count($selectedPlayerHand),
+      $selectedPlayer->getId() => count($playerHand),
+    ]);
+
+    Notifications::replaceHand($player, $selectedPlayerHand);
+    Notifications::replaceHand($selectedPlayer, $playerHand);
+    $this->nextState("playerActions");
+  }
+
   private function resolvePashtunwaliValues($data)
   {
-    $this->resolveFavoredSuitChange($data['suit'],ECE_PASHTUNWALI_VALUES);
+    $this->resolveFavoredSuitChange($data['suit'], ECE_PASHTUNWALI_VALUES);
     $this->nextState("playerActions");
   }
 
@@ -134,7 +170,7 @@ trait ResolveEventTrait
       'to' => $to,
       'tokenId' => 'card_108'
     ]];
-    Cards::move('card_108',$to);
+    Cards::move('card_108', $to);
     Notifications::moveCard($message, [
       'player' => $player,
       'player_name2' => $selectedPlayer->getName(),

@@ -115,13 +115,16 @@ trait PlayerActionTrait
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, BUILD);
 
+    $nationBuildingMultiplier = Events::isNationBuildingActive(Players::get()) ? 2 : 1;
+
     $numberOfTokens = count($locations);
     Notifications::log('numberOfTokens', $numberOfTokens);
     // max number to build is 3
-    if ($numberOfTokens > 3) {
+    if ($numberOfTokens > 3 * $nationBuildingMultiplier) {
       throw new \feException("Too many tokens selected");
     };
-    $cost = $numberOfTokens * 2;
+
+    $cost = ceil($numberOfTokens / $nationBuildingMultiplier)  * 2;
     $player = Players::get();
     // player should have rupees
     if ($cost > $player->getRupees()) {

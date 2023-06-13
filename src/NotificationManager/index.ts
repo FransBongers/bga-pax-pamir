@@ -48,25 +48,29 @@ class NotificationManager {
       ['discardFromHand', 250],
       ['discardFromMarket', 250],
       ['discardPrizes', 1000],
+      ['exchangeHand', 100],
       ['dominanceCheck', 1],
-      ['publicWithdrawal', 1000],
-      ['purchaseCard', 2000],
-      ['playCard', 2000],
-      ['refreshMarket', 250],
-      ['returnRupeesToSupply', 250],
-      ['takeRupeesFromSupply', 250],
-      ['payBribe', 1],
-      ['purchaseGift', 1],
-      ['smallRefreshHand', 1],
-      ['smallRefreshInterface', 1],
       ['moveCard', 1000],
       ['moveToken', 1000],
-      ['updatePlayerCounts', 1],
-      ['log', 1],
+      ['payBribe', 1],
+      ['publicWithdrawal', 1000],
+      ['purchaseCard', 2000],
+      ['purchaseGift', 1],
+      ['playCard', 2000],
+      ['refreshMarket', 250],
+      ['replaceHand',250],
+      ['returnRupeesToSupply', 250],
+      ['smallRefreshHand', 1],
+      ['smallRefreshInterface', 1],
+      ['takeRupeesFromSupply', 250],
       ['taxMarket', 250],
       ['taxPlayer', 250],
       ['updateCourtCardStates', 1],
       ['updateInfluence', 1],
+      ['updatePlayerCounts', 1],
+      ['log', 1],
+      
+      
     ];
 
     notifs.forEach((notif) => {
@@ -334,6 +338,20 @@ class NotificationManager {
     });
   }
 
+  notif_exchangeHand(notif: Notif<NotifExchangeHandArgs>) {
+    debug('notif_exchangeHand', notif.args);
+    Object.entries(notif.args.newHandCounts).forEach(([key,value]) => {
+      console.log(typeof key);
+      const playerId = Number(key);
+      // Updates for current player have been sent in separate notification.
+      if (playerId === this.game.getPlayerId()) {
+        return;
+      }
+      const player = this.getPlayer({playerId: Number(key)});
+      player.toValueCounter({counter: 'cards', value})
+    });
+  }
+
   notif_moveCard(notif: Notif<NotifMoveCardArgs>) {
     debug('notif_moveCard', notif.args);
     const { moves, action } = notif.args;
@@ -469,7 +487,7 @@ class NotificationManager {
       this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
       discardCardAnimation({ cardId, game: this.game });
     } else {
-      this.getPlayer({ playerId }).purchaseCard({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      this.getPlayer({ playerId }).addCardToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
     }
   }
 
@@ -533,6 +551,18 @@ class NotificationManager {
         cardId: move.cardId,
       });
     });
+  }
+
+  notif_replaceHand(notif: Notif<NotifReplaceHandArgs>) {
+    debug('notif_replaceHand', notif.args);
+    const {hand} = notif.args;
+    const player = this.game.getCurrentPlayer();
+    const handZone = player.getHandZone();
+    handZone.removeAll();
+    hand.forEach((card: Token) => {
+      player.addCardToHand({cardId: card.id});
+    });
+    player.toValueCounter({counter: 'cards', value: hand.length});
   }
 
   notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {

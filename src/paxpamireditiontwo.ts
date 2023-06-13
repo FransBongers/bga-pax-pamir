@@ -52,6 +52,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
+    [CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS]: ClientResolveEventOtherPersuasiveMethodsState;
     [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: ClientResolveEventPashtunwaliValuesState;
     [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
     [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
@@ -103,6 +104,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
+      [CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS]: new ClientResolveEventOtherPersuasiveMethodsState(this),
       [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: new ClientResolveEventPashtunwaliValuesState(this),
       [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
       [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
@@ -164,10 +166,17 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
-    const ALWAYS_ENTER = ['resolveEvent', CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, CLIENT_RESOLVE_EVENT_REBUKE, CLIENT_RESOLVE_EVENT_RUMOR];
+    const ALWAYS_ENTER = [
+      'resolveEvent',
+      CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE,
+      CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS,
+      CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES,
+      CLIENT_RESOLVE_EVENT_REBUKE,
+      CLIENT_RESOLVE_EVENT_RUMOR,
+    ];
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
-    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || ALWAYS_ENTER.includes(stateName)) {
+    if ((this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) || ALWAYS_ENTER.includes(stateName)) {
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }
@@ -291,6 +300,15 @@ class PaxPamir implements PaxPamirGame {
     }
   }
 
+  addPlayerButton({ player, callback }: { player: PPPlayer; callback: Function | string; }) {
+    this.addPrimaryActionButton({
+      id: `select_${player.getPlayerId()}`,
+      text: player.getName(),
+      callback,
+      extraClasses: `pp_player_button pp_player_color_${player.getColor()}`,
+    });
+  }
+
   public clearInterface() {
     console.log('clear interface');
     Object.keys(this.spies).forEach((key) => {
@@ -314,7 +332,6 @@ class PaxPamir implements PaxPamirGame {
     dojo.query('.pp_selectable').removeClass('pp_selectable');
     dojo.query('.pp_selected').removeClass('pp_selected');
 
-
     this.map.clearSelectable();
     // REGIONS.forEach((region) => {
     //   const element = document.getElementById(`pp_region_${region}`);
@@ -337,7 +354,7 @@ class PaxPamir implements PaxPamirGame {
   }
 
   public getCurrentPlayer(): PPPlayer {
-    return this.playerManager.getPlayer({playerId: this.getPlayerId()});
+    return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
   }
 
   /**
@@ -409,12 +426,12 @@ class PaxPamir implements PaxPamirGame {
 
         // replace all keys that start with 'logToken'
         Object.entries(args).forEach(([key, value]) => {
-          if(key.startsWith('logToken')) {
-            args[key] = getLogTokenDiv({logToken: value as string, game: this});
+          if (key.startsWith('logToken')) {
+            args[key] = getLogTokenDiv({ logToken: value as string, game: this });
           }
-        })
+        });
 
-        // TODO: check below code. Looks like improved way for text shadows (source ticket to ride) 
+        // TODO: check below code. Looks like improved way for text shadows (source ticket to ride)
         // ['you', 'actplayer', 'player_name'].forEach((field) => {
         //   if (typeof args[field] === 'string' && args[field].indexOf('#ffed00;') !== -1 && args[field].indexOf('text-shadow') === -1) {
         //     args[field] = args[field].replace('#ffed00;', '#ffed00; text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;');

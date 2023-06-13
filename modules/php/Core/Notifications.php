@@ -509,6 +509,23 @@ class Notifications
     ));
   }
 
+  public static function exchangeHandAllPlayers($player,$selectedPlayer,$newHandCounts)
+  {
+    self::notifyAll("exchangeHand", clienttranslate('${player_name} exchanges hand with ${player_name2}'), [
+      'player_name' => $player->getName(),
+      'player_name2' => $selectedPlayer->getName(),
+      'newHandCounts' => $newHandCounts
+    ]);
+  }
+
+  public static function replaceHand($player,$hand)
+  {
+    self::notify($player,'replaceHand','',[
+      'player' => $player,
+      'hand' => $hand,
+    ]);
+  }
+
   public static function tax($cardId, $player)
   {
     self::notifyAll("tax", clienttranslate('${player_name} taxes with ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}'), array(

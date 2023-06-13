@@ -13,17 +13,10 @@
 - Check states file
 
 ### Card Actions
-- Battle
-- Betray
-- Build
-- Gift
-- Tax
-- Move
 - Pay for hostage cards
 
 ### Event cards purchase
-- card 112
-- card 114
+-
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market
@@ -33,6 +26,7 @@
 - Only highlight card actions that are possible based on rupees, ruled regions etc?
 - For bribes: should ruler be able to demand higher amount than briber has available even though briber can never accept?
 - For discard: instead of moving card div change discard background to show certain card and remove the card div?
+- Reduce size of notifications as much as possible (ie remove all unnecessary data like card info)
 
 ## Bugs
 - Return all coalition blocks from map after succesfull dominance check
@@ -50,6 +44,7 @@
 - What is the formal order for betray action, leverage and loyalty change
   - Discard betrayed card, handle leverage (ie return rupees / discard additional cards)
   - Handle loyalty change for taking prize, discard patriots, handle leverage (return rupees / more cards)
+- Nation building, is player required to build a multiple of 2? Does player need to place per 2 blocks at same location?
 
 
 ### Ideas

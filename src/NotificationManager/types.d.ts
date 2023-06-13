@@ -105,6 +105,14 @@ interface NotifDiscardPrizesArgs {
   player_name: string;
 }
 
+interface NotifExchangeHandArgs {
+  player_name: string;
+  player_name2: string;
+  newHandCounts: {
+    [playerId: number]: number
+  }
+}
+
 interface NotifMoveCardArgs {
   action: 'PURCHASE_CARD' | 'MOVE_EVENT';
   moves: TokenMove[];
@@ -163,6 +171,11 @@ interface NotifRefreshMarketArgs {
     from: string;
     to: string;
   }[];
+}
+
+interface NotifReplaceHandArgs {
+  playerId: number;
+  hand: Token[];
 }
 
 interface NotifReturnRupeesToSupplyArgs {

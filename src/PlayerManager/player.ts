@@ -645,14 +645,19 @@ class PPPlayer {
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
   }
 
-  purchaseCard({ cardId, from }: { cardId: string; from: Zone }) {
-    if (this.playerId === this.game.getPlayerId()) {
+  addCardToHand({ cardId, from }: { cardId: string; from?: Zone }) {
+    if (this.playerId === this.game.getPlayerId() && from) {
       this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
-      this.game.tooltipManager.addTooltipToCard({ cardId });
+      
+    } else if (this.playerId === this.game.getPlayerId()) {
+      // No from we need to create card
+      dojo.place(tplCard({ cardId, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
+      this.hand.placeInZone(cardId);
     } else {
       dojo.addClass(cardId, 'pp_moving');
       from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
-    }
+    };
+    this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
   addEvent({ cardId, from }: { cardId: string; from: Zone }) {

@@ -45,6 +45,7 @@ const ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
 const ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
 const ECE_MILITARY_SUIT = 'militarySuit';
 const ECE_NATION_BUILDING = 'nationBuilding';
+const ECE_NATION_BUILDING_CARD_ID = 'card_112';
 const ECE_NATIONALISM = 'nationalism';
 const ECE_NATIONALISM_CARD_ID = 'card_110';
 const ECE_NEW_TACTICS = 'newTactics';

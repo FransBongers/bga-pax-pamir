@@ -2,7 +2,8 @@ class ClientCardActionBuildState implements State {
   private game: PaxPamirGame;
   private cardId: string;
   private tempTokens: { location: string; type: 'army' | 'road' }[];
-  private maxNumberTopPlace: number;
+  private maxNumberToPlace: number;
+  private playerHasNationBuilding: boolean;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
@@ -11,8 +12,11 @@ class ClientCardActionBuildState implements State {
   onEnteringState({ cardId }: ClientCardActionStateArgs) {
     this.cardId = cardId;
     this.tempTokens = [];
-    const playerRupees = this.game.getCurrentPlayer().getRupees();
-    this.maxNumberTopPlace = Math.min(Math.floor(playerRupees / 2), 3);
+    const player = this.game.getCurrentPlayer();
+    const playerRupees = player.getRupees();
+    this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
+    const multiplier = this.playerHasNationBuilding ? 2 : 1;
+    this.maxNumberToPlace = Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
     this.updateInterfaceInitialStep();
   }
 
@@ -55,10 +59,11 @@ class ClientCardActionBuildState implements State {
 
   private updateInterfaceConfirm() {
     this.game.clearPossible();
+    const amount = Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
     this.game.clientUpdatePageTitle({
       text: _('Place x for a cost of ${amount} rupees?'),
       args: {
-        amount: this.tempTokens.length * 2,
+        amount,
       },
     });
     this.game.addPrimaryActionButton({
@@ -90,7 +95,7 @@ class ClientCardActionBuildState implements State {
   // .##.....##.##.....##.##....##.########..########.########.##.....##..######.
 
   private onLocationClick({ location }: { location: string }) {
-    if (this.maxNumberTopPlace - this.tempTokens.length <= 0) {
+    if (this.maxNumberToPlace - this.tempTokens.length <= 0) {
       return;
     }
     debug('onLocationClick', location);
@@ -126,7 +131,10 @@ class ClientCardActionBuildState implements State {
   private onConfirm() {
     debug('handleConfirm');
     if (this.tempTokens.length > 0) {
-      this.game.takeAction({ action: 'build', data: { cardId: this.cardId, locations: this.tempTokens.map((token) => token.location).join(' ') } });
+      this.game.takeAction({
+        action: 'build',
+        data: { cardId: this.cardId, locations: this.tempTokens.map((token) => token.location).join(' ') },
+      });
     }
   }
 
@@ -189,7 +197,7 @@ class ClientCardActionBuildState implements State {
       text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
       args: {
         you: '${you}',
-        number: this.maxNumberTopPlace - this.tempTokens.length,
+        number: this.maxNumberToPlace - this.tempTokens.length,
       },
     });
   }

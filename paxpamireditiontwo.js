@@ -257,6 +257,7 @@ var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 var CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
+var CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS = 'clientResolveEventOtherPersuasiveMethods';
 var CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 var CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
@@ -351,6 +352,7 @@ var ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
 var ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
 var ECE_MILITARY_SUIT = 'militarySuit';
 var ECE_NATION_BUILDING = 'nationBuilding';
+var ECE_NATION_BUILDING_CARD_ID = 'card_112';
 var ECE_NATIONALISM = 'nationalism';
 var ECE_NATIONALISM_CARD_ID = 'card_110';
 var ECE_NEW_TACTICS = 'newTactics';
@@ -1255,16 +1257,21 @@ var PPPlayer = (function () {
         }
         this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     };
-    PPPlayer.prototype.purchaseCard = function (_a) {
+    PPPlayer.prototype.addCardToHand = function (_a) {
         var cardId = _a.cardId, from = _a.from;
-        if (this.playerId === this.game.getPlayerId()) {
+        if (this.playerId === this.game.getPlayerId() && from) {
             this.game.move({ id: cardId, to: this.hand, from: from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
-            this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+        }
+        else if (this.playerId === this.game.getPlayerId()) {
+            dojo.place(tplCard({ cardId: cardId, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
+            this.hand.placeInZone(cardId);
         }
         else {
             dojo.addClass(cardId, 'pp_moving');
             from.removeFromZone(cardId, true, "player_board_".concat(this.playerId));
         }
+        ;
+        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
     };
     PPPlayer.prototype.addEvent = function (_a) {
         var cardId = _a.cardId, from = _a.from;
@@ -2206,8 +2213,11 @@ var ClientCardActionBuildState = (function () {
         var cardId = _a.cardId;
         this.cardId = cardId;
         this.tempTokens = [];
-        var playerRupees = this.game.getCurrentPlayer().getRupees();
-        this.maxNumberTopPlace = Math.min(Math.floor(playerRupees / 2), 3);
+        var player = this.game.getCurrentPlayer();
+        var playerRupees = player.getRupees();
+        this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
+        var multiplier = this.playerHasNationBuilding ? 2 : 1;
+        this.maxNumberToPlace = Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
@@ -2230,10 +2240,11 @@ var ClientCardActionBuildState = (function () {
     ClientCardActionBuildState.prototype.updateInterfaceConfirm = function () {
         var _this = this;
         this.game.clearPossible();
+        var amount = Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
         this.game.clientUpdatePageTitle({
             text: _('Place x for a cost of ${amount} rupees?'),
             args: {
-                amount: this.tempTokens.length * 2,
+                amount: amount,
             },
         });
         this.game.addPrimaryActionButton({
@@ -2249,7 +2260,7 @@ var ClientCardActionBuildState = (function () {
     };
     ClientCardActionBuildState.prototype.onLocationClick = function (_a) {
         var location = _a.location;
-        if (this.maxNumberTopPlace - this.tempTokens.length <= 0) {
+        if (this.maxNumberToPlace - this.tempTokens.length <= 0) {
             return;
         }
         debug('onLocationClick', location);
@@ -2283,7 +2294,10 @@ var ClientCardActionBuildState = (function () {
     ClientCardActionBuildState.prototype.onConfirm = function () {
         debug('handleConfirm');
         if (this.tempTokens.length > 0) {
-            this.game.takeAction({ action: 'build', data: { cardId: this.cardId, locations: this.tempTokens.map(function (token) { return token.location; }).join(' ') } });
+            this.game.takeAction({
+                action: 'build',
+                data: { cardId: this.cardId, locations: this.tempTokens.map(function (token) { return token.location; }).join(' ') },
+            });
         }
     };
     ClientCardActionBuildState.prototype.clearTemporaryTokens = function () {
@@ -2331,7 +2345,7 @@ var ClientCardActionBuildState = (function () {
             text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
             args: {
                 you: '${you}',
-                number: this.maxNumberTopPlace - this.tempTokens.length,
+                number: this.maxNumberToPlace - this.tempTokens.length,
             },
         });
     };
@@ -3234,6 +3248,74 @@ var ClientResolveEventConfidenceFailureState = (function () {
     };
     return ClientResolveEventConfidenceFailureState;
 }());
+var ClientResolveEventOtherPersuasiveMethodsState = (function () {
+    function ClientResolveEventOtherPersuasiveMethodsState(game) {
+        this.game = game;
+    }
+    ClientResolveEventOtherPersuasiveMethodsState.prototype.onEnteringState = function (_a) {
+        var event = _a.event;
+        if (this.game.framework().isCurrentPlayerActive()) {
+            this.updateInterfaceInitialStep();
+        }
+        else {
+            this.updateInterfaceOtherPlayers();
+        }
+    };
+    ClientResolveEventOtherPersuasiveMethodsState.prototype.onLeavingState = function () { };
+    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceOtherPlayers = function () {
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitleOtherPlayers({
+            text: _('${actplayer} must exchange hand with another player'),
+            args: {
+                actplayer: '${actplayer}',
+            },
+        });
+    };
+    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a player to exchange your hand with',
+            args: {
+                you: '${you}',
+            },
+        });
+        var players = this.game.playerManager.getPlayers();
+        players
+            .filter(function (player) { return player.getPlayerId() !== _this.game.getPlayerId(); })
+            .forEach(function (player) {
+            _this.game.addPlayerButton({
+                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
+                player: player,
+            });
+        });
+    };
+    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceConfirmPlayer = function (_a) {
+        var _this = this;
+        var player = _a.player;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${player_name}?',
+            args: {
+                player_name: player.getName(),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventChoice',
+                    data: {
+                        data: JSON.stringify({ playerId: player.getPlayerId() }),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ClientResolveEventOtherPersuasiveMethodsState;
+}());
 var ClientResolveEventPashtunwaliValuesState = (function () {
     function ClientResolveEventPashtunwaliValuesState(game) {
         this.game = game;
@@ -3411,7 +3493,8 @@ var ClientResolveEventRumorState = (function () {
         });
         var players = this.game.playerManager.getPlayers();
         players.forEach(function (player) {
-            _this.addPlayerButton({
+            _this.game.addPlayerButton({
+                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
                 player: player,
             });
         });
@@ -3439,16 +3522,6 @@ var ClientResolveEventRumorState = (function () {
             },
         });
         this.game.addCancelButton();
-    };
-    ClientResolveEventRumorState.prototype.addPlayerButton = function (_a) {
-        var _this = this;
-        var player = _a.player;
-        this.game.addPrimaryActionButton({
-            id: "select_".concat(player.getPlayerId()),
-            text: player.getName(),
-            callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
-            extraClasses: "pp_player_button pp_player_color_".concat(player.getColor()),
-        });
     };
     return ClientResolveEventRumorState;
 }());
@@ -3981,6 +4054,9 @@ var ResolveEventState = (function () {
             case ECE_CONFIDENCE_FAILURE:
                 this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, { args: { event: event } });
                 break;
+            case ECE_OTHER_PERSUASIVE_METHODS:
+                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS, { args: { event: event } });
+                break;
             case ECE_PASHTUNWALI_VALUES:
                 this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, { args: { event: event } });
                 break;
@@ -4059,25 +4135,27 @@ var NotificationManager = (function () {
             ['discardFromHand', 250],
             ['discardFromMarket', 250],
             ['discardPrizes', 1000],
+            ['exchangeHand', 100],
             ['dominanceCheck', 1],
-            ['publicWithdrawal', 1000],
-            ['purchaseCard', 2000],
-            ['playCard', 2000],
-            ['refreshMarket', 250],
-            ['returnRupeesToSupply', 250],
-            ['takeRupeesFromSupply', 250],
-            ['payBribe', 1],
-            ['purchaseGift', 1],
-            ['smallRefreshHand', 1],
-            ['smallRefreshInterface', 1],
             ['moveCard', 1000],
             ['moveToken', 1000],
-            ['updatePlayerCounts', 1],
-            ['log', 1],
+            ['payBribe', 1],
+            ['publicWithdrawal', 1000],
+            ['purchaseCard', 2000],
+            ['purchaseGift', 1],
+            ['playCard', 2000],
+            ['refreshMarket', 250],
+            ['replaceHand', 250],
+            ['returnRupeesToSupply', 250],
+            ['smallRefreshHand', 1],
+            ['smallRefreshInterface', 1],
+            ['takeRupeesFromSupply', 250],
             ['taxMarket', 250],
             ['taxPlayer', 250],
             ['updateCourtCardStates', 1],
             ['updateInfluence', 1],
+            ['updatePlayerCounts', 1],
+            ['log', 1],
         ];
         notifs.forEach(function (notif) {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, "notif_".concat(notif[0])));
@@ -4277,6 +4355,20 @@ var NotificationManager = (function () {
             });
         });
     };
+    NotificationManager.prototype.notif_exchangeHand = function (notif) {
+        var _this = this;
+        debug('notif_exchangeHand', notif.args);
+        Object.entries(notif.args.newHandCounts).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
+            console.log(typeof key);
+            var playerId = Number(key);
+            if (playerId === _this.game.getPlayerId()) {
+                return;
+            }
+            var player = _this.getPlayer({ playerId: Number(key) });
+            player.toValueCounter({ counter: 'cards', value: value });
+        });
+    };
     NotificationManager.prototype.notif_moveCard = function (notif) {
         var _this = this;
         debug('notif_moveCard', notif.args);
@@ -4391,7 +4483,7 @@ var NotificationManager = (function () {
             discardCardAnimation({ cardId: cardId, game: this.game });
         }
         else {
-            this.getPlayer({ playerId: playerId }).purchaseCard({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
+            this.getPlayer({ playerId: playerId }).addCardToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
     };
     NotificationManager.prototype.notif_purchaseGift = function (notif) {
@@ -4446,6 +4538,17 @@ var NotificationManager = (function () {
                 cardId: move.cardId,
             });
         });
+    };
+    NotificationManager.prototype.notif_replaceHand = function (notif) {
+        debug('notif_replaceHand', notif.args);
+        var hand = notif.args.hand;
+        var player = this.game.getCurrentPlayer();
+        var handZone = player.getHandZone();
+        handZone.removeAll();
+        hand.forEach(function (card) {
+            player.addCardToHand({ cardId: card.id });
+        });
+        player.toValueCounter({ counter: 'cards', value: hand.length });
     };
     NotificationManager.prototype.notif_returnRupeesToSupply = function (notif) {
         debug('notif_returnRupeesToSupply', notif.args);
@@ -4561,6 +4664,7 @@ var PaxPamir = (function () {
             _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
+            _a[CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS] = new ClientResolveEventOtherPersuasiveMethodsState(this),
             _a[CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES] = new ClientResolveEventPashtunwaliValuesState(this),
             _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
             _a[CLIENT_RESOLVE_EVENT_RUMOR] = new ClientResolveEventRumorState(this),
@@ -4599,9 +4703,16 @@ var PaxPamir = (function () {
         debug('Ending game setup');
     };
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
-        var ALWAYS_ENTER = ['resolveEvent', CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, CLIENT_RESOLVE_EVENT_REBUKE, CLIENT_RESOLVE_EVENT_RUMOR];
+        var ALWAYS_ENTER = [
+            'resolveEvent',
+            CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE,
+            CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS,
+            CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES,
+            CLIENT_RESOLVE_EVENT_REBUKE,
+            CLIENT_RESOLVE_EVENT_RUMOR,
+        ];
         console.log('Entering state: ' + stateName, args);
-        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName] || ALWAYS_ENTER.includes(stateName)) {
+        if ((this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) || ALWAYS_ENTER.includes(stateName)) {
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };
@@ -4658,6 +4769,15 @@ var PaxPamir = (function () {
         if (extraClasses) {
             dojo.addClass(id, extraClasses);
         }
+    };
+    PaxPamir.prototype.addPlayerButton = function (_a) {
+        var player = _a.player, callback = _a.callback;
+        this.addPrimaryActionButton({
+            id: "select_".concat(player.getPlayerId()),
+            text: player.getName(),
+            callback: callback,
+            extraClasses: "pp_player_button pp_player_color_".concat(player.getColor()),
+        });
     };
     PaxPamir.prototype.clearInterface = function () {
         var _this = this;

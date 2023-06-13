@@ -94,12 +94,15 @@ interface PaxPamirGamedatas extends Gamedatas {
     cards: {
       [cardId: string]: Card;
     };
-    loyalty: Record<string, {
-      icon: number;
-      id: string;
-      name: string;
-    }>;
-    regions: Record<string,{id: string; name: string; borders: string[];}>
+    loyalty: Record<
+      string,
+      {
+        icon: number;
+        id: string;
+        name: string;
+      }
+    >;
+    regions: Record<string, { id: string; name: string; borders: string[] }>;
     specialAbilities: Record<string, { title: string; description: string }>;
     suits: {
       [suit: string]: Suit;
@@ -172,6 +175,7 @@ interface PaxPamirGame extends Game {
   localState: LocalState;
   addActionButtonClient: (props: AddActionButtonProps) => void;
   addCancelButton: () => void;
+  addPlayerButton: (props: { callback: () => void; player: PPPlayer }) => void;
   addPrimaryActionButton: (props: AddButtonProps) => void;
   addSecondaryActionButton: (props: AddButtonProps) => void;
   addDangerActionButton: (props: AddButtonProps) => void;

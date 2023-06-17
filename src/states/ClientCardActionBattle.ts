@@ -51,13 +51,13 @@ class ClientCardActionBattleState implements State {
     const region = this.game.map.getRegion({ region: regionId });
     const coalitionId = this.game.localState.activePlayer.loyalty;
 
-    const enemyPieces = region.getEnemyPieces({ coalitionId });
+    const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }));
+    debug('enemyPieces', enemyPieces);
     const cardInfo = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
     const cardRank = cardInfo.rank;
 
-    this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({region, coalitionId}));
+    this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }));
     this.numberSelected = 0;
-    debug('enemyPieces', enemyPieces);
 
     this.updatePageTitle('region');
     this.setPiecesSelectable({ pieces: enemyPieces });
@@ -98,14 +98,33 @@ class ClientCardActionBattleState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  getNumberOfFriendlyArmiesInRegion({ coalitionId, region}: {coalitionId: string; region: Region; }) {
+  checkForCitadel({ pieceId, region }: { pieceId: string; region: string }): boolean {
+    if (!pieceId.startsWith('cylinder')) {
+      return true;
+    }
+    if (
+      region === KABUL &&
+      this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_KABUL })
+    ) {
+      return false;
+    };
+    if (
+      region === TRANSCASPIA &&
+      this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_TRANSCASPIA })
+    ) {
+      return false;
+    };
+    return true;
+  }
+
+  getNumberOfFriendlyArmiesInRegion({ coalitionId, region }: { coalitionId: string; region: Region }) {
     const coalitionArmies = region.getCoalitionArmies({ coalitionId });
     const player = this.game.getCurrentPlayer();
     const tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
       ? region.getPlayerTribes({ playerId: player.getPlayerId() }).length
       : 0;
 
-      return coalitionArmies.length + tribesNationalism;
+    return coalitionArmies.length + tribesNationalism;
   }
 
   confirmBattle() {
@@ -195,8 +214,7 @@ class ClientCardActionBattleState implements State {
       const coalitionId = this.game.localState.activePlayer.loyalty;
       const enemyPieces = region.getEnemyPieces({ coalitionId });
 
-
-      if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({region, coalitionId}) === 0) {
+      if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }) === 0) {
         return;
       }
 

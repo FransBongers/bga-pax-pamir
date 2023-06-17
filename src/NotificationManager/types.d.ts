@@ -105,6 +105,20 @@ interface NotifDiscardPrizesArgs {
   player_name: string;
 }
 
+interface NotifDominanceCheckScoresArgs {
+  scores: {
+    [playerId: string]: {
+      currentScore: number;
+      newScore: number;
+      playerId: number;
+    }
+  };
+}
+
+interface NotifDominanceCheckReturnBlocksArgs {
+  moves: TokenMove[]
+}
+
 interface NotifExchangeHandArgs {
   player_name: string;
   player_name2: string;

@@ -156,3 +156,27 @@ const ECE_RIOTS_IN_KABUL = 'riotsInKabul';
 const ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
 const ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
 const ECE_RUMOR = 'rumor';
+
+/**
+ * Special abilities
+ */
+const SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors'; // card_1
+const SA_INSURRESCTION = 'insurrection'; // card_3
+const SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage'; // card_5
+const SA_BODYGUARDS = 'bodyguards'; // card_15 card_83
+const SA_CITADEL_KABUL = 'citadelKabul'; // card_17
+const SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia'; // card_97
+const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
+const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms'; // card_24
+const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
+const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42
+const SA_BLACKMAIL_HERAT = 'blackmailHerat'; // card_54
+const SA_BLACKMAIL_KANDAHAR = 'blackmailKandahar'; // card_43
+const SA_INDIAN_SUPPLIES = 'indianSupplies'; // card_51
+const SA_WELL_CONNECTED = 'wellConnected'; // card_56
+const SA_HERAT_INFLUENCE = 'heratInfluence'; // card_66
+const SA_PERSIAN_INFLUENCE = 'persianInfluence'; // card_68
+const SA_RUSSIAN_INFLUENCE = 'russianInfluence'; // card_70
+const SA_INFRASTRUCTURE = 'infrastructure'; // card_78
+const SA_SAVVY_OPERATOR = 'savvyOperator'; // card_91
+const SA_IRREGULARS = 'irregulars'; // card_99

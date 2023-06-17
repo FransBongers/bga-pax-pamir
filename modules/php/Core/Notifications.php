@@ -174,6 +174,52 @@ class Notifications
     ]);
   }
 
+  public static function dominanceCheckResult($scores, $checkSuccessful, $coalition = null)
+  {
+    $logs = [];
+    $args = [];
+    foreach ($scores as $playerId => $playerScore) {
+      // $playerId = explode("_", $move['tokenId'])[1];
+      $logs[] = '${playerScore_' . $playerId . '}';
+      $args['playerScore_' . $playerId] = [
+        'log' => clienttranslate('${player_name} scores ${points} victory point(s)${logTokenNewLine}'),
+        'args' => [
+          'player_name' => Players::get($playerId)-> getName(), 
+          'logTokenNewLine' => Utils::logTokenNewLine(),
+          'points' => $playerScore['newScore'] - $playerScore['currentScore']
+        ] 
+      ];
+    }
+
+    self::notifyAll("dominanceCheckScores", clienttranslate('${resultLog}${logTokenNewLine}${logTokenNewLine}${pointsPerPlayer}'), array(
+      'resultLog' => $checkSuccessful ? [
+        'log' => clienttranslate('The ${logTokenCoalitionName} ${logTokenCoalition} coalition is dominant. The Dominance Check is successful.'),
+        'args' => [
+          'logTokenCoalition' => Utils::logTokenCoalition($coalition),
+          'logTokenCoalitionName' => Utils::logTokenCoalitionName($coalition),
+        ]
+      ] : [
+        'log' => clienttranslate('There is no dominant coalition. The Dominance Check is unsuccessful.'),
+        'args' => []
+      ],
+      'scores' => $scores,
+      // 'successful' => $checkSuccessful,
+      // 'moves' => $moves,
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'pointsPerPlayer' => [
+        'log' => implode('', $logs),
+        'args' => $args
+      ]
+    ));
+  }
+
+  public static function dominanceCheckReturnCoalitionBlocks($moves)
+  {
+    self::notifyAll("dominanceCheckReturnCoalitionBlocks", clienttranslate('All coalition blocks are removed from the board'), array(
+      'moves' => $moves,
+    ));
+  }
+
   public static function moveCard($message, $messageArgs, $action, $moves)
   {
     self::notifyAll(

@@ -58,32 +58,33 @@ trait PurchaseCardTrait
 
 
     $rupeesOnCards = array();
-
-    // Place rupees on market cards
-    for ($i = $column - 1; $i >= 0; $i--) {
-      $location = ['market', $row, $i];
-      $marketCard = Cards::getInLocation($location)->first();
-      // If location is empty put rupee(s) on the other row
-      if ($marketCard == NULL) {
-        $location[1] = $rowAlt;
+    if ($cost > 0) {
+      // Place rupees on market cards
+      for ($i = $column - 1; $i >= 0; $i--) {
+        $location = ['market', $row, $i];
         $marketCard = Cards::getInLocation($location)->first();
-      }
-      if ($marketCard !== NULL) {
-        Cards::setUsed($marketCard["id"], 1); // set unavailable
-        // Add rupees base on card cost (ie add two if favored suit is military)
-        for ($j = 1; $j <= $baseCost; $j++) {
-          $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
-          Tokens::move($rupee['id'], [implode('_', $location), 'rupees']);
-          $rupeesOnCards[] = array(
-            'row' => $location[1],
-            'column' => $i,
-            'cardId' => $marketCard["id"],
-            'rupeeId' => $rupee['id']
-          );
+        // If location is empty put rupee(s) on the other row
+        if ($marketCard == NULL) {
+          $location[1] = $rowAlt;
+          $marketCard = Cards::getInLocation($location)->first();
+        }
+        if ($marketCard !== NULL) {
+          Cards::setUsed($marketCard["id"], 1); // set unavailable
+          // Add rupees base on card cost (ie add two if favored suit is military)
+          for ($j = 1; $j <= $baseCost; $j++) {
+            $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
+            Tokens::move($rupee['id'], [implode('_', $location), 'rupees']);
+            $rupeesOnCards[] = array(
+              'row' => $location[1],
+              'column' => $i,
+              'cardId' => $marketCard["id"],
+              'rupeeId' => $rupee['id']
+            );
+          }
         }
       }
     }
-
+    
     // add all rupees on card to player totals. Then put them in rupee_pool location
     $receivedRupees = count(Tokens::getInLocation([$marketLocation, 'rupees']));
     Players::incRupees($playerId, $receivedRupees);
@@ -115,6 +116,21 @@ trait PurchaseCardTrait
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
+  function getCardCost($column, $card, $baseCost)
+  {
+    $player = Players::get();
+    if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
+      return 0;
+    };
+    return $column * $baseCost;
+  }
+
   function isValidPurchaseCard($player, $card, $baseCost)
   {
     // Player should have remaining actions
@@ -137,7 +153,7 @@ trait PurchaseCardTrait
     $row = intval($explodedLocation[1]);
     $column = intval($explodedLocation[2]);
     $rowAlt = ($row == 0) ? 1 : 0;
-    $cost = $column * $baseCost;
+    $cost = $this->getCardCost($column, $card, $baseCost);
     // Player should be able to afford card
     if ($cost > $player->getRupees()) {
       throw new \feException("Not enough rupees");

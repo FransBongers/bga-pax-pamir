@@ -4,6 +4,10 @@ namespace PaxPamir\Helpers;
 
 abstract class Locations extends \APP_DbObject
 {
+  public static function court($playerId)
+  {
+    return 'court_'.$playerId;
+  }
 
   public static function discardPile()
   {

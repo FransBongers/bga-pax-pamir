@@ -89,26 +89,29 @@ const PUNJAB = 'punjab';
 /**
  * Special abilities
  */
-const SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors';
-const SA_INSURRESCTION = 'insurrection';
-const SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage';
-const SA_BODYGUARDS = 'bodyguards';
-const SA_CITADEL_KABUL = 'citadelKabul';
-const SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia';
-const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows';
-const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms';
-const SA_SAFE_HOUSE = 'safeHouse';
-const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers';
-const SA_BLACKMAIL_HERAT = 'blackmailHerat';
-const SA_BLACKMAIL_KANDAHAR = 'blackmailKandahar';
-const SA_INDIAN_SUPPLIES = 'indianSupplies';
-const SA_WELL_CONNECTED = 'wellConnected';
-const SA_HERAT_INFLUENCE = 'heratInfluence';
-const SA_PERSIAN_INFLUENCE = 'persianInfluence';
-const SA_RUSSIAN_INFLUENCE = 'russianInfluence';
-const SA_INFRASTRUCTURE = 'infrastructure';
-const SA_SAVVY_OPERATOR = 'savvyOperator';
-const SA_IRREGULARS = 'irregulars';
+const SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors'; // card_1
+const SA_INSURRESCTION = 'insurrection'; // card_3
+const SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage'; // card_5
+const SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID = 'card_5';
+const SA_BODYGUARDS = 'bodyguards'; // card_15 card_83
+const SA_CITADEL_KABUL = 'citadelKabul'; // card_17
+const SA_CITADEL_KABUL_CARD_ID = 'card_17';
+const SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia'; // card_97
+const SA_CITADEL_TRANSCASPIA_CARD_ID = 'card_97';
+const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
+const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms'; // card_24
+const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
+const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42
+const SA_BLACKMAIL_HERAT = 'blackmailHerat'; // card_54
+const SA_BLACKMAIL_KANDAHAR = 'blackmailKandahar'; // card_43
+const SA_INDIAN_SUPPLIES = 'indianSupplies'; // card_51
+const SA_WELL_CONNECTED = 'wellConnected'; // card_56
+const SA_HERAT_INFLUENCE = 'heratInfluence'; // card_66
+const SA_PERSIAN_INFLUENCE = 'persianInfluence'; // card_68
+const SA_RUSSIAN_INFLUENCE = 'russianInfluence'; // card_70
+const SA_INFRASTRUCTURE = 'infrastructure'; // card_78
+const SA_SAVVY_OPERATOR = 'savvyOperator'; // card_91
+const SA_IRREGULARS = 'irregulars'; // card_99
 
 /**
  * Suits
@@ -148,6 +151,7 @@ const LOG_TOKEN_ARMY = 'army';
 const LOG_TOKEN_CARD = 'card';
 const LOG_TOKEN_CARD_NAME = 'cardName';
 const LOG_TOKEN_COALITION = 'coalition';
+const LOG_TOKEN_COALITION_NAME = 'coalitionName';
 const LOG_TOKEN_CYLINDER = 'cylinder';
 const LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
 const LOG_TOKEN_LARGE_CARD = 'largeCard';

@@ -69,7 +69,13 @@ trait PlayerActionTrait
     if (!Utils::startsWith($betrayedCardInfo['location'], 'court')) {
       throw new \feException("Card is not in a players court");
     }
-    if ($acceptPrize && $betrayedCardInfo['loyalty'] === null) {
+
+    if (Players::get($betrayedPlayerId)->hasSpecialAbility(SA_BODYGUARDS) && $betrayedCardInfo['suit'] === POLITICAL) {
+      throw new \feException("Player has Bodyguard special ability");
+    }
+
+    if ($acceptPrize && $betrayedCardInfo['prize'] === null) {
+      throw new \feException("Card does not have a prize");
     }
     $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
     // Notifications::log('spies',[$spiesOnCard[0]]);
@@ -336,6 +342,8 @@ trait PlayerActionTrait
     $activePlayerId = $activePlayer->getId();
     $rulers = Globals::getRulers();
 
+    $hasClaimOfAncientLineage = Cards::get(SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID)['location'] === Locations::court($activePlayerId);
+
     // Checks for selected players
     foreach ($selectedPlayers as $index => $selectedPlayer) {
       if (strlen($selectedPlayer) == 0) {
@@ -346,16 +354,17 @@ trait PlayerActionTrait
       $selectedRupees = intval($playerInput[1]);
       $player = Players::get($playerId);
 
-      // Player owns card of region ruled by active player
-      $courtCards = $player->getCourtCards();
+      if (!$hasClaimOfAncientLineage) {
+        // Player owns card of region ruled by active player
+        $courtCards = $player->getCourtCards();
 
-      $hasCardRuledByActivePlayer = Utils::array_some($courtCards, function ($courtCard) use ($activePlayerId, $rulers) {
-        return $rulers[$courtCard['region']] === $activePlayerId;
-      });
-      if (!$hasCardRuledByActivePlayer) {
-        throw new \feException("Seelcted player does not have a court card ruled by active player");
+        $hasCardRuledByActivePlayer = Utils::array_some($courtCards, function ($courtCard) use ($activePlayerId, $rulers) {
+          return $rulers[$courtCard['region']] === $activePlayerId;
+        });
+        if (!$hasCardRuledByActivePlayer) {
+          throw new \feException("Seelcted player does not have a court card ruled by active player");
+        }
       }
-
       // Amount taxed from player is allowed
       $playerRupees = $player->getRupees();
       $taxShelter = $player->getSuitTotals()[ECONOMIC];
@@ -425,6 +434,9 @@ trait PlayerActionTrait
   {
     $isFavoredSuit = Globals::getFavoredSuit() == $cardInfo['suit'];
     if ($isFavoredSuit) {
+      return true;
+    };
+    if ($cardInfo['specialAbility'] === SA_SAVVY_OPERATOR || $cardInfo['specialAbility'] === SA_IRREGULARS) {
       return true;
     };
     $player = Players::get();

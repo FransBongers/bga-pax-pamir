@@ -137,10 +137,7 @@ class PPPlayer {
     }
     playerGamedatas.events.forEach((card: EventCard & Token) => {
       const cardId = card.id;
-      dojo.place(
-        tplCard({ cardId }),
-        `player_tableau_events_${this.playerId}`
-      );
+      dojo.place(tplCard({ cardId }), `player_tableau_events_${this.playerId}`);
       this.events.placeInZone(cardId, card.state);
       this.game.tooltipManager.addTooltipToCard({ cardId });
     });
@@ -558,8 +555,15 @@ class PPPlayer {
     this.court.instantaneous = false;
   }
 
-  ownsEventCard({cardId}: {cardId: string;}): boolean {
+  ownsEventCard({ cardId }: { cardId: string }): boolean {
     return this.events.getAllItems().includes(cardId);
+  }
+
+  hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
+    return this.court
+      .getAllItems()
+      .map((cardId: string) => this.game.getCardInfo({ cardId }))
+      .some((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
   // ....###.....######..########.####..#######..##....##..######.
@@ -648,7 +652,6 @@ class PPPlayer {
   addCardToHand({ cardId, from }: { cardId: string; from?: Zone }) {
     if (this.playerId === this.game.getPlayerId() && from) {
       this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
-      
     } else if (this.playerId === this.game.getPlayerId()) {
       // No from we need to create card
       dojo.place(tplCard({ cardId, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
@@ -656,7 +659,7 @@ class PPPlayer {
     } else {
       dojo.addClass(cardId, 'pp_moving');
       from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
-    };
+    }
     this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
@@ -669,7 +672,7 @@ class PPPlayer {
       id: cardId,
       from,
       to: this.getEventsZone(),
-      removeClass: [PP_MARKET_CARD]
+      removeClass: [PP_MARKET_CARD],
     });
     this.game.tooltipManager.addTooltipToCard({ cardId });
   }

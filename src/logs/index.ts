@@ -2,6 +2,7 @@ const LOG_TOKEN_ARMY = 'army';
 const LOG_TOKEN_CARD = 'card';
 const LOG_TOKEN_CARD_NAME = 'cardName';
 const LOG_TOKEN_COALITION = 'coalition';
+const LOG_TOKEN_COALITION_NAME = 'coalitionName';
 const LOG_TOKEN_CYLINDER = 'cylinder';
 const LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
 const LOG_TOKEN_LARGE_CARD = 'largeCard';
@@ -29,6 +30,8 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
       return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(data) }).getColor() });
     case LOG_TOKEN_COALITION:
       return tplLogTokenCoalition({ coalition: data });
+    case LOG_TOKEN_COALITION_NAME:
+      return tlpLogTokenBoldText({ text: game.gamedatas.staticData.loyalty[data].name });
     case LOG_TOKEN_LEVERAGE:
       return tplLogTokenLeverage();
     case LOG_TOKEN_NEW_LINE:

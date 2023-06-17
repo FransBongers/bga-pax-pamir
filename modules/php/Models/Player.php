@@ -188,4 +188,12 @@ class Player extends \PaxPamir\Helpers\DB_Model
 
     return $result;
   }
+
+  function hasSpecialAbility($specialAbility)
+  {
+    $courtCards = $this->getCourtCards();
+    return Utils::array_some($courtCards, function ($card) use ($specialAbility) {
+      return $card['specialAbility'] === $specialAbility;
+    });
+  }
 }

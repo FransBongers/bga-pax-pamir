@@ -38,9 +38,10 @@ trait DebugTrait
 
   function test()
   {
+    // Notifications::log('player',Players::get()->hasSpecialAbility(SA_RUSSIAN_INFLUENCE));
     // Globals::setRemainingActions(2);
     // Cards::move('card_107',ACTIVE_EVENTS);
-    Cards::move('card_114','market_0_2');
+    // Cards::move('card_114','market_0_2');
     // Cards::move('card_107','market_1_0');
     
     // Notifications::log('isConflictFatigueActive',Events::isConflictFatigueActive());
@@ -50,11 +51,13 @@ trait DebugTrait
     // Cards::move('card_106','market_1_0');
     // Notifications::log('isNationalismActive',Events::isNationalismActive(Players::get()));
     // Notifications::log('isActive',$result);
-    // $this->debugCreateArmy(PERSIA,BRITISH);
-    // $this->debugCreateArmy(PERSIA,BRITISH);
-    // $this->debugCreateArmy(PERSIA,AFGHAN);
-    // $this->debugCreateArmy(PERSIA,AFGHAN);
-    // $this->debugCreateArmy(PERSIA,RUSSIAN);
+    $this->debugCreateArmy(PERSIA,BRITISH);
+    $this->debugCreateArmy(PERSIA,BRITISH);
+    $this->debugCreateArmy(PERSIA,AFGHAN);
+    $this->debugCreateArmy(PERSIA,AFGHAN);
+    $this->debugCreateArmy(PERSIA,RUSSIAN);
+    $this->debugCreateRoad('herat_kabul',RUSSIAN);
+    $this->debugCreateArmy(KABUL,AFGHAN);
     // $this->debugCreateTribe(PERSIA);
     // $this->debugCreateTribe(PERSIA);
     // Map::removeTribesFromRegion(PERSIA);

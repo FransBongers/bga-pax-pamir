@@ -128,7 +128,10 @@ class ClientCardActionBetrayState implements State {
       player.getCourtCards().forEach((card: CourtCard) => {
         debug('card', card);
         const { enemy, own } = this.getSpies({ cardId: card.id });
-        if (!(own.length > 0)) {
+        if (own.length === 0) {
+          return;
+        }
+        if (card.suit === POLITICAL && player.hasSpecialAbility({specialAbility: SA_BODYGUARDS})) {
           return;
         }
         const node = dojo.byId(card.id);

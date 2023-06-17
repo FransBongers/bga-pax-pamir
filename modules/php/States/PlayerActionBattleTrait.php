@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
@@ -59,13 +60,20 @@ trait PlayerActionBattleTrait
 
     foreach ($removedPieces as $index => $tokenId) {
       $splitTokenId = explode("_", $tokenId);
+      $isCylinder = $splitTokenId[0] === "cylinder";
       // enemy pieces may not have the same loyalty
       if (Utils::startsWith($tokenId, "block") && $splitTokenId[1] === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
-      if ($isBattleInRegion && Utils::startsWith($tokenId, "cylinder") && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
+      if ($isBattleInRegion && $isCylinder && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
-      }
+      };
+      if ($location === KABUL && $isCylinder && Cards::get(SA_CITADEL_KABUL_CARD_ID)['location'] === Locations::court($splitTokenId[1])) {
+        throw new \feException("Player has Citadel special ability");
+      };
+      if ($location === TRANSCASPIA && $isCylinder && Cards::get(SA_CITADEL_TRANSCASPIA_CARD_ID)['location'] === Locations::court($splitTokenId[1])) {
+        throw new \feException("Player has Citadel special ability");
+      };
       $tokenInfo = Tokens::get($tokenId);
       $tokenLocation = $tokenInfo['location'];
       $explodedTokenLocation = explode("_", $tokenLocation);

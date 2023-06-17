@@ -16,11 +16,29 @@
 - Pay for hostage cards
 
 ### Event cards purchase
--
+- card_1 / SA_INDISPENSABLE_ADVISORS
+
+- card_21 / SA_STRANGE_BEDFELLOWS
+- card_24 / SA_CIVIL_SERVICE_REFORM
+- card_41 card_72 / SA_SAFE_HOUSE
+- card_42 / SA_CHARISMATIC_COURTIERS -> ignore bribes
+
+- card_51 / SA_INDIAN_SUPPLIES
+
+- card_43 / SA_BLACKMAIL_KANDAHAR
+- card_54 / SA_BLACKMAIL_HERAT
+- card_56 / SA_WELL_CONNECTED
+
+- card_78 / SA_INFRASTRUCTURE
+
+
+
+### Card abilities
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market
 - Remove active events after check is resolved
+- Check returning of coalition blocks to 'top' of supply
 
 ### Improvements
 - Only highlight card actions that are possible based on rupees, ruled regions etc?

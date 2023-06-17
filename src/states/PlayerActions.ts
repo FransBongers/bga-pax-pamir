@@ -82,14 +82,22 @@ class PlayerActionsState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  private isCardFavoredSuit({ cardId }: { cardId: string }) {
+  private isCardFavoredSuit({ cardId }: { cardId: string }): boolean {
     debug('isCardFavoredSuit', cardId);
-    const cardSuit = (this.game.getCardInfo({ cardId }) as CourtCard).suit;
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    if (cardInfo.suit === this.game.objectManager.favoredSuit.get()) {
+      return true;
+    }
+    if (cardInfo.specialAbility === SA_SAVVY_OPERATOR || cardInfo.specialAbility === SA_IRREGULARS) {
+      return true;
+    }
+
     const player = this.game.getCurrentPlayer();
-    const isFavoredSuit = cardSuit === this.game.objectManager.favoredSuit.get();
-    // card 105
-    const isAffectedByNewTactics = cardSuit === MILITARY && player.getEventsZone().getAllItems().includes('card_105');
-    return isFavoredSuit || isAffectedByNewTactics;
+    // card 105 - New Tactics
+    if (cardInfo.suit === MILITARY && player.getEventsZone().getAllItems().includes('card_105')) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -156,9 +164,8 @@ class PlayerActionsState implements State {
   private activePlayerHasFreeCardActions(): boolean {
     return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
       const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return used === 0 && 
-      this.isCardFavoredSuit({cardId: id})
-      // cardInfo.suit == this.game.objectManager.favoredSuit.get() && 
+      return used === 0 && this.isCardFavoredSuit({ cardId: id });
+      // cardInfo.suit == this.game.objectManager.favoredSuit.get() &&
       Object.keys(cardInfo.actions).length > 0;
     });
   }
@@ -227,15 +234,34 @@ class PlayerActionsState implements State {
     });
   }
 
-  setMarketCardsSelectable() {
+  getCardCost({ cardId, column }: { cardId: string; column: number }): number {
     const baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
+    const player = this.game.getCurrentPlayer();
+    const cardInfo = this.game.getCardInfo({ cardId });
+    if (cardInfo.type === 'courtCard' && cardInfo.region === HERAT && player.hasSpecialAbility({ specialAbility: SA_HERAT_INFLUENCE })) {
+      return 0;
+    }
+    if (cardInfo.type === 'courtCard' && cardInfo.region === PERSIA && player.hasSpecialAbility({ specialAbility: SA_PERSIAN_INFLUENCE })) {
+      return 0;
+    }
+    if (
+      cardInfo.type === 'courtCard' &&
+      cardInfo.loyalty === RUSSIAN &&
+      player.hasSpecialAbility({ specialAbility: SA_RUSSIAN_INFLUENCE })
+    ) {
+      return 0;
+    }
+    return column * baseCardCost; // cost is equal to the column number
+  }
+
+  setMarketCardsSelectable() {
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
-      const cost = Number(node.parentElement.id.split('_')[3]) * baseCardCost; // cost is equal to the column number
       const cardId = node.id;
       const cardInfo = this.game.getCardInfo({ cardId });
       if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
         return;
       }
+      const cost = this.getCardCost({ cardId, column: Number(node.parentElement.id.split('_')[3]) });
       if (cost <= this.game.localState.activePlayer.rupees && !this.game.localState.usedCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(

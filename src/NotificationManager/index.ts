@@ -49,7 +49,8 @@ class NotificationManager {
       ['discardFromMarket', 250],
       ['discardPrizes', 1000],
       ['exchangeHand', 100],
-      ['dominanceCheck', 1],
+      ['dominanceCheckScores', 1],
+      ['dominanceCheckReturnCoalitionBlocks', 250],
       ['moveCard', 1000],
       ['moveToken', 1000],
       ['payBribe', 1],
@@ -309,20 +310,27 @@ class NotificationManager {
     });
   }
 
-  notif_dominanceCheck(notif) {
+  notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
     console.log('notif_dominanceCheck', notif);
-    const { scores, moves } = notif.args;
+    const { scores } = notif.args;
     Object.keys(scores).forEach((playerId) => {
+      console.log('typeof', typeof playerId);
       this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
       this.game.move({
         id: `vp_cylinder_${playerId}`,
-        from: this.game.objectManager.vpTrack.getZone(scores[playerId].currentScore),
-        to: this.game.objectManager.vpTrack.getZone(scores[playerId].newScore),
+        from: this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`),
+        to: this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`),
       });
     });
 
+
+  }
+
+  notif_dominanceCheckReturnCoalitionBlocks(notif: Notif<NotifDominanceCheckReturnBlocksArgs>) {
+    const { moves } = notif.args;
+    console.log('moves',moves);
     (moves || []).forEach((move) => {
-      const { tokenId, from, to } = move;
+      const { tokenId, from, to, weight } = move;
       const coalition = to.split('_')[1];
       const splitFrom = from.split('_');
       const isArmy = splitFrom[0] == 'armies';
@@ -334,6 +342,7 @@ class NotificationManager {
           : this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
         addClass: ['pp_coalition_block'],
         removeClass: isArmy ? ['pp_army'] : ['pp_road'],
+        weight
       });
     });
   }

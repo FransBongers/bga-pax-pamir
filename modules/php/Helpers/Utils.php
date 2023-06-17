@@ -141,6 +141,11 @@ abstract class Utils extends \APP_DbObject
     return implode(':', [LOG_TOKEN_COALITION, $coalition]);
   }
 
+  public static function logTokenCoalitionName($coalition)
+  {
+    return implode(':', [LOG_TOKEN_COALITION_NAME, $coalition]);
+  }
+
   public static function logTokenCylinder($playerId)
   {
     return implode(':', [LOG_TOKEN_CYLINDER, $playerId]);

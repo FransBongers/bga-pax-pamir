@@ -196,9 +196,10 @@ trait ResolveImpactIconsTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function resolvePlaceArmy($regionId)
+  function resolvePlaceArmy($regionId, $playerId = null)
   {
-    $loyalty = Players::get()->getLoyalty();
+    $player = $playerId !== null ? Players::get($playerId) : Players::get();
+    $loyalty = $player->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
     $army = Tokens::getTopOf($location);
     if ($army != null) {
@@ -206,7 +207,7 @@ trait ResolveImpactIconsTrait
       Tokens::move($army['id'], $this->locations['armies'][$regionId]);
       $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => $player,
         'logTokenArmy' => Utils::logTokenArmy($loyalty),
         'logTokenRegionName' => Utils::logTokenRegionName($regionId),
         'moves' => [

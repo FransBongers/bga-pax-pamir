@@ -77,16 +77,19 @@ class ClientCardActionTaxState implements State {
     });
     Object.keys(this.maxPerPlayer).forEach((playerId: string) => {
       const taxCounter = dojo.byId(`rupees_tableau_${playerId}_tax_counter`);
-      if(taxCounter) {
+      if (taxCounter) {
         playerRupees.push(`${playerId}_${Number(taxCounter.innerText)}`);
       }
     });
 
-    this.game.takeAction({action: 'tax', data: {
-      cardId: this.cardId,
-      market: marketRupees.join(' '),
-      players: playerRupees.join(' '),
-    }})
+    this.game.takeAction({
+      action: 'tax',
+      data: {
+        cardId: this.cardId,
+        market: marketRupees.join(' '),
+        players: playerRupees.join(' '),
+      },
+    });
   }
 
   private handleMarketRupeeClicked({ rupeeId }: { rupeeId: string }) {
@@ -115,9 +118,8 @@ class ClientCardActionTaxState implements State {
       debug('max selected reached');
       return;
     }
-    
 
-    if(!taxCounter) {
+    if (!taxCounter) {
       dojo.place(`<span id="${node.id}_tax_counter" class="pp_tax_counter">1</span>`, node);
     } else {
       const playerId = Number(node.id.split('_')[2]);
@@ -159,23 +161,26 @@ class ClientCardActionTaxState implements State {
       }
     });
 
+    const hasClaimOfAncientLineage = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CLAIM_OF_ANCIENT_LINEAGE });
     // Players
     this.game.playerManager.getPlayerIds().forEach((playerId: number) => {
       if (playerId === this.game.getPlayerId()) {
         return;
       }
       const player = this.game.playerManager.getPlayer({ playerId });
-      const hasCardRuledByPlayer = player
-        .getCourtZone()
-        .getAllItems()
-        .some((cardId: string) => {
-          const cardRegion = (this.game.getCardInfo({ cardId }) as CourtCard).region;
-          if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {
-            return true;
-          }
-        });
-      if (!hasCardRuledByPlayer) {
-        return;
+      if (!hasClaimOfAncientLineage) {
+        const hasCardRuledByPlayer = player
+          .getCourtZone()
+          .getAllItems()
+          .some((cardId: string) => {
+            const cardRegion = (this.game.getCardInfo({ cardId }) as CourtCard).region;
+            if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {
+              return true;
+            }
+          });
+        if (!hasCardRuledByPlayer) {
+          return;
+        }
       }
       const taxShelter = player.getTaxShelter();
       const playerRupees = player.getRupees();
@@ -212,7 +217,7 @@ class ClientCardActionTaxState implements State {
     });
     Object.keys(this.maxPerPlayer).forEach((playerId: string) => {
       const taxCounter = dojo.byId(`rupees_tableau_${playerId}_tax_counter`);
-      if(taxCounter) {
+      if (taxCounter) {
         numberSelected += Number(taxCounter.innerText);
       }
     });
@@ -238,11 +243,11 @@ class ClientCardActionTaxState implements State {
       const hasSelectableClass = rupeeNode.classList.contains('pp_selectable');
       if (!taxCounter && !hasSelectableClass) {
         this.toggleSelected(rupeeNode);
-      };
-      if(!taxCounter) {
+      }
+      if (!taxCounter) {
         return;
       }
-      
+
       const currentValue = taxCounter ? Number(taxCounter.innerText) : 0;
       const playerMax = this.maxPerPlayer[playerId];
       if (hasSelectableClass && (this.maxNumberToSelect <= this.numberSelected || currentValue >= playerMax)) {

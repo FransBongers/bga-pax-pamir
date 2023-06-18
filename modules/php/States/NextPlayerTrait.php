@@ -25,15 +25,13 @@ trait NextPlayerTrait
         $this->giveExtraTime($playerId);
 
         Globals::setSetup(0);
-        Globals::setRemainingActions(2);
 
         $this->gamestate->nextState('prepareNextTurn');
       }
     } else {
       // player turn
       $playerId = self::activeNextPlayer();
-
-      Globals::setRemainingActions(2);
+      
       $this->giveExtraTime($playerId);
 
       $this->gamestate->nextState('prepareNextTurn');

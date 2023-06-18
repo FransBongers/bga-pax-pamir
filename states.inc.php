@@ -55,6 +55,7 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PREPARE_TURN", 3);
+    define("STATE_START_OF_TURN_ABILITIES",14);
     define("STATE_PLAYER_ACTIONS", 4);
     define("STATE_NEGOTIATE_BRIBE", 5);
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
@@ -139,6 +140,20 @@ $machinestates = array(
         "updateGameProgression" => true,
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
+            'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
+        )
+    ),
+
+    STATE_START_OF_TURN_ABILITIES => array(
+        "name" => "startOfTurnAbilities",
+        "description" => clienttranslate('${actplayer} may use a special ability'),
+        "descriptionmyturn" => clienttranslate('${you} '),
+        "type" => "activeplayer",
+        "args" => "argStartOfTurnAbilities",
+        "possibleactions" => array("placeSpy", "pass"),
+        "transitions" => array(
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 

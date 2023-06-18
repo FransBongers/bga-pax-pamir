@@ -16,8 +16,6 @@
 - Pay for hostage cards
 
 ### Event cards purchase
-- card_1 / SA_INDISPENSABLE_ADVISORS
-
 - card_21 / SA_STRANGE_BEDFELLOWS
 - card_24 / SA_CIVIL_SERVICE_REFORM
 - card_41 card_72 / SA_SAFE_HOUSE
@@ -25,8 +23,6 @@
 
 - card_51 / SA_INDIAN_SUPPLIES
 
-- card_43 / SA_BLACKMAIL_KANDAHAR
-- card_54 / SA_BLACKMAIL_HERAT
 - card_56 / SA_WELL_CONNECTED
 
 - card_78 / SA_INFRASTRUCTURE
@@ -53,6 +49,7 @@
 ## To check
 - Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
 - Check totals in player panels. Seem to be off for cylinders
+- do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args
 
 ### UI
 - Matching colors for selectable / selected

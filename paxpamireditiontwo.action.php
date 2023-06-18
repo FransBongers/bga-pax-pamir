@@ -149,7 +149,8 @@ class action_paxpamireditiontwo extends APP_GameAction
     public function pass()
     {
         self::setAjaxMode();
-        $result = $this->game->pass();
+        $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
+        $result = $this->game->pass($specialAbility);
         self::ajaxResponse();
     }
 
@@ -171,8 +172,9 @@ class action_paxpamireditiontwo extends APP_GameAction
     public function placeSpy()
     {
         self::setAjaxMode();
-        $card_id = self::getArg("cardId", AT_alphanum, true);
-        $result = $this->game->placeSpy($card_id);
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
+        $result = $this->game->placeSpy($cardId,$specialAbility);
         self::ajaxResponse();
     }
 

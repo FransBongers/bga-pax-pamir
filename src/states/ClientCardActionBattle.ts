@@ -80,7 +80,7 @@ class ClientCardActionBattleState implements State {
     this.numberSelected = 0;
 
     this.updatePageTitle('card');
-    this.setPiecesSelectable({ pieces: enemy });
+    this.setPiecesSelectable({ pieces: enemy.filter((cylinderId: string) => this.checkForIndispensableAdvisors({ cylinderId })) });
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
@@ -107,14 +107,22 @@ class ClientCardActionBattleState implements State {
       this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_KABUL })
     ) {
       return false;
-    };
+    }
     if (
       region === TRANSCASPIA &&
-      this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_TRANSCASPIA })
+      this.game.playerManager
+        .getPlayer({ playerId: Number(pieceId.split('_')[1]) })
+        .hasSpecialAbility({ specialAbility: SA_CITADEL_TRANSCASPIA })
     ) {
       return false;
-    };
+    }
     return true;
+  }
+
+  checkForIndispensableAdvisors({ cylinderId }: { cylinderId: string }): boolean {
+    return !this.game.playerManager
+      .getPlayer({ playerId: Number(cylinderId.split('_')[1]) })
+      .hasSpecialAbility({ specialAbility: SA_INDISPENSABLE_ADVISORS });
   }
 
   getNumberOfFriendlyArmiesInRegion({ coalitionId, region }: { coalitionId: string; region: Region }) {
@@ -156,7 +164,7 @@ class ClientCardActionBattleState implements State {
       courtCards.forEach((card: CourtCard) => {
         const { enemy, own } = this.getSpies({ cardId: card.id });
 
-        if (enemy.length > 0 && own.length > 0) {
+        if (enemy.filter((cylinderId: string) => this.checkForIndispensableAdvisors({ cylinderId })).length > 0 && own.length > 0) {
           battleSites.push(card.id);
         }
       });

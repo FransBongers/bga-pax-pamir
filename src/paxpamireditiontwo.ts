@@ -65,6 +65,7 @@ class PaxPamir implements PaxPamirGame {
     playerActions: PlayerActionsState;
     resolveEvent: ResolveEventState;
     setup: SetupState;
+    startOfTurnAbilities: StartOfTurnAbilitiesState;
   };
 
   constructor() {
@@ -117,6 +118,7 @@ class PaxPamir implements PaxPamirGame {
       playerActions: new PlayerActionsState(this),
       resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
+      startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
     };
 
     // Events

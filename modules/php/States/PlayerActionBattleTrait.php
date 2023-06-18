@@ -58,6 +58,7 @@ trait PlayerActionBattleTrait
       throw new \feException("Not enough loyal pieces");
     }
 
+
     foreach ($removedPieces as $index => $tokenId) {
       $splitTokenId = explode("_", $tokenId);
       $isCylinder = $splitTokenId[0] === "cylinder";
@@ -74,6 +75,9 @@ trait PlayerActionBattleTrait
       if ($location === TRANSCASPIA && $isCylinder && Cards::get(SA_CITADEL_TRANSCASPIA_CARD_ID)['location'] === Locations::court($splitTokenId[1])) {
         throw new \feException("Player has Citadel special ability");
       };
+      if (!$isBattleInRegion && Players::get($splitTokenId[1])->hasSpecialAbility(SA_INDISPENSABLE_ADVISORS)) {
+        throw new \feException("Player's spies can not be removed in battles with other spies");
+      }
       $tokenInfo = Tokens::get($tokenId);
       $tokenLocation = $tokenInfo['location'];
       $explodedTokenLocation = explode("_", $tokenLocation);

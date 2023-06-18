@@ -55,7 +55,6 @@ const tplTooltipImpactIcon = ({ impactIcon, loyalty }: { impactIcon: string; loy
     case IMPACT_ICON_MILITARY_SUIT:
     case IMPACT_ICON_POLITICAL_SUIT:
     case IMPACT_ICON_INTELLIGENCE_SUIT:
-      console.log('impactIcon', impactIcon)
       icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_suit ${impactIcon}"></div>`;
       break;
     default:

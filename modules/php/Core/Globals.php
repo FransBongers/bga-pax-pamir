@@ -22,6 +22,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "loyaltyChangeInput" => "obj",
     "currentEvent" => "obj",
     "setup" => "int",
+    "usedSpecialAbilities" => "obj",
 
     // TODO: check implementation
     "resolveImpactIconsCardId" => "str",

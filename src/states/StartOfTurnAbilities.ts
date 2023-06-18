@@ -1,0 +1,119 @@
+class StartOfTurnAbilitiesState implements State {
+  private game: PaxPamirGame;
+  private specialAbility: string;
+
+  constructor(game: PaxPamirGame) {
+    this.game = game;
+  }
+
+  onEnteringState(args: OnEnteringStartOfTurnAbilitiesArgs) {
+    debug('Entering StartOfTurnAbilitiesState', args);
+    const { specialAbilities } = args;
+    this.specialAbility = specialAbilities[0];
+    this.updateInterfaceInitialStep();
+  }
+
+  onLeavingState() {
+    debug('Leaving StartOfTurnAbilitiesState');
+  }
+
+  //  .####.##....##.########.########.########..########....###.....######..########
+  //  ..##..###...##....##....##.......##.....##.##.........##.##...##....##.##......
+  //  ..##..####..##....##....##.......##.....##.##........##...##..##.......##......
+  //  ..##..##.##.##....##....######...########..######...##.....##.##.......######..
+  //  ..##..##..####....##....##.......##...##...##.......#########.##.......##......
+  //  ..##..##...###....##....##.......##....##..##.......##.....##.##....##.##......
+  //  .####.##....##....##....########.##.....##.##.......##.....##..######..########
+
+  // ..######..########.########.########...######.
+  // .##....##....##....##.......##.....##.##....##
+  // .##..........##....##.......##.....##.##......
+  // ..######.....##....######...########...######.
+  // .......##....##....##.......##..............##
+  // .##....##....##....##.......##........##....##
+  // ..######.....##....########.##.........######.
+
+  private updateInterfaceInitialStep() {
+    this.game.clearPossible();
+    this.game.clientUpdatePageTitle({
+      text: _('${you} may place a spy on any ${regionName} court card without a spy'),
+      args: {
+        you: '${you}',
+        regionName: this.getRegionNameForSpecialAbility(),
+      },
+    });
+    this.game.addPrimaryActionButton({
+      id: 'skip_btn',
+      text: _('Skip'),
+      callback: () => this.game.takeAction({ action: 'pass', data: { specialAbility: this.specialAbility } }),
+    });
+    this.setCourtCardsSelectable();
+  }
+
+  private updateInterfaceConfirmPlaceSpy({ cardId }: { cardId: string }) {
+    this.game.clearPossible();
+    dojo.query(`.pp_card_in_court.pp_${cardId}`).addClass('pp_selected');
+    this.game.clientUpdatePageTitle({
+      text: _('Place a spy on ${cardName}?'),
+      args: {
+        cardName: (this.game.getCardInfo({ cardId }) as CourtCard).name,
+      },
+    });
+    this.game.addPrimaryActionButton({
+      id: 'confirm_btn',
+      text: _('Confirm'),
+      callback: () => this.game.takeAction({ action: 'placeSpy', data: { cardId, specialAbility: this.specialAbility } }),
+    });
+    this.game.addDangerActionButton({
+      id: 'cancel_btn',
+      text: _('Cancel'),
+      callback: () => this.game.onCancel(),
+    });
+  }
+  //  .##.....##.########.####.##.......####.########.##....##
+  //  .##.....##....##.....##..##........##.....##.....##..##.
+  //  .##.....##....##.....##..##........##.....##......####..
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  ..#######.....##....####.########.####....##.......##...
+
+  private getRegionNameForSpecialAbility() {
+    switch (this.specialAbility) {
+      case SA_BLACKMAIL_HERAT:
+        return this.game.gamedatas.staticData.regions[HERAT].name;
+      case SA_BLACKMAIL_KANDAHAR:
+        return this.game.gamedatas.staticData.regions[KANDAHAR].name;
+      default:
+        return '';
+    }
+  }
+
+  setCourtCardsSelectable() {
+    const region = this.specialAbility === SA_BLACKMAIL_HERAT ? HERAT : KANDAHAR;
+    dojo.query(`.pp_card_in_court`).forEach((node: HTMLElement, index: number) => {
+      const cardId = node.id;
+      const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+      if (cardInfo.region === region && (this.game.spies[cardId]?.getAllItems() || []).length === 0) {
+        dojo.addClass(node, 'pp_selectable');
+        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
+      }
+    });
+  }
+
+  //  ..######..##.......####..######..##....##
+  //  .##....##.##........##..##....##.##...##.
+  //  .##.......##........##..##.......##..##..
+  //  .##.......##........##..##.......#####...
+  //  .##.......##........##..##.......##..##..
+  //  .##....##.##........##..##....##.##...##.
+  //  ..######..########.####..######..##....##
+
+  // .##.....##....###....##....##.########..##.......########..######.
+  // .##.....##...##.##...###...##.##.....##.##.......##.......##....##
+  // .##.....##..##...##..####..##.##.....##.##.......##.......##......
+  // .#########.##.....##.##.##.##.##.....##.##.......######....######.
+  // .##.....##.#########.##..####.##.....##.##.......##.............##
+  // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##
+  // .##.....##.##.....##.##....##.########..########.########..######.
+}

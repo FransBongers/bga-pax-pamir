@@ -50,14 +50,20 @@ trait PlaceSpyTrait
   /**
    * Places spy on card
    */
-  function placeSpy($cardId)
+  function placeSpy($cardId, $specialAbility = null)
   {
     self::checkAction('placeSpy');
     self::dump("placeSpy on ", $cardId);
     $card = Cards::get($cardId);
-    if(!Utils::startsWith($card['location'], "court")) {
+    if (!Utils::startsWith($card['location'], "court")) {
       throw new \feException("Selected card is not in a court");
     };
+
+    $isStartOfTurnAbility = $this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities";
+    if ($isStartOfTurnAbility) {
+      $this->isValidStartOfTurnSpecialAbility($specialAbility);
+    }
+
     // TODO: check if $cardId is in court?
     $playerId = self::getActivePlayerId();
     $from = "cylinders_" . $playerId;
@@ -82,7 +88,37 @@ trait PlaceSpyTrait
         ]
       ]);
     }
-    Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolveImpactIcons');
+    if ($isStartOfTurnAbility) {
+      $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
+      $usedSpecialAbilities[] = $specialAbility;
+      Globals::setUsedSpecialAbilities($usedSpecialAbilities);
+      $transition = $this->playerHasStartOfTurnSpecialAbilities($usedSpecialAbilities) ? 'startOfTurnAbilities' : 'playerActions';
+      $this->nextState($transition);
+    } else {
+      Globals::incResolveImpactIconsCurrentIcon(1);
+      $this->gamestate->nextState('resolveImpactIcons');
+    }
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function isValidStartOfTurnSpecialAbility($specialAbility)
+  {
+    if (!in_array($specialAbility, [SA_BLACKMAIL_HERAT, SA_BLACKMAIL_KANDAHAR])) {
+      throw new \feException("Not a valid start of turn ability");
+    };
+    $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
+    if (in_array($specialAbility, $usedSpecialAbilities)) {
+      throw new \feException("Special ability has already been used this turn");
+    };
+    if (!Players::get()->hasSpecialAbility($specialAbility)) {
+      throw new \feException("Player does not have special ability");
+    }
   }
 }

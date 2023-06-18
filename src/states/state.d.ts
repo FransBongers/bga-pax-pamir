@@ -58,3 +58,7 @@ interface OnEnteringResolveEventArgs {
 interface OnEnteringPlaceSpyArgs {
   regionId: string;
 }
+
+interface OnEnteringStartOfTurnAbilitiesArgs {
+  specialAbilities: string[];
+}

@@ -506,7 +506,6 @@ var tplTooltipImpactIcon = function (_a) {
         case IMPACT_ICON_MILITARY_SUIT:
         case IMPACT_ICON_POLITICAL_SUIT:
         case IMPACT_ICON_INTELLIGENCE_SUIT:
-            console.log('impactIcon', impactIcon);
             icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_suit ".concat(impactIcon, "\"></div>");
             break;
         default:
@@ -1985,7 +1984,7 @@ var ClientCardActionBattleState = (function () {
         this.maxNumberToSelect = Math.min(cardRank, own.length);
         this.numberSelected = 0;
         this.updatePageTitle('card');
-        this.setPiecesSelectable({ pieces: enemy });
+        this.setPiecesSelectable({ pieces: enemy.filter(function (cylinderId) { return _this.checkForIndispensableAdvisors({ cylinderId: cylinderId }); }) });
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
@@ -2003,13 +2002,19 @@ var ClientCardActionBattleState = (function () {
             this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_KABUL })) {
             return false;
         }
-        ;
         if (region === TRANSCASPIA &&
-            this.game.playerManager.getPlayer({ playerId: Number(pieceId.split('_')[1]) }).hasSpecialAbility({ specialAbility: SA_CITADEL_TRANSCASPIA })) {
+            this.game.playerManager
+                .getPlayer({ playerId: Number(pieceId.split('_')[1]) })
+                .hasSpecialAbility({ specialAbility: SA_CITADEL_TRANSCASPIA })) {
             return false;
         }
-        ;
         return true;
+    };
+    ClientCardActionBattleState.prototype.checkForIndispensableAdvisors = function (_a) {
+        var cylinderId = _a.cylinderId;
+        return !this.game.playerManager
+            .getPlayer({ playerId: Number(cylinderId.split('_')[1]) })
+            .hasSpecialAbility({ specialAbility: SA_INDISPENSABLE_ADVISORS });
     };
     ClientCardActionBattleState.prototype.getNumberOfFriendlyArmiesInRegion = function (_a) {
         var coalitionId = _a.coalitionId, region = _a.region;
@@ -2044,7 +2049,7 @@ var ClientCardActionBattleState = (function () {
             var courtCards = player.getCourtCards();
             courtCards.forEach(function (card) {
                 var _a = _this.getSpies({ cardId: card.id }), enemy = _a.enemy, own = _a.own;
-                if (enemy.length > 0 && own.length > 0) {
+                if (enemy.filter(function (cylinderId) { return _this.checkForIndispensableAdvisors({ cylinderId: cylinderId }); }).length > 0 && own.length > 0) {
                     battleSites.push(card.id);
                 }
             });
@@ -4184,6 +4189,83 @@ var SetupState = (function () {
     };
     return SetupState;
 }());
+var StartOfTurnAbilitiesState = (function () {
+    function StartOfTurnAbilitiesState(game) {
+        this.game = game;
+    }
+    StartOfTurnAbilitiesState.prototype.onEnteringState = function (args) {
+        debug('Entering StartOfTurnAbilitiesState', args);
+        var specialAbilities = args.specialAbilities;
+        this.specialAbility = specialAbilities[0];
+        this.updateInterfaceInitialStep();
+    };
+    StartOfTurnAbilitiesState.prototype.onLeavingState = function () {
+        debug('Leaving StartOfTurnAbilitiesState');
+    };
+    StartOfTurnAbilitiesState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} may place a spy on any ${regionName} court card without a spy'),
+            args: {
+                you: '${you}',
+                regionName: this.getRegionNameForSpecialAbility(),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'skip_btn',
+            text: _('Skip'),
+            callback: function () { return _this.game.takeAction({ action: 'pass', data: { specialAbility: _this.specialAbility } }); },
+        });
+        this.setCourtCardsSelectable();
+    };
+    StartOfTurnAbilitiesState.prototype.updateInterfaceConfirmPlaceSpy = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId;
+        this.game.clearPossible();
+        dojo.query(".pp_card_in_court.pp_".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _('Place a spy on ${cardName}?'),
+            args: {
+                cardName: this.game.getCardInfo({ cardId: cardId }).name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'placeSpy', data: { cardId: cardId, specialAbility: _this.specialAbility } }); },
+        });
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () { return _this.game.onCancel(); },
+        });
+    };
+    StartOfTurnAbilitiesState.prototype.getRegionNameForSpecialAbility = function () {
+        switch (this.specialAbility) {
+            case SA_BLACKMAIL_HERAT:
+                return this.game.gamedatas.staticData.regions[HERAT].name;
+            case SA_BLACKMAIL_KANDAHAR:
+                return this.game.gamedatas.staticData.regions[KANDAHAR].name;
+            default:
+                return '';
+        }
+    };
+    StartOfTurnAbilitiesState.prototype.setCourtCardsSelectable = function () {
+        var _this = this;
+        var region = this.specialAbility === SA_BLACKMAIL_HERAT ? HERAT : KANDAHAR;
+        dojo.query(".pp_card_in_court").forEach(function (node, index) {
+            var _a;
+            var cardId = node.id;
+            var cardInfo = _this.game.getCardInfo({ cardId: cardId });
+            if (cardInfo.region === region && (((_a = _this.game.spies[cardId]) === null || _a === void 0 ? void 0 : _a.getAllItems()) || []).length === 0) {
+                dojo.addClass(node, 'pp_selectable');
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmPlaceSpy({ cardId: cardId }); }));
+            }
+        });
+    };
+    return StartOfTurnAbilitiesState;
+}());
 var NotificationManager = (function () {
     function NotificationManager(game) {
         this.game = game;
@@ -4763,6 +4845,7 @@ var PaxPamir = (function () {
             _a.playerActions = new PlayerActionsState(this),
             _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
+            _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),
             _a);
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
         this.activeEvents.instantaneous = true;

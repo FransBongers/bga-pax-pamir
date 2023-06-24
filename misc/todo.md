@@ -16,12 +16,10 @@
 - Pay for hostage cards
 
 ### Event cards purchase
-- card_21 / SA_STRANGE_BEDFELLOWS
 - card_24 / SA_CIVIL_SERVICE_REFORM
 
 - card_42 / SA_CHARISMATIC_COURTIERS -> ignore bribes
 - card_51 / SA_INDIAN_SUPPLIES
-- card_56 / SA_WELL_CONNECTED
 - card_78 / SA_INFRASTRUCTURE
 
 

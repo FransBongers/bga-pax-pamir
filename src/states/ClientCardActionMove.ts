@@ -224,7 +224,9 @@ class ClientCardActionMoveState implements State {
    *
    * @returns next card for given cardId in court of playerId
    */
-  private getNextCardId({ cardId, playerId }: { cardId: string; playerId: number }) {
+  private getNextCardId({ cardId }: { cardId: string; }) {
+    const node = dojo.byId(cardId);
+    const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
     const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
 
     // Assumption to check: cardIds are returned in court order (based on weight)
@@ -252,7 +254,9 @@ class ClientCardActionMoveState implements State {
    *
    * @returns previous card for given cardId in court of playerId
    */
-  private getPreviousCardId({ cardId, playerId }: { cardId: string; playerId: number }) {
+  private getPreviousCardId({ cardId }: { cardId: string;}) {
+    const node = dojo.byId(cardId);
+    const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
     const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
 
     // Assumption to check: cardIds are returned in court order (based on weight)
@@ -392,34 +396,57 @@ class ClientCardActionMoveState implements State {
     });
   }
 
-  private setDestinationCardsSelectable({ pieceId, cardId }) {
-    debug('setDestinationCardsSelectable', pieceId, cardId);
-    const node = dojo.byId(pieceId);
-    const courtCardOwnerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
-    if (!courtCardOwnerId) {
-      // This should never happen but just in case to handle typing
-      return;
+  private getSingleMoveDestinationsForSpy({ cardId }: {cardId: string;}): string[] {
+    const cardInfo = this.game.getCardInfo({cardId}) as CourtCard;
+    const destinationCards: string[] = [];
+    destinationCards.push(
+      this.getNextCardId({ cardId })
+    )
+    const previousCardId = this.getPreviousCardId({ cardId });
+    if (!destinationCards.includes(previousCardId)) {
+      destinationCards.push(previousCardId);
+    };
+    const player = this.game.getCurrentPlayer();
+    if (player.hasSpecialAbility({specialAbility: SA_STRANGE_BEDFELLOWS})) {
+      dojo.query(`.pp_card_in_court.pp_${cardInfo.region}`).forEach((node) => {
+        const nodeId = node.id;
+        if (!destinationCards.includes(nodeId)) {
+          destinationCards.push(nodeId);
+        }
+      })
     }
-    const nextCardId = this.getNextCardId({ cardId, playerId: courtCardOwnerId });
-    const previousCardId = this.getPreviousCardId({ cardId, playerId: courtCardOwnerId });
-    console.log('nextCardId', nextCardId);
+    return destinationCards;
+  }
+
+  private setDestinationCardsSelectable({ pieceId, cardId: inputCardId }: {pieceId: string; cardId: string;}) {
+    debug('setDestinationCardsSelectable', pieceId, inputCardId);
+
+    const destinationCards = this.getSingleMoveDestinationsForSpy({cardId: inputCardId});
+    const player = this.game.getCurrentPlayer();
+    if (player.hasSpecialAbility({specialAbility: SA_WELL_CONNECTED})) {
+      [...destinationCards].forEach((cardId) => {
+        destinationCards.push(...this.getSingleMoveDestinationsForSpy({cardId}));
+      });
+    }
+
+    const uniqueDestinations: string[] = [];
+    destinationCards.forEach((cardId) => {
+      if (!uniqueDestinations.includes(cardId)) {
+        uniqueDestinations.push(cardId);
+      }
+    })
+
     // Filter in case this is the only card in play so previous and next card are same as the selected card
-    [nextCardId, previousCardId]
-      .filter((id) => id !== cardId)
+    // destinationCards
+    uniqueDestinations
+      .filter((id) => id !== inputCardId)
       .forEach((toCardId) => {
         const destinationCardNode = dojo.byId(toCardId);
         destinationCardNode.classList.add(PP_SELECTABLE);
         this.game._connections.push(
-          dojo.connect(destinationCardNode, 'onclick', this, () => this.onCardClick({ toCardId, fromCardId: cardId, pieceId }))
+          dojo.connect(destinationCardNode, 'onclick', this, () => this.onCardClick({ toCardId, fromCardId: inputCardId, pieceId }))
         );
       });
-
-    // const nextCards;
-
-    // // console.log('zone', cardIds, courtZone);
-    // const nextPlayer = this.getNextPlayer({ playerId: courtCardOwnerId });
-    // const previousPlayer = this.getPreviousPlayer({ playerId: courtCardOwnerId });
-    // console.log('next', nextPlayer, 'previous', previousPlayer);
   }
 
   private setDestinationRegionsSelectable({ pieceId, regionId }: { pieceId: string; regionId: string }) {

@@ -102,7 +102,7 @@ trait PlayerActionMoveTrait
 
         $from = 'tribes_' . $source;
         $to = 'tribes_' . $destination;
-        Notifications::log('locations',[
+        Notifications::log('locations', [
           'from' => $from,
           'to' => $to
         ]);
@@ -120,7 +120,6 @@ trait PlayerActionMoveTrait
           'logTokenRegionFrom' => Utils::logTokenRegionName($source),
           'logTokenRegionTo' => Utils::logTokenRegionName($destination),
         ]);
-
       } else if (Utils::isCylinder($pieceId)) {
         $from = 'spies_' . $source;
         $to = 'spies_' . $destination;
@@ -219,73 +218,82 @@ trait PlayerActionMoveTrait
     if ($playerId !== intval(explode('_', $pieceId)[1])) {
       throw new \feException("Cylinder is not owned by player");
     };
+    $player = Players::get();
+    $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
+    $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
+    $courtCards = $this->getAllCourtCardsOrdered();
     // Each move should be valid (spy should be at specified location and cards need to be adjacent)
     foreach ($moves as $index => $move) {
       // block should be in db location for first move or in destination of previous move
       if (($index === 0 && $tokenInfo['location'] !== 'spies_' . $move['from']) || ($index > 0 && $move['from'] !== $moves[$index - 1]['to'])) {
         throw new \feException("Spy is not in the specified location");
       };
-      $adjacentCards = $this->getAdjacentCards($move['from']);
+
+      $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
+
+      if ($hasWellConnectedAbility ) {
+        $arrayCopy = $adjacentCards;
+        foreach($arrayCopy as $index => $cardId) {
+          $adjacentCards = array_merge($adjacentCards,$this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+        }
+      };
+
       if (!in_array($move['to'], $adjacentCards)) {
         throw new \feException("Destination is not adjacent to current location");
       }
     }
   }
 
-  function getAdjacentCards($cardId)
+  function getAllCourtCardsOrdered()
+  {
+    $players = Players::getAll()->toArray();
+    usort($players, function ($a, $b) {
+      return $a->getNo() - $b->getNo();
+    });
+    $courtCards = [];
+    foreach ($players as $index => $player) {
+      $playerCourtCards = $player->getCourtCards();
+      array_push($courtCards, ...$playerCourtCards);
+    }
+    return $courtCards;
+  }
+
+  function getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility)
   {
     $adjacentCards = [];
-    $court = [];
-    $cardInfo = Cards::get($cardId);
-    $courtOwnerId = intval(explode('_', $cardInfo['location'])[1]);
 
-    $court[$courtOwnerId] = array_map(function ($item) {
+    $courtCardIds = array_map(function ($item) {
       return $item['id'];
-    }, Players::get($courtOwnerId)->getCourtCards());
+    }, $courtCards);
 
+    $index = array_search($cardId, $courtCardIds);
 
-    $index = array_search($cardId, $court[$courtOwnerId]);
     // Previous card
-    if ($index !== 0) {
-      $adjacentCards[] = $court[$courtOwnerId][$index - 1];
+    if ($index === 0) {
+      $adjacentCards[] = $courtCardIds[count($courtCards) - 1];
     } else {
-      $currentPlayerId = $courtOwnerId;
-      while (true) {
-        $prevPlayerId = Players::getPrevId($currentPlayerId);
-        if (!isset($court[$prevPlayerId])) {
-          $court[$prevPlayerId] = array_map(function ($item) {
-            return $item['id'];
-          }, Players::get($prevPlayerId)->getCourtCards());
-        }
-        if (count($court[$prevPlayerId]) > 0) {
-          $adjacentCards[] = $court[$prevPlayerId][count($court[$prevPlayerId]) - 1];
-          break;
-        } else {
-          $currentPlayerId = $prevPlayerId;
-        }
-      }
+      $adjacentCards[] = $courtCardIds[$index - 1];
     }
 
     // Next card
-    if ($index !== count($court[$courtOwnerId]) - 1) {
-      $adjacentCards[] = $court[$courtOwnerId][$index + 1];
+    if ($index === count($courtCardIds) - 1) {
+      $adjacentCards[] = $courtCardIds[0];
     } else {
-      $currentPlayerId = $courtOwnerId;
-      while (true) {
-        $nextPlayerId = Players::getNextId($currentPlayerId);
-        if (!isset($court[$nextPlayerId])) {
-          $court[$nextPlayerId] = array_map(function ($item) {
-            return $item['id'];
-          }, Players::get($nextPlayerId)->getCourtCards());
-        }
-        if (count($court[$nextPlayerId]) > 0) {
-          $adjacentCards[] = $court[$nextPlayerId][0];
-          break;
-        } else {
-          $currentPlayerId = $nextPlayerId;
-        }
+      $adjacentCards[] = $courtCardIds[$index + 1];
+    }
+
+    // Strange Bedfellows cards
+    if ($hasStrangeBedfellowsAbility) {
+      $region = $courtCards[$index]['region'];
+      foreach ($courtCards as $index => $courtCard) {
+        if ($courtCard['region'] === $region) {
+          $adjacentCards[] = $courtCard['id'];
+        };
       }
     }
-    return $adjacentCards;
+
+    return array_unique(Utils::filter($adjacentCards, function ($adjacentCardId) use ($cardId) {
+      return $adjacentCardId !== $cardId;
+    }));
   }
 }

@@ -2633,7 +2633,10 @@ var ClientCardActionMoveState = (function () {
         });
     };
     ClientCardActionMoveState.prototype.getNextCardId = function (_a) {
-        var cardId = _a.cardId, playerId = _a.playerId;
+        var _b;
+        var cardId = _a.cardId;
+        var node = dojo.byId(cardId);
+        var playerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
         var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
         var index = cardIds.indexOf(cardId);
         if (index !== cardIds.length - 1) {
@@ -2652,7 +2655,10 @@ var ClientCardActionMoveState = (function () {
         }
     };
     ClientCardActionMoveState.prototype.getPreviousCardId = function (_a) {
-        var cardId = _a.cardId, playerId = _a.playerId;
+        var _b;
+        var cardId = _a.cardId;
+        var node = dojo.byId(cardId);
+        var playerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
         var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getAllItems();
         var index = cardIds.indexOf(cardId);
         if (index !== 0) {
@@ -2757,25 +2763,50 @@ var ClientCardActionMoveState = (function () {
             });
         });
     };
+    ClientCardActionMoveState.prototype.getSingleMoveDestinationsForSpy = function (_a) {
+        var cardId = _a.cardId;
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var destinationCards = [];
+        destinationCards.push(this.getNextCardId({ cardId: cardId }));
+        var previousCardId = this.getPreviousCardId({ cardId: cardId });
+        if (!destinationCards.includes(previousCardId)) {
+            destinationCards.push(previousCardId);
+        }
+        ;
+        var player = this.game.getCurrentPlayer();
+        if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
+            dojo.query(".pp_card_in_court.pp_".concat(cardInfo.region)).forEach(function (node) {
+                var nodeId = node.id;
+                if (!destinationCards.includes(nodeId)) {
+                    destinationCards.push(nodeId);
+                }
+            });
+        }
+        return destinationCards;
+    };
     ClientCardActionMoveState.prototype.setDestinationCardsSelectable = function (_a) {
         var _this = this;
-        var _b;
-        var pieceId = _a.pieceId, cardId = _a.cardId;
-        debug('setDestinationCardsSelectable', pieceId, cardId);
-        var node = dojo.byId(pieceId);
-        var courtCardOwnerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
-        if (!courtCardOwnerId) {
-            return;
+        var pieceId = _a.pieceId, inputCardId = _a.cardId;
+        debug('setDestinationCardsSelectable', pieceId, inputCardId);
+        var destinationCards = this.getSingleMoveDestinationsForSpy({ cardId: inputCardId });
+        var player = this.game.getCurrentPlayer();
+        if (player.hasSpecialAbility({ specialAbility: SA_WELL_CONNECTED })) {
+            __spreadArray([], destinationCards, true).forEach(function (cardId) {
+                destinationCards.push.apply(destinationCards, _this.getSingleMoveDestinationsForSpy({ cardId: cardId }));
+            });
         }
-        var nextCardId = this.getNextCardId({ cardId: cardId, playerId: courtCardOwnerId });
-        var previousCardId = this.getPreviousCardId({ cardId: cardId, playerId: courtCardOwnerId });
-        console.log('nextCardId', nextCardId);
-        [nextCardId, previousCardId]
-            .filter(function (id) { return id !== cardId; })
+        var uniqueDestinations = [];
+        destinationCards.forEach(function (cardId) {
+            if (!uniqueDestinations.includes(cardId)) {
+                uniqueDestinations.push(cardId);
+            }
+        });
+        uniqueDestinations
+            .filter(function (id) { return id !== inputCardId; })
             .forEach(function (toCardId) {
             var destinationCardNode = dojo.byId(toCardId);
             destinationCardNode.classList.add(PP_SELECTABLE);
-            _this.game._connections.push(dojo.connect(destinationCardNode, 'onclick', _this, function () { return _this.onCardClick({ toCardId: toCardId, fromCardId: cardId, pieceId: pieceId }); }));
+            _this.game._connections.push(dojo.connect(destinationCardNode, 'onclick', _this, function () { return _this.onCardClick({ toCardId: toCardId, fromCardId: inputCardId, pieceId: pieceId }); }));
         });
     };
     ClientCardActionMoveState.prototype.setDestinationRegionsSelectable = function (_a) {

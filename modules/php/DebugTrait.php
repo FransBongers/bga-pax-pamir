@@ -38,8 +38,18 @@ trait DebugTrait
 
   function test()
   {
-    $result = $this->didPlayerWin();
-    Notifications::log('winner',$result);
+    // Notifications::log('nextPlayerTable',$this->getNextPlayerTable());
+    // $players = Players::getAll()->toArray();
+    // usort($players,function ($a, $b) { return $a->getNo() - $b->getNo(); });
+    // $courtCards = [];
+    // foreach($players as $index => $player) {
+    //   $playerCourtCards = $player->getCourtCards();
+    //   array_push($courtCards,...$playerCourtCards);
+    // }
+    // Notifications::log('players',$players);
+    Notifications::log('courtCards',$this->getAllCourtCardsOrdered());
+    // $result = $this->didPlayerWin();
+    // Notifications::log('winner',$result);
     // Globals::setUsedSpecialAbilities([SA_BLACKMAIL_KANDAHAR]);
     // $this->isValidStartOfTurnSpecialAbility(SA_BLACKMAIL_KANDAHAR);
     // Notifications::log('has abilities',$this->playerHasStartOfTurnSpecialAbilities([]));

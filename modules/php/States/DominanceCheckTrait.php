@@ -35,7 +35,11 @@ trait DominanceCheckTrait
     $this->resolveDominanceCheck();
 
     // TODO: Frans: if one player leads by 4 or more end the game
-    $this->gamestate->nextState('playerActions');
+    if ($this->didPlayerWin() && false) {
+      $this->nextState('endGame');
+    } else {
+      $this->gamestate->nextState('playerActions');
+    }
   }
 
   // .##.....##.########.####.##.......####.########.##....##
@@ -256,5 +260,19 @@ trait DominanceCheckTrait
       $this->resolvePlaceArmy(KABUL,$playerId);
       $this->resolvePlaceArmy(KABUL,$playerId);
     }
+  }
+
+  function didPlayerWin()
+  {
+    $players = Players::getAll()->toArray();
+    usort($players,function ($a,$b) {
+      return $b->getScore() - $a->getScore();
+    });
+    Notifications::log('player',$players);
+    if ($players[0]->getScore() - $players[1]->getScore() >= 4) {
+      return true;
+    };
+    return false;
+    // Notifications::log('score',$players[0]->getScore());
   }
 }

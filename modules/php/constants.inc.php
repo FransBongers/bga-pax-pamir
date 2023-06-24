@@ -101,6 +101,7 @@ const SA_CITADEL_TRANSCASPIA_CARD_ID = 'card_97';
 const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
 const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms'; // card_24
 const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
+const SA_SAFE_HOUSE_CARD_IDS = ['card_41','card_72'];
 const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42
 const SA_BLACKMAIL_HERAT = 'blackmailHerat'; // card_54
 const SA_BLACKMAIL_KANDAHAR = 'blackmailKandahar'; // card_43

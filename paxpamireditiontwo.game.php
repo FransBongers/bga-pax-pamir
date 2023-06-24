@@ -69,6 +69,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\RefreshMarketTrait;
     use PaxPamir\States\ResolveEventTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
+    use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\TurnTrait;
 
     public static $instance = null;

@@ -52,6 +52,7 @@
     "src/states/PlaceSpy.ts",
     "src/states/PlayerActions.ts",
     "src/states/ResolveEvent.ts",
+    "src/states/SASafeHouse.ts",
     "src/states/Setup.ts",
     "src/states/StartOfTurnAbilities.ts",
     "src/NotificationManager/types.d.ts",

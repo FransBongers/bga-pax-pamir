@@ -18,13 +18,10 @@
 ### Event cards purchase
 - card_21 / SA_STRANGE_BEDFELLOWS
 - card_24 / SA_CIVIL_SERVICE_REFORM
-- card_41 card_72 / SA_SAFE_HOUSE
+
 - card_42 / SA_CHARISMATIC_COURTIERS -> ignore bribes
-
 - card_51 / SA_INDIAN_SUPPLIES
-
 - card_56 / SA_WELL_CONNECTED
-
 - card_78 / SA_INFRASTRUCTURE
 
 
@@ -50,6 +47,7 @@
 - Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
 - Check totals in player panels. Seem to be off for cylinders
 - do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args
+- no animation when there is a bribe of 0 rupees. Change text from 0 rupee(s) to no bribe?
 
 ### UI
 - Matching colors for selectable / selected

@@ -28,4 +28,9 @@ abstract class Locations extends \APP_DbObject
   {
     return 'events_'.$playerId;
   }
+
+  public static function spies($cardId)
+  {
+    return 'spies_'.$cardId;
+  }
 }

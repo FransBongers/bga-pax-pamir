@@ -188,7 +188,6 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
-
     public function purchaseCard()
     {
         self::setAjaxMode();
@@ -203,6 +202,14 @@ class action_paxpamireditiontwo extends APP_GameAction
         $value = self::getArg("value", AT_alphanum, true);
         $card_id = self::getArg("cardId", AT_alphanum, true);
         $result = $this->game->purchaseGift($value, $card_id);
+        self::ajaxResponse();
+    }
+
+    public function specialAbilitySafeHouse()
+    {
+        self::setAjaxMode();
+        $cardId = self::getArg("cardId", AT_alphanum, false);
+        $result = $this->game->specialAbilitySafeHouse($cardId);
         self::ajaxResponse();
     }
 

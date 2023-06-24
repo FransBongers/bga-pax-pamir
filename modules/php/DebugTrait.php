@@ -38,12 +38,13 @@ trait DebugTrait
 
   function test()
   {
+    $result = $this->didPlayerWin();
+    Notifications::log('winner',$result);
     // Globals::setUsedSpecialAbilities([SA_BLACKMAIL_KANDAHAR]);
-    $this->isValidStartOfTurnSpecialAbility(SA_BLACKMAIL_KANDAHAR);
+    // $this->isValidStartOfTurnSpecialAbility(SA_BLACKMAIL_KANDAHAR);
     // Notifications::log('has abilities',$this->playerHasStartOfTurnSpecialAbilities([]));
 
-    $state = $this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities";
-    Notifications::log('state', $state);
+    // Notifications::log('owners', $this->getSafeHouseOwners());
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)
@@ -177,6 +178,13 @@ trait DebugTrait
     $rupees = intval($rupees);
     $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
     Players::incRupees($playerId, $rupees);
+  }
+
+  function debugIncScore($score, $playerId = null)
+  {
+    $score = intval($score);
+    $player = $playerId === null ? Players::get() : Players::get(intval($playerId));
+    $player->incScore($score);
   }
 
   function debugSetFavoredSuit($suitId)

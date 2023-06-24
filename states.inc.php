@@ -68,6 +68,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CLEANUP_DISCARD_EVENTS", 12);
     define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
+    define("ST_SA_SAFE_HOUSE", 22);
     define("STATE_DOMINANCE_CHECK", 30);
     define("STATE_CARD_ACTION_BATTLE", 40);
     define("STATE_CARD_ACTION_BETRAY", 41);
@@ -170,6 +171,7 @@ $machinestates = array(
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveEvent" => STATE_RESOLVE_EVENT,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
             "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
@@ -250,6 +252,7 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
+            "endGame" => STATE_END_GAME,
             // "nextTurn" => STATE_NEXT_PLAYER,
             // "refreshMarket" => STATE_REFRESH_MARKET,
         )
@@ -402,6 +405,19 @@ $machinestates = array(
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
             "playerActions" => STATE_PLAYER_ACTIONS,
             "resolveEvent" => STATE_RESOLVE_EVENT,
+        ]
+    ],
+
+    ST_SA_SAFE_HOUSE => [
+        "name" => "specialAbilitySafeHouse",
+        "description" => clienttranslate('${actplayer} may use Safe House'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "args" => "argSpecialAbilitySafeHouse",
+        "possibleactions" => ["specialAbilitySafeHouse"],
+        "transitions" => [
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
         ]
     ],
 

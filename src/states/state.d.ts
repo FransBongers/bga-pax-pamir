@@ -59,6 +59,10 @@ interface OnEnteringPlaceSpyArgs {
   regionId: string;
 }
 
+interface OnEnteringPlaceSASafeHouseArgs {
+  cylinderId: string;
+}
+
 interface OnEnteringStartOfTurnAbilitiesArgs {
   specialAbilities: string[];
 }

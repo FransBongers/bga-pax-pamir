@@ -566,6 +566,13 @@ class PPPlayer {
       .some((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
+  getCourtCardsWithSpecialAbility({ specialAbility }: { specialAbility: string }): CourtCard[] {
+    return this.court
+      .getAllItems()
+      .map((cardId: string) => this.game.getCardInfo({ cardId }) as CourtCard)
+      .filter((card: CourtCard) => card.specialAbility === specialAbility);
+  }
+
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
   // ..##...##..##..........##.....##..##.....##.####..##.##......

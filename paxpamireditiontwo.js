@@ -1217,6 +1217,14 @@ var PPPlayer = (function () {
             .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
             .some(function (card) { return card.specialAbility === specialAbility; });
     };
+    PPPlayer.prototype.getCourtCardsWithSpecialAbility = function (_a) {
+        var _this = this;
+        var specialAbility = _a.specialAbility;
+        return this.court
+            .getAllItems()
+            .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
+            .filter(function (card) { return card.specialAbility === specialAbility; });
+    };
     PPPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId;
         var node = dojo.byId(cardId);
@@ -4156,6 +4164,72 @@ var ResolveEventState = (function () {
     ResolveEventState.prototype.onLeavingState = function () { };
     return ResolveEventState;
 }());
+var SASafeHouseState = (function () {
+    function SASafeHouseState(game) {
+        this.game = game;
+    }
+    SASafeHouseState.prototype.onEnteringState = function (props) {
+        debug('safeHouseProps', props);
+        this.updateInterfaceInitialStep();
+    };
+    SASafeHouseState.prototype.onLeavingState = function () { };
+    SASafeHouseState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        var player = this.game.getCurrentPlayer();
+        var safeHouseCards = player.getCourtCardsWithSpecialAbility({ specialAbility: SA_SAFE_HOUSE });
+        if (safeHouseCards.length === 1) {
+            this.updateInterfaceConfirmSafeHouse({ card: safeHouseCards[0], showCancelButton: false });
+        }
+        else {
+            this.game.clientUpdatePageTitle({
+                text: _('${you} may select a card to place a spy on'),
+                args: {
+                    you: '${you}',
+                },
+            });
+            safeHouseCards.forEach(function (card) {
+                var node = dojo.byId(card.id);
+                dojo.addClass(node, PP_SELECTABLE);
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSafeHouse({ card: card, showCancelButton: true }); }));
+            });
+            this.game.addDangerActionButton({
+                id: 'do_not_place_btn',
+                text: _('Do not place spy'),
+                callback: function () { return _this.game.takeAction({ action: 'specialAbilitySafeHouse', data: { cardId: null } }); },
+            });
+        }
+    };
+    SASafeHouseState.prototype.updateInterfaceConfirmSafeHouse = function (_a) {
+        var _this = this;
+        var card = _a.card, showCancelButton = _a.showCancelButton;
+        this.game.clearPossible();
+        var node = dojo.byId(card.id);
+        dojo.addClass(node, PP_SELECTED);
+        this.game.clientUpdatePageTitle({
+            text: _('Place spy on ${cardName}?'),
+            args: {
+                cardName: card.name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'specialAbilitySafeHouse', data: { cardId: card.id } }); },
+        });
+        if (showCancelButton) {
+            this.game.addCancelButton();
+        }
+        else {
+            this.game.addDangerActionButton({
+                id: 'do_not_place_btn',
+                text: _('Do not place spy'),
+                callback: function () { return _this.game.takeAction({ action: 'specialAbilitySafeHouse', data: { cardId: null } }); },
+            });
+        }
+    };
+    return SASafeHouseState;
+}());
 var SetupState = (function () {
     function SetupState(game) {
         this.game = game;
@@ -4845,6 +4919,7 @@ var PaxPamir = (function () {
             _a.playerActions = new PlayerActionsState(this),
             _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
+            _a.specialAbilitySafeHouse = new SASafeHouseState(this),
             _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),
             _a);
         this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);

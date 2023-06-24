@@ -23,7 +23,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "currentEvent" => "obj",
     "setup" => "int",
     "usedSpecialAbilities" => "obj",
-
+    "specialAbilityData" => "obj",
     // TODO: check implementation
     "resolveImpactIconsCardId" => "str",
     "resolveImpactIconsCurrentIcon" => "int"

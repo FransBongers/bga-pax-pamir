@@ -17,9 +17,6 @@
 
 ### Event cards purchase
 - card_24 / SA_CIVIL_SERVICE_REFORM
-
-- card_42 / SA_CHARISMATIC_COURTIERS -> ignore bribes
-- card_51 / SA_INDIAN_SUPPLIES
 - card_78 / SA_INFRASTRUCTURE
 
 

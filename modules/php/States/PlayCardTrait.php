@@ -208,6 +208,9 @@ trait PlayCardTrait
     if (Events::isCourtlyMannersActive(Players::get()) && $bribe === 0) {
       return null;
     };
+    if (Players::get()->hasSpecialAbility(SA_CHARISMATIC_COURTIERS)) {
+      return null;
+    }
     $rulers = Globals::getRulers();
     $region = $card['region'];
     self::dump("ruler", $rulers[$region]);

@@ -2748,7 +2748,8 @@ var ClientCardActionMoveState = (function () {
             if (coalitionArmies.length + tribesNationalism.length === 0) {
                 return;
             }
-            var hasCoalitionRoads = region.borders.some(function (borderId) {
+            var hasIndianSupplies = player.hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
+            var hasCoalitionRoads = hasIndianSupplies || region.borders.some(function (borderId) {
                 var border = _this.game.map.getBorder({ border: borderId });
                 return border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0;
             });
@@ -2816,9 +2817,10 @@ var ClientCardActionMoveState = (function () {
         this.game.map.setSelectable();
         var region = this.game.map.getRegion({ region: regionId });
         var coalitionId = this.game.localState.activePlayer.loyalty;
+        var hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
         region.borders.forEach(function (borderId) {
             var border = _this.game.map.getBorder({ border: borderId });
-            if (border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0) {
+            if (hasIndianSupplies || border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0) {
                 var toRegionId_1 = borderId.split('_').filter(function (borderRegionId) { return borderRegionId !== regionId; })[0];
                 _this.game.map
                     .getRegion({ region: toRegionId_1 })
@@ -3107,7 +3109,6 @@ var ClientPlayCardState = (function () {
             if (typeof state_1 === "object")
                 return state_1.value;
         }
-        ;
         if (this.game.getCurrentPlayer().ownsEventCard({ cardId: 'card_107' })) {
             this.game.addPrimaryActionButton({
                 id: "do_not_pay_btn",
@@ -3194,11 +3195,11 @@ var ClientPlayCardState = (function () {
     ClientPlayCardState.prototype.checkBribe = function (_a) {
         var cardId = _a.cardId;
         console.log('disregardForCustoms', this.game.activeEvents.getAllItems().includes('card_107'));
-        if (this.game.activeEvents.getAllItems().includes('card_107')) {
+        if (this.game.activeEvents.getAllItems().includes('card_107') ||
+            this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS })) {
             this.playCardNextStep({ cardId: cardId, bribe: 0 });
             return;
         }
-        ;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         var region = cardInfo.region;
         var rulerId = this.game.map.getRegion({ region: region }).getRuler();

@@ -153,6 +153,7 @@ trait ResolveEventTrait
       'logTokenRegionName' => Utils::logTokenRegionName($regionId),
       'moves' => $moves
     ]);
+    Map::checkRulerChange($regionId);
     $this->nextState("playerActions");
   }
 

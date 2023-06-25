@@ -73,7 +73,7 @@ trait PlayerActionMoveTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::move($cardId, $player);
-
+    $regionsThatNeedRulerCheck  = [];
     foreach ($moves as $pieceId => $pieceMoves) {
       $numberOfMoves = count($pieceMoves);
 
@@ -84,6 +84,7 @@ trait PlayerActionMoveTrait
       if (Utils::isBlock($pieceId)) {
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
+        array_push($regionsThatNeedRulerCheck,$source,$destination);
         $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
@@ -102,6 +103,7 @@ trait PlayerActionMoveTrait
 
         $from = 'tribes_' . $source;
         $to = 'tribes_' . $destination;
+        array_push($regionsThatNeedRulerCheck,$source,$destination);
         Notifications::log('locations', [
           'from' => $from,
           'to' => $to
@@ -145,6 +147,11 @@ trait PlayerActionMoveTrait
       };
       Tokens::move($pieceId, $to);
     }
+    $regionsThatNeedRulerCheck = array_values(array_unique($regionsThatNeedRulerCheck));
+    Notifications::log('regionsThatNeedRulerCheck',$regionsThatNeedRulerCheck);
+    foreach($regionsThatNeedRulerCheck as $index => $region) {
+      Map::checkRulerChange($region);
+    };
     $this->gamestate->nextState('playerActions');
   }
 
@@ -164,6 +171,7 @@ trait PlayerActionMoveTrait
   {
     $tokenInfo = Tokens::get($pieceId);
     $playerLoyalty = $player->getLoyalty();
+    $hasIndianSupplies = $player->hasSpecialAbility(SA_INDIAN_SUPPLIES);
     // Piece should be loyal to players coalition
     if ($playerLoyalty !== explode('_', $pieceId)[1]) {
       throw new \feException("Not allowed to move blocks from another coalition");
@@ -177,7 +185,7 @@ trait PlayerActionMoveTrait
       $border = [$move['from'], $move['to']];
       sort($border);
       $border = implode('_', $border);
-      if (!Map::borderHasRoadForCoalition($border, $playerLoyalty)) {
+      if (!($hasIndianSupplies || Map::borderHasRoadForCoalition($border, $playerLoyalty))) {
         throw new \feException("No road of same coalition on border");
       }
     }
@@ -191,6 +199,7 @@ trait PlayerActionMoveTrait
 
     $tokenInfo = Tokens::get($pieceId);
     $playerLoyalty = $player->getLoyalty();
+    $hasIndianSupplies = $player->hasSpecialAbility(SA_INDIAN_SUPPLIES);
     // Piece should be loyal to players coalition
     if (Utils::getPlayerIdForCylinderId($pieceId) !== $player->getId()) {
       throw new \feException("Not allowed to move tribe from another player");
@@ -204,7 +213,7 @@ trait PlayerActionMoveTrait
       $border = [$move['from'], $move['to']];
       sort($border);
       $border = implode('_', $border);
-      if (!Map::borderHasRoadForCoalition($border, $playerLoyalty)) {
+      if (!($hasIndianSupplies || Map::borderHasRoadForCoalition($border, $playerLoyalty))) {
         throw new \feException("No road of same coalition on border");
       }
     }

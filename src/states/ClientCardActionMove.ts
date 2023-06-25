@@ -380,7 +380,8 @@ class ClientCardActionMoveState implements State {
         return;
       }
 
-      const hasCoalitionRoads = region.borders.some((borderId: string) => {
+      const hasIndianSupplies = player.hasSpecialAbility({specialAbility: SA_INDIAN_SUPPLIES});
+      const hasCoalitionRoads = hasIndianSupplies || region.borders.some((borderId: string) => {
         const border = this.game.map.getBorder({ border: borderId });
         return border.getCoalitionRoads({ coalitionId }).length > 0;
       });
@@ -456,9 +457,11 @@ class ClientCardActionMoveState implements State {
 
     const region = this.game.map.getRegion({ region: regionId });
     const coalitionId = this.game.localState.activePlayer.loyalty;
+    const hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({specialAbility: SA_INDIAN_SUPPLIES});
+
     region.borders.forEach((borderId) => {
       const border = this.game.map.getBorder({ border: borderId });
-      if (border.getCoalitionRoads({ coalitionId }).length > 0) {
+      if (hasIndianSupplies || border.getCoalitionRoads({ coalitionId }).length > 0) {
         const toRegionId = borderId.split('_').filter((borderRegionId) => borderRegionId !== regionId)[0];
         this.game.map
           .getRegion({ region: toRegionId })

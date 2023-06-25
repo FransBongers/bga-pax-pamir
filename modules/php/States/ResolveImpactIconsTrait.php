@@ -65,64 +65,15 @@ trait ResolveImpactIconsTrait
     switch ($current_icon) {
       case ARMY:
         $this->resolvePlaceArmy($card_region);
-        // $loyalty = Players::get()->getLoyalty();
-        // $location = $this->locations['pools'][$loyalty];
-        // $army = Tokens::getTopOf($location);
-        // if ($army != null) {
-        //   $to = $this->locations['armies'][$card_region];
-        //   Tokens::move($army['id'], $this->locations['armies'][$card_region]);
-        //   $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
-        //   Notifications::moveToken($message, [
-        //     'player' => Players::get(),
-        //     'logTokenArmy' => Utils::logTokenArmy($loyalty),
-        //     'logTokenRegionName' => Utils::logTokenRegionName($card_region),
-        //     'moves' => [
-        //       [
-        //         'from' => $location,
-        //         'to' => $to,
-        //         'tokenId' => $army['id'],
-        //       ]
-        //     ]
-        //   ]);
-        // }
         break;
       case ECONOMIC_SUIT:
         $this->resolveFavoredSuitChange(ECONOMIC);
-        // $previous_suit = Globals::getFavoredSuit();
-        // if ($previous_suit == ECONOMIC) {
-        //   break;
-        // }
-        // // Update favored suit
-        // Globals::setFavoredSuit(ECONOMIC);
-        // // Suit change notification
-        // $previous_suit_id = $this->suits[$previous_suit]['id'];
-        // Notifications::changeFavoredSuit($previous_suit_id, ECONOMIC);
         break;
       case INTELLIGENCE_SUIT:
         $this->resolveFavoredSuitChange(INTELLIGENCE);
-        // $previous_suit = Globals::getFavoredSuit();
-        // if ($previous_suit == INTELLIGENCE) {
-        //   break;
-        // }
-        // // Update favored suit
-        // Globals::setFavoredSuit(INTELLIGENCE);
-
-        // // Suit change notification
-        // $previous_suit_id = $this->suits[$previous_suit]['id'];
-        // Notifications::changeFavoredSuit($previous_suit_id, INTELLIGENCE);
         break;
       case MILITARY_SUIT:
         $this->resolveFavoredSuitChange(MILITARY);
-        // $previous_suit = Globals::getFavoredSuit();
-        // if ($previous_suit == MILITARY) {
-        //   break;
-        // }
-        // // Update favored suit
-        // Globals::setFavoredSuit(MILITARY);
-
-        // // Suit change notification
-        // $previous_suit_id = $this->suits[$previous_suit]['id'];
-        // Notifications::changeFavoredSuit($previous_suit_id, MILITARY);
         break;
       case LEVERAGE:
         Players::incRupees($player_id, 2);
@@ -130,16 +81,6 @@ trait ResolveImpactIconsTrait
         break;
       case POLITICAL_SUIT:
         $this->resolveFavoredSuitChange(POLITICAL);
-        // $previous_suit = Globals::getFavoredSuit();
-        // if ($previous_suit == POLITICAL) {
-        //   break;
-        // }
-        // // Update favored suit
-        // Globals::setFavoredSuit(POLITICAL);
-
-        // // Suit change notificationx§
-        // $previous_suit_id = $this->suits[$previous_suit]['id'];
-        // Notifications::changeFavoredSuit($previous_suit_id, POLITICAL);
         break;
       case ROAD:
         $next_state = "placeRoad";

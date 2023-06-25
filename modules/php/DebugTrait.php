@@ -38,6 +38,10 @@ trait DebugTrait
 
   function test()
   {
+    Cards::move('card_110','market_0_3');
+    // $this->debugCreateArmy(KANDAHAR);
+    // $this->debugCreateArmy(KABUL);
+    // $this->debugCreateArmy(PERSIA);
     // Notifications::log('nextPlayerTable',$this->getNextPlayerTable());
     // $players = Players::getAll()->toArray();
     // usort($players,function ($a, $b) { return $a->getNo() - $b->getNo(); });
@@ -47,7 +51,7 @@ trait DebugTrait
     //   array_push($courtCards,...$playerCourtCards);
     // }
     // Notifications::log('players',$players);
-    Notifications::log('courtCards',$this->getAllCourtCardsOrdered());
+    // Notifications::log('courtCards',$this->getAllCourtCardsOrdered());
     // $result = $this->didPlayerWin();
     // Notifications::log('winner',$result);
     // Globals::setUsedSpecialAbilities([SA_BLACKMAIL_KANDAHAR]);

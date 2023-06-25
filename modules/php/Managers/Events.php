@@ -98,6 +98,7 @@ class Events
       'logTokenRegionName' => Utils::logTokenRegionName($regionId),
       'moves' => $moves
     ]);
+    Map::checkRulerChange($regionId);
   }
 
   // .##.....##.########.####.##.......####.########.##....##

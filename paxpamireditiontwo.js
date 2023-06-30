@@ -2269,18 +2269,18 @@ var ClientCardActionBetrayState = (function () {
     return ClientCardActionBetrayState;
 }());
 var ClientCardActionBuildState = (function () {
-    function ClientCardActionBuildState(game) {
+    function ClientCardActionBuildState(game, specialAbilityInfrastructure) {
         this.game = game;
+        this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
     }
-    ClientCardActionBuildState.prototype.onEnteringState = function (_a) {
-        var cardId = _a.cardId;
-        this.cardId = cardId;
+    ClientCardActionBuildState.prototype.onEnteringState = function (props) {
+        this.cardId = (props === null || props === void 0 ? void 0 : props.cardId) ? props.cardId : null;
         this.tempTokens = [];
         var player = this.game.getCurrentPlayer();
         var playerRupees = player.getRupees();
         this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
         var multiplier = this.playerHasNationBuilding ? 2 : 1;
-        this.maxNumberToPlace = Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
+        this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
@@ -2294,16 +2294,26 @@ var ClientCardActionBuildState = (function () {
             text: _('Done'),
             callback: function () { return _this.updateInterfaceConfirm(); },
         });
-        this.game.addDangerActionButton({
-            id: 'cancel_btn',
-            text: _('Cancel'),
-            callback: function () { return _this.onCancel(); },
-        });
+        dojo.addClass('done_button', 'disabled');
+        if (this.isSpecialAbilityInfrastructure) {
+            this.game.addDangerActionButton({
+                id: 'skip_btn',
+                text: _('Skip'),
+                callback: function () { return _this.game.takeAction({ action: 'skipSpecialAbility' }); },
+            });
+        }
+        else {
+            this.game.addDangerActionButton({
+                id: 'cancel_btn',
+                text: _('Cancel'),
+                callback: function () { return _this.onCancel(); },
+            });
+        }
     };
     ClientCardActionBuildState.prototype.updateInterfaceConfirm = function () {
         var _this = this;
         this.game.clearPossible();
-        var amount = Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
+        var amount = this.isSpecialAbilityInfrastructure ? 0 : Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
         this.game.clientUpdatePageTitle({
             text: _('Place x for a cost of ${amount} rupees?'),
             args: {
@@ -2348,6 +2358,7 @@ var ClientCardActionBuildState = (function () {
                 type: 'road',
             });
         }
+        dojo.removeClass('done_button', 'disabled');
         this.updatePageTitle();
     };
     ClientCardActionBuildState.prototype.onCancel = function () {
@@ -2359,8 +2370,9 @@ var ClientCardActionBuildState = (function () {
         if (this.tempTokens.length > 0) {
             this.game.takeAction({
                 action: 'build',
-                data: { cardId: this.cardId, locations: this.tempTokens.map(function (token) { return token.location; }).join(' ') },
+                data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens) },
             });
+            this.clearTemporaryTokens();
         }
     };
     ClientCardActionBuildState.prototype.clearTemporaryTokens = function () {
@@ -2404,13 +2416,23 @@ var ClientCardActionBuildState = (function () {
         });
     };
     ClientCardActionBuildState.prototype.updatePageTitle = function () {
-        this.game.clientUpdatePageTitle({
-            text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
-            args: {
-                you: '${you}',
-                number: this.maxNumberToPlace - this.tempTokens.length,
-            },
-        });
+        if (this.isSpecialAbilityInfrastructure) {
+            this.game.clientUpdatePageTitle({
+                text: _('${you} may place one additional block'),
+                args: {
+                    you: '${you}',
+                },
+            });
+        }
+        else {
+            this.game.clientUpdatePageTitle({
+                text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
+                args: {
+                    you: '${you}',
+                    number: this.maxNumberToPlace - this.tempTokens.length,
+                },
+            });
+        }
     };
     return ClientCardActionBuildState;
 }());
@@ -4446,9 +4468,6 @@ var NotificationManager = (function () {
         var _this = this;
         debug('notif_build', notif);
         var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.game.activeStates.clientCardActionBuild.clearTemporaryTokens();
-        }
         rupeesOnCards.forEach(function (item, index) {
             var row = item.row, column = item.column, rupeeId = item.rupeeId;
             _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
@@ -4931,7 +4950,7 @@ var PaxPamir = (function () {
         this.activeStates = (_a = {},
             _a[CLIENT_CARD_ACTION_BATTLE] = new ClientCardActionBattleState(this),
             _a[CLIENT_CARD_ACTION_BETRAY] = new ClientCardActionBetrayState(this),
-            _a[CLIENT_CARD_ACTION_BUILD] = new ClientCardActionBuildState(this),
+            _a[CLIENT_CARD_ACTION_BUILD] = new ClientCardActionBuildState(this, false),
             _a[CLIENT_CARD_ACTION_GIFT] = new ClientCardActionGiftState(this),
             _a[CLIENT_CARD_ACTION_MOVE] = new ClientCardActionMoveState(this),
             _a[CLIENT_CARD_ACTION_TAX] = new ClientCardActionTaxState(this),
@@ -4951,6 +4970,7 @@ var PaxPamir = (function () {
             _a.playerActions = new PlayerActionsState(this),
             _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
+            _a.specialAbilityInfrastructure = new ClientCardActionBuildState(this, true),
             _a.specialAbilitySafeHouse = new SASafeHouseState(this),
             _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),
             _a);

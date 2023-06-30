@@ -1,22 +1,24 @@
 class ClientCardActionBuildState implements State {
   private game: PaxPamirGame;
-  private cardId: string;
+  private cardId: string | null;
   private tempTokens: { location: string; type: 'army' | 'road' }[];
   private maxNumberToPlace: number;
   private playerHasNationBuilding: boolean;
+  private isSpecialAbilityInfrastructure: boolean;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: PaxPamirGame, specialAbilityInfrastructure: boolean) {
     this.game = game;
+    this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
   }
 
-  onEnteringState({ cardId }: ClientCardActionStateArgs) {
-    this.cardId = cardId;
+  onEnteringState(props: ClientCardActionStateArgs) {
+    this.cardId = props?.cardId ? props.cardId : null;
     this.tempTokens = [];
     const player = this.game.getCurrentPlayer();
     const playerRupees = player.getRupees();
     this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
     const multiplier = this.playerHasNationBuilding ? 2 : 1;
-    this.maxNumberToPlace = Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
+    this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
     this.updateInterfaceInitialStep();
   }
 
@@ -50,16 +52,25 @@ class ClientCardActionBuildState implements State {
       text: _('Done'),
       callback: () => this.updateInterfaceConfirm(),
     });
-    this.game.addDangerActionButton({
-      id: 'cancel_btn',
-      text: _('Cancel'),
-      callback: () => this.onCancel(),
-    });
+    dojo.addClass('done_button', 'disabled');
+    if (this.isSpecialAbilityInfrastructure) {
+      this.game.addDangerActionButton({
+        id: 'skip_btn',
+        text: _('Skip'),
+        callback: () => this.game.takeAction({ action: 'skipSpecialAbility' }),
+      });
+    } else {
+      this.game.addDangerActionButton({
+        id: 'cancel_btn',
+        text: _('Cancel'),
+        callback: () => this.onCancel(),
+      });
+    }
   }
 
   private updateInterfaceConfirm() {
     this.game.clearPossible();
-    const amount = Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
+    const amount = this.isSpecialAbilityInfrastructure ? 0 :  Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
     this.game.clientUpdatePageTitle({
       text: _('Place x for a cost of ${amount} rupees?'),
       args: {
@@ -120,6 +131,7 @@ class ClientCardActionBuildState implements State {
         type: 'road',
       });
     }
+    dojo.removeClass('done_button', 'disabled');
     this.updatePageTitle();
   }
 
@@ -133,8 +145,9 @@ class ClientCardActionBuildState implements State {
     if (this.tempTokens.length > 0) {
       this.game.takeAction({
         action: 'build',
-        data: { cardId: this.cardId, locations: this.tempTokens.map((token) => token.location).join(' ') },
+        data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens) },
       });
+      this.clearTemporaryTokens();
     }
   }
 
@@ -193,12 +206,23 @@ class ClientCardActionBuildState implements State {
   }
 
   private updatePageTitle() {
-    this.game.clientUpdatePageTitle({
-      text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
-      args: {
-        you: '${you}',
-        number: this.maxNumberToPlace - this.tempTokens.length,
-      },
-    });
+    if (this.isSpecialAbilityInfrastructure) {
+      this.game.clientUpdatePageTitle({
+        text: _('${you} may place one additional block'),
+        args: {
+          you: '${you}',
+        },
+      });
+    } else {
+      this.game.clientUpdatePageTitle({
+        text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
+        args: {
+          you: '${you}',
+          number: this.maxNumberToPlace - this.tempTokens.length,
+        },
+      });
+    }
+
+
   }
 }

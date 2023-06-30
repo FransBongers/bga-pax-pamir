@@ -136,6 +136,14 @@ class Notifications
     ));
   }
 
+  public static function buildInfrastructure($player)
+  {
+    self::notifyAll("build", clienttranslate('${player_name} uses Infrastructure special ability'), [
+      'player' => $player,
+      'rupeesOnCards' => [],
+    ]);
+  }
+
   public static function changeFavoredSuit($previousSuit, $newSuit, $customMessage = null)
   {
     $message = clienttranslate('${player_name} changes favored suit to ${logTokenFavoredSuit}');

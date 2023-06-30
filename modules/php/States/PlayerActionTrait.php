@@ -112,30 +112,60 @@ trait PlayerActionTrait
    * cardId: card with build action
    * locations: locations to build: roads on borders, armies in regions
    */
-  function build($cardId, $locations)
+  function build($inputLocations, $cardId = null)
   {
-    $locations = explode(' ', trim($locations));
-
     self::checkAction('build');
+    Notifications::log('cardId',$cardId);
+    Notifications::log('input',$inputLocations);
+    $isInfrastructureAbilityState = $this->gamestate->state(true, false, true)['name'] === "specialAbilityInfrastructure";
+    Notifications::log('isInfrastructureAbilityState',$isInfrastructureAbilityState);
+    // return;
+    $locations = [];
+    foreach($inputLocations as $index => $location) {
+      $locations[] = $location['location'];
+    }
+
+    
     Notifications::log('build', $locations);
-    $cardInfo = Cards::get($cardId);
-    $this->isValidCardAction($cardInfo, BUILD);
+    $cardInfo = $cardId !== null ? Cards::get($cardId) : null;
+    if (!$isInfrastructureAbilityState) {
+      $this->isValidCardAction($cardInfo, BUILD);
+    }
+
+    $player = Players::get();
+    if ($isInfrastructureAbilityState && !$player->hasSpecialAbility(SA_INFRASTRUCTURE)) {
+      throw new \feException("Player does not have Infrastructure special ability");
+    }
 
     $nationBuildingMultiplier = Events::isNationBuildingActive(Players::get()) ? 2 : 1;
 
     $numberOfTokens = count($locations);
     Notifications::log('numberOfTokens', $numberOfTokens);
+
+    $maxNumberOfTokens = $isInfrastructureAbilityState ? 1 : 3 * $nationBuildingMultiplier;
     // max number to build is 3
-    if ($numberOfTokens > 3 * $nationBuildingMultiplier) {
-      throw new \feException("Too many tokens selected");
+    if ($numberOfTokens > 3 * $maxNumberOfTokens) {
+      throw new \feException("Too many blocks selected");
     };
 
-    $cost = ceil($numberOfTokens / $nationBuildingMultiplier)  * 2;
-    $player = Players::get();
+    if ($numberOfTokens === 0) {
+      throw new \feException("At least one block needs to be selected");
+    };
+
+    $cost = $isInfrastructureAbilityState ? 0 : ceil($numberOfTokens / $nationBuildingMultiplier)  * 2;
+    
     // player should have rupees
-    if ($cost > $player->getRupees()) {
+    if (!$isInfrastructureAbilityState && $cost > $player->getRupees()) {
       throw new \feException("Player does not have enough rupees to pay for action");
     }
+
+    // $hasInfrastructureAbility = $player->hasSpecialAbility(SA_INFRASTRUCTURE);
+    // if (!$hasInfrastructureAbility && count($infrastructureLocations) > 0) {
+    //   throw new \feException("Player does not have Infrastructure special ability");
+    // }
+    // if (count($infrastructureLocations) > 1) {
+    //   throw new \feException("Only allowed to place one additional block with Infrastructure special ability");
+    // }
 
     $borders = [];
     $regions = [];
@@ -161,15 +191,18 @@ trait PlayerActionTrait
       'borders' => $borders,
       'regions' => $regions
     ]);
-
-    Cards::setUsed($cardId, 1);
-
-    if (!$this->isCardFavoredSuit($cardInfo)) {
-      Globals::incRemainingActions(-1);
+    if (!$isInfrastructureAbilityState) {
+      Cards::setUsed($cardId, 1);
+      if (!$this->isCardFavoredSuit($cardInfo)) {
+        Globals::incRemainingActions(-1);
+      }
+      $rupeesOnCards = $this->payActionCosts($cost);
+      Players::incRupees($playerId, -$cost);
+      Notifications::build($cardId, $player, $rupeesOnCards);
+    } else {
+      Notifications::buildInfrastructure($player);
     }
-    $rupeesOnCards = $this->payActionCosts($cost);
-    Players::incRupees($playerId, -$cost);
-    Notifications::build($cardId, $player, $rupeesOnCards);
+
     // Move tokens
     foreach ($regions as $index => $regionId) {
       $this->resolvePlaceArmy($regionId);
@@ -178,7 +211,13 @@ trait PlayerActionTrait
       $this->resolvePlaceRoad($borderId);
     }
 
-    $this->gamestate->nextState('playerActions');
+    $hasInfrastructureAbility = $player->hasSpecialAbility(SA_INFRASTRUCTURE);
+    Notifications::log('isInfrastructureAbilityState',$isInfrastructureAbilityState);
+    if ($hasInfrastructureAbility && !$isInfrastructureAbilityState) {
+      $this->nextState('specialAbilityInfrastructure');
+    } else {
+      $this->gamestate->nextState('playerActions');
+    }
   }
 
   /**
@@ -320,6 +359,16 @@ trait PlayerActionTrait
     );
 
     $this->gamestate->nextState('playerActions');
+  }
+
+  function skipSpecialAbility()
+  {
+    self::checkAction('skipSpecialAbility');
+
+    // Right now only used for infrastructure. Might need to check for state 
+    // when used for multiple abilities
+    // TODO: check use for start of turn abilities instead of pass function
+    $this->nextState('playerActions');
   }
 
   function tax($cardId, $market, $players)

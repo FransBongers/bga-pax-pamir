@@ -32,12 +32,7 @@ interface NotifPayBribeArgs {
 interface NotifBuildArgs {
   player_name: string;
   playerId: number;
-  numberOfRupees: number;
-  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
-  logTokenCardName: string;
-  logTokenLargeCard: string;
-  logTokenRupee: string;
-  
+  rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
 interface NotifChangeFavoredSuitArgs {

@@ -65,6 +65,7 @@ class PaxPamir implements PaxPamirGame {
     playerActions: PlayerActionsState;
     resolveEvent: ResolveEventState;
     setup: SetupState;
+    specialAbilityInfrastructure: ClientCardActionBuildState;
     specialAbilitySafeHouse: SASafeHouseState;
     startOfTurnAbilities: StartOfTurnAbilitiesState;
   };
@@ -99,7 +100,7 @@ class PaxPamir implements PaxPamirGame {
     this.activeStates = {
       [CLIENT_CARD_ACTION_BATTLE]: new ClientCardActionBattleState(this),
       [CLIENT_CARD_ACTION_BETRAY]: new ClientCardActionBetrayState(this),
-      [CLIENT_CARD_ACTION_BUILD]: new ClientCardActionBuildState(this),
+      [CLIENT_CARD_ACTION_BUILD]: new ClientCardActionBuildState(this,false),
       [CLIENT_CARD_ACTION_GIFT]: new ClientCardActionGiftState(this),
       [CLIENT_CARD_ACTION_MOVE]: new ClientCardActionMoveState(this),
       [CLIENT_CARD_ACTION_TAX]: new ClientCardActionTaxState(this),
@@ -119,6 +120,7 @@ class PaxPamir implements PaxPamirGame {
       playerActions: new PlayerActionsState(this),
       resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
+      specialAbilityInfrastructure: new ClientCardActionBuildState(this,true),
       specialAbilitySafeHouse: new SASafeHouseState(this),
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
     };

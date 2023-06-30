@@ -92,9 +92,10 @@ class action_paxpamireditiontwo extends APP_GameAction
     public function build()
     {
         self::setAjaxMode();
-        $locations = self::getArg("locations", AT_alphanum, true);
-        $cardId = self::getArg("cardId", AT_alphanum, true);
-        $result = $this->game->build($cardId, $locations);
+        $locations = self::getArg("locations", AT_json, true);
+        $cardId = self::getArg("cardId", AT_alphanum, false);
+        Utils::validateJSonAlphaNum($locations, 'locations');
+        $result = $this->game->build($locations, $cardId);
         self::ajaxResponse();
     }
 
@@ -152,7 +153,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
         $result = $this->game->pass($specialAbility);
         self::ajaxResponse();
-    }
+    }    
 
     public function restart()
     {
@@ -202,6 +203,13 @@ class action_paxpamireditiontwo extends APP_GameAction
         $value = self::getArg("value", AT_alphanum, true);
         $card_id = self::getArg("cardId", AT_alphanum, true);
         $result = $this->game->purchaseGift($value, $card_id);
+        self::ajaxResponse();
+    }
+
+    public function skipSpecialAbility()
+    {
+        self::setAjaxMode();
+        $result = $this->game->skipSpecialAbility();
         self::ajaxResponse();
     }
 

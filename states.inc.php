@@ -69,6 +69,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("ST_SA_SAFE_HOUSE", 22);
+    define("ST_SA_INFRASTRUCTURE", 23);
     define("STATE_DOMINANCE_CHECK", 30);
     define("STATE_CARD_ACTION_BATTLE", 40);
     define("STATE_CARD_ACTION_BETRAY", 41);
@@ -171,6 +172,7 @@ $machinestates = array(
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveEvent" => STATE_RESOLVE_EVENT,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
@@ -418,6 +420,17 @@ $machinestates = array(
         "transitions" => [
             "playerActions" => STATE_PLAYER_ACTIONS,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
+        ]
+    ],
+
+    ST_SA_INFRASTRUCTURE => [
+        "name" => "specialAbilityInfrastructure",
+        "description" => clienttranslate('${actplayer} may place one additional block with Infrastructure'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["build","skipSpecialAbility"],
+        "transitions" => [
+            "playerActions" => STATE_PLAYER_ACTIONS,
         ]
     ],
 

@@ -139,9 +139,7 @@ class NotificationManager {
   notif_build(notif: Notif<NotifBuildArgs>) {
     debug('notif_build', notif);
     const { playerId, rupeesOnCards } = notif.args;
-    if (this.game.framework().isCurrentPlayerActive()) {
-      this.game.activeStates.clientCardActionBuild.clearTemporaryTokens();
-    }
+
     // Place paid rupees on market cards
     rupeesOnCards.forEach((item, index) => {
       const { row, column, rupeeId } = item;

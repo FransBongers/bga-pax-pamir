@@ -160,6 +160,9 @@ interface PaxPamirGame extends Game {
     placeSpy: PlaceSpyState;
     playerActions: PlayerActionsState;
     setup: SetupState;
+    specialAbilityInfrastructure: ClientCardActionBuildState;
+    specialAbilitySafeHouse: SASafeHouseState;
+    startOfTurnAbilities: StartOfTurnAbilitiesState;
   };
   gamedatas: PaxPamirGamedatas;
   map: PPMap;

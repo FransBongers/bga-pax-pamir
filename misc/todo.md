@@ -3,7 +3,6 @@
 ## Implementation
 
 ### General
-- Event cards
 - Special abilities
 - Loyualty change (discard everything including prizes / gifts)
 - Select tokens when supply is empty
@@ -15,13 +14,8 @@
 ### Card Actions
 - Pay for hostage cards
 
-### Event cards purchase
-- card_24 / SA_CIVIL_SERVICE_REFORM
-- card_78 / SA_INFRASTRUCTURE
-
-
-
 ### Card abilities
+- card_24 / SA_CIVIL_SERVICE_REFORM
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market

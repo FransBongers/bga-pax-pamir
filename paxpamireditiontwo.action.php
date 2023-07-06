@@ -39,13 +39,6 @@ class action_paxpamireditiontwo extends APP_GameAction
     }
 
     // TODO: defines your action entry points there
-    public function acceptBribe()
-    {
-        self::setAjaxMode();
-        $result = $this->game->acceptBribe();
-        self::ajaxResponse();
-    }
-
     public function declineBribe()
     {
         self::setAjaxMode();
@@ -53,10 +46,10 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
-    public function proposeBribeAmount() {
+    public function negotiateBribe() {
         self::setAjaxMode();
         $amount = self::getArg("amount", AT_posint, true);
-        $result = $this->game->proposeBribeAmount($amount);
+        $result = $this->game->negotiateBribe($amount);
         self::ajaxResponse();
     }
 

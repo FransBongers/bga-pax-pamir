@@ -58,6 +58,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_START_OF_TURN_ABILITIES",14);
     define("STATE_PLAYER_ACTIONS", 4);
     define("STATE_NEGOTIATE_BRIBE", 5);
+    define("STATE_RESOLVE_ACCEPTED_BRIBE", 25);
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
     define("STATE_DISCARD_COURT", 7);
     define("STATE_DISCARD_HAND", 8);
@@ -77,7 +78,6 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CARD_ACTION_MOVE", 44);
     define("STATE_CARD_ACTION_TAX", 45);
     define("STATE_NEXT_PLAYER", 50);
-    define("STATE_NEXT_PLAYER_NEGOTIATE_BRIBE", 51);
     define("STATE_CHANGE_LOYALTY", 52);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
@@ -123,18 +123,6 @@ $machinestates = array(
         )
     ),
 
-    STATE_NEXT_PLAYER_NEGOTIATE_BRIBE => array(
-        "name" => "nextPlayerNegotiateBribe",
-        "type" => "game",
-        "action" => "stNextPlayerNegotiateBribe",
-        "updateGameProgression" => true,
-        "transitions" => array(
-            "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-        )
-    ),
-
     STATE_PREPARE_TURN => array(
         "name" => "prepareTurn",
         "type" => "game",
@@ -174,7 +162,7 @@ $machinestates = array(
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
-            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
+            "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
             "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
             "cardActionBuild" => STATE_CARD_ACTION_BUILD,
@@ -190,9 +178,22 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argNegotiateBribe",
-        "possibleactions" => array("acceptBribe", "declineBribe", "proposeBribeAmount"),
+        "possibleactions" => array("declineBribe", "negotiateBribe"),
         "transitions" => array(
-            "nextPlayerNegotiateBribe" => STATE_NEXT_PLAYER_NEGOTIATE_BRIBE,
+            "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "resolveAcceptedBribe" => STATE_RESOLVE_ACCEPTED_BRIBE,
+        )
+    ),
+
+    STATE_RESOLVE_ACCEPTED_BRIBE => array(
+        "name" => "resolveAcceptedBribe",
+        "type" => "game",
+        "action" => "stResolveAcceptedBribe",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 

@@ -58,6 +58,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DominanceCheckTrait;
+    use PaxPamir\States\NegotiateBribeTrait;
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;

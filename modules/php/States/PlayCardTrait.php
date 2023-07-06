@@ -16,54 +16,6 @@ use PaxPamir\Managers\Tokens;
 
 trait PlayCardTrait
 {
-  // ....###....########...######....######.
-  // ...##.##...##.....##.##....##..##....##
-  // ..##...##..##.....##.##........##......
-  // .##.....##.########..##...####..######.
-  // .#########.##...##...##....##........##
-  // .##.....##.##....##..##....##..##....##
-  // .##.....##.##.....##..######....######.
-
-  function argNegotiateBribe()
-  {
-    $bribeState = Globals::getBribe();
-    unset($bribeState['next']);
-    unset($bribeState['side']);
-    $bribeState['active'] = self::getActivePlayerId();
-    return $bribeState;
-  }
-
-  // ..######......###....##.....##.########.....######..########....###....########.########
-  // .##....##....##.##...###...###.##..........##....##....##......##.##......##....##......
-  // .##.........##...##..####.####.##..........##..........##.....##...##.....##....##......
-  // .##...####.##.....##.##.###.##.######.......######.....##....##.....##....##....######..
-  // .##....##..#########.##.....##.##................##....##....#########....##....##......
-  // .##....##..##.....##.##.....##.##..........##....##....##....##.....##....##....##......
-  // ..######...##.....##.##.....##.########.....######.....##....##.....##....##....########
-
-  function stNextPlayerNegotiateBribe()
-  {
-    $bribeState = Globals::getBribe();
-    if ($bribeState['status'] == BRIBE_ACCEPTED) {
-      $this->gamestate->changeActivePlayer($bribeState['next']);
-      $playerId = $bribeState['briber'];
-      $cardId = $bribeState['cardId'];
-      $side = $bribeState['side'];
-      Globals::setBribeClearLogs(true);
-      $this->resolvePlayCard($playerId, $cardId, $side);
-    } else if ($bribeState['status'] == BRIBE_DECLINED) {
-      $this->gamestate->changeActivePlayer($bribeState['next']);
-      Log::clearAll();
-      $this->gamestate->nextState('playerActions');
-      return;
-    } else {
-      $this->giveExtraTime($bribeState['next']);
-      $this->gamestate->changeActivePlayer($bribeState['next']);
-      Log::clearAll();
-      $this->gamestate->nextState('negotiateBribe');
-    }
-  }
-
   //  .########..##..........###....##....##.########.########.
   //  .##.....##.##.........##.##....##..##..##.......##.....##
   //  .##.....##.##........##...##....####...##.......##.....##
@@ -104,16 +56,24 @@ trait PlayCardTrait
       $ruler = $checkBribeResult['ruler'];
       $maxAmount = $checkBribeResult['amount'];
       Globals::setBribe([
-        'briber' => intval($playerId),
-        'cardId' => $cardId,
-        'side' => $side,
+        'briber' => [
+          'playerId' => intval($playerId),
+          'currentAmount' => $bribe,
+        ],
+        'bribee' => [
+          'playerId' => $ruler,
+        ],
+        'ifAccepted' => [
+          'action' => 'playCard',
+          'cardId' => $cardId,
+          'side' => $side,
+        ],
         'maxAmount' => $maxAmount,
-        'currentAmount' => $bribe,
-        'declined' => [],
-        'possible' => array_values(array_diff(range(0, $maxAmount), [$bribe])),
-        'ruler' => $ruler,
-        'next' => $ruler,
-        'status' => BRIBE_UNRESOLVED,
+        
+        // 'declined' => [],
+        // 'possible' => array_values(array_diff(range(0, $maxAmount), [$bribe])),
+        // 'next' => $ruler,
+        // 'status' => BRIBE_UNRESOLVED,
       ]);
       $message = clienttranslate('${player_name} wants to play ${cardName} and offers bribe of ${bribeAmount} rupee(s)${logTokenNewLine}${logTokenLargeCard}');
 
@@ -125,7 +85,7 @@ trait PlayCardTrait
         'logTokenNewLine' => Utils::logTokenNewLine(),
       ));
 
-      $this->gamestate->nextState('nextPlayerNegotiateBribe');
+      $this->nextState('negotiateBribe',$ruler);
       return;
     } else if ($checkBribeResult !== null && $bribe > 0) {
       $this->payBribe($playerId, $checkBribeResult['ruler'], $bribe);
@@ -133,63 +93,6 @@ trait PlayCardTrait
 
     // TODO create separate state to resolve play card. First handle potential loyalty change.
     $this->resolvePlayCard($playerId, $cardId, $side);
-  }
-
-  function payBribe($briberId, $rulerId, $rupees)
-  {
-    Players::incRupees($rulerId, $rupees);
-    Players::incRupees($briberId, -$rupees);
-    Notifications::payBribe($briberId, $rulerId, $rupees);
-  }
-
-
-  function acceptBribe()
-  {
-    self::checkAction('acceptBribe');
-    $bribeState = Globals::getBribe();
-    $rulerId = $bribeState['ruler'];
-    $briberId = $bribeState['briber'];
-    $rupees = $bribeState['currentAmount'];
-    if (Players::get($briberId)->getRupees() < $rupees) {
-      throw new \feException("Not enough rupees available");
-    }
-    $bribeState['status'] = BRIBE_ACCEPTED;
-    $bribeState['next'] = $bribeState['briber'];
-    Globals::setBribe($bribeState);
-
-    Notifications::acceptBribe($briberId, $rulerId, $rupees);
-    Notifications::payBribe($briberId, $rulerId, $rupees);
-
-    $this->gamestate->nextState('nextPlayerNegotiateBribe');
-  }
-
-  function declineBribe()
-  {
-    self::checkAction('declineBribe');
-
-    $bribeState = Globals::getBribe();
-    $bribeState['status'] = BRIBE_DECLINED;
-    $bribeState['next'] = $bribeState['briber'];
-    Globals::setBribe($bribeState);
-    Notifications::declineBribe($bribeState['currentAmount']);
-
-    $this->gamestate->nextState('nextPlayerNegotiateBribe');
-  }
-
-  function proposeBribeAmount($amount)
-  {
-    self::checkAction('proposeBribeAmount');
-
-    $bribeState = Globals::getBribe();
-    $isRuler = $bribeState['ruler'] == $bribeState['next'];
-    $declinedAmount = $bribeState['currentAmount'];
-    $bribeState['possible'] = array_values(array_diff($bribeState['possible'], [$declinedAmount]));
-    $bribeState['declined'][] = $declinedAmount;
-    $bribeState['currentAmount'] = intval($amount);
-    $bribeState['next'] = $isRuler ? $bribeState['briber'] : $bribeState['ruler'];
-    Globals::setBribe($bribeState);
-    Notifications::proposeBribeAmount($bribeState['currentAmount'], $isRuler);
-    $this->gamestate->nextState('nextPlayerNegotiateBribe');
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

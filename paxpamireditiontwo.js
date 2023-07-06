@@ -3841,53 +3841,76 @@ var NegotiateBribeState = (function () {
         this.game = game;
     }
     NegotiateBribeState.prototype.onEnteringState = function (_a) {
-        var currentAmount = _a.currentAmount, ruler = _a.ruler, possible = _a.possible;
-        this.updateInterfaceInitialStep({ amount: currentAmount, ruler: ruler, possible: possible });
+        var bribee = _a.bribee, briber = _a.briber, maxAmount = _a.maxAmount;
+        this.isBribee = this.game.getPlayerId() === bribee.playerId;
+        this.bribee = bribee;
+        this.briber = briber;
+        this.maxAmount = maxAmount;
+        this.updateInterfaceInitialStep();
     };
     NegotiateBribeState.prototype.onLeavingState = function () { };
-    NegotiateBribeState.prototype.updateInterfaceInitialStep = function (_a) {
+    NegotiateBribeState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
-        var amount = _a.amount, possible = _a.possible, ruler = _a.ruler;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
             text: '${you} must accept or decline bribe of ${amount} rupee(s)',
             args: {
-                amount: amount,
+                amount: this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount,
                 you: '${you}',
             },
         });
-        var isRuler = ruler === this.game.getPlayerId();
-        if (isRuler || (!isRuler && amount <= this.game.localState.activePlayer.rupees)) {
-            this.game.addPrimaryActionButton({
-                id: 'accept_btn',
-                text: _('Accept'),
-                callback: function () { return _this.game.takeAction({ action: 'acceptBribe' }); },
-            });
-        }
-        possible.reverse().forEach(function (value) {
-            if (value == amount || (isRuler && value < amount) || (!isRuler && value > _this.game.localState.activePlayer.rupees)) {
-                return;
-            }
-            _this.game.addPrimaryActionButton({
-                id: "ask_partial_waive_".concat(value, "_btn"),
-                text: isRuler
-                    ? dojo.string.substitute(_("Demand ".concat(value, " rupee(s)")), { value: value })
-                    : dojo.string.substitute(_("Offer ".concat(value, " rupee(s)")), { value: value }),
-                callback: function () {
-                    return _this.game.takeAction({
-                        action: 'proposeBribeAmount',
-                        data: {
-                            amount: value,
-                        },
-                    });
-                },
-            });
-        });
+        this.addBribeButtons();
         this.game.addSecondaryActionButton({
             id: 'decline_btn',
             text: _('Decline'),
             callback: function () { return _this.game.takeAction({ action: 'declineBribe' }); },
         });
+    };
+    NegotiateBribeState.prototype.addBribeButtons = function () {
+        var _this = this;
+        var currentOffer = this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount;
+        if (this.isBribee || (!this.isBribee && currentOffer <= this.game.localState.activePlayer.rupees)) {
+            this.game.addPrimaryActionButton({
+                id: 'accept_btn',
+                text: _('Accept'),
+                callback: function () { return _this.game.takeAction({ action: 'negotiateBribe', data: {
+                        amount: currentOffer,
+                    }, }); },
+            });
+        }
+        var values = Array.from({ length: this.maxAmount });
+        console.log('maxAmount', this.maxAmount);
+        var _loop_2 = function (i) {
+            console.log('for loop i:', i);
+            var isLowerThanOfferedByBriber = i < this_2.briber.currentAmount;
+            console.log('isLowerThanOfferedByBriber', isLowerThanOfferedByBriber);
+            var isHigherThanDemandedByBribee = i > (this_2.bribee.currentAmount || this_2.maxAmount);
+            console.log('isHigherThanDemandedByBribee', isHigherThanDemandedByBribee);
+            var isCurrentOffer = i === currentOffer;
+            console.log('isCurrentOffer', isCurrentOffer);
+            if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer) {
+                return "continue";
+            }
+            this_2.game.addPrimaryActionButton({
+                id: "ask_partial_waive_".concat(i, "_btn"),
+                text: this_2.isBribee
+                    ? dojo.string.substitute(_("Demand ".concat(i, " rupee(s)")), { i: i })
+                    : dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'negotiateBribe',
+                        data: {
+                            amount: i,
+                        },
+                    });
+                },
+            });
+        };
+        var this_2 = this;
+        for (var i = this.maxAmount; i >= 0; i--) {
+            _loop_2(i);
+        }
+        console.log('values', values);
     };
     return NegotiateBribeState;
 }());

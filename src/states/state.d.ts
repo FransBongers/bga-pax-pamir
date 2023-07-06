@@ -33,14 +33,20 @@ interface EnteringDiscardLeverageArgs {
 }
 
 interface OnEnteringNegotiateBribeArgs {
-  active: number;
-  briber: number;
-  cardId: string;
-  currentAmount: number;
-  declined: number[];
-  possible: number[];
+  bribee: {
+    currentAmount?: number;
+    playerId: number;
+  };
+  briber: {
+    currentAmount: number;
+    playerId: number;
+  };
+  ifAccepted: {
+    action: 'playCard';
+    cardId: string;
+    side: 'left' | 'right';
+  };
   maxAmount: number;
-  ruler: number;
 }
 
 interface OnEnteringPlaceRoadArgs {

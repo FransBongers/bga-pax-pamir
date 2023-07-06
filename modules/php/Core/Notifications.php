@@ -416,11 +416,11 @@ class Notifications
     ));
   }
 
-  public static function acceptBribe($briberId, $rulerId, $rupees)
+  public static function acceptBribe($player, $amount)
   {
     self::notifyAll("acceptBribe", clienttranslate('${player_name} accepts bribe of ${rupees} rupee(s)'), array(
-      'player' => Players::get(),
-      'rupees' => $rupees,
+      'player' => $player,
+      'rupees' => $amount,
     ));
   }
 
@@ -482,12 +482,12 @@ class Notifications
     ));
   }
 
-  public static function proposeBribeAmount($rupees, $isRuler)
+  public static function negotiateBribe($player, $amount, $isBribee)
   {
-    $msg = $isRuler ? clienttranslate('${player_name} demands bribe of ${rupees} rupee(s)') : clienttranslate('${player_name} offers bribe of ${rupees} rupee(s)');
+    $msg = $isBribee ? clienttranslate('${player_name} demands bribe of ${rupees} rupee(s)') : clienttranslate('${player_name} offers bribe of ${rupees} rupee(s)');
     self::notifyAll("proposeBribeAmount", $msg, array(
-      'player' => Players::get(),
-      'rupees' => $rupees,
+      'player' => $player,
+      'rupees' => $amount,
     ));
   }
 
@@ -500,7 +500,7 @@ class Notifications
 
   public static function payBribe($briberId, $rulerId, $rupees)
   {
-    self::notifyAll("payBribe", clienttranslate('${player_name} pays bribe of ${rupees} rupee(s) to ${logTokenPlayerName}'), array(
+    self::notifyAll("payBribe", clienttranslate('${player_name} pays ${rupees} rupee(s) to ${logTokenPlayerName}'), array(
       'player' => Players::get($briberId),
       'rulerId' => $rulerId,
       'briberId' => $briberId,

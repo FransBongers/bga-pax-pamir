@@ -3209,8 +3209,8 @@ var ClientPlayCardState = (function () {
             id: 'cancel_btn',
             text: _('Cancel'),
             callback: function () {
-                _this.game.onCancel();
                 _this.removeSideSelectable();
+                _this.game.onCancel();
             },
         });
     };

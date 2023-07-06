@@ -155,8 +155,8 @@ class ClientPlayCardState implements State {
       id: 'cancel_btn',
       text: _('Cancel'),
       callback: () => {
-        this.game.onCancel();
         this.removeSideSelectable();
+        this.game.onCancel();
       },
     });
   }

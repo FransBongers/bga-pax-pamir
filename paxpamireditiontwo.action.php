@@ -1,6 +1,7 @@
 <?php
 
 use PaxPamir\Helpers\Utils;
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -39,6 +40,24 @@ class action_paxpamireditiontwo extends APP_GameAction
     }
 
     // TODO: defines your action entry points there
+    public function startBribeNegotiation()
+    {
+        self::setAjaxMode();
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $amount = self::getArg("amount", AT_alphanum, true);
+        $action = self::getArg("useFor", AT_alphanum, true);
+
+        $result = $this->game->startBribeNegotiation($cardId, $amount, $action);
+        self::ajaxResponse();
+    }
+
+    public function cancelBribe()
+    {
+        self::setAjaxMode();
+        $result = $this->game->cancelBribe();
+        self::ajaxResponse();
+    }
+
     public function declineBribe()
     {
         self::setAjaxMode();
@@ -46,7 +65,8 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
-    public function negotiateBribe() {
+    public function negotiateBribe()
+    {
         self::setAjaxMode();
         $amount = self::getArg("amount", AT_posint, true);
         $result = $this->game->negotiateBribe($amount);
@@ -59,6 +79,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         $removedPiecesString = self::getArg("removedPieces", AT_alphanum, true);
         $location = self::getArg("location", AT_alphanum, true);
         $cardId = self::getArg("cardId", AT_alphanum, true);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
 
         $removedPiecesString = trim($removedPiecesString);
 
@@ -67,7 +88,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         else
             $removedPieces = explode(' ', $removedPiecesString);
 
-        $result = $this->game->battle($cardId, $location, $removedPieces);
+        $result = $this->game->battle($cardId, $location, $removedPieces, $bribeAmount);
         self::ajaxResponse();
     }
 
@@ -77,8 +98,9 @@ class action_paxpamireditiontwo extends APP_GameAction
         $acceptPrize = self::getArg("acceptPrize", AT_bool, true);
         $cardId = self::getArg("cardId", AT_alphanum, true);
         $betrayedCardId = self::getArg("betrayedCardId", AT_alphanum, true);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
 
-        $result = $this->game->betray($cardId, $betrayedCardId, $acceptPrize);
+        $result = $this->game->betray($cardId, $betrayedCardId, $acceptPrize,$bribeAmount);
         self::ajaxResponse();
     }
 
@@ -87,8 +109,9 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::setAjaxMode();
         $locations = self::getArg("locations", AT_json, true);
         $cardId = self::getArg("cardId", AT_alphanum, false);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
         Utils::validateJSonAlphaNum($locations, 'locations');
-        $result = $this->game->build($locations, $cardId);
+        $result = $this->game->build($locations, $cardId,$bribeAmount);
         self::ajaxResponse();
     }
 
@@ -132,11 +155,12 @@ class action_paxpamireditiontwo extends APP_GameAction
     {
         self::setAjaxMode();
         $moves = self::getArg("moves", AT_json, true);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
         // $args = self::getArg('actionArgs', AT_json, true);
         Utils::validateJSonAlphaNum($moves, 'moves');
         // $this->validateJSonAlphaNum($args, 'actionArgs');
         $cardId = self::getArg("cardId", AT_alphanum, true);
-        $result = $this->game->move($cardId, $moves);
+        $result = $this->game->move($cardId, $moves,$bribeAmount);
         self::ajaxResponse();
     }
 
@@ -146,7 +170,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
         $result = $this->game->pass($specialAbility);
         self::ajaxResponse();
-    }    
+    }
 
     public function restart()
     {
@@ -168,7 +192,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::setAjaxMode();
         $cardId = self::getArg("cardId", AT_alphanum, true);
         $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
-        $result = $this->game->placeSpy($cardId,$specialAbility);
+        $result = $this->game->placeSpy($cardId, $specialAbility);
         self::ajaxResponse();
     }
 
@@ -177,7 +201,7 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::setAjaxMode();
         $card_id = self::getArg("cardId", AT_alphanum, true);
         $side = self::getArg("side", AT_alphanum, true);
-        $bribe = self::getArg("bribe", AT_posint, true);
+        $bribe = self::getArg("bribeAmount", AT_posint, false);
         $result = $this->game->playCard($card_id, $side, $bribe);
         self::ajaxResponse();
     }
@@ -195,7 +219,8 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::setAjaxMode();
         $value = self::getArg("value", AT_alphanum, true);
         $card_id = self::getArg("cardId", AT_alphanum, true);
-        $result = $this->game->purchaseGift($value, $card_id);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
+        $result = $this->game->purchaseGift($value, $card_id,$bribeAmount);
         self::ajaxResponse();
     }
 
@@ -220,7 +245,8 @@ class action_paxpamireditiontwo extends APP_GameAction
         $cardId = self::getArg("cardId", AT_alphanum, true);
         $market = self::getArg("market", AT_alphanum, true);
         $players = self::getArg("players", AT_alphanum, true);
-        $result = $this->game->tax($cardId, $market, $players);
+        $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
+        $result = $this->game->tax($cardId, $market, $players,$bribeAmount);
         self::ajaxResponse();
     }
 

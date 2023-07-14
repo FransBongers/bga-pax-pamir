@@ -1,5 +1,6 @@
 class ClientCardActionBattleState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
   private cardId: string;
   private numberSelected: number;
   private maxNumberToSelect: number;
@@ -9,7 +10,8 @@ class ClientCardActionBattleState implements State {
     this.game = game;
   }
 
-  onEnteringState({ cardId }: ClientCardActionStateArgs) {
+  onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
+    this.bribe = bribe;
     this.cardId = cardId;
     this.updateInterfaceInitialStep();
   }
@@ -40,7 +42,18 @@ class ClientCardActionBattleState implements State {
         you: '${you}',
       },
     });
-    this.game.addCancelButton();
+    if (this.bribe?.negotiated) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () =>
+          this.game.takeAction({
+            action: 'cancelBribe',
+          }),
+      });
+    } else {
+      this.game.addCancelButton();
+    }
     this.setLocationsSelectable();
   }
 
@@ -148,6 +161,7 @@ class ClientCardActionBattleState implements State {
           removedPieces: pieces.join(' '),
           location: this.location,
           cardId: this.cardId,
+          bribeAmount: this.bribe?.amount ?? null,
         },
       });
     }

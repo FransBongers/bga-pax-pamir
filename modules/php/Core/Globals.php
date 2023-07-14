@@ -15,8 +15,8 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
-    "bribe" => "obj",
-    "bribeClearLogs" => "bool",
+    "negotiatedBribe" => "obj",
+    "bribeClearLogs" => "bool", // TODO check if we can remove this one
     "leverageData" => "obj",
     "rulers" => "obj",
     "loyaltyChangeInput" => "obj",
@@ -165,5 +165,6 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setRemainingActions(2);
     self::setSetup(1);
     self::setBribeClearLogs(true);
+    self::setNegotiatedBribe([]);
   }
 }

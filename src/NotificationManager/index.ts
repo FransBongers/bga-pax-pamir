@@ -39,7 +39,6 @@ class NotificationManager {
       ['build', 250],
       ['cardAction', 1],
       ['changeRuler', 1],
-      // ['initiateNegotiation', 1],
       ['changeFavoredSuit', 250],
       ['changeLoyalty', 1],
       ['clearTurn', 1],

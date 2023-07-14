@@ -31,15 +31,20 @@ trait PlayerActionMoveTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function move($cardId, $moves)
+  function move($cardId, $moves, $offeredBribeAmount = null)
   {
     self::checkAction('move');
 
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, MOVE);
-    Notifications::log('moves', $moves);
 
     $player = Players::get();
+
+    $resolved = $this->resolveBribe($cardInfo, $player, MOVE, $offeredBribeAmount);
+    if (!$resolved) {
+      $this->nextState('playerActions');
+      return;
+    }
 
     /**
      * Validate moves
@@ -84,7 +89,7 @@ trait PlayerActionMoveTrait
       if (Utils::isBlock($pieceId)) {
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
-        array_push($regionsThatNeedRulerCheck,$source,$destination);
+        array_push($regionsThatNeedRulerCheck, $source, $destination);
         $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
@@ -103,7 +108,7 @@ trait PlayerActionMoveTrait
 
         $from = 'tribes_' . $source;
         $to = 'tribes_' . $destination;
-        array_push($regionsThatNeedRulerCheck,$source,$destination);
+        array_push($regionsThatNeedRulerCheck, $source, $destination);
         Notifications::log('locations', [
           'from' => $from,
           'to' => $to
@@ -148,8 +153,8 @@ trait PlayerActionMoveTrait
       Tokens::move($pieceId, $to);
     }
     $regionsThatNeedRulerCheck = array_values(array_unique($regionsThatNeedRulerCheck));
-    Notifications::log('regionsThatNeedRulerCheck',$regionsThatNeedRulerCheck);
-    foreach($regionsThatNeedRulerCheck as $index => $region) {
+    Notifications::log('regionsThatNeedRulerCheck', $regionsThatNeedRulerCheck);
+    foreach ($regionsThatNeedRulerCheck as $index => $region) {
       Map::checkRulerChange($region);
     };
     $this->gamestate->nextState('playerActions');
@@ -240,10 +245,10 @@ trait PlayerActionMoveTrait
 
       $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
 
-      if ($hasWellConnectedAbility ) {
+      if ($hasWellConnectedAbility) {
         $arrayCopy = $adjacentCards;
-        foreach($arrayCopy as $index => $cardId) {
-          $adjacentCards = array_merge($adjacentCards,$this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+        foreach ($arrayCopy as $index => $cardId) {
+          $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
         }
       };
 

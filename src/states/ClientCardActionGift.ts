@@ -1,11 +1,13 @@
 class ClientCardActionGiftState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
   onEnteringState(args: ClientCardActionStateArgs) {
+    this.bribe = args.bribe;
     this.updateInterfaceInitialStep(args);
   }
 
@@ -27,7 +29,7 @@ class ClientCardActionGiftState implements State {
   // .##....##....##....##.......##........##....##
   // ..######.....##....########.##.........######.
 
-  private updateInterfaceInitialStep({cardId}: ClientCardActionStateArgs) {
+  private updateInterfaceInitialStep({ cardId }: ClientCardActionStateArgs) {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a gift to purchase'),
@@ -36,9 +38,19 @@ class ClientCardActionGiftState implements State {
       },
     });
     this.setGiftsSelectable({ cardId });
-    this.game.addCancelButton();
+    if (this.bribe?.negotiated) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () =>
+          this.game.takeAction({
+            action: 'cancelBribe',
+          }),
+      });
+    } else {
+      this.game.addCancelButton();
+    }
   }
-
 
   private updateInterfaceConfirmSelectGift({ value, cardId }: { value: number; cardId: string }) {
     this.game.clearPossible();
@@ -50,7 +62,7 @@ class ClientCardActionGiftState implements State {
       callback: () =>
         this.game.takeAction({
           action: 'purchaseGift',
-          data: { value, cardId },
+          data: { value, cardId, bribeAmount: this.bribe?.amount ?? null, },
         }),
     });
     this.game.addDangerActionButton({
@@ -70,7 +82,6 @@ class ClientCardActionGiftState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-
   setGiftsSelectable({ cardId }: { cardId: string }) {
     const playerId = this.game.getPlayerId();
     [2, 4, 6].forEach((giftValue) => {
@@ -81,7 +92,7 @@ class ClientCardActionGiftState implements State {
             value: giftValue,
           })
           .getAllItems().length > 0;
-      if (!hasGift && giftValue <= this.game.localState.activePlayer.rupees) {
+      if ((!hasGift && giftValue <= this.game.localState.activePlayer.rupees - this.bribe?.amount) || 0) {
         dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
           dojo.addClass(node, 'pp_selectable');
           this.game._connections.push(

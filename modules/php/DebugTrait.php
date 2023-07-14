@@ -38,7 +38,38 @@ trait DebugTrait
 
   function test()
   {
-    Cards::move('card_110','market_0_3');
+    $this->debugIncPlayerRupees(-1);
+  
+    // $lowest = Players::get()->getLowestAvailableGift();
+    // Notifications::log('lowest',$lowest);
+    // Notifications::log('determineResult',$this->determineBribe(Cards::get('card_50'), Players::get(), 1, 'playCard'));
+    // Notifications::log('intval',intval('1'));
+    // $this->debugCreateSpy('card_50');
+    // $this->debugCreateSpy('card_50');
+    // Globals::setNegotiatedBribe([]);
+    // $bribe = Globals::getNegotiatedBribe();
+    // Notifications::log('bribe',$bribe);
+    // Notifications::log('verify',$this->verifyBribe('card_14','playCard',2));
+
+    // $matchingAmount = isset($bribe['briber']['currentAmount']);
+    // Notifications::log('matchingAmount',$matchingAmount);
+    // Notifications::log('test',5 < null);
+    // $this->debugCreateSpy('card_91',2371054);
+    // $this->debugCreateSpy('card_91',2371054);
+    // $this->debugCreateSpy('card_68');
+    // $this->debugCreateSpy('card_68');
+    
+    // Notifications::log('card_84',$this->determineBribe(Cards::get('card_84'), Players::get(), 0, 'playCard'));
+    // Notifications::log('card_68',$this->determineBribe(Cards::get('card_68'), Players::get(), 0, 'cardAction'));
+    
+    // Notifications::log('card_21',$this->checkHostageAction('card_21'));
+    // Notifications::log('card_40',$this->checkHostageAction('card_40'));
+    // Notifications::log('card_1',$this->checkHostageAction('card_1'));
+    // Notifications::log('card_42',$this->checkHostageAction('card_42'));
+    // $this->debugIncPlayerRupees(1);
+    // Notifications::log('this is not sent',[]);
+    // throw new \feException("Testing");
+    // Cards::move('card_110','market_0_3');
     // $this->debugCreateArmy(KANDAHAR);
     // $this->debugCreateArmy(KABUL);
     // $this->debugCreateArmy(PERSIA);

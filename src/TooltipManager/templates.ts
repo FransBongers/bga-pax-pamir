@@ -70,19 +70,19 @@ const tplTooltipImpactIcon = ({ impactIcon, loyalty }: { impactIcon: string; loy
 
 const getCardActionText = ({ type }: { type: string }) => {
   switch (type) {
-    case TYPE_BATTLE:
+    case BATTLE:
       return _(
         'At a single site (region or court card), remove any combination of enemy tribes, roads, spies or armies equal to rank. You cannot remove more units than you yourself have armies/spies in that battle.'
       );
-    case TYPE_BETRAY:
+    case BETRAY:
       return _('Pay 2. Discard a card where you have a spy. You may take its prize.');
-    case TYPE_BUILD:
+    case BUILD:
       return _('Pay 2/4/6 to place 1, 2 or 3 blocks in any region you rule (as an army) or on adjacent borders (as a road).');
-    case TYPE_GIFT:
+    case GIFT:
       return _('Pay 2/4/6 to purchase 1st, 2nd or 3rd gift.');
-    case TYPE_MOVE:
+    case MOVE:
       return _('For each rank, move one spy or army.');
-    case TYPE_TAX:
+    case TAX:
       return _(
         'Take rupees from market cards. If you rule a region, may take from players with at least one card associated with that region.'
       );

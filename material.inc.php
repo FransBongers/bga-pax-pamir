@@ -222,7 +222,7 @@ $this->specialAbilities = array(
     'title' => clienttranslate('Strange Bedfellows'),
     'description' => clienttranslate('For spy travel, you treat cards that share a region as adjacent.')
   ),
-  SA_CIVIL_SERVICE_REFORM => array( 
+  SA_CIVIL_SERVICE_REFORMS => array( 
     'title' => clienttranslate('Civil Service Reforms'),
     'description' => clienttranslate('You do not pay bribes when taking hostage actions.')
   ),
@@ -426,7 +426,7 @@ $this->cards = array(
   'card_10' => array(
     'id' => 'card_10',
     'actions' => array(
-      BUILD => array('type' => BUILD, 'left' => 108, 'top' => 154),
+      BUILD => array('type' => BUILD, 'left' => 70, 'top' => 154),
       BETRAY => array('type' => BETRAY, 'left' => 108, 'top' => 154),
     ),
     'flavorText' => clienttranslate("Commonly associated with its lethal properties, Arsenic has many other applications. In Afghanistan, it was used in fabric dyes to brighten colors and could be combined with black pepper to make a popular British anti-venom called the Tanjore pill."),
@@ -669,7 +669,7 @@ $this->cards = array(
     'prize' => null,
     'rank' => 2,
     'region' => PUNJAB,
-    'specialAbility' => SA_CIVIL_SERVICE_REFORM,
+    'specialAbility' => SA_CIVIL_SERVICE_REFORMS,
     'suit' => POLITICAL,
     'type' => COURT_CARD,
   ),

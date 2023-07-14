@@ -74,6 +74,7 @@ interface LocalState {
   activePlayer: PaxPamirPlayer;
   remainingActions: number;
   usedCards: string[];
+  bribe: NegotiatedBribe | null;
 }
 
 /**
@@ -187,6 +188,7 @@ interface PaxPamirGame extends Game {
   clearPossible: () => void;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getCurrentPlayer: () => PPPlayer;
+  getMinimumActionCost: (props: {action: string;}) => number | null;
   getPlayerId: () => number;
   getZoneForLocation: ({ location }: { location: string }) => Zone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;

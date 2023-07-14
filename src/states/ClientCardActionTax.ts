@@ -1,5 +1,6 @@
 class ClientCardActionTaxState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
   private maxNumberToSelect: number;
   private numberSelected: number;
   private cardId: string;
@@ -18,8 +19,9 @@ class ClientCardActionTaxState implements State {
    * 2. Let player select rupees
    * 3. Send to backens
    */
-  onEnteringState(args: { cardId: string }) {
+  onEnteringState(args: ClientCardActionStateArgs) {
     this.cardId = args.cardId;
+    this.bribe = args.bribe;
     const cardInfo = this.game.getCardInfo(args) as CourtCard;
     this.maxNumberToSelect = cardInfo.rank;
     this.numberSelected = 0;
@@ -49,13 +51,7 @@ class ClientCardActionTaxState implements State {
     this.game.clearPossible();
 
     this.updatePageTitle();
-    this.game.addPrimaryActionButton({
-      id: 'confirm_btn',
-      text: _('Confirm'),
-      callback: () => this.confirmTax(),
-    });
-    dojo.addClass('confirm_btn', 'disabled');
-    this.game.addCancelButton();
+    this.updateActionButtons();
     this.setRupeesSelectable();
   }
 
@@ -66,6 +62,19 @@ class ClientCardActionTaxState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private addCancelButton() {
+    this.game.addDangerActionButton({
+      id: 'cancel_btn',
+      text: _('Cancel'),
+      callback: () => {
+        Object.keys(this.maxPerPlayer).forEach((playerId: string) => {
+          this.game.playerManager.getPlayer({ playerId: Number(playerId) }).removeTaxCounter();
+        });
+        this.game.onCancel();
+      },
+    });
+  }
 
   private confirmTax() {
     const marketRupees: string[] = [];
@@ -88,6 +97,7 @@ class ClientCardActionTaxState implements State {
         cardId: this.cardId,
         market: marketRupees.join(' '),
         players: playerRupees.join(' '),
+        bribeAmount: this.bribe?.amount ?? null,
       },
     });
   }
@@ -103,8 +113,9 @@ class ClientCardActionTaxState implements State {
     this.toggleSelected(node);
 
     this.updateNumberSelected();
-    this.updateConfirmButton();
+    // this.updateConfirmButton();
     this.updatePageTitle();
+    this.updateActionButtons();
     this.updateSelectableStatePlayers();
   }
 
@@ -136,8 +147,9 @@ class ClientCardActionTaxState implements State {
     }
 
     this.updateNumberSelected();
-    this.updateConfirmButton();
+    // this.updateConfirmButton();
     this.updatePageTitle();
+    this.updateActionButtons();
     this.updateSelectableStatePlayers();
   }
 
@@ -200,13 +212,13 @@ class ClientCardActionTaxState implements State {
     });
   }
 
-  private updateConfirmButton() {
-    if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
-      dojo.removeClass('confirm_btn', 'disabled');
-    } else {
-      dojo.addClass('confirm_btn', 'disabled');
-    }
-  }
+  // private updateConfirmButton() {
+  //   if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
+  //     dojo.removeClass('confirm_btn', 'disabled');
+  //   } else {
+  //     dojo.addClass('confirm_btn', 'disabled');
+  //   }
+  // }
 
   private updateNumberSelected() {
     let numberSelected = 0;
@@ -223,6 +235,32 @@ class ClientCardActionTaxState implements State {
     });
 
     this.numberSelected = numberSelected;
+  }
+
+  private updateActionButtons() {
+    this.game.framework().removeActionButtons();
+    dojo.empty('customActions');
+    this.game.addPrimaryActionButton({
+      id: 'confirm_btn',
+      text: _('Confirm'),
+      callback: () => this.confirmTax(),
+    });
+    if (this.numberSelected === 0) {
+      dojo.addClass('confirm_btn', 'disabled');
+    }
+
+    if (this.bribe?.negotiated && this.numberSelected === 0) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () =>
+          this.game.takeAction({
+            action: 'cancelBribe',
+          }),
+      });
+    } else {
+      this.addCancelButton();
+    }
   }
 
   private updatePageTitle() {

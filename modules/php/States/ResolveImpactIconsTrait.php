@@ -39,9 +39,6 @@ trait ResolveImpactIconsTrait
     $current_impact_icon_index = Globals::getResolveImpactIconsCurrentIcon();
     $card_info = $this->cards[$card_id];
     $impactIcons = $card_info['impactIcons'];
-    self::dump('----------- resolving impact icons for card', $card_id);
-    self::dump('----------- resolving impact icons current icon', $current_impact_icon_index);
-    self::dump('----------- resolving impact icons number of icons', count($impactIcons));
     $card_region = $card_info['region'];
 
     if ($current_impact_icon_index >= count($impactIcons)) {
@@ -55,7 +52,7 @@ trait ResolveImpactIconsTrait
       if (in_array(TRIBE, $impactIcons, true) || in_array(ARMY, $impactIcons, true)) {
         Map::checkRulerChange($card_region);
       };
-      $this->gamestate->nextState('playerActions');
+      $this->nextState('playerActions');
       return;
     }
 

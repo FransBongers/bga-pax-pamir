@@ -342,6 +342,10 @@ html {
   cursor: pointer !important;
 }
 
+.pp_card_action.pp_selected {
+  box-shadow: 0px 0px 0px 2px base.$selected-color !important;
+}
+
 .pp_card_action.pp_selectable:hover {
   box-shadow: 0px 0px 0px 2px base.$selected-color !important;
 }

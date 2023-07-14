@@ -447,6 +447,19 @@ class PPPlayer {
     return this.playerColor;
   }
 
+  getLowestAvailableGift(): number | null {
+    if (this.gifts['2'].getItemNumber() === 0) {
+      return 2;
+    };
+    if (this.gifts['4'].getItemNumber() === 0) {
+      return 4;
+    };
+    if (this.gifts['6'].getItemNumber() === 0) {
+      return 6;
+    };
+    return null;
+  }
+
   getLoyalty(): string {
     return this.loyalty;
   }

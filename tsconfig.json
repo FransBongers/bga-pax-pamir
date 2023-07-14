@@ -37,6 +37,7 @@
     "src/states/ClientCardActionGift.ts",
     "src/states/ClientCardActionMove.ts",
     "src/states/ClientCardActionTax.ts",
+    "src/states/ClientInitialBribeCheck.ts",
     "src/states/ClientPlayCard.ts",
     "src/states/ClientPurchaseCard.ts",
     "src/states/ClientResolveEventConfidenceFailure.ts",

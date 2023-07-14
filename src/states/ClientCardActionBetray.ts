@@ -1,12 +1,14 @@
 class ClientCardActionBetrayState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
   private cardId: string;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ cardId }: ClientCardActionStateArgs) {
+  onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
+    this.bribe = bribe;
     this.cardId = cardId;
     this.updateInterfaceInitialStep();
   }
@@ -43,7 +45,18 @@ class ClientCardActionBetrayState implements State {
       },
     });
     this.setCourtCardsSelectable();
-    this.game.addCancelButton();
+    if (this.bribe?.negotiated) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () =>
+          this.game.takeAction({
+            action: 'cancelBribe',
+          }),
+      });
+    } else {
+      this.game.addCancelButton();
+    }
   }
 
   private updateInterfaceAcceptPrize({ betrayedCardId }: { betrayedCardId: string }) {
@@ -119,7 +132,8 @@ class ClientCardActionBetrayState implements State {
     this.game.takeAction({action: 'betray', data: {
       cardId: this.cardId,
       betrayedCardId,
-      acceptPrize
+      acceptPrize,
+      bribeAmount: this.bribe?.amount ?? null,
     }})
   }
 

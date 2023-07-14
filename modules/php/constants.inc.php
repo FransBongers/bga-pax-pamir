@@ -1,8 +1,11 @@
 <?php
 
 /**
- * Card actions 
+ * Actions 
  */
+const PLAY_CARD = 'playCard';
+const PURCHASE_CARD = 'purchaseCard';
+// card actions
 const BATTLE = 'battle';
 const BETRAY = 'betray';
 const BUILD = 'build';
@@ -99,7 +102,7 @@ const SA_CITADEL_KABUL_CARD_ID = 'card_17';
 const SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia'; // card_97
 const SA_CITADEL_TRANSCASPIA_CARD_ID = 'card_97';
 const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
-const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms'; // card_24
+const SA_CIVIL_SERVICE_REFORMS = 'civilServiceReforms'; // card_24
 const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
 const SA_SAFE_HOUSE_CARD_IDS = ['card_41','card_72'];
 const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42

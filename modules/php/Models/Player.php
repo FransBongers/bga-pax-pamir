@@ -153,6 +153,17 @@ class Player extends \PaxPamir\Helpers\DB_Model
     return $influence;
   }
 
+  function getLowestAvailableGift()
+  {
+    foreach (['2', '4', '6'] as $giftValue) {
+      $token = Tokens::getTopOf(['gift', $giftValue, $this->id]);
+      if ($token === null) {
+        return intval($giftValue);
+      }
+    }
+    return null;
+  }
+
   function getSuitTotals()
   {
     $suits = array(

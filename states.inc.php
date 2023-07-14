@@ -58,7 +58,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_START_OF_TURN_ABILITIES",14);
     define("STATE_PLAYER_ACTIONS", 4);
     define("STATE_NEGOTIATE_BRIBE", 5);
-    define("STATE_RESOLVE_ACCEPTED_BRIBE", 25);
+    // define("STATE_RESOLVE_ACCEPTED_BRIBE", 25);
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
     define("STATE_DISCARD_COURT", 7);
     define("STATE_DISCARD_HAND", 8);
@@ -153,7 +153,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "move", "tax", "betray"),
+        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "move", "tax", "betray","startBribeNegotiation","cancelBribe"),
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "discardLeverage" => STATE_DISCARD_LEVERAGE,
@@ -182,20 +182,20 @@ $machinestates = array(
         "transitions" => array(
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "playerActions" => STATE_PLAYER_ACTIONS,
-            "resolveAcceptedBribe" => STATE_RESOLVE_ACCEPTED_BRIBE,
+            // "resolveAcceptedBribe" => STATE_RESOLVE_ACCEPTED_BRIBE,
         )
     ),
 
-    STATE_RESOLVE_ACCEPTED_BRIBE => array(
-        "name" => "resolveAcceptedBribe",
-        "type" => "game",
-        "action" => "stResolveAcceptedBribe",
-        "updateGameProgression" => false,
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-        )
-    ),
+    // STATE_RESOLVE_ACCEPTED_BRIBE => array(
+    //     "name" => "resolveAcceptedBribe",
+    //     "type" => "game",
+    //     "action" => "stResolveAcceptedBribe",
+    //     "updateGameProgression" => false,
+    //     "transitions" => array(
+    //         "playerActions" => STATE_PLAYER_ACTIONS,
+    //         "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+    //     )
+    // ),
 
     STATE_CLEANUP => array(
         "name" => "cleanup",

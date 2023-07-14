@@ -49,6 +49,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_CARD_ACTION_GIFT]: ClientCardActionGiftState;
     [CLIENT_CARD_ACTION_MOVE]: ClientCardActionMoveState;
     [CLIENT_CARD_ACTION_TAX]: ClientCardActionTaxState;
+    [CLIENT_INITIAL_BRIBE_CHECK]: ClientInitialBribeCheckState;
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
@@ -104,6 +105,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_CARD_ACTION_GIFT]: new ClientCardActionGiftState(this),
       [CLIENT_CARD_ACTION_MOVE]: new ClientCardActionMoveState(this),
       [CLIENT_CARD_ACTION_TAX]: new ClientCardActionTaxState(this),
+      [CLIENT_INITIAL_BRIBE_CHECK]: new ClientInitialBribeCheckState(this),
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
@@ -361,6 +363,17 @@ class PaxPamir implements PaxPamirGame {
 
   public getCurrentPlayer(): PPPlayer {
     return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
+  }
+
+  public getMinimumActionCost({action}: {action: string;}): number | null {
+    if([BATTLE, MOVE, TAX, PLAY_CARD].includes(action)) {
+      return 0;
+    } else if ([BETRAY,BUILD].includes(action)) {
+      return 2;
+    } else {
+      // only option remaining is purchase gift, determines on lowest empty spot
+      return this.getCurrentPlayer().getLowestAvailableGift();
+    };
   }
 
   /**

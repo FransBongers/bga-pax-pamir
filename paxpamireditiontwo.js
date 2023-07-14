@@ -251,12 +251,14 @@ var tplLogTokenRoad = function (_a) {
     return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
 };
 var tplLogTokenRupee = function () { return "<div class=\"pp_log_token_rupee pp_log_token\"></div>"; };
+var _a;
 var CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
 var CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
 var CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
 var CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
 var CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 var CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
+var CLIENT_INITIAL_BRIBE_CHECK = 'clientInitialBribeCheck';
 var CLIENT_PLAY_CARD = 'clientPlayCard';
 var CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 var CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
@@ -264,6 +266,24 @@ var CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS = 'clientResolveEventOtherPers
 var CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 var CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
+var PLAY_CARD = 'playCard';
+var PURCHASE_CARD = 'purchaseCard';
+var BATTLE = 'battle';
+var BETRAY = 'betray';
+var BUILD = 'build';
+var GIFT = 'gift';
+var MOVE = 'move';
+var TAX = 'tax';
+var CARD_ACTIONS_WITH_COST = [BETRAY, BUILD, GIFT];
+var CARD_ACTIONS_WITHOUT_COST = [BATTLE, MOVE, TAX];
+var cardActionClientStateMap = (_a = {},
+    _a[BATTLE] = CLIENT_CARD_ACTION_BATTLE,
+    _a[BETRAY] = CLIENT_CARD_ACTION_BETRAY,
+    _a[BUILD] = CLIENT_CARD_ACTION_BUILD,
+    _a[GIFT] = CLIENT_CARD_ACTION_GIFT,
+    _a[MOVE] = CLIENT_CARD_ACTION_MOVE,
+    _a[TAX] = CLIENT_CARD_ACTION_TAX,
+    _a);
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
 var ARMY_HEIGHT = 40;
@@ -329,14 +349,6 @@ var IMPACT_ICON_ECONOMIC_SUIT = 'economic';
 var IMPACT_ICON_MILITARY_SUIT = 'military';
 var IMPACT_ICON_POLITICAL_SUIT = 'political';
 var IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
-var TYPE_BATTLE = 'battle';
-var TYPE_BETRAY = 'betray';
-var TYPE_BUILD = 'build';
-var TYPE_GIFT = 'gift';
-var TYPE_MOVE = 'move';
-var TYPE_TAX = 'tax';
-var CARD_ACTIONS_WITH_COST = [TYPE_BETRAY, TYPE_BUILD, TYPE_GIFT];
-var CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE, TYPE_MOVE, TYPE_TAX];
 var PP_SELECTABLE = 'pp_selectable';
 var PP_SELECTED = 'pp_selected';
 var PP_CARD_IN_HAND = 'pp_card_in_hand';
@@ -378,7 +390,7 @@ var SA_BODYGUARDS = 'bodyguards';
 var SA_CITADEL_KABUL = 'citadelKabul';
 var SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia';
 var SA_STRANGE_BEDFELLOWS = 'strangeBedfellows';
-var SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms';
+var SA_CIVIL_SERVICE_REFORMS = 'civilServiceReforms';
 var SA_SAFE_HOUSE = 'safeHouse';
 var SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers';
 var SA_BLACKMAIL_HERAT = 'blackmailHerat';
@@ -516,17 +528,17 @@ var tplTooltipImpactIcon = function (_a) {
 var getCardActionText = function (_a) {
     var type = _a.type;
     switch (type) {
-        case TYPE_BATTLE:
+        case BATTLE:
             return _('At a single site (region or court card), remove any combination of enemy tribes, roads, spies or armies equal to rank. You cannot remove more units than you yourself have armies/spies in that battle.');
-        case TYPE_BETRAY:
+        case BETRAY:
             return _('Pay 2. Discard a card where you have a spy. You may take its prize.');
-        case TYPE_BUILD:
+        case BUILD:
             return _('Pay 2/4/6 to place 1, 2 or 3 blocks in any region you rule (as an army) or on adjacent borders (as a road).');
-        case TYPE_GIFT:
+        case GIFT:
             return _('Pay 2/4/6 to purchase 1st, 2nd or 3rd gift.');
-        case TYPE_MOVE:
+        case MOVE:
             return _('For each rank, move one spy or army.');
-        case TYPE_TAX:
+        case TAX:
             return _('Take rupees from market cards. If you rule a region, may take from players with at least one card associated with that region.');
         default:
             return '';
@@ -1125,6 +1137,21 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.getPlayerColor = function () {
         return this.playerColor;
+    };
+    PPPlayer.prototype.getLowestAvailableGift = function () {
+        if (this.gifts['2'].getItemNumber() === 0) {
+            return 2;
+        }
+        ;
+        if (this.gifts['4'].getItemNumber() === 0) {
+            return 4;
+        }
+        ;
+        if (this.gifts['6'].getItemNumber() === 0) {
+            return 6;
+        }
+        ;
+        return null;
     };
     PPPlayer.prototype.getLoyalty = function () {
         return this.loyalty;
@@ -1942,12 +1969,15 @@ var ClientCardActionBattleState = (function () {
         this.game = game;
     }
     ClientCardActionBattleState.prototype.onEnteringState = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, bribe = _a.bribe;
+        this.bribe = bribe;
         this.cardId = cardId;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBattleState.prototype.onLeavingState = function () { };
     ClientCardActionBattleState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        var _a;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
             text: _('${you} must select a region or court card to start a battle in'),
@@ -1955,7 +1985,20 @@ var ClientCardActionBattleState = (function () {
                 you: '${you}',
             },
         });
-        this.game.addCancelButton();
+        if ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.game.addCancelButton();
+        }
         this.setLocationsSelectable();
     };
     ClientCardActionBattleState.prototype.updateInterfaceSelectPiecesInRegion = function (_a) {
@@ -2034,6 +2077,7 @@ var ClientCardActionBattleState = (function () {
         return coalitionArmies.length + tribesNationalism;
     };
     ClientCardActionBattleState.prototype.confirmBattle = function () {
+        var _a, _b;
         debug('confirmBattle');
         var pieces = [];
         dojo.query('.pp_selected').forEach(function (node) { return pieces.push(node.id); });
@@ -2046,6 +2090,7 @@ var ClientCardActionBattleState = (function () {
                     removedPieces: pieces.join(' '),
                     location: this.location,
                     cardId: this.cardId,
+                    bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null,
                 },
             });
         }
@@ -2153,12 +2198,15 @@ var ClientCardActionBetrayState = (function () {
         this.game = game;
     }
     ClientCardActionBetrayState.prototype.onEnteringState = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, bribe = _a.bribe;
+        this.bribe = bribe;
         this.cardId = cardId;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBetrayState.prototype.onLeavingState = function () { };
     ClientCardActionBetrayState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        var _a;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
             text: _('${you} must select a court card to betray'),
@@ -2167,7 +2215,20 @@ var ClientCardActionBetrayState = (function () {
             },
         });
         this.setCourtCardsSelectable();
-        this.game.addCancelButton();
+        if ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.game.addCancelButton();
+        }
     };
     ClientCardActionBetrayState.prototype.updateInterfaceAcceptPrize = function (_a) {
         var _this = this;
@@ -2231,12 +2292,14 @@ var ClientCardActionBetrayState = (function () {
         };
     };
     ClientCardActionBetrayState.prototype.handleConfirm = function (_a) {
+        var _b, _c;
         var betrayedCardId = _a.betrayedCardId, acceptPrize = _a.acceptPrize;
         debug('handleConfirm', betrayedCardId);
         this.game.takeAction({ action: 'betray', data: {
                 cardId: this.cardId,
                 betrayedCardId: betrayedCardId,
-                acceptPrize: acceptPrize
+                acceptPrize: acceptPrize,
+                bribeAmount: (_c = (_b = this.bribe) === null || _b === void 0 ? void 0 : _b.amount) !== null && _c !== void 0 ? _c : null,
             } });
     };
     ClientCardActionBetrayState.prototype.setCourtCardsSelectable = function () {
@@ -2274,41 +2337,23 @@ var ClientCardActionBuildState = (function () {
         this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
     }
     ClientCardActionBuildState.prototype.onEnteringState = function (props) {
+        var _a;
         this.cardId = (props === null || props === void 0 ? void 0 : props.cardId) ? props.cardId : null;
+        this.bribe = props.bribe;
         this.tempTokens = [];
         var player = this.game.getCurrentPlayer();
         var playerRupees = player.getRupees();
         this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
         var multiplier = this.playerHasNationBuilding ? 2 : 1;
-        this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
+        this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor((playerRupees - ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0) / 2), 3) * multiplier;
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
     ClientCardActionBuildState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
         this.game.clearPossible();
         this.updatePageTitle();
         this.setLocationsSelectable();
-        this.game.addPrimaryActionButton({
-            id: 'done_button',
-            text: _('Done'),
-            callback: function () { return _this.updateInterfaceConfirm(); },
-        });
-        dojo.addClass('done_button', 'disabled');
-        if (this.isSpecialAbilityInfrastructure) {
-            this.game.addDangerActionButton({
-                id: 'skip_btn',
-                text: _('Skip'),
-                callback: function () { return _this.game.takeAction({ action: 'skipSpecialAbility' }); },
-            });
-        }
-        else {
-            this.game.addDangerActionButton({
-                id: 'cancel_btn',
-                text: _('Cancel'),
-                callback: function () { return _this.onCancel(); },
-            });
-        }
+        this.updateActionButtons();
     };
     ClientCardActionBuildState.prototype.updateInterfaceConfirm = function () {
         var _this = this;
@@ -2358,19 +2403,20 @@ var ClientCardActionBuildState = (function () {
                 type: 'road',
             });
         }
-        dojo.removeClass('done_button', 'disabled');
         this.updatePageTitle();
+        this.updateActionButtons();
     };
     ClientCardActionBuildState.prototype.onCancel = function () {
         this.clearTemporaryTokens();
         this.game.onCancel();
     };
     ClientCardActionBuildState.prototype.onConfirm = function () {
+        var _a, _b;
         debug('handleConfirm');
         if (this.tempTokens.length > 0) {
             this.game.takeAction({
                 action: 'build',
-                data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens) },
+                data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null, },
             });
             this.clearTemporaryTokens();
         }
@@ -2434,6 +2480,46 @@ var ClientCardActionBuildState = (function () {
             });
         }
     };
+    ClientCardActionBuildState.prototype.updateActionButtons = function () {
+        var _this = this;
+        var _a;
+        this.game.framework().removeActionButtons();
+        dojo.empty('customActions');
+        this.game.addPrimaryActionButton({
+            id: 'done_button',
+            text: _('Done'),
+            callback: function () { return _this.updateInterfaceConfirm(); },
+        });
+        if (this.tempTokens.length === 0) {
+            dojo.addClass('done_button', 'disabled');
+        }
+        if (this.isSpecialAbilityInfrastructure) {
+            this.game.addDangerActionButton({
+                id: 'skip_btn',
+                text: _('Skip'),
+                callback: function () { return _this.game.takeAction({ action: 'skipSpecialAbility' }); },
+            });
+        }
+        else if (((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) && this.tempTokens.length === 0) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    _this.clearTemporaryTokens();
+                    _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.game.addDangerActionButton({
+                id: 'cancel_btn',
+                text: _('Cancel'),
+                callback: function () { return _this.onCancel(); },
+            });
+        }
+    };
     return ClientCardActionBuildState;
 }());
 var ClientCardActionGiftState = (function () {
@@ -2441,10 +2527,13 @@ var ClientCardActionGiftState = (function () {
         this.game = game;
     }
     ClientCardActionGiftState.prototype.onEnteringState = function (args) {
+        this.bribe = args.bribe;
         this.updateInterfaceInitialStep(args);
     };
     ClientCardActionGiftState.prototype.onLeavingState = function () { };
     ClientCardActionGiftState.prototype.updateInterfaceInitialStep = function (_a) {
+        var _this = this;
+        var _b;
         var cardId = _a.cardId;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
@@ -2454,7 +2543,20 @@ var ClientCardActionGiftState = (function () {
             },
         });
         this.setGiftsSelectable({ cardId: cardId });
-        this.game.addCancelButton();
+        if ((_b = this.bribe) === null || _b === void 0 ? void 0 : _b.negotiated) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.game.addCancelButton();
+        }
     };
     ClientCardActionGiftState.prototype.updateInterfaceConfirmSelectGift = function (_a) {
         var _this = this;
@@ -2466,9 +2568,10 @@ var ClientCardActionGiftState = (function () {
             id: 'confirm_btn',
             text: _('Confirm'),
             callback: function () {
+                var _a, _b;
                 return _this.game.takeAction({
                     action: 'purchaseGift',
-                    data: { value: value, cardId: cardId },
+                    data: { value: value, cardId: cardId, bribeAmount: (_b = (_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null, },
                 });
             },
         });
@@ -2485,13 +2588,14 @@ var ClientCardActionGiftState = (function () {
         var cardId = _a.cardId;
         var playerId = this.game.getPlayerId();
         [2, 4, 6].forEach(function (giftValue) {
+            var _a;
             var hasGift = _this.game.playerManager
                 .getPlayer({ playerId: playerId })
                 .getGiftZone({
                 value: giftValue,
             })
                 .getAllItems().length > 0;
-            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees) {
+            if ((!hasGift && giftValue <= _this.game.localState.activePlayer.rupees - ((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount)) || 0) {
                 dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
                     dojo.addClass(node, 'pp_selectable');
                     _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));
@@ -2510,8 +2614,9 @@ var ClientCardActionMoveState = (function () {
         this.game = game;
     }
     ClientCardActionMoveState.prototype.onEnteringState = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, bribe = _a.bribe;
         this.cardId = cardId;
+        this.bribe = bribe;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         this.maxNumberOfMoves = cardInfo.rank;
         this.moves = {};
@@ -2520,6 +2625,7 @@ var ClientCardActionMoveState = (function () {
     ClientCardActionMoveState.prototype.onLeavingState = function () { };
     ClientCardActionMoveState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
+        var _a;
         this.game.clearPossible();
         this.updatePageTitle();
         this.setArmiesSelectable();
@@ -2531,7 +2637,21 @@ var ClientCardActionMoveState = (function () {
                 callback: function () { return _this.onConfirm(); },
             });
         }
-        this.addCancelButton();
+        if (((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) && Object.keys(this.moves).length === 0) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    _this.returnPiecesToOriginalPosition();
+                    _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.addCancelButton();
+        }
     };
     ClientCardActionMoveState.prototype.updateInterfaceArmySelected = function (_a) {
         var pieceId = _a.pieceId, regionId = _a.regionId;
@@ -2588,6 +2708,7 @@ var ClientCardActionMoveState = (function () {
         this.nextStepAfterMove();
     };
     ClientCardActionMoveState.prototype.onConfirm = function () {
+        var _a, _b;
         debug('onConfirm', this.moves);
         if (this.totalNumberOfMoves() > 0) {
             this.game.takeAction({
@@ -2595,6 +2716,7 @@ var ClientCardActionMoveState = (function () {
                 data: {
                     cardId: this.cardId,
                     moves: JSON.stringify(this.moves),
+                    bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null,
                 },
             });
         }
@@ -2722,12 +2844,13 @@ var ClientCardActionMoveState = (function () {
     };
     ClientCardActionMoveState.prototype.returnPiecesToOriginalPosition = function () {
         var _this = this;
+        debug('returnPiecesToOriginalPosition');
         Object.entries(this.moves).forEach(function (_a) {
             var key = _a[0], value = _a[1];
             if (value.length === 0) {
                 return;
             }
-            debug('return', key, value);
+            debug('returnPiecesToOriginalPosition', key, value);
             var from = value[value.length - 1].to;
             var to = value[0].from;
             if (from === to) {
@@ -2771,10 +2894,11 @@ var ClientCardActionMoveState = (function () {
                 return;
             }
             var hasIndianSupplies = player.hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
-            var hasCoalitionRoads = hasIndianSupplies || region.borders.some(function (borderId) {
-                var border = _this.game.map.getBorder({ border: borderId });
-                return border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0;
-            });
+            var hasCoalitionRoads = hasIndianSupplies ||
+                region.borders.some(function (borderId) {
+                    var border = _this.game.map.getBorder({ border: borderId });
+                    return border.getCoalitionRoads({ coalitionId: coalitionId }).length > 0;
+                });
             if (!hasCoalitionRoads) {
                 return;
             }
@@ -2795,7 +2919,6 @@ var ClientCardActionMoveState = (function () {
         if (!destinationCards.includes(previousCardId)) {
             destinationCards.push(previousCardId);
         }
-        ;
         var player = this.game.getCurrentPlayer();
         if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
             dojo.query(".pp_card_in_court.pp_".concat(cardInfo.region)).forEach(function (node) {
@@ -2888,6 +3011,7 @@ var ClientCardActionTaxState = (function () {
     }
     ClientCardActionTaxState.prototype.onEnteringState = function (args) {
         this.cardId = args.cardId;
+        this.bribe = args.bribe;
         var cardInfo = this.game.getCardInfo(args);
         this.maxNumberToSelect = cardInfo.rank;
         this.numberSelected = 0;
@@ -2896,19 +3020,26 @@ var ClientCardActionTaxState = (function () {
     };
     ClientCardActionTaxState.prototype.onLeavingState = function () { };
     ClientCardActionTaxState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
         this.game.clearPossible();
         this.updatePageTitle();
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () { return _this.confirmTax(); },
-        });
-        dojo.addClass('confirm_btn', 'disabled');
-        this.game.addCancelButton();
+        this.updateActionButtons();
         this.setRupeesSelectable();
     };
+    ClientCardActionTaxState.prototype.addCancelButton = function () {
+        var _this = this;
+        this.game.addDangerActionButton({
+            id: 'cancel_btn',
+            text: _('Cancel'),
+            callback: function () {
+                Object.keys(_this.maxPerPlayer).forEach(function (playerId) {
+                    _this.game.playerManager.getPlayer({ playerId: Number(playerId) }).removeTaxCounter();
+                });
+                _this.game.onCancel();
+            },
+        });
+    };
     ClientCardActionTaxState.prototype.confirmTax = function () {
+        var _a, _b;
         var marketRupees = [];
         var playerRupees = [];
         dojo.query('.pp_selected').forEach(function (node) {
@@ -2928,6 +3059,7 @@ var ClientCardActionTaxState = (function () {
                 cardId: this.cardId,
                 market: marketRupees.join(' '),
                 players: playerRupees.join(' '),
+                bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null,
             },
         });
     };
@@ -2941,8 +3073,8 @@ var ClientCardActionTaxState = (function () {
         }
         this.toggleSelected(node);
         this.updateNumberSelected();
-        this.updateConfirmButton();
         this.updatePageTitle();
+        this.updateActionButtons();
         this.updateSelectableStatePlayers();
     };
     ClientCardActionTaxState.prototype.handlePlayerRupeeClicked = function (_a) {
@@ -2970,8 +3102,8 @@ var ClientCardActionTaxState = (function () {
             }
         }
         this.updateNumberSelected();
-        this.updateConfirmButton();
         this.updatePageTitle();
+        this.updateActionButtons();
         this.updateSelectableStatePlayers();
     };
     ClientCardActionTaxState.prototype.toggleSelected = function (node) {
@@ -3024,14 +3156,6 @@ var ClientCardActionTaxState = (function () {
             }));
         });
     };
-    ClientCardActionTaxState.prototype.updateConfirmButton = function () {
-        if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
-            dojo.removeClass('confirm_btn', 'disabled');
-        }
-        else {
-            dojo.addClass('confirm_btn', 'disabled');
-        }
-    };
     ClientCardActionTaxState.prototype.updateNumberSelected = function () {
         var numberSelected = 0;
         dojo.query('.pp_selected').forEach(function (node) {
@@ -3046,6 +3170,34 @@ var ClientCardActionTaxState = (function () {
             }
         });
         this.numberSelected = numberSelected;
+    };
+    ClientCardActionTaxState.prototype.updateActionButtons = function () {
+        var _this = this;
+        var _a;
+        this.game.framework().removeActionButtons();
+        dojo.empty('customActions');
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.confirmTax(); },
+        });
+        if (this.numberSelected === 0) {
+            dojo.addClass('confirm_btn', 'disabled');
+        }
+        if (((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) && this.numberSelected === 0) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.addCancelButton();
+        }
     };
     ClientCardActionTaxState.prototype.updatePageTitle = function () {
         this.game.clientUpdatePageTitle({
@@ -3081,83 +3233,198 @@ var ClientCardActionTaxState = (function () {
     };
     return ClientCardActionTaxState;
 }());
-var ClientPlayCardState = (function () {
-    function ClientPlayCardState(game) {
+var ClientInitialBribeCheckState = (function () {
+    function ClientInitialBribeCheckState(game) {
         this.game = game;
     }
-    ClientPlayCardState.prototype.onEnteringState = function (args) {
+    ClientInitialBribeCheckState.prototype.onEnteringState = function (args) {
+        this.action = args.action;
+        this.cardId = args.cardId;
         this.checkBribe(args);
     };
-    ClientPlayCardState.prototype.onLeavingState = function () { };
-    ClientPlayCardState.prototype.updateInterfacePlayCardBribe = function (_a) {
+    ClientInitialBribeCheckState.prototype.onLeavingState = function () { };
+    ClientInitialBribeCheckState.prototype.updateInterfaceInitialStep = function (_a) {
         var _this = this;
-        var cardId = _a.cardId, ruler = _a.ruler, rupees = _a.rupees;
+        var bribeeId = _a.bribeeId, amount = _a.amount, next = _a.next;
         this.game.clearPossible();
+        this.game.activeStates.playerActions.setCardActionSelected({ cardId: this.cardId, action: this.action });
         var localState = this.game.localState;
-        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        var bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
         this.game.clientUpdatePageTitle({
             text: substituteKeywords({
-                string: " ${you} must pay a bribe of ${rupees} rupee(s) to ${playerName} or ask to waive",
+                string: " ${you} must pay a bribe of ${amount} rupee(s) to ${playerName} or ask to waive",
                 args: {
-                    rupees: rupees,
+                    amount: amount,
                 },
-                playerColor: ruler.getColor(),
+                playerColor: bribee.getColor(),
             }),
             args: {
-                playerName: ruler.getName(),
+                playerName: bribee.getName(),
                 you: '${you}',
             },
         });
-        if (rupees <= localState.activePlayer.rupees) {
+        var minActionCost = this.game.getMinimumActionCost({ action: this.action }) || 0;
+        var maxAvailableRupees = localState.activePlayer.rupees - minActionCost;
+        if (amount <= maxAvailableRupees) {
             this.game.addPrimaryActionButton({
                 id: "pay_bribe_btn",
                 text: _('Pay bribe'),
-                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: rupees }); },
+                callback: function () { return next({ bribe: { amount: amount } }); },
             });
         }
         var _loop_1 = function (i) {
-            if (i > localState.activePlayer.rupees) {
-                return { value: void 0 };
+            if (i > maxAvailableRupees) {
+                return "continue";
             }
             this_1.game.addPrimaryActionButton({
                 id: "ask_partial_waive_".concat(i, "_btn"),
                 text: dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
-                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: i }); },
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'startBribeNegotiation',
+                        data: {
+                            cardId: _this.cardId,
+                            useFor: _this.action,
+                            amount: i,
+                        },
+                    });
+                },
             });
         };
         var this_1 = this;
-        for (var i = rupees - 1; i >= 1; i--) {
-            var state_1 = _loop_1(i);
-            if (typeof state_1 === "object")
-                return state_1.value;
+        for (var i = amount - 1; i >= 1; i--) {
+            _loop_1(i);
         }
         if (this.game.getCurrentPlayer().ownsEventCard({ cardId: 'card_107' })) {
             this.game.addPrimaryActionButton({
                 id: "do_not_pay_btn",
                 text: _('Do not pay'),
-                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
+                callback: function () { return next({ bribe: null }); },
             });
         }
         else {
             this.game.addPrimaryActionButton({
                 id: "ask_waive_btn",
                 text: _('Ask to waive'),
-                callback: function () { return _this.playCardNextStep({ cardId: cardId, bribe: 0 }); },
+                callback: function () {
+                    return _this.game.takeAction({
+                        action: 'startBribeNegotiation',
+                        data: {
+                            cardId: _this.cardId,
+                            useFor: _this.action,
+                            amount: 0,
+                        },
+                    });
+                },
             });
         }
         this.game.addCancelButton();
     };
+    ClientInitialBribeCheckState.prototype.checkBribe = function (_a) {
+        var cardId = _a.cardId, action = _a.action, next = _a.next;
+        var disregardForCustomsActive = this.game.activeEvents.getAllItems().includes('card_107');
+        var charismaticCourtiersAcitve = action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
+        var civilServiceReformsActive = action !== 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CIVIL_SERVICE_REFORMS });
+        if (disregardForCustomsActive || charismaticCourtiersAcitve || civilServiceReformsActive) {
+            next({ bribe: null });
+            return;
+        }
+        var bribe = action === 'playCard' ? this.checkBribePlayCard({ cardId: cardId }) : this.checkBribeCardAction({ cardId: cardId });
+        if (bribe === null) {
+            next({ bribe: null });
+        }
+        else {
+            this.updateInterfaceInitialStep(__assign(__assign({}, bribe), { next: next }));
+        }
+    };
+    ClientInitialBribeCheckState.prototype.checkBribeCardAction = function (_a) {
+        var cardId = _a.cardId;
+        var spyZone = this.game.spies[cardId];
+        if (!spyZone) {
+            return null;
+        }
+        var cylinderIds = spyZone.getAllItems();
+        var totals = {};
+        cylinderIds.forEach(function (cylinderId) {
+            var playerId = cylinderId.split('_')[1];
+            if (totals[playerId]) {
+                totals[playerId] += 1;
+            }
+            else {
+                totals[playerId] = 1;
+            }
+        });
+        var sortedTotals = Object.entries(totals)
+            .map(function (_a) {
+            var key = _a[0], value = _a[1];
+            return ({
+                playerId: Number(key),
+                numberOfSpies: value,
+            });
+        })
+            .sort(function (a, b) { return b.numberOfSpies - a.numberOfSpies; });
+        console.log('sortedTotals', sortedTotals);
+        var currentPlayerId = this.game.getPlayerId();
+        var numberOfPlayersWithSpies = sortedTotals.length;
+        if (numberOfPlayersWithSpies === 1 && sortedTotals[0].playerId !== currentPlayerId) {
+            var _b = sortedTotals[0], playerId = _b.playerId, numberOfSpies = _b.numberOfSpies;
+            return {
+                bribeeId: playerId,
+                amount: numberOfSpies,
+            };
+        }
+        else if (numberOfPlayersWithSpies > 1 &&
+            sortedTotals[0].numberOfSpies > sortedTotals[1].numberOfSpies &&
+            sortedTotals[0].playerId !== currentPlayerId) {
+            var _c = sortedTotals[0], playerId = _c.playerId, numberOfSpies = _c.numberOfSpies;
+            return {
+                bribeeId: playerId,
+                amount: numberOfSpies,
+            };
+        }
+        else {
+            return null;
+        }
+    };
+    ClientInitialBribeCheckState.prototype.checkBribePlayCard = function (_a) {
+        var cardId = _a.cardId;
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var region = cardInfo.region;
+        var rulerId = this.game.map.getRegion({ region: region }).getRuler();
+        var playerId = this.game.getPlayerId();
+        if (rulerId !== null && rulerId !== playerId) {
+            var amount = this.game.map.getRegion({ region: region }).getRulerTribes().length;
+            return { bribeeId: rulerId, amount: amount };
+        }
+        else {
+            return null;
+        }
+    };
+    return ClientInitialBribeCheckState;
+}());
+var ClientPlayCardState = (function () {
+    function ClientPlayCardState(game) {
+        this.game = game;
+    }
+    ClientPlayCardState.prototype.onEnteringState = function (_a) {
+        var bribe = _a.bribe, cardId = _a.cardId;
+        this.cardId = cardId;
+        this.bribe = bribe;
+        this.playCardNextStep();
+    };
+    ClientPlayCardState.prototype.onLeavingState = function () { };
     ClientPlayCardState.prototype.updateInterfacePlayCardConfirm = function (_a) {
         var _this = this;
-        var cardId = _a.cardId, side = _a.side, firstCard = _a.firstCard, bribe = _a.bribe;
+        var _b;
+        var side = _a.side, firstCard = _a.firstCard;
         this.game.clearPossible();
         dojo.query("#pp_card_select_".concat(side)).addClass('pp_selected');
-        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
         if (firstCard) {
             this.game.clientUpdatePageTitle({
                 text: _("Play '${name}' to court?"),
                 args: {
-                    name: this.game.getCardInfo({ cardId: cardId }).name,
+                    name: this.game.getCardInfo({ cardId: this.cardId }).name,
                 },
             });
         }
@@ -3165,7 +3432,7 @@ var ClientPlayCardState = (function () {
             this.game.clientUpdatePageTitle({
                 text: _("Play '${name}' to ${side} end of court?"),
                 args: {
-                    name: this.game.getCardInfo({ cardId: cardId }).name,
+                    name: this.game.getCardInfo({ cardId: this.cardId }).name,
                     side: side,
                 },
             });
@@ -3177,91 +3444,100 @@ var ClientPlayCardState = (function () {
                 return _this.game.takeAction({
                     action: 'playCard',
                     data: {
-                        cardId: cardId,
+                        cardId: _this.cardId,
                         side: side,
-                        bribe: bribe,
+                        bribeAmount: _this.bribe ? _this.bribe.amount : null,
                     },
                 });
             },
         });
-        this.game.addDangerActionButton({
-            id: 'cancel_btn',
-            text: _('Cancel'),
-            callback: function () {
-                _this.removeSideSelectable();
-                _this.game.onCancel();
-            },
-        });
+        if (((_b = this.bribe) === null || _b === void 0 ? void 0 : _b.negotiated) && firstCard) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    _this.removeSideSelectable();
+                    _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
+        }
+        else {
+            this.game.addDangerActionButton({
+                id: 'cancel_btn',
+                text: _('Cancel'),
+                callback: function () {
+                    var _a;
+                    _this.removeSideSelectable();
+                    setTimeout(function () {
+                        _this.game.onCancel();
+                    }, ((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) ? 20 : 0);
+                },
+            });
+        }
     };
-    ClientPlayCardState.prototype.updateInterfacePlayCardSelectSide = function (_a) {
+    ClientPlayCardState.prototype.updateInterfacePlayCardSelectSide = function () {
         var _this = this;
-        var cardId = _a.cardId, bribe = _a.bribe;
+        var _a;
         this.game.clearPossible();
-        dojo.query(".pp_card_in_hand.pp_".concat(cardId)).addClass('pp_selected');
+        dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
         this.game.clientUpdatePageTitle({
             text: _("Select which end of court to play '${name}'"),
             args: {
-                name: this.game.getCardInfo({ cardId: cardId }).name,
+                name: this.game.getCardInfo({ cardId: this.cardId }).name,
             },
         });
-        this.setSideSelectable({ cardId: cardId, bribe: bribe });
-        this.game.addDangerActionButton({
-            id: 'cancel_btn',
-            text: _('Cancel'),
-            callback: function () {
-                _this.removeSideSelectable();
-                _this.game.onCancel();
-            },
-        });
-    };
-    ClientPlayCardState.prototype.checkBribe = function (_a) {
-        var cardId = _a.cardId;
-        console.log('disregardForCustoms', this.game.activeEvents.getAllItems().includes('card_107'));
-        if (this.game.activeEvents.getAllItems().includes('card_107') ||
-            this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS })) {
-            this.playCardNextStep({ cardId: cardId, bribe: 0 });
-            return;
-        }
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
-        var region = cardInfo.region;
-        var rulerId = this.game.map.getRegion({ region: region }).getRuler();
-        var playerId = this.game.getPlayerId();
-        if (rulerId !== null && rulerId !== playerId) {
-            var rupees = this.game.map.getRegion({ region: region }).getRulerTribes().length;
-            this.updateInterfacePlayCardBribe({ cardId: cardId, ruler: this.game.playerManager.getPlayer({ playerId: rulerId }), rupees: rupees });
+        this.setSideSelectable();
+        if ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) {
+            this.game.addDangerActionButton({
+                id: 'cancel_bribe_btn',
+                text: _('Cancel bribe'),
+                callback: function () {
+                    _this.removeSideSelectable();
+                    _this.game.takeAction({
+                        action: 'cancelBribe',
+                    });
+                },
+            });
         }
         else {
-            this.playCardNextStep({ cardId: cardId, bribe: 0 });
+            this.game.addDangerActionButton({
+                id: 'cancel_btn',
+                text: _('Cancel'),
+                callback: function () {
+                    _this.removeSideSelectable();
+                    _this.game.onCancel();
+                },
+            });
         }
     };
-    ClientPlayCardState.prototype.playCardNextStep = function (_a) {
-        var cardId = _a.cardId, bribe = _a.bribe;
+    ClientPlayCardState.prototype.playCardNextStep = function () {
         var numberOfCardsInCourt = this.game.playerManager
             .getPlayer({ playerId: this.game.getPlayerId() })
             .getCourtZone()
             .getAllItems().length;
         if (numberOfCardsInCourt === 0) {
-            this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: true, side: 'left', bribe: bribe });
+            this.updateInterfacePlayCardConfirm({ firstCard: true, side: 'left' });
         }
         else {
-            this.updateInterfacePlayCardSelectSide({ cardId: cardId, bribe: bribe });
+            this.updateInterfacePlayCardSelectSide();
         }
     };
     ClientPlayCardState.prototype.removeSideSelectable = function () {
         this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).removeSideSelectFromCourt();
     };
-    ClientPlayCardState.prototype.setSideSelectable = function (_a) {
+    ClientPlayCardState.prototype.setSideSelectable = function () {
         var _this = this;
-        var cardId = _a.cardId, bribe = _a.bribe;
         this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
         dojo.query('#pp_card_select_left').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: false, side: 'left', bribe: bribe });
+                _this.updateInterfacePlayCardConfirm({ firstCard: false, side: 'left' });
             });
         });
         dojo.query('#pp_card_select_right').forEach(function (node) {
             dojo.connect(node, 'onclick', _this, function () {
-                _this.updateInterfacePlayCardConfirm({ cardId: cardId, firstCard: false, side: 'right', bribe: bribe });
+                _this.updateInterfacePlayCardConfirm({ firstCard: false, side: 'right' });
             });
         });
     };
@@ -3841,7 +4117,8 @@ var NegotiateBribeState = (function () {
         this.game = game;
     }
     NegotiateBribeState.prototype.onEnteringState = function (_a) {
-        var bribee = _a.bribee, briber = _a.briber, maxAmount = _a.maxAmount;
+        var bribee = _a.bribee, briber = _a.briber, maxAmount = _a.maxAmount, action = _a.action;
+        this.action = action;
         this.isBribee = this.game.getPlayerId() === bribee.playerId;
         this.bribee = bribee;
         this.briber = briber;
@@ -3869,7 +4146,7 @@ var NegotiateBribeState = (function () {
     NegotiateBribeState.prototype.addBribeButtons = function () {
         var _this = this;
         var currentOffer = this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount;
-        if (this.isBribee || (!this.isBribee && currentOffer <= this.game.localState.activePlayer.rupees)) {
+        if (this.isBribee || (!this.isBribee && currentOffer <= (this.game.localState.activePlayer.rupees - this.game.getMinimumActionCost({ action: this.action })))) {
             this.game.addPrimaryActionButton({
                 id: 'accept_btn',
                 text: _('Accept'),
@@ -3888,7 +4165,8 @@ var NegotiateBribeState = (function () {
             console.log('isHigherThanDemandedByBribee', isHigherThanDemandedByBribee);
             var isCurrentOffer = i === currentOffer;
             console.log('isCurrentOffer', isCurrentOffer);
-            if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer) {
+            var briberCannotAfford = !this_2.isBribee && i > (this_2.game.localState.activePlayer.rupees - this_2.game.getMinimumActionCost({ action: this_2.action }));
+            if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer || briberCannotAfford) {
                 return "continue";
             }
             this_2.game.addPrimaryActionButton({
@@ -3990,6 +4268,10 @@ var PlayerActionsState = (function () {
     }
     PlayerActionsState.prototype.onEnteringState = function (args) {
         this.game.updateLocalState(args);
+        if (args.bribe !== null) {
+            this.handleNegotiatedBribe(args.bribe);
+            return;
+        }
         this.updateInterfaceInitialStep();
     };
     PlayerActionsState.prototype.onLeavingState = function () {
@@ -4009,7 +4291,16 @@ var PlayerActionsState = (function () {
             this.game.setHandCardsSelectable({
                 callback: function (_a) {
                     var cardId = _a.cardId;
-                    _this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId } });
+                    return _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
+                        args: {
+                            cardId: cardId,
+                            action: 'playCard',
+                            next: function (_a) {
+                                var bribe = _a.bribe;
+                                return _this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId, bribe: bribe } });
+                            },
+                        },
+                    });
                 },
             });
             this.setCardActionsSelectable();
@@ -4120,6 +4411,24 @@ var PlayerActionsState = (function () {
         var currentPlayerId = this.game.getPlayerId();
         return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
     };
+    PlayerActionsState.prototype.handleNegotiatedBribe = function (_a) {
+        var action = _a.action, cardId = _a.cardId, briber = _a.briber;
+        var bribe = {
+            amount: briber.currentAmount,
+            negotiated: true,
+        };
+        if (action === 'playCard') {
+            this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId, bribe: bribe } });
+        }
+        else if (Object.keys(cardActionClientStateMap).includes(action)) {
+            this.game.framework().setClientState(cardActionClientStateMap[action], {
+                args: {
+                    cardId: cardId,
+                    bribe: bribe,
+                },
+            });
+        }
+    };
     PlayerActionsState.prototype.setCardActionsSelectable = function () {
         var _this = this;
         var playerId = this.game.getPlayerId();
@@ -4133,33 +4442,26 @@ var PlayerActionsState = (function () {
                 dojo.map(node.children, function (child) {
                     if (dojo.hasClass(child, 'pp_card_action')) {
                         var cardAction_1 = child.id.split('_')[0];
-                        if (CARD_ACTIONS_WITH_COST.includes(cardAction_1) && rupees_1 < 2) {
+                        var minActionCost = _this.game.getMinimumActionCost({ action: cardAction_1 });
+                        console.log('cardAction', cardAction_1, 'minActionCost', minActionCost);
+                        if (minActionCost === null || rupees_1 < minActionCost) {
                             return;
                         }
+                        console.log('childId', child.id);
                         dojo.addClass(child, 'pp_selectable');
                         _this.game._connections.push(dojo.connect(child, 'onclick', _this, function (event) {
                             event.preventDefault();
                             event.stopPropagation();
-                            switch (cardAction_1) {
-                                case 'battle':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BATTLE, { args: { cardId: cardId } });
-                                    break;
-                                case 'betray':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BETRAY, { args: { cardId: cardId } });
-                                    break;
-                                case 'build':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_BUILD, { args: { cardId: cardId } });
-                                    break;
-                                case 'gift':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_GIFT, { args: { cardId: cardId } });
-                                    break;
-                                case 'move':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_MOVE, { args: { cardId: cardId } });
-                                    break;
-                                case 'tax':
-                                    _this.game.framework().setClientState(CLIENT_CARD_ACTION_TAX, { args: { cardId: cardId } });
-                                    break;
-                            }
+                            _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
+                                args: {
+                                    cardId: cardId,
+                                    action: cardAction_1,
+                                    next: function (_a) {
+                                        var bribe = _a.bribe;
+                                        return _this.game.framework().setClientState(cardActionClientStateMap[cardAction_1], { args: { cardId: cardId, bribe: bribe } });
+                                    },
+                                },
+                            });
                         }));
                     }
                 });
@@ -4200,6 +4502,13 @@ var PlayerActionsState = (function () {
                 }));
             }
         });
+    };
+    PlayerActionsState.prototype.setCardActionSelected = function (_a) {
+        var cardId = _a.cardId, action = _a.action;
+        var node = dojo.byId("".concat(action, "_").concat(cardId));
+        if (node) {
+            dojo.addClass(node, PP_SELECTED);
+        }
     };
     PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())
@@ -4977,6 +5286,7 @@ var PaxPamir = (function () {
             _a[CLIENT_CARD_ACTION_GIFT] = new ClientCardActionGiftState(this),
             _a[CLIENT_CARD_ACTION_MOVE] = new ClientCardActionMoveState(this),
             _a[CLIENT_CARD_ACTION_TAX] = new ClientCardActionTaxState(this),
+            _a[CLIENT_INITIAL_BRIBE_CHECK] = new ClientInitialBribeCheckState(this),
             _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
@@ -5128,6 +5438,19 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.getCurrentPlayer = function () {
         return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
+    };
+    PaxPamir.prototype.getMinimumActionCost = function (_a) {
+        var action = _a.action;
+        if ([BATTLE, MOVE, TAX, PLAY_CARD].includes(action)) {
+            return 0;
+        }
+        else if ([BETRAY, BUILD].includes(action)) {
+            return 2;
+        }
+        else {
+            return this.getCurrentPlayer().getLowestAvailableGift();
+        }
+        ;
     };
     PaxPamir.prototype.framework = function () {
         return this;

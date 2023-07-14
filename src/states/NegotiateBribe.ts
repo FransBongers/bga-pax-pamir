@@ -1,5 +1,6 @@
 class NegotiateBribeState implements State {
   private game: PaxPamirGame;
+  private action: string;
   private isBribee: boolean;
   private briber: OnEnteringNegotiateBribeArgs['briber'];
   private bribee: OnEnteringNegotiateBribeArgs['bribee'];
@@ -9,7 +10,8 @@ class NegotiateBribeState implements State {
     this.game = game;
   }
 
-  onEnteringState({ bribee, briber, maxAmount }: OnEnteringNegotiateBribeArgs) {
+  onEnteringState({ bribee, briber, maxAmount, action }: OnEnteringNegotiateBribeArgs) {
+    this.action = action;
     this.isBribee = this.game.getPlayerId() === bribee.playerId;
     this.bribee = bribee;
     this.briber = briber;
@@ -63,7 +65,7 @@ class NegotiateBribeState implements State {
 
   private addBribeButtons() {
     const currentOffer = this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount;
-    if (this.isBribee || (!this.isBribee && currentOffer <= this.game.localState.activePlayer.rupees)) {
+    if (this.isBribee || (!this.isBribee && currentOffer <= (this.game.localState.activePlayer.rupees - this.game.getMinimumActionCost({action: this.action})))) {
       this.game.addPrimaryActionButton({
         id: 'accept_btn',
         text: _('Accept'),
@@ -83,8 +85,9 @@ class NegotiateBribeState implements State {
       
       const isCurrentOffer = i === currentOffer;
       console.log('isCurrentOffer',isCurrentOffer);
+      const briberCannotAfford = !this.isBribee && i >(this.game.localState.activePlayer.rupees - this.game.getMinimumActionCost({action: this.action}));
       
-      if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer) {
+      if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer || briberCannotAfford) {
         continue;
       }
       this.game.addPrimaryActionButton({

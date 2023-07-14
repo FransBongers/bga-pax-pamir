@@ -3,8 +3,14 @@ interface State {
   onLeavingState: () => void;
 }
 
+type BribeArgs = {
+  amount: number;
+  negotiated?: boolean;
+} | null;
+
 interface ClientPlayCardStateArgs {
   cardId: string;
+  bribe: BribeArgs;
 }
 
 interface ClientPurchaseCardStateArgs {
@@ -13,6 +19,22 @@ interface ClientPurchaseCardStateArgs {
 }
 
 interface ClientCardActionStateArgs {
+  cardId: string;
+  bribe: BribeArgs;
+}
+
+type CardAction = 'battle' | 'betray' | 'build' | 'gift' | 'move' | 'tax';
+
+type PlayerAction = 'playCard' | CardAction;
+
+interface ClientInitialBribeCheckArgs {
+  next: (props: {
+    bribe: {
+      amount: number;
+      negotiated?: boolean;
+    } | null;
+  }) => void;
+  action: PlayerAction;
   cardId: string;
 }
 
@@ -41,13 +63,17 @@ interface OnEnteringNegotiateBribeArgs {
     currentAmount: number;
     playerId: number;
   };
-  ifAccepted: {
-    action: 'playCard';
-    cardId: string;
-    side: 'left' | 'right';
-  };
+  action: PlayerAction;
+  cardId: string;
   maxAmount: number;
 }
+
+type NegotiatedBribe = Omit<OnEnteringNegotiateBribeArgs, 'bribee'> & {
+  bribee: {
+    currentAmount: number;
+    playerId: number;
+  };
+};
 
 interface OnEnteringPlaceRoadArgs {
   region: {

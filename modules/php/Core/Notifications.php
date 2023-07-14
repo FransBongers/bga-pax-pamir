@@ -192,10 +192,10 @@ class Notifications
       $args['playerScore_' . $playerId] = [
         'log' => clienttranslate('${player_name} scores ${points} victory point(s)${logTokenNewLine}'),
         'args' => [
-          'player_name' => Players::get($playerId)-> getName(), 
+          'player_name' => Players::get($playerId)->getName(),
           'logTokenNewLine' => Utils::logTokenNewLine(),
           'points' => $playerScore['newScore'] - $playerScore['currentScore']
-        ] 
+        ]
       ];
     }
 
@@ -434,6 +434,13 @@ class Notifications
     ));
   }
 
+  public static function cancelBribe()
+  {
+    self::notifyAll("declineBribe", clienttranslate('${player_name} chooses not to pay bribe and perform a different action'), array(
+      'player' => Players::get(),
+    ));
+  }
+
   public static function declineBribe($rupees)
   {
     self::notifyAll("declineBribe", clienttranslate('${player_name} declines bribe of ${rupees} rupee(s)'), array(
@@ -480,6 +487,22 @@ class Notifications
       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
       'logTokenNewLine' => Utils::logTokenNewLine()
     ));
+  }
+
+  public static function startBribeNegotiation($player, $card,  $amount, $action)
+  {
+    $message =  $action === 'playCard' ?
+      clienttranslate('${player_name} wants to play ${logTokenCardName} and offers bribe of ${amount} rupee(s)${logTokenNewLine}${logTokenLargeCard}') :
+      clienttranslate('${player_name} wants to use ${logTokenCardName} to ${action} and offers bribe of ${amount} rupee(s)${logTokenNewLine}${logTokenLargeCard}');
+
+    self::notifyAll("startBribeNegotiation", $message, [
+      'player' => $player,
+      'amount' => $amount,
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'action' => $action,
+      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+    ]);
   }
 
   public static function negotiateBribe($player, $amount, $isBribee)
@@ -563,7 +586,7 @@ class Notifications
     ));
   }
 
-  public static function exchangeHandAllPlayers($player,$selectedPlayer,$newHandCounts)
+  public static function exchangeHandAllPlayers($player, $selectedPlayer, $newHandCounts)
   {
     self::notifyAll("exchangeHand", clienttranslate('${player_name} exchanges hand with ${player_name2}'), [
       'player_name' => $player->getName(),
@@ -572,9 +595,9 @@ class Notifications
     ]);
   }
 
-  public static function replaceHand($player,$hand)
+  public static function replaceHand($player, $hand)
   {
-    self::notify($player,'replaceHand','',[
+    self::notify($player, 'replaceHand', '', [
       'player' => $player,
       'hand' => $hand,
     ]);

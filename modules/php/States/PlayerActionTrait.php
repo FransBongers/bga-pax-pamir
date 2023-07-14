@@ -28,11 +28,14 @@ trait PlayerActionTrait
 
   function argPlayerActions()
   {
-    return array(
-      'activePlayer' => Players::get()->jsonSerialize(null),
+    $bribe = Globals::getNegotiatedBribe();
+    return [
+      // TODO: remove activePlayer here
+      'activePlayer' => Players::getActive()->jsonSerialize(null),
       'remainingActions' => Globals::getRemainingActions(),
       'usedCards' => Cards::getUnavailableCards(),
-    );
+      'bribe' => isset($bribe['action']) ? $bribe : null,
+    ];
   }
 
   //  .########..##..........###....##....##.########.########.
@@ -50,175 +53,6 @@ trait PlayerActionTrait
   // .#########.##..........##.....##..##.....##.##..####.......##
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
-
-  function betray($cardId, $betrayedCardId, $acceptPrize = false)
-  {
-    self::checkAction('betray');
-
-    $cardInfo = Cards::get($cardId);
-    $this->isValidCardAction($cardInfo, BETRAY);
-
-    $betrayedCardInfo = Cards::get($betrayedCardId);
-    $betrayedPlayerId = intval(explode('_', $betrayedCardInfo['location'])[1]);
-
-    Notifications::log('acceptPrize', [
-      'acceptPrize' => $acceptPrize
-    ]);
-
-    // Card should be in a player's court
-    if (!Utils::startsWith($betrayedCardInfo['location'], 'court')) {
-      throw new \feException("Card is not in a players court");
-    }
-
-    if (Players::get($betrayedPlayerId)->hasSpecialAbility(SA_BODYGUARDS) && $betrayedCardInfo['suit'] === POLITICAL) {
-      throw new \feException("Player has Bodyguard special ability");
-    }
-
-    if ($acceptPrize && $betrayedCardInfo['prize'] === null) {
-      throw new \feException("Card does not have a prize");
-    }
-    $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
-    // Notifications::log('spies',[$spiesOnCard[0]]);
-    $player = Players::get();
-    $playerId = $player->getId();
-    // Card should have spy of active player
-    if (!Utils::array_some($spiesOnCard, function ($cylinder) use ($playerId) {
-      return intval(explode('_', $cylinder['id'])[1]) === $playerId;
-    })) {
-      throw new \feException("No spy on selected card");
-    }
-
-    if ($player->getRupees() < 2) {
-      throw new \feException("Player does not have enough rupees to pay for action");
-    }
-
-    Cards::setUsed($cardId, 1);
-    // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardInfo)) {
-      Globals::incRemainingActions(-1);
-    }
-    $rupeesOnCards = $this->payActionCosts(2);
-    Players::incRupees($playerId, -2);
-    Notifications::betray($betrayedCardInfo, $player, $rupeesOnCards);
-
-    $prizeTaker = $betrayedCardInfo['prize'] !== null && $acceptPrize ? $player : null;
-    $this->executeDiscards([$betrayedCardInfo], Players::get($betrayedPlayerId), [
-      'activePlayerId' => $playerId,
-      'transition' => 'playerActions'
-    ], $prizeTaker);
-  }
-
-  /**
-   * cardId: card with build action
-   * locations: locations to build: roads on borders, armies in regions
-   */
-  function build($inputLocations, $cardId = null)
-  {
-    self::checkAction('build');
-    Notifications::log('cardId',$cardId);
-    Notifications::log('input',$inputLocations);
-    $isInfrastructureAbilityState = $this->gamestate->state(true, false, true)['name'] === "specialAbilityInfrastructure";
-    Notifications::log('isInfrastructureAbilityState',$isInfrastructureAbilityState);
-    // return;
-    $locations = [];
-    foreach($inputLocations as $index => $location) {
-      $locations[] = $location['location'];
-    }
-
-    
-    Notifications::log('build', $locations);
-    $cardInfo = $cardId !== null ? Cards::get($cardId) : null;
-    if (!$isInfrastructureAbilityState) {
-      $this->isValidCardAction($cardInfo, BUILD);
-    }
-
-    $player = Players::get();
-    if ($isInfrastructureAbilityState && !$player->hasSpecialAbility(SA_INFRASTRUCTURE)) {
-      throw new \feException("Player does not have Infrastructure special ability");
-    }
-
-    $nationBuildingMultiplier = Events::isNationBuildingActive(Players::get()) ? 2 : 1;
-
-    $numberOfTokens = count($locations);
-    Notifications::log('numberOfTokens', $numberOfTokens);
-
-    $maxNumberOfTokens = $isInfrastructureAbilityState ? 1 : 3 * $nationBuildingMultiplier;
-    // max number to build is 3
-    if ($numberOfTokens > 3 * $maxNumberOfTokens) {
-      throw new \feException("Too many blocks selected");
-    };
-
-    if ($numberOfTokens === 0) {
-      throw new \feException("At least one block needs to be selected");
-    };
-
-    $cost = $isInfrastructureAbilityState ? 0 : ceil($numberOfTokens / $nationBuildingMultiplier)  * 2;
-    
-    // player should have rupees
-    if (!$isInfrastructureAbilityState && $cost > $player->getRupees()) {
-      throw new \feException("Player does not have enough rupees to pay for action");
-    }
-
-    // $hasInfrastructureAbility = $player->hasSpecialAbility(SA_INFRASTRUCTURE);
-    // if (!$hasInfrastructureAbility && count($infrastructureLocations) > 0) {
-    //   throw new \feException("Player does not have Infrastructure special ability");
-    // }
-    // if (count($infrastructureLocations) > 1) {
-    //   throw new \feException("Only allowed to place one additional block with Infrastructure special ability");
-    // }
-
-    $borders = [];
-    $regions = [];
-    $playerId = $player->getId();
-    //player should rule region or an adjacent region in case of a border
-    foreach ($locations as $index => $location) {
-      $isBorder = str_contains($location, '_');
-      $rulers = Globals::getRulers();
-      if ($isBorder) {
-        $borderRegions = explode('_', $location);
-        if (!($rulers[$borderRegions[0]] === $playerId || $rulers[$borderRegions[1]] === $playerId)) {
-          throw new \feException("Player does not rule an adjacent region");
-        };
-        $borders[] = $location;
-      } else {
-        if (!($rulers[$location] === $playerId)) {
-          throw new \feException("Player does not rule region");
-        }
-        $regions[] = $location;
-      }
-    }
-    Notifications::log('build', [
-      'borders' => $borders,
-      'regions' => $regions
-    ]);
-    if (!$isInfrastructureAbilityState) {
-      Cards::setUsed($cardId, 1);
-      if (!$this->isCardFavoredSuit($cardInfo)) {
-        Globals::incRemainingActions(-1);
-      }
-      $rupeesOnCards = $this->payActionCosts($cost);
-      Players::incRupees($playerId, -$cost);
-      Notifications::build($cardId, $player, $rupeesOnCards);
-    } else {
-      Notifications::buildInfrastructure($player);
-    }
-
-    // Move tokens
-    foreach ($regions as $index => $regionId) {
-      $this->resolvePlaceArmy($regionId);
-    }
-    foreach ($borders as $index => $borderId) {
-      $this->resolvePlaceRoad($borderId);
-    }
-
-    $hasInfrastructureAbility = $player->hasSpecialAbility(SA_INFRASTRUCTURE);
-    Notifications::log('isInfrastructureAbilityState',$isInfrastructureAbilityState);
-    if ($hasInfrastructureAbility && !$isInfrastructureAbilityState) {
-      $this->nextState('specialAbilityInfrastructure');
-    } else {
-      $this->gamestate->nextState('playerActions');
-    }
-  }
 
   /**
    * Part of set up when players need to select loyalty.
@@ -256,7 +90,7 @@ trait PlayerActionTrait
 
     if ($this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities") {
       $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
-      Notifications::log('usedAbilities',$usedSpecialAbilities);
+      Notifications::log('usedAbilities', $usedSpecialAbilities);
       $usedSpecialAbilities[] = $specialAbility;
       Globals::setUsedSpecialAbilities($usedSpecialAbilities);
       $transition = $this->playerHasStartOfTurnSpecialAbilities($usedSpecialAbilities) ? 'startOfTurnAbilities' : 'playerActions';
@@ -266,14 +100,14 @@ trait PlayerActionTrait
 
       $remainingActions = Globals::getRemainingActions();
       $state = $this->gamestate->state();
-  
+
       // TODO: (check if it is necessary to set remaining actions to 0 here, also done in turn trait?)
       if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
         Globals::setRemainingActions(0);
       }
       // Notify
       Notifications::pass();
-  
+
       $this->gamestate->nextState('cleanup');
     }
   }
@@ -304,63 +138,6 @@ trait PlayerActionTrait
     $this->gamestate->jumpToState(Globals::getLogState());
   }
 
-  /**
-   * Play card from hand to court
-   */
-  function purchaseGift($value, $cardId)
-  {
-    self::checkAction('purchaseGift');
-    self::dump("gift value", $value);
-    $cardInfo = Cards::get($cardId);
-    if (!$this->isValidCardAction($cardInfo, GIFT)) {
-      return;
-    }
-
-    $player = Players::get();
-    $playerId = $player->getId();
-    $rupees = $player->getRupees();
-    // Player should have enough rupees
-    if ($rupees < $value) {
-      throw new \feException("Not enough rupees to pay for the gift.");
-    }
-    $location = 'gift_' . $value . '_' . $playerId;
-    $tokenInLocation = Tokens::getInLocation($location)->first();
-    if ($tokenInLocation != null) {
-      throw new \feException("Already a cylinder in selected location.");
-    }
-
-    $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getTopOf($from);
-
-    // If null player needs to select cylinder from somewhere else
-    if ($cylinder != null) {
-      Tokens::move($cylinder['id'], $location);
-      Cards::setUsed($cardId, 1); // unavailable
-    }
-
-    // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardInfo)) {
-      Globals::incRemainingActions(-1);
-    }
-
-
-    $rupeesOnCards = $this->payActionCosts($value);
-    Players::incRupees($playerId, -intval($value));
-
-    Notifications::purchaseGift(
-      $player,
-      $value,
-      [
-        'from' => $from,
-        'to' => $location,
-        'tokenId' => $cylinder['id'],
-      ],
-      $rupeesOnCards
-    );
-
-    $this->gamestate->nextState('playerActions');
-  }
-
   function skipSpecialAbility()
   {
     self::checkAction('skipSpecialAbility');
@@ -371,116 +148,6 @@ trait PlayerActionTrait
     $this->nextState('playerActions');
   }
 
-  function tax($cardId, $market, $players)
-  {
-    self::checkAction('tax');
-
-    $cardInfo = Cards::get($cardId);
-    $this->isValidCardAction($cardInfo, TAX);
-    $selectedFromMarket = explode(' ', $market);
-    $selectedPlayers = explode(' ', $players);
-
-
-
-    $numberOfRupeesSelectedFromMarket = 0;
-    $numberOfRupeesSelectedFromPlayers = 0;
-    // Check if rupee is in market
-    foreach ($selectedFromMarket as $index => $rupeeId) {
-      if (strlen($rupeeId) == 0) {
-        continue;
-      };
-      $rupee = Tokens::get($rupeeId);
-      $location = $rupee['location'];
-
-      if (!Utils::startsWith($location, 'market')) {
-        throw new \feException("Selected rupee is not in the market");
-      };
-      $numberOfRupeesSelectedFromMarket += 1;
-    }
-    $activePlayer = Players::get();
-    $activePlayerId = $activePlayer->getId();
-    $rulers = Globals::getRulers();
-
-    $hasClaimOfAncientLineage = Cards::get(SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID)['location'] === Locations::court($activePlayerId);
-
-    // Checks for selected players
-    foreach ($selectedPlayers as $index => $selectedPlayer) {
-      if (strlen($selectedPlayer) == 0) {
-        continue;
-      };
-      $playerInput = explode('_', $selectedPlayer);
-      $playerId = $playerInput[0];
-      $selectedRupees = intval($playerInput[1]);
-      $player = Players::get($playerId);
-
-      if (!$hasClaimOfAncientLineage) {
-        // Player owns card of region ruled by active player
-        $courtCards = $player->getCourtCards();
-
-        $hasCardRuledByActivePlayer = Utils::array_some($courtCards, function ($courtCard) use ($activePlayerId, $rulers) {
-          return $rulers[$courtCard['region']] === $activePlayerId;
-        });
-        if (!$hasCardRuledByActivePlayer) {
-          throw new \feException("Seelcted player does not have a court card ruled by active player");
-        }
-      }
-      // Amount taxed from player is allowed
-      $playerRupees = $player->getRupees();
-      $taxShelter = $player->getSuitTotals()[ECONOMIC];
-      $maxTaxable = $playerRupees - $taxShelter;
-      if ($selectedRupees > $maxTaxable) {
-        throw new \feException("More rupees selected for player than allowed");
-      };
-      $numberOfRupeesSelectedFromPlayers += $selectedRupees;
-    }
-    $totalSelected = $numberOfRupeesSelectedFromMarket + $numberOfRupeesSelectedFromPlayers;
-    // Total number of rupees selected does not exceed card rank
-    if ($totalSelected > $cardInfo['rank']) {
-      throw new \feException("More rupees selected for player than allowed by card rank");
-    }
-
-    Cards::setUsed($cardId, 1);
-    // if not free action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardInfo)) {
-      Globals::incRemainingActions(-1);
-    }
-    Notifications::tax($cardId, $activePlayer);
-    Players::incRupees($activePlayerId, $totalSelected);
-
-    $rupeesInMarket = [];
-    // Check if rupee is in market
-    foreach ($selectedFromMarket as $index => $rupeeId) {
-      if (strlen($rupeeId) == 0) {
-        continue;
-      };
-      $rupee = Tokens::get($rupeeId);
-      $location = explode('_', $rupee['location']);
-      $rupeesInMarket[] = [
-        'rupeeId' => $rupeeId,
-        'row' => intval($location[1]),
-        'column' => intval($location[2])
-      ];
-      Tokens::move($rupeeId, RUPEE_SUPPLY);
-    };
-    if ($numberOfRupeesSelectedFromMarket > 0) {
-      Notifications::taxMarket($numberOfRupeesSelectedFromMarket, $activePlayer, $rupeesInMarket);
-    }
-
-    foreach ($selectedPlayers as $index => $selectedPlayer) {
-      if (strlen($selectedPlayer) == 0) {
-        continue;
-      };
-      $playerInput = explode('_', $selectedPlayer);
-      $playerId = $playerInput[0];
-      $numberOfRupees = intval($playerInput[1]);
-
-      Players::incRupees($playerId, -$numberOfRupees);
-      Notifications::taxPlayer($numberOfRupees, $activePlayer, $playerId);
-    };
-
-    $this->gamestate->nextState('playerActions');
-  }
-
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
   // .##.....##....##.....##..##........##.....##......####..
@@ -488,6 +155,17 @@ trait PlayerActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  function getMinimumActionCost($action,$player) {
+    if(in_array($action, [BATTLE, MOVE, TAX, PLAY_CARD])) {
+      return 0;
+    } else if (in_array($action, [BETRAY,BUILD])) {
+      return 2;
+    } else {
+      // only option remaining is purchase gift, determines on lowest empty spot
+      return $player->getLowestAvailableGift();
+    };
+  }
 
   function isCardFavoredSuit($cardInfo)
   {

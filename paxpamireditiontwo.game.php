@@ -58,13 +58,17 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DominanceCheckTrait;
-    use PaxPamir\States\NegotiateBribeTrait;
+    use PaxPamir\States\BribeTrait;
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayCardTrait;
     use PaxPamir\States\PlayerActionBattleTrait;
+    use PaxPamir\States\PlayerActionBetrayTrait;
+    use PaxPamir\States\PlayerActionBuildTrait;
+    use PaxPamir\States\PlayerActionGiftTrait;
     use PaxPamir\States\PlayerActionMoveTrait;
+    use PaxPamir\States\PlayerActionTaxTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
     use PaxPamir\States\RefreshMarketTrait;
@@ -72,6 +76,14 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\TurnTrait;
+
+    // Declare objects from material.inc.php to remove IntelliSense errors
+    public $borders;
+    public $cards;
+    public $loyalty;
+    public $regions;
+    public $specialAbilities;
+    public $suits;
 
     public static $instance = null;
     function __construct()

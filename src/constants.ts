@@ -5,6 +5,7 @@ const CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
 const CLIENT_CARD_ACTION_GIFT = 'clientCardActionGift';
 const CLIENT_CARD_ACTION_MOVE = 'clientCardActionMove';
 const CLIENT_CARD_ACTION_TAX = 'clientCardActionTax';
+const CLIENT_INITIAL_BRIBE_CHECK = 'clientInitialBribeCheck';
 const CLIENT_PLAY_CARD = 'clientPlayCard';
 const CLIENT_PURCHASE_CARD = 'clientPurchaseCard';
 const CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE = 'clientResolveConfidenceFailure';
@@ -12,6 +13,32 @@ const CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS = 'clientResolveEventOtherPe
 const CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 const CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 const CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
+
+/**
+ * Action
+ */
+// default actions
+const PLAY_CARD = 'playCard';
+const PURCHASE_CARD = 'purchaseCard';
+// card actions
+const BATTLE = 'battle';
+const BETRAY = 'betray';
+const BUILD = 'build';
+const GIFT = 'gift';
+const MOVE = 'move';
+const TAX = 'tax';
+
+const CARD_ACTIONS_WITH_COST = [BETRAY, BUILD, GIFT];
+const CARD_ACTIONS_WITHOUT_COST = [BATTLE, MOVE, TAX];
+
+const cardActionClientStateMap = {
+  [BATTLE]: CLIENT_CARD_ACTION_BATTLE,
+  [BETRAY]: CLIENT_CARD_ACTION_BETRAY,
+  [BUILD]: CLIENT_CARD_ACTION_BUILD,
+  [GIFT]: CLIENT_CARD_ACTION_GIFT,
+  [MOVE]: CLIENT_CARD_ACTION_MOVE,
+  [TAX]: CLIENT_CARD_ACTION_TAX,
+};
 
 // size of tokens
 const CARD_WIDTH = 150;
@@ -45,7 +72,7 @@ const MILITARY = 'military';
 const POLITICAL = 'political';
 const INTELLIGENCE = 'intelligence';
 
-const SUITS = [POLITICAL, INTELLIGENCE,ECONOMIC,MILITARY];
+const SUITS = [POLITICAL, INTELLIGENCE, ECONOMIC, MILITARY];
 
 // coalitions
 const AFGHAN = 'afghan';
@@ -99,31 +126,17 @@ const IMPACT_ICON_POLITICAL_SUIT = 'political';
 const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 
 /**
- * Card actions types
+ * Class names
  */
- const TYPE_BATTLE = 'battle';
- const TYPE_BETRAY = 'betray';
- const TYPE_BUILD = 'build';
- const TYPE_GIFT = 'gift';
- const TYPE_MOVE = 'move';
- const TYPE_TAX = 'tax';
+const PP_SELECTABLE = 'pp_selectable';
+const PP_SELECTED = 'pp_selected';
+const PP_CARD_IN_HAND = 'pp_card_in_hand';
+const PP_CARD_IN_ZONE = 'pp_card_in_zone';
+const PP_MARKET_CARD = 'pp_market_card';
 
- const CARD_ACTIONS_WITH_COST = [TYPE_BETRAY,TYPE_BUILD,TYPE_GIFT];
- const CARD_ACTIONS_WITHOUT_COST = [TYPE_BATTLE,TYPE_MOVE,TYPE_TAX];
-
- /**
-  * Class names
-  */
- const PP_SELECTABLE = 'pp_selectable';
- const PP_SELECTED = 'pp_selected';
- const PP_CARD_IN_HAND = 'pp_card_in_hand';
- const PP_CARD_IN_ZONE = 'pp_card_in_zone';
- const PP_MARKET_CARD = 'pp_market_card';
- 
-
- /**
-  * Events
-  */
+/**
+ * Events
+ */
 /**
  * Event card effects & cardIds
  */
@@ -167,7 +180,7 @@ const SA_BODYGUARDS = 'bodyguards'; // card_15 card_83
 const SA_CITADEL_KABUL = 'citadelKabul'; // card_17
 const SA_CITADEL_TRANSCASPIA = 'citadelTranscaspia'; // card_97
 const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
-const SA_CIVIL_SERVICE_REFORM = 'civilServiceReforms'; // card_24
+const SA_CIVIL_SERVICE_REFORMS = 'civilServiceReforms'; // card_24
 const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
 const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42
 const SA_BLACKMAIL_HERAT = 'blackmailHerat'; // card_54

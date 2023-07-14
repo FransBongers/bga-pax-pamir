@@ -1,5 +1,6 @@
 class ClientCardActionMoveState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
   private cardId: string;
   private moves: Record<
     string,
@@ -14,8 +15,9 @@ class ClientCardActionMoveState implements State {
     this.game = game;
   }
 
-  onEnteringState({ cardId }: ClientCardActionStateArgs) {
+  onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
     this.cardId = cardId;
+    this.bribe = bribe;
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     this.maxNumberOfMoves = cardInfo.rank;
     this.moves = {};
@@ -52,7 +54,20 @@ class ClientCardActionMoveState implements State {
         callback: () => this.onConfirm(),
       });
     }
-    this.addCancelButton();
+    if (this.bribe?.negotiated && Object.keys(this.moves).length === 0) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () => {
+          this.returnPiecesToOriginalPosition();
+          this.game.takeAction({
+            action: 'cancelBribe',
+          });
+        },
+      });
+    } else {
+      this.addCancelButton();
+    }
   }
 
   private updateInterfaceArmySelected({ pieceId, regionId }: { pieceId: string; regionId: string }) {
@@ -151,6 +166,7 @@ class ClientCardActionMoveState implements State {
         data: {
           cardId: this.cardId,
           moves: JSON.stringify(this.moves),
+          bribeAmount: this.bribe?.amount ?? null,
         },
       });
     }
@@ -215,7 +231,10 @@ class ClientCardActionMoveState implements State {
       text: _('Cancel'),
       callback: () => {
         this.returnPiecesToOriginalPosition();
-        this.game.onCancel();
+        // setTimeout(() => {
+          this.game.onCancel();
+        // },this.bribe?.negotiated ? 100 : 0)
+        
       },
     });
   }
@@ -224,7 +243,7 @@ class ClientCardActionMoveState implements State {
    *
    * @returns next card for given cardId in court of playerId
    */
-  private getNextCardId({ cardId }: { cardId: string; }) {
+  private getNextCardId({ cardId }: { cardId: string }) {
     const node = dojo.byId(cardId);
     const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
     const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
@@ -254,7 +273,7 @@ class ClientCardActionMoveState implements State {
    *
    * @returns previous card for given cardId in court of playerId
    */
-  private getPreviousCardId({ cardId }: { cardId: string;}) {
+  private getPreviousCardId({ cardId }: { cardId: string }) {
     const node = dojo.byId(cardId);
     const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
     const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getAllItems();
@@ -323,11 +342,12 @@ class ClientCardActionMoveState implements State {
    * Return pieces to location where they started their moves (in case of cancel)
    */
   private returnPiecesToOriginalPosition() {
+    debug('returnPiecesToOriginalPosition');
     Object.entries(this.moves).forEach(([key, value]) => {
       if (value.length === 0) {
         return;
       }
-      debug('return', key, value);
+      debug('returnPiecesToOriginalPosition', key, value);
       // From region is the destination of the last move
       const from = value[value.length - 1].to;
       // To region is the source of the first move
@@ -380,11 +400,13 @@ class ClientCardActionMoveState implements State {
         return;
       }
 
-      const hasIndianSupplies = player.hasSpecialAbility({specialAbility: SA_INDIAN_SUPPLIES});
-      const hasCoalitionRoads = hasIndianSupplies || region.borders.some((borderId: string) => {
-        const border = this.game.map.getBorder({ border: borderId });
-        return border.getCoalitionRoads({ coalitionId }).length > 0;
-      });
+      const hasIndianSupplies = player.hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
+      const hasCoalitionRoads =
+        hasIndianSupplies ||
+        region.borders.some((borderId: string) => {
+          const border = this.game.map.getBorder({ border: borderId });
+          return border.getCoalitionRoads({ coalitionId }).length > 0;
+        });
       if (!hasCoalitionRoads) {
         return;
       }
@@ -397,36 +419,34 @@ class ClientCardActionMoveState implements State {
     });
   }
 
-  private getSingleMoveDestinationsForSpy({ cardId }: {cardId: string;}): string[] {
-    const cardInfo = this.game.getCardInfo({cardId}) as CourtCard;
+  private getSingleMoveDestinationsForSpy({ cardId }: { cardId: string }): string[] {
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     const destinationCards: string[] = [];
-    destinationCards.push(
-      this.getNextCardId({ cardId })
-    )
+    destinationCards.push(this.getNextCardId({ cardId }));
     const previousCardId = this.getPreviousCardId({ cardId });
     if (!destinationCards.includes(previousCardId)) {
       destinationCards.push(previousCardId);
-    };
+    }
     const player = this.game.getCurrentPlayer();
-    if (player.hasSpecialAbility({specialAbility: SA_STRANGE_BEDFELLOWS})) {
+    if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
       dojo.query(`.pp_card_in_court.pp_${cardInfo.region}`).forEach((node) => {
         const nodeId = node.id;
         if (!destinationCards.includes(nodeId)) {
           destinationCards.push(nodeId);
         }
-      })
+      });
     }
     return destinationCards;
   }
 
-  private setDestinationCardsSelectable({ pieceId, cardId: inputCardId }: {pieceId: string; cardId: string;}) {
+  private setDestinationCardsSelectable({ pieceId, cardId: inputCardId }: { pieceId: string; cardId: string }) {
     debug('setDestinationCardsSelectable', pieceId, inputCardId);
 
-    const destinationCards = this.getSingleMoveDestinationsForSpy({cardId: inputCardId});
+    const destinationCards = this.getSingleMoveDestinationsForSpy({ cardId: inputCardId });
     const player = this.game.getCurrentPlayer();
-    if (player.hasSpecialAbility({specialAbility: SA_WELL_CONNECTED})) {
+    if (player.hasSpecialAbility({ specialAbility: SA_WELL_CONNECTED })) {
       [...destinationCards].forEach((cardId) => {
-        destinationCards.push(...this.getSingleMoveDestinationsForSpy({cardId}));
+        destinationCards.push(...this.getSingleMoveDestinationsForSpy({ cardId }));
       });
     }
 
@@ -435,7 +455,7 @@ class ClientCardActionMoveState implements State {
       if (!uniqueDestinations.includes(cardId)) {
         uniqueDestinations.push(cardId);
       }
-    })
+    });
 
     // Filter in case this is the only card in play so previous and next card are same as the selected card
     // destinationCards
@@ -457,7 +477,7 @@ class ClientCardActionMoveState implements State {
 
     const region = this.game.map.getRegion({ region: regionId });
     const coalitionId = this.game.localState.activePlayer.loyalty;
-    const hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({specialAbility: SA_INDIAN_SUPPLIES});
+    const hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
 
     region.borders.forEach((borderId) => {
       const border = this.game.map.getBorder({ border: borderId });

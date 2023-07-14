@@ -15,7 +15,7 @@
 - Pay for hostage cards
 
 ### Card abilities
-- card_24 / SA_CIVIL_SERVICE_REFORM
+- card_24 / SA_CIVIL_SERVICE_REFORMS
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market
@@ -52,3 +52,4 @@
 ### Ideas
 - Slot events cards under 'player tableau' of player who purchased
 - Add counters to roads / armies to show the number in a region (in case total numner exceeds a certain amount)
+

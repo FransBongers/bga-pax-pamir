@@ -1,5 +1,6 @@
 class ClientCardActionBuildState implements State {
   private game: PaxPamirGame;
+  private bribe: BribeArgs;
   private cardId: string | null;
   private tempTokens: { location: string; type: 'army' | 'road' }[];
   private maxNumberToPlace: number;
@@ -13,12 +14,13 @@ class ClientCardActionBuildState implements State {
 
   onEnteringState(props: ClientCardActionStateArgs) {
     this.cardId = props?.cardId ? props.cardId : null;
+    this.bribe = props.bribe;
     this.tempTokens = [];
     const player = this.game.getCurrentPlayer();
     const playerRupees = player.getRupees();
     this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
     const multiplier = this.playerHasNationBuilding ? 2 : 1;
-    this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor(playerRupees / 2), 3) * multiplier;
+    this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor((playerRupees - this.bribe?.amount || 0) / 2), 3) * multiplier;
     this.updateInterfaceInitialStep();
   }
 
@@ -47,25 +49,8 @@ class ClientCardActionBuildState implements State {
     // Let player select roads / armies
     this.updatePageTitle();
     this.setLocationsSelectable();
-    this.game.addPrimaryActionButton({
-      id: 'done_button',
-      text: _('Done'),
-      callback: () => this.updateInterfaceConfirm(),
-    });
-    dojo.addClass('done_button', 'disabled');
-    if (this.isSpecialAbilityInfrastructure) {
-      this.game.addDangerActionButton({
-        id: 'skip_btn',
-        text: _('Skip'),
-        callback: () => this.game.takeAction({ action: 'skipSpecialAbility' }),
-      });
-    } else {
-      this.game.addDangerActionButton({
-        id: 'cancel_btn',
-        text: _('Cancel'),
-        callback: () => this.onCancel(),
-      });
-    }
+    this.updateActionButtons();
+
   }
 
   private updateInterfaceConfirm() {
@@ -131,8 +116,8 @@ class ClientCardActionBuildState implements State {
         type: 'road',
       });
     }
-    dojo.removeClass('done_button', 'disabled');
     this.updatePageTitle();
+    this.updateActionButtons();
   }
 
   private onCancel() {
@@ -145,7 +130,7 @@ class ClientCardActionBuildState implements State {
     if (this.tempTokens.length > 0) {
       this.game.takeAction({
         action: 'build',
-        data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens) },
+        data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: this.bribe?.amount ?? null, },
       });
       this.clearTemporaryTokens();
     }
@@ -222,7 +207,42 @@ class ClientCardActionBuildState implements State {
         },
       });
     }
+  }
 
-
+  private updateActionButtons() {
+    this.game.framework().removeActionButtons();
+    dojo.empty('customActions');
+    this.game.addPrimaryActionButton({
+      id: 'done_button',
+      text: _('Done'),
+      callback: () => this.updateInterfaceConfirm(),
+    });
+    if (this.tempTokens.length === 0) {
+      dojo.addClass('done_button', 'disabled');
+    }
+    if (this.isSpecialAbilityInfrastructure) {
+      this.game.addDangerActionButton({
+        id: 'skip_btn',
+        text: _('Skip'),
+        callback: () => this.game.takeAction({ action: 'skipSpecialAbility' }),
+      });
+    } else if (this.bribe?.negotiated && this.tempTokens.length === 0) {
+      this.game.addDangerActionButton({
+        id: 'cancel_bribe_btn',
+        text: _('Cancel bribe'),
+        callback: () => {
+          this.clearTemporaryTokens();
+          this.game.takeAction({
+            action: 'cancelBribe',
+          });
+        },
+      });
+    } else {
+      this.game.addDangerActionButton({
+        id: 'cancel_btn',
+        text: _('Cancel'),
+        callback: () => this.onCancel(),
+      });
+    }
   }
 }

@@ -35,6 +35,9 @@ trait PlayCardTrait
 
   /**
    * Play card from hand to court
+   * 1. Play card to left or right end of court
+   * 2. Check for loyalty change
+   * 3. Resolve impact icons if card is still in court
    */
   function playCard($cardId, $side = 'left', $offeredBribeAmount = null)
   {
@@ -43,19 +46,55 @@ trait PlayCardTrait
     $player = Players::get();
     $playerId = $player->getId();
     $card = Cards::get($cardId);
+    Notifications::log('card', $card);
 
-    // Check if player owns card and card is in players hand
-    // Check if player needs to pay bribe
+    if ($card['location'] !== Locations::hand($playerId)) {
+      throw new \feException("Player does not own the card");
+    }
 
+    if (Globals::getRemainingActions() <= 0) {
+      throw new \feException("Player does not have actions left");
+    }
 
-    $resolved = $this->resolveBribe($card, $player,'playCard', $offeredBribeAmount);
+    $resolved = $this->resolveBribe($card, $player, 'playCard', $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
       return;
     }
 
-    // TODO create separate state to resolve play card. First handle potential loyalty change.
-    $this->resolvePlayCard($playerId, $cardId, $side);
+
+    // $this->resolvePlayCard($playerId, $cardId, $side);
+    $actionStack =
+      [
+        [
+          'action' => 'playerActions',
+          'playerId' => $playerId,
+          'data' => [],
+        ],
+        [
+          'action' => 'resolveImpactIcons',
+          'playerId' => $playerId,
+          'data' => [
+            'cardId' => $cardId
+          ],
+        ]
+      ];
+    $cardLoyalty = $card['loyalty'];
+    if ($cardLoyalty !== null && $this->checkLoyaltyChange($player, $cardLoyalty)) {
+      $actionStack = array_merge($actionStack, $this->getLoyaltyChangeActions($player->getId(), $cardLoyalty));
+    };
+
+    $actionStack[] = [
+      'action' => 'playCard',
+      'playerId' => $playerId,
+      'data' => [
+        'cardId' => $cardId,
+        'side' => $side,
+      ],
+    ];
+    Notifications::log('stack', $actionStack);
+    Globals::setActionStack($actionStack);
+    $this->nextState('dispatchAction');
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -66,42 +105,75 @@ trait PlayCardTrait
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-
-  // TODO(Frans): move all playCard related code to separate Trait
-  function resolvePlayCard($playerId, $cardId, $side)
+  function dispatchPlayCard($actionStack)
   {
+    $action = array_pop($actionStack);
+    Globals::setActionStack($actionStack);
+
+    $playerId = $action['playerId'];
+    $cardId = $action['data']['cardId'];
+    $side = $action['data']['side'];
+
     $card = Cards::get($cardId);
     $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
 
-    if (Globals::getRemainingActions() > 0) {
-      // check if loyaly change
-      $cardLoyalty = $this->cards[$cardId]['loyalty'];
-      if ($cardLoyalty != null ) {
-        // TODO: fix loyalty change
-        // $this->checkAndHandleLoyaltyChange($cardLoyalty);
+    // To check: we could probably just do 100 / +100 and then call reallign?
+    if ($side === 'left') {
+      for ($i = 0; $i < count($courtCards); $i++) {
+        Cards::setState($courtCards[$i]['id'], $i + 2);
       }
-
-      // To check: we could probably just do 100 / +100 and then call reallign?
-      if ($side === 'left') {
-        for ($i = 0; $i < count($courtCards); $i++) {
-          Cards::setState($courtCards[$i]['id'], $i + 2);
-        }
-        Cards::move($cardId, ['court', $playerId], 1);
-      } else {
-        Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
-      }
-      Globals::incRemainingActions(-1);
-      // We need to fetch data again to get updated state
-      $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
-      $card = Cards::get($cardId);
-      Notifications::playCard($card, $courtCards, $side, $playerId);
-
-      $this->updatePlayerCounts();
-
-      Globals::setResolveImpactIconsCardId($cardId);
-      Globals::setResolveImpactIconsCurrentIcon(0);
-      $this->gamestate->nextState('resolveImpactIcons');
+      Cards::move($cardId, ['court', $playerId], 1);
+    } else {
+      Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
     }
+    Globals::incRemainingActions(-1);
+    // We need to fetch data again to get updated state
+    $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+    $card = Cards::get($cardId);
+    Notifications::playCard($card, $courtCards, $side, $playerId);
+
+    // $this->updatePlayerCounts();
+
+    // Globals::setResolveImpactIconsCardId($cardId);
+    // Globals::setResolveImpactIconsCurrentIcon(0);
+    // $this->gamestate->nextState('resolveImpactIcons');
+    $this->nextState('dispatchAction');
   }
 
+
+  // function resolvePlayCard($playerId, $cardId, $side)
+  // {
+  //   $card = Cards::get($cardId);
+  //   $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+
+  //   if (Globals::getRemainingActions() > 0) {
+  //     // check if loyaly change
+  //     $cardLoyalty = $this->cards[$cardId]['loyalty'];
+  //     if ($cardLoyalty != null) {
+  //       // TODO: fix loyalty change
+  //       // $this->checkAndHandleLoyaltyChange($cardLoyalty);
+  //     }
+
+  //     // To check: we could probably just do 100 / +100 and then call reallign?
+  //     if ($side === 'left') {
+  //       for ($i = 0; $i < count($courtCards); $i++) {
+  //         Cards::setState($courtCards[$i]['id'], $i + 2);
+  //       }
+  //       Cards::move($cardId, ['court', $playerId], 1);
+  //     } else {
+  //       Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
+  //     }
+  //     Globals::incRemainingActions(-1);
+  //     // We need to fetch data again to get updated state
+  //     $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+  //     $card = Cards::get($cardId);
+  //     Notifications::playCard($card, $courtCards, $side, $playerId);
+
+  //     $this->updatePlayerCounts();
+
+  //     Globals::setResolveImpactIconsCardId($cardId);
+  //     Globals::setResolveImpactIconsCurrentIcon(0);
+  //     $this->gamestate->nextState('resolveImpactIcons');
+  //   }
+  // }
 }

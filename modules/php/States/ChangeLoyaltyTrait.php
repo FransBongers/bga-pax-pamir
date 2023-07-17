@@ -62,7 +62,7 @@ trait ChangeLoyaltyTrait
         ],
       ],
       [
-        'action' => 'discardPatriots',
+        'action' => DISPATCH_DISCARD_PATRIOTS,
         'playerId' => $playerId,
         'data' => [
           'coalition' => $coalition
@@ -175,7 +175,7 @@ trait ChangeLoyaltyTrait
     }
   }
 
-  function discardPatriots($actionStack)
+  function dispatchDiscardPatriots($actionStack)
   {
     /**
      * Three cases:
@@ -208,7 +208,7 @@ trait ChangeLoyaltyTrait
     // Transition to discard step where player needs to select patriots
     if ($hasPatriotWithLeverage) {
       $actionStack[] = [
-        'action' => 'discard',
+        'action' => DISPATCH_DISCARD,
         'playerId' => $playerId,
         'data' => [
           'from' => [COURT],

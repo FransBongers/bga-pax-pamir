@@ -26,8 +26,8 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "usedSpecialAbilities" => "obj",
     "specialAbilityData" => "obj",
     // TODO: check implementation
-    "resolveImpactIconsCardId" => "str",
-    "resolveImpactIconsCurrentIcon" => "int"
+    // "resolveImpactIconsCardId" => "str",
+    // "resolveImpactIconsCurrentIcon" => "int"
   ];
 
   protected static $table = 'global_variables';

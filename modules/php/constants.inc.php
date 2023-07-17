@@ -177,3 +177,31 @@ const LOG_TOKEN_RUPEE = 'rupee';
 /*
  * Stats
  */
+
+ /**
+  * Dispatch actions
+  */
+  const DISPATCH_DISCARD = 'dispatchDiscard';
+  const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
+  
+  const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
+  const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';
+  const DISPATCH_IMPACT_ICON_INTELLIGENCE = 'dispatchImpactIntelligence';
+  const DISPATCH_IMPACT_ICON_MILITARY = 'dispatchImpactMilitary';
+  const DISPATCH_IMPACT_ICON_LEVERAGE = 'dispatchImpactLeverage';
+  const DISPATCH_IMPACT_ICON_POLITICAL = 'dispatchImpactPolitical';
+  const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
+  const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
+  const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
+  
+  const IMPACT_ICON_DISPATCH_MAP = [
+    ARMY => DISPATCH_IMPACT_ICON_ARMY,
+    ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,
+    INTELLIGENCE_SUIT => DISPATCH_IMPACT_ICON_INTELLIGENCE,
+    MILITARY_SUIT => DISPATCH_IMPACT_ICON_MILITARY,
+    LEVERAGE => DISPATCH_IMPACT_ICON_LEVERAGE,
+    POLITICAL_SUIT => DISPATCH_IMPACT_ICON_POLITICAL,
+    ROAD => DISPATCH_IMPACT_ICON_ROAD,
+    SPY => DISPATCH_IMPACT_ICON_SPY,
+    TRIBE => DISPATCH_IMPACT_ICON_TRIBE
+  ];

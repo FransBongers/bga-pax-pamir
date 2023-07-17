@@ -23,11 +23,13 @@ trait PlaceRoadTrait
 
   function argPlaceRoad()
   {
-    $card_id = Globals::getResolveImpactIconsCardId();
-    $card_info = $this->cards[$card_id];
-    $card_region = $card_info['region'];
+    $actionStack = Globals::getActionStack();
+    $action = $actionStack[count($actionStack) - 1];
+
+    $card = Cards::get($action['data']['cardId']);
+    
     return array(
-      'region' => $this->regions[$card_region],
+      'region' => $this->regions[$card['region']],
     );
   }
 
@@ -53,9 +55,14 @@ trait PlaceRoadTrait
   function placeRoad($border)
   {
     self::checkAction('placeRoad');
-    self::dump("placeRoad on ", $border);
-    $player_id = self::getActivePlayerId();
-    // TODO: check if allowed based on resolveImpactIconsCardId
+    $actionStack = Globals::getActionStack();
+    $action = array_pop($actionStack);
+    Globals::setActionStack($actionStack);
+
+    if ($action['action'] !== DISPATCH_IMPACT_ICON_ROAD) {
+      throw new \feException("Not a valid action");
+    };
+
     $this->resolvePlaceRoad($border);
 
     // $loyalty = Players::get()->getLoyalty();
@@ -81,8 +88,8 @@ trait PlaceRoadTrait
     //     ]
     //   ]);
     // }
-    Globals::incResolveImpactIconsCurrentIcon(1);
-    $this->gamestate->nextState('resolveImpactIcons');
+    
+    $this->nextState('dispatchAction');
   }
 
   // .##.....##.########.####.##.......####.########.##....##

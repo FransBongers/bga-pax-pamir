@@ -25,7 +25,6 @@ trait DiscardTrait
   function argDiscard()
   {
     $actionStack = Globals::getActionStack();
-    Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
     return [
@@ -84,15 +83,12 @@ trait DiscardTrait
   function discard($cardId, $from)
   {
     self::checkAction('discard');
-    Notifications::log('discard', [
-      'cardId' => $cardId,
-      'from' => $from
-    ]);
+
     $actionStack = Globals::getActionStack();
     $action = array_pop($actionStack);
     Globals::setActionStack($actionStack);
 
-    if ($action['action'] !== 'discard') {
+    if ($action['action'] !== DISPATCH_DISCARD) {
       throw new \feException("Not a valid action");
     }
 
@@ -102,7 +98,7 @@ trait DiscardTrait
 
     $card = Cards::get($cardId);
 
-    if (isset($action['data']['loyalty']) && $action['data']['loyalty'] !== $card['loyalty'] ) {
+    if (isset($action['data']['loyalty']) && $action['data']['loyalty'] !== $card['loyalty']) {
       throw new \feException("Card does not have the required loyalty");
     }
 
@@ -113,8 +109,59 @@ trait DiscardTrait
     if ($explodedLocation[0] !== $from || $explodedLocation[1] !== strval($playerId)) {
       throw new \feException("Card is not in the discard location");
     }
+    
+    $this->resolveDiscardCard($card, $player, $from);
+  }
 
-    $this->resolveDiscardCard($card,$player,$from);
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  function dispatchDiscard($actionStack)
+  {
+    $next = $actionStack[count($actionStack) - 1];
+
+    $playerId = $next['playerId'];
+    $from = $next['data']['from'];
+    $loyalty = isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null;
+    $player = Players::get($playerId);
+
+    // Determine if there are cards left to discard
+    $availableCards = 0;
+    if (in_array(COURT,$from)) {
+      $courtCards = array_filter($player->getCourtCards(),function ($card) use ($loyalty) {
+        if ($loyalty === null) {
+          return true;
+        }
+        return $card['loyalty'] === $loyalty;
+      });
+      $availableCards += count($courtCards);
+    }
+    if (in_array(HAND,$from)) {
+      $handCards = $player->getHandCards();
+      $availableCards += count($handCards);
+    }
+    // If cards available transition to discard state
+    // otherwise cancel action and continue to next action
+    if ($availableCards > 0) {
+      $this->nextState('discard', $playerId);
+    } else {
+      array_pop($actionStack);
+      Globals::setActionStack($actionStack);
+      $this->nextState('dispatchAction');
+    } 
   }
 
 
@@ -130,26 +177,26 @@ trait DiscardTrait
    * Function which handles the actual discarding so it can be called
    * from player triggered action or from game state
    */
-  function resolveDiscardCard($card,$player,$from,$to = DISCARD,$cardOwner = null)
+  function resolveDiscardCard($card, $player, $from, $to = DISCARD, $cardOwner = null)
   {
     $cardOwner = $cardOwner === null ? $player : $cardOwner;
     $cardId = $card['id'];
-    Notifications::discardMessage($card, $player, $from,$cardOwner);
+    Notifications::discardMessage($card, $player, $from, $cardOwner);
 
     if ($from === COURT) {
-      $this->returnSpies($card['id'],$player);
+      $this->returnSpies($card['id'], $player);
     }
     Cards::insertOnTop($cardId, $to);
-    Notifications::discard($card,$cardOwner,$from,$to);
+    Notifications::discard($card, $cardOwner, $from, $to);
 
     if ($from === COURT) {
-      $this->checkLeverage($card,$cardOwner);
+      $this->checkLeverage($card, $cardOwner);
     }
-    
+
     $this->nextState('dispatchAction');
   }
 
-   /**
+  /**
    * Checks if card is leveraged. Decreases players rupees and returns number of cards 
    * a player needs to discard in case player does not have enough rupees.
    */
@@ -169,14 +216,13 @@ trait DiscardTrait
     if ($additionalDiscards === 0) {
       return;
     }
-    Notifications::additionalDiscardsForDiscardingLeveragedCard($player,$additionalDiscards);
+    Notifications::additionalDiscardsForDiscardingLeveragedCard($player, $additionalDiscards);
     // Add actions to action stack in case additional cards need to be discarded
     for ($i = $additionalDiscards; $i > 0; $i--) {
-      Notifications::log('need to discard cards',[]);
       $this->pushActionsToActionStack(
         [
           [
-            'action' => 'discard',
+            'action' => DISPATCH_DISCARD,
             'playerId' => $player->getId(),
             'data' => [
               'from' => [COURT, HAND]

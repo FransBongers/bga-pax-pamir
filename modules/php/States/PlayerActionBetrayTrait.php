@@ -188,7 +188,7 @@ trait PlayerActionBetrayTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function takePrize($actionStack)
+  function dispatchTakePrize($actionStack)
   {
     $current = array_pop($actionStack);
     Globals::setActionStack($actionStack);

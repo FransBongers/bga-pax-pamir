@@ -8,9 +8,11 @@
 - Select tokens when supply is empty
 - End of game
 - Instability rule: resolve dominance check when two are in the market
-- Overthrow rule: linnk between political cards and ruled regions
+- Overthrow rule: link between political cards and ruled regions
 - Check states file
 
+### Bugs
+- Check embarassment of riches discard event (or discard event in general)
 
 ### Card abilities
 - card_24 / SA_CIVIL_SERVICE_REFORMS

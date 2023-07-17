@@ -2660,7 +2660,7 @@ var ClientCardActionGiftState = (function () {
                 value: giftValue,
             })
                 .getAllItems().length > 0;
-            if ((!hasGift && giftValue <= _this.game.localState.activePlayer.rupees - ((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount)) || 0) {
+            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees - (((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0)) {
                 dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
                     dojo.addClass(node, 'pp_selectable');
                     _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));

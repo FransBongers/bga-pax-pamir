@@ -225,21 +225,21 @@ $machinestates = array(
         )
     ),
 
-    STATE_RESOLVE_IMPACT_ICONS => array(
-        "name" => "resolveImpactIcons",
-        "type" => "game",
-        "action" => "stResolveImpactIcons",
-        "updateGameProgression" => false,
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-            "refreshMarket" => STATE_REFRESH_MARKET,
-            "placeRoad" => STATE_PLACE_ROAD,
-            "placeSpy" => STATE_PLACE_SPY,
-            // "discardCourt" => STATE_DISCARD_COURT,
-            // "discardHand" => STATE_DISCARD_HAND,
-        )
-    ),
+    // STATE_RESOLVE_IMPACT_ICONS => array(
+    //     "name" => "resolveImpactIcons",
+    //     "type" => "game",
+    //     "action" => "stResolveImpactIcons",
+    //     "updateGameProgression" => false,
+    //     "transitions" => array(
+    //         "playerActions" => STATE_PLAYER_ACTIONS,
+    //         "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+    //         "refreshMarket" => STATE_REFRESH_MARKET,
+    //         "placeRoad" => STATE_PLACE_ROAD,
+    //         "placeSpy" => STATE_PLACE_SPY,
+    //         // "discardCourt" => STATE_DISCARD_COURT,
+    //         // "discardHand" => STATE_DISCARD_HAND,
+    //     )
+    // ),
 
     STATE_REFRESH_MARKET => array(
         "name" => "refreshMarket",
@@ -289,8 +289,10 @@ $machinestates = array(
             "acceptPrize" => ST_ACCEPT_PRIZE,
             "cleanup" => STATE_CLEANUP,
             "discard" => STATE_DISCARD,
-            "playerActions" => STATE_PLAYER_ACTIONS,
             "dispatchAction" => STATE_DISPATCH_ACTION,
+            "placeRoad" => STATE_PLACE_ROAD,
+            "placeSpy" => STATE_PLACE_SPY,
+            "playerActions" => STATE_PLAYER_ACTIONS,
         )
     ),
 
@@ -342,7 +344,9 @@ $machinestates = array(
         "args" => "argPlaceRoad",
         "possibleactions" => array("placeRoad"),
         "transitions" => array(
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "playerActions" => STATE_PLAYER_ACTIONS,
+            // "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 
@@ -354,7 +358,9 @@ $machinestates = array(
         "args" => "argPlaceSpy",
         "possibleactions" => array("placeSpy"),
         "transitions" => array(
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "playerActions" => STATE_PLAYER_ACTIONS,
+            // "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 

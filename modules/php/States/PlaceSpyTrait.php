@@ -23,11 +23,13 @@ trait PlaceSpyTrait
 
   function argPlaceSpy()
   {
-    $card_id = Globals::getResolveImpactIconsCardId();
-    $card_info = $this->cards[$card_id];
-    $card_region = $card_info['region'];
+    $actionStack = Globals::getActionStack();
+    $action = $actionStack[count($actionStack) - 1];
+
+    $card = Cards::get($action['data']['cardId']);
+
     return array(
-      'regionId' => $card_region,
+      'regionId' => $card['region'],
     );
   }
 
@@ -53,7 +55,7 @@ trait PlaceSpyTrait
   function placeSpy($cardId, $specialAbility = null)
   {
     self::checkAction('placeSpy');
-    self::dump("placeSpy on ", $cardId);
+
     $card = Cards::get($cardId);
     if (!Utils::startsWith($card['location'], "court")) {
       throw new \feException("Selected card is not in a court");
@@ -62,6 +64,14 @@ trait PlaceSpyTrait
     $isStartOfTurnAbility = $this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities";
     if ($isStartOfTurnAbility) {
       $this->isValidStartOfTurnSpecialAbility($specialAbility);
+    } else {
+      $actionStack = Globals::getActionStack();
+      $action = array_pop($actionStack);
+      Globals::setActionStack($actionStack);
+
+      if ($action['action'] !== DISPATCH_IMPACT_ICON_SPY) {
+        throw new \feException("Not a valid action");
+      };
     }
 
     // TODO: check if $cardId is in court?
@@ -95,8 +105,7 @@ trait PlaceSpyTrait
       $transition = $this->playerHasStartOfTurnSpecialAbilities($usedSpecialAbilities) ? 'startOfTurnAbilities' : 'playerActions';
       $this->nextState($transition);
     } else {
-      Globals::incResolveImpactIconsCurrentIcon(1);
-      $this->gamestate->nextState('resolveImpactIcons');
+      $this->nextState('dispatchAction');
     }
   }
 

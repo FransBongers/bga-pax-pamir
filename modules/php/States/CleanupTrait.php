@@ -58,7 +58,7 @@ trait CleanupTrait
             'data' => [],
           ],
           [
-            'action' => 'discard',
+            'action' => DISPATCH_DISCARD,
             'playerId' => $playerId,
             'data' => [
               'from' => [COURT]
@@ -77,7 +77,7 @@ trait CleanupTrait
             'data' => [],
           ],
           [
-            'action' => 'discard',
+            'action' => DISPATCH_DISCARD,
             'playerId' => $playerId,
             'data' => [
               'from' => [HAND]

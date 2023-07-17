@@ -134,46 +134,6 @@ trait PlayCardTrait
 
     // $this->updatePlayerCounts();
 
-    // Globals::setResolveImpactIconsCardId($cardId);
-    // Globals::setResolveImpactIconsCurrentIcon(0);
-    // $this->gamestate->nextState('resolveImpactIcons');
     $this->nextState('dispatchAction');
   }
-
-
-  // function resolvePlayCard($playerId, $cardId, $side)
-  // {
-  //   $card = Cards::get($cardId);
-  //   $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
-
-  //   if (Globals::getRemainingActions() > 0) {
-  //     // check if loyaly change
-  //     $cardLoyalty = $this->cards[$cardId]['loyalty'];
-  //     if ($cardLoyalty != null) {
-  //       // TODO: fix loyalty change
-  //       // $this->checkAndHandleLoyaltyChange($cardLoyalty);
-  //     }
-
-  //     // To check: we could probably just do 100 / +100 and then call reallign?
-  //     if ($side === 'left') {
-  //       for ($i = 0; $i < count($courtCards); $i++) {
-  //         Cards::setState($courtCards[$i]['id'], $i + 2);
-  //       }
-  //       Cards::move($cardId, ['court', $playerId], 1);
-  //     } else {
-  //       Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
-  //     }
-  //     Globals::incRemainingActions(-1);
-  //     // We need to fetch data again to get updated state
-  //     $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
-  //     $card = Cards::get($cardId);
-  //     Notifications::playCard($card, $courtCards, $side, $playerId);
-
-  //     $this->updatePlayerCounts();
-
-  //     Globals::setResolveImpactIconsCardId($cardId);
-  //     Globals::setResolveImpactIconsCurrentIcon(0);
-  //     $this->gamestate->nextState('resolveImpactIcons');
-  //   }
-  // }
 }

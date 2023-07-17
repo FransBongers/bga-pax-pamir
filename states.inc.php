@@ -58,12 +58,8 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_START_OF_TURN_ABILITIES", 14);
     define("STATE_PLAYER_ACTIONS", 4);
     define("STATE_NEGOTIATE_BRIBE", 5);
-    // define("STATE_RESOLVE_ACCEPTED_BRIBE", 25);
-    define("STATE_RESOLVE_IMPACT_ICONS", 6);
     define("STATE_DISCARD", 7);
     define("STATE_DISPATCH_ACTION", 8);
-    // define("STATE_DISCARD_HAND", 8);
-    // define("STATE_DISCARD_LEVERAGE", 13);
     define("STATE_PLACE_ROAD", 9);
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
@@ -73,15 +69,8 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("ST_SA_SAFE_HOUSE", 22);
     define("ST_SA_INFRASTRUCTURE", 23);
     define("STATE_DOMINANCE_CHECK", 30);
-    define("STATE_CARD_ACTION_BATTLE", 40);
-    define("STATE_CARD_ACTION_BETRAY", 41);
-    define("STATE_CARD_ACTION_BUILD", 42);
-    define("STATE_CARD_ACTION_MOVE", 44);
-    define("STATE_CARD_ACTION_TAX", 45);
     define("ST_ACCEPT_PRIZE", 46);
     define("STATE_NEXT_PLAYER", 50);
-    // define("STATE_CHANGE_LOYALTY", 52);
-    // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
     define("ST_CHANGE_ACTIVE_PLAYER", 95);
     define("STATE_END_GAME", 99);
@@ -159,18 +148,11 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "discardLeverage" => STATE_DISCARD_LEVERAGE,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveEvent" => STATE_RESOLVE_EVENT,
-            "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
-            "cardActionBattle" => STATE_CARD_ACTION_BATTLE,
-            "cardActionBetray" => STATE_CARD_ACTION_BETRAY,
-            "cardActionBuild" => STATE_CARD_ACTION_BUILD,
-            "cardActionMove" => STATE_CARD_ACTION_MOVE,
-            "cardActionTax" => STATE_CARD_ACTION_TAX,
             "cleanup" => STATE_CLEANUP,
         )
     ),
@@ -185,20 +167,8 @@ $machinestates = array(
         "transitions" => array(
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "playerActions" => STATE_PLAYER_ACTIONS,
-            // "resolveAcceptedBribe" => STATE_RESOLVE_ACCEPTED_BRIBE,
         )
     ),
-
-    // STATE_RESOLVE_ACCEPTED_BRIBE => array(
-    //     "name" => "resolveAcceptedBribe",
-    //     "type" => "game",
-    //     "action" => "stResolveAcceptedBribe",
-    //     "updateGameProgression" => false,
-    //     "transitions" => array(
-    //         "playerActions" => STATE_PLAYER_ACTIONS,
-    //         "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-    //     )
-    // ),
 
     STATE_CLEANUP => array(
         "name" => "cleanup",
@@ -207,8 +177,6 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "discardCourt" => STATE_DISCARD_COURT,
-            // "discardHand" => STATE_DISCARD_HAND,
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
         )
     ),
@@ -224,22 +192,6 @@ $machinestates = array(
             "resolveEvent" => STATE_RESOLVE_EVENT,
         )
     ),
-
-    // STATE_RESOLVE_IMPACT_ICONS => array(
-    //     "name" => "resolveImpactIcons",
-    //     "type" => "game",
-    //     "action" => "stResolveImpactIcons",
-    //     "updateGameProgression" => false,
-    //     "transitions" => array(
-    //         "playerActions" => STATE_PLAYER_ACTIONS,
-    //         "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
-    //         "refreshMarket" => STATE_REFRESH_MARKET,
-    //         "placeRoad" => STATE_PLACE_ROAD,
-    //         "placeSpy" => STATE_PLACE_SPY,
-    //         // "discardCourt" => STATE_DISCARD_COURT,
-    //         // "discardHand" => STATE_DISCARD_HAND,
-    //     )
-    // ),
 
     STATE_REFRESH_MARKET => array(
         "name" => "refreshMarket",
@@ -275,8 +227,6 @@ $machinestates = array(
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
             "playerActions" => STATE_PLAYER_ACTIONS,
-            // "discardLeverage" => STATE_DISCARD_LEVERAGE,
-            // "cleanup" => STATE_CLEANUP,
         )
     ),
 
@@ -296,46 +246,6 @@ $machinestates = array(
         )
     ),
 
-    // STATE_DISCARD_COURT => array(
-    //     "name" => "discardCourt",
-    //     "description" => clienttranslate('${actplayer} must discard court cards'),
-    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
-    //     "type" => "activeplayer",
-    //     "args" => "argDiscardCourt",
-    //     "possibleactions" => array("discardCards"),
-    //     "transitions" => array(
-    //         "discardLeverage" => STATE_DISCARD_LEVERAGE,
-    //         "cleanup" => STATE_CLEANUP,
-    //     )
-    // ),
-
-    // STATE_DISCARD_HAND => array(
-    //     "name" => "discardHand",
-    //     "description" => clienttranslate('${actplayer} must discard hand cards'),
-    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
-    //     "type" => "activeplayer",
-    //     "args" => "argDiscardHand",
-    //     "possibleactions" => array("discardCards"),
-    //     "transitions" => array(
-    //         "cleanup" => STATE_CLEANUP,
-    //     )
-    // ),
-
-    // STATE_DISCARD_LEVERAGE => array(
-    //     "name" => "discardLeverage",
-    //     "description" => clienttranslate('${actplayer} must discard cards'),
-    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
-    //     "type" => "activeplayer",
-    //     "args" => "argDiscardLeverage",
-    //     "possibleactions" => array("discardCards"),
-    //     // TODO check all possible transitions? Or use jumpToState?
-    //     "transitions" => array(
-    //         "cleanup" => STATE_CLEANUP,
-    //         "discardLeverage" => STATE_DISCARD_LEVERAGE,
-    //         "playerActions" => STATE_PLAYER_ACTIONS,
-    //     )
-    // ),
-
     STATE_PLACE_ROAD => array(
         "name" => "placeRoad",
         "description" => clienttranslate('${actplayer} must place a road'),
@@ -345,8 +255,6 @@ $machinestates = array(
         "possibleactions" => array("placeRoad"),
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "playerActions" => STATE_PLAYER_ACTIONS,
-            // "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
         )
     ),
 
@@ -359,34 +267,10 @@ $machinestates = array(
         "possibleactions" => array("placeSpy"),
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "playerActions" => STATE_PLAYER_ACTIONS,
-            // "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
+
         )
     ),
 
-    STATE_CARD_ACTION_BATTLE => array(
-        "name" => "cardActionBattle",
-        "description" => clienttranslate('${actplayer} must select a place to battle'),
-        "descriptionmyturn" => clienttranslate('${you} must select a place to battle'),
-        "type" => "activeplayer",
-        "args" => "argPlaceRoad",
-        "possibleactions" => array("cardActionBattle"),
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ),
-
-    STATE_CARD_ACTION_BETRAY => array(
-        "name" => "cardActionBetray",
-        "description" => clienttranslate('${actplayer} must select a card'),
-        "descriptionmyturn" => clienttranslate('${you} must select a card'),
-        "type" => "activeplayer",
-        "args" => "argPlaceRoad",
-        "possibleactions" => array("cardActionBetray"),
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ),
 
     ST_ACCEPT_PRIZE => [
         "name" => "acceptPrize",
@@ -400,54 +284,7 @@ $machinestates = array(
         ]
     ],
 
-    STATE_CARD_ACTION_BUILD => array(
-        "name" => "cardActionBuild",
-        "description" => clienttranslate('${actplayer} must build'),
-        "descriptionmyturn" => clienttranslate('${you} must build'),
-        "type" => "activeplayer",
-        "args" => "argPlaceRoad",
-        "possibleactions" => array("cardActionBuild"),
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ),
-
-    STATE_CARD_ACTION_MOVE => array(
-        "name" => "cardActionMove",
-        "description" => clienttranslate('${actplayer} must move an army or a spy'),
-        "descriptionmyturn" => clienttranslate('${you} must move an army or a spy'),
-        "type" => "activeplayer",
-        "args" => "argPlaceRoad",
-        "possibleactions" => array("cardActionMove"),
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ),
-
-    STATE_CARD_ACTION_TAX => array(
-        "name" => "cardActionTax",
-        "description" => clienttranslate('${actplayer} must tax market or player'),
-        "descriptionmyturn" => clienttranslate('${you} must tax market or player'),
-        "type" => "activeplayer",
-        "args" => "argPlaceRoad",
-        "possibleactions" => array("cardActionTax"),
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ),
-
-    // STATE_CHANGE_LOYALTY => [
-    //     'name' => 'changeLoyalty',
-    //     'description' => '',
-    //     'descriptionmyturn' => '',
-    //     'type' => 'game',
-    //     'action' => 'stChangeLoyalty',
-    //     "transitions" => array(
-    //         "playerActions" => STATE_PLAYER_ACTIONS,
-    //     )
-    // ],
-
-    STATE_RESOLVE_EVENT => [
+      STATE_RESOLVE_EVENT => [
         "name" => "resolveEvent",
         "description" => '',
         "descriptionmyturn" => '',

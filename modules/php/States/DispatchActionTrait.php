@@ -121,14 +121,6 @@ trait DispatchActionTrait
     $this->nextState('acceptPrize', $next['playerId']);
   }
 
-  function dispatchChangeLoyalty($actionStack)
-  {
-    $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
-
-    $this->changeLoyalty($action);
-  }
-
   function dispatchCleanup($actionStack)
   {
     $next = array_pop($actionStack);

@@ -50,21 +50,35 @@ interface NotifChangeRulerArgs {
 
 interface NotifChangeLoyaltyArgs {
   playerId: string;
-  player_name: string;
+  // player_name: string;
   coalition: string;
-  coalitionName: string;
+  // coalitionName: string;
 }
 
-interface NotifDiscardAndTakePrizeArgs {
-  cardId: string;
-  courtOwnerPlayerId: string;
+interface NotifDiscardArgs {
   playerId: number;
   player_name: string;
-  logTokenCardName: string;
-  logTokenLargeCard: string;
-  moves: TokenMove[];
-  returnedSpiesLog: Log | '';
+  cardId: string;
+  from: 'court' | 'hand';
+  to: 'discard' | 'temp_discard'
 }
+
+interface NotifReturnSpiesArgs {
+  playerId: number;
+  player_name: string;
+  moves: TokenMove[];
+}
+
+// interface NotifDiscardAndTakePrizeArgs {
+//   cardId: string;
+//   courtOwnerPlayerId: string;
+//   playerId: number;
+//   player_name: string;
+//   logTokenCardName: string;
+//   logTokenLargeCard: string;
+//   moves: TokenMove[];
+//   returnedSpiesLog: Log | '';
+// }
 
 interface NotifDiscardFromCourtArgs {
   cardId: string;
@@ -191,6 +205,14 @@ interface NotifReturnRupeesToSupplyArgs {
   playerId: number;
   player_name: string;
   amount: number;
+}
+
+type NotifDeclinePrizeArgs = NotifTakePrizeArgs;
+
+interface NotifTakePrizeArgs {
+  cardId: string;
+  playerId: number;
+  player_name: string;
 }
 
 interface NotifTakeRupeesFromSupplyArgs {

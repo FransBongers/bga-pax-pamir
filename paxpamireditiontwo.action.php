@@ -40,6 +40,16 @@ class action_paxpamireditiontwo extends APP_GameAction
     }
 
     // TODO: defines your action entry points there
+
+    public function acceptPrize()
+    {
+        self::setAjaxMode();
+        $accept = self::getArg("accept", AT_bool, true);
+
+        $result = $this->game->acceptPrize($accept);
+        self::ajaxResponse();
+    }
+
     public function startBribeNegotiation()
     {
         self::setAjaxMode();
@@ -95,12 +105,11 @@ class action_paxpamireditiontwo extends APP_GameAction
     public function betray()
     {
         self::setAjaxMode();
-        $acceptPrize = self::getArg("acceptPrize", AT_bool, true);
         $cardId = self::getArg("cardId", AT_alphanum, true);
         $betrayedCardId = self::getArg("betrayedCardId", AT_alphanum, true);
         $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
 
-        $result = $this->game->betray($cardId, $betrayedCardId, $acceptPrize,$bribeAmount);
+        $result = $this->game->betray($cardId, $betrayedCardId,$bribeAmount);
         self::ajaxResponse();
     }
 
@@ -123,6 +132,15 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function discard()
+    {
+        self::setAjaxMode();
+        $cardId = self::getArg("cardId", AT_alphanum, true);
+        $from = self::getArg("from", AT_alphanum, true);
+
+        $result = $this->game->discard($cardId,$from);
+        self::ajaxResponse();
+    }
 
     public function discardCards()
     {

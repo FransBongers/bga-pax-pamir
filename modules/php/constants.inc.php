@@ -137,7 +137,10 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
  * Card locations
  */
 const DISCARD = 'discard';
+const TEMP_DISCARD = 'temp_discard';
 const ACTIVE_EVENTS = 'active_events';
+const HAND = 'hand';
+const COURT = 'court';
 
 /**
  * Bribe status
@@ -153,6 +156,7 @@ const BRIBE_UNRESOLVED = null;
  */
 const LOG_TOKEN_ARMY = 'army';
 const LOG_TOKEN_CARD = 'card';
+const LOG_TOKEN_CARD_ICON = 'cardIcon';
 const LOG_TOKEN_CARD_NAME = 'cardName';
 const LOG_TOKEN_COALITION = 'coalition';
 const LOG_TOKEN_COALITION_NAME = 'coalitionName';

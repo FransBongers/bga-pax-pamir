@@ -1,5 +1,6 @@
 const LOG_TOKEN_ARMY = 'army';
 const LOG_TOKEN_CARD = 'card';
+const LOG_TOKEN_CARD_ICON = 'cardIcon';
 const LOG_TOKEN_CARD_NAME = 'cardName';
 const LOG_TOKEN_COALITION = 'coalition';
 const LOG_TOKEN_COALITION_NAME = 'coalitionName';
@@ -20,6 +21,8 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
       return tplLogTokenArmy({ coalition: data });
     case LOG_TOKEN_CARD:
       return tplLogTokenCard({ cardId: data });
+    case LOG_TOKEN_CARD_ICON:
+      return tplLogTokenCard({ cardId: 'card_back' });
     case LOG_TOKEN_LARGE_CARD:
       return tplLogTokenCard({ cardId: data, large: true });
     case LOG_TOKEN_CARD_NAME:

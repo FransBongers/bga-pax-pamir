@@ -22,36 +22,48 @@ trait DiscardTrait
   // .##.....##.##....##..##....##..##....##
   // .##.....##.##.....##..######....######.
 
-  function argDiscardCourt()
+  function argDiscard()
   {
-    $player = Players::getActive();
-    $countPoliticalSuit = $player->getSuitTotals()[POLITICAL];
-    $countCourtCards = count($player->getCourtCards());
+    $actionStack = Globals::getActionStack();
+    Notifications::log('actionStack', $actionStack);
 
-    return array(
-      'numberOfDiscards' => $countCourtCards - $countPoliticalSuit - 3
-    );
+    $next = $actionStack[count($actionStack) - 1];
+    return [
+      'from' => $next['data']['from'],
+      'loyalty' => isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null,
+    ];
   }
 
-  function argDiscardHand()
-  {
-    $player = Players::getActive();
-    $countIntelligenceSuit = $player->getSuitTotals()[INTELLIGENCE];
-    $countHandCards = count($player->getHandCards());
+  // function argDiscardCourt()
+  // {
+  //   $player = Players::getActive();
+  //   $countPoliticalSuit = $player->getSuitTotals()[POLITICAL];
+  //   $countCourtCards = count($player->getCourtCards());
 
-    return array(
-      'numberOfDiscards' => $countHandCards - $countIntelligenceSuit - 2
-    );
-  }
+  //   return array(
+  //     'numberOfDiscards' => $countCourtCards - $countPoliticalSuit - 3
+  //   );
+  // }
 
-  function argDiscardLeverage()
-  {
-    $data = Globals::getLeverageData();
+  // function argDiscardHand()
+  // {
+  //   $player = Players::getActive();
+  //   $countIntelligenceSuit = $player->getSuitTotals()[INTELLIGENCE];
+  //   $countHandCards = count($player->getHandCards());
 
-    return array(
-      'numberOfDiscards' => $data['numberOfDiscards'],
-    );
-  }
+  //   return array(
+  //     'numberOfDiscards' => $countHandCards - $countIntelligenceSuit - 2
+  //   );
+  // }
+
+  // function argDiscardLeverage()
+  // {
+  //   $data = Globals::getLeverageData();
+
+  //   return array(
+  //     'numberOfDiscards' => $data['numberOfDiscards'],
+  //   );
+  // }
 
   //  .########..##..........###....##....##.########.########.
   //  .##.....##.##.........##.##....##..##..##.......##.....##
@@ -69,55 +81,42 @@ trait DiscardTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  /**
-   * Discard cards action when needed
-   */
-  function discardCards($cardIds)
+  function discard($cardId, $from)
   {
-    self::checkAction('discardCards');
+    self::checkAction('discard');
+    Notifications::log('discard', [
+      'cardId' => $cardId,
+      'from' => $from
+    ]);
+    $actionStack = Globals::getActionStack();
+    $action = array_pop($actionStack);
+    Globals::setActionStack($actionStack);
 
-    // Checks depend on state
-    $state = $this->gamestate->state(true, false, true);
-    // discardLeverage, discardCourt, discardHand
+    if ($action['action'] !== 'discard') {
+      throw new \feException("Not a valid action");
+    }
+
+    if (!in_array($from, $action['data']['from'])) {
+      throw new \feException("Not allowed to discard from location");
+    }
+
+    $card = Cards::get($cardId);
+
+    if (isset($action['data']['loyalty']) && $action['data']['loyalty'] !== $card['loyalty'] ) {
+      throw new \feException("Card does not have the required loyalty");
+    }
 
     $player = Players::get();
     $playerId = $player->getId();
 
-    $discardCourt = $state['name'] === 'discardCourt';
-    $discardHand = $state['name'] === 'discardHand';
-    $discardLeverage = $state['name'] === 'discardLeverage';
-    /**
-     * for each card
-     * if state is discardHand and location not hand throw error
-     * if state is discardCourt and location not court throw error
-     * check if enough cards have been discarded
-     */
-    $cards = Cards::getMany($cardIds)->toArray();
-    foreach ($cards as $index => $card) {
-      $inHand = $card['location'] === 'hand_' . $playerId;
-      $inCourt = $card['location'] === 'court_' . $playerId;
-      if (!($inCourt || $inHand) || ($discardHand && !$inHand) || ($discardCourt && !$inCourt)) {
-        throw new \feException("Card is not in the discard location");
-      }
-    }
-    $numberOfCardsToDiscard = $this->getNumberOfCardsToDiscard($player, $state);
-    $numberOfSelectedCards = count($cardIds);
-    if ($numberOfCardsToDiscard !== $numberOfSelectedCards) {
-      throw new \feException("Incorrect number of discards");
+    $explodedLocation = explode('_', $card['location']);
+    if ($explodedLocation[0] !== $from || $explodedLocation[1] !== strval($playerId)) {
+      throw new \feException("Card is not in the discard location");
     }
 
-    $next = null;
-    if ($discardLeverage) {
-      $next = Globals::getLeverageData();
-    } else {
-      $next = [
-        'activePlayerId' => $playerId,
-        'transition' => 'cleanup',
-      ];
-    }
-
-    $this->executeDiscards($cards, $player, $next);
+    $this->resolveDiscardCard($card,$player,$from);
   }
+
 
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
@@ -128,43 +127,128 @@ trait DiscardTrait
   // ..#######.....##....####.########.####....##.......##...
 
   /**
+   * Function which handles the actual discarding so it can be called
+   * from player triggered action or from game state
+   */
+  function resolveDiscardCard($card,$player,$from,$to = DISCARD,$cardOwner = null)
+  {
+    $cardOwner = $cardOwner === null ? $player : $cardOwner;
+    $cardId = $card['id'];
+    Notifications::discardMessage($card, $player, $from,$cardOwner);
+
+    if ($from === COURT) {
+      $this->returnSpies($card['id'],$player);
+    }
+    Cards::insertOnTop($cardId, $to);
+    Notifications::discard($card,$cardOwner,$from,$to);
+
+    if ($from === COURT) {
+      $this->checkLeverage($card,$cardOwner);
+    }
+    
+    $this->nextState('dispatchAction');
+  }
+
+   /**
    * Checks if card is leveraged. Decreases players rupees and returns number of cards 
    * a player needs to discard in case player does not have enough rupees.
    */
-  function checkAndHandleLeverage($cardId, $cardOwnerId)
+  function checkLeverage($card, $player)
   {
-    $card = Cards::get($cardId);
     if (!in_array(LEVERAGE, $card['impactIcons'])) {
-      return 0;
+      return;
     }
-    $player = Players::get($cardOwnerId);
     $rupees = $player->getRupees();
     $amountOfRupeesToReturn = min($rupees, 2);
     if ($amountOfRupeesToReturn > 0) {
-      Players::incRupees($cardOwnerId, -$amountOfRupeesToReturn);
-      Notifications::leveragedCardDiscard($card, $player, $amountOfRupeesToReturn);
+      Players::incRupees($player->getId(), -$amountOfRupeesToReturn);
+      Notifications::returnRupeesForDiscardingLeveragedCard($player, $amountOfRupeesToReturn);
     }
-    // return number of cards that need to be discarded due to lack of rupees
-    return 2 - $amountOfRupeesToReturn;
+
+    $additionalDiscards = 2 - $amountOfRupeesToReturn;
+    if ($additionalDiscards === 0) {
+      return;
+    }
+    Notifications::additionalDiscardsForDiscardingLeveragedCard($player,$additionalDiscards);
+    // Add actions to action stack in case additional cards need to be discarded
+    for ($i = $additionalDiscards; $i > 0; $i--) {
+      Notifications::log('need to discard cards',[]);
+      $this->pushActionsToActionStack(
+        [
+          [
+            'action' => 'discard',
+            'playerId' => $player->getId(),
+            'data' => [
+              'from' => [COURT, HAND]
+            ]
+          ]
+        ]
+      );
+    }
   }
 
-  function getNumberOfCardsToDiscard($player, $state)
+
+  function returnSpies($cardId, $player)
   {
-    $discardCourt = $state['name'] === 'discardCourt';
-    $discardHand = $state['name'] === 'discardHand';
-    $discardLeverage = $state['name'] === 'discardLeverage';
-    if ($discardLeverage) {
-      $data = Globals::getLeverageData();
-      return $data['numberOfDiscards'];
+    $from = 'spies_' . $cardId;
+    $spiesOnCard = Tokens::getInLocation($from)->toArray();
+    $moves = [];
+    if (count($spiesOnCard) === 0) {
+      return;;
     }
-    $discards = $player->checkDiscards();
-    if ($discardHand) {
-      return $discards['hand'];
+
+    foreach ($spiesOnCard as $index => $spy) {
+      $spyOwner = explode("_", $spy['id'])[1];
+      $to = 'cylinders_' . $spyOwner;
+      $state = Tokens::insertOnTop($spy['id'], $to);
+      $moves[] =  [
+        'from' => $from,
+        'to' => $to,
+        'tokenId' => $spy['id'],
+        'weight' => $state,
+      ];
     };
-    if ($discardCourt) {
-      return $discards['court'];
-    };
+    Notifications::returnSpies($player, $moves);
   }
+
+  /**
+   * Checks if card is leveraged. Decreases players rupees and returns number of cards 
+   * a player needs to discard in case player does not have enough rupees.
+   */
+  // function checkAndHandleLeverage($cardId, $cardOwnerId)
+  // {
+  //   $card = Cards::get($cardId);
+  //   if (!in_array(LEVERAGE, $card['impactIcons'])) {
+  //     return 0;
+  //   }
+  //   $player = Players::get($cardOwnerId);
+  //   $rupees = $player->getRupees();
+  //   $amountOfRupeesToReturn = min($rupees, 2);
+  //   if ($amountOfRupeesToReturn > 0) {
+  //     Players::incRupees($cardOwnerId, -$amountOfRupeesToReturn);
+  //     Notifications::leveragedCardDiscard($card, $player, $amountOfRupeesToReturn);
+  //   }
+  //   // return number of cards that need to be discarded due to lack of rupees
+  //   return 2 - $amountOfRupeesToReturn;
+  // }
+
+  // function getNumberOfCardsToDiscard($player, $state)
+  // {
+  //   $discardCourt = $state['name'] === 'discardCourt';
+  //   $discardHand = $state['name'] === 'discardHand';
+  //   $discardLeverage = $state['name'] === 'discardLeverage';
+  //   if ($discardLeverage) {
+  //     $data = Globals::getLeverageData();
+  //     return $data['numberOfDiscards'];
+  //   }
+  //   $discards = $player->checkDiscards();
+  //   if ($discardHand) {
+  //     return $discards['hand'];
+  //   };
+  //   if ($discardCourt) {
+  //     return $discards['court'];
+  //   };
+  // }
 
   function reassignCourtState($playerId = null)
   {
@@ -183,61 +267,61 @@ trait DiscardTrait
     Notifications::updateCourtCardStates($courtCardStates, $player->getId());
   }
 
-  function removeSpiesFromCard($cardId)
-  {
-    $from = 'spies_' . $cardId;
-    $spiesOnCard = Tokens::getInLocation($from)->toArray();
-    $moves = [];
-    if (count($spiesOnCard) === 0) {
-      return $moves;
-    }
+  // function removeSpiesFromCard($cardId)
+  // {
+  //   $from = 'spies_' . $cardId;
+  //   $spiesOnCard = Tokens::getInLocation($from)->toArray();
+  //   $moves = [];
+  //   if (count($spiesOnCard) === 0) {
+  //     return $moves;
+  //   }
 
-    foreach ($spiesOnCard as $index => $spy) {
-      $spyOwner = explode("_", $spy['id'])[1];
-      $to = 'cylinders_' . $spyOwner;
-      $state = Tokens::insertOnTop($spy['id'], $to);
-      $moves[] =  [
-        'from' => $from,
-        'to' => $to,
-        'tokenId' => $spy['id'],
-        'weight' => $state,
-      ];
-    };
+  //   foreach ($spiesOnCard as $index => $spy) {
+  //     $spyOwner = explode("_", $spy['id'])[1];
+  //     $to = 'cylinders_' . $spyOwner;
+  //     $state = Tokens::insertOnTop($spy['id'], $to);
+  //     $moves[] =  [
+  //       'from' => $from,
+  //       'to' => $to,
+  //       'tokenId' => $spy['id'],
+  //       'weight' => $state,
+  //     ];
+  //   };
 
-    return $moves;
-  }
+  //   return $moves;
+  // }
 
-  function resolveDiscardCards($cards, $cardsOwner, $prizeTaker = null)
-  {
-    $playerId = $cardsOwner->getId();
-    $state = Cards::getExtremePosition(true, DISCARD);
-    $numberOfAdditionalCardsToDiscardDueToLeverage = 0;
-    foreach ($cards as $card) {
-      $cardId = $card['id'];
-      $spyMoves = [];
-      $isCourtCard = Utils::startsWith($card['location'], 'court');
-      if ($isCourtCard) {
-        $spyMoves = $this->removeSpiesFromCard($cardId);
-      }
-      $state += 1;
-      if (!$isCourtCard || $prizeTaker === null) {
-        Cards::move($cardId, DISCARD, $state);
-      } else {
-        Cards::move($cardId, Locations::prizes($prizeTaker->getId()), $state);
-      }
+  // function resolveDiscardCards($cards, $cardsOwner, $prizeTaker = null)
+  // {
+  //   $playerId = $cardsOwner->getId();
+  //   $state = Cards::getExtremePosition(true, DISCARD);
+  //   $numberOfAdditionalCardsToDiscardDueToLeverage = 0;
+  //   foreach ($cards as $card) {
+  //     $cardId = $card['id'];
+  //     $spyMoves = [];
+  //     $isCourtCard = Utils::startsWith($card['location'], 'court');
+  //     if ($isCourtCard) {
+  //       $spyMoves = $this->removeSpiesFromCard($cardId);
+  //     }
+  //     $state += 1;
+  //     if (!$isCourtCard || $prizeTaker === null) {
+  //       Cards::move($cardId, DISCARD, $state);
+  //     } else {
+  //       Cards::move($cardId, Locations::prizes($prizeTaker->getId()), $state);
+  //     }
 
-      if (!$isCourtCard) {
-        Notifications::discardFromHand($card, $cardsOwner);
-      } else if ($prizeTaker === null) {
-        Notifications::discardFromCourt($card, $cardsOwner, $spyMoves);
-        $numberOfAdditionalCardsToDiscardDueToLeverage += $this->checkAndHandleLeverage($cardId, $playerId);
-      } else {
-        Notifications::discardAndTakePrize($card, $prizeTaker, $spyMoves, $playerId === $prizeTaker->getId() ? null : $playerId);
-        $numberOfAdditionalCardsToDiscardDueToLeverage += $this->checkAndHandleLeverage($cardId, $playerId);
-      };
-    }
-    return $numberOfAdditionalCardsToDiscardDueToLeverage;
-  }
+  //     if (!$isCourtCard) {
+  //       Notifications::discardFromHand($card, $cardsOwner);
+  //     } else if ($prizeTaker === null) {
+  //       Notifications::discardFromCourt($card, $cardsOwner, $spyMoves);
+  //       $numberOfAdditionalCardsToDiscardDueToLeverage += $this->checkAndHandleLeverage($cardId, $playerId);
+  //     } else {
+  //       Notifications::discardAndTakePrize($card, $prizeTaker, $spyMoves, $playerId === $prizeTaker->getId() ? null : $playerId);
+  //       $numberOfAdditionalCardsToDiscardDueToLeverage += $this->checkAndHandleLeverage($cardId, $playerId);
+  //     };
+  //   }
+  //   return $numberOfAdditionalCardsToDiscardDueToLeverage;
+  // }
 
   /**
    * 1. Discard cards
@@ -249,31 +333,31 @@ trait DiscardTrait
    * cardsOwner is a player
    * prizeTake is a player
    */
-  function executeDiscards($cards, $cardsOwner, $next, $prizeTaker = null)
-  {
-    $playerId = $cardsOwner->getId();
-    $numberOfAdditionalCardsToDiscardDueToLeverage = $this->resolveDiscardCards($cards, $cardsOwner, $prizeTaker);
+  // function executeDiscards($cards, $cardsOwner, $next, $prizeTaker = null)
+  // {
+  //   $playerId = $cardsOwner->getId();
+  //   $numberOfAdditionalCardsToDiscardDueToLeverage = $this->resolveDiscardCards($cards, $cardsOwner, $prizeTaker);
 
-    $playerCourtCards = $cardsOwner->getCourtCards();
-    $playerHandCards = $cardsOwner->getHandCards();
-    $totalCards = count($playerCourtCards) + count($playerHandCards);
-    if ($numberOfAdditionalCardsToDiscardDueToLeverage > 0 && $totalCards > 0 && $totalCards > $numberOfAdditionalCardsToDiscardDueToLeverage) {
-      // Player needs to select cards to discard due to leverage
-      Globals::setLeverageData([
-        'activePlayerId' => $next['activePlayerId'],
-        'transition' => $next['transition'],
-        'numberOfDiscards' => $numberOfAdditionalCardsToDiscardDueToLeverage,
-      ]);
-      $this->nextState('discardLeverage', $playerId);
-    } else if ($numberOfAdditionalCardsToDiscardDueToLeverage > 0 && $totalCards > 0 && $totalCards <= $numberOfAdditionalCardsToDiscardDueToLeverage) {
-      // Player needs to discard all remaining cards due to leverage
-      Notifications::leveragedDiscardRemaining($cardsOwner);
-      $this->resolveDiscardCards(array_merge($playerCourtCards, $playerHandCards), $cardsOwner);
-      $this->reassignCourtState($playerId);
-      $this->nextState($next['transition'], $next['activePlayerId']);
-    } else {
-      $this->reassignCourtState($playerId);
-      $this->nextState($next['transition'], $next['activePlayerId']);
-    }
-  }
+  //   $playerCourtCards = $cardsOwner->getCourtCards();
+  //   $playerHandCards = $cardsOwner->getHandCards();
+  //   $totalCards = count($playerCourtCards) + count($playerHandCards);
+  //   if ($numberOfAdditionalCardsToDiscardDueToLeverage > 0 && $totalCards > 0 && $totalCards > $numberOfAdditionalCardsToDiscardDueToLeverage) {
+  //     // Player needs to select cards to discard due to leverage
+  //     Globals::setLeverageData([
+  //       'activePlayerId' => $next['activePlayerId'],
+  //       'transition' => $next['transition'],
+  //       'numberOfDiscards' => $numberOfAdditionalCardsToDiscardDueToLeverage,
+  //     ]);
+  //     $this->nextState('discardLeverage', $playerId);
+  //   } else if ($numberOfAdditionalCardsToDiscardDueToLeverage > 0 && $totalCards > 0 && $totalCards <= $numberOfAdditionalCardsToDiscardDueToLeverage) {
+  //     // Player needs to discard all remaining cards due to leverage
+  //     Notifications::leveragedDiscardRemaining($cardsOwner);
+  //     $this->resolveDiscardCards(array_merge($playerCourtCards, $playerHandCards), $cardsOwner);
+  //     $this->reassignCourtState($playerId);
+  //     $this->nextState($next['transition'], $next['activePlayerId']);
+  //   } else {
+  //     $this->reassignCourtState($playerId);
+  //     $this->nextState($next['transition'], $next['activePlayerId']);
+  //   }
+  // }
 }

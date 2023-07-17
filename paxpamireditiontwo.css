@@ -1134,6 +1134,13 @@ html {
   display: flex;
 }
 
+#pp_temp_discard_pile {
+  width: 150px;
+  height: 209px;
+  position: relative;
+  margin-right: 10px;
+}
+
 #pp_discard_pile {
   width: 149px;
   height: 208px;

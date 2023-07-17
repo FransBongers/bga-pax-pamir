@@ -12,6 +12,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
   protected static $variables = [
     'changeActivePlayer' => 'obj', // Used for the generic "changeActivePlayer" state
     'logState' => 'int', // Used to store state id when enabling the log
+    'actionStack' => 'obj',
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
@@ -166,5 +167,6 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setSetup(1);
     self::setBribeClearLogs(true);
     self::setNegotiatedBribe([]);
+    self::setActionStack([]);
   }
 }

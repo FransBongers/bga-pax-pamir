@@ -57,6 +57,8 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: ClientResolveEventPashtunwaliValuesState;
     [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
     [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
+    acceptPrize: AcceptPrizeState;
+    discard: DiscardState;
     discardCourt: DiscardCourtState;
     discardHand: DiscardHandState;
     discardLeverage: DiscardLeverageState;
@@ -101,7 +103,7 @@ class PaxPamir implements PaxPamirGame {
     this.activeStates = {
       [CLIENT_CARD_ACTION_BATTLE]: new ClientCardActionBattleState(this),
       [CLIENT_CARD_ACTION_BETRAY]: new ClientCardActionBetrayState(this),
-      [CLIENT_CARD_ACTION_BUILD]: new ClientCardActionBuildState(this,false),
+      [CLIENT_CARD_ACTION_BUILD]: new ClientCardActionBuildState(this, false),
       [CLIENT_CARD_ACTION_GIFT]: new ClientCardActionGiftState(this),
       [CLIENT_CARD_ACTION_MOVE]: new ClientCardActionMoveState(this),
       [CLIENT_CARD_ACTION_TAX]: new ClientCardActionTaxState(this),
@@ -113,6 +115,8 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: new ClientResolveEventPashtunwaliValuesState(this),
       [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
       [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
+      acceptPrize: new AcceptPrizeState(this),
+      discard: new DiscardState(this),
       discardCourt: new DiscardCourtState(this),
       discardHand: new DiscardHandState(this),
       discardLeverage: new DiscardLeverageState(this),
@@ -122,7 +126,7 @@ class PaxPamir implements PaxPamirGame {
       playerActions: new PlayerActionsState(this),
       resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
-      specialAbilityInfrastructure: new ClientCardActionBuildState(this,true),
+      specialAbilityInfrastructure: new ClientCardActionBuildState(this, true),
       specialAbilitySafeHouse: new SASafeHouseState(this),
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
     };
@@ -308,7 +312,7 @@ class PaxPamir implements PaxPamirGame {
     }
   }
 
-  addPlayerButton({ player, callback }: { player: PPPlayer; callback: Function | string; }) {
+  addPlayerButton({ player, callback }: { player: PPPlayer; callback: Function | string }) {
     this.addPrimaryActionButton({
       id: `select_${player.getPlayerId()}`,
       text: player.getName(),
@@ -365,15 +369,15 @@ class PaxPamir implements PaxPamirGame {
     return this.playerManager.getPlayer({ playerId: this.getPlayerId() });
   }
 
-  public getMinimumActionCost({action}: {action: string;}): number | null {
-    if([BATTLE, MOVE, TAX, PLAY_CARD].includes(action)) {
+  public getMinimumActionCost({ action }: { action: string }): number | null {
+    if ([BATTLE, MOVE, TAX, PLAY_CARD].includes(action)) {
       return 0;
-    } else if ([BETRAY,BUILD].includes(action)) {
+    } else if ([BETRAY, BUILD].includes(action)) {
       return 2;
     } else {
       // only option remaining is purchase gift, determines on lowest empty spot
       return this.getCurrentPlayer().getLowestAvailableGift();
-    };
+    }
   }
 
   /**
@@ -392,12 +396,15 @@ class PaxPamir implements PaxPamirGame {
     this.localState = { ...this.localState, ...updates };
   }
 
-  setCourtCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
+  setCourtCardsSelectable({ callback, loyalty }: { callback: (props: { cardId: string }) => void; loyalty?: string | null }) {
     const playerId = this.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = 'card_' + node.id.split('_')[1];
-      dojo.addClass(node, 'pp_selectable');
-      this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
+      const card = this.getCardInfo({ cardId }) as CourtCard;
+      if (!loyalty || card.loyalty === loyalty) {
+        dojo.addClass(node, 'pp_selectable');
+        this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
+      }
     });
   }
 

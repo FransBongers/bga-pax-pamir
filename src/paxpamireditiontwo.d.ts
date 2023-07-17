@@ -85,6 +85,7 @@ interface LocalState {
 interface PaxPamirGamedatas extends Gamedatas {
   canceledNotifIds: string[];
   discardPile: Card | null;
+  tempDiscardPile: Card | null;
   staticData: {
     borders: {
       [border: string]: {
@@ -196,8 +197,8 @@ interface PaxPamirGame extends Game {
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   onCancel: () => void;
   // returnSpiesFromCard: (props: { cardId: string }) => void;
-  setCourtCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
-  setHandCardsSelectable: ({ callback }: { callback: (props: { cardId: string }) => void }) => void;
+  setCourtCardsSelectable: (props: { callback: (props: { cardId: string }) => void; loyalty?: string | null; }) => void;
+  setHandCardsSelectable: (props: { callback: (props: { cardId: string }) => void }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
   updateLocalState: (updates: Partial<LocalState>) => void;

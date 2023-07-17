@@ -594,7 +594,7 @@ class PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  discardCourtCard({ cardId }: { cardId: string }) {
+  discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
     // // Move all spies back to cylinder pools if there are any
     // this.game.returnSpiesFromCard({ cardId });
     const node = dojo.byId(cardId);
@@ -602,24 +602,28 @@ class PPPlayer {
     node.classList.remove(`pp_player_${this.playerId}`);
     // Move card to discard pile
     this.court.removeFromZone(cardId, false);
-    discardCardAnimation({ cardId, game: this.game });
+    discardCardAnimation({ cardId, game: this.game, to });
   }
 
-  discardHandCard({ cardId }: { cardId: string }) {
+  discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
     if (this.playerId === this.game.getPlayerId()) {
+      const node = dojo.byId(cardId);
+      if (node) {
+        node.classList.remove(PP_CARD_IN_HAND);
+      }
       this.hand.removeFromZone(cardId, false);
     } else {
       dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
     }
-    discardCardAnimation({ cardId, game: this.game });
+    discardCardAnimation({ cardId, game: this.game, to });
   }
 
-  discardPrize({ cardId }: { cardId: string }) {
+  discardPrize({ cardId, to }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
     const node = dojo.byId(cardId);
     node.classList.remove('pp_prize');
     // Move card to discard pile
     this.prizes.removeFromZone(cardId, false);
-    discardCardAnimation({ cardId, game: this.game });
+    discardCardAnimation({ cardId, game: this.game, to });
   }
 
   payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
@@ -704,17 +708,24 @@ class PPPlayer {
     }
   }
 
-  takePrize({ cardId, cardOwnerId }: { cardId: string; cardOwnerId: number }): void {
+  takePrize({ cardId }: { cardId: string; }): void {
     debug('item number', this.prizes.getItemNumber());
     this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
-    this.game.move({
-      id: cardId,
-      from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
-      to: this.getPrizeZone(),
-      addClass: ['pp_prize'],
-      removeClass: ['pp_card_in_court', `pp_player_${cardOwnerId}`],
-      // weight,
-    });
+    
+    dojo.addClass(cardId, 'pp_prize');
+    const div = this.prizes.container_div;
+    attachToNewParentNoDestroy(cardId, div);
+    const animation = this.game.framework().slideToObject(cardId, div);
+    animation.play();
+    this.prizes.placeInZone(cardId);
+    // this.game.move({
+    //   id: cardId,
+    //   from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
+    //   to: this.getPrizeZone(),
+    //   addClass: ['pp_prize'],
+    //   removeClass: ['pp_card_in_court', `pp_player_${cardOwnerId}`],
+    //   // weight,
+    // });
     this.incCounter({ counter: 'influence', value: 1 });
   }
 

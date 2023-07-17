@@ -99,7 +99,7 @@ class PlayerActionsState implements State {
   //  ..#######.....##....####.########.####....##.......##...
 
   private isCardFavoredSuit({ cardId }: { cardId: string }): boolean {
-    debug('isCardFavoredSuit', cardId);
+    // debug('isCardFavoredSuit', cardId);
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     if (cardInfo.suit === this.game.objectManager.favoredSuit.get()) {
       return true;

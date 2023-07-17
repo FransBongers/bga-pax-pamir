@@ -55,14 +55,15 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_SETUP", 2);
     define("STATE_PREPARE_TURN", 3);
-    define("STATE_START_OF_TURN_ABILITIES",14);
+    define("STATE_START_OF_TURN_ABILITIES", 14);
     define("STATE_PLAYER_ACTIONS", 4);
     define("STATE_NEGOTIATE_BRIBE", 5);
     // define("STATE_RESOLVE_ACCEPTED_BRIBE", 25);
     define("STATE_RESOLVE_IMPACT_ICONS", 6);
-    define("STATE_DISCARD_COURT", 7);
-    define("STATE_DISCARD_HAND", 8);
-    define("STATE_DISCARD_LEVERAGE", 13);
+    define("STATE_DISCARD", 7);
+    define("STATE_DISPATCH_ACTION", 8);
+    // define("STATE_DISCARD_HAND", 8);
+    // define("STATE_DISCARD_LEVERAGE", 13);
     define("STATE_PLACE_ROAD", 9);
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
@@ -77,8 +78,9 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CARD_ACTION_BUILD", 42);
     define("STATE_CARD_ACTION_MOVE", 44);
     define("STATE_CARD_ACTION_TAX", 45);
+    define("ST_ACCEPT_PRIZE", 46);
     define("STATE_NEXT_PLAYER", 50);
-    define("STATE_CHANGE_LOYALTY", 52);
+    // define("STATE_CHANGE_LOYALTY", 52);
     // define("STATE_OVERTHROW", 60);
     define("STATE_FINAL", 90);
     define("ST_CHANGE_ACTIVE_PLAYER", 95);
@@ -153,10 +155,11 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argPlayerActions",
-        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "move", "tax", "betray","startBribeNegotiation","cancelBribe"),
+        "possibleactions" => array("purchaseCard", "playCard", "purchaseGift", "pass", "restart", "battle", "build", "move", "tax", "betray", "startBribeNegotiation", "cancelBribe"),
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
-            "discardLeverage" => STATE_DISCARD_LEVERAGE,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "discardLeverage" => STATE_DISCARD_LEVERAGE,
             "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveEvent" => STATE_RESOLVE_EVENT,
             "resolveImpactIcons" => STATE_RESOLVE_IMPACT_ICONS,
@@ -203,8 +206,9 @@ $machinestates = array(
         "action" => "stCleanup",
         "updateGameProgression" => false,
         "transitions" => array(
-            "discardCourt" => STATE_DISCARD_COURT,
-            "discardHand" => STATE_DISCARD_HAND,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "discardCourt" => STATE_DISCARD_COURT,
+            // "discardHand" => STATE_DISCARD_HAND,
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
         )
     ),
@@ -232,8 +236,8 @@ $machinestates = array(
             "refreshMarket" => STATE_REFRESH_MARKET,
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
-            "discardCourt" => STATE_DISCARD_COURT,
-            "discardHand" => STATE_DISCARD_HAND,
+            // "discardCourt" => STATE_DISCARD_COURT,
+            // "discardHand" => STATE_DISCARD_HAND,
         )
     ),
 
@@ -261,45 +265,74 @@ $machinestates = array(
         )
     ),
 
-    STATE_DISCARD_COURT => array(
-        "name" => "discardCourt",
-        "description" => clienttranslate('${actplayer} must discard court cards'),
+    STATE_DISCARD => array(
+        "name" => "discard",
+        "description" => clienttranslate('${actplayer} must discard a card'),
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
-        "args" => "argDiscardCourt",
-        "possibleactions" => array("discardCards"),
+        "args" => "argDiscard",
+        "possibleactions" => array("discard"),
         "transitions" => array(
-            "discardLeverage" => STATE_DISCARD_LEVERAGE,
-            "cleanup" => STATE_CLEANUP,
-        )
-    ),
-
-    STATE_DISCARD_HAND => array(
-        "name" => "discardHand",
-        "description" => clienttranslate('${actplayer} must discard hand cards'),
-        "descriptionmyturn" => clienttranslate('${you} must discard '),
-        "type" => "activeplayer",
-        "args" => "argDiscardHand",
-        "possibleactions" => array("discardCards"),
-        "transitions" => array(
-            "cleanup" => STATE_CLEANUP,
-        )
-    ),
-
-    STATE_DISCARD_LEVERAGE => array(
-        "name" => "discardLeverage",
-        "description" => clienttranslate('${actplayer} must discard cards'),
-        "descriptionmyturn" => clienttranslate('${you} must discard '),
-        "type" => "activeplayer",
-        "args" => "argDiscardLeverage",
-        "possibleactions" => array("discardCards"),
-        // TODO check all possible transitions? Or use jumpToState?
-        "transitions" => array(
-            "cleanup" => STATE_CLEANUP,
-            "discardLeverage" => STATE_DISCARD_LEVERAGE,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
             "playerActions" => STATE_PLAYER_ACTIONS,
+            // "discardLeverage" => STATE_DISCARD_LEVERAGE,
+            // "cleanup" => STATE_CLEANUP,
         )
     ),
+
+    STATE_DISPATCH_ACTION => array(
+        "name" => "dispatchAction",
+        "type" => "game",
+        "action" => "stDispatchAction",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "acceptPrize" => ST_ACCEPT_PRIZE,
+            "cleanup" => STATE_CLEANUP,
+            "discard" => STATE_DISCARD,
+            "playerActions" => STATE_PLAYER_ACTIONS,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+        )
+    ),
+
+    // STATE_DISCARD_COURT => array(
+    //     "name" => "discardCourt",
+    //     "description" => clienttranslate('${actplayer} must discard court cards'),
+    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
+    //     "type" => "activeplayer",
+    //     "args" => "argDiscardCourt",
+    //     "possibleactions" => array("discardCards"),
+    //     "transitions" => array(
+    //         "discardLeverage" => STATE_DISCARD_LEVERAGE,
+    //         "cleanup" => STATE_CLEANUP,
+    //     )
+    // ),
+
+    // STATE_DISCARD_HAND => array(
+    //     "name" => "discardHand",
+    //     "description" => clienttranslate('${actplayer} must discard hand cards'),
+    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
+    //     "type" => "activeplayer",
+    //     "args" => "argDiscardHand",
+    //     "possibleactions" => array("discardCards"),
+    //     "transitions" => array(
+    //         "cleanup" => STATE_CLEANUP,
+    //     )
+    // ),
+
+    // STATE_DISCARD_LEVERAGE => array(
+    //     "name" => "discardLeverage",
+    //     "description" => clienttranslate('${actplayer} must discard cards'),
+    //     "descriptionmyturn" => clienttranslate('${you} must discard '),
+    //     "type" => "activeplayer",
+    //     "args" => "argDiscardLeverage",
+    //     "possibleactions" => array("discardCards"),
+    //     // TODO check all possible transitions? Or use jumpToState?
+    //     "transitions" => array(
+    //         "cleanup" => STATE_CLEANUP,
+    //         "discardLeverage" => STATE_DISCARD_LEVERAGE,
+    //         "playerActions" => STATE_PLAYER_ACTIONS,
+    //     )
+    // ),
 
     STATE_PLACE_ROAD => array(
         "name" => "placeRoad",
@@ -349,6 +382,18 @@ $machinestates = array(
         )
     ),
 
+    ST_ACCEPT_PRIZE => [
+        "name" => "acceptPrize",
+        "description" => clienttranslate('${actplayer} may accept prize'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "args" => "argAcceptPrize",
+        "possibleactions" => ["acceptPrize"],
+        "transitions" => [
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+        ]
+    ],
+
     STATE_CARD_ACTION_BUILD => array(
         "name" => "cardActionBuild",
         "description" => clienttranslate('${actplayer} must build'),
@@ -385,16 +430,16 @@ $machinestates = array(
         )
     ),
 
-    STATE_CHANGE_LOYALTY => [
-        'name' => 'changeLoyalty',
-        'description' => '',
-        'descriptionmyturn' => '',
-        'type' => 'game',
-        'action' => 'stChangeLoyalty',
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-        )
-    ],
+    // STATE_CHANGE_LOYALTY => [
+    //     'name' => 'changeLoyalty',
+    //     'description' => '',
+    //     'descriptionmyturn' => '',
+    //     'type' => 'game',
+    //     'action' => 'stChangeLoyalty',
+    //     "transitions" => array(
+    //         "playerActions" => STATE_PLAYER_ACTIONS,
+    //     )
+    // ],
 
     STATE_RESOLVE_EVENT => [
         "name" => "resolveEvent",
@@ -429,7 +474,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} may place one additional block with Infrastructure'),
         "descriptionmyturn" => clienttranslate('${you}'),
         "type" => "activeplayer",
-        "possibleactions" => ["build","skipSpecialAbility"],
+        "possibleactions" => ["build", "skipSpecialAbility"],
         "transitions" => [
             "playerActions" => STATE_PLAYER_ACTIONS,
         ]

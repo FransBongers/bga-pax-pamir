@@ -57,6 +57,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\ChangeLoyaltyTrait;
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
+    use PaxPamir\States\DispatchActionTrait;
     use PaxPamir\States\DominanceCheckTrait;
     use PaxPamir\States\BribeTrait;
     use PaxPamir\States\NextPlayerTrait;
@@ -170,6 +171,7 @@ class PaxPamirEditionTwo extends Table
             'favoredSuit' => Globals::getFavoredSuit(),
             'canceledNotifIds' => Log::getCanceledNotifIds(),
             'discardPile' => Cards::getTopOf(DISCARD),
+            'tempDiscardPile' => Cards::getTopOf(TEMP_DISCARD),
         ];
         $activePlayerId = Players::getActiveId();
         $data['localState'] = [

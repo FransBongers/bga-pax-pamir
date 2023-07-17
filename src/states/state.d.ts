@@ -54,6 +54,15 @@ interface EnteringDiscardLeverageArgs {
   numberOfDiscards: number;
 }
 
+interface OnEnteringAcceptPrizeArgs {
+  cardId: string;
+}
+
+interface OnEnteringDiscardArgs {
+  from: ('hand' | 'court')[];
+  loyalty: string | null;
+}
+
 interface OnEnteringNegotiateBribeArgs {
   bribee: {
     currentAmount?: number;

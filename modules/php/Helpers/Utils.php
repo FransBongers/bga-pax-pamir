@@ -125,6 +125,11 @@ abstract class Utils extends \APP_DbObject
     return implode(':', [LOG_TOKEN_CARD, $cardId]);
   }
 
+  public static function logTokenCardIcon()
+  {
+    return implode(':', [LOG_TOKEN_CARD_ICON, '']);
+  }
+
   public static function logTokenLargeCard($cardId)
   {
     return implode(':', [LOG_TOKEN_LARGE_CARD, $cardId]);

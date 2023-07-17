@@ -10,10 +10,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var discardCardAnimation = function (_a) {
-    var cardId = _a.cardId, game = _a.game;
-    attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
+    var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b, game = _a.game;
+    var destinationId = to === DISCARD ? 'pp_discard_pile' : 'pp_temp_discard_pile';
+    attachToNewParentNoDestroy(cardId, destinationId);
     dojo.addClass(cardId, 'pp_moving');
-    var animation = game.framework().slideToObject(cardId, 'pp_discard_pile');
+    var animation = game.framework().slideToObject(cardId, destinationId);
     dojo.connect(animation, 'onEnd', function () {
         dojo.removeClass(cardId, 'pp_moving');
     });
@@ -156,6 +157,7 @@ var positionObjectDirectly = function (mobileObj, x, y) {
 };
 var LOG_TOKEN_ARMY = 'army';
 var LOG_TOKEN_CARD = 'card';
+var LOG_TOKEN_CARD_ICON = 'cardIcon';
 var LOG_TOKEN_CARD_NAME = 'cardName';
 var LOG_TOKEN_COALITION = 'coalition';
 var LOG_TOKEN_COALITION_NAME = 'coalitionName';
@@ -176,6 +178,8 @@ var getLogTokenDiv = function (_a) {
             return tplLogTokenArmy({ coalition: data });
         case LOG_TOKEN_CARD:
             return tplLogTokenCard({ cardId: data });
+        case LOG_TOKEN_CARD_ICON:
+            return tplLogTokenCard({ cardId: 'card_back' });
         case LOG_TOKEN_LARGE_CARD:
             return tplLogTokenCard({ cardId: data, large: true });
         case LOG_TOKEN_CARD_NAME:
@@ -284,6 +288,10 @@ var cardActionClientStateMap = (_a = {},
     _a[MOVE] = CLIENT_CARD_ACTION_MOVE,
     _a[TAX] = CLIENT_CARD_ACTION_TAX,
     _a);
+var DISCARD = 'discard';
+var TEMP_DISCARD = 'temp_discard';
+var HAND = 'hand';
+var COURT = 'court';
 var CARD_WIDTH = 150;
 var CARD_HEIGHT = 209;
 var ARMY_HEIGHT = 40;
@@ -611,6 +619,24 @@ var DiscardPile = (function () {
     };
     return DiscardPile;
 }());
+var TempDiscardPile = (function () {
+    function TempDiscardPile(_a) {
+        var game = _a.game;
+        console.log('Constructor TempDiscardPile');
+        this.game = game;
+        this.setup({ gamedatas: game.gamedatas });
+    }
+    TempDiscardPile.prototype.setup = function (_a) {
+        var gamedatas = _a.gamedatas;
+        if (gamedatas.tempDiscardPile) {
+            dojo.place(tplCard({ cardId: gamedatas.tempDiscardPile.id }), 'pp_temp_discard_pile');
+        }
+    };
+    TempDiscardPile.prototype.clearInterface = function () {
+        dojo.empty('pp_temp_discard_pile');
+    };
+    return TempDiscardPile;
+}());
 var FavoredSuit = (function () {
     function FavoredSuit(_a) {
         var game = _a.game;
@@ -775,6 +801,7 @@ var ObjectManager = (function () {
         console.log('ObjectManager');
         this.game = game;
         this.discardPile = new DiscardPile({ game: game });
+        this.tempDiscardPile = new TempDiscardPile({ game: game });
         this.favoredSuit = new FavoredSuit({ game: game });
         this.supply = new Supply({ game: game });
         this.vpTrack = new VpTrack({ game: game });
@@ -784,12 +811,14 @@ var ObjectManager = (function () {
         this.discardPile.setup({ gamedatas: gamedatas });
         this.favoredSuit.setup({ gamedatas: gamedatas });
         this.supply.setup({ gamedatas: gamedatas });
+        this.tempDiscardPile.setup({ gamedatas: gamedatas });
         this.vpTrack.setupVpTrack({ gamedatas: gamedatas });
     };
     ObjectManager.prototype.clearInterface = function () {
         this.discardPile.clearInterface();
         this.favoredSuit.clearInterface();
         this.supply.clearInterface();
+        this.tempDiscardPile.clearInterface();
         this.vpTrack.clearInterface();
     };
     return ObjectManager;
@@ -1253,29 +1282,33 @@ var PPPlayer = (function () {
             .filter(function (card) { return card.specialAbility === specialAbility; });
     };
     PPPlayer.prototype.discardCourtCard = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
         var node = dojo.byId(cardId);
         node.classList.remove('pp_card_in_court');
         node.classList.remove("pp_player_".concat(this.playerId));
         this.court.removeFromZone(cardId, false);
-        discardCardAnimation({ cardId: cardId, game: this.game });
+        discardCardAnimation({ cardId: cardId, game: this.game, to: to });
     };
     PPPlayer.prototype.discardHandCard = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
         if (this.playerId === this.game.getPlayerId()) {
+            var node = dojo.byId(cardId);
+            if (node) {
+                node.classList.remove(PP_CARD_IN_HAND);
+            }
             this.hand.removeFromZone(cardId, false);
         }
         else {
             dojo.place(tplCard({ cardId: cardId }), "cards_".concat(this.playerId));
         }
-        discardCardAnimation({ cardId: cardId, game: this.game });
+        discardCardAnimation({ cardId: cardId, game: this.game, to: to });
     };
     PPPlayer.prototype.discardPrize = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, to = _a.to;
         var node = dojo.byId(cardId);
         node.classList.remove('pp_prize');
         this.prizes.removeFromZone(cardId, false);
-        discardCardAnimation({ cardId: cardId, game: this.game });
+        discardCardAnimation({ cardId: cardId, game: this.game, to: to });
     };
     PPPlayer.prototype.payToPlayer = function (_a) {
         var _this = this;
@@ -1358,16 +1391,15 @@ var PPPlayer = (function () {
         }
     };
     PPPlayer.prototype.takePrize = function (_a) {
-        var cardId = _a.cardId, cardOwnerId = _a.cardOwnerId;
+        var cardId = _a.cardId;
         debug('item number', this.prizes.getItemNumber());
         this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
-        this.game.move({
-            id: cardId,
-            from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
-            to: this.getPrizeZone(),
-            addClass: ['pp_prize'],
-            removeClass: ['pp_card_in_court', "pp_player_".concat(cardOwnerId)],
-        });
+        dojo.addClass(cardId, 'pp_prize');
+        var div = this.prizes.container_div;
+        attachToNewParentNoDestroy(cardId, div);
+        var animation = this.game.framework().slideToObject(cardId, div);
+        animation.play();
+        this.prizes.placeInZone(cardId);
         this.incCounter({ counter: 'influence', value: 1 });
     };
     PPPlayer.prototype.updatePlayerLoyalty = function (_a) {
@@ -1964,6 +1996,69 @@ var Market = (function () {
     };
     return Market;
 }());
+var AcceptPrizeState = (function () {
+    function AcceptPrizeState(game) {
+        this.game = game;
+    }
+    AcceptPrizeState.prototype.onEnteringState = function (_a) {
+        var cardId = _a.cardId;
+        this.cardId = cardId;
+        this.updateInterfaceInitialStep();
+    };
+    AcceptPrizeState.prototype.onLeavingState = function () { };
+    AcceptPrizeState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.updatePageTitle();
+        this.game.addPrimaryActionButton({
+            id: 'accept_prize_btn',
+            text: _('Accept prize'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'acceptPrize',
+                    data: {
+                        accept: true,
+                    },
+                });
+            },
+        });
+        this.game.addSecondaryActionButton({
+            id: 'no_prize_btn',
+            text: _('Decline prize'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'acceptPrize',
+                    data: {
+                        accept: false,
+                    },
+                });
+            },
+        });
+    };
+    AcceptPrizeState.prototype.updatePageTitle = function () {
+        var card = this.game.getCardInfo({ cardId: this.cardId });
+        console.log('card', card);
+        var playerLoyalty = this.game.getCurrentPlayer().getLoyalty();
+        if (card.prize !== playerLoyalty) {
+            this.game.clientUpdatePageTitle({
+                text: _('Accept ${cardName} as a prize and change loyalty to ${coalitionName}?'),
+                args: {
+                    cardName: _(card.name),
+                    coalitionName: this.game.gamedatas.staticData.loyalty[card.prize].name,
+                },
+            });
+        }
+        else {
+            this.game.clientUpdatePageTitle({
+                text: _('Accept ${cardName} as a prize?'),
+                args: {
+                    cardName: _(card.name),
+                },
+            });
+        }
+    };
+    return AcceptPrizeState;
+}());
 var ClientCardActionBattleState = (function () {
     function ClientCardActionBattleState(game) {
         this.game = game;
@@ -2230,34 +2325,9 @@ var ClientCardActionBetrayState = (function () {
             this.game.addCancelButton();
         }
     };
-    ClientCardActionBetrayState.prototype.updateInterfaceAcceptPrize = function (_a) {
-        var _this = this;
-        var betrayedCardId = _a.betrayedCardId;
-        this.game.clearPossible();
-        var card = this.game.getCardInfo({ cardId: betrayedCardId });
-        var node = dojo.byId(betrayedCardId);
-        dojo.addClass(node, 'pp_selected');
-        this.game.clientUpdatePageTitle({
-            text: _('Accept ${cardName} as a prize?'),
-            args: {
-                cardName: _(card.name),
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'accept_prize_btn',
-            text: _('Accept as prize'),
-            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: true }); },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'no_prize_btn',
-            text: _('Decline prize'),
-            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: false }); },
-        });
-        this.game.addCancelButton();
-    };
     ClientCardActionBetrayState.prototype.updateInterfaceConfirm = function (_a) {
         var _this = this;
-        var betrayedCardId = _a.betrayedCardId, acceptPrize = _a.acceptPrize;
+        var betrayedCardId = _a.betrayedCardId;
         this.game.clearPossible();
         var card = this.game.getCardInfo({ cardId: betrayedCardId });
         var node = dojo.byId(betrayedCardId);
@@ -2271,7 +2341,7 @@ var ClientCardActionBetrayState = (function () {
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
-            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId, acceptPrize: acceptPrize }); },
+            callback: function () { return _this.handleConfirm({ betrayedCardId: betrayedCardId }); },
         });
         this.game.addCancelButton();
     };
@@ -2293,14 +2363,16 @@ var ClientCardActionBetrayState = (function () {
     };
     ClientCardActionBetrayState.prototype.handleConfirm = function (_a) {
         var _b, _c;
-        var betrayedCardId = _a.betrayedCardId, acceptPrize = _a.acceptPrize;
+        var betrayedCardId = _a.betrayedCardId;
         debug('handleConfirm', betrayedCardId);
-        this.game.takeAction({ action: 'betray', data: {
+        this.game.takeAction({
+            action: 'betray',
+            data: {
                 cardId: this.cardId,
                 betrayedCardId: betrayedCardId,
-                acceptPrize: acceptPrize,
                 bribeAmount: (_c = (_b = this.bribe) === null || _b === void 0 ? void 0 : _b.amount) !== null && _c !== void 0 ? _c : null,
-            } });
+            },
+        });
     };
     ClientCardActionBetrayState.prototype.setCourtCardsSelectable = function () {
         var _this = this;
@@ -2316,16 +2388,9 @@ var ClientCardActionBetrayState = (function () {
                 }
                 var node = dojo.byId(card.id);
                 dojo.addClass(node, 'pp_selectable');
-                if (card.prize) {
-                    dojo.connect(node, 'onclick', _this, function () {
-                        _this.updateInterfaceAcceptPrize({ betrayedCardId: card.id });
-                    });
-                }
-                else {
-                    dojo.connect(node, 'onclick', _this, function () {
-                        _this.updateInterfaceConfirm({ betrayedCardId: card.id, acceptPrize: false });
-                    });
-                }
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
+                    _this.updateInterfaceConfirm({ betrayedCardId: card.id });
+                }));
             });
         });
     };
@@ -2615,6 +2680,7 @@ var ClientCardActionMoveState = (function () {
     }
     ClientCardActionMoveState.prototype.onEnteringState = function (_a) {
         var cardId = _a.cardId, bribe = _a.bribe;
+        this.game.clearPossible();
         this.cardId = cardId;
         this.bribe = bribe;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
@@ -2889,7 +2955,6 @@ var ClientCardActionMoveState = (function () {
             var tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
                 ? region.getPlayerTribes({ playerId: player.getPlayerId() })
                 : [];
-            debug('coalitionArmies', regionId, coalitionArmies);
             if (coalitionArmies.length + tribesNationalism.length === 0) {
                 return;
             }
@@ -3923,6 +3988,88 @@ var ClientResolveEventRumorState = (function () {
     };
     return ClientResolveEventRumorState;
 }());
+var DiscardState = (function () {
+    function DiscardState(game) {
+        this.game = game;
+    }
+    DiscardState.prototype.onEnteringState = function (_a) {
+        var from = _a.from, loyalty = _a.loyalty;
+        console.log('from state file', from);
+        this.from = from;
+        this.loyalty = loyalty;
+        this.updateInterfaceInitialStep();
+    };
+    DiscardState.prototype.onLeavingState = function () { };
+    DiscardState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.updatePageTitle();
+        if (this.from.includes(COURT)) {
+            this.game.setCourtCardsSelectable({
+                callback: function (_a) {
+                    var cardId = _a.cardId;
+                    return _this.updateInterfaceConfirm({ cardId: cardId, from: 'court' });
+                },
+                loyalty: this.loyalty,
+            });
+        }
+        if (this.from.includes(HAND)) {
+            this.game.setHandCardsSelectable({
+                callback: function (_a) {
+                    var cardId = _a.cardId;
+                    return _this.updateInterfaceConfirm({ cardId: cardId, from: 'hand' });
+                },
+            });
+        }
+    };
+    DiscardState.prototype.updateInterfaceConfirm = function (_a) {
+        var _this = this;
+        var cardId = _a.cardId, from = _a.from;
+        this.game.clearPossible();
+        dojo.query("#".concat(cardId)).addClass('pp_selected');
+        this.game.clientUpdatePageTitle({
+            text: _('Discard ${name}?'),
+            args: {
+                name: this.game.getCardInfo({ cardId: cardId }).name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'discard',
+                    data: {
+                        cardId: cardId,
+                        from: from,
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    DiscardState.prototype.updatePageTitle = function () {
+        var text = _('${you} must discard a card');
+        var fromCourt = this.from.length === 1 && this.from[0] === COURT;
+        var fromHand = this.from.length === 1 && this.from[0] === HAND;
+        if (fromCourt && this.loyalty) {
+            text = _('${you} must discard a patriot from court');
+        }
+        else if (fromCourt) {
+            text = _('${you} must discard a card from court');
+        }
+        else if (fromHand) {
+            text = _('${you} must discard a card from hand');
+        }
+        this.game.clientUpdatePageTitle({
+            text: text,
+            args: {
+                you: '${you}',
+            },
+        });
+    };
+    return DiscardState;
+}());
 var DiscardCourtState = (function () {
     function DiscardCourtState(game) {
         this.game = game;
@@ -4334,7 +4481,6 @@ var PlayerActionsState = (function () {
     };
     PlayerActionsState.prototype.isCardFavoredSuit = function (_a) {
         var cardId = _a.cardId;
-        debug('isCardFavoredSuit', cardId);
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         if (cardInfo.suit === this.game.objectManager.favoredSuit.get()) {
             return true;
@@ -4750,10 +4896,7 @@ var NotificationManager = (function () {
             ['changeFavoredSuit', 250],
             ['changeLoyalty', 1],
             ['clearTurn', 1],
-            ['discardAndTakePrize', 1000],
-            ['discardFromCourt', 1000],
-            ['discardFromHand', 250],
-            ['discardFromMarket', 250],
+            ['discard', 1000],
             ['discardPrizes', 1000],
             ['exchangeHand', 100],
             ['dominanceCheckScores', 1],
@@ -4768,8 +4911,11 @@ var NotificationManager = (function () {
             ['refreshMarket', 250],
             ['replaceHand', 250],
             ['returnRupeesToSupply', 250],
+            ['returnSpies', 1000],
             ['smallRefreshHand', 1],
             ['smallRefreshInterface', 1],
+            ['declinePrize', 250],
+            ['takePrize', 250],
             ['takeRupeesFromSupply', 250],
             ['taxMarket', 250],
             ['taxPlayer', 250],
@@ -4824,9 +4970,9 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_changeLoyalty = function (notif) {
         debug('notif_changeLoyalty', notif.args);
-        var args = notif.args;
-        var playerId = Number(args.playerId);
-        this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: args.coalition });
+        var _a = notif.args, argsPlayerId = _a.playerId, coalition = _a.coalition;
+        var playerId = Number(argsPlayerId);
+        this.getPlayer({ playerId: playerId }).updatePlayerLoyalty({ coalition: coalition });
         var player = this.getPlayer({ playerId: playerId });
         if (player.getInfluence() === 0) {
             player.setCounter({ counter: 'influence', value: 1 });
@@ -4856,66 +5002,51 @@ var NotificationManager = (function () {
         console.log('notif_clearTurn notifIds', notifIds);
         this.game.cancelLogs(notifIds);
     };
-    NotificationManager.prototype.notif_discardAndTakePrize = function (notif) {
-        var _this = this;
-        console.log('notif_discardAndTakePrize', notif);
+    NotificationManager.prototype.notif_declinePrize = function (notif) {
+        debug('notif_declinePrize', notif);
         this.game.clearPossible();
-        var courtOwnerPlayerId = Number(notif.args.courtOwnerPlayerId);
-        var _a = notif.args, cardId = _a.cardId, moves = _a.moves, playerId = _a.playerId;
-        moves.forEach(function (move) {
-            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
-            var fromZone = _this.game.getZoneForLocation({ location: from });
-            var toZone = _this.game.getZoneForLocation({ location: to });
-            _this.game.move({
-                id: tokenId,
-                from: fromZone,
-                to: toZone,
-                weight: weight,
-            });
-            var spyOwnerId = Number(tokenId.split('_')[1]);
-            _this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
-        });
-        var player = this.getPlayer({ playerId: courtOwnerPlayerId });
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
-        this.game.playerManager.getPlayer({ playerId: playerId }).takePrize({ cardOwnerId: courtOwnerPlayerId, cardId: cardId });
-        player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+        var cardId = notif.args.cardId;
+        discardCardAnimation({ cardId: cardId, to: DISCARD, game: this.game });
     };
-    NotificationManager.prototype.notif_discardFromCourt = function (notif) {
-        var _this = this;
-        console.log('notif_discardCard', notif);
+    NotificationManager.prototype.notif_takePrize = function (notif) {
+        debug('notif_takePrize', notif);
         this.game.clearPossible();
-        var playerId = Number(notif.args.courtOwnerPlayerId);
-        var _a = notif.args, cardId = _a.cardId, moves = _a.moves;
-        moves.forEach(function (move) {
-            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
-            var fromZone = _this.game.getZoneForLocation({ location: from });
-            var toZone = _this.game.getZoneForLocation({ location: to });
-            _this.game.move({
-                id: tokenId,
-                from: fromZone,
-                to: toZone,
-                weight: weight,
-            });
-            var spyOwnerId = Number(tokenId.split('_')[1]);
-            _this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
-        });
+        var _a = notif.args, cardId = _a.cardId, playerId = _a.playerId;
+        this.game.playerManager.getPlayer({ playerId: playerId }).takePrize({ cardId: cardId });
+    };
+    NotificationManager.prototype.notif_discard = function (notif) {
+        debug('notif_discard', notif);
+        this.game.clearPossible();
+        var _a = notif.args, cardId = _a.cardId, from = _a.from, playerId = _a.playerId, to = _a.to;
         var player = this.getPlayer({ playerId: playerId });
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
-        player.discardCourtCard({ cardId: cardId });
-        player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
-    };
-    NotificationManager.prototype.notif_discardFromHand = function (notif) {
-        debug('notif_discardFromHand', notif);
-        this.game.clearPossible();
-        var node = dojo.byId(notif.args.cardId);
-        console.log('discarded card', node);
-        if (node) {
-            node.classList.remove(PP_CARD_IN_HAND);
+        if (from === COURT) {
+            var cardInfo = this.game.getCardInfo({ cardId: cardId });
+            player.discardCourtCard({ cardId: cardId, to: to });
+            player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
         }
-        var playerId = Number(notif.args.playerId);
-        var player = this.getPlayer({ playerId: playerId });
-        player.discardHandCard({ cardId: notif.args.cardId });
-        player.incCounter({ counter: 'cards', value: -1 });
+        else if (from === HAND) {
+            player.discardHandCard({ cardId: cardId, to: to });
+            player.incCounter({ counter: 'cards', value: -1 });
+        }
+    };
+    NotificationManager.prototype.notif_returnSpies = function (notif) {
+        var _this = this;
+        debug('notif_discard', notif);
+        this.game.clearPossible();
+        var moves = notif.args.moves;
+        moves.forEach(function (move) {
+            var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
+            var fromZone = _this.game.getZoneForLocation({ location: from });
+            var toZone = _this.game.getZoneForLocation({ location: to });
+            _this.game.move({
+                id: tokenId,
+                from: fromZone,
+                to: toZone,
+                weight: weight,
+            });
+            var spyOwnerId = Number(tokenId.split('_')[1]);
+            _this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
+        });
     };
     NotificationManager.prototype.notif_discardFromMarket = function (notif) {
         debug('notif_discardFromMarket', notif);
@@ -4976,7 +5107,7 @@ var NotificationManager = (function () {
                     : _this.game.map.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone(),
                 addClass: ['pp_coalition_block'],
                 removeClass: isArmy ? ['pp_army'] : ['pp_road'],
-                weight: weight
+                weight: weight,
             });
         });
     };
@@ -5294,6 +5425,8 @@ var PaxPamir = (function () {
             _a[CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES] = new ClientResolveEventPashtunwaliValuesState(this),
             _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
             _a[CLIENT_RESOLVE_EVENT_RUMOR] = new ClientResolveEventRumorState(this),
+            _a.acceptPrize = new AcceptPrizeState(this),
+            _a.discard = new DiscardState(this),
             _a.discardCourt = new DiscardCourtState(this),
             _a.discardHand = new DiscardHandState(this),
             _a.discardLeverage = new DiscardLeverageState(this),
@@ -5450,7 +5583,6 @@ var PaxPamir = (function () {
         else {
             return this.getCurrentPlayer().getLowestAvailableGift();
         }
-        ;
     };
     PaxPamir.prototype.framework = function () {
         return this;
@@ -5464,12 +5596,15 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.setCourtCardsSelectable = function (_a) {
         var _this = this;
-        var callback = _a.callback;
+        var callback = _a.callback, loyalty = _a.loyalty;
         var playerId = this.getPlayerId();
         dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[1];
-            dojo.addClass(node, 'pp_selectable');
-            _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
+            var card = _this.getCardInfo({ cardId: cardId });
+            if (!loyalty || card.loyalty === loyalty) {
+                dojo.addClass(node, 'pp_selectable');
+                _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
+            }
         });
     };
     PaxPamir.prototype.setHandCardsSelectable = function (_a) {

@@ -16,6 +16,7 @@ class ClientCardActionMoveState implements State {
   }
 
   onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
+    this.game.clearPossible();
     this.cardId = cardId;
     this.bribe = bribe;
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
@@ -395,7 +396,7 @@ class ClientCardActionMoveState implements State {
         ? region.getPlayerTribes({ playerId: player.getPlayerId() })
         : [];
 
-      debug('coalitionArmies', regionId, coalitionArmies);
+
       if (coalitionArmies.length + tribesNationalism.length === 0) {
         return;
       }

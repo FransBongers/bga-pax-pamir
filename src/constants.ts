@@ -40,6 +40,14 @@ const cardActionClientStateMap = {
   [TAX]: CLIENT_CARD_ACTION_TAX,
 };
 
+/**
+ * Locations
+ */
+const DISCARD = 'discard';
+const TEMP_DISCARD = 'temp_discard';
+const HAND = 'hand';
+const COURT = 'court';
+
 // size of tokens
 const CARD_WIDTH = 150;
 const CARD_HEIGHT = 209;

@@ -11,8 +11,6 @@
 - Overthrow rule: linnk between political cards and ruled regions
 - Check states file
 
-### Card Actions
-- Pay for hostage cards
 
 ### Card abilities
 - card_24 / SA_CIVIL_SERVICE_REFORMS
@@ -37,6 +35,7 @@
 - Check totals in player panels. Seem to be off for cylinders
 - do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args
 - no animation when there is a bribe of 0 rupees. Change text from 0 rupee(s) to no bribe?
+- When betraying a card it's moved to discard pile first before asking for prize. Keep it in separate zone next to discard before player makes choice? (since other cards can be discarded)
 
 ### UI
 - Matching colors for selectable / selected

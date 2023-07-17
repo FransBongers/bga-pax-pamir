@@ -1,7 +1,8 @@
-const discardCardAnimation = ({cardId, game}: {cardId: string; game: PaxPamirGame}) => {
-  attachToNewParentNoDestroy(cardId, 'pp_discard_pile');
+const discardCardAnimation = ({cardId, to = DISCARD, game}: {cardId: string; to?: 'discard' | 'temp_discard'; game: PaxPamirGame}) => {
+  const destinationId = to === DISCARD ? 'pp_discard_pile' : 'pp_temp_discard_pile';
+  attachToNewParentNoDestroy(cardId, destinationId);
   dojo.addClass(cardId, 'pp_moving');
-  const animation = game.framework().slideToObject(cardId, 'pp_discard_pile');
+  const animation = game.framework().slideToObject(cardId, destinationId);
   dojo.connect(animation, 'onEnd', () => {
     dojo.removeClass(cardId, 'pp_moving');
   });

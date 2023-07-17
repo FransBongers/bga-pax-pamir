@@ -16,6 +16,25 @@ use PaxPamir\Managers\Tokens;
 
 trait PlayerActionBetrayTrait
 {
+  // ....###....########...######....######.
+  // ...##.##...##.....##.##....##..##....##
+  // ..##...##..##.....##.##........##......
+  // .##.....##.########..##...####..######.
+  // .#########.##...##...##....##........##
+  // .##.....##.##....##..##....##..##....##
+  // .##.....##.##.....##..######....######.
+
+  function argAcceptPrize()
+  {
+    $actionStack = Globals::getActionStack();
+    Notifications::log('actionStack', $actionStack);
+
+    $next = $actionStack[count($actionStack) - 1];
+    return [
+      'cardId' => $next['data']['cardId'],
+    ];
+  }
+
   //  .########..##..........###....##....##.########.########.
   //  .##.....##.##.........##.##....##..##..##.......##.....##
   //  .##.....##.##........##...##....####...##.......##.....##
@@ -32,7 +51,44 @@ trait PlayerActionBetrayTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function betray($cardId, $betrayedCardId, $acceptPrize = false, $offeredBribeAmount = null)
+  function acceptPrize($accept)
+  {
+    self::checkAction('acceptPrize');
+    Notifications::log('acceptPrize', $accept);
+    $actionStack = Globals::getActionStack();
+    $current = array_pop($actionStack);
+
+    if ($current['action'] !== 'acceptPrizeCheck') {
+      throw new \feException("Not a valid action");
+    }
+    $cardId = $current['data']['cardId'];
+    $card = Cards::get($cardId);
+    $prize = $card['prize'];
+    $player = Players::get();
+
+    if ($accept) {
+      Notifications::acceptPrize($cardId, $player);
+      $actionStack[] = [
+        'action' => 'takePrize',
+        'playerId' => $player->getId(),
+        'data' => [
+          'cardId' => $cardId
+        ],
+      ];
+      if ($prize !== null && $this->checkLoyaltyChange($player,$prize)) {
+        $actionStack = array_merge($actionStack,$this->getLoyaltyChangeActions($player->getId(),$prize));
+      }
+    } else {
+      Cards::insertOnTop($cardId, Locations::discardPile());
+      Notifications::declinePrize($cardId, $player);
+    }
+
+    Globals::setActionStack($actionStack);
+    $this->nextState('dispatchAction');
+  }
+
+
+  function betray($cardId, $betrayedCardId, $offeredBribeAmount = null)
   {
     self::checkAction('betray');
 
@@ -42,12 +98,9 @@ trait PlayerActionBetrayTrait
     $betrayedCardInfo = Cards::get($betrayedCardId);
     $betrayedPlayerId = intval(explode('_', $betrayedCardInfo['location'])[1]);
 
-    Notifications::log('acceptPrize', [
-      'acceptPrize' => $acceptPrize
-    ]);
 
     $player = Players::get();
-    $resolved = $this->resolveBribe($cardInfo, $player,BETRAY, $offeredBribeAmount);
+    $resolved = $this->resolveBribe($cardInfo, $player, BETRAY, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
       return;
@@ -66,12 +119,12 @@ trait PlayerActionBetrayTrait
       throw new \feException("Player has Bodyguard special ability");
     }
 
-    if ($acceptPrize && $betrayedCardInfo['prize'] === null) {
-      throw new \feException("Card does not have a prize");
-    }
+    // if ($acceptPrize && $betrayedCardInfo['prize'] === null) {
+    //   throw new \feException("Card does not have a prize");
+    // }
     $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
     // Notifications::log('spies',[$spiesOnCard[0]]);
-    
+
     $playerId = $player->getId();
     // Card should have spy of active player
     if (!Utils::array_some($spiesOnCard, function ($cylinder) use ($playerId) {
@@ -93,11 +146,37 @@ trait PlayerActionBetrayTrait
     Players::incRupees($playerId, -2);
     Notifications::betray($betrayedCardInfo, $player, $rupeesOnCards);
 
-    $prizeTaker = $betrayedCardInfo['prize'] !== null && $acceptPrize ? $player : null;
-    $this->executeDiscards([$betrayedCardInfo], Players::get($betrayedPlayerId), [
-      'activePlayerId' => $playerId,
-      'transition' => 'playerActions'
-    ], $prizeTaker);
+    $actionStack =
+      [
+        [
+          'action' => 'playerActions',
+          'playerId' => $playerId,
+          'data' => [],
+        ],
+      ];
+
+    if ($betrayedCardInfo['prize'] !== null) {
+      $actionStack[] = [
+        'action' => 'acceptPrizeCheck',
+        'playerId' => $playerId,
+        'data' => [
+          'cardId' => $betrayedCardId,
+        ],
+      ];
+    }
+
+    $actionStack[] =
+      [
+        'action' => 'discardBetrayedCard',
+        'playerId' => $playerId,
+        'data' => [
+          'cardId' => $betrayedCardId,
+          'cardOwnerId' => $betrayedPlayerId,
+        ],
+      ];
+    Globals::setActionStack($actionStack);
+
+    $this->nextState('dispatchAction');
   }
 
 
@@ -109,6 +188,17 @@ trait PlayerActionBetrayTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
+  function takePrize($actionStack)
+  {
+    $current = array_pop($actionStack);
+    Globals::setActionStack($actionStack);
+    $cardId = $current['data']['cardId'];
+    $playerId = $current['playerId'];
 
+    Cards::move($cardId, Locations::prizes($playerId));
+    Notifications::takePrize($cardId, Players::Get($playerId));
+
+    $this->nextState('dispatchAction');
+  }
 
 }

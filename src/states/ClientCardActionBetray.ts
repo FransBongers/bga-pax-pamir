@@ -59,33 +59,33 @@ class ClientCardActionBetrayState implements State {
     }
   }
 
-  private updateInterfaceAcceptPrize({ betrayedCardId }: { betrayedCardId: string }) {
-    this.game.clearPossible();
-    const card = this.game.getCardInfo({cardId: betrayedCardId}) as CourtCard;
-    const node = dojo.byId(betrayedCardId);
-    dojo.addClass(node, 'pp_selected');
-    this.game.clientUpdatePageTitle({
-      text: _('Accept ${cardName} as a prize?'),
-      args: {
-        cardName: _(card.name),
-      },
-    });
-    this.game.addPrimaryActionButton({
-      id: 'accept_prize_btn',
-      text: _('Accept as prize'),
-      callback: () => this.handleConfirm({betrayedCardId, acceptPrize: true}),
-    });
-    this.game.addPrimaryActionButton({
-      id: 'no_prize_btn',
-      text: _('Decline prize'),
-      callback: () => this.handleConfirm({betrayedCardId, acceptPrize: false}),
-    });
-    this.game.addCancelButton();
-  }
+  // private updateInterfaceAcceptPrize({ betrayedCardId }: { betrayedCardId: string }) {
+  //   this.game.clearPossible();
+  //   const card = this.game.getCardInfo({ cardId: betrayedCardId }) as CourtCard;
+  //   const node = dojo.byId(betrayedCardId);
+  //   dojo.addClass(node, 'pp_selected');
+  //   this.game.clientUpdatePageTitle({
+  //     text: _('Accept ${cardName} as a prize?'),
+  //     args: {
+  //       cardName: _(card.name),
+  //     },
+  //   });
+  //   this.game.addPrimaryActionButton({
+  //     id: 'accept_prize_btn',
+  //     text: _('Accept as prize'),
+  //     callback: () => this.handleConfirm({ betrayedCardId }),
+  //   });
+  //   this.game.addPrimaryActionButton({
+  //     id: 'no_prize_btn',
+  //     text: _('Decline prize'),
+  //     callback: () => this.handleConfirm({ betrayedCardId }),
+  //   });
+  //   this.game.addCancelButton();
+  // }
 
-  private updateInterfaceConfirm({ betrayedCardId, acceptPrize }: { betrayedCardId: string; acceptPrize: boolean }) {
+  private updateInterfaceConfirm({ betrayedCardId }: { betrayedCardId: string; }) {
     this.game.clearPossible();
-    const card = this.game.getCardInfo({cardId: betrayedCardId}) as CourtCard;
+    const card = this.game.getCardInfo({ cardId: betrayedCardId }) as CourtCard;
     const node = dojo.byId(betrayedCardId);
     dojo.addClass(node, 'pp_selected');
     this.game.clientUpdatePageTitle({
@@ -97,10 +97,9 @@ class ClientCardActionBetrayState implements State {
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
-      callback: () => this.handleConfirm({betrayedCardId, acceptPrize}),
+      callback: () => this.handleConfirm({ betrayedCardId }),
     });
     this.game.addCancelButton();
-    
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -127,14 +126,16 @@ class ClientCardActionBetrayState implements State {
     };
   }
 
-  private handleConfirm({betrayedCardId, acceptPrize}:{betrayedCardId: string; acceptPrize: boolean;}) {
-    debug('handleConfirm',betrayedCardId);
-    this.game.takeAction({action: 'betray', data: {
-      cardId: this.cardId,
-      betrayedCardId,
-      acceptPrize,
-      bribeAmount: this.bribe?.amount ?? null,
-    }})
+  private handleConfirm({ betrayedCardId }: { betrayedCardId: string;}) {
+    debug('handleConfirm', betrayedCardId);
+    this.game.takeAction({
+      action: 'betray',
+      data: {
+        cardId: this.cardId,
+        betrayedCardId,
+        bribeAmount: this.bribe?.amount ?? null,
+      },
+    });
   }
 
   private setCourtCardsSelectable() {
@@ -145,21 +146,16 @@ class ClientCardActionBetrayState implements State {
         if (own.length === 0) {
           return;
         }
-        if (card.suit === POLITICAL && player.hasSpecialAbility({specialAbility: SA_BODYGUARDS})) {
+        if (card.suit === POLITICAL && player.hasSpecialAbility({ specialAbility: SA_BODYGUARDS })) {
           return;
         }
         const node = dojo.byId(card.id);
         dojo.addClass(node, 'pp_selectable');
-        if (card.prize) {
+        this.game._connections.push(
           dojo.connect(node, 'onclick', this, () => {
-            this.updateInterfaceAcceptPrize({ betrayedCardId: card.id });
-          });
-        } else {
-          dojo.connect(node, 'onclick', this, () => {
-            this.updateInterfaceConfirm({ betrayedCardId: card.id, acceptPrize: false });
-          });
-        }
- 
+            this.updateInterfaceConfirm({ betrayedCardId: card.id });
+          })
+        );
       });
     });
   }

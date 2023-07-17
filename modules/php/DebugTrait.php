@@ -21,8 +21,8 @@ trait DebugTrait
   {
     $this->debugAddCardToCourt('card_32');
     $this->debugAddCardToCourt('card_19');
-    $this->debugAddCardToCourt('card_27','2371052');
-    $this->debugAddCardToCourt('card_52','2371052');
+    $this->debugAddCardToCourt('card_27', '2371052');
+    $this->debugAddCardToCourt('card_52', '2371052');
   }
 
   function debugSetupTokens()
@@ -38,58 +38,34 @@ trait DebugTrait
 
   function test()
   {
-    $this->debugIncPlayerRupees(-1);
-  
-    // $lowest = Players::get()->getLowestAvailableGift();
-    // Notifications::log('lowest',$lowest);
-    // Notifications::log('determineResult',$this->determineBribe(Cards::get('card_50'), Players::get(), 1, 'playCard'));
-    // Notifications::log('intval',intval('1'));
-    // $this->debugCreateSpy('card_50');
-    // $this->debugCreateSpy('card_50');
-    // Globals::setNegotiatedBribe([]);
-    // $bribe = Globals::getNegotiatedBribe();
-    // Notifications::log('bribe',$bribe);
-    // Notifications::log('verify',$this->verifyBribe('card_14','playCard',2));
+    // $this->debugAddCardToHand('card_1');
+    // $this->debugAddCardToHand('card_2');
+    // $this->debugAddCardToHand('card_3');
+    // $this->debugAddCardToHand('card_4');
 
-    // $matchingAmount = isset($bribe['briber']['currentAmount']);
-    // Notifications::log('matchingAmount',$matchingAmount);
-    // Notifications::log('test',5 < null);
-    // $this->debugCreateSpy('card_91',2371054);
-    // $this->debugCreateSpy('card_91',2371054);
-    // $this->debugCreateSpy('card_68');
-    // $this->debugCreateSpy('card_68');
-    
-    // Notifications::log('card_84',$this->determineBribe(Cards::get('card_84'), Players::get(), 0, 'playCard'));
-    // Notifications::log('card_68',$this->determineBribe(Cards::get('card_68'), Players::get(), 0, 'cardAction'));
-    
-    // Notifications::log('card_21',$this->checkHostageAction('card_21'));
-    // Notifications::log('card_40',$this->checkHostageAction('card_40'));
-    // Notifications::log('card_1',$this->checkHostageAction('card_1'));
-    // Notifications::log('card_42',$this->checkHostageAction('card_42'));
-    // $this->debugIncPlayerRupees(1);
-    // Notifications::log('this is not sent',[]);
-    // throw new \feException("Testing");
-    // Cards::move('card_110','market_0_3');
-    // $this->debugCreateArmy(KANDAHAR);
-    // $this->debugCreateArmy(KABUL);
-    // $this->debugCreateArmy(PERSIA);
-    // Notifications::log('nextPlayerTable',$this->getNextPlayerTable());
-    // $players = Players::getAll()->toArray();
-    // usort($players,function ($a, $b) { return $a->getNo() - $b->getNo(); });
-    // $courtCards = [];
-    // foreach($players as $index => $player) {
-    //   $playerCourtCards = $player->getCourtCards();
-    //   array_push($courtCards,...$playerCourtCards);
-    // }
-    // Notifications::log('players',$players);
-    // Notifications::log('courtCards',$this->getAllCourtCardsOrdered());
-    // $result = $this->didPlayerWin();
-    // Notifications::log('winner',$result);
-    // Globals::setUsedSpecialAbilities([SA_BLACKMAIL_KANDAHAR]);
-    // $this->isValidStartOfTurnSpecialAbility(SA_BLACKMAIL_KANDAHAR);
-    // Notifications::log('has abilities',$this->playerHasStartOfTurnSpecialAbilities([]));
-
-    // Notifications::log('owners', $this->getSafeHouseOwners());
+    Notifications::log('actions', Globals::getActionStack());
+    // Globals::setActionStack([]);
+    // $this->nextState('playerActions');
+    // $this->pushActionsToActionStack([
+    //   [
+    //     'action' => 'discard',
+    //     'data' => [
+    //       'source' => 'hand',
+    //     ],
+    //   ],
+    //   [
+    //     'action' => 'discard',
+    //     'data' => [
+    //       'source' => 'court',
+    //     ],
+    //   ],
+    // ]);
+    // Notifications::log('actionStack', Globals::getActionStack());
+    // $actionStack = Globals::getActionStack();
+    // Notifications::log('actionStack before', $actionStack);
+    // $action = array_pop($actionStack);
+    // Notifications::log('action', $action);
+    // Notifications::log('actionStack after', $actionStack);
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)
@@ -98,6 +74,13 @@ trait DebugTrait
     $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
     Cards::move($cardId, ['court', $playerId]);
     $this->reassignCourtState($playerId);
+  }
+
+  function debugAddCardToHand($cardId, $playerId = null)
+  {
+    $card = Cards::get($cardId);
+    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    Cards::move($cardId, ['hand', $playerId]);
   }
 
   function debugCreateArmy($region, $coalition = null)
@@ -236,7 +219,7 @@ trait DebugTrait
   {
     $previous_suit_id = Globals::getFavoredSuit();
     Globals::setFavoredSuit($suitId);
-    Notifications::changeFavoredSuit($previous_suit_id, $suitId,false);
+    Notifications::changeFavoredSuit($previous_suit_id, $suitId, false);
   }
 
   function debugGetState()
@@ -262,7 +245,7 @@ trait DebugTrait
     Tokens::move($cylinder['id'], $to);
   }
 
-  function debugCreatePrize($cardId,$playerId = null)
+  function debugCreatePrize($cardId, $playerId = null)
   {
     $playerId = $this->debugGetPlayerId($playerId);
     Cards::move($cardId, Locations::prizes($playerId));

@@ -17,13 +17,34 @@ class DiscardPile {
   }
 
   setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    if(gamedatas.discardPile) {
+    if (gamedatas.discardPile) {
       dojo.place(tplCard({ cardId: gamedatas.discardPile.id }), 'pp_discard_pile');
     }
   }
 
   clearInterface() {
     dojo.empty('pp_discard_pile');
+  }
+}
+
+class TempDiscardPile {
+  private game: PaxPamirGame;
+
+  constructor({ game }: { game: PaxPamirGame }) {
+    console.log('Constructor TempDiscardPile');
+    this.game = game;
+
+    this.setup({ gamedatas: game.gamedatas });
+  }
+
+  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    if (gamedatas.tempDiscardPile) {
+      dojo.place(tplCard({ cardId: gamedatas.tempDiscardPile.id }), 'pp_temp_discard_pile');
+    }
+  }
+
+  clearInterface() {
+    dojo.empty('pp_temp_discard_pile');
   }
 }
 
@@ -100,9 +121,9 @@ class FavoredSuit {
     return this.favoredSuit;
   }
 
-  change({suit}: {suit: string;}): void {
+  change({ suit }: { suit: string }): void {
     this.favoredSuit = suit;
-    // TODO animation    
+    // TODO animation
   }
 }
 
@@ -256,6 +277,7 @@ class VpTrack {
 class ObjectManager {
   private game: PaxPamirGame;
   public discardPile: DiscardPile;
+  public tempDiscardPile: TempDiscardPile;
   public favoredSuit: FavoredSuit;
   public supply: Supply;
   public vpTrack: VpTrack;
@@ -265,6 +287,7 @@ class ObjectManager {
     this.game = game;
 
     this.discardPile = new DiscardPile({ game });
+    this.tempDiscardPile = new TempDiscardPile({ game });
     this.favoredSuit = new FavoredSuit({ game });
     this.supply = new Supply({ game });
     this.vpTrack = new VpTrack({ game });
@@ -274,6 +297,7 @@ class ObjectManager {
     this.discardPile.setup({ gamedatas });
     this.favoredSuit.setup({ gamedatas });
     this.supply.setup({ gamedatas });
+    this.tempDiscardPile.setup({ gamedatas });
     this.vpTrack.setupVpTrack({ gamedatas });
   }
 
@@ -281,6 +305,7 @@ class ObjectManager {
     this.discardPile.clearInterface();
     this.favoredSuit.clearInterface();
     this.supply.clearInterface();
+    this.tempDiscardPile.clearInterface();
     this.vpTrack.clearInterface();
   }
 }

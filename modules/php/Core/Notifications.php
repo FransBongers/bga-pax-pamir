@@ -342,37 +342,6 @@ class Notifications
     ));
   }
 
-  // public static function discardAndTakePrize($card, $player, $moves = [], $courtOwnerPlayerId = null)
-  // {
-  //   $message =  clienttranslate('${player_name} takes ${logTokenCardName} as a prize ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
-  //   $hasSpies = count($moves) > 0;
-  //   $logs = [];
-  //   $args = [];
-  //   foreach ($moves as $index => $move) {
-  //     $playerId = explode("_", $move['tokenId'])[1];
-  //     $logs[] = '${logTokenCylinder' . $index . '}';
-  //     $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
-  //   }
-  //   self::notifyAll("discardAndTakePrize", $message, array(
-  //     'player' => $player,
-  //     'courtOwnerPlayerId' => $courtOwnerPlayerId === null ? $player->getId() : $courtOwnerPlayerId,
-  //     'logTokenCardName' => Utils::logTokenCardName($card['name']),
-  //     'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-  //     'logTokenNewLine' => Utils::logTokenNewLine(),
-  //     'cardId' => $card['id'],
-  //     'moves' => $moves,
-  //     'returnedSpiesLog' => $hasSpies ? [
-  //       'log' => clienttranslate('and returns ${spies}'),
-  //       'args' => [
-  //         'spies' => [
-  //           'log' => implode('', $logs),
-  //           'args' => $args
-  //         ]
-  //       ],
-  //     ] : '',
-  //   ));
-  // }
-
   public static function discardPatriots($player)
   {
     $message = clienttranslate('${player_name} discards patriots');

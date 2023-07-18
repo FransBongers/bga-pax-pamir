@@ -1171,15 +1171,12 @@ var PPPlayer = (function () {
         if (this.gifts['2'].getItemNumber() === 0) {
             return 2;
         }
-        ;
         if (this.gifts['4'].getItemNumber() === 0) {
             return 4;
         }
-        ;
         if (this.gifts['6'].getItemNumber() === 0) {
             return 6;
         }
-        ;
         return null;
     };
     PPPlayer.prototype.getLoyalty = function () {
@@ -1327,7 +1324,8 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.playCard = function (_a) {
         var card = _a.card;
-        var region = this.game.gamedatas.staticData.cards[card.id].region;
+        var cardInfo = this.game.getCardInfo({ cardId: card.id });
+        var region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
         if (this.playerId === this.game.getPlayerId()) {
             this.setupCourtCard({ cardId: card.id });
             this.game.move({
@@ -1353,6 +1351,7 @@ var PPPlayer = (function () {
             animation.play();
             this.court.placeInZone(card.id, card.state);
         }
+        this.incCounter({ counter: suit, value: rank });
         this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     };
     PPPlayer.prototype.addCardToHand = function (_a) {
@@ -4344,7 +4343,8 @@ var PlaceRoadState = (function () {
         this.game = game;
     }
     PlaceRoadState.prototype.onEnteringState = function (_a) {
-        var region = _a.region;
+        var region = _a.region, selectedPiece = _a.selectedPiece;
+        this.selectedPiece = selectedPiece;
         this.updateInterfaceInitialStep({ borders: region.borders });
     };
     PlaceRoadState.prototype.onLeavingState = function () { };
@@ -4352,13 +4352,25 @@ var PlaceRoadState = (function () {
         var _this = this;
         var borders = _a.borders;
         this.game.clearPossible();
+        if (this.selectedPiece) {
+            this.setPieceSelected();
+        }
         borders.forEach(function (border) {
             _this.game.addPrimaryActionButton({
                 id: "".concat(border, "_btn"),
                 text: _(_this.game.gamedatas.staticData.borders[border].name),
-                callback: function () { return _this.game.takeAction({ action: 'placeRoad', data: { border: border } }); },
+                callback: function () {
+                    _this.game.clearPossible();
+                    _this.game.takeAction({ action: 'placeRoad', data: { border: border } });
+                },
             });
         });
+    };
+    PlaceRoadState.prototype.setPieceSelected = function () {
+        var node = dojo.byId(this.selectedPiece);
+        if (node) {
+            dojo.addClass(node, PP_SELECTED);
+        }
     };
     return PlaceRoadState;
 }());
@@ -4367,13 +4379,17 @@ var PlaceSpyState = (function () {
         this.game = game;
     }
     PlaceSpyState.prototype.onEnteringState = function (_a) {
-        var regionId = _a.regionId;
+        var regionId = _a.regionId, selectedPiece = _a.selectedPiece;
+        this.selectedPiece = selectedPiece;
         this.updateInterfaceInitialStep({ regionId: regionId });
     };
     PlaceSpyState.prototype.onLeavingState = function () { };
     PlaceSpyState.prototype.updateInterfaceInitialStep = function (_a) {
         var regionId = _a.regionId;
         this.game.clearPossible();
+        if (this.selectedPiece) {
+            this.setPieceSelected();
+        }
         this.setPlaceSpyCardsSelectable({ regionId: regionId });
     };
     PlaceSpyState.prototype.updateInterfaceConfirmPlaceSpy = function (_a) {
@@ -4381,6 +4397,9 @@ var PlaceSpyState = (function () {
         var cardId = _a.cardId;
         this.game.clearPossible();
         dojo.query(".pp_card_in_court.pp_".concat(cardId)).addClass('pp_selected');
+        if (this.selectedPiece) {
+            this.setPieceSelected();
+        }
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}'),
             args: {
@@ -4397,6 +4416,12 @@ var PlaceSpyState = (function () {
             text: _('Cancel'),
             callback: function () { return _this.game.onCancel(); },
         });
+    };
+    PlaceSpyState.prototype.setPieceSelected = function () {
+        var node = dojo.byId(this.selectedPiece);
+        if (node) {
+            dojo.addClass(node, PP_SELECTED);
+        }
     };
     PlaceSpyState.prototype.setPlaceSpyCardsSelectable = function (_a) {
         var _this = this;
@@ -4761,6 +4786,48 @@ var SASafeHouseState = (function () {
         }
     };
     return SASafeHouseState;
+}());
+var SelectPieceState = (function () {
+    function SelectPieceState(game) {
+        this.game = game;
+    }
+    SelectPieceState.prototype.onEnteringState = function (_a) {
+        var availablePieces = _a.availablePieces;
+        this.availablePieces = availablePieces;
+        this.updateInterfaceInitialStep();
+    };
+    SelectPieceState.prototype.onLeavingState = function () { };
+    SelectPieceState.prototype.updateInterfaceInitialStep = function () {
+        this.game.clearPossible();
+        this.setPiecesSelectable();
+    };
+    SelectPieceState.prototype.updateInterfaceConfirm = function (_a) {
+        var _this = this;
+        var pieceId = _a.pieceId;
+        this.game.clearPossible();
+        var node = dojo.byId(pieceId);
+        if (node) {
+            dojo.addClass(node, PP_SELECTED);
+        }
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () { return _this.game.takeAction({ action: 'selectPiece', data: { pieceId: pieceId } }); },
+        });
+        this.game.addCancelButton();
+    };
+    SelectPieceState.prototype.setPiecesSelectable = function () {
+        var _this = this;
+        this.availablePieces.forEach(function (pieceId) {
+            console.log('pieceId', pieceId);
+            var node = dojo.byId(pieceId);
+            if (node) {
+                dojo.addClass(node, PP_SELECTABLE);
+                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirm({ pieceId: pieceId }); }));
+            }
+        });
+    };
+    return SelectPieceState;
 }());
 var SetupState = (function () {
     function SetupState(game) {
@@ -5147,6 +5214,9 @@ var NotificationManager = (function () {
         debug('notif_moveToken', notif);
         notif.args.moves.forEach(function (move) {
             var tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
+            if (from === to) {
+                return;
+            }
             var fromZone = _this.game.getZoneForLocation({ location: from });
             var toZone = _this.game.getZoneForLocation({ location: to });
             if (_this.game.framework().isCurrentPlayerActive() &&
@@ -5436,6 +5506,7 @@ var PaxPamir = (function () {
             _a.playerActions = new PlayerActionsState(this),
             _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
+            _a.selectPiece = new SelectPieceState(this),
             _a.specialAbilityInfrastructure = new ClientCardActionBuildState(this, true),
             _a.specialAbilitySafeHouse = new SASafeHouseState(this),
             _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),

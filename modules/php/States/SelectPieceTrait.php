@@ -7,11 +7,10 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
-use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
-trait PlaceRoadTrait
+trait SelectPieceTrait
 {
 
   // ....###....########...######....######.
@@ -22,17 +21,17 @@ trait PlaceRoadTrait
   // .##.....##.##....##..##....##..##....##
   // .##.....##.##.....##..######....######.
 
-  function argPlaceRoad()
+  function argSelectPiece()
   {
     $actionStack = Globals::getActionStack();
     $action = $actionStack[count($actionStack) - 1];
 
-    $card = Cards::get($action['data']['cardId']);
-    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+    // Notifications::log('action',$action);
+    // $card = Cards::get($action['data']['cardId']);
 
     return array(
-      'region' => $this->regions[$card['region']],
-      'selectedPiece' => $selectedPiece,
+      'availablePieces' => $this->getAvailablePieces($action),
+      'action' => $action
     );
   }
 
@@ -55,20 +54,21 @@ trait PlaceRoadTrait
   /**
    * Places road on a border for loyalty of active player
    */
-  function placeRoad($border)
+  function selectPiece($pieceId)
   {
-    self::checkAction('placeRoad');
+    self::checkAction('selectPiece');
     $actionStack = Globals::getActionStack();
-    $action = array_pop($actionStack);
+
+    $allowed = $this->getAvailablePieces($actionStack[count($actionStack) - 1]);
+    if (!in_array($pieceId, $allowed)) {
+      throw new \feException("Not allowed to select this piece");
+    }
+
+    $actionStack[count($actionStack) - 1]['data']['selectedPiece'] = $pieceId;
+    Notifications::log('action', $actionStack[count($actionStack) - 1]);
+
+    Notifications::log('selectPiece', $pieceId);
     Globals::setActionStack($actionStack);
-
-    if ($action['action'] !== DISPATCH_IMPACT_ICON_ROAD) {
-      throw new \feException("Not a valid action");
-    };
-    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
-
-    $this->resolvePlaceRoad($border, $selectedPiece);
-
     $this->nextState('dispatchAction');
   }
 
@@ -80,41 +80,22 @@ trait PlaceRoadTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function resolvePlaceRoad($borderId, $selectedPiece = null)
+  function getAvailablePieces($action)
   {
-    $loyalty = Players::get()->getLoyalty();
-    $location = $this->locations['pools'][$loyalty];
-    $road = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($location);
-    if ($road === null) {
-      return;
-    }
-    $to = $this->locations['roads'][$borderId];
-    $from = $road['location'];
-    $region0 = explode("_", $borderId)[0];
-    $region1 = explode("_", $borderId)[1];
-    Tokens::move($road['id'], $to);
-    Tokens::setUsed($road['id'], USED);
-    $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
-    Notifications::moveToken($message, [
-      'player' => Players::get(),
-      'logTokenRoad' => Utils::logTokenRoad($loyalty),
-      'logTokenRegionName0' => Utils::logTokenRegionName($region0),
-      'logTokenRegionName1' => Utils::logTokenRegionName($region1),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $road['id'],
-        ]
-      ]
-    ]);
+    $playerId = $action['playerId'];
+    $availablePieces = [];
 
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      $isTribe = Utils::startsWith($from, 'armies');
-      if ($isTribe) {
-        Map::checkRulerChange($fromRegionId);
-      }
+    if (in_array($action['action'], [DISPATCH_IMPACT_ICON_ARMY, DISPATCH_IMPACT_ICON_ROAD])) {
+      $loyalty = Players::get($playerId)->getLoyalty();
+      $availablePieces = Tokens::getOfType('block_' . $loyalty);
+    } else if (in_array($action['action'], [DISPATCH_IMPACT_ICON_TRIBE, DISPATCH_IMPACT_ICON_SPY])) {
+      $availablePieces = Tokens::getOfType('cylinder_' . $playerId);
     }
+
+    return array_map(function ($piece) {
+      return $piece['id'];
+    }, Utils::filter($availablePieces, function ($piece) {
+      return $piece['used'] !== USED;
+    }));
   }
 }

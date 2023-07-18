@@ -355,6 +355,13 @@ class NotificationManager {
     debug('notif_moveToken', notif);
     notif.args.moves.forEach((move) => {
       const { tokenId, from, to, weight } = move;
+      
+      // Can be the case when a player needs to select a piece
+      // because pool is empty
+      if (from === to) {
+        return;
+      }
+
       const fromZone = this.game.getZoneForLocation({ location: from });
       const toZone = this.game.getZoneForLocation({ location: to });
 

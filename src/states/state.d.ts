@@ -90,6 +90,11 @@ interface OnEnteringPlaceRoadArgs {
     name: string;
     borders: string[];
   };
+  selectedPiece: string | null;
+}
+
+interface OnEnteringSelectPieceArgs {
+  availablePieces: string[];
 }
 
 interface OnEnteringResolveEventArgs {
@@ -98,6 +103,7 @@ interface OnEnteringResolveEventArgs {
 
 interface OnEnteringPlaceSpyArgs {
   regionId: string;
+  selectedPiece: string | null;
 }
 
 interface OnEnteringPlaceSASafeHouseArgs {

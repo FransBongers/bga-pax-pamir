@@ -254,11 +254,12 @@ trait DominanceCheckTrait
   function afterDominanceCheckAbilities()
   {
     // SA_INSURRECTION
+    // TODO (Frans): action stack so pieces can be selected if needed
     $card = Cards::get('card_3');
     if(Utils::startsWith($card['location'],'court')) {
       $playerId = intval(explode('_',$card['location'])[1]);
-      $this->resolvePlaceArmy(KABUL,$playerId);
-      $this->resolvePlaceArmy(KABUL,$playerId);
+      $this->resolvePlaceArmy(KABUL,null,$playerId);
+      $this->resolvePlaceArmy(KABUL,null,$playerId);
     }
   }
 

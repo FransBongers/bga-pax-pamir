@@ -64,6 +64,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_PLACE_SPY", 10);
     define("STATE_CLEANUP", 11);
     define("STATE_CLEANUP_DISCARD_EVENTS", 12);
+    define("ST_SELECT_PIECE",13);
     define("STATE_RESOLVE_EVENT", 20);
     define("STATE_REFRESH_MARKET", 21);
     define("ST_SA_SAFE_HOUSE", 22);
@@ -243,6 +244,7 @@ $machinestates = array(
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
             "playerActions" => STATE_PLAYER_ACTIONS,
+            "selectPiece" => ST_SELECT_PIECE,
         )
     ),
 
@@ -268,6 +270,18 @@ $machinestates = array(
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
 
+        )
+    ),
+
+    ST_SELECT_PIECE => array(
+        "name" => "selectPiece",
+        "description" => clienttranslate('${actplayer} must select a piece'),
+        "descriptionmyturn" => clienttranslate('${you} must select a piece'),
+        "type" => "activeplayer",
+        "args" => "argSelectPiece",
+        "possibleactions" => array("selectPiece"),
+        "transitions" => array(
+            "dispatchAction" => STATE_DISPATCH_ACTION,
         )
     ),
 

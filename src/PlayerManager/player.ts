@@ -450,13 +450,13 @@ class PPPlayer {
   getLowestAvailableGift(): number | null {
     if (this.gifts['2'].getItemNumber() === 0) {
       return 2;
-    };
+    }
     if (this.gifts['4'].getItemNumber() === 0) {
       return 4;
-    };
+    }
     if (this.gifts['6'].getItemNumber() === 0) {
       return 6;
-    };
+    }
     return null;
   }
 
@@ -642,7 +642,8 @@ class PPPlayer {
   }
 
   playCard({ card }: { card: Token }) {
-    const { region } = this.game.gamedatas.staticData.cards[card.id] as CourtCard;
+    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
+    const { region, suit, rank } = cardInfo;
     if (this.playerId === this.game.getPlayerId()) {
       this.setupCourtCard({ cardId: card.id });
       this.game.move({
@@ -670,6 +671,7 @@ class PPPlayer {
       animation.play();
       this.court.placeInZone(card.id, card.state);
     }
+    this.incCounter({ counter: suit, value: rank });
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
   }
 
@@ -708,10 +710,10 @@ class PPPlayer {
     }
   }
 
-  takePrize({ cardId }: { cardId: string; }): void {
+  takePrize({ cardId }: { cardId: string }): void {
     debug('item number', this.prizes.getItemNumber());
     this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
-    
+
     dojo.addClass(cardId, 'pp_prize');
     const div = this.prizes.container_div;
     attachToNewParentNoDestroy(cardId, div);

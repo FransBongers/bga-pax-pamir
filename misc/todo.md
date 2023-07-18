@@ -3,10 +3,7 @@
 ## Implementation
 
 ### General
-- Special abilities
-- Loyualty change (discard everything including prizes / gifts)
 - Select tokens when supply is empty
-- End of game
 - Instability rule: resolve dominance check when two are in the market
 - Overthrow rule: link between political cards and ruled regions
 - Check states file
@@ -15,7 +12,7 @@
 - Check embarassment of riches discard event (or discard event in general)
 
 ### Card abilities
-- card_24 / SA_CIVIL_SERVICE_REFORMS
+
 
 ### Dominance Checks
 - Perform check when 2nd dominance check enters te market

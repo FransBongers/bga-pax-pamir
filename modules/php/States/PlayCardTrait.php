@@ -132,8 +132,6 @@ trait PlayCardTrait
     $card = Cards::get($cardId);
     Notifications::playCard($card, $courtCards, $side, $playerId);
 
-    // $this->updatePlayerCounts();
-
     $this->nextState('dispatchAction');
   }
 }

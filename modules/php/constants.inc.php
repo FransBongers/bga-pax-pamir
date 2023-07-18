@@ -205,3 +205,9 @@ const LOG_TOKEN_RUPEE = 'rupee';
     SPY => DISPATCH_IMPACT_ICON_SPY,
     TRIBE => DISPATCH_IMPACT_ICON_TRIBE
   ];
+
+  /**
+   * 
+   */
+  const USED = 1;
+  const NOT_USED = 0;

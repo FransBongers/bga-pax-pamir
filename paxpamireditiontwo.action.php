@@ -242,6 +242,14 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function selectPiece()
+    {
+        self::setAjaxMode();
+        $pieceId = self::getArg("pieceId", AT_alphanum, true);
+        $result = $this->game->selectPiece($pieceId);
+        self::ajaxResponse();
+    }
+
     public function skipSpecialAbility()
     {
         self::setAjaxMode();

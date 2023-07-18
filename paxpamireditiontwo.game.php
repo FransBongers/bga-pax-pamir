@@ -76,6 +76,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\ResolveEventTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\States\SASafeHouseTrait;
+    use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
 
     // Declare objects from material.inc.php to remove IntelliSense errors

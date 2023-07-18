@@ -1,14 +1,14 @@
-class PlaceRoadState implements State {
+class SelectPieceState implements State {
   private game: PaxPamirGame;
-  private selectedPiece: string | null;
+  private availablePieces: string[];
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ region, selectedPiece }: OnEnteringPlaceRoadArgs) {
-    this.selectedPiece = selectedPiece;
-    this.updateInterfaceInitialStep({ borders: region.borders });
+  onEnteringState({ availablePieces }: OnEnteringSelectPieceArgs) {
+    this.availablePieces = availablePieces;
+    this.updateInterfaceInitialStep();
   }
 
   onLeavingState() {}
@@ -29,22 +29,23 @@ class PlaceRoadState implements State {
   // .##....##....##....##.......##........##....##
   // ..######.....##....########.##.........######.
 
-  private updateInterfaceInitialStep({ borders }: { borders: string[] }) {
+  private updateInterfaceInitialStep() {
     this.game.clearPossible();
-    if (this.selectedPiece) {
-      this.setPieceSelected();
-    }
+    this.setPiecesSelectable();
+  }
 
-    borders.forEach((border) => {
-      this.game.addPrimaryActionButton({
-        id: `${border}_btn`,
-        text: _(this.game.gamedatas.staticData.borders[border].name),
-        callback: () => {
-          this.game.clearPossible();
-          this.game.takeAction({ action: 'placeRoad', data: { border } });
-        },
-      });
+  private updateInterfaceConfirm({ pieceId }: { pieceId: string }) {
+    this.game.clearPossible();
+    const node = dojo.byId(pieceId);
+    if (node) {
+      dojo.addClass(node, PP_SELECTED);
+    }
+    this.game.addPrimaryActionButton({
+      id: 'confirm_btn',
+      text: _('Confirm'),
+      callback: () => this.game.takeAction({ action: 'selectPiece', data: { pieceId } }),
     });
+    this.game.addCancelButton();
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -55,10 +56,14 @@ class PlaceRoadState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  private setPieceSelected() {
-    const node = dojo.byId(this.selectedPiece);
-    if (node) {
-      dojo.addClass(node, PP_SELECTED);
-    }
+  private setPiecesSelectable() {
+    this.availablePieces.forEach((pieceId) => {
+      console.log('pieceId', pieceId);
+      const node = dojo.byId(pieceId);
+      if (node) {
+        dojo.addClass(node, PP_SELECTABLE);
+        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirm({ pieceId })));
+      }
+    });
   }
 }

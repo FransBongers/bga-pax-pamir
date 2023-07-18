@@ -68,6 +68,7 @@ class PaxPamir implements PaxPamirGame {
     playerActions: PlayerActionsState;
     resolveEvent: ResolveEventState;
     setup: SetupState;
+    selectPiece: SelectPieceState;
     specialAbilityInfrastructure: ClientCardActionBuildState;
     specialAbilitySafeHouse: SASafeHouseState;
     startOfTurnAbilities: StartOfTurnAbilitiesState;
@@ -126,6 +127,7 @@ class PaxPamir implements PaxPamirGame {
       playerActions: new PlayerActionsState(this),
       resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
+      selectPiece: new SelectPieceState(this),
       specialAbilityInfrastructure: new ClientCardActionBuildState(this, true),
       specialAbilitySafeHouse: new SASafeHouseState(this),
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),

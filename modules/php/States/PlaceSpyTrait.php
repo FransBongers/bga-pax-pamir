@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -27,9 +28,11 @@ trait PlaceSpyTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $card = Cards::get($action['data']['cardId']);
+    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
 
     return array(
       'regionId' => $card['region'],
+      'selectedPiece' => $selectedPiece,
     );
   }
 
@@ -64,6 +67,8 @@ trait PlaceSpyTrait
     $isStartOfTurnAbility = $this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities";
     if ($isStartOfTurnAbility) {
       $this->isValidStartOfTurnSpecialAbility($specialAbility);
+      $playerId = self::getActivePlayerId();
+      $this->resolvePlaceSpy($cardId, $playerId);
     } else {
       $actionStack = Globals::getActionStack();
       $action = array_pop($actionStack);
@@ -72,32 +77,14 @@ trait PlaceSpyTrait
       if ($action['action'] !== DISPATCH_IMPACT_ICON_SPY) {
         throw new \feException("Not a valid action");
       };
+      $playerId = $action['playerId'];
+      $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+      $this->resolvePlaceSpy($cardId, $playerId, $selectedPiece);
     }
 
-    // TODO: check if $cardId is in court?
-    $playerId = self::getActivePlayerId();
-    $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getTopOf($from);
 
-    if ($cylinder != null) {
-      $to = 'spies_' . $cardId;
-      Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
-      Notifications::moveToken($message, [
-        'player' => Players::get(),
-        'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-        'logTokenCylinder' => Utils::logTokenCylinder(Players::get()->getId()),
-        'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-        'logTokenNewLine' => Utils::logTokenNewLine(),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $cylinder['id'],
-          ]
-        ]
-      ]);
-    }
+
+
     if ($isStartOfTurnAbility) {
       $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
       $usedSpecialAbilities[] = $specialAbility;
@@ -116,6 +103,43 @@ trait PlaceSpyTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  function resolvePlaceSpy($cardId, $playerId, $selectedPiece = null)
+  {
+
+    $from = "cylinders_" . $playerId;
+    $cylinder = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($from);
+    if ($cylinder === null) {
+      return;
+    }
+    $from = $cylinder['location'];
+    $to = 'spies_' . $cardId;
+    Tokens::move($cylinder['id'], $to);
+    Tokens::setUsed($cylinder['id'], USED);
+    $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    Notifications::moveToken($message, [
+      'player' => Players::get(),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'logTokenCylinder' => Utils::logTokenCylinder(Players::get()->getId()),
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinder['id'],
+        ]
+      ]
+    ]);
+
+    if ($selectedPiece !== null) {
+      $fromRegionId = explode('_', $from)[1];
+      $isTribe = Utils::startsWith($from, 'tribes');
+      if ($isTribe) {
+        Map::checkRulerChange($fromRegionId);
+      }
+    }
+  }
 
   function isValidStartOfTurnSpecialAbility($specialAbility)
   {

@@ -45,6 +45,7 @@ trait CleanupTrait
      */
 
     Cards::resetUsed();
+    Tokens::resetUsed();
     $player = Players::get();
     $playerId = $player->getId();
     $discards = $player->checkDiscards();

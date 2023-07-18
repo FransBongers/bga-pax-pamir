@@ -59,30 +59,6 @@ class ClientCardActionBetrayState implements State {
     }
   }
 
-  // private updateInterfaceAcceptPrize({ betrayedCardId }: { betrayedCardId: string }) {
-  //   this.game.clearPossible();
-  //   const card = this.game.getCardInfo({ cardId: betrayedCardId }) as CourtCard;
-  //   const node = dojo.byId(betrayedCardId);
-  //   dojo.addClass(node, 'pp_selected');
-  //   this.game.clientUpdatePageTitle({
-  //     text: _('Accept ${cardName} as a prize?'),
-  //     args: {
-  //       cardName: _(card.name),
-  //     },
-  //   });
-  //   this.game.addPrimaryActionButton({
-  //     id: 'accept_prize_btn',
-  //     text: _('Accept as prize'),
-  //     callback: () => this.handleConfirm({ betrayedCardId }),
-  //   });
-  //   this.game.addPrimaryActionButton({
-  //     id: 'no_prize_btn',
-  //     text: _('Decline prize'),
-  //     callback: () => this.handleConfirm({ betrayedCardId }),
-  //   });
-  //   this.game.addCancelButton();
-  // }
-
   private updateInterfaceConfirm({ betrayedCardId }: { betrayedCardId: string; }) {
     this.game.clearPossible();
     const card = this.game.getCardInfo({ cardId: betrayedCardId }) as CourtCard;

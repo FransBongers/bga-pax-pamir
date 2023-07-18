@@ -116,4 +116,9 @@ class Tokens extends \PaxPamir\Helpers\Pieces
       'used' => $value,
     ], $id);
   }
+
+  public static function resetUsed()
+  {
+    self::DB()->update(['used' => 0])->run();
+  }
 }

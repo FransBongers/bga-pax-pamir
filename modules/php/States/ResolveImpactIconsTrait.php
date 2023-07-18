@@ -91,16 +91,24 @@ trait ResolveImpactIconsTrait
 
   function dispatchResolveImpactIconArmy($actionStack)
   {
-    $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
-
+    $action = $actionStack[count($actionStack) - 1];
+    // $action = array_pop($actionStack);
+    // Globals::setActionStack($actionStack);
+    $playerId = $action['playerId'];
     $cardId = $action['data']['cardId'];
     $region = Cards::get($cardId)['region'];
+    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
 
-    $this->resolvePlaceArmy($region);
-    Map::checkRulerChange($region);
+    $armyPlaced = $this->resolvePlaceArmy($region, $selectedPiece);
+    if ($armyPlaced) {
+      array_pop($actionStack);
 
-    $this->nextState('dispatchAction');
+      Globals::setActionStack($actionStack);
+      $this->nextState('dispatchAction');
+    } else {
+      // No army available in supply, player needs to select
+      $this->nextState('selectPiece', $playerId);
+    }
   }
 
   function dispatchResolveImpactIconEconomic($actionStack)
@@ -158,27 +166,46 @@ trait ResolveImpactIconsTrait
 
   function dispatchResolveImpactIconRoad($actionStack)
   {
-    $this->gamestate->nextState('placeRoad');
+    $action = $actionStack[count($actionStack) - 1];
+
+    if ($this->isBlockAvailableForAction($action)) {
+      $this->gamestate->nextState('placeRoad');
+    } else {
+      $playerId = $action['playerId'];
+      $this->nextState('selectPiece', $playerId);
+    }
   }
 
   function dispatchResolveImpactIconSpy($actionStack)
   {
-    $this->gamestate->nextState('placeSpy');
+    $action = $actionStack[count($actionStack) - 1];
+
+    if ($this->isCylinderAvailableForAction($action)) {
+      $this->gamestate->nextState('placeSpy');
+    } else {
+      $playerId = $action['playerId'];
+      $this->nextState('selectPiece', $playerId);
+    }
   }
 
   function dispatchResolveImpactIconTribe($actionStack)
   {
-    $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
-
+    $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
-    $cardId = $action['data']['cardId'];
-    $region = Cards::get($cardId)['region'];
-    
-    $this->resolvePlaceTribe($region, $playerId);
-    Map::checkRulerChange($region);
 
-    $this->nextState('dispatchAction');
+    if ($this->isCylinderAvailableForAction($action)) {
+      array_pop($actionStack);
+      Globals::setActionStack($actionStack);
+
+      $cardId = $action['data']['cardId'];
+      $region = Cards::get($cardId)['region'];
+      $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+
+      $this->resolvePlaceTribe($region, $playerId, $selectedPiece);
+      $this->nextState('dispatchAction');
+    } else {
+      $this->nextState('selectPiece', $playerId);
+    }
   }
 
   // .##.....##.########.####.##.......####.########.##....##
@@ -189,29 +216,91 @@ trait ResolveImpactIconsTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function resolvePlaceArmy($regionId, $playerId = null)
+  /**
+   * There is a block available if it either has been selected or if there is a block in the pool
+   */
+  function isBlockAvailableForAction($action)
+  {
+    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+    if ($selectedPiece !== null) {
+      return true;
+    }
+
+    $playerId = $action['playerId'];
+    $loyalty = Players::get($playerId)->getLoyalty();
+    $location = $this->locations['pools'][$loyalty];
+    $road = Tokens::getTopOf($location);
+    if ($road !== null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * There is a block available if it either has been selected or if there is a block in the pool
+   */
+  function isCylinderAvailableForAction($action)
+  {
+
+    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+    if ($selectedPiece !== null) {
+      return true;
+    }
+
+    $playerId = $action['playerId'];
+    $pool = "cylinders_" . $playerId;
+    $cylinder = Tokens::getTopOf($pool);
+    if ($cylinder !== null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function resolvePlaceArmy($regionId, $selectedPiece = null, $playerId = null)
   {
     $player = $playerId !== null ? Players::get($playerId) : Players::get();
     $loyalty = $player->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
-    $army = Tokens::getTopOf($location);
-    if ($army != null) {
-      $to = $this->locations['armies'][$regionId];
-      Tokens::move($army['id'], $this->locations['armies'][$regionId]);
-      $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
-      Notifications::moveToken($message, [
-        'player' => $player,
-        'logTokenArmy' => Utils::logTokenArmy($loyalty),
-        'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-        'moves' => [
-          [
-            'from' => $location,
-            'to' => $to,
-            'tokenId' => $army['id'],
-          ]
-        ]
-      ]);
+
+    $army = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($location);
+    if ($army === null) {
+      return false;
     }
+    $to = $this->locations['armies'][$regionId];
+    $from = $army['location'];
+    Tokens::move($army['id'], $this->locations['armies'][$regionId]);
+    Tokens::setUsed($army['id'], USED);
+
+    // TODO: (add from log in case it was a selected pieces)
+    $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+    Notifications::moveToken($message, [
+      'player' => $player,
+      'logTokenArmy' => Utils::logTokenArmy($loyalty),
+      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $army['id'],
+        ]
+      ],
+    ]);
+
+    if ($selectedPiece !== null) {
+      $fromRegionId = explode('_', $from)[1];
+      Notifications::log('fromRegionId', $fromRegionId);
+      $isArmy = Utils::startsWith($from, 'armies');
+      Notifications::log('isArmy', $isArmy);
+      if ($isArmy && explode('_', $from)[1] !== $regionId) {
+        Map::checkRulerChange($fromRegionId);
+        Notifications::log('selectedPieceFrom', $fromRegionId);
+      }
+    }
+    Map::checkRulerChange($regionId);
+
+    return true;
   }
 
   function resolveFavoredSuitChange($newSuit, $source = null)
@@ -233,27 +322,42 @@ trait ResolveImpactIconsTrait
     Notifications::changeFavoredSuit($currentSuitId, $newSuit, $customMessage);
   }
 
-  function resolvePlaceTribe($regionId, $playerId)
+  function resolvePlaceTribe($regionId, $playerId, $selectedPiece = null)
   {
     $player = Players::get($playerId);
     $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getTopOf($from);
+    $cylinder = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($from);
     $to = $this->locations["tribes"][$regionId];
-    if ($cylinder != null) {
-      Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
-      Notifications::moveToken($message, [
-        'player' => $player,
-        'logTokenCylinder' => Utils::logTokenCylinder($playerId),
-        'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $cylinder['id'],
-          ]
-        ]
-      ]);
+    if ($cylinder === null) {
+      return;
     }
+    Tokens::move($cylinder['id'], $to);
+    Tokens::setUsed($cylinder['id'], USED);
+    $from = $cylinder['location'];
+    $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
+    Notifications::moveToken($message, [
+      'player' => $player,
+      'logTokenCylinder' => Utils::logTokenCylinder($playerId),
+      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinder['id'],
+        ]
+      ]
+    ]);
+
+    if ($selectedPiece !== null) {
+      $fromRegionId = explode('_', $from)[1];
+      Notifications::log('fromRegionId', $fromRegionId);
+      $isTribe = Utils::startsWith($from, 'tribes');
+      Notifications::log('isTribe', $isTribe);
+      if ($isTribe && $fromRegionId !== $regionId) {
+        Map::checkRulerChange($fromRegionId);
+        Notifications::log('selectedPieceFrom', $fromRegionId);
+      }
+    }
+    Map::checkRulerChange($regionId);
   }
 }

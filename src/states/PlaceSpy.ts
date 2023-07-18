@@ -1,11 +1,13 @@
 class PlaceSpyState implements State {
   private game: PaxPamirGame;
+  private selectedPiece: string | null;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ regionId }: OnEnteringPlaceSpyArgs) {
+  onEnteringState({ regionId, selectedPiece }: OnEnteringPlaceSpyArgs) {
+    this.selectedPiece = selectedPiece;
     this.updateInterfaceInitialStep({ regionId });
   }
 
@@ -29,6 +31,9 @@ class PlaceSpyState implements State {
 
   private updateInterfaceInitialStep({ regionId }: { regionId: string }) {
     this.game.clearPossible();
+    if (this.selectedPiece) {
+      this.setPieceSelected();
+    }
 
     this.setPlaceSpyCardsSelectable({ regionId });
   }
@@ -36,6 +41,9 @@ class PlaceSpyState implements State {
   private updateInterfaceConfirmPlaceSpy({ cardId }: { cardId: string }) {
     this.game.clearPossible();
     dojo.query(`.pp_card_in_court.pp_${cardId}`).addClass('pp_selected');
+    if (this.selectedPiece) {
+      this.setPieceSelected();
+    }
     this.game.clientUpdatePageTitle({
       text: _('Place a spy on ${cardName}'),
       args: {
@@ -61,6 +69,13 @@ class PlaceSpyState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private setPieceSelected() {
+    const node = dojo.byId(this.selectedPiece);
+    if (node) {
+      dojo.addClass(node, PP_SELECTED);
+    }
+  }
 
   setPlaceSpyCardsSelectable({ regionId }: { regionId: string }) {
     dojo.query(`.pp_card_in_court.pp_${regionId}`).forEach((node: HTMLElement, index: number) => {

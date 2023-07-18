@@ -72,7 +72,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlayerActionTaxTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
-    use PaxPamir\States\RefreshMarketTrait;
+    use PaxPamir\States\RefillMarketTrait;
     use PaxPamir\States\ResolveEventTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;
     use PaxPamir\States\SASafeHouseTrait;

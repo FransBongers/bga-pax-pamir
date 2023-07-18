@@ -190,6 +190,28 @@ class Notifications
     ]);
   }
 
+  public static function drawMarketCard($player,$cardId,$from,$to)
+  {
+    
+    self::notifyAll("drawMarketCard", clienttranslate('${player_name} draws a new card for the market${logTokenNewLine}${logTokenLargeCard}'), array(
+      'player' => $player,
+      'cardId' => $cardId,
+      'from' => $from,
+      'to' => $to,
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+    ));
+  }
+
+  public static function shiftMarket($cardMoves, $playerId)
+  {
+    $message = clienttranslate('${player_name} moves cards in the market left');
+    self::notifyAll("shiftMarket", $message, array(
+      'player' => Players::get($playerId),
+      'cardMoves' => $cardMoves,
+    ));
+  }
+
   public static function dominanceCheckResult($scores, $checkSuccessful, $coalition = null)
   {
     $logs = [];

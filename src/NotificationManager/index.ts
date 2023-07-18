@@ -42,7 +42,9 @@ class NotificationManager {
       ['changeFavoredSuit', 250],
       ['changeLoyalty', 1],
       ['clearTurn', 1],
+      ['drawMarketCard',1000],
       ['discard', 1000],
+      ['discardFromMarket',1000], // TODO: check if we can remove this
       ['discardPrizes', 1000],
       ['exchangeHand', 100],
       ['dominanceCheckScores', 1],
@@ -54,14 +56,14 @@ class NotificationManager {
       ['purchaseCard', 2000],
       ['purchaseGift', 1],
       ['playCard', 2000],
-      ['refreshMarket', 250],
+      ['shiftMarket', 250],
       ['replaceHand', 250],
       ['returnRupeesToSupply', 250],
       ['returnSpies', 1000],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
-      ['declinePrize',250],
-      ['takePrize',250],
+      ['declinePrize', 250],
+      ['takePrize', 250],
       ['takeRupeesFromSupply', 250],
       ['taxMarket', 250],
       ['taxPlayer', 250],
@@ -208,7 +210,7 @@ class NotificationManager {
     debug('notif_declinePrize', notif);
     this.game.clearPossible();
     const { cardId } = notif.args;
-    discardCardAnimation({cardId, to: DISCARD, game: this.game});
+    discardCardAnimation({ cardId, to: DISCARD, game: this.game });
   }
 
   notif_takePrize(notif: Notif<NotifTakePrizeArgs>) {
@@ -231,13 +233,19 @@ class NotificationManager {
     } else if (from === HAND) {
       player.discardHandCard({ cardId, to });
       player.incCounter({ counter: 'cards', value: -1 });
-    }
+    } 
+    // else if(from.startsWith('market')) {
+    //   this.game.market.discardCard({
+    //     cardId,
+    //     row
+    //   })
+    // }
   }
 
   notif_returnSpies(notif: Notif<NotifReturnSpiesArgs>) {
     debug('notif_discard', notif);
     this.game.clearPossible();
-    const { moves, } = notif.args;
+    const { moves } = notif.args;
     moves.forEach((move: TokenMove) => {
       const { tokenId, from, to, weight } = move;
       const fromZone = this.game.getZoneForLocation({ location: from });
@@ -355,7 +363,7 @@ class NotificationManager {
     debug('notif_moveToken', notif);
     notif.args.moves.forEach((move) => {
       const { tokenId, from, to, weight } = move;
-      
+
       // Can be the case when a player needs to select a piece
       // because pool is empty
       if (from === to) {
@@ -505,8 +513,8 @@ class NotificationManager {
     this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
   }
 
-  notif_refreshMarket(notif: Notif<NotifRefreshMarketArgs>) {
-    console.log('notif_refreshMarket', notif);
+  notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>) {
+    console.log('notif_shiftMarket', notif);
 
     this.game.clearPossible();
 
@@ -528,16 +536,30 @@ class NotificationManager {
       });
     });
 
-    notif.args.newCards.forEach((move, index) => {
-      const row = Number(move.to.split('_')[1]);
-      const column = Number(move.to.split('_')[2]);
-      this.game.market.addCardFromDeck({
-        to: {
-          row,
-          column,
-        },
-        cardId: move.cardId,
-      });
+    // notif.args.newCards.forEach((move, index) => {
+    //   const row = Number(move.to.split('_')[1]);
+    //   const column = Number(move.to.split('_')[2]);
+    //   this.game.market.addCardFromDeck({
+    //     to: {
+    //       row,
+    //       column,
+    //     },
+    //     cardId: move.cardId,
+    //   });
+    // });
+  }
+
+  notif_drawMarketCard(notif: Notif<NotifDrawMarketCardArgs>) {
+    debug('notif_drawMarketCard',notif.args);
+    const { cardId, to } = notif.args;
+    const row = Number(to.split('_')[1]);
+    const column = Number(to.split('_')[2]);
+    this.game.market.addCardFromDeck({
+      to: {
+        row,
+        column,
+      },
+      cardId,
     });
   }
 

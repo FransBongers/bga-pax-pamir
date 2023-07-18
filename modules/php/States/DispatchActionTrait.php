@@ -64,6 +64,15 @@ trait DispatchActionTrait
       case DISPATCH_IMPACT_ICON_TRIBE:
         $this->dispatchResolveImpactIconTribe($actionStack);
         break;
+      case DISPATCH_REFILL_MARKET_DRAW_CARDS:
+        $this->dispatchRefillMarketDrawCards($actionStack);
+        break;
+      case DISPATCH_REFILL_MARKET_SHIFT_CARDS:
+        $this->dispatchRefillMarketShiftCards($actionStack);
+        break;
+      case DISPATCH_TRANSITION:
+        $this->dispatchTransition($actionStack);
+        break;
       case 'acceptPrizeCheck':
         $this->dispatchAcceptPrizeCheck($actionStack);
         break;
@@ -114,6 +123,7 @@ trait DispatchActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
+  // TODO: replace with dispatchTransition
   function dispatchAcceptPrizeCheck($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
@@ -121,6 +131,7 @@ trait DispatchActionTrait
     $this->nextState('acceptPrize', $next['playerId']);
   }
 
+  // TODO: replace with dispatchTransition
   function dispatchCleanup($actionStack)
   {
     $next = array_pop($actionStack);
@@ -171,6 +182,13 @@ trait DispatchActionTrait
     $this->changeLoyaltyReturnGiftsDiscardPrizes($action);
   }
 
+  function dispatchTransition($actionStack)
+  {
+    $next = array_pop($actionStack);
+    Globals::setActionStack($actionStack);
+    $this->nextState($next['data']['transition'], $next['playerId']);
+  }
+
 
   /**
    * Use to push array of actions to action stack
@@ -179,9 +197,9 @@ trait DispatchActionTrait
   function pushActionsToActionStack($actions)
   {
     $actionStack = Globals::getActionStack();
-    Notifications::log('pushActionsToActionStack - before', $actionStack);
+
     $actionStack = array_merge($actionStack, $actions);
-    Notifications::log('pushActionsToActionStack - after', $actionStack);
+
     Globals::setActionStack($actionStack);
   }
 }

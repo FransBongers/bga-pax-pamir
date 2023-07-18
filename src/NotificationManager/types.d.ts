@@ -11,7 +11,7 @@ interface TokenMove {
 
 interface Log {
   log: string;
-  args: Record<string,unknown>;
+  args: Record<string, unknown>;
 }
 
 interface NotifBetrayArgs {
@@ -59,8 +59,8 @@ interface NotifDiscardArgs {
   playerId: number;
   player_name: string;
   cardId: string;
-  from: 'court' | 'hand';
-  to: 'discard' | 'temp_discard'
+  from: 'court' | 'hand' | string;
+  to: 'discard' | 'temp_discard';
 }
 
 interface NotifReturnSpiesArgs {
@@ -120,20 +120,20 @@ interface NotifDominanceCheckScoresArgs {
       currentScore: number;
       newScore: number;
       playerId: number;
-    }
+    };
   };
 }
 
 interface NotifDominanceCheckReturnBlocksArgs {
-  moves: TokenMove[]
+  moves: TokenMove[];
 }
 
 interface NotifExchangeHandArgs {
   player_name: string;
   player_name2: string;
   newHandCounts: {
-    [playerId: number]: number
-  }
+    [playerId: number]: number;
+  };
 }
 
 interface NotifMoveCardArgs {
@@ -183,17 +183,18 @@ interface NotifPurchaseGiftArgs {
   };
 }
 
-interface NotifRefreshMarketArgs {
+interface NotifShiftMarketArgs {
   cardMoves: {
     cardId: string;
     from: string;
     to: string;
   }[];
-  newCards: {
-    cardId: string;
-    from: string;
-    to: string;
-  }[];
+}
+
+interface NotifDrawMarketCardArgs {
+  cardId: string;
+  from: string;
+  to: string;
 }
 
 interface NotifReplaceHandArgs {

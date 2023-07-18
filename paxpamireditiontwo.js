@@ -4963,7 +4963,9 @@ var NotificationManager = (function () {
             ['changeFavoredSuit', 250],
             ['changeLoyalty', 1],
             ['clearTurn', 1],
+            ['drawMarketCard', 1000],
             ['discard', 1000],
+            ['discardFromMarket', 1000],
             ['discardPrizes', 1000],
             ['exchangeHand', 100],
             ['dominanceCheckScores', 1],
@@ -4975,7 +4977,7 @@ var NotificationManager = (function () {
             ['purchaseCard', 2000],
             ['purchaseGift', 1],
             ['playCard', 2000],
-            ['refreshMarket', 250],
+            ['shiftMarket', 250],
             ['replaceHand', 250],
             ['returnRupeesToSupply', 250],
             ['returnSpies', 1000],
@@ -5332,9 +5334,9 @@ var NotificationManager = (function () {
         });
         this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
     };
-    NotificationManager.prototype.notif_refreshMarket = function (notif) {
+    NotificationManager.prototype.notif_shiftMarket = function (notif) {
         var _this = this;
-        console.log('notif_refreshMarket', notif);
+        console.log('notif_shiftMarket', notif);
         this.game.clearPossible();
         notif.args.cardMoves.forEach(function (move, index) {
             var fromRow = Number(move.from.split('_')[1]);
@@ -5353,16 +5355,18 @@ var NotificationManager = (function () {
                 },
             });
         });
-        notif.args.newCards.forEach(function (move, index) {
-            var row = Number(move.to.split('_')[1]);
-            var column = Number(move.to.split('_')[2]);
-            _this.game.market.addCardFromDeck({
-                to: {
-                    row: row,
-                    column: column,
-                },
-                cardId: move.cardId,
-            });
+    };
+    NotificationManager.prototype.notif_drawMarketCard = function (notif) {
+        debug('notif_drawMarketCard', notif.args);
+        var _a = notif.args, cardId = _a.cardId, to = _a.to;
+        var row = Number(to.split('_')[1]);
+        var column = Number(to.split('_')[2]);
+        this.game.market.addCardFromDeck({
+            to: {
+                row: row,
+                column: column,
+            },
+            cardId: cardId,
         });
     };
     NotificationManager.prototype.notif_replaceHand = function (notif) {

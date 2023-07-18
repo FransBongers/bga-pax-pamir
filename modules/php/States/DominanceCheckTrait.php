@@ -50,10 +50,10 @@ trait DominanceCheckTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function resolveDominanceCheck()
+  function resolveDominanceCheck($numberOfCards = 1)
   {
     // TODO: increase by 2 in case of instability
-    Globals::incDominanceChecksResolved(1);
+    Globals::incDominanceChecksResolved($numberOfCards);
     Notifications::message('A Dominance Check is resolved');
     // Determine if check is successful
     // Get counts of all blocks left in pool
@@ -256,7 +256,7 @@ trait DominanceCheckTrait
     // SA_INSURRECTION
     // TODO (Frans): action stack so pieces can be selected if needed
     $card = Cards::get('card_3');
-    if(Utils::startsWith($card['location'],'court')) {
+    if(Utils::startsWith($card['location'],'court_')) {
       $playerId = intval(explode('_',$card['location'])[1]);
       $this->resolvePlaceArmy(KABUL,null,$playerId);
       $this->resolvePlaceArmy(KABUL,null,$playerId);

@@ -48,6 +48,15 @@ class Cards extends \PaxPamir\Helpers\Pieces
     return self::getInLocation(['hand', $pId]);
   }
 
+  public static function getOfTypeInLocation($type, $location)
+  {
+    return self::getSelectQuery()
+      ->where(static::$prefix . 'id', 'LIKE', $type . '%')
+      ->where(static::$prefix . 'location', 'LIKE', $location . '%')
+      ->get()
+      ->toArray();
+  }
+
   //////////////////////////////////
   //////////////////////////////////
   ///////////// SETTERS //////////////

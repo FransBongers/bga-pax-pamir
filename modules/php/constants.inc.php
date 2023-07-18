@@ -194,6 +194,11 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
   const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
   
+  const DISPATCH_TRANSITION = 'dispatchTransition';
+  const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
+  const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
+  
+
   const IMPACT_ICON_DISPATCH_MAP = [
     ARMY => DISPATCH_IMPACT_ICON_ARMY,
     ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,

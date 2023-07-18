@@ -41,7 +41,7 @@ trait CleanupTrait
      * 1. discard court cards if needed
      * 2. discard hand cards if needed
      * 3. discard events in leftmost column (TODO)
-     * 4. refreshMarket
+     * 4. refillMarket
      */
 
     Cards::resetUsed();
@@ -103,7 +103,7 @@ trait CleanupTrait
     if ($interrupt) {
       return;
     }
-    $this->gamestate->nextState('refreshMarket');
+    $this->gamestate->nextState('refillMarket');
   }
 
   // .##.....##.########.####.##.......####.########.##....##

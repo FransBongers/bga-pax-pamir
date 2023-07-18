@@ -66,7 +66,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_CLEANUP_DISCARD_EVENTS", 12);
     define("ST_SELECT_PIECE",13);
     define("STATE_RESOLVE_EVENT", 20);
-    define("STATE_REFRESH_MARKET", 21);
+    define("STATE_REFILL_MARKET", 21);
     define("ST_SA_SAFE_HOUSE", 22);
     define("ST_SA_INFRASTRUCTURE", 23);
     define("STATE_DOMINANCE_CHECK", 30);
@@ -188,20 +188,21 @@ $machinestates = array(
         "action" => "stCleanupDiscardEvents",
         "updateGameProgression" => false,
         "transitions" => array(
-            "refreshMarket" => STATE_REFRESH_MARKET,
+            "refillMarket" => STATE_REFILL_MARKET,
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
             "resolveEvent" => STATE_RESOLVE_EVENT,
         )
     ),
 
-    STATE_REFRESH_MARKET => array(
-        "name" => "refreshMarket",
+    STATE_REFILL_MARKET => array(
+        "name" => "refillMarket",
         "type" => "game",
-        "action" => "stRefreshMarket",
+        "action" => "stRefillMarket",
         "updateGameProgression" => false,
         "transitions" => array(
-            "nextTurn" => STATE_NEXT_PLAYER,
-            "refreshMarket" => STATE_REFRESH_MARKET,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "nextTurn" => STATE_NEXT_PLAYER,
+            // "refillMarket" => STATE_REFILL_MARKET,
         )
     ),
 
@@ -214,7 +215,7 @@ $machinestates = array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "endGame" => STATE_END_GAME,
             // "nextTurn" => STATE_NEXT_PLAYER,
-            // "refreshMarket" => STATE_REFRESH_MARKET,
+            // "refillMarket" => STATE_REFILL_MARKET,
         )
     ),
 
@@ -239,6 +240,7 @@ $machinestates = array(
         "transitions" => array(
             "acceptPrize" => ST_ACCEPT_PRIZE,
             "cleanup" => STATE_CLEANUP,
+            "nextTurn" => STATE_NEXT_PLAYER,
             "discard" => STATE_DISCARD,
             "dispatchAction" => STATE_DISPATCH_ACTION,
             "placeRoad" => STATE_PLACE_ROAD,

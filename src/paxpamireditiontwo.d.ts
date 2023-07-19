@@ -154,9 +154,6 @@ interface PaxPamirGame extends Game {
     clientCardActionTax: ClientCardActionTaxState;
     clientPlayCard: ClientPlayCardState;
     clientPurchaseCard: ClientPurchaseCardState;
-    discardCourt: DiscardCourtState;
-    discardHand: DiscardHandState;
-    discardLeverage: DiscardLeverageState;
     negotiateBribe: NegotiateBribeState;
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;

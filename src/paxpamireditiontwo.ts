@@ -59,9 +59,6 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
     acceptPrize: AcceptPrizeState;
     discard: DiscardState;
-    discardCourt: DiscardCourtState;
-    discardHand: DiscardHandState;
-    discardLeverage: DiscardLeverageState;
     negotiateBribe: NegotiateBribeState;
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;
@@ -118,9 +115,6 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
       acceptPrize: new AcceptPrizeState(this),
       discard: new DiscardState(this),
-      discardCourt: new DiscardCourtState(this),
-      discardHand: new DiscardHandState(this),
-      discardLeverage: new DiscardLeverageState(this),
       negotiateBribe: new NegotiateBribeState(this),
       placeRoad: new PlaceRoadState(this),
       placeSpy: new PlaceSpyState(this),

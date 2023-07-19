@@ -79,6 +79,7 @@ trait PlayerActionMoveTrait
     }
     Notifications::move($cardId, $player);
     $regionsThatNeedRulerCheck  = [];
+    $regionsThatNeedOverthrowCheck = [];
     foreach ($moves as $pieceId => $pieceMoves) {
       $numberOfMoves = count($pieceMoves);
 
@@ -109,6 +110,11 @@ trait PlayerActionMoveTrait
         $from = 'tribes_' . $source;
         $to = 'tribes_' . $destination;
         array_push($regionsThatNeedRulerCheck, $source, $destination);
+
+        if (!in_array($source,$regionsThatNeedOverthrowCheck)) {
+          $regionsThatNeedOverthrowCheck[] = $source;
+        }
+
         Notifications::log('locations', [
           'from' => $from,
           'to' => $to
@@ -157,7 +163,32 @@ trait PlayerActionMoveTrait
     foreach ($regionsThatNeedRulerCheck as $index => $region) {
       Map::checkRulerChange($region);
     };
-    $this->gamestate->nextState('playerActions');
+
+    if (count($regionsThatNeedOverthrowCheck) === 0) {
+      $this->gamestate->nextState('playerActions');
+      return;
+    }
+    $playerId = $player->getId();
+    $actions = [
+      [
+        'action' => DISPATCH_TRANSITION,
+        'playerId' => $playerId,
+        'data' => [
+          'transition' => 'playerActions'
+        ]
+      ]
+    ];
+    foreach ($regionsThatNeedOverthrowCheck as $index => $region) {
+      $actions[] = [
+        'action' => DISPATCH_OVERTHROW_TRIBE,
+        'playerId' => $playerId,
+        'data' => [
+          'region' => $region
+        ]
+      ];
+    }
+    $this->pushActionsToActionStack($actions);
+    $this->nextState('dispatchAction');
   }
 
 

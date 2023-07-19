@@ -60,7 +60,9 @@ interface OnEnteringAcceptPrizeArgs {
 
 interface OnEnteringDiscardArgs {
   from: ('hand' | 'court')[];
-  loyalty: string | null;
+  loyalty?: string;
+  region?: string;
+  suit?: string;
 }
 
 interface OnEnteringNegotiateBribeArgs {

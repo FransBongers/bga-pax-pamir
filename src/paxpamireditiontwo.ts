@@ -398,12 +398,17 @@ class PaxPamir implements PaxPamirGame {
     this.localState = { ...this.localState, ...updates };
   }
 
-  setCourtCardsSelectable({ callback, loyalty }: { callback: (props: { cardId: string }) => void; loyalty?: string | null }) {
+  setCourtCardsSelectable({ callback, loyalty, region, suit }: { callback: (props: { cardId: string }) => void; loyalty?: string; region?: string; suit?: string; }) {
     const playerId = this.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = 'card_' + node.id.split('_')[1];
       const card = this.getCardInfo({ cardId }) as CourtCard;
-      if (!loyalty || card.loyalty === loyalty) {
+
+      const loyaltyFilter = !loyalty || card.loyalty === loyalty;
+      const regionFilter = !region || card.region === region;
+      const suitFilter = !suit || card.suit === suit;
+
+      if (loyaltyFilter && regionFilter && suitFilter) {
         dojo.addClass(node, 'pp_selectable');
         this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
       }

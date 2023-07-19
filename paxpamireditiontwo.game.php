@@ -72,6 +72,7 @@ class PaxPamirEditionTwo extends Table
     use PaxPamir\States\PlayerActionTaxTrait;
     use PaxPamir\States\PlayerActionTrait;
     use PaxPamir\States\PurchaseCardTrait;
+    use PaxPamir\States\OverthrowTrait;
     use PaxPamir\States\RefillMarketTrait;
     use PaxPamir\States\ResolveEventTrait;
     use PaxPamir\States\ResolveImpactIconsTrait;

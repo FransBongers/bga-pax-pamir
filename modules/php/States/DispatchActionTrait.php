@@ -64,6 +64,9 @@ trait DispatchActionTrait
       case DISPATCH_IMPACT_ICON_TRIBE:
         $this->dispatchResolveImpactIconTribe($actionStack);
         break;
+      case DISPATCH_OVERTHROW_TRIBE:
+        $this->dispatchOverthrowTribe($actionStack);
+        break;
       case DISPATCH_REFILL_MARKET_DRAW_CARDS:
         $this->dispatchRefillMarketDrawCards($actionStack);
         break;
@@ -87,6 +90,9 @@ trait DispatchActionTrait
         break;
       case 'discardBetrayedCard':
         $this->dispatchDiscardBetrayedCard($actionStack);
+        break;
+      case DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE:
+        $this->dispatchDiscardAllCourtCardsOfType($actionStack);
         break;
       case DISPATCH_DISCARD_PATRIOTS:
         $this->dispatchDiscardPatriots($actionStack);
@@ -139,6 +145,7 @@ trait DispatchActionTrait
     $this->nextState('cleanup', $next['playerId']);
   }
 
+  // TODO: replace with dispatchSingleCard
   function dispatchDiscardBetrayedCard($actionStack)
   {
     $current = array_pop($actionStack);
@@ -167,6 +174,7 @@ trait DispatchActionTrait
     $this->resolveDiscardCard($card, $player, $from, $to, $cardOwner);
   }
 
+  // TODO: replace with dispatchTransition
   function dispatchPlayerActions($actionStack)
   {
     $next = array_pop($actionStack);

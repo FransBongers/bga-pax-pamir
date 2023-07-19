@@ -3,7 +3,6 @@
 ## Implementation
 
 ### General
-- Instability rule: resolve dominance check when two are in the market
 - Overthrow rule: link between political cards and ruled regions
 - Check states file
 

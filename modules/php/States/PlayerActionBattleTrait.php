@@ -46,7 +46,7 @@ trait PlayerActionBattleTrait
 
     $player = Players::get();
 
-    $resolved = $this->resolveBribe($cardInfo, $player,BATTLE, $offeredBribeAmount);
+    $resolved = $this->resolveBribe($cardInfo, $player, BATTLE, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
       return;
@@ -76,6 +76,16 @@ trait PlayerActionBattleTrait
 
   function resolveBattleInRegion($cardInfo, $location, $removedPieces)
   {
+    Notifications::battleRegion($location);
+
+    // All checks have been done. Execute battle
+    Cards::setUsed($cardInfo['id'], 1);
+    // if not bonus action reduce remaining actions.
+    if (!$this->isCardFavoredSuit($cardInfo)) {
+      Globals::incRemainingActions(-1);
+    }
+
+
     $player = Players::get();
     $loyalty = $player->getLoyalty();
     $numberOfLoyalPieces = $this->getNumberOfLoyalArmies($player, $location);
@@ -85,11 +95,15 @@ trait PlayerActionBattleTrait
       throw new \feException("Not enough loyal pieces");
     }
 
+    $playersWithRemovedCylinders = [];
+
+    // TODO: split below in two different funtions: remove cylinder / remove block
     foreach ($removedPieces as $index => $tokenId) {
       $splitTokenId = explode("_", $tokenId);
       $isCylinder = $splitTokenId[0] === "cylinder";
+      $isBlock = $splitTokenId[0] === "block";
       // enemy pieces may not have the same loyalty
-      if (Utils::startsWith($tokenId, "block") && $splitTokenId[1] === $loyalty) {
+      if ($isBlock && $splitTokenId[1] === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
       if ($isCylinder && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
@@ -113,26 +127,13 @@ trait PlayerActionBattleTrait
       if (Utils::startsWith($tokenLocation, "roads") && !in_array($location, $this->borders[$explodedTokenLocation[1] . '_' . $explodedTokenLocation[2]]['regions'])) {
         throw new \feException("Piece is not on a border connected to the region of the battle");
       }
-    };
 
 
-    // All checks have been done. Execute battle
-    Cards::setUsed($cardInfo['id'], 1);
-    // if not bonus action reduce remaining actions.
-    if (!$this->isCardFavoredSuit($cardInfo)) {
-      Globals::incRemainingActions(-1);
-    }
-
-    Notifications::battleRegion($location);
-
-    foreach ($removedPieces as $index => $tokenId) {
-      $splitTokenId = explode("_", $tokenId);
-      $tokenInfo = Tokens::get($tokenId);
       $from = $tokenInfo['location'];
       $to = '';
       $logTokenType = '';
       $logTokenData = '';
-      if (Utils::startsWith($tokenId, "block")) {
+      if ($isBlock) {
         $to = implode('_', ['blocks', $splitTokenId[1]]);
         $logTokenData = $splitTokenId[1];
         if (Utils::startsWith($from, "armies")) {
@@ -142,11 +143,16 @@ trait PlayerActionBattleTrait
           $logTokenType = 'road';
         }
       };
-      if (Utils::startsWith($tokenId, "cylinder")) {
-        $cylinderOwnerPlayerId = $splitTokenId[1];
+
+      if ($isCylinder) {
+        $cylinderOwnerPlayerId = intval($splitTokenId[1]);
         $to = implode('_', ['cylinders', $cylinderOwnerPlayerId]);
         $logTokenType = 'cylinder';
         $logTokenData = $cylinderOwnerPlayerId;
+
+        if (!in_array($cylinderOwnerPlayerId, $playersWithRemovedCylinders)) {
+          $playersWithRemovedCylinders[] = $cylinderOwnerPlayerId;
+        }
       }
       $state = Tokens::insertOnTop($tokenId, $to);
       $message = clienttranslate('${player_name} removes ${logTokenRemoved}');
@@ -165,8 +171,34 @@ trait PlayerActionBattleTrait
         ]
       ]);
     };
+
     Map::checkRulerChange($location);
-    $this->gamestate->nextState('playerActions');
+
+    if (count($playersWithRemovedCylinders) === 0) {
+      $this->gamestate->nextState('playerActions');
+      return;
+    }
+
+    $actions = [
+      [
+        'action' => DISPATCH_TRANSITION,
+        'playerId' => $player->getId(),
+        'data' => [
+          'transition' => 'playerActions'
+        ]
+      ]
+    ];
+    foreach ($playersWithRemovedCylinders as $index => $playerId) {
+      $actions[] = [
+        'action' => DISPATCH_OVERTHROW_TRIBE,
+        'playerId' => $playerId,
+        'data' => [
+          'region' => $location
+        ]
+      ];
+    }
+    $this->pushActionsToActionStack($actions);
+    $this->nextState('dispatchAction');
   }
 
   function resolveBattleOnCourtCard($cardInfo, $location, $removedPieces)

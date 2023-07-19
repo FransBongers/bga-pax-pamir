@@ -183,7 +183,8 @@ const LOG_TOKEN_RUPEE = 'rupee';
   */
   const DISPATCH_DISCARD = 'dispatchDiscard';
   const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
-  
+  const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';
+
   const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
   const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';
   const DISPATCH_IMPACT_ICON_INTELLIGENCE = 'dispatchImpactIntelligence';
@@ -194,10 +195,10 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
   const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
   
-  const DISPATCH_TRANSITION = 'dispatchTransition';
+  const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
   const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
   const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
-  
+  const DISPATCH_TRANSITION = 'dispatchTransition';
 
   const IMPACT_ICON_DISPATCH_MAP = [
     ARMY => DISPATCH_IMPACT_ICON_ARMY,

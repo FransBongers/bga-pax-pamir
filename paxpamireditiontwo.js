@@ -3992,10 +3992,12 @@ var DiscardState = (function () {
         this.game = game;
     }
     DiscardState.prototype.onEnteringState = function (_a) {
-        var from = _a.from, loyalty = _a.loyalty;
+        var from = _a.from, loyalty = _a.loyalty, region = _a.region, suit = _a.suit;
         console.log('from state file', from);
         this.from = from;
         this.loyalty = loyalty;
+        this.region = region;
+        this.suit = suit;
         this.updateInterfaceInitialStep();
     };
     DiscardState.prototype.onLeavingState = function () { };
@@ -4010,6 +4012,8 @@ var DiscardState = (function () {
                     return _this.updateInterfaceConfirm({ cardId: cardId, from: 'court' });
                 },
                 loyalty: this.loyalty,
+                region: this.region,
+                suit: this.suit,
             });
         }
         if (this.from.includes(HAND)) {
@@ -5671,12 +5675,15 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.setCourtCardsSelectable = function (_a) {
         var _this = this;
-        var callback = _a.callback, loyalty = _a.loyalty;
+        var callback = _a.callback, loyalty = _a.loyalty, region = _a.region, suit = _a.suit;
         var playerId = this.getPlayerId();
         dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[1];
             var card = _this.getCardInfo({ cardId: cardId });
-            if (!loyalty || card.loyalty === loyalty) {
+            var loyaltyFilter = !loyalty || card.loyalty === loyalty;
+            var regionFilter = !region || card.region === region;
+            var suitFilter = !suit || card.suit === suit;
+            if (loyaltyFilter && regionFilter && suitFilter) {
                 dojo.addClass(node, 'pp_selectable');
                 _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
             }

@@ -2,15 +2,20 @@ class DiscardState implements State {
   private game: PaxPamirGame;
   private from: OnEnteringDiscardArgs['from'];
   private loyalty: OnEnteringDiscardArgs['loyalty'];
+  private region: OnEnteringDiscardArgs['region'];
+  private suit: OnEnteringDiscardArgs['suit'];
+  
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ from, loyalty }: OnEnteringDiscardArgs) {
+  onEnteringState({ from, loyalty, region, suit }: OnEnteringDiscardArgs) {
     console.log('from state file', from);
     this.from = from;
     this.loyalty = loyalty;
+    this.region = region;
+    this.suit = suit;
     this.updateInterfaceInitialStep();
   }
 
@@ -40,6 +45,8 @@ class DiscardState implements State {
       this.game.setCourtCardsSelectable({
         callback: ({ cardId }: { cardId: string }) => this.updateInterfaceConfirm({ cardId, from: 'court' }),
         loyalty: this.loyalty,
+        region: this.region,
+        suit: this.suit,
       });
     }
     if (this.from.includes(HAND)) {

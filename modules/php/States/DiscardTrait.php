@@ -27,10 +27,8 @@ trait DiscardTrait
     $actionStack = Globals::getActionStack();
 
     $next = $actionStack[count($actionStack) - 1];
-    return [
-      'from' => $next['data']['from'],
-      'loyalty' => isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null,
-    ];
+
+    return $next['data'];
   }
 
   //  .########..##..........###....##....##.########.########.
@@ -78,7 +76,7 @@ trait DiscardTrait
     if ($explodedLocation[0] !== $from || $explodedLocation[1] !== strval($playerId)) {
       throw new \feException("Card is not in the discard location");
     }
-    
+
     $this->resolveDiscardCard($card, $player, $from);
   }
 
@@ -109,8 +107,8 @@ trait DiscardTrait
 
     // Determine if there are cards left to discard
     $availableCards = 0;
-    if (in_array(COURT,$from)) {
-      $courtCards = array_filter($player->getCourtCards(),function ($card) use ($loyalty) {
+    if (in_array(COURT, $from)) {
+      $courtCards = array_filter($player->getCourtCards(), function ($card) use ($loyalty) {
         if ($loyalty === null) {
           return true;
         }
@@ -118,7 +116,7 @@ trait DiscardTrait
       });
       $availableCards += count($courtCards);
     }
-    if (in_array(HAND,$from)) {
+    if (in_array(HAND, $from)) {
       $handCards = $player->getHandCards();
       $availableCards += count($handCards);
     }
@@ -130,7 +128,70 @@ trait DiscardTrait
       array_pop($actionStack);
       Globals::setActionStack($actionStack);
       $this->nextState('dispatchAction');
-    } 
+    }
+  }
+
+  function dispatchDiscardAllCourtCardsOfType($actionStack)
+  {
+    /**
+     * Three cases:
+     * 1. Player has no cards of type
+     * 2. Player has cards of type of which at least one with leverage
+     * 3. Player has cards without leverage only.
+     */
+    $action = $actionStack[count($actionStack) - 1];
+
+    $playerId = $action['playerId'];
+    $player = Players::get($playerId);
+
+    $courtCards = $player->getCourtCards();
+    // $loyalty =  $player->getLoyalty();
+    $data = $action['data'];
+
+    $cardsToDiscard = Utils::filter($courtCards, function ($card) use ($data) {
+      $checkLoyalty = isset($data['loyalty']) ? $data['loyalty'] === $card['loyalty'] : true;
+      $checkSuit = isset($data['suit']) ? $data['suit'] === $card['suit'] : true;
+      $checkRegion = isset($data['region']) ? $data['region'] === $card['region'] : true;
+      return $checkLoyalty && $checkSuit && $checkRegion;
+      // return $card['loyalty'] !== null && $card['loyalty'] === $loyalty;
+    });
+
+    // 1. Player has no cards of type, so next action can be resolved
+    if (count($cardsToDiscard) === 0) {
+      array_pop($actionStack);
+      Globals::setActionStack($actionStack);
+      $this->nextState('dispatchAction');
+      return;
+    }
+    $hasCardsWithLeverage = Utils::array_some($cardsToDiscard, function ($card) {
+      return in_array(LEVERAGE, $card['impactIcons']);
+    });
+    // Transition to discard step where player needs to select patriots
+    if ($hasCardsWithLeverage) {
+      $actionStack[] = [
+        'action' => DISPATCH_DISCARD,
+        'playerId' => $playerId,
+        'data' => array_merge($data, ['from' => [COURT]])
+      ];
+      Globals::setActionStack($actionStack);
+      $this->nextState('dispatchAction');
+      return;
+    }
+    // 3. Discard all patriots
+    array_pop($actionStack);
+    foreach ($cardsToDiscard as $index => $card) {
+      $actionStack[] = [
+        'action' => 'discardSingleCard',
+        'playerId' => $playerId,
+        'data' => [
+          'cardId' => $card['id'],
+          'from' => COURT,
+          'to' => DISCARD
+        ],
+      ];
+    }
+    Globals::setActionStack($actionStack);
+    $this->nextState('dispatchAction');
   }
 
 
@@ -158,6 +219,9 @@ trait DiscardTrait
     Cards::insertOnTop($cardId, $to);
     Notifications::discard($card, $cardOwner, $from, $to);
 
+    if ($from === COURT && $card['suit'] === POLITICAL) {
+      $this->checkOverthrowCard($card, $cardOwner);
+    }
     if ($from === COURT) {
       $this->checkLeverage($card, $cardOwner);
     }
@@ -242,5 +306,4 @@ trait DiscardTrait
     };
     Notifications::updateCourtCardStates($courtCardStates, $player->getId());
   }
-
 }

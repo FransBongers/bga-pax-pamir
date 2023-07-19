@@ -38,7 +38,7 @@ trait DebugTrait
 
   function test()
   {
-    Cards::move('card_101','market_1_0');
+    // Cards::move('card_113','discard');
    
     // $this->dispatchRefillMarketDrawCards([]);
 
@@ -48,7 +48,7 @@ trait DebugTrait
     // $this->debugAddCardToHand('card_3');
     // $this->debugAddCardToHand('card_4');
 
-    // Notifications::log('actions', Globals::getActionStack());
+    Notifications::log('actions', Globals::getActionStack());
     // Globals::setActionStack([]);
     // $this->nextState('playerActions');
     // $this->pushActionsToActionStack([

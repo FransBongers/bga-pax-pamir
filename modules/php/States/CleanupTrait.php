@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -31,13 +32,13 @@ trait CleanupTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  /*
-        Triggered at end of a players turn. Checks if player needs to discard any cards from court or hand.
-    */
+  /**
+   * Triggered at end of a players turn. Checks if player needs to discard any cards from court or hand.
+   */
   function stCleanup()
   {
     /**
-     * 0. Set cards back to unused
+     * 0. Set cards and tokens back to unused
      * 1. discard court cards if needed
      * 2. discard hand cards if needed
      * 3. discard events in leftmost column (TODO)
@@ -46,64 +47,133 @@ trait CleanupTrait
 
     Cards::resetUsed();
     Tokens::resetUsed();
+
     $player = Players::get();
     $playerId = $player->getId();
-    $discards = $player->checkDiscards();
-    Notifications::log('discard',$discards);
-    if ($discards['court'] > 0) {
-      $this->pushActionsToActionStack(
-        [
-          [
-            'action' => 'cleanup',
-            'playerId' => $playerId,
-            'data' => [],
-          ],
-          [
-            'action' => DISPATCH_DISCARD,
-            'playerId' => $playerId,
-            'data' => [
-              'from' => [COURT]
-            ]
-          ]
-        ]
-      );
-      $this->nextState('dispatchAction');
-      // $this->gamestate->nextState('discardCourt');
-    } else if ($discards['hand'] > 0) {
-      $this->pushActionsToActionStack(
-        [
-          [
-            'action' => 'cleanup',
-            'playerId' => $playerId,
-            'data' => [],
-          ],
-          [
-            'action' => DISPATCH_DISCARD,
-            'playerId' => $playerId,
-            'data' => [
-              'from' => [HAND]
-            ]
-          ]
-        ]
-      );
-      $this->nextState('dispatchAction');
-    } else {
-      $this->gamestate->nextState('discardEvents');
+
+
+
+    // $discards = $player->checkDiscards();
+    // Notifications::log('discard', $discards);
+
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+        'transition' => 'refillMarket'
+      ]),
+    ];
+
+    $bottomRowEventAction = $this->checkForEventCardInLocation('market_1_0', $playerId);
+    if ($bottomRowEventAction !== null) {
+      $actionStack[] = $bottomRowEventAction;
     }
+
+    $topRowEventAction = $this->checkForEventCardInLocation('market_0_0', $playerId);
+    if ($topRowEventAction !== null) {
+      $actionStack[] = $topRowEventAction;
+    }
+
+    $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_HAND, $playerId, []);
+    $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_COURT, $playerId, []);
+
+    ActionStack::set($actionStack);
+    $this->nextState('dispatchAction');
   }
 
-  function stCleanupDiscardEvents()
+  // function stCleanupDiscardEvents()
+  // {
+  //   // Discard events at front of market
+  //   $interrupt = $this->checkAndDiscardIfEvent('market_0_0');
+  //   if ($interrupt) {
+  //     return;
+  //   }
+  //   $interrupt = $this->checkAndDiscardIfEvent('market_1_0');
+  //   if ($interrupt) {
+  //     return;
+  //   }
+  //   $this->gamestate->nextState('refillMarket');
+  // }
+
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  function dispatchCleanupCheckCourt($actionStack)
   {
-    // Discard events at front of market
-    $interrupt = $this->checkAndDiscardIfEvent('market_0_0');
-    if ($interrupt) {
-      return;
+    $action = $actionStack[count($actionStack) - 1];
+    $playerId = $action['playerId'];
+    $player = Players::get($playerId);
+
+    $totals = $player->getSuitTotals();
+
+    $playerHasToDiscard = $totals['courtCards'] - $totals['political'] - 3 > 0;
+
+    if ($playerHasToDiscard) {
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
+        'from' => [COURT]
+      ]);
+    } else {
+      array_pop($actionStack);
     }
-    $interrupt = $this->checkAndDiscardIfEvent('market_1_0');
-    if ($interrupt) {
-      return;
+    ActionStack::set($actionStack);
+    $this->nextState('dispatchAction');
+  }
+
+  function dispatchCleanupCheckHand($actionStack)
+  {
+    $action = $actionStack[count($actionStack) - 1];
+    $playerId = $action['playerId'];
+    $player = Players::get($playerId);
+
+    $totals = $player->getSuitTotals();
+    $handCards = $player->getHandCards();
+
+    $playerHasToDiscard = count($handCards) - $totals['intelligence'] - 2 > 0;
+
+    if ($playerHasToDiscard) {
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
+        'from' => [HAND]
+      ]);
+    } else {
+      array_pop($actionStack);
     }
-    $this->gamestate->nextState('refillMarket');
+    ActionStack::set($actionStack);
+    $this->nextState('dispatchAction');
+  }
+
+  function dispatchCleanupDiscardEvent($actionStack)
+  {
+    $action = array_pop($actionStack);
+    $playerId = $action['playerId'];
+    $cardId = $action['data']['cardId'];
+    $location = $action['data']['location'];
+    $card = Cards::get($cardId);
+
+    $player = Players::get($playerId);
+
+    $to = in_array($cardId, ['card_106', 'card_107']) ? ACTIVE_EVENTS : DISCARD;
+
+    Cards::insertOnTop($cardId, $to);
+    Notifications::discardEventCardFromMarket($card, $location, $to);
+
+    $extraActions = Events::resolveDiscardEffect($card['discarded']['effect'], $location, $playerId);
+    Notifications::log('extraActions', $extraActions);
+    if ($extraActions !== null) {
+      $actionStack = array_merge($actionStack, $extraActions);
+    }
+    ActionStack::set($actionStack);
+    $this->nextState('dispatchAction');
   }
 
   // .##.....##.########.####.##.......####.########.##....##
@@ -113,6 +183,20 @@ trait CleanupTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  function checkForEventCardInLocation($location, $playerId)
+  {
+    $card = Cards::getInLocation($location)->first();
+
+    if ($card !== null && $card['type'] == EVENT_CARD) {
+      return ActionStack::createAction(DISPATCH_CLEANUP_DISCARD_EVENT, $playerId, [
+        'cardId' => $card['id'],
+        'location' => $location,
+      ]);
+    }
+
+    return null;
+  }
 
   function checkAndDiscardIfEvent($location)
   {
@@ -130,67 +214,5 @@ trait CleanupTrait
       }
     };
     return false;
-  }
-
-  function resolveEventDiscardEffect($event, $location)
-  {
-    Notifications::log('event', $event);
-    switch ($event) {
-        // cards 101-104
-      case ECE_DOMINANCE_CHECK:
-        $this->resolveDominanceCheck();
-        break;
-        // card 105
-      case ECE_MILITARY_SUIT:
-        $this->resolveFavoredSuitChange(MILITARY, ECE_MILITARY_SUIT);
-        break;
-        // card 106
-      case ECE_EMBARRASSEMENT_OF_RICHES:
-        Events::embarrassementOfRiches();
-        break;
-        // card 107
-      case ECE_DISREGARD_FOR_CUSTOMS:
-        // No additional action needed at this point
-        break;
-        // card 108
-      case ECE_FAILURE_TO_IMPRESS:
-        Events::failureToImpress();
-        break;
-        // card 109
-      case ECE_RIOTS_IN_PUNJAB:
-        Events::riot(PUNJAB);
-        break;
-        // card 110
-      case ECE_RIOTS_IN_HERAT:
-        Events::riot(HERAT);
-        break;
-        // card 111
-      case ECE_NO_EFFECT:
-        // Event has a discard effect instead of purchasse effect
-        Events::publicWithdrawal($location);
-        break;
-        // card 112
-      case ECE_RIOTS_IN_KABUL:
-        Events::riot(KABUL);
-        break;
-        // card 113
-      case ECE_RIOTS_IN_PERSIA:
-        Events::riot(PERSIA);
-        break;
-        // card 114
-      case ECE_CONFIDENCE_FAILURE:
-        Events::confidenceFailure();
-        break;
-        // card 115
-      case ECE_INTELLIGENCE_SUIT:
-        $this->resolveFavoredSuitChange(INTELLIGENCE, ECE_INTELLIGENCE_SUIT);
-        break;
-        // card 116
-      case ECE_POLITICAL_SUIT:
-        $this->resolveFavoredSuitChange(POLITICAL, ECE_POLITICAL_SUIT);
-        break;
-      default:
-        Notifications::log('no match for event', []);
-    }
   }
 }

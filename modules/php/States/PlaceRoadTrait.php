@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
@@ -24,7 +25,7 @@ trait PlaceRoadTrait
 
   function argPlaceRoad()
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     $action = $actionStack[count($actionStack) - 1];
 
     $card = Cards::get($action['data']['cardId']);
@@ -58,11 +59,11 @@ trait PlaceRoadTrait
   function placeRoad($border)
   {
     self::checkAction('placeRoad');
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
-    if ($action['action'] !== DISPATCH_IMPACT_ICON_ROAD) {
+    if ($action['type'] !== DISPATCH_IMPACT_ICON_ROAD) {
       throw new \feException("Not a valid action");
     };
     $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;

@@ -246,6 +246,7 @@ $machinestates = array(
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
             "playerActions" => STATE_PLAYER_ACTIONS,
+            "refillMarket" => STATE_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
         )
     ),

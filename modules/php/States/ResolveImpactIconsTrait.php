@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -51,7 +52,7 @@ trait ResolveImpactIconsTrait
     // Card is not in court anymore so do not resolve impact icons
     // and go back to player actions
     if ($card['location'] !== Locations::court($playerId)) {
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
@@ -60,15 +61,15 @@ trait ResolveImpactIconsTrait
 
     $impactIcons = array_reverse($card['impactIcons']);
     foreach ($impactIcons as $index => $icon) {
-      $actionStack[] = [
-        'action' => IMPACT_ICON_DISPATCH_MAP[$icon],
-        'playerId' => $playerId,
-        'data' => [
+      $actionStack[] = ActionStack::createAction(
+        IMPACT_ICON_DISPATCH_MAP[$icon],
+        $playerId,
+        [
           'cardId' => $cardId
-        ],
-      ];
+        ]
+      );
     }
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -93,7 +94,7 @@ trait ResolveImpactIconsTrait
   {
     $action = $actionStack[count($actionStack) - 1];
     // $action = array_pop($actionStack);
-    // Globals::setActionStack($actionStack);
+    // ActionStack::set($actionStack);
     $playerId = $action['playerId'];
     $cardId = $action['data']['cardId'];
     $region = Cards::get($cardId)['region'];
@@ -103,7 +104,7 @@ trait ResolveImpactIconsTrait
     if ($armyPlaced) {
       array_pop($actionStack);
 
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
     } else {
       // No army available in supply, player needs to select
@@ -114,7 +115,7 @@ trait ResolveImpactIconsTrait
   function dispatchResolveImpactIconEconomic($actionStack)
   {
     array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $this->resolveFavoredSuitChange(ECONOMIC);
 
@@ -124,7 +125,7 @@ trait ResolveImpactIconsTrait
   function dispatchResolveImpactIconIntelligence($actionStack)
   {
     array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $this->resolveFavoredSuitChange(INTELLIGENCE);
 
@@ -134,7 +135,7 @@ trait ResolveImpactIconsTrait
   function dispatchResolveImpactIconMilitary($actionStack)
   {
     array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $this->resolveFavoredSuitChange(MILITARY);
 
@@ -144,7 +145,7 @@ trait ResolveImpactIconsTrait
   function dispatchResolveImpactIconLeverage($actionStack)
   {
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $playerId = $action['playerId'];
     Players::incRupees($playerId, 2);
@@ -157,7 +158,7 @@ trait ResolveImpactIconsTrait
   function dispatchResolveImpactIconPolitical($actionStack)
   {
     array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $this->resolveFavoredSuitChange(POLITICAL);
 
@@ -195,7 +196,7 @@ trait ResolveImpactIconsTrait
 
     if ($this->isCylinderAvailableForAction($action)) {
       array_pop($actionStack);
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
 
       $cardId = $action['data']['cardId'];
       $region = Cards::get($cardId)['region'];

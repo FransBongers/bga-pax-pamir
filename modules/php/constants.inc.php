@@ -181,6 +181,9 @@ const LOG_TOKEN_RUPEE = 'rupee';
  /**
   * Dispatch actions
   */
+  const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
+  const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
+  const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
   const DISPATCH_DISCARD = 'dispatchDiscard';
   const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
   const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';

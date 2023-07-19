@@ -23,6 +23,69 @@ class Events
   // .##.........##.##...##.......##...###....##....##....##
   // .########....###....########.##....##....##.....######.
 
+  public static function resolveDiscardEffect($event, $location, $playerId)
+  {
+    Notifications::log('event', $event);
+    switch ($event) {
+        // cards 101-104
+      case ECE_DOMINANCE_CHECK:
+        Game::get()->resolveDominanceCheck();
+        break;
+        // card 105
+      case ECE_MILITARY_SUIT:
+        Game::get()->resolveFavoredSuitChange(MILITARY, ECE_MILITARY_SUIT);
+        break;
+        // card 106
+      case ECE_EMBARRASSEMENT_OF_RICHES:
+        Events::embarrassementOfRiches();
+        break;
+        // card 107
+      case ECE_DISREGARD_FOR_CUSTOMS:
+        // No additional action needed at this point
+        break;
+        // card 108
+      case ECE_FAILURE_TO_IMPRESS:
+        Events::failureToImpress();
+        break;
+        // card 109
+      case ECE_RIOTS_IN_PUNJAB:
+        Events::riot(PUNJAB);
+        break;
+        // card 110
+      case ECE_RIOTS_IN_HERAT:
+        Events::riot(HERAT);
+        break;
+        // card 111
+      case ECE_NO_EFFECT:
+        // Event has a discard effect instead of purchasse effect
+        Events::publicWithdrawal($location);
+        break;
+        // card 112
+      case ECE_RIOTS_IN_KABUL:
+        Events::riot(KABUL);
+        break;
+        // card 113
+      case ECE_RIOTS_IN_PERSIA:
+        Events::riot(PERSIA);
+        break;
+        // card 114
+      case ECE_CONFIDENCE_FAILURE:
+        return Events::confidenceFailure($playerId);
+        break;
+        // card 115
+      case ECE_INTELLIGENCE_SUIT:
+        Game::get()->resolveFavoredSuitChange(INTELLIGENCE, ECE_INTELLIGENCE_SUIT);
+        break;
+        // card 116
+      case ECE_POLITICAL_SUIT:
+        Game::get()->resolveFavoredSuitChange(POLITICAL, ECE_POLITICAL_SUIT);
+        break;
+      default:
+        Notifications::log('no match for event', []);
+    }
+    return null;
+  }
+
   // card_113 - purchase
   public static function backingOfPersianAristocracy()
   {
@@ -32,30 +95,24 @@ class Events
   }
 
   // card_114
-  public static function confidenceFailure()
+  public static function confidenceFailure($playerId)
   {
     Notifications::message(clienttranslate('All players must discard a card from their hand'));
-    // call utility function to determine
-    // get current PlayerId. Call function to execute check for current player
-    $playerId = Players::get()->getId();
-    $currentEvent = [
-      'event' => ECE_CONFIDENCE_FAILURE,
-      'activePlayerId' => $playerId,
-      'transition' => 'discardEvents',
-      'resolvedForPlayers' => []
-    ];
-    Globals::setCurrentEvent($currentEvent);
-    Events::confidenceFailureNextStep($currentEvent, $playerId);
-    /**
-     * For given player
-     *  => check if already processed, otherwise done
-     *    if not check number of cards:
-     *      0: check next player
-     *      1: discard and check next player
-     *      >1: player must choose
-     * When done
-     *  => transition to cleanup 
-     */
+
+    $playerOrder = [];
+    $nextPlayerId = $playerId;
+
+    while (!in_array($nextPlayerId, $playerOrder)) {
+      $playerOrder[] = $nextPlayerId;
+      $nextPlayerId = Players::getNextId($nextPlayerId);
+    }
+    $extraActions = array_map(function ($id) {
+      return ActionStack::createAction(DISPATCH_DISCARD, $id, [
+        'from' => [HAND]
+      ]);
+    }, array_reverse($playerOrder));
+
+    return $extraActions;
   }
 
   // card_106
@@ -109,30 +166,30 @@ class Events
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  public static function confidenceFailureNextStep($currentEvent, $playerId)
-  {
-    $player = Players::get($playerId);
-    if (in_array($playerId, $currentEvent['resolvedForPlayers'])) {
-      // Made full round, can get back to discardEvents
-      Game::get()->nextState($currentEvent['transition'], $currentEvent['activePlayerId']);
-      return;
-    }
-    $handCards = $player->getHandCards();
-    $number = count($handCards);
-    if ($number === 0) {
-      $nextPlayerId = Players::getNextId($player);
-      $currentEvent['resolvedForPlayers'][] = $playerId;
-      Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
-    } else if ($number === 1) {
-      Cards::insertOnTop($handCards[0]['id'], DISCARD);
-      Notifications::discardFromHand($handCards[0], $player);
-      $nextPlayerId = Players::getNextId($player);
-      $currentEvent['resolvedForPlayers'][] = $playerId;
-      Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
-    } else if ($number > 1) {
-      Game::get()->nextState("resolveEvent", $playerId);
-    }
-  }
+  // public static function confidenceFailureNextStep($currentEvent, $playerId)
+  // {
+  //   $player = Players::get($playerId);
+  //   if (in_array($playerId, $currentEvent['resolvedForPlayers'])) {
+  //     // Made full round, can get back to discardEvents
+  //     Game::get()->nextState($currentEvent['transition'], $currentEvent['activePlayerId']);
+  //     return;
+  //   }
+  //   $handCards = $player->getHandCards();
+  //   $number = count($handCards);
+  //   if ($number === 0) {
+  //     $nextPlayerId = Players::getNextId($player);
+  //     $currentEvent['resolvedForPlayers'][] = $playerId;
+  //     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
+  //   } else if ($number === 1) {
+  //     Cards::insertOnTop($handCards[0]['id'], DISCARD);
+  //     Notifications::discardFromHand($handCards[0], $player);
+  //     $nextPlayerId = Players::getNextId($player);
+  //     $currentEvent['resolvedForPlayers'][] = $playerId;
+  //     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
+  //   } else if ($number > 1) {
+  //     Game::get()->nextState("resolveEvent", $playerId);
+  //   }
+  // }
 
   public static function getPurchasedEventLocation($event, $playerId)
   {
@@ -210,13 +267,13 @@ class Events
   public static function isNationalismActive($player)
   {
     $card = Cards::get(ECE_NATIONALISM_CARD_ID);
-    return $card['location'] === 'events_'.$player->getId();
+    return $card['location'] === 'events_' . $player->getId();
   }
 
   public static function isNationBuildingActive($player)
   {
     $card = Cards::get(ECE_NATION_BUILDING_CARD_ID);
-    return $card['location'] === 'events_'.$player->getId();
+    return $card['location'] === 'events_' . $player->getId();
   }
 
   public static function isNewTacticsActive($player)

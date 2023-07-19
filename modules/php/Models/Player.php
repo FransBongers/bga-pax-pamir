@@ -170,14 +170,15 @@ class Player extends \PaxPamir\Helpers\DB_Model
       POLITICAL => 0,
       MILITARY => 0,
       ECONOMIC => 0,
-      INTELLIGENCE => 0
+      INTELLIGENCE => 0,
     );
 
-    $court_cards = $this->getCourtCards();
-    for ($i = 0; $i < count($court_cards); $i++) {
-      $card = $court_cards[$i];
+    $courtCards = $this->getCourtCards();
+    for ($i = 0; $i < count($courtCards); $i++) {
+      $card = $courtCards[$i];
       $suits[$card['suit']] += $card['rank'];
     }
+    $suits['courtCards'] = count($courtCards);
     return $suits;
   }
 

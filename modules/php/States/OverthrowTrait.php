@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
@@ -36,7 +37,7 @@ trait OverthrowTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-    /**
+  /**
    * Check if player has other tribes in specified region. If not discard all
    * political cards in region
    */
@@ -52,17 +53,17 @@ trait OverthrowTrait
     });
 
     if (!$hasOtherTribesInregion) {
-      $actionStack[] = [
-        'action' => DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE,
-        'playerId' => $playerId,
-        'data' => [
+      $actionStack[] = ActionStack::createAction(
+        DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE,
+        $playerId,
+        [
           'suit' => POLITICAL,
           'region' => $region
         ]
-        ];
+      );
     }
 
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -115,5 +116,4 @@ trait OverthrowTrait
     }
     Map::checkRulerChange($region);
   }
-
 }

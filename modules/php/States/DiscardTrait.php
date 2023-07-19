@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -24,7 +25,7 @@ trait DiscardTrait
 
   function argDiscard()
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
 
     $next = $actionStack[count($actionStack) - 1];
 
@@ -51,11 +52,11 @@ trait DiscardTrait
   {
     self::checkAction('discard');
 
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
-    if ($action['action'] !== DISPATCH_DISCARD) {
+    if ($action['type'] !== DISPATCH_DISCARD) {
       throw new \feException("Not a valid action");
     }
 
@@ -96,6 +97,15 @@ trait DiscardTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  function isValidCardForDiscardFilter($card, $data)
+  {
+    $loyaltyFilter = isset($data['loyalty']) ? $data['loyalty'] === $card['loyalty'] : true;
+    $regionFilter = isset($data['region']) ? $data['region'] === $card['region'] : true;
+    $suitFilter = isset($data['suit']) ? $data['suit'] === $card['suit'] : true;
+    return $loyaltyFilter && $regionFilter && $suitFilter;
+  }
+
+  // loyalty?: string; region?: string; suit?: string;
   function dispatchDiscard($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
@@ -104,15 +114,14 @@ trait DiscardTrait
     $from = $next['data']['from'];
     $loyalty = isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null;
     $player = Players::get($playerId);
+    $data = $next['data'];
 
     // Determine if there are cards left to discard
     $availableCards = 0;
+
     if (in_array(COURT, $from)) {
-      $courtCards = array_filter($player->getCourtCards(), function ($card) use ($loyalty) {
-        if ($loyalty === null) {
-          return true;
-        }
-        return $card['loyalty'] === $loyalty;
+      $courtCards = array_filter($player->getCourtCards(), function ($card) use ($data) {
+        return $this->isValidCardForDiscardFilter($card, $data);
       });
       $availableCards += count($courtCards);
     }
@@ -126,7 +135,7 @@ trait DiscardTrait
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
     }
   }
@@ -159,7 +168,7 @@ trait DiscardTrait
     // 1. Player has no cards of type, so next action can be resolved
     if (count($cardsToDiscard) === 0) {
       array_pop($actionStack);
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
@@ -168,29 +177,21 @@ trait DiscardTrait
     });
     // Transition to discard step where player needs to select patriots
     if ($hasCardsWithLeverage) {
-      $actionStack[] = [
-        'action' => DISPATCH_DISCARD,
-        'playerId' => $playerId,
-        'data' => array_merge($data, ['from' => [COURT]])
-      ];
-      Globals::setActionStack($actionStack);
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, array_merge($data, ['from' => [COURT]]));
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
     // 3. Discard all patriots
     array_pop($actionStack);
     foreach ($cardsToDiscard as $index => $card) {
-      $actionStack[] = [
-        'action' => 'discardSingleCard',
-        'playerId' => $playerId,
-        'data' => [
-          'cardId' => $card['id'],
-          'from' => COURT,
-          'to' => DISCARD
-        ],
-      ];
+      $actionStack[] = ActionStack::createAction('discardSingleCard', $playerId, [
+        'cardId' => $card['id'],
+        'from' => COURT,
+        'to' => DISCARD
+      ]);
     }
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -252,17 +253,13 @@ trait DiscardTrait
     Notifications::additionalDiscardsForDiscardingLeveragedCard($player, $additionalDiscards);
     // Add actions to action stack in case additional cards need to be discarded
     for ($i = $additionalDiscards; $i > 0; $i--) {
-      $this->pushActionsToActionStack(
+      ActionStack::push(ActionStack::createAction(
+        DISPATCH_DISCARD,
+        $player->getId(),
         [
-          [
-            'action' => DISPATCH_DISCARD,
-            'playerId' => $player->getId(),
-            'data' => [
-              'from' => [COURT, HAND]
-            ]
-          ]
+          'from' => [COURT, HAND]
         ]
-      );
+      ));
     }
   }
 

@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -66,34 +67,20 @@ trait PlayCardTrait
     // $this->resolvePlayCard($playerId, $cardId, $side);
     $actionStack =
       [
-        [
-          'action' => 'playerActions',
-          'playerId' => $playerId,
-          'data' => [],
-        ],
-        [
-          'action' => 'resolveImpactIcons',
-          'playerId' => $playerId,
-          'data' => [
-            'cardId' => $cardId
-          ],
-        ]
+        ActionStack::createAction('playerActions', $playerId, []),
+        ActionStack::createAction('resolveImpactIcons', $playerId, ['cardId' => $cardId]),
       ];
     $cardLoyalty = $card['loyalty'];
     if ($cardLoyalty !== null && $this->checkLoyaltyChange($player, $cardLoyalty)) {
       $actionStack = array_merge($actionStack, $this->getLoyaltyChangeActions($player->getId(), $cardLoyalty));
     };
 
-    $actionStack[] = [
-      'action' => 'playCard',
-      'playerId' => $playerId,
-      'data' => [
-        'cardId' => $cardId,
-        'side' => $side,
-      ],
-    ];
+    $actionStack[] = ActionStack::createAction('playCard', $playerId, [
+      'cardId' => $cardId,
+      'side' => $side,
+    ]);
     Notifications::log('stack', $actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -108,7 +95,7 @@ trait PlayCardTrait
   function dispatchPlayCard($actionStack)
   {
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $playerId = $action['playerId'];
     $cardId = $action['data']['cardId'];

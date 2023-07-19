@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -38,8 +39,9 @@ trait DebugTrait
 
   function test()
   {
-    // Cards::move('card_113','discard');
-   
+    // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
+    // Cards::move('card_114','market_0_0');
+
     // $this->dispatchRefillMarketDrawCards([]);
 
     // Notifications::log('getInLocation',Cards::getOfTypeInLocation('card','market'));
@@ -48,8 +50,8 @@ trait DebugTrait
     // $this->debugAddCardToHand('card_3');
     // $this->debugAddCardToHand('card_4');
 
-    Notifications::log('actions', Globals::getActionStack());
-    // Globals::setActionStack([]);
+    Notifications::log('actions', ActionStack::get());
+    // ActionStack::set([]);
     // $this->nextState('playerActions');
     // $this->pushActionsToActionStack([
     //   [
@@ -65,8 +67,8 @@ trait DebugTrait
     //     ],
     //   ],
     // ]);
-    // Notifications::log('actionStack', Globals::getActionStack());
-    // $actionStack = Globals::getActionStack();
+    // Notifications::log('actionStack', ActionStack::get());
+    // $actionStack = ActionStack::get();
     // Notifications::log('actionStack before', $actionStack);
     // $action = array_pop($actionStack);
     // Notifications::log('action', $action);

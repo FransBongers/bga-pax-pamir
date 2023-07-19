@@ -36,6 +36,7 @@ require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Market;

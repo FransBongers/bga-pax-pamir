@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -34,7 +35,7 @@ trait ChangeLoyaltyTrait
   function dispatchChangeLoyalty($actionStack)
   {
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $playerId = $action['playerId'];
     $coalition = $action['data']['coalition'];
@@ -68,7 +69,7 @@ trait ChangeLoyaltyTrait
     // 1. Player has no patriots, so next action can be resolved
     if (count($patriotsToDiscard) === 0) {
       array_pop($actionStack);
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
@@ -77,32 +78,24 @@ trait ChangeLoyaltyTrait
     });
     // Transition to discard step where player needs to select patriots
     if ($hasPatriotWithLeverage) {
-      $actionStack[] = [
-        'action' => DISPATCH_DISCARD,
-        'playerId' => $playerId,
-        'data' => [
-          'from' => [COURT],
-          'loyalty' => $loyalty,
-        ]
-      ];
-      Globals::setActionStack($actionStack);
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
+        'from' => [COURT],
+        'loyalty' => $loyalty,
+      ]);
+      ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
     // 3. Discard all patriots
     array_pop($actionStack);
     foreach ($patriotsToDiscard as $index => $patriot) {
-      $actionStack[] = [
-        'action' => 'discardSingleCard',
-        'playerId' => $playerId,
-        'data' => [
-          'cardId' => $patriot['id'],
-          'from' => COURT,
-          'to' => DISCARD
-        ],
-      ];
+      $actionStack[] = ActionStack::createAction('discardSingleCard', $playerId, [
+        'cardId' => $patriot['id'],
+        'from' => COURT,
+        'to' => DISCARD
+      ]);
     }
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -120,27 +113,15 @@ trait ChangeLoyaltyTrait
   function getLoyaltyChangeActions($playerId, $coalition)
   {
     return [
-      [
-        'action' => 'changeLoyalty',
-        'playerId' => $playerId,
-        'data' => [
-          'coalition' => $coalition
-        ],
-      ],
-      [
-        'action' => DISPATCH_DISCARD_PATRIOTS,
-        'playerId' => $playerId,
-        'data' => [
-          'coalition' => $coalition
-        ],
-      ],
-      [
-        'action' => 'returnGiftsAndDiscardPrizes',
-        'playerId' => $playerId,
-        'data' => [
-          'coalition' => $coalition
-        ],
-      ],
+      ActionStack::createAction('changeLoyalty', $playerId, [
+        'coalition' => $coalition
+      ]),
+      ActionStack::createAction(DISPATCH_DISCARD_PATRIOTS, $playerId, [
+        'coalition' => $coalition
+      ]),
+      ActionStack::createAction('returnGiftsAndDiscardPrizes', $playerId, [
+        'coalition' => $coalition
+      ]),
     ];
   }
 

@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -39,24 +40,12 @@ trait RefillMarketTrait
   {
     $player = Players::get();
     $playerId = $player->getId();
-    $this->pushActionsToActionStack([
-      [
-        'action' => DISPATCH_TRANSITION,
-        'playerId' => $playerId,
-        'data' => [
-          'transition' => 'nextTurn'
-        ]
-      ],
-      [
-        'action' => DISPATCH_REFILL_MARKET_DRAW_CARDS,
-        'playerId' => $playerId,
-        'data' => [],
-      ],
-      [
-        'action' => DISPATCH_REFILL_MARKET_SHIFT_CARDS,
-        'playerId' => $playerId,
-        'data' => []
-      ]
+    ActionStack::push([
+      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+        'transition' => 'nextTurn'
+      ]),
+      ActionStack::createAction(DISPATCH_REFILL_MARKET_DRAW_CARDS, $playerId, []),
+      ActionStack::createAction(DISPATCH_REFILL_MARKET_SHIFT_CARDS, $playerId, []),
     ]);
     $this->nextState('dispatchAction');
   }
@@ -110,7 +99,7 @@ trait RefillMarketTrait
       Notifications::shiftMarket($cardMoves, $action['playerId']);
     }
 
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -155,7 +144,7 @@ trait RefillMarketTrait
     }
 
     array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -177,18 +166,14 @@ trait RefillMarketTrait
       $from = $card['location'];
       $to = DISCARD;
       Cards::move($card['id'], DISCARD);
-      Notifications::discardEventCardFromMarket($card,$from,$to);
+      Notifications::discardEventCardFromMarket($card, $from, $to);
     }
 
     $this->resolveDominanceCheck(2);
 
-    $actionStack[] =       [
-      'action' => DISPATCH_REFILL_MARKET_SHIFT_CARDS,
-      'playerId' => $playerId,
-      'data' => []
-    ];
+    $actionStack[] = ActionStack::createAction(DISPATCH_REFILL_MARKET_SHIFT_CARDS, $playerId, []);
 
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 

@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -180,22 +181,14 @@ trait PlayerActionBattleTrait
     }
 
     $actions = [
-      [
-        'action' => DISPATCH_TRANSITION,
-        'playerId' => $player->getId(),
-        'data' => [
-          'transition' => 'playerActions'
-        ]
-      ]
+      ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [
+        'transition' => 'playerActions'
+      ])
     ];
     foreach ($playersWithRemovedCylinders as $index => $playerId) {
-      $actions[] = [
-        'action' => DISPATCH_OVERTHROW_TRIBE,
-        'playerId' => $playerId,
-        'data' => [
-          'region' => $location
-        ]
-      ];
+      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [
+        'region' => $location
+      ]);
     }
     $this->pushActionsToActionStack($actions);
     $this->nextState('dispatchAction');

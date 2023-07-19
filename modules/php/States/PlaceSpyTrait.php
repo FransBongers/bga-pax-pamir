@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
@@ -24,7 +25,7 @@ trait PlaceSpyTrait
 
   function argPlaceSpy()
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     $action = $actionStack[count($actionStack) - 1];
 
     $card = Cards::get($action['data']['cardId']);
@@ -70,11 +71,11 @@ trait PlaceSpyTrait
       $playerId = self::getActivePlayerId();
       $this->resolvePlaceSpy($cardId, $playerId);
     } else {
-      $actionStack = Globals::getActionStack();
+      $actionStack = ActionStack::get();
       $action = array_pop($actionStack);
-      Globals::setActionStack($actionStack);
+      ActionStack::set($actionStack);
 
-      if ($action['action'] !== DISPATCH_IMPACT_ICON_SPY) {
+      if ($action['type'] !== DISPATCH_IMPACT_ICON_SPY) {
         throw new \feException("Not a valid action");
       };
       $playerId = $action['playerId'];

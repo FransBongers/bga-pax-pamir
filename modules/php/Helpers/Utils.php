@@ -22,6 +22,14 @@ abstract class Utils extends \APP_DbObject
   // .##.....##.##....##..##....##..##.....##....##...
   // .##.....##.##.....##.##.....##.##.....##....##...
 
+  public static function array_is_list(array $arr)
+  {
+    if ($arr === []) {
+      return true;
+    }
+    return array_keys($arr) === range(0, count($arr) - 1);
+  }
+
   public static function filter($data, $filter)
   {
     return array_values(array_filter($data, $filter));
@@ -211,7 +219,7 @@ abstract class Utils extends \APP_DbObject
 
   public static function getPlayerIdForCylinderId($cylinderId)
   {
-    return intval(explode('_',$cylinderId)[1]);
+    return intval(explode('_', $cylinderId)[1]);
   }
 
   // .##.....##....###....##.......####.########.....###....########.####..#######..##....##

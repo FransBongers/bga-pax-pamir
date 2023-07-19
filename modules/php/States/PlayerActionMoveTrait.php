@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -170,22 +171,10 @@ trait PlayerActionMoveTrait
     }
     $playerId = $player->getId();
     $actions = [
-      [
-        'action' => DISPATCH_TRANSITION,
-        'playerId' => $playerId,
-        'data' => [
-          'transition' => 'playerActions'
-        ]
-      ]
+      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [ 'transition' => 'playerActions']),
     ];
     foreach ($regionsThatNeedOverthrowCheck as $index => $region) {
-      $actions[] = [
-        'action' => DISPATCH_OVERTHROW_TRIBE,
-        'playerId' => $playerId,
-        'data' => [
-          'region' => $region
-        ]
-      ];
+      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [ 'region' => $region]);
     }
     $this->pushActionsToActionStack($actions);
     $this->nextState('dispatchAction');

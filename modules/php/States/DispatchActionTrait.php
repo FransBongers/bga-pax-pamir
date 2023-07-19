@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Players;
@@ -32,11 +33,20 @@ trait DispatchActionTrait
 
   function stDispatchAction()
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
-    switch ($next['action']) {
+    switch ($next['type']) {
+      case DISPATCH_CLEANUP_CHECK_COURT:
+        $this->dispatchCleanupCheckCourt($actionStack);
+        break;
+      case DISPATCH_CLEANUP_CHECK_HAND:
+        $this->dispatchCleanupCheckHand($actionStack);
+        break;
+      case DISPATCH_CLEANUP_DISCARD_EVENT:
+        $this->dispatchCleanupDiscardEvent($actionStack);
+        break;
       case DISPATCH_IMPACT_ICON_ARMY:
         $this->dispatchResolveImpactIconArmy($actionStack);
         break;
@@ -133,7 +143,7 @@ trait DispatchActionTrait
   function dispatchAcceptPrizeCheck($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('acceptPrize', $next['playerId']);
   }
 
@@ -141,7 +151,7 @@ trait DispatchActionTrait
   function dispatchCleanup($actionStack)
   {
     $next = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('cleanup', $next['playerId']);
   }
 
@@ -149,7 +159,7 @@ trait DispatchActionTrait
   function dispatchDiscardBetrayedCard($actionStack)
   {
     $current = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $card = Cards::get($current['data']['cardId']);
     $this->resolveDiscardCard(
       $card,
@@ -163,7 +173,7 @@ trait DispatchActionTrait
   function dispatchDiscardSingleCard($actionStack)
   {
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $card = Cards::get($action['data']['cardId']);
     $player = Players::get($action['playerId']);
@@ -178,14 +188,14 @@ trait DispatchActionTrait
   function dispatchPlayerActions($actionStack)
   {
     $next = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('playerActions', $next['playerId']);
   }
 
   function dispatchReturnGiftsAndDiscardPrizes($actionStack)
   {
     $action = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
 
     $this->changeLoyaltyReturnGiftsDiscardPrizes($action);
   }
@@ -193,7 +203,7 @@ trait DispatchActionTrait
   function dispatchTransition($actionStack)
   {
     $next = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState($next['data']['transition'], $next['playerId']);
   }
 
@@ -204,10 +214,10 @@ trait DispatchActionTrait
    */
   function pushActionsToActionStack($actions)
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
 
     $actionStack = array_merge($actionStack, $actions);
 
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
   }
 }

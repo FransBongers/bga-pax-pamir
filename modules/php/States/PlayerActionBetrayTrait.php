@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -26,7 +27,7 @@ trait PlayerActionBetrayTrait
 
   function argAcceptPrize()
   {
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
@@ -55,10 +56,10 @@ trait PlayerActionBetrayTrait
   {
     self::checkAction('acceptPrize');
     Notifications::log('acceptPrize', $accept);
-    $actionStack = Globals::getActionStack();
+    $actionStack = ActionStack::get();
     $current = array_pop($actionStack);
 
-    if ($current['action'] !== 'acceptPrizeCheck') {
+    if ($current['type'] !== 'acceptPrizeCheck') {
       throw new \feException("Not a valid action");
     }
     $cardId = $current['data']['cardId'];
@@ -68,22 +69,19 @@ trait PlayerActionBetrayTrait
 
     if ($accept) {
       Notifications::acceptPrize($cardId, $player);
-      $actionStack[] = [
-        'action' => 'takePrize',
-        'playerId' => $player->getId(),
-        'data' => [
-          'cardId' => $cardId
-        ],
-      ];
-      if ($prize !== null && $this->checkLoyaltyChange($player,$prize)) {
-        $actionStack = array_merge($actionStack,$this->getLoyaltyChangeActions($player->getId(),$prize));
+      $actionStack[] = ActionStack::createAction('takePrize', $player->getId(), [
+        'cardId' => $cardId
+      ],);
+
+      if ($prize !== null && $this->checkLoyaltyChange($player, $prize)) {
+        $actionStack = array_merge($actionStack, $this->getLoyaltyChangeActions($player->getId(), $prize));
       }
     } else {
       Cards::insertOnTop($cardId, Locations::discardPile());
       Notifications::declinePrize($cardId, $player);
     }
 
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
 
@@ -148,33 +146,19 @@ trait PlayerActionBetrayTrait
 
     $actionStack =
       [
-        [
-          'action' => 'playerActions',
-          'playerId' => $playerId,
-          'data' => [],
-        ],
+        ActionStack::createAction('playerActions', $playerId, [])
       ];
 
     if ($betrayedCardInfo['prize'] !== null) {
-      $actionStack[] = [
-        'action' => 'acceptPrizeCheck',
-        'playerId' => $playerId,
-        'data' => [
-          'cardId' => $betrayedCardId,
-        ],
-      ];
+      $actionStack[] = ActionStack::createAction('acceptPrizeCheck', $playerId, ['cardId' => $betrayedCardId,]);
     }
 
-    $actionStack[] =
-      [
-        'action' => 'discardBetrayedCard',
-        'playerId' => $playerId,
-        'data' => [
-          'cardId' => $betrayedCardId,
-          'cardOwnerId' => $betrayedPlayerId,
-        ],
-      ];
-    Globals::setActionStack($actionStack);
+    $actionStack[] = ActionStack::createAction('discardBetrayedCard', $playerId, [
+      'cardId' => $betrayedCardId,
+      'cardOwnerId' => $betrayedPlayerId,
+    ]);
+
+    ActionStack::set($actionStack);
 
     $this->nextState('dispatchAction');
   }
@@ -191,7 +175,7 @@ trait PlayerActionBetrayTrait
   function dispatchTakePrize($actionStack)
   {
     $current = array_pop($actionStack);
-    Globals::setActionStack($actionStack);
+    ActionStack::set($actionStack);
     $cardId = $current['data']['cardId'];
     $playerId = $current['playerId'];
 
@@ -200,5 +184,4 @@ trait PlayerActionBetrayTrait
 
     $this->nextState('dispatchAction');
   }
-
 }

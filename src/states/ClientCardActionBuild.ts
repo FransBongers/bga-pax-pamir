@@ -14,13 +14,10 @@ class ClientCardActionBuildState implements State {
 
   onEnteringState(props: ClientCardActionStateArgs) {
     this.cardId = props?.cardId ? props.cardId : null;
-    this.bribe = props.bribe;
+    this.bribe = props?.bribe;
     this.tempTokens = [];
-    const player = this.game.getCurrentPlayer();
-    const playerRupees = player.getRupees();
-    this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
-    const multiplier = this.playerHasNationBuilding ? 2 : 1;
-    this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor((playerRupees - this.bribe?.amount || 0) / 2), 3) * multiplier;
+    this.setMaxNumberToPlace();
+    console.log('maxNumberToPlace', this.maxNumberToPlace);
     this.updateInterfaceInitialStep();
   }
 
@@ -50,12 +47,11 @@ class ClientCardActionBuildState implements State {
     this.updatePageTitle();
     this.setLocationsSelectable();
     this.updateActionButtons();
-
   }
 
   private updateInterfaceConfirm() {
     this.game.clearPossible();
-    const amount = this.isSpecialAbilityInfrastructure ? 0 :  Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
+    const amount = this.isSpecialAbilityInfrastructure ? 0 : Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
     this.game.clientUpdatePageTitle({
       text: _('Place x for a cost of ${amount} rupees?'),
       args: {
@@ -116,6 +112,7 @@ class ClientCardActionBuildState implements State {
         type: 'road',
       });
     }
+    console.log('tempTokens', this.tempTokens);
     this.updatePageTitle();
     this.updateActionButtons();
   }
@@ -129,8 +126,8 @@ class ClientCardActionBuildState implements State {
     debug('handleConfirm');
     if (this.tempTokens.length > 0) {
       this.game.takeAction({
-        action: 'build',
-        data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: this.bribe?.amount ?? null, },
+        action: this.isSpecialAbilityInfrastructure ? 'specialAbilityInfrastructure' : 'build',
+        data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: this.bribe?.amount ?? null },
       });
       this.clearTemporaryTokens();
     }
@@ -143,6 +140,22 @@ class ClientCardActionBuildState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private setMaxNumberToPlace() {
+    const player = this.game.getCurrentPlayer();
+    if (this.isSpecialAbilityInfrastructure) {
+      this.maxNumberToPlace = 1;
+      return;
+    }
+
+    const playerRupees = player.getRupees();
+    this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
+    const multiplier = this.playerHasNationBuilding ? 2 : 1;
+    console.log('multiplier', multiplier);
+    const bribe = this.bribe?.amount || 0;
+    const maxAffordable = Math.floor((playerRupees - bribe) / 2);
+    this.maxNumberToPlace = Math.min(maxAffordable, 3) * multiplier;
+  }
 
   public clearTemporaryTokens() {
     debug('inside clearTemporaryTokens');
@@ -224,7 +237,7 @@ class ClientCardActionBuildState implements State {
       this.game.addDangerActionButton({
         id: 'skip_btn',
         text: _('Skip'),
-        callback: () => this.game.takeAction({ action: 'skipSpecialAbility' }),
+        callback: () => this.game.takeAction({ action: 'specialAbilityInfrastructure', data: { skip: true } }),
       });
     } else if (this.bribe?.negotiated && this.tempTokens.length === 0) {
       this.game.addDangerActionButton({

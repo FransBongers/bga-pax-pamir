@@ -149,7 +149,6 @@ $machinestates = array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "dispatchAction" => STATE_DISPATCH_ACTION,
             "resolveEvent" => STATE_RESOLVE_EVENT,
-            "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "cleanup" => STATE_CLEANUP,
@@ -234,6 +233,7 @@ $machinestates = array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "refillMarket" => STATE_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
+            "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
         )
     ),
 
@@ -320,9 +320,10 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} may place one additional block with Infrastructure'),
         "descriptionmyturn" => clienttranslate('${you}'),
         "type" => "activeplayer",
-        "possibleactions" => ["build", "skipSpecialAbility"],
+        "possibleactions" => ["specialAbilityInfrastructure"],
         "transitions" => [
-            "playerActions" => STATE_PLAYER_ACTIONS,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "playerActions" => STATE_PLAYER_ACTIONS,
         ]
     ],
 

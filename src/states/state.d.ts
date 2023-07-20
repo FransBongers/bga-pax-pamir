@@ -6,7 +6,7 @@ interface State {
 type BribeArgs = {
   amount: number;
   negotiated?: boolean;
-} | null;
+} | null | undefined;
 
 interface ClientPlayCardStateArgs {
   cardId: string;
@@ -92,7 +92,7 @@ interface OnEnteringPlaceRoadArgs {
     name: string;
     borders: string[];
   };
-  selectedPiece: string | null;
+  // selectedPiece: string | null;
 }
 
 interface OnEnteringSelectPieceArgs {

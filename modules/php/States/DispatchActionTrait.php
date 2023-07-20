@@ -69,9 +69,6 @@ trait DispatchActionTrait
       case DISPATCH_EVENT_RESOLVE_PURCHASED:
         Events::dispatchResolvePurchasedEffect($actionStack);
         break;
-      // case DISPATCH_IMPACT_ICON_ARMY:
-      //   $this->dispatchResolveImpactIconArmy($actionStack);
-      //   break;
       case DISPATCH_IMPACT_ICON_ECONOMIC:
         $this->dispatchResolveImpactIconEconomic($actionStack);
         break;
@@ -101,6 +98,9 @@ trait DispatchActionTrait
         break;
       case DISPATCH_PLACE_ARMY:
         $this->dispatchPlaceArmy($actionStack);
+        break;
+      case DISPATCH_PLACE_ROAD:
+        $this->dispatchPlaceRoad($actionStack);
         break;
       case DISPATCH_REFILL_MARKET_DRAW_CARDS:
         $this->dispatchRefillMarketDrawCards($actionStack);

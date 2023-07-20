@@ -2401,15 +2401,11 @@ var ClientCardActionBuildState = (function () {
         this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
     }
     ClientCardActionBuildState.prototype.onEnteringState = function (props) {
-        var _a;
         this.cardId = (props === null || props === void 0 ? void 0 : props.cardId) ? props.cardId : null;
-        this.bribe = props.bribe;
+        this.bribe = props === null || props === void 0 ? void 0 : props.bribe;
         this.tempTokens = [];
-        var player = this.game.getCurrentPlayer();
-        var playerRupees = player.getRupees();
-        this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
-        var multiplier = this.playerHasNationBuilding ? 2 : 1;
-        this.maxNumberToPlace = this.isSpecialAbilityInfrastructure ? 1 : Math.min(Math.floor((playerRupees - ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0) / 2), 3) * multiplier;
+        this.setMaxNumberToPlace();
+        console.log('maxNumberToPlace', this.maxNumberToPlace);
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
@@ -2467,6 +2463,7 @@ var ClientCardActionBuildState = (function () {
                 type: 'road',
             });
         }
+        console.log('tempTokens', this.tempTokens);
         this.updatePageTitle();
         this.updateActionButtons();
     };
@@ -2479,11 +2476,26 @@ var ClientCardActionBuildState = (function () {
         debug('handleConfirm');
         if (this.tempTokens.length > 0) {
             this.game.takeAction({
-                action: 'build',
-                data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null, },
+                action: this.isSpecialAbilityInfrastructure ? 'specialAbilityInfrastructure' : 'build',
+                data: { cardId: this.cardId || undefined, locations: JSON.stringify(this.tempTokens), bribeAmount: (_b = (_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null },
             });
             this.clearTemporaryTokens();
         }
+    };
+    ClientCardActionBuildState.prototype.setMaxNumberToPlace = function () {
+        var _a;
+        var player = this.game.getCurrentPlayer();
+        if (this.isSpecialAbilityInfrastructure) {
+            this.maxNumberToPlace = 1;
+            return;
+        }
+        var playerRupees = player.getRupees();
+        this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
+        var multiplier = this.playerHasNationBuilding ? 2 : 1;
+        console.log('multiplier', multiplier);
+        var bribe = ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0;
+        var maxAffordable = Math.floor((playerRupees - bribe) / 2);
+        this.maxNumberToPlace = Math.min(maxAffordable, 3) * multiplier;
     };
     ClientCardActionBuildState.prototype.clearTemporaryTokens = function () {
         var _this = this;
@@ -2561,7 +2573,7 @@ var ClientCardActionBuildState = (function () {
             this.game.addDangerActionButton({
                 id: 'skip_btn',
                 text: _('Skip'),
-                callback: function () { return _this.game.takeAction({ action: 'skipSpecialAbility' }); },
+                callback: function () { return _this.game.takeAction({ action: 'specialAbilityInfrastructure', data: { skip: true } }); },
             });
         }
         else if (((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.negotiated) && this.tempTokens.length === 0) {
@@ -4158,8 +4170,7 @@ var PlaceRoadState = (function () {
         this.game = game;
     }
     PlaceRoadState.prototype.onEnteringState = function (_a) {
-        var region = _a.region, selectedPiece = _a.selectedPiece;
-        this.selectedPiece = selectedPiece;
+        var region = _a.region;
         this.updateInterfaceInitialStep({ borders: region.borders });
     };
     PlaceRoadState.prototype.onLeavingState = function () { };
@@ -4167,9 +4178,6 @@ var PlaceRoadState = (function () {
         var _this = this;
         var borders = _a.borders;
         this.game.clearPossible();
-        if (this.selectedPiece) {
-            this.setPieceSelected();
-        }
         borders.forEach(function (border) {
             _this.game.addPrimaryActionButton({
                 id: "".concat(border, "_btn"),
@@ -4180,12 +4188,6 @@ var PlaceRoadState = (function () {
                 },
             });
         });
-    };
-    PlaceRoadState.prototype.setPieceSelected = function () {
-        var node = dojo.byId(this.selectedPiece);
-        if (node) {
-            dojo.addClass(node, PP_SELECTED);
-        }
     };
     return PlaceRoadState;
 }());

@@ -147,28 +147,6 @@ trait ResolveImpactIconsTrait
     ActionStack::next($actionStack);
   }
 
-  // function dispatchResolveImpactIconArmy($actionStack)
-  // {
-  //   $action = $actionStack[count($actionStack) - 1];
-  //   // $action = array_pop($actionStack);
-  //   // ActionStack::set($actionStack);
-  //   $playerId = $action['playerId'];
-  //   $cardId = $action['data']['cardId'];
-  //   $region = Cards::get($cardId)['region'];
-  //   $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
-
-  //   $armyPlaced = $this->resolvePlaceArmy($region, $selectedPiece);
-  //   if ($armyPlaced) {
-  //     array_pop($actionStack);
-
-  //     ActionStack::set($actionStack);
-  //     $this->nextState('dispatchAction');
-  //   } else {
-  //     // No army available in supply, player needs to select
-  //     $this->nextState('selectPiece', $playerId);
-  //   }
-  // }
-
   function dispatchResolveImpactIconEconomic($actionStack)
   {
     array_pop($actionStack);
@@ -224,14 +202,14 @@ trait ResolveImpactIconsTrait
 
   function dispatchResolveImpactIconRoad($actionStack)
   {
-    $action = $actionStack[count($actionStack) - 1];
+    // $action = $actionStack[count($actionStack) - 1];
 
-    if ($this->isBlockAvailableForAction($action)) {
-      $this->gamestate->nextState('placeRoad');
-    } else {
-      $playerId = $action['playerId'];
-      $this->nextState('selectPiece', $playerId);
-    }
+    // if ($this->isBlockAvailableForAction($action)) {
+    $this->nextState('placeRoad');
+    // } else {
+    //   $playerId = $action['playerId'];
+    //   $this->nextState('selectPiece', $playerId);
+    // }
   }
 
   function dispatchResolveImpactIconSpy($actionStack)

@@ -117,10 +117,23 @@ class action_paxpamireditiontwo extends APP_GameAction
     {
         self::setAjaxMode();
         $locations = self::getArg("locations", AT_json, true);
-        $cardId = self::getArg("cardId", AT_alphanum, false);
+        $cardId = self::getArg("cardId", AT_alphanum, true);
         $bribeAmount = self::getArg("bribeAmount", AT_alphanum, false);
         Utils::validateJSonAlphaNum($locations, 'locations');
         $result = $this->game->build($locations, $cardId,$bribeAmount);
+        self::ajaxResponse();
+    }
+
+    public function specialAbilityInfrastructure()
+    {
+        self::setAjaxMode();
+        $locations = self::getArg("locations", AT_json, false);
+        $skip = self::getArg("skip", AT_bool, false);
+        if ($locations !== null) {
+            Utils::validateJSonAlphaNum($locations, 'locations');
+        }
+        $skip = $skip === null ? false : $skip;
+        $result = $this->game->specialAbilityInfrastructure($skip, $locations);
         self::ajaxResponse();
     }
 

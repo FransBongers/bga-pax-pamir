@@ -1,13 +1,11 @@
 class PlaceRoadState implements State {
   private game: PaxPamirGame;
-  private selectedPiece: string | null;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ region, selectedPiece }: OnEnteringPlaceRoadArgs) {
-    this.selectedPiece = selectedPiece;
+  onEnteringState({ region }: OnEnteringPlaceRoadArgs) {
     this.updateInterfaceInitialStep({ borders: region.borders });
   }
 
@@ -31,9 +29,6 @@ class PlaceRoadState implements State {
 
   private updateInterfaceInitialStep({ borders }: { borders: string[] }) {
     this.game.clearPossible();
-    if (this.selectedPiece) {
-      this.setPieceSelected();
-    }
 
     borders.forEach((border) => {
       this.game.addPrimaryActionButton({
@@ -54,11 +49,4 @@ class PlaceRoadState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
-
-  private setPieceSelected() {
-    const node = dojo.byId(this.selectedPiece);
-    if (node) {
-      dojo.addClass(node, PP_SELECTED);
-    }
-  }
 }

@@ -57,7 +57,7 @@ trait ResolveImpactIconsTrait
       return;
     }
 
-    // CHECK: we could add state to check ruler change instead of after each single icon
+    // CHECK: we could add action to stack to check ruler change instead of after each single icon
 
     $impactIcons = array_reverse($card['impactIcons']);
     foreach ($impactIcons as $index => $icon) {
@@ -65,7 +65,8 @@ trait ResolveImpactIconsTrait
         IMPACT_ICON_DISPATCH_MAP[$icon],
         $playerId,
         [
-          'cardId' => $cardId
+          'cardId' => $cardId,
+          'region' => $card['region'],
         ]
       );
     }
@@ -90,27 +91,83 @@ trait ResolveImpactIconsTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function dispatchResolveImpactIconArmy($actionStack)
+  // NOTE: might be a better place to put this instead of with impact icons?
+  function dispatchPlaceArmy($actionStack)
   {
     $action = $actionStack[count($actionStack) - 1];
-    // $action = array_pop($actionStack);
-    // ActionStack::set($actionStack);
+
     $playerId = $action['playerId'];
-    $cardId = $action['data']['cardId'];
-    $region = Cards::get($cardId)['region'];
+    $player = Players::get($playerId);
+    $loyalty = $player->getLoyalty();
+
+    $regionId = $action['data']['region'];
+    $pool = $this->locations['pools'][$loyalty];
+
     $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+    $army = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($pool);
 
-    $armyPlaced = $this->resolvePlaceArmy($region, $selectedPiece);
-    if ($armyPlaced) {
-      array_pop($actionStack);
-
-      ActionStack::set($actionStack);
-      $this->nextState('dispatchAction');
-    } else {
-      // No army available in supply, player needs to select
+    // There is no army in the pool. Player needs to select piece
+    if ($army === null) {
       $this->nextState('selectPiece', $playerId);
+      return;
     }
+
+    $to = $this->locations['armies'][$regionId];
+    $from = $army['location'];
+
+    Tokens::move($army['id'], $this->locations['armies'][$regionId]);
+    Tokens::setUsed($army['id'], USED);
+
+    // TODO: (add from log in case it was a selected pieces)
+    $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+    Notifications::moveToken($message, [
+      'player' => $player,
+      'logTokenArmy' => Utils::logTokenArmy($loyalty),
+      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $army['id'],
+        ]
+      ],
+    ]);
+
+    if ($selectedPiece !== null) {
+      $fromRegionId = explode('_', $from)[1];
+      $isArmy = Utils::startsWith($from, 'armies');
+
+      if ($isArmy && $fromRegionId !== $regionId) {
+        Map::checkRulerChange($fromRegionId);
+      }
+    }
+    Map::checkRulerChange($regionId);
+
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
   }
+
+  // function dispatchResolveImpactIconArmy($actionStack)
+  // {
+  //   $action = $actionStack[count($actionStack) - 1];
+  //   // $action = array_pop($actionStack);
+  //   // ActionStack::set($actionStack);
+  //   $playerId = $action['playerId'];
+  //   $cardId = $action['data']['cardId'];
+  //   $region = Cards::get($cardId)['region'];
+  //   $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+
+  //   $armyPlaced = $this->resolvePlaceArmy($region, $selectedPiece);
+  //   if ($armyPlaced) {
+  //     array_pop($actionStack);
+
+  //     ActionStack::set($actionStack);
+  //     $this->nextState('dispatchAction');
+  //   } else {
+  //     // No army available in supply, player needs to select
+  //     $this->nextState('selectPiece', $playerId);
+  //   }
+  // }
 
   function dispatchResolveImpactIconEconomic($actionStack)
   {

@@ -188,7 +188,17 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
   const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';
 
-  const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
+  const DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES = 'dispDominanceAfterAbilities';
+  const DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY = 'dispDominanceCheckDiscardEventsInPlay';
+  const DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK = 'dispDominanceCheckEndGameCheck';
+  const DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS = 'dispDominanceRemoveBlocks';
+  const DISPATCH_DOMINANCE_CHECK_RESOLVE = 'dispDominanceCheckResolve';
+  const DISPATCH_DOMINANCE_CHECK_SETUP = 'dispDominanceCheckSetup';
+
+  const DISPATCH_EVENT_RESOLVE_PURCHASED = 'dispEventResolvePurchased';
+  const DISPATCH_EVENT_RESOLVE_PLAYER_ACTION = 'dispEventResolvePlayerAction';
+
+  // const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
   const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';
   const DISPATCH_IMPACT_ICON_INTELLIGENCE = 'dispatchImpactIntelligence';
   const DISPATCH_IMPACT_ICON_MILITARY = 'dispatchImpactMilitary';
@@ -197,14 +207,20 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
   const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
   const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
+
+  const DISPATCH_PLACE_ARMY = 'distPlaceArmy';
+  const DISPATCH_PLACE_ROAD = 'dispPlaceRoad';
+  const DISPATCH_PLACE_SPY = 'dispPlaceSpy';
+  const DISPATCH_PLACE_TRIBE = 'dispPlaceTribe';
   
   const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
   const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
   const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
+  
   const DISPATCH_TRANSITION = 'dispatchTransition';
 
   const IMPACT_ICON_DISPATCH_MAP = [
-    ARMY => DISPATCH_IMPACT_ICON_ARMY,
+    ARMY => DISPATCH_PLACE_ARMY,
     ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,
     INTELLIGENCE_SUIT => DISPATCH_IMPACT_ICON_INTELLIGENCE,
     MILITARY_SUIT => DISPATCH_IMPACT_ICON_MILITARY,

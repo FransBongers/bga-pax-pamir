@@ -158,23 +158,25 @@ trait RefillMarketTrait
 
   function handleInstability($dominanceCheckCards, $actionStack)
   {
-    Notifications::message(clienttranslate('Instability'));
+    Notifications::message(clienttranslate('Second Dominance Check card in the market: Instability'));
     $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
 
+    $cards = [];
     foreach ($dominanceCheckCards as $index => $card) {
+      $cards[] = $card['id'];
       $from = $card['location'];
       $to = DISCARD;
       Cards::move($card['id'], DISCARD);
       Notifications::discardEventCardFromMarket($card, $from, $to);
     }
 
-    $this->resolveDominanceCheck(2);
-
     $actionStack[] = ActionStack::createAction(DISPATCH_REFILL_MARKET_SHIFT_CARDS, $playerId, []);
+    $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+      'cards' => $cards,
+    ]);
 
-    ActionStack::set($actionStack);
-    $this->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   function isDominanceCheck($card)

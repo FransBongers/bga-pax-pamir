@@ -258,6 +258,13 @@ class Notifications
     ));
   }
 
+  public static function insurrection($player)
+  {
+    self::notifyAll("insurrectionSpecialAbility", clienttranslate('${player_name} uses Insurrection special ability'), [
+      'player' => $player,
+    ]);
+  }
+
   public static function moveCard($message, $messageArgs, $action, $moves)
   {
     self::notifyAll(

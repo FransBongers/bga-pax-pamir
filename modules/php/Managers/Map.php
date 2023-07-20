@@ -87,13 +87,14 @@ class Map
     return null;
   }
 
-  public static function getPlayerTribesInRegion($region,$player) {
+  public static function getPlayerTribesInRegion($region, $player)
+  {
     $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
     $playerId = $player->getId();
-    $playerTribes = Utils::filter($tribes,function ($cylinder) use ($playerId) {
+    $playerTribes = Utils::filter($tribes, function ($cylinder) use ($playerId) {
       return Utils::getPlayerIdForCylinderId($cylinder['id']) === $playerId;
     });
-    Notifications::log('playerTribes',$playerTribes);
+    Notifications::log('playerTribes', $playerTribes);
     return $playerTribes;
   }
 
@@ -123,16 +124,17 @@ class Map
    * Moves all armies in region to supply. Returns array of moves
    * that can be used for notification
    */
-  public static function removeArmiesFromRegion($regionId) {
+  public static function removeArmiesFromRegion($regionId)
+  {
     $moves = [];
-    $from = "armies_".$regionId;
+    $from = "armies_" . $regionId;
     $armies = Tokens::getInLocation($from)->toArray();
-    foreach($armies as $index => $army) {
-      
+    foreach ($armies as $index => $army) {
+
       $tokenId = $army['id'];
-      $coalition = explode('_',$tokenId)[1];
-      $to = 'blocks_'.$coalition;
-      $weight = Tokens::insertOnTop($tokenId,$to);
+      $coalition = explode('_', $tokenId)[1];
+      $to = 'blocks_' . $coalition;
+      $weight = Tokens::insertOnTop($tokenId, $to);
       $moves[] =  [
         'from' => $from,
         'to' => $to,
@@ -140,24 +142,44 @@ class Map
         'weight' => $weight,
       ];
     }
-    Notifications::log('moves',$moves);
+    Notifications::log('moves', $moves);
     return $moves;
   }
 
-    /**
+  public static function removeAllBlocksForCoalition($coalition)
+  {
+    $moves = [];
+    // return all coalition blocks to their pools
+    $coalitionBlocks = Tokens::getOfType('block_' . $coalition);
+    foreach ($coalitionBlocks as $index => $tokenInfo) {
+      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
+        $weight = Tokens::insertOnTop($tokenInfo['id'], 'blocks_' . $coalition);
+        $moves[] = array(
+          'tokenId' => $tokenInfo['id'],
+          'from' => $tokenInfo['location'],
+          'to' => 'blocks_' . $coalition,
+          'weight' => $weight
+        );
+      };
+    };
+    return $moves;
+  }
+
+  /**
    * Moves all armies in region to supply. Returns array of moves
    * that can be used for notification
    */
-  public static function removeTribesFromRegion($regionId) {
+  public static function removeTribesFromRegion($regionId)
+  {
     $moves = [];
-    $from = "tribes_".$regionId;
+    $from = "tribes_" . $regionId;
     $tribes = Tokens::getInLocation($from)->toArray();
-    foreach($tribes as $index => $tribe) {
-      
+    foreach ($tribes as $index => $tribe) {
+
       $tokenId = $tribe['id'];
-      $playerId = explode('_',$tokenId)[1];
-      $to = 'cylinders_'.$playerId;
-      $weight = Tokens::insertOnTop($tokenId,$to);
+      $playerId = explode('_', $tokenId)[1];
+      $to = 'cylinders_' . $playerId;
+      $weight = Tokens::insertOnTop($tokenId, $to);
       $moves[] =  [
         'from' => $from,
         'to' => $to,
@@ -165,7 +187,7 @@ class Map
         'weight' => $weight,
       ];
     }
-    Notifications::log('moves',$moves);
+    Notifications::log('moves', $moves);
     return $moves;
   }
 }

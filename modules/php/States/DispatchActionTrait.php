@@ -31,9 +31,10 @@ trait DispatchActionTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function stDispatchAction()
+  function stDispatchAction($actionStack = null)
   {
-    $actionStack = ActionStack::get();
+    // $actionStack = ActionStack::get();
+    $actionStack = $actionStack === null ? ActionStack::get() : $actionStack;
     Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
@@ -47,9 +48,30 @@ trait DispatchActionTrait
       case DISPATCH_CLEANUP_DISCARD_EVENT:
         $this->dispatchCleanupDiscardEvent($actionStack);
         break;
-      case DISPATCH_IMPACT_ICON_ARMY:
-        $this->dispatchResolveImpactIconArmy($actionStack);
+      case DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES:
+        $this->dispatchDominanceCheckAfterAbilities($actionStack);
         break;
+      case DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY:
+        $this->dispatchDominanceCheckDiscardEventInPlay($actionStack);
+        break;
+      case DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK:
+        $this->dispatchDominanceCheckEndGameCheck($actionStack);
+        break;
+      case DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS:
+        $this->dispatchDominanceCheckRemoveCoalitionBlocks($actionStack);
+        break;
+      case DISPATCH_DOMINANCE_CHECK_RESOLVE:
+        $this->dispatchDominanceCheckResolve($actionStack);
+        break;
+      case DISPATCH_DOMINANCE_CHECK_SETUP:
+        $this->dispatchDominanceCheckSetup($actionStack);
+        break;
+      case DISPATCH_EVENT_RESOLVE_PURCHASED:
+        Events::dispatchResolvePurchasedEffect($actionStack);
+        break;
+      // case DISPATCH_IMPACT_ICON_ARMY:
+      //   $this->dispatchResolveImpactIconArmy($actionStack);
+      //   break;
       case DISPATCH_IMPACT_ICON_ECONOMIC:
         $this->dispatchResolveImpactIconEconomic($actionStack);
         break;
@@ -76,6 +98,9 @@ trait DispatchActionTrait
         break;
       case DISPATCH_OVERTHROW_TRIBE:
         $this->dispatchOverthrowTribe($actionStack);
+        break;
+      case DISPATCH_PLACE_ARMY:
+        $this->dispatchPlaceArmy($actionStack);
         break;
       case DISPATCH_REFILL_MARKET_DRAW_CARDS:
         $this->dispatchRefillMarketDrawCards($actionStack);
@@ -126,7 +151,7 @@ trait DispatchActionTrait
         $this->dispatchTakePrize($actionStack);
         break;
       default:
-        Notifications::log('---CHECK THIS---',$next);
+        Notifications::log('---CHECK THIS---', $next);
         $this->nextState('playerActions');
     }
   }

@@ -132,6 +132,7 @@ trait DiscardTrait
     // If cards available transition to discard state
     // otherwise cancel action and continue to next action
     if ($availableCards > 0) {
+      // ActionStack::set($actionStack);
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);

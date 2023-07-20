@@ -14,6 +14,81 @@ use PaxPamir\Managers\Tokens;
 
 class Events
 {
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  public static function dispatchResolvePurchasedEffect($actionStack)
+  {
+    $action = array_pop($actionStack);
+    $event = $action['data']['event'];
+    $playerId = $action['playerId'];
+
+    switch ($event) {
+      case ECE_DOMINANCE_CHECK:
+        $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+          'cards' => [$action['data']['cardId']],
+        ]);
+        break;
+      case ECE_KOH_I_NOOR_RECOVERED: // card_106
+        // TODO: update player cylinder counrt
+        break;
+      case ECE_RUMOR: // card_108
+        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
+          'event' => ECE_RUMOR,
+        ]);
+        // Events::setCurrentEventGlobalState(ECE_RUMOR);
+        // Game::get()->nextState("resolveEvent");
+        break;
+      case ECE_BACKING_OF_PERSIAN_ARISTOCRACY: // card_113
+        Events::backingOfPersianAristocracy($playerId);
+        break;
+      case ECE_OTHER_PERSUASIVE_METHODS: // card_114
+        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
+          'event' => ECE_OTHER_PERSUASIVE_METHODS,
+        ]);
+        // Events::setCurrentEventGlobalState(ECE_OTHER_PERSUASIVE_METHODS);
+        // Game::get()->nextState("resolveEvent");
+        break;
+      case ECE_PASHTUNWALI_VALUES: // card_115
+        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
+          'event' => ECE_PASHTUNWALI_VALUES,
+        ]);
+        // Events::setCurrentEventGlobalState(ECE_PASHTUNWALI_VALUES);
+        // Game::get()->nextState("resolveEvent");
+        break;
+      case ECE_REBUKE: // card_116
+        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
+          'event' => ECE_REBUKE,
+        ]);
+        // Events::setCurrentEventGlobalState(ECE_REBUKE);
+        // Game::get()->nextState("resolveEvent");
+        break;
+      case ECE_NEW_TACTICS: // card_105
+      case ECE_COURTLY_MANNERS: // card_107
+      case ECE_CONFLICT_FATIGUE: // card_109
+      case ECE_NATIONALISM: // card_110
+      case ECE_PUBLIC_WITHDRAWAL: // card_111
+
+      default:
+        break;
+    }
+
+    ActionStack::set($actionStack);
+    Game::get()->nextState('dispatchAction');
+  }
 
   // .########.##.....##.########.##....##.########..######.
   // .##.......##.....##.##.......###...##....##....##....##
@@ -23,13 +98,16 @@ class Events
   // .##.........##.##...##.......##...###....##....##....##
   // .########....###....########.##....##....##.....######.
 
-  public static function resolveDiscardEffect($event, $location, $playerId)
+  public static function resolveDiscardEffect($card, $location, $playerId)
   {
+    $event = $card['discarded']['effect'];
     Notifications::log('event', $event);
     switch ($event) {
         // cards 101-104
       case ECE_DOMINANCE_CHECK:
-        Game::get()->resolveDominanceCheck();
+        return [ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+          'cards' => [$card['id']],
+        ])];
         break;
         // card 105
       case ECE_MILITARY_SUIT:
@@ -86,11 +164,13 @@ class Events
     return null;
   }
 
+
+
   // card_113 - purchase
-  public static function backingOfPersianAristocracy()
+  public static function backingOfPersianAristocracy($playerId)
   {
-    $player = Players::get();
-    Players::incRupees($player->getId(), 3);
+    $player = Players::get($playerId);
+    Players::incRupees($playerId, 3);
     Notifications::takeRupeesFromSupply($player, 3);
   }
 

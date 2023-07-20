@@ -69,7 +69,6 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_REFILL_MARKET", 21);
     define("ST_SA_SAFE_HOUSE", 22);
     define("ST_SA_INFRASTRUCTURE", 23);
-    define("STATE_DOMINANCE_CHECK", 30);
     define("ST_ACCEPT_PRIZE", 46);
     define("STATE_NEXT_PLAYER", 50);
     define("STATE_FINAL", 90);
@@ -149,7 +148,6 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            "dominanceCheck" => STATE_DOMINANCE_CHECK,
             "resolveEvent" => STATE_RESOLVE_EVENT,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
@@ -206,19 +204,6 @@ $machinestates = array(
         )
     ),
 
-    STATE_DOMINANCE_CHECK => array(
-        "name" => "dominanceCheck",
-        "type" => "game",
-        "action" => "stDominanceCheck",
-        "updateGameProgression" => false,
-        "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            "endGame" => STATE_END_GAME,
-            // "nextTurn" => STATE_NEXT_PLAYER,
-            // "refillMarket" => STATE_REFILL_MARKET,
-        )
-    ),
-
     STATE_DISCARD => array(
         "name" => "discard",
         "description" => clienttranslate('${actplayer} must discard a card'),
@@ -243,6 +228,7 @@ $machinestates = array(
             "nextTurn" => STATE_NEXT_PLAYER,
             "discard" => STATE_DISCARD,
             "dispatchAction" => STATE_DISPATCH_ACTION,
+            "endGame" => STATE_END_GAME,
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
             "playerActions" => STATE_PLAYER_ACTIONS,

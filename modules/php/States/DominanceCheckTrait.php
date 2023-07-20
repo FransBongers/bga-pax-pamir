@@ -6,21 +6,23 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait DominanceCheckTrait
 {
 
-  // ..######..########....###....########.########
-  // .##....##....##......##.##......##....##......
-  // .##..........##.....##...##.....##....##......
-  // ..######.....##....##.....##....##....######..
-  // .......##....##....#########....##....##......
-  // .##....##....##....##.....##....##....##......
-  // ..######.....##....##.....##....##....########
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
 
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
@@ -30,17 +32,101 @@ trait DominanceCheckTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function stDominanceCheck()
+  function dispatchDominanceCheckSetup($actionStack)
   {
-    $this->resolveDominanceCheck();
+    $action = array_pop($actionStack);
+    $cards = $action['data']['cards'];
+    $playerId = $action['playerId'];
 
-    // TODO: Frans: if one player leads by 4 or more end the game
-    if ($this->didPlayerWin() && false) {
-      $this->nextState('endGame');
-    } else {
-      $this->gamestate->nextState('playerActions');
-    }
+    $actionStack = array_merge($actionStack, [
+      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY, $playerId, []),
+      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES, $playerId, []),
+      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK, $playerId, []),
+      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_RESOLVE, $playerId, [
+        'cards' => $cards,
+      ]),
+    ]);
+    ActionStack::next($actionStack);
   }
+
+
+  function dispatchDominanceCheckResolve($actionStack)
+  {
+    $action = array_pop($actionStack);
+    $cards = $action['data']['cards'];
+    $playerId = $action['playerId'];
+
+    Globals::incDominanceChecksResolved(count($cards));
+    Notifications::message('A Dominance Check is resolved');
+
+    // Determine if there is a dominant coalition
+    $dominantCoalition = $this->getDominantCoalition();
+    $checkSuccessful = $dominantCoalition !== null;
+
+    // Determine scores
+    $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition) : $this->getScoresUnsuccessFulCheck();
+
+    Notifications::dominanceCheckResult($scores, $checkSuccessful, $dominantCoalition);
+
+    if ($checkSuccessful) {
+      $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS, $playerId, []);
+    };
+    ActionStack::next($actionStack);
+  }
+
+
+  function dispatchDominanceCheckRemoveCoalitionBlocks($actionStack)
+  {
+    $moves = array_merge(
+      Map::removeAllBlocksForCoalition(AFGHAN),
+      Map::removeAllBlocksForCoalition(BRITISH),
+      Map::removeAllBlocksForCoalition(RUSSIAN)
+    );
+    Notifications::dominanceCheckReturnCoalitionBlocks($moves);
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
+
+
+  function dispatchDominanceCheckEndGameCheck($actionStack)
+  {
+    if ($this->didPlayerWin()) {
+      $this->nextState('endGame');
+      return;
+    }
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
+
+  function dispatchDominanceCheckAfterAbilities($actionStack)
+  {
+    array_pop($actionStack);
+    // SA_INSURRECTION
+    // TODO (Frans): action stack so pieces can be selected if needed
+    $card = Cards::get('card_3');
+    if (Utils::startsWith($card['location'], 'court_')) {
+      $playerId = intval(explode('_', $card['location'])[1]);
+      Notifications::insurrection(Players::get($playerId));
+      for ($i = 0; $i < 2; $i++) {
+        $actionStack[] = ActionStack::createAction(
+          DISPATCH_PLACE_ARMY,
+          $playerId,
+          [
+            'region' => KABUL,
+          ]
+        );
+      }
+    }
+    ActionStack::next($actionStack);
+  }
+
+  function dispatchDominanceCheckDiscardEventInPlay($actionStack)
+  {
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
+
+
 
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
@@ -50,22 +136,17 @@ trait DominanceCheckTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function resolveDominanceCheck($numberOfCards = 1)
+  function getDominantCoalition()
   {
-    // TODO: increase by 2 in case of instability
-    Globals::incDominanceChecksResolved($numberOfCards);
-    Notifications::message('A Dominance Check is resolved');
-    // Determine if check is successful
-    // Get counts of all blocks left in pool
-    $coalitionBlockCounts = array();
-    $i = 0;
+    // Determine number of blocks left for each pool
+    $coalitionBlockCounts = [];
     foreach ($this->locations['pools'] as $coalitionId => $coalitionPool) {
-      $coalitionBlockCounts[$i] = array(
+      $coalitionBlockCounts[] = [
         'count' => Tokens::countInLocation($coalitionPool),
         'coalition' => $coalitionId,
-      );
-      $i += 1;
+      ];
     }
+
     // sort array lowest to highest. Since we count remaining blocks the coalition with the lowest
     // number has the most blocks in play
     usort($coalitionBlockCounts, function ($a, $b) {
@@ -74,69 +155,50 @@ trait DominanceCheckTrait
 
     $requiredDifferenceToBeDominant = Events::isConflictFatigueActive() ? 2 : 4;
     $checkSuccessful = $coalitionBlockCounts[1]['count'] - $coalitionBlockCounts[0]['count'] >= $requiredDifferenceToBeDominant;
-    $dominantCoalition = null;
-
-    // scores object which will be returned with notification
-    $scores = array();
-
     if ($checkSuccessful) {
-      $dominantCoalition =  $coalitionBlockCounts[0]['coalition'];
-      // Notifications::dominanceCheckSuccessful($dominantCoalition);
-      $players = $this->loadPlayersBasicInfos();
-
-      // Create array of players loyal to dominant coalition and their total influence
-      $loyalPlayers = array();
-      foreach ($players as $playerId => $playerInfo) {
-        $player = Players::get($playerId);
-        if ($player->getLoyalty() == $dominantCoalition) {
-          $loyalPlayers[] = array(
-            'playerId' => $playerId,
-            'count' => $player->getInfluence(),
-          );
-        }
-      };
-
-      // Sort array so leader is at position 0
-      usort($loyalPlayers, function ($a, $b) {
-        return $b['count'] - $a['count'];
-      });
-
-      $availablePoints = [5, 3, 1];
-      if (Globals::getDominanceChecksResolved() == 4) {
-        $availablePoints = [10, 6, 2];
-      }
-      $scores = $this->determineVictoryPoints($loyalPlayers, $availablePoints);
-    } else {
-      // Notifications::dominanceUnsuccessful();
-      // Determine number of cylinders in play by each player
-      $cylinderCounts = $this->getCylindersInPlayPerPlayer();
-
-      // Sort array so player with highest number is at 0.
-      usort($cylinderCounts, function ($a, $b) {
-        return $b['count'] - $a['count'];
-      });
-
-      // Determine VPs
-      $availablePoints = [3, 1];
-      if (Globals::getDominanceChecksResolved() == 4) {
-        $availablePoints = [6, 2];
-      }
-      $scores = $this->determineVictoryPoints($cylinderCounts, $availablePoints);
+      return $coalitionBlockCounts[0]['coalition'];
     }
+    return null;
+  }
 
-    // Notifications::dominanceCheckScores($scores,$moves);
-    Notifications::dominanceCheckResult($scores, $checkSuccessful, $dominantCoalition);
+  function getScoresSuccessFulCheck($dominantCoalition)
+  {
+    $players = Players::getAll();
 
-    // self::notifyAllPlayers("dominanceCheck", clienttranslate('A Dominance Check has been resolved.'), array(
-    //   'scores' => $scores,
-    //   'successful' => $checkSuccessful,
-    //   'moves' => $moves,
-    // ));
-    if ($checkSuccessful) {
-      $this->returnCoalitionBlocks();
+    // Create array of players loyal to dominant coalition and their total influence
+    $loyalPlayers = [];
+    foreach ($players as $playerId => $player) {
+      if ($player->getLoyalty() === $dominantCoalition) {
+        $loyalPlayers[] = [
+          'playerId' => $playerId,
+          'count' => $player->getInfluence(),
+        ];
+      }
     };
-    $this->returnEventCards();
-    $this->afterDominanceCheckAbilities();
+
+    // Sort array so leader is at position 0
+    usort($loyalPlayers, function ($a, $b) {
+      return $b['count'] - $a['count'];
+    });
+
+    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [10, 6, 2] : [5, 3, 1];
+
+    return $this->determineVictoryPoints($loyalPlayers, $availablePoints);
+  }
+
+  function getScoresUnsuccessFulCheck()
+  {
+    // Determine number of cylinders in play by each player
+    $cylinderCounts = $this->getCylindersInPlayPerPlayer();
+
+    // Sort array so player with highest number is at 0.
+    usort($cylinderCounts, function ($a, $b) {
+      return $b['count'] - $a['count'];
+    });
+
+    // Determine VPs
+    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [6, 2] :  [3, 1];
+    return $this->determineVictoryPoints($cylinderCounts, $availablePoints);
   }
 
   function getCylindersInPlayPerPlayer()
@@ -199,81 +261,19 @@ trait DominanceCheckTrait
     return $scores;
   }
 
-  function returnCoalitionBlocks()
-  {
-    $moves = [];
-    // return all coalition blocks to their pools
-    $afghanBlocks = Tokens::getOfType('block_' . AFGHAN);
-    foreach ($afghanBlocks as $index => $tokenInfo) {
-      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
-        $weight = Tokens::insertOnTop($tokenInfo['id'], BLOCKS_AFGHAN_SUPPLY);
-        $moves[] = array(
-          'tokenId' => $tokenInfo['id'],
-          'from' => $tokenInfo['location'],
-          'to' => BLOCKS_AFGHAN_SUPPLY,
-          'weight' => $weight
-        );
-      };
-    };
-    
-
-    $russianBlocks = Tokens::getOfType('block_' . RUSSIAN);
-    Notifications::log('russianBlocks', $russianBlocks);
-    foreach ($russianBlocks as $index => $tokenInfo) {
-      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
-        $weight = Tokens::insertOnTop($tokenInfo['id'], BLOCKS_RUSSIAN_SUPPLY);
-        $moves[] = array(
-          'tokenId' =>  $tokenInfo['id'],
-          'from' => $tokenInfo['location'],
-          'to' => BLOCKS_RUSSIAN_SUPPLY,
-          'weight' => $weight
-        );
-      };
-    };
-
-    $britishBlocks = Tokens::getOfType('block_' . BRITISH);
-    Notifications::log('britishBlocks', $britishBlocks);
-    foreach ($britishBlocks as $index => $tokenInfo) {
-      if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
-        $weight = Tokens::insertOnTop($tokenInfo['id'], BLOCKS_BRITISH_SUPPLY);
-        $moves[] = array(
-          'tokenId' =>  $tokenInfo['id'],
-          'from' => $tokenInfo['location'],
-          'to' => BLOCKS_BRITISH_SUPPLY,
-          'weight' => $weight
-        );
-      };
-    };
-    Notifications::dominanceCheckReturnCoalitionBlocks($moves);
-  }
-
-  function returnEventCards()
-  {
-  }
-
-  function afterDominanceCheckAbilities()
-  {
-    // SA_INSURRECTION
-    // TODO (Frans): action stack so pieces can be selected if needed
-    $card = Cards::get('card_3');
-    if(Utils::startsWith($card['location'],'court_')) {
-      $playerId = intval(explode('_',$card['location'])[1]);
-      $this->resolvePlaceArmy(KABUL,null,$playerId);
-      $this->resolvePlaceArmy(KABUL,null,$playerId);
-    }
-  }
 
   function didPlayerWin()
   {
+    if (Globals::getDominanceChecksResolved() >= 4) {
+      return true;
+    }
     $players = Players::getAll()->toArray();
-    usort($players,function ($a,$b) {
+    usort($players, function ($a, $b) {
       return $b->getScore() - $a->getScore();
     });
-    Notifications::log('player',$players);
     if ($players[0]->getScore() - $players[1]->getScore() >= 4) {
       return true;
     };
     return false;
-    // Notifications::log('score',$players[0]->getScore());
   }
 }

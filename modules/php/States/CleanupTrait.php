@@ -75,8 +75,7 @@ trait CleanupTrait
     $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_HAND, $playerId, []);
     $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_COURT, $playerId, []);
 
-    ActionStack::set($actionStack);
-    $this->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   // function stCleanupDiscardEvents()
@@ -126,8 +125,7 @@ trait CleanupTrait
     } else {
       array_pop($actionStack);
     }
-    ActionStack::set($actionStack);
-    $this->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   function dispatchCleanupCheckHand($actionStack)
@@ -148,8 +146,7 @@ trait CleanupTrait
     } else {
       array_pop($actionStack);
     }
-    ActionStack::set($actionStack);
-    $this->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   function dispatchCleanupDiscardEvent($actionStack)
@@ -167,13 +164,12 @@ trait CleanupTrait
     Cards::insertOnTop($cardId, $to);
     Notifications::discardEventCardFromMarket($card, $location, $to);
 
-    $extraActions = Events::resolveDiscardEffect($card['discarded']['effect'], $location, $playerId);
+    $extraActions = Events::resolveDiscardEffect($card, $location, $playerId);
     Notifications::log('extraActions', $extraActions);
     if ($extraActions !== null) {
       $actionStack = array_merge($actionStack, $extraActions);
     }
-    ActionStack::set($actionStack);
-    $this->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   // .##.....##.########.####.##.......####.########.##....##

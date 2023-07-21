@@ -23,9 +23,9 @@ class ActionStack
     return Globals::getActionStack();
   }
 
-  public static function getNext()
+  public static function getNext($actionStack = null)
   {
-    $actionStack = ActionStack::get();
+    $actionStack = $actionStack === null ? ActionStack::get() : $actionStack;
     return $actionStack[count($actionStack) - 1];
   }
 

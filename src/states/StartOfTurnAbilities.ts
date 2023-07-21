@@ -8,8 +8,8 @@ class StartOfTurnAbilitiesState implements State {
 
   onEnteringState(args: OnEnteringStartOfTurnAbilitiesArgs) {
     debug('Entering StartOfTurnAbilitiesState', args);
-    const { specialAbilities } = args;
-    this.specialAbility = specialAbilities[0];
+    const { specialAbility } = args;
+    this.specialAbility = specialAbility;
     this.updateInterfaceInitialStep();
   }
 
@@ -45,7 +45,7 @@ class StartOfTurnAbilitiesState implements State {
     this.game.addPrimaryActionButton({
       id: 'skip_btn',
       text: _('Skip'),
-      callback: () => this.game.takeAction({ action: 'pass', data: { specialAbility: this.specialAbility } }),
+      callback: () => this.game.takeAction({ action: 'specialAbilityPlaceSpyStartOfTurn', data: { skip: true } }),
     });
     this.setCourtCardsSelectable();
   }
@@ -62,7 +62,7 @@ class StartOfTurnAbilitiesState implements State {
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
-      callback: () => this.game.takeAction({ action: 'placeSpy', data: { cardId, specialAbility: this.specialAbility } }),
+      callback: () => this.game.takeAction({ action: 'specialAbilityPlaceSpyStartOfTurn', data: { cardId } }),
     });
     this.game.addDangerActionButton({
       id: 'cancel_btn',

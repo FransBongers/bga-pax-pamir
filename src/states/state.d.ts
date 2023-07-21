@@ -113,5 +113,5 @@ interface OnEnteringPlaceSASafeHouseArgs {
 }
 
 interface OnEnteringStartOfTurnAbilitiesArgs {
-  specialAbilities: string[];
+  specialAbility: string;
 }

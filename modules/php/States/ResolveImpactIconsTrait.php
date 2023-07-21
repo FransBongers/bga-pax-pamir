@@ -67,6 +67,7 @@ trait ResolveImpactIconsTrait
         [
           'cardId' => $cardId,
           'region' => $card['region'],
+          'type' => $icon === TRIBE ? TRIBE  : null,
         ]
       );
     }
@@ -91,7 +92,10 @@ trait ResolveImpactIconsTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  // NOTE: might be a better place to put this instead of with impact icons?
+  /**
+   * Place army
+   * NOTE: might be a better place to put this instead of with impact icons?
+   */
   function dispatchPlaceArmy($actionStack)
   {
     $action = $actionStack[count($actionStack) - 1];
@@ -147,6 +151,66 @@ trait ResolveImpactIconsTrait
     ActionStack::next($actionStack);
   }
 
+
+  /**
+   * Place cylinder
+   * NOTE: might be a better place to put this instead of with impact icons?
+   */
+  function dispatchPlaceCylinder($actionStack)
+  {
+    $action = $actionStack[count($actionStack) - 1];
+
+    $playerId = $action['playerId'];
+    $player = Players::get($playerId);
+
+    $pool = "cylinders_" . $playerId;
+
+    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
+    $cylinder = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($pool);
+
+    if ($cylinder === null) {
+      $this->nextState('selectPiece', $playerId);
+      return;
+    }
+
+    $cylinderId = $cylinder['id'];
+    $from = $cylinder['location'];
+    $to = '';
+
+    if ($action['data']['type'] === TRIBE) {
+      $regionId = $action['data']['region'];
+      $to = $this->locations["tribes"][$regionId];
+      Notifications::placeTribe($cylinderId, $player, $regionId, $from, $to);
+    } else if ($action['data']['type'] === SPY) {
+      $cardId = $action['data']['cardId'];
+      $to = 'spies_' . $cardId;
+      Notifications::placeSpy($cylinderId, $player, $cardId, $from, $to);
+    }
+
+    Tokens::move($cylinderId, $to);
+    Tokens::setUsed($cylinderId, USED);
+
+    if ($selectedPiece !== null) {
+      $fromRegionId = explode('_', $from)[1];
+      $isTribe = Utils::startsWith($from, 'tribes');
+      if ($isTribe && ($action['data']['type'] === SPY || $fromRegionId !== $regionId)) {
+        Map::checkRulerChange($fromRegionId);
+      }
+    }
+
+    if ($action['data']['type'] === TRIBE) {
+      $regionId = $action['data']['region'];
+      Map::checkRulerChange($regionId);
+    }
+
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
+
+
+  /**
+   * Impact icon economic
+   */
   function dispatchResolveImpactIconEconomic($actionStack)
   {
     array_pop($actionStack);
@@ -157,6 +221,10 @@ trait ResolveImpactIconsTrait
     $this->nextState('dispatchAction');
   }
 
+
+  /**
+   * Impact icon intelligence
+   */
   function dispatchResolveImpactIconIntelligence($actionStack)
   {
     array_pop($actionStack);
@@ -167,6 +235,10 @@ trait ResolveImpactIconsTrait
     $this->nextState('dispatchAction');
   }
 
+
+  /**
+   * Impact icon military
+   */
   function dispatchResolveImpactIconMilitary($actionStack)
   {
     array_pop($actionStack);
@@ -177,6 +249,10 @@ trait ResolveImpactIconsTrait
     $this->nextState('dispatchAction');
   }
 
+
+  /**
+   * Impact icon leverage
+   */
   function dispatchResolveImpactIconLeverage($actionStack)
   {
     $action = array_pop($actionStack);
@@ -190,6 +266,10 @@ trait ResolveImpactIconsTrait
     $this->nextState('dispatchAction');
   }
 
+
+  /**
+   * Impact icon political
+   */
   function dispatchResolveImpactIconPolitical($actionStack)
   {
     array_pop($actionStack);
@@ -200,49 +280,25 @@ trait ResolveImpactIconsTrait
     $this->nextState('dispatchAction');
   }
 
+
+  /**
+   * Impact icon road
+   */
   function dispatchResolveImpactIconRoad($actionStack)
   {
-    // $action = $actionStack[count($actionStack) - 1];
-
-    // if ($this->isBlockAvailableForAction($action)) {
     $this->nextState('placeRoad');
-    // } else {
-    //   $playerId = $action['playerId'];
-    //   $this->nextState('selectPiece', $playerId);
-    // }
   }
 
+
+  /**
+   * Impact icon spy
+   */
   function dispatchResolveImpactIconSpy($actionStack)
   {
-    $action = $actionStack[count($actionStack) - 1];
-
-    if ($this->isCylinderAvailableForAction($action)) {
-      $this->gamestate->nextState('placeSpy');
-    } else {
-      $playerId = $action['playerId'];
-      $this->nextState('selectPiece', $playerId);
-    }
+    $this->gamestate->nextState('placeSpy');
   }
 
-  function dispatchResolveImpactIconTribe($actionStack)
-  {
-    $action = $actionStack[count($actionStack) - 1];
-    $playerId = $action['playerId'];
 
-    if ($this->isCylinderAvailableForAction($action)) {
-      array_pop($actionStack);
-      ActionStack::set($actionStack);
-
-      $cardId = $action['data']['cardId'];
-      $region = Cards::get($cardId)['region'];
-      $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
-
-      $this->resolvePlaceTribe($region, $playerId, $selectedPiece);
-      $this->nextState('dispatchAction');
-    } else {
-      $this->nextState('selectPiece', $playerId);
-    }
-  }
 
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
@@ -356,44 +412,5 @@ trait ResolveImpactIconsTrait
     // Suit change notification
     $currentSuitId = $this->suits[$currentSuit]['id'];
     Notifications::changeFavoredSuit($currentSuitId, $newSuit, $customMessage);
-  }
-
-  function resolvePlaceTribe($regionId, $playerId, $selectedPiece = null)
-  {
-    $player = Players::get($playerId);
-    $from = "cylinders_" . $playerId;
-    $cylinder = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($from);
-    $to = $this->locations["tribes"][$regionId];
-    if ($cylinder === null) {
-      return;
-    }
-    Tokens::move($cylinder['id'], $to);
-    Tokens::setUsed($cylinder['id'], USED);
-    $from = $cylinder['location'];
-    $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
-    Notifications::moveToken($message, [
-      'player' => $player,
-      'logTokenCylinder' => Utils::logTokenCylinder($playerId),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $cylinder['id'],
-        ]
-      ]
-    ]);
-
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      Notifications::log('fromRegionId', $fromRegionId);
-      $isTribe = Utils::startsWith($from, 'tribes');
-      Notifications::log('isTribe', $isTribe);
-      if ($isTribe && $fromRegionId !== $regionId) {
-        Map::checkRulerChange($fromRegionId);
-        Notifications::log('selectedPieceFrom', $fromRegionId);
-      }
-    }
-    Map::checkRulerChange($regionId);
   }
 }

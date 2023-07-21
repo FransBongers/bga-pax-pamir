@@ -120,8 +120,9 @@ $machinestates = array(
         "action" => "stPrepareTurn",
         "updateGameProgression" => true,
         "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "playerActions" => STATE_PLAYER_ACTIONS,
+            // 'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 
@@ -131,10 +132,11 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} '),
         "type" => "activeplayer",
         "args" => "argStartOfTurnAbilities",
-        "possibleactions" => array("placeSpy", "pass"),
+        "possibleactions" => array("specialAbilityPlaceSpyStartOfTurn"),
         "transitions" => array(
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+            // "playerActions" => STATE_PLAYER_ACTIONS,
+            // 'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 
@@ -234,6 +236,7 @@ $machinestates = array(
             "refillMarket" => STATE_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
+            'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 

@@ -4685,8 +4685,8 @@ var StartOfTurnAbilitiesState = (function () {
     }
     StartOfTurnAbilitiesState.prototype.onEnteringState = function (args) {
         debug('Entering StartOfTurnAbilitiesState', args);
-        var specialAbilities = args.specialAbilities;
-        this.specialAbility = specialAbilities[0];
+        var specialAbility = args.specialAbility;
+        this.specialAbility = specialAbility;
         this.updateInterfaceInitialStep();
     };
     StartOfTurnAbilitiesState.prototype.onLeavingState = function () {
@@ -4705,7 +4705,7 @@ var StartOfTurnAbilitiesState = (function () {
         this.game.addPrimaryActionButton({
             id: 'skip_btn',
             text: _('Skip'),
-            callback: function () { return _this.game.takeAction({ action: 'pass', data: { specialAbility: _this.specialAbility } }); },
+            callback: function () { return _this.game.takeAction({ action: 'specialAbilityPlaceSpyStartOfTurn', data: { skip: true } }); },
         });
         this.setCourtCardsSelectable();
     };
@@ -4723,7 +4723,7 @@ var StartOfTurnAbilitiesState = (function () {
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
-            callback: function () { return _this.game.takeAction({ action: 'placeSpy', data: { cardId: cardId, specialAbility: _this.specialAbility } }); },
+            callback: function () { return _this.game.takeAction({ action: 'specialAbilityPlaceSpyStartOfTurn', data: { cardId: cardId } }); },
         });
         this.game.addDangerActionButton({
             id: 'cancel_btn',

@@ -4,6 +4,7 @@ namespace PaxPamir\States;
 
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
@@ -22,17 +23,10 @@ trait TurnTrait
 
   function argStartOfTurnAbilities()
   {
-    $player = Players::get();
-    $specialAbilities = [];
-    $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
-    if ($player->hasSpecialAbility(SA_BLACKMAIL_HERAT) && !in_array(SA_BLACKMAIL_HERAT, $usedSpecialAbilities)) {
-      $specialAbilities[] = SA_BLACKMAIL_HERAT;
-    }
-    if ($player->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && !in_array(SA_BLACKMAIL_KANDAHAR, $usedSpecialAbilities)) {
-      $specialAbilities[] = SA_BLACKMAIL_KANDAHAR;
-    }
+    $action = ActionStack::getNext();
+
     return [
-      'specialAbilities' => $specialAbilities,
+      'specialAbility' => $action['data']['specialAbility'],
     ];
   }
 
@@ -55,16 +49,36 @@ trait TurnTrait
   function stPrepareTurn()
   {
     Globals::setRemainingActions(2);
-    Globals::setUsedSpecialAbilities([]);
     Log::enable();
     // Log::checkpoint();
     Log::clearAll();
 
-    if ($this->playerHasStartOfTurnSpecialAbilities([])) {
-      $this->nextState('startOfTurnAbilities');
-    } else {
-      $this->gamestate->nextState('playerActions');
+    $player = Players::get();
+    $playerId = $player->getId();
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+        'transition' => 'playerActions'
+      ])
+    ];
+
+    // Add start of turn abilities to action stack
+    if ($player->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
+      $actionStack[] =    ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+        'transition' => 'startOfTurnAbilities',
+        'pop' => false,
+        'specialAbility' => SA_BLACKMAIL_KANDAHAR
+      ]);
     }
+
+    if ($player->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
+      $actionStack[] =    ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+        'transition' => 'startOfTurnAbilities',
+        'pop' => false,
+        'specialAbility' => SA_BLACKMAIL_HERAT
+      ]);
+    }
+
+    ActionStack::next($actionStack);
   }
 
   // .##.....##.########.####.##.......####.########.##....##
@@ -75,17 +89,6 @@ trait TurnTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function playerHasStartOfTurnSpecialAbilities($usedSpecialAbilities)
-  {
-    $player = Players::get();
-    if (!in_array(SA_BLACKMAIL_HERAT, $usedSpecialAbilities) && $player->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
-      return true;
-    }
-    if (!in_array(SA_BLACKMAIL_KANDAHAR, $usedSpecialAbilities) && $player->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
-      return true;
-    }
-    return false;
-  }
 
   function existsCourtCardWithoutSpy($region)
   {

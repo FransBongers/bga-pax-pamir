@@ -28,29 +28,39 @@ trait DebugTrait
 
   function debugSetupTokens()
   {
-    $this->debugCreateArmy(KABUL);
-    $this->debugCreateArmy(KABUL);
-    $this->debugCreateArmy(KABUL);
-    $this->debugCreateArmy(KABUL);
+    // $this->debugCreateArmy(KABUL);
+    // $this->debugCreateArmy(KABUL);
+    // $this->debugCreateArmy(KABUL);
+    // $this->debugCreateArmy(KABUL);
     // $this->debugCreateArmy(HERAT);
-    $this->debugCreateArmy(HERAT);
-    $this->debugCreateArmy(HERAT);
+    // $this->debugCreateArmy(HERAT);
+    // $this->debugCreateArmy(HERAT);
     // $this->debugCreateArmy(PERSIA,RUSSIAN);
     // $this->debugCreateArmy(PERSIA,RUSSIAN);
     // $this->debugCreateArmy(PERSIA,RUSSIAN);
-    $this->debugCreateArmy(PUNJAB);
-    $this->debugCreateArmy(PUNJAB);
+    // $this->debugCreateArmy(PUNJAB);
+    // $this->debugCreateArmy(PUNJAB);
     // $this->debugCreateArmy(PUNJAB,AFGHAN);
-    $this->debugCreateRoad('herat_kabul');
-    $this->debugCreateRoad('herat_persia');
-    $this->debugCreateRoad('kabul_punjab');
+    // $this->debugCreateRoad('herat_kabul');
+    // $this->debugCreateRoad('herat_persia');
+    // $this->debugCreateRoad('kabul_punjab');
     // $this->debugCreateSpy('card_32');
     // $this->debugCreateSpy('card_27');
+    $this->debugCreateTribe(PUNJAB);
+    $this->debugCreateTribe(PUNJAB);
+    $this->debugCreateTribe(PUNJAB);
+    $this->debugCreateTribe(PUNJAB);
+    // $this->debugCreateTribe(PUNJAB);
+    $this->debugCreateTribe(TRANSCASPIA);
+    $this->debugCreateTribe(TRANSCASPIA);
+    $this->debugCreateTribe(TRANSCASPIA);
+    $this->debugCreateTribe(TRANSCASPIA);
   }
 
   function test()
   {
-    // $this->debugSetupTokens();
+
+    $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
     // Cards::move('card_114','market_0_0');
 
@@ -61,8 +71,10 @@ trait DebugTrait
     // $this->debugAddCardToHand('card_2');
     // $this->debugAddCardToHand('card_3');
     // $this->debugAddCardToHand('card_4');
+    $actionStack = ActionStack::get();
+    Notifications::log('actions', $actionStack);
+    // ActionStack::next($actionStack);
 
-    Notifications::log('actions', ActionStack::get());
     // ActionStack::set([]);
     // $this->nextState('playerActions');
     // $this->pushActionsToActionStack([

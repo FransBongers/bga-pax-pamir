@@ -630,6 +630,43 @@ class Notifications
     ));
   }
 
+  public static function placeSpy($cylinderId,$player,$cardId,$from,$to)
+  {
+    $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    Notifications::moveToken($message, [
+      'player' => $player,
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'logTokenCylinder' => Utils::logTokenCylinder(Players::get()->getId()),
+      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinderId,
+        ]
+      ]
+    ]);
+  }
+
+  public static function placeTribe($cylinderId,$player,$regionId,$from,$to)
+  {
+    $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
+    Notifications::moveToken($message, [
+      'player' => $player,
+      'logTokenCylinder' => Utils::logTokenCylinder($player->getId()),
+      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinderId,
+        ]
+      ]
+    ]);
+  }
+  
+
   public static function playCard($card, $courtCards, $side, $playerId)
   {
     // Minus 1 because $courtCards includes the card currently being played

@@ -90,14 +90,17 @@ trait DispatchActionTrait
       case DISPATCH_IMPACT_ICON_SPY:
         $this->dispatchResolveImpactIconSpy($actionStack);
         break;
-      case DISPATCH_IMPACT_ICON_TRIBE:
-        $this->dispatchResolveImpactIconTribe($actionStack);
-        break;
+      // case DISPATCH_IMPACT_ICON_TRIBE:
+      //   $this->dispatchResolveImpactIconTribe($actionStack);
+      //   break;
       case DISPATCH_OVERTHROW_TRIBE:
         $this->dispatchOverthrowTribe($actionStack);
         break;
       case DISPATCH_PLACE_ARMY:
-        $this->dispatchPlaceArmy($actionStack);
+        $this->dispatchPlaceArmy($actionStack);      
+        break;
+      case DISPATCH_PLACE_CYLINDER:
+        $this->dispatchPlaceCylinder($actionStack);
         break;
       case DISPATCH_PLACE_ROAD:
         $this->dispatchPlaceRoad($actionStack);
@@ -227,7 +230,12 @@ trait DispatchActionTrait
 
   function dispatchTransition($actionStack)
   {
-    $next = array_pop($actionStack);
+    $next = $actionStack[count($actionStack) - 1];
+    $popSet = isset($next['data']['pop']);
+    if (!$popSet || ($popSet && $next['data']['pop'])) {
+      array_pop($actionStack);
+    }
+
     ActionStack::set($actionStack);
     $this->nextState($next['data']['transition'], $next['playerId']);
   }

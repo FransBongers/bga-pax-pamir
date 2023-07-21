@@ -83,7 +83,7 @@ trait SelectPieceTrait
     if (in_array($action['type'], [DISPATCH_PLACE_ARMY, DISPATCH_PLACE_ROAD])) {
       $loyalty = Players::get($playerId)->getLoyalty();
       $availablePieces = Tokens::getOfType('block_' . $loyalty);
-    } else if (in_array($action['type'], [DISPATCH_IMPACT_ICON_TRIBE, DISPATCH_IMPACT_ICON_SPY])) {
+    } else if (in_array($action['type'], [DISPATCH_PLACE_CYLINDER, DISPATCH_IMPACT_ICON_SPY])) {
       $availablePieces = Tokens::getOfType('cylinder_' . $playerId);
     }
 

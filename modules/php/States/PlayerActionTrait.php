@@ -84,32 +84,22 @@ trait PlayerActionTrait
    * 1. End player's turn
    * 2. Skip start of turn abilities
    */
-  function pass($specialAbility = null)
+  function pass()
   {
     self::checkAction('pass');
+    $playerId = self::getActivePlayerId();
 
-    if ($this->gamestate->state(true, false, true)['name'] === "startOfTurnAbilities") {
-      $usedSpecialAbilities = Globals::getUsedSpecialAbilities();
-      Notifications::log('usedAbilities', $usedSpecialAbilities);
-      $usedSpecialAbilities[] = $specialAbility;
-      Globals::setUsedSpecialAbilities($usedSpecialAbilities);
-      $transition = $this->playerHasStartOfTurnSpecialAbilities($usedSpecialAbilities) ? 'startOfTurnAbilities' : 'playerActions';
-      $this->nextState($transition);
-    } else {
-      $playerId = self::getActivePlayerId();
+    $remainingActions = Globals::getRemainingActions();
+    $state = $this->gamestate->state();
 
-      $remainingActions = Globals::getRemainingActions();
-      $state = $this->gamestate->state();
-
-      // TODO: (check if it is necessary to set remaining actions to 0 here, also done in turn trait?)
-      if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
-        Globals::setRemainingActions(0);
-      }
-      // Notify
-      Notifications::pass();
-
-      $this->gamestate->nextState('cleanup');
+    // TODO: (check if it is necessary to set remaining actions to 0 here, also done in turn trait?)
+    if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
+      Globals::setRemainingActions(0);
     }
+    // Notify
+    Notifications::pass();
+
+    $this->gamestate->nextState('cleanup');
   }
 
   /**
@@ -156,10 +146,11 @@ trait PlayerActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function getMinimumActionCost($action,$player) {
-    if(in_array($action, [BATTLE, MOVE, TAX, PLAY_CARD])) {
+  function getMinimumActionCost($action, $player)
+  {
+    if (in_array($action, [BATTLE, MOVE, TAX, PLAY_CARD])) {
       return 0;
-    } else if (in_array($action, [BETRAY,BUILD])) {
+    } else if (in_array($action, [BETRAY, BUILD])) {
       return 2;
     } else {
       // only option remaining is purchase gift, determines on lowest empty spot

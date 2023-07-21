@@ -114,6 +114,7 @@ trait PlayerActionBuildTrait
 
     $actionStack = ActionStack::get();
     if ($skip) {
+      // No need to pop, since action has actions has already been popped from stack by the transition
       ActionStack::next($actionStack);
       return;
     }

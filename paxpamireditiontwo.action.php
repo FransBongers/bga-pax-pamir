@@ -137,6 +137,16 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function  specialAbilityPlaceSpyStartOfTurn()
+    {
+        self::setAjaxMode();
+        $cardId = self::getArg("cardId", AT_alphanum, false);
+        $skip = self::getArg("skip", AT_bool, false);
+        $skip = $skip === null ? false : $skip;
+        $result = $this->game->specialAbilityPlaceSpyStartOfTurn($skip,$cardId);
+        self::ajaxResponse();
+    }
+
     public function chooseLoyalty()
     {
         self::setAjaxMode();
@@ -198,8 +208,7 @@ class action_paxpamireditiontwo extends APP_GameAction
     public function pass()
     {
         self::setAjaxMode();
-        $specialAbility = self::getArg("specialAbility", AT_alphanum, false);
-        $result = $this->game->pass($specialAbility);
+        $result = $this->game->pass();
         self::ajaxResponse();
     }
 

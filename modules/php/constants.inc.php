@@ -206,12 +206,12 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_IMPACT_ICON_POLITICAL = 'dispatchImpactPolitical';
   const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
   const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
-  const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
+  // const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
 
   const DISPATCH_PLACE_ARMY = 'distPlaceArmy';
   const DISPATCH_PLACE_ROAD = 'dispPlaceRoad';
-  const DISPATCH_PLACE_SPY = 'dispPlaceSpy';
-  const DISPATCH_PLACE_TRIBE = 'dispPlaceTribe';
+  // const DISPATCH_PLACE_SPY = 'dispPlaceSpy';
+  const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
   
   const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
   const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
@@ -228,7 +228,7 @@ const LOG_TOKEN_RUPEE = 'rupee';
     POLITICAL_SUIT => DISPATCH_IMPACT_ICON_POLITICAL,
     ROAD => DISPATCH_IMPACT_ICON_ROAD,
     SPY => DISPATCH_IMPACT_ICON_SPY,
-    TRIBE => DISPATCH_IMPACT_ICON_TRIBE
+    TRIBE => DISPATCH_PLACE_CYLINDER
   ];
 
   /**

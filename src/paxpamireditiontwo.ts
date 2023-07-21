@@ -52,18 +52,18 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_INITIAL_BRIBE_CHECK]: ClientInitialBribeCheckState;
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
-    [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ClientResolveEventConfidenceFailureState;
-    [CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS]: ClientResolveEventOtherPersuasiveMethodsState;
-    [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: ClientResolveEventPashtunwaliValuesState;
-    [CLIENT_RESOLVE_EVENT_REBUKE]: ClientResolveEventRebukeState;
-    [CLIENT_RESOLVE_EVENT_RUMOR]: ClientResolveEventRumorState;
+    // [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ResolveEventConfidenceFailureState;
+    eventCardRebuke: ResolveEventRebukeState;
     acceptPrize: AcceptPrizeState;
     discard: DiscardState;
     negotiateBribe: NegotiateBribeState;
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;
     playerActions: PlayerActionsState;
-    resolveEvent: ResolveEventState;
+    eventCardPashtunwaliValues: ResolveEventPashtunwaliValuesState;
+    eventCardOtherPersuasiveMethods: ResolveEventOtherPersuasiveMethodsState;
+    eventCardRumor: ResolveEventRumor;
+    // resolveEvent: ResolveEventState;
     setup: SetupState;
     selectPiece: SelectPieceState;
     specialAbilityInfrastructure: ClientCardActionBuildState;
@@ -108,18 +108,16 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_INITIAL_BRIBE_CHECK]: new ClientInitialBribeCheckState(this),
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
-      [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: new ClientResolveEventConfidenceFailureState(this),
-      [CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS]: new ClientResolveEventOtherPersuasiveMethodsState(this),
-      [CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES]: new ClientResolveEventPashtunwaliValuesState(this),
-      [CLIENT_RESOLVE_EVENT_REBUKE]: new ClientResolveEventRebukeState(this),
-      [CLIENT_RESOLVE_EVENT_RUMOR]: new ClientResolveEventRumorState(this),
       acceptPrize: new AcceptPrizeState(this),
       discard: new DiscardState(this),
+      eventCardPashtunwaliValues: new ResolveEventPashtunwaliValuesState(this),
+      eventCardOtherPersuasiveMethods: new ResolveEventOtherPersuasiveMethodsState(this),
+      eventCardRumor: new ResolveEventRumor(this),
+      eventCardRebuke: new ResolveEventRebukeState(this),
       negotiateBribe: new NegotiateBribeState(this),
       placeRoad: new PlaceRoadState(this),
       placeSpy: new PlaceSpyState(this),
       playerActions: new PlayerActionsState(this),
-      resolveEvent: new ResolveEventState(this),
       setup: new SetupState(this),
       selectPiece: new SelectPieceState(this),
       specialAbilityInfrastructure: new ClientCardActionBuildState(this, true),
@@ -174,17 +172,17 @@ class PaxPamir implements PaxPamirGame {
   // onEnteringState: this method is called each time we are entering into a new game state.
   //                  You can use this method to perform some user interface changes at this moment.
   public onEnteringState(stateName: string, args: any) {
-    const ALWAYS_ENTER = [
-      'resolveEvent',
-      CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE,
-      CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS,
-      CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES,
-      CLIENT_RESOLVE_EVENT_REBUKE,
-      CLIENT_RESOLVE_EVENT_RUMOR,
-    ];
+    // const ALWAYS_ENTER = [
+    //   'resolveEvent',
+    //   CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE,
+    //   CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS,
+    //   CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES,
+    //   CLIENT_RESOLVE_EVENT_REBUKE,
+    //   CLIENT_RESOLVE_EVENT_RUMOR,
+    // ];
     console.log('Entering state: ' + stateName, args);
     // UI changes for active player
-    if ((this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) || ALWAYS_ENTER.includes(stateName)) {
+    if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
       this.activeStates[stateName].onEnteringState(args.args);
     }
   }

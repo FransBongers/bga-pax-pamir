@@ -51,46 +51,19 @@ trait CleanupTrait
     $player = Players::get();
     $playerId = $player->getId();
 
-
-
-    // $discards = $player->checkDiscards();
-    // Notifications::log('discard', $discards);
-
     $actionStack = [
       ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
         'transition' => 'refillMarket'
       ]),
     ];
 
-    $bottomRowEventAction = $this->checkForEventCardInLocation('market_1_0', $playerId);
-    if ($bottomRowEventAction !== null) {
-      $actionStack[] = $bottomRowEventAction;
-    }
-
-    $topRowEventAction = $this->checkForEventCardInLocation('market_0_0', $playerId);
-    if ($topRowEventAction !== null) {
-      $actionStack[] = $topRowEventAction;
-    }
-
+    $actionStack = $this->addActionIfEventCardInLocation($actionStack,'market_1_0', $playerId);
+    $actionStack = $this->addActionIfEventCardInLocation($actionStack,'market_0_0', $playerId);
     $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_HAND, $playerId, []);
     $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_CHECK_COURT, $playerId, []);
 
     ActionStack::next($actionStack);
   }
-
-  // function stCleanupDiscardEvents()
-  // {
-  //   // Discard events at front of market
-  //   $interrupt = $this->checkAndDiscardIfEvent('market_0_0');
-  //   if ($interrupt) {
-  //     return;
-  //   }
-  //   $interrupt = $this->checkAndDiscardIfEvent('market_1_0');
-  //   if ($interrupt) {
-  //     return;
-  //   }
-  //   $this->gamestate->nextState('refillMarket');
-  // }
 
   // .########..####..######..########.....###....########..######..##.....##
   // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
@@ -164,11 +137,11 @@ trait CleanupTrait
     Cards::insertOnTop($cardId, $to);
     Notifications::discardEventCardFromMarket($card, $location, $to);
 
-    $extraActions = Events::resolveDiscardEffect($card, $location, $playerId);
-    Notifications::log('extraActions', $extraActions);
-    if ($extraActions !== null) {
-      $actionStack = array_merge($actionStack, $extraActions);
-    }
+    $actionStack = Events::resolveDiscardEffect($actionStack,$card, $location, $playerId);
+    // Notifications::log('extraActions', $extraActions);
+    // if ($extraActions !== null) {
+    //   $actionStack = array_merge($actionStack, $extraActions);
+    // }
     ActionStack::next($actionStack);
   }
 
@@ -180,18 +153,18 @@ trait CleanupTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function checkForEventCardInLocation($location, $playerId)
+  function addActionIfEventCardInLocation($actionStack,$location, $playerId)
   {
     $card = Cards::getInLocation($location)->first();
 
     if ($card !== null && $card['type'] == EVENT_CARD) {
-      return ActionStack::createAction(DISPATCH_CLEANUP_DISCARD_EVENT, $playerId, [
+      $actionStack[] = ActionStack::createAction(DISPATCH_CLEANUP_DISCARD_EVENT, $playerId, [
         'cardId' => $card['id'],
         'location' => $location,
       ]);
     }
 
-    return null;
+    return $actionStack;
   }
 
   function checkAndDiscardIfEvent($location)

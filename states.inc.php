@@ -69,6 +69,10 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_REFILL_MARKET", 21);
     define("ST_SA_SAFE_HOUSE", 22);
     define("ST_SA_INFRASTRUCTURE", 23);
+    define("ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS",24);
+    define("ST_RESOLVE_ECE_PASHTUNWALI_VALUES",25);
+    define("ST_RESOLVE_ECE_REBUKE",26);
+    define("ST_RESOLVE_ECE_RUMOR", 27);
     define("ST_ACCEPT_PRIZE", 46);
     define("STATE_NEXT_PLAYER", 50);
     define("STATE_FINAL", 90);
@@ -121,8 +125,6 @@ $machinestates = array(
         "updateGameProgression" => true,
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "playerActions" => STATE_PLAYER_ACTIONS,
-            // 'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 
@@ -135,8 +137,6 @@ $machinestates = array(
         "possibleactions" => array("specialAbilityPlaceSpyStartOfTurn"),
         "transitions" => array(
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            // "playerActions" => STATE_PLAYER_ACTIONS,
-            // 'startOfTurnAbilities' => STATE_START_OF_TURN_ABILITIES,
         )
     ),
 
@@ -150,7 +150,6 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => STATE_PLAYER_ACTIONS,
             "dispatchAction" => STATE_DISPATCH_ACTION,
-            "resolveEvent" => STATE_RESOLVE_EVENT,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "negotiateBribe" => STATE_NEGOTIATE_BRIBE,
             "cleanup" => STATE_CLEANUP,
@@ -189,7 +188,7 @@ $machinestates = array(
         "transitions" => array(
             "refillMarket" => STATE_REFILL_MARKET,
             "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
-            "resolveEvent" => STATE_RESOLVE_EVENT,
+            // "resolveEvent" => STATE_RESOLVE_EVENT,
         )
     ),
 
@@ -230,6 +229,10 @@ $machinestates = array(
             "discard" => STATE_DISCARD,
             "dispatchAction" => STATE_DISPATCH_ACTION,
             "endGame" => STATE_END_GAME,
+            'eventCardOtherPersuasiveMethods' => ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS,
+            'eventCardPashtunwaliValues' => ST_RESOLVE_ECE_PASHTUNWALI_VALUES,
+            'eventCardRebuke' => ST_RESOLVE_ECE_REBUKE,
+            'eventCardRumor' => ST_RESOLVE_ECE_RUMOR,
             "placeRoad" => STATE_PLACE_ROAD,
             "placeSpy" => STATE_PLACE_SPY,
             "playerActions" => STATE_PLAYER_ACTIONS,
@@ -290,21 +293,6 @@ $machinestates = array(
         ]
     ],
 
-      STATE_RESOLVE_EVENT => [
-        "name" => "resolveEvent",
-        "description" => '',
-        "descriptionmyturn" => '',
-        "type" => "activeplayer",
-        "args" => "argResolveEvent",
-        "possibleactions" => ["eventChoice"],
-        "transitions" => [
-            // "cleanup" => STATE_CLEANUP,
-            "discardEvents" => STATE_CLEANUP_DISCARD_EVENTS,
-            "playerActions" => STATE_PLAYER_ACTIONS,
-            "resolveEvent" => STATE_RESOLVE_EVENT,
-        ]
-    ],
-
     ST_SA_SAFE_HOUSE => [
         "name" => "specialAbilitySafeHouse",
         "description" => clienttranslate('${actplayer} may use Safe House'),
@@ -327,6 +315,52 @@ $machinestates = array(
         "transitions" => [
             "dispatchAction" => STATE_DISPATCH_ACTION,
             // "playerActions" => STATE_PLAYER_ACTIONS,
+        ]
+    ],
+
+    
+
+    ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS => [
+        "name" => "eventCardOtherPersuasiveMethods",
+        "description" => clienttranslate('${actplayer} must exchange hand with another player'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["eventCardOtherPersuasiveMethods"],
+        "transitions" => [
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_RESOLVE_ECE_PASHTUNWALI_VALUES => [
+        "name" => "eventCardPashtunwaliValues",
+        "description" => clienttranslate('${actplayer} must select a suit to favor'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["eventCardPashtunwaliValues"],
+        "transitions" => [
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_RESOLVE_ECE_REBUKE => [
+        "name" => "eventCardRebuke",
+        "description" => clienttranslate('${actplayer} must select a region'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["eventCardRebuke"],
+        "transitions" => [
+            "dispatchAction" => STATE_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_RESOLVE_ECE_RUMOR => [
+        "name" => "eventCardRumor",
+        "description" => clienttranslate('${actplayer} must choose a player'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["eventCardRumor"],
+        "transitions" => [
+            "dispatchAction" => STATE_DISPATCH_ACTION,
         ]
     ],
 

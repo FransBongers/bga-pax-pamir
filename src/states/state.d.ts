@@ -38,10 +38,6 @@ interface ClientInitialBribeCheckArgs {
   cardId: string;
 }
 
-interface ClientResolveEventStateArgs {
-  event: string;
-}
-
 interface EnteringDiscardCourtArgs {
   numberOfDiscards: number;
 }
@@ -111,6 +107,8 @@ interface OnEnteringPlaceSpyArgs {
 interface OnEnteringPlaceSASafeHouseArgs {
   cylinderId: string;
 }
+
+type OnEnteringResolveEventStateArgs = null;
 
 interface OnEnteringStartOfTurnAbilitiesArgs {
   specialAbility: string;

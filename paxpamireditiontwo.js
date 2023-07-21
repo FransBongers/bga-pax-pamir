@@ -3650,355 +3650,6 @@ var ClientPurchaseCardState = (function () {
     };
     return ClientPurchaseCardState;
 }());
-var ClientResolveEventConfidenceFailureState = (function () {
-    function ClientResolveEventConfidenceFailureState(game) {
-        this.game = game;
-    }
-    ClientResolveEventConfidenceFailureState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.updateInterfaceInitialStep();
-        }
-        else {
-            this.updateInterfaceOtherPlayers();
-        }
-    };
-    ClientResolveEventConfidenceFailureState.prototype.onLeavingState = function () { };
-    ClientResolveEventConfidenceFailureState.prototype.updateInterfaceOtherPlayers = function () {
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitleOtherPlayers({
-            text: _('${actplayer} must discard a card from hand'),
-            args: {
-                actplayer: '${actplayer}',
-            },
-        });
-    };
-    ClientResolveEventConfidenceFailureState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: '${you} must discard a card from hand',
-            args: {
-                you: '${you}',
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () { return _this.handleDiscardConfirm(); },
-        });
-        dojo.addClass('confirm_btn', 'disabled');
-        this.game.setHandCardsSelectable({
-            callback: function (_a) {
-                var cardId = _a.cardId;
-                return _this.handleDiscardSelect({ cardId: cardId });
-            },
-        });
-    };
-    ClientResolveEventConfidenceFailureState.prototype.handleDiscardConfirm = function () {
-        var nodes = dojo.query('.pp_selected');
-        if (nodes.length === 1) {
-            var cardId = nodes[0].id;
-            this.game.takeAction({
-                action: 'eventChoice',
-                data: {
-                    data: JSON.stringify({
-                        cardId: cardId,
-                    }),
-                },
-            });
-        }
-    };
-    ClientResolveEventConfidenceFailureState.prototype.handleDiscardSelect = function (_a) {
-        var cardId = _a.cardId;
-        dojo.query(".pp_card_in_zone.pp_".concat(cardId)).toggleClass('pp_selected').toggleClass('pp_selectable');
-        var numberSelected = dojo.query('.pp_selected').length;
-        if (numberSelected === 1) {
-            dojo.removeClass('confirm_btn', 'disabled');
-        }
-        else {
-            dojo.addClass('confirm_btn', 'disabled');
-        }
-    };
-    return ClientResolveEventConfidenceFailureState;
-}());
-var ClientResolveEventOtherPersuasiveMethodsState = (function () {
-    function ClientResolveEventOtherPersuasiveMethodsState(game) {
-        this.game = game;
-    }
-    ClientResolveEventOtherPersuasiveMethodsState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.updateInterfaceInitialStep();
-        }
-        else {
-            this.updateInterfaceOtherPlayers();
-        }
-    };
-    ClientResolveEventOtherPersuasiveMethodsState.prototype.onLeavingState = function () { };
-    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceOtherPlayers = function () {
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitleOtherPlayers({
-            text: _('${actplayer} must exchange hand with another player'),
-            args: {
-                actplayer: '${actplayer}',
-            },
-        });
-    };
-    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: '${you} must select a player to exchange your hand with',
-            args: {
-                you: '${you}',
-            },
-        });
-        var players = this.game.playerManager.getPlayers();
-        players
-            .filter(function (player) { return player.getPlayerId() !== _this.game.getPlayerId(); })
-            .forEach(function (player) {
-            _this.game.addPlayerButton({
-                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
-                player: player,
-            });
-        });
-    };
-    ClientResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceConfirmPlayer = function (_a) {
-        var _this = this;
-        var player = _a.player;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: 'Choose ${player_name}?',
-            args: {
-                player_name: player.getName(),
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () {
-                return _this.game.takeAction({
-                    action: 'eventChoice',
-                    data: {
-                        data: JSON.stringify({ playerId: player.getPlayerId() }),
-                    },
-                });
-            },
-        });
-        this.game.addCancelButton();
-    };
-    return ClientResolveEventOtherPersuasiveMethodsState;
-}());
-var ClientResolveEventPashtunwaliValuesState = (function () {
-    function ClientResolveEventPashtunwaliValuesState(game) {
-        this.game = game;
-    }
-    ClientResolveEventPashtunwaliValuesState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        console.log('other player pashtunwali values');
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.updateInterfaceInitialStep();
-        }
-        else {
-            this.updateInterfaceOtherPlayers();
-        }
-    };
-    ClientResolveEventPashtunwaliValuesState.prototype.onLeavingState = function () { };
-    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceOtherPlayers = function () {
-        this.game.clearPossible();
-        console.log('other player pashtunwali values');
-        this.game.clientUpdatePageTitleOtherPlayers({
-            text: _('${actplayer} must select a suit to favor'),
-            args: {
-                actplayer: '${actplayer}',
-            },
-        });
-    };
-    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: '${you} must select a suit to favor',
-            args: {
-                you: '${you}',
-            },
-        });
-        SUITS.forEach(function (suit) {
-            var name = _this.game.gamedatas.staticData.suits[suit].name;
-            _this.game.addPrimaryActionButton({
-                id: "".concat(suit, "_btn"),
-                text: _(name),
-                callback: function () {
-                    return _this.updateInterfaceConfirmSuit({ suit: suit, name: name });
-                },
-            });
-        });
-    };
-    ClientResolveEventPashtunwaliValuesState.prototype.updateInterfaceConfirmSuit = function (_a) {
-        var _this = this;
-        var suit = _a.suit, name = _a.name;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: 'Choose ${name}?',
-            args: {
-                name: name,
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () {
-                return _this.game.takeAction({
-                    action: 'eventChoice',
-                    data: {
-                        data: JSON.stringify({ suit: suit }),
-                    },
-                });
-            },
-        });
-        this.game.addCancelButton();
-    };
-    return ClientResolveEventPashtunwaliValuesState;
-}());
-var ClientResolveEventRebukeState = (function () {
-    function ClientResolveEventRebukeState(game) {
-        this.game = game;
-    }
-    ClientResolveEventRebukeState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        debug('clientState rebuke');
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.updateInterfaceInitialStep();
-        }
-        else {
-            this.updateInterfaceOtherPlayers();
-        }
-    };
-    ClientResolveEventRebukeState.prototype.onLeavingState = function () { };
-    ClientResolveEventRebukeState.prototype.updateInterfaceOtherPlayers = function () {
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitleOtherPlayers({
-            text: _('${actplayer} must select a region'),
-            args: {
-                actplayer: '${actplayer}',
-            },
-        });
-    };
-    ClientResolveEventRebukeState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
-        this.game.clientUpdatePageTitle({
-            text: '${you} must select a region',
-            args: {
-                you: '${you}',
-            },
-        });
-        this.game.map.setSelectable();
-        REGIONS.forEach(function (regionId) {
-            var element = document.getElementById("pp_region_".concat(regionId));
-            if (element) {
-                element.classList.add('pp_selectable');
-                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceRegionSelected({ regionId: regionId }); }));
-            }
-        });
-    };
-    ClientResolveEventRebukeState.prototype.updateInterfaceRegionSelected = function (_a) {
-        var _this = this;
-        var regionId = _a.regionId;
-        this.game.clearPossible();
-        this.game.map.setSelectable();
-        var element = document.getElementById("pp_region_".concat(regionId));
-        if (element) {
-            element.classList.add(PP_SELECTED);
-        }
-        this.game.clientUpdatePageTitle({
-            text: 'Remove all tribes and armies from ${regionName}?',
-            args: {
-                regionName: this.game.gamedatas.staticData.regions[regionId].name,
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () {
-                return _this.game.takeAction({
-                    action: 'eventChoice',
-                    data: {
-                        data: JSON.stringify({ regionId: regionId }),
-                    },
-                });
-            },
-        });
-        this.game.addCancelButton();
-    };
-    return ClientResolveEventRebukeState;
-}());
-var ClientResolveEventRumorState = (function () {
-    function ClientResolveEventRumorState(game) {
-        this.game = game;
-    }
-    ClientResolveEventRumorState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        if (this.game.framework().isCurrentPlayerActive()) {
-            this.updateInterfaceInitialStep();
-        }
-        else {
-            this.updateInterfaceOtherPlayers();
-        }
-    };
-    ClientResolveEventRumorState.prototype.onLeavingState = function () { };
-    ClientResolveEventRumorState.prototype.updateInterfaceOtherPlayers = function () {
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitleOtherPlayers({
-            text: _('${actplayer} must select a player'),
-            args: {
-                actplayer: '${actplayer}',
-            },
-        });
-    };
-    ClientResolveEventRumorState.prototype.updateInterfaceInitialStep = function () {
-        var _this = this;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: '${you} must select a player',
-            args: {
-                you: '${you}',
-            },
-        });
-        var players = this.game.playerManager.getPlayers();
-        players.forEach(function (player) {
-            _this.game.addPlayerButton({
-                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
-                player: player,
-            });
-        });
-    };
-    ClientResolveEventRumorState.prototype.updateInterfaceConfirmPlayer = function (_a) {
-        var _this = this;
-        var player = _a.player;
-        this.game.clearPossible();
-        this.game.clientUpdatePageTitle({
-            text: 'Choose ${player_name}?',
-            args: {
-                player_name: player.getName(),
-            },
-        });
-        this.game.addPrimaryActionButton({
-            id: 'confirm_btn',
-            text: _('Confirm'),
-            callback: function () {
-                return _this.game.takeAction({
-                    action: 'eventChoice',
-                    data: {
-                        data: JSON.stringify({ playerId: player.getPlayerId() }),
-                    },
-                });
-            },
-        });
-        this.game.addCancelButton();
-    };
-    return ClientResolveEventRumorState;
-}());
 var DiscardState = (function () {
     function DiscardState(game) {
         this.game = game;
@@ -4509,34 +4160,217 @@ var PlayerActionsState = (function () {
     };
     return PlayerActionsState;
 }());
-var ResolveEventState = (function () {
-    function ResolveEventState(game) {
+var ResolveEventOtherPersuasiveMethodsState = (function () {
+    function ResolveEventOtherPersuasiveMethodsState(game) {
         this.game = game;
     }
-    ResolveEventState.prototype.onEnteringState = function (_a) {
-        var event = _a.event;
-        switch (event) {
-            case ECE_CONFIDENCE_FAILURE:
-                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE, { args: { event: event } });
-                break;
-            case ECE_OTHER_PERSUASIVE_METHODS:
-                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS, { args: { event: event } });
-                break;
-            case ECE_PASHTUNWALI_VALUES:
-                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES, { args: { event: event } });
-                break;
-            case ECE_REBUKE:
-                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_REBUKE, { args: { event: event } });
-                break;
-            case ECE_RUMOR:
-                this.game.framework().setClientState(CLIENT_RESOLVE_EVENT_RUMOR, { args: { event: event } });
-                break;
-            default:
-                debug('unrecognized event', event);
-        }
+    ResolveEventOtherPersuasiveMethodsState.prototype.onEnteringState = function (_props) {
+        this.updateInterfaceInitialStep();
     };
-    ResolveEventState.prototype.onLeavingState = function () { };
-    return ResolveEventState;
+    ResolveEventOtherPersuasiveMethodsState.prototype.onLeavingState = function () { };
+    ResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a player to exchange your hand with',
+            args: {
+                you: '${you}',
+            },
+        });
+        var players = this.game.playerManager.getPlayers();
+        players
+            .filter(function (player) { return player.getPlayerId() !== _this.game.getPlayerId(); })
+            .forEach(function (player) {
+            _this.game.addPlayerButton({
+                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
+                player: player,
+            });
+        });
+    };
+    ResolveEventOtherPersuasiveMethodsState.prototype.updateInterfaceConfirmPlayer = function (_a) {
+        var _this = this;
+        var player = _a.player;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${player_name}?',
+            args: {
+                player_name: player.getName(),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventCardOtherPersuasiveMethods',
+                    data: {
+                        playerId: player.getPlayerId(),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ResolveEventOtherPersuasiveMethodsState;
+}());
+var ResolveEventPashtunwaliValuesState = (function () {
+    function ResolveEventPashtunwaliValuesState(game) {
+        this.game = game;
+    }
+    ResolveEventPashtunwaliValuesState.prototype.onEnteringState = function (_props) {
+        this.updateInterfaceInitialStep();
+    };
+    ResolveEventPashtunwaliValuesState.prototype.onLeavingState = function () { };
+    ResolveEventPashtunwaliValuesState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a suit to favor',
+            args: {
+                you: '${you}',
+            },
+        });
+        SUITS.forEach(function (suit) {
+            var name = _this.game.gamedatas.staticData.suits[suit].name;
+            _this.game.addPrimaryActionButton({
+                id: "".concat(suit, "_btn"),
+                text: _(name),
+                callback: function () { return _this.updateInterfaceConfirmSuit({ suit: suit, name: name }); },
+            });
+        });
+    };
+    ResolveEventPashtunwaliValuesState.prototype.updateInterfaceConfirmSuit = function (_a) {
+        var _this = this;
+        var suit = _a.suit, name = _a.name;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${suitName}?',
+            args: {
+                suitName: name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventCardPashtunwaliValues',
+                    data: {
+                        suit: suit,
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ResolveEventPashtunwaliValuesState;
+}());
+var ResolveEventRebukeState = (function () {
+    function ResolveEventRebukeState(game) {
+        this.game = game;
+    }
+    ResolveEventRebukeState.prototype.onEnteringState = function (_props) {
+        this.updateInterfaceInitialStep();
+    };
+    ResolveEventRebukeState.prototype.onLeavingState = function () { };
+    ResolveEventRebukeState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a region',
+            args: {
+                you: '${you}',
+            },
+        });
+        this.game.map.setSelectable();
+        REGIONS.forEach(function (regionId) {
+            var element = document.getElementById("pp_region_".concat(regionId));
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceRegionSelected({ regionId: regionId }); }));
+            }
+        });
+    };
+    ResolveEventRebukeState.prototype.updateInterfaceRegionSelected = function (_a) {
+        var _this = this;
+        var regionId = _a.regionId;
+        this.game.clearPossible();
+        this.game.map.setSelectable();
+        var element = document.getElementById("pp_region_".concat(regionId));
+        if (element) {
+            element.classList.add(PP_SELECTED);
+        }
+        this.game.clientUpdatePageTitle({
+            text: 'Remove all tribes and armies from ${regionName}?',
+            args: {
+                regionName: this.game.gamedatas.staticData.regions[regionId].name,
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventCardRebuke',
+                    data: {
+                        regionId: regionId,
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ResolveEventRebukeState;
+}());
+var ResolveEventRumor = (function () {
+    function ResolveEventRumor(game) {
+        this.game = game;
+    }
+    ResolveEventRumor.prototype.onEnteringState = function (_props) {
+        this.updateInterfaceInitialStep();
+    };
+    ResolveEventRumor.prototype.onLeavingState = function () { };
+    ResolveEventRumor.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: '${you} must select a player',
+            args: {
+                you: '${you}',
+            },
+        });
+        var players = this.game.playerManager.getPlayers();
+        players.forEach(function (player) {
+            _this.game.addPlayerButton({
+                callback: function () { return _this.updateInterfaceConfirmPlayer({ player: player }); },
+                player: player,
+            });
+        });
+    };
+    ResolveEventRumor.prototype.updateInterfaceConfirmPlayer = function (_a) {
+        var _this = this;
+        var player = _a.player;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: 'Choose ${player_name}?',
+            args: {
+                player_name: player.getName(),
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'confirm_btn',
+            text: _('Confirm'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'eventCardRumor',
+                    data: {
+                        playerId: player.getPlayerId(),
+                    },
+                });
+            },
+        });
+        this.game.addCancelButton();
+    };
+    return ResolveEventRumor;
 }());
 var SASafeHouseState = (function () {
     function SASafeHouseState(game) {
@@ -5301,18 +5135,16 @@ var PaxPamir = (function () {
             _a[CLIENT_INITIAL_BRIBE_CHECK] = new ClientInitialBribeCheckState(this),
             _a[CLIENT_PLAY_CARD] = new ClientPlayCardState(this),
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
-            _a[CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE] = new ClientResolveEventConfidenceFailureState(this),
-            _a[CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS] = new ClientResolveEventOtherPersuasiveMethodsState(this),
-            _a[CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES] = new ClientResolveEventPashtunwaliValuesState(this),
-            _a[CLIENT_RESOLVE_EVENT_REBUKE] = new ClientResolveEventRebukeState(this),
-            _a[CLIENT_RESOLVE_EVENT_RUMOR] = new ClientResolveEventRumorState(this),
             _a.acceptPrize = new AcceptPrizeState(this),
             _a.discard = new DiscardState(this),
+            _a.eventCardPashtunwaliValues = new ResolveEventPashtunwaliValuesState(this),
+            _a.eventCardOtherPersuasiveMethods = new ResolveEventOtherPersuasiveMethodsState(this),
+            _a.eventCardRumor = new ResolveEventRumor(this),
+            _a.eventCardRebuke = new ResolveEventRebukeState(this),
             _a.negotiateBribe = new NegotiateBribeState(this),
             _a.placeRoad = new PlaceRoadState(this),
             _a.placeSpy = new PlaceSpyState(this),
             _a.playerActions = new PlayerActionsState(this),
-            _a.resolveEvent = new ResolveEventState(this),
             _a.setup = new SetupState(this),
             _a.selectPiece = new SelectPieceState(this),
             _a.specialAbilityInfrastructure = new ClientCardActionBuildState(this, true),
@@ -5344,16 +5176,8 @@ var PaxPamir = (function () {
         debug('Ending game setup');
     };
     PaxPamir.prototype.onEnteringState = function (stateName, args) {
-        var ALWAYS_ENTER = [
-            'resolveEvent',
-            CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE,
-            CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS,
-            CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES,
-            CLIENT_RESOLVE_EVENT_REBUKE,
-            CLIENT_RESOLVE_EVENT_RUMOR,
-        ];
         console.log('Entering state: ' + stateName, args);
-        if ((this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) || ALWAYS_ENTER.includes(stateName)) {
+        if (this.framework().isCurrentPlayerActive() && this.activeStates[stateName]) {
             this.activeStates[stateName].onEnteringState(args.args);
         }
     };

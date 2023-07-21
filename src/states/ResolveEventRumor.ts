@@ -1,16 +1,12 @@
-class ClientResolveEventOtherPersuasiveMethodsState implements State {
+class ResolveEventRumor implements State {
   private game: PaxPamirGame;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ event }: ClientResolveEventStateArgs) {
-    if (this.game.framework().isCurrentPlayerActive()) {
-      this.updateInterfaceInitialStep();
-    } else {
-      this.updateInterfaceOtherPlayers();
-    }
+  onEnteringState(_props: OnEnteringResolveEventStateArgs) {
+    this.updateInterfaceInitialStep();
   }
 
   onLeavingState() {}
@@ -31,34 +27,21 @@ class ClientResolveEventOtherPersuasiveMethodsState implements State {
   // .##....##....##....##.......##........##....##
   // ..######.....##....########.##.........######.
 
-  private updateInterfaceOtherPlayers() {
-    this.game.clearPossible();
-
-    this.game.clientUpdatePageTitleOtherPlayers({
-      text: _('${actplayer} must exchange hand with another player'),
-      args: {
-        actplayer: '${actplayer}',
-      },
-    });
-  }
-
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a player to exchange your hand with',
+      text: '${you} must select a player',
       args: {
         you: '${you}',
       },
     });
     const players = this.game.playerManager.getPlayers();
-    players
-      .filter((player) => player.getPlayerId() !== this.game.getPlayerId())
-      .forEach((player) => {
-        this.game.addPlayerButton({
-          callback: () => this.updateInterfaceConfirmPlayer({ player }),
-          player,
-        });
+    players.forEach((player) => {
+      this.game.addPlayerButton({
+        callback: () => this.updateInterfaceConfirmPlayer({ player }),
+        player,
       });
+    });
   }
 
   private updateInterfaceConfirmPlayer({ player }: { player: PPPlayer }) {
@@ -74,9 +57,9 @@ class ClientResolveEventOtherPersuasiveMethodsState implements State {
       text: _('Confirm'),
       callback: () =>
         this.game.takeAction({
-          action: 'eventChoice',
+          action: 'eventCardRumor',
           data: {
-            data: JSON.stringify({ playerId: player.getPlayerId() }),
+            playerId: player.getPlayerId(),
           },
         }),
     });
@@ -90,4 +73,13 @@ class ClientResolveEventOtherPersuasiveMethodsState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  // private addPlayerButton({ player }: { player: PPPlayer }) {
+  //   this.game.addPrimaryActionButton({
+  //     id: `select_${player.getPlayerId()}`,
+  //     text: player.getName(),
+  //     callback: () => this.updateInterfaceConfirmPlayer({ player }),
+  //     extraClasses: `pp_player_button pp_player_color_${player.getColor()}`,
+  //   });
+  // }
 }

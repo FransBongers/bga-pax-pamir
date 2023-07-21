@@ -196,7 +196,7 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_DOMINANCE_CHECK_SETUP = 'dispDominanceCheckSetup';
 
   const DISPATCH_EVENT_RESOLVE_PURCHASED = 'dispEventResolvePurchased';
-  const DISPATCH_EVENT_RESOLVE_PLAYER_ACTION = 'dispEventResolvePlayerAction';
+  // const DISPATCH_EVENT_RESOLVE_PLAYER_ACTION = 'dispEventResolvePlayerAction';
 
   // const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
   const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';

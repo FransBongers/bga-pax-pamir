@@ -254,6 +254,39 @@ class action_paxpamireditiontwo extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function eventCardPashtunwaliValues()
+    {
+        self::setAjaxMode();
+        $suit = self::getArg("suit", AT_alphanum, true);
+        $result = $this->game->eventCardPashtunwaliValues($suit);
+        self::ajaxResponse();
+    }
+    
+    public function eventCardOtherPersuasiveMethods()
+    {
+        self::setAjaxMode();
+        $playerId = self::getArg("playerId", AT_alphanum, true);
+        $result = $this->game->eventCardOtherPersuasiveMethods($playerId);
+        self::ajaxResponse();
+    }
+
+    public function eventCardRebuke()
+    {
+        self::setAjaxMode();
+        $regionId = self::getArg("regionId", AT_alphanum, true);
+        $result = $this->game->eventCardRebuke($regionId);
+        self::ajaxResponse();
+    }
+
+
+    public function eventCardRumor()
+    {
+        self::setAjaxMode();
+        $playerId = self::getArg("playerId", AT_alphanum, true);
+        $result = $this->game->eventCardRumor($playerId);
+        self::ajaxResponse();
+    }
+
     public function purchaseGift()
     {
         self::setAjaxMode();

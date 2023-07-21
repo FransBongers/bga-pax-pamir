@@ -35,46 +35,38 @@ class Events
     $action = array_pop($actionStack);
     $event = $action['data']['event'];
     $playerId = $action['playerId'];
-
+    Notifications::log('actionStack',$actionStack);
     switch ($event) {
       case ECE_DOMINANCE_CHECK:
-        $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+        $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
           'cards' => [$action['data']['cardId']],
         ]);
         break;
       case ECE_KOH_I_NOOR_RECOVERED: // card_106
-        // TODO: update player cylinder counrt
+        // TODO: update player cylinder count
         break;
       case ECE_RUMOR: // card_108
-        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
-          'event' => ECE_RUMOR,
+        $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+          'transition' => 'eventCardRumor',
         ]);
-        // Events::setCurrentEventGlobalState(ECE_RUMOR);
-        // Game::get()->nextState("resolveEvent");
         break;
       case ECE_BACKING_OF_PERSIAN_ARISTOCRACY: // card_113
         Events::backingOfPersianAristocracy($playerId);
         break;
       case ECE_OTHER_PERSUASIVE_METHODS: // card_114
-        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
-          'event' => ECE_OTHER_PERSUASIVE_METHODS,
+        $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+          'transition' => 'eventCardOtherPersuasiveMethods',
         ]);
-        // Events::setCurrentEventGlobalState(ECE_OTHER_PERSUASIVE_METHODS);
-        // Game::get()->nextState("resolveEvent");
         break;
       case ECE_PASHTUNWALI_VALUES: // card_115
-        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
-          'event' => ECE_PASHTUNWALI_VALUES,
+        $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+          'transition' => 'eventCardPashtunwaliValues',
         ]);
-        // Events::setCurrentEventGlobalState(ECE_PASHTUNWALI_VALUES);
-        // Game::get()->nextState("resolveEvent");
         break;
       case ECE_REBUKE: // card_116
-        $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PLAYER_ACTION,$playerId,[
-          'event' => ECE_REBUKE,
+        $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+          'transition' => 'eventCardRebuke',
         ]);
-        // Events::setCurrentEventGlobalState(ECE_REBUKE);
-        // Game::get()->nextState("resolveEvent");
         break;
       case ECE_NEW_TACTICS: // card_105
       case ECE_COURTLY_MANNERS: // card_107
@@ -86,8 +78,7 @@ class Events
         break;
     }
 
-    ActionStack::set($actionStack);
-    Game::get()->nextState('dispatchAction');
+    ActionStack::next($actionStack);
   }
 
   // .########.##.....##.########.##....##.########..######.
@@ -98,16 +89,17 @@ class Events
   // .##.........##.##...##.......##...###....##....##....##
   // .########....###....########.##....##....##.....######.
 
-  public static function resolveDiscardEffect($card, $location, $playerId)
+  public static function resolveDiscardEffect($actionStack, $card, $location, $playerId)
   {
     $event = $card['discarded']['effect'];
     Notifications::log('event', $event);
     switch ($event) {
         // cards 101-104
       case ECE_DOMINANCE_CHECK:
-        return [ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+        $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
           'cards' => [$card['id']],
-        ])];
+        ]);
+        return $actionStack;
         break;
         // card 105
       case ECE_MILITARY_SUIT:
@@ -135,7 +127,7 @@ class Events
         break;
         // card 111
       case ECE_NO_EFFECT:
-        // Event has a discard effect instead of purchasse effect
+        // Event has a discard effect instead of purchase effect
         Events::publicWithdrawal($location);
         break;
         // card 112
@@ -148,7 +140,7 @@ class Events
         break;
         // card 114
       case ECE_CONFIDENCE_FAILURE:
-        return Events::confidenceFailure($playerId);
+        return array_merge($actionStack, Events::confidenceFailure($playerId));
         break;
         // card 115
       case ECE_INTELLIGENCE_SUIT:

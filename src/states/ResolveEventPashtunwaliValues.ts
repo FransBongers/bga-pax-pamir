@@ -1,17 +1,12 @@
-class ClientResolveEventRebukeState implements State {
+class ResolveEventPashtunwaliValuesState implements State {
   private game: PaxPamirGame;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ event }: ClientResolveEventStateArgs) {
-    debug('clientState rebuke')
-    if (this.game.framework().isCurrentPlayerActive()) {
-      this.updateInterfaceInitialStep();
-    } else {
-      this.updateInterfaceOtherPlayers();
-    }
+  onEnteringState(_props: OnEnteringResolveEventStateArgs) {
+    this.updateInterfaceInitialStep();
   }
 
   onLeavingState() {}
@@ -32,50 +27,30 @@ class ClientResolveEventRebukeState implements State {
   // .##....##....##....##.......##........##....##
   // ..######.....##....########.##.........######.
 
-  private updateInterfaceOtherPlayers() {
-    this.game.clearPossible();
-
-    this.game.clientUpdatePageTitleOtherPlayers({
-      text: _('${actplayer} must select a region'),
-      args: {
-        actplayer: '${actplayer}',
-      },
-    });
-  }
-
   private updateInterfaceInitialStep() {
-    // this.game.clearPossible();
+    this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a region',
+      text: '${you} must select a suit to favor',
       args: {
         you: '${you}',
       },
     });
-
-    this.game.map.setSelectable();
-
-    REGIONS.forEach((regionId) => {
-      const element = document.getElementById(`pp_region_${regionId}`);
-      if (element) {
-        element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceRegionSelected({ regionId })));
-      }
+    SUITS.forEach((suit) => {
+      const name = this.game.gamedatas.staticData.suits[suit].name;
+      this.game.addPrimaryActionButton({
+        id: `${suit}_btn`,
+        text: _(name),
+        callback: () => this.updateInterfaceConfirmSuit({ suit, name }),
+      });
     });
   }
 
-  private updateInterfaceRegionSelected({ regionId }: { regionId: string }) {
+  private updateInterfaceConfirmSuit({ suit, name }: { suit: string; name: string }) {
     this.game.clearPossible();
-
-    // dojo.removeClass('confirm_btn', 'disabled');
-    this.game.map.setSelectable();
-    const element = document.getElementById(`pp_region_${regionId}`);
-    if (element) {
-      element.classList.add(PP_SELECTED);
-    }
     this.game.clientUpdatePageTitle({
-      text: 'Remove all tribes and armies from ${regionName}?',
+      text: 'Choose ${suitName}?',
       args: {
-        regionName: this.game.gamedatas.staticData.regions[regionId].name,
+        suitName: name,
       },
     });
     this.game.addPrimaryActionButton({
@@ -83,9 +58,9 @@ class ClientResolveEventRebukeState implements State {
       text: _('Confirm'),
       callback: () =>
         this.game.takeAction({
-          action: 'eventChoice',
+          action: 'eventCardPashtunwaliValues',
           data: {
-            data: JSON.stringify({ regionId }),
+            suit,
           },
         }),
     });

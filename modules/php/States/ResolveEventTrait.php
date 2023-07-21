@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -24,13 +25,13 @@ trait ResolveEventTrait
   // .##.....##.##....##..##....##..##....##
   // .##.....##.##.....##..######....######.
 
-  function argResolveEvent()
-  {
-    $currentEvent = Globals::getCurrentEvent();
-    return [
-      'event' => $currentEvent['event'],
-    ];
-  }
+  // function argResolveEvent()
+  // {
+  //   $currentEvent = Globals::getCurrentEvent();
+  //   return [
+  //     'event' => $currentEvent['event'],
+  //   ];
+  // }
 
   //  .########..##..........###....##....##.########.########.
   //  .##.....##.##.........##.##....##..##..##.......##.....##
@@ -48,66 +49,27 @@ trait ResolveEventTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function eventChoice($data)
+  function eventCardPashtunwaliValues($suit)
   {
-    self::checkAction('eventChoice');
-    Notifications::log('eventChoice', $data);
-    $currentEvent = Globals::getCurrentEvent();
-    switch ($currentEvent['event']) {
-      case ECE_CONFIDENCE_FAILURE:
-        $this->resolveConfidenceFailure($currentEvent, $data);
-        break;
-      case ECE_OTHER_PERSUASIVE_METHODS:
-        $this->resolveOtherPersuasiveMethods($data);
-        break;
-      case ECE_PASHTUNWALI_VALUES:
-        $this->resolvePashtunwaliValues($data);
-        break;
-      case ECE_REBUKE:
-        $this->resolveRebuke($data);
-        break;
-      case ECE_RUMOR:
-        $this->resolveRumor($data);
-        break;
-      default:
-        throw new \feException("Unable to resolve event");
-    }
+    self::checkAction('eventCardPashtunwaliValues');
+    $this->resolveFavoredSuitChange($suit, ECE_PASHTUNWALI_VALUES);
+    $actionStack = ActionStack::get();
+    ActionStack::next($actionStack);
   }
 
-  // .##.....##.########.####.##.......####.########.##....##
-  // .##.....##....##.....##..##........##.....##.....##..##.
-  // .##.....##....##.....##..##........##.....##......####..
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // ..#######.....##....####.########.####....##.......##...
-
-  private function resolveConfidenceFailure($currentEvent, $data)
+  function eventCardOtherPersuasiveMethods($selectedPlayerId)
   {
-    $cardId = $data['cardId'];
-    Notifications::log('resolveConfidenceFailure', $cardId);
+    self::checkAction('eventCardOtherPersuasiveMethods');
+    Notifications::log('selected',$selectedPlayerId);
+    $actionStack = ActionStack::get();
+    $selectedPlayerId = intval($selectedPlayerId);
 
+
+    $selectedPlayer = Players::get($selectedPlayerId);
     $player = Players::get();
     $playerId = $player->getId();
-    $card = Cards::get($cardId);
 
-    if ($card['location'] !== Locations::hand($playerId)) {
-      throw new \feException("Card is not in players hand");
-    }
-
-    Cards::insertOnTop($cardId, DISCARD);
-    Notifications::discardFromHand($card, $player);
-    $nextPlayerId = Players::getNextId($player);
-    $currentEvent['resolvedForPlayers'][] = $playerId;
-    Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
-  }
-
-  private function resolveOtherPersuasiveMethods($data)
-  {
-
-    $selectedPlayer = Players::get($data['playerId']);
-    $player = Players::get();
-    if ($player->getId() === $selectedPlayer->getId()) {
+    if ($playerId === $selectedPlayerId) {
       throw new \feException("Player must select another player");
     };
     $selectedPlayerHand = $selectedPlayer->getHandCards();
@@ -116,10 +78,10 @@ trait ResolveEventTrait
 
     Cards::move(array_map(function ($card) {
       return $card['id'];
-    }, $selectedPlayerHand), Locations::hand($player->getId()));
+    }, $selectedPlayerHand), Locations::hand($playerId));
     Cards::move(array_map(function ($card) {
       return $card['id'];
-    }, $playerHand), Locations::hand($selectedPlayer->getId()));
+    }, $playerHand), Locations::hand($selectedPlayerId));
 
     Notifications::log('resolveOtherPersuasiveMethods', [
       'selectedPlayerHand'  => $selectedPlayerHand,
@@ -132,18 +94,16 @@ trait ResolveEventTrait
 
     Notifications::replaceHand($player, $selectedPlayerHand);
     Notifications::replaceHand($selectedPlayer, $playerHand);
-    $this->nextState("playerActions");
+
+    ActionStack::next($actionStack);
   }
 
-  private function resolvePashtunwaliValues($data)
-  {
-    $this->resolveFavoredSuitChange($data['suit'], ECE_PASHTUNWALI_VALUES);
-    $this->nextState("playerActions");
-  }
 
-  private function resolveRebuke($data)
+  function eventCardRebuke($regionId)
   {
-    $regionId = $data['regionId'];
+    self::checkAction('eventCardRebuke');
+    $actionStack = ActionStack::get();
+
     $tribeMoves = Map::removeTribesFromRegion($regionId);
     $armyMoves = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('${player_name} removes all tribes and armies from ${logTokenRegionName}');
@@ -154,18 +114,28 @@ trait ResolveEventTrait
       'moves' => $moves
     ]);
     Map::checkRulerChange($regionId);
-    $this->nextState("playerActions");
+
+    ActionStack::next($actionStack);
   }
 
-  private function resolveRumor($data)
+
+
+  function eventCardRumor($selectedPlayerId)
   {
+    self::checkAction('eventCardRumor');
+    $actionStack = ActionStack::get();
+
     $player = Players::get();
     $playerId = $player->getId();
-    $selectedPlayerId = $data['playerId'];
+
+    $selectedPlayerId = intval($selectedPlayerId);
     $selectedPlayer = Players::get($selectedPlayerId);
+
     $message = clienttranslate('${player_name} chooses ${player_name2}');
+
     $from = 'events_' . $playerId;
     $to = 'events_' . $selectedPlayerId;
+
     $moves = $playerId === $selectedPlayerId ? [] : [[
       'from' => $from,
       'to' => $to,
@@ -181,6 +151,16 @@ trait ResolveEventTrait
       'value' => $selectedPlayer->getInfluence(),
     ]];
     Notifications::updateInfluence($updates);
-    $this->nextState("playerActions");
+
+    ActionStack::next($actionStack);
   }
+
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
 }

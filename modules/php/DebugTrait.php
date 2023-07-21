@@ -61,9 +61,9 @@ trait DebugTrait
   function test()
   {
 
-    $this->debugSetupTokens();
+    // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    // Cards::move('card_114','market_0_0');
+    Cards::move('card_116','market_0_0');
 
     // $this->dispatchRefillMarketDrawCards([]);
 

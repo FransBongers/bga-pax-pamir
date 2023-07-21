@@ -9,6 +9,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -36,6 +37,41 @@ trait PlayerActionTrait
       'usedCards' => Cards::getUnavailableCards(),
       'bribe' => isset($bribe['action']) ? $bribe : null,
     ];
+  }
+
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  function dispatchPayRupeesToMarket($actionStack)
+  {
+    $action = array_pop($actionStack);
+    $cost = $action['data']['cost'];
+    $playerId = $action['playerId'];
+    Notifications::log('dispatchPayRupeesToMarket',$action);
+    $rupeesOnCards = $this->payActionCosts($cost);
+    Players::incRupees($playerId, -$cost);
+
+    $player = Players::get($playerId);
+
+    Notifications::payRupeesToMarket(
+      $player,
+      $rupeesOnCards
+    );
+
+    ActionStack::next($actionStack);
   }
 
   //  .########..##..........###....##....##.########.########.

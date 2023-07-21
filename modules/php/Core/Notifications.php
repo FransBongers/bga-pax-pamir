@@ -190,9 +190,9 @@ class Notifications
     ]);
   }
 
-  public static function drawMarketCard($player,$cardId,$from,$to)
+  public static function drawMarketCard($player, $cardId, $from, $to)
   {
-    
+
     self::notifyAll("drawMarketCard", clienttranslate('${player_name} draws a new card for the market${logTokenNewLine}${logTokenLargeCard}'), array(
       'player' => $player,
       'cardId' => $cardId,
@@ -337,7 +337,7 @@ class Notifications
     ));
   }
 
-  public static function declinePrize($cardId,$player)
+  public static function declinePrize($cardId, $player)
   {
     $card = Cards::get($cardId);
     $message =  clienttranslate('${player_name} declines ${logTokenCardName} as a prize${logTokenNewLine}${logTokenLargeCard}');
@@ -350,7 +350,7 @@ class Notifications
     ));
   }
 
-  public static function acceptPrize($cardId,$player)
+  public static function acceptPrize($cardId, $player)
   {
     $card = Cards::get($cardId);
     $message =  clienttranslate('${player_name} accepts ${logTokenCardName} as a prize${logTokenNewLine}${logTokenLargeCard}');
@@ -362,7 +362,7 @@ class Notifications
     ));
   }
 
-  public static function takePrize($cardId,$player)
+  public static function takePrize($cardId, $player)
   {
     $card = Cards::get($cardId);
     self::notifyAll("takePrize", '', array(
@@ -459,7 +459,7 @@ class Notifications
     } else if ($from === COURT) {
       $message = clienttranslate('${player_name} discards ${logTokenCardName} from court${logTokenNewLine}${logTokenLargeCard}');
     }
-      
+
     self::notifyAll("discardMessage", $message, array(
       'player' => $player,
       'logTokenCardName' => Utils::logTokenCardName($card['name']),
@@ -470,7 +470,7 @@ class Notifications
     ));
   }
 
-  public static function discard($card, $player, $from,$to)
+  public static function discard($card, $player, $from, $to)
   {
     self::notifyAll("discard", '', array(
       'player' => $player,
@@ -630,7 +630,29 @@ class Notifications
     ));
   }
 
-  public static function placeSpy($cylinderId,$player,$cardId,$from,$to)
+  public static function payRupeesToMarket($player, $rupeesOnCards)
+  {
+    self::notifyAll("payRupeesToMarket", '', [
+      'player' => $player,
+      'rupeesOnCards' => $rupeesOnCards,
+    ]);
+  }
+
+  public static function placeGift($cylinderId, $player, $from, $to)
+  {
+    Notifications::moveToken('', [
+      'player' => $player,
+      'moves' => [
+        [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinderId,
+        ]
+      ]
+    ]);
+  }
+
+  public static function placeSpy($cylinderId, $player, $cardId, $from, $to)
   {
     $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
     Notifications::moveToken($message, [
@@ -649,7 +671,7 @@ class Notifications
     ]);
   }
 
-  public static function placeTribe($cylinderId,$player,$regionId,$from,$to)
+  public static function placeTribe($cylinderId, $player, $regionId, $from, $to)
   {
     $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
     Notifications::moveToken($message, [
@@ -665,7 +687,7 @@ class Notifications
       ]
     ]);
   }
-  
+
 
   public static function playCard($card, $courtCards, $side, $playerId)
   {
@@ -709,15 +731,15 @@ class Notifications
     ));
   }
 
-  public static function purchaseGift($player, $value, $move, $rupeesOnCards)
+  public static function purchaseGift($player, $value)
   {
     self::notifyAll("purchaseGift", clienttranslate('${player_name} purchases a gift for ${value} rupees'), array(
       'player' => $player,
       'value' => $value,
-      'rupeesOnCards' => $rupeesOnCards,
-      'rupeeChange' => -$value,
-      'influenceChange' => Events::isKohINoorRecoveredActive($player) ? 2 : 1,
-      'tokenMove' => $move
+      // 'rupeesOnCards' => $rupeesOnCards,
+      // 'rupeeChange' => -$value,
+      // 'influenceChange' => Events::isKohINoorRecoveredActive($player) ? 2 : 1,
+      // 'tokenMove' => $move
     ));
   }
 

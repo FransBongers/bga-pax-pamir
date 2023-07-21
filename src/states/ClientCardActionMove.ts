@@ -232,10 +232,7 @@ class ClientCardActionMoveState implements State {
       text: _('Cancel'),
       callback: () => {
         this.returnPiecesToOriginalPosition();
-        // setTimeout(() => {
           this.game.onCancel();
-        // },this.bribe?.negotiated ? 100 : 0)
-        
       },
     });
   }

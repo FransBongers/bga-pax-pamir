@@ -50,7 +50,8 @@ trait DebugTrait
     $this->debugCreateTribe(PUNJAB);
     $this->debugCreateTribe(PUNJAB);
     $this->debugCreateTribe(PUNJAB);
-    // $this->debugCreateTribe(PUNJAB);
+    $this->debugCreateTribe(KABUL);
+    $this->debugCreateTribe(KABUL);
     $this->debugCreateTribe(TRANSCASPIA);
     $this->debugCreateTribe(TRANSCASPIA);
     $this->debugCreateTribe(TRANSCASPIA);

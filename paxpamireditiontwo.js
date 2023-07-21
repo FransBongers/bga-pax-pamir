@@ -4790,9 +4790,9 @@ var NotificationManager = (function () {
             ['moveCard', 1000],
             ['moveToken', 1000],
             ['payBribe', 1],
+            ['payRupeesToMarket', 100],
             ['publicWithdrawal', 1000],
             ['purchaseCard', 2000],
-            ['purchaseGift', 1],
             ['playCard', 2000],
             ['shiftMarket', 250],
             ['replaceHand', 250],
@@ -5082,6 +5082,16 @@ var NotificationManager = (function () {
         var briberId = args.briberId, rulerId = args.rulerId, rupees = args.rupees;
         this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees: rupees });
     };
+    NotificationManager.prototype.notif_payRupeesToMarket = function (notif) {
+        var _this = this;
+        debug('notif_payRupeesToMarket', notif.args);
+        var _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
+        rupeesOnCards.forEach(function (item, index) {
+            var row = item.row, column = item.column, rupeeId = item.rupeeId;
+            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
+            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+        });
+    };
     NotificationManager.prototype.notif_playCard = function (notif) {
         console.log('notif_playCard', notif);
         this.game.clearPossible();
@@ -5130,26 +5140,6 @@ var NotificationManager = (function () {
         else {
             this.getPlayer({ playerId: playerId }).addCardToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
         }
-    };
-    NotificationManager.prototype.notif_purchaseGift = function (notif) {
-        var _this = this;
-        console.log('notif_purchaseGift', notif);
-        this.game.clearPossible();
-        var _a = notif.args, rupeesOnCards = _a.rupeesOnCards, playerId = _a.playerId, tokenMove = _a.tokenMove, influenceChange = _a.influenceChange;
-        rupeesOnCards.forEach(function (item, index) {
-            var row = item.row, column = item.column, rupeeId = item.rupeeId;
-            _this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
-            _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
-        });
-        var tokenId = tokenMove.tokenId, from = tokenMove.from, to = tokenMove.to;
-        var fromZone = this.game.getZoneForLocation({ location: from });
-        var toZone = this.game.getZoneForLocation({ location: to });
-        this.game.move({
-            id: tokenId,
-            from: fromZone,
-            to: toZone,
-        });
-        this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
     };
     NotificationManager.prototype.notif_shiftMarket = function (notif) {
         var _this = this;

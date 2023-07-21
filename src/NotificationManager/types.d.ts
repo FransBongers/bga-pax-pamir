@@ -145,6 +145,12 @@ interface NotifMoveTokenArgs {
   moves: TokenMove[];
 }
 
+interface NotifPayRupeesToMarketArgs {
+  playerId: number;
+  player_name: string;
+  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+}
+
 interface NotifPlayCardArgs {
   playerId: string;
   player_name: string;
@@ -173,14 +179,14 @@ interface NotifPurchaseGiftArgs {
   playerId: number;
   player_name: string;
   value: number;
-  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
-  rupeeChange: number;
-  influenceChange: number;
-  tokenMove: {
-    from: string;
-    to: string;
-    tokenId: string;
-  };
+  // rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+  // rupeeChange: number;
+  // influenceChange: number;
+  // tokenMove: {
+  //   from: string;
+  //   to: string;
+  //   tokenId: string;
+  // };
 }
 
 interface NotifShiftMarketArgs {

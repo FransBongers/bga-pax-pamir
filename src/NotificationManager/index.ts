@@ -42,9 +42,9 @@ class NotificationManager {
       ['changeFavoredSuit', 250],
       ['changeLoyalty', 1],
       ['clearTurn', 1],
-      ['drawMarketCard',1000],
+      ['drawMarketCard', 1000],
       ['discard', 1000],
-      ['discardFromMarket',1000], // TODO: check if we can remove this
+      ['discardFromMarket', 1000], // TODO: check if we can remove this
       ['discardPrizes', 1000],
       ['exchangeHand', 100],
       ['dominanceCheckScores', 1],
@@ -52,9 +52,10 @@ class NotificationManager {
       ['moveCard', 1000],
       ['moveToken', 1000],
       ['payBribe', 1],
+      ['payRupeesToMarket', 100],
       ['publicWithdrawal', 1000],
       ['purchaseCard', 2000],
-      ['purchaseGift', 1],
+      // ['purchaseGift', 1],
       ['playCard', 2000],
       ['shiftMarket', 250],
       ['replaceHand', 250],
@@ -233,7 +234,7 @@ class NotificationManager {
     } else if (from === HAND) {
       player.discardHandCard({ cardId, to });
       player.incCounter({ counter: 'cards', value: -1 });
-    } 
+    }
     // else if(from.startsWith('market')) {
     //   this.game.market.discardCard({
     //     cardId,
@@ -422,6 +423,17 @@ class NotificationManager {
     this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees });
   }
 
+  notif_payRupeesToMarket(notif: Notif<NotifPayRupeesToMarketArgs>) {
+    debug('notif_payRupeesToMarket', notif.args);
+    const { playerId, rupeesOnCards } = notif.args;
+    // Place paid rupees on market cards
+    rupeesOnCards.forEach((item, index) => {
+      const { row, column, rupeeId } = item;
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+    });
+  }
+
   notif_playCard(notif: Notif<NotifPlayCardArgs>) {
     console.log('notif_playCard', notif);
 
@@ -487,31 +499,31 @@ class NotificationManager {
     }
   }
 
-  notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
-    console.log('notif_purchaseGift', notif);
-    this.game.clearPossible();
-    const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
+  // notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
+  //   console.log('notif_purchaseGift', notif);
+  //   this.game.clearPossible();
+  //   const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
 
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
+  //   // Place paid rupees on market cards
+  //   rupeesOnCards.forEach((item, index) => {
+  //     const { row, column, rupeeId } = item;
+  //     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+  //     this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+  //   });
 
-    // Move cylinder
-    const { tokenId, from, to } = tokenMove;
-    const fromZone = this.game.getZoneForLocation({ location: from });
-    const toZone = this.game.getZoneForLocation({ location: to });
-    this.game.move({
-      id: tokenId,
-      from: fromZone,
-      to: toZone,
-    });
+  //   // Move cylinder
+  //   const { tokenId, from, to } = tokenMove;
+  //   const fromZone = this.game.getZoneForLocation({ location: from });
+  //   const toZone = this.game.getZoneForLocation({ location: to });
+  //   this.game.move({
+  //     id: tokenId,
+  //     from: fromZone,
+  //     to: toZone,
+  //   });
 
-    // Update influence
-    this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
-  }
+  //   // Update influence
+  //   this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
+  // }
 
   notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>) {
     console.log('notif_shiftMarket', notif);
@@ -550,7 +562,7 @@ class NotificationManager {
   }
 
   notif_drawMarketCard(notif: Notif<NotifDrawMarketCardArgs>) {
-    debug('notif_drawMarketCard',notif.args);
+    debug('notif_drawMarketCard', notif.args);
     const { cardId, to } = notif.args;
     const row = Number(to.split('_')[1]);
     const column = Number(to.split('_')[2]);

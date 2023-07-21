@@ -207,6 +207,7 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
   const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
   // const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
+  const DISPATCH_PAY_RUPEES_TO_MARKET = 'dispPayRupeesToMarket';
 
   const DISPATCH_PLACE_ARMY = 'distPlaceArmy';
   const DISPATCH_PLACE_ROAD = 'dispPlaceRoad';

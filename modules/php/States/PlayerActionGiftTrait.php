@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -41,6 +42,7 @@ trait PlayerActionGiftTrait
       return;
     }
 
+    $value = intval($value);
     $player = Players::get();
     $resolved = $this->resolveBribe($cardInfo, $player,GIFT, $offeredBribeAmount);
     if (!$resolved) {
@@ -64,36 +66,31 @@ trait PlayerActionGiftTrait
       throw new \feException("Already a cylinder in selected location.");
     }
 
-    $from = "cylinders_" . $playerId;
-    $cylinder = Tokens::getTopOf($from);
+    Notifications::purchaseGift(
+      $player,
+      $value,
+    );
 
-    // If null player needs to select cylinder from somewhere else
-    if ($cylinder != null) {
-      Tokens::move($cylinder['id'], $location);
-      Cards::setUsed($cardId, 1); // unavailable
-    }
-
+    Cards::setUsed($cardId, 1); // unavailable
     // if not free action reduce remaining actions.
     if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
 
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [
+        'transition' => 'playerActions'
+      ]),
+      ActionStack::createAction(DISPATCH_PLACE_CYLINDER, $playerId, [
+        'value' => $value,
+        'type' => GIFT,
+      ]),
+      ActionStack::createAction(DISPATCH_PAY_RUPEES_TO_MARKET, $player->getId(), [
+        'cost' => $value
+      ]),
+    ];
 
-    $rupeesOnCards = $this->payActionCosts($value);
-    Players::incRupees($playerId, -intval($value));
-
-    Notifications::purchaseGift(
-      $player,
-      $value,
-      [
-        'from' => $from,
-        'to' => $location,
-        'tokenId' => $cylinder['id'],
-      ],
-      $rupeesOnCards
-    );
-
-    $this->gamestate->nextState('playerActions');
+    ActionStack::next($actionStack);
   }
 
 

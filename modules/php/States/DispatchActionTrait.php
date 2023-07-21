@@ -96,6 +96,9 @@ trait DispatchActionTrait
       case DISPATCH_OVERTHROW_TRIBE:
         $this->dispatchOverthrowTribe($actionStack);
         break;
+      case DISPATCH_PAY_RUPEES_TO_MARKET:
+        $this->dispatchPayRupeesToMarket($actionStack);
+        break;
       case DISPATCH_PLACE_ARMY:
         $this->dispatchPlaceArmy($actionStack);      
         break;

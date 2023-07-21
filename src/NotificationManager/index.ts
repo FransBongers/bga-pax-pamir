@@ -234,6 +234,11 @@ class NotificationManager {
     } else if (from === HAND) {
       player.discardHandCard({ cardId, to });
       player.incCounter({ counter: 'cards', value: -1 });
+    } else if (from === ACTIVE_EVENTS) {
+      this.game.activeEvents.removeFromZone(cardId, false);
+      discardCardAnimation({ cardId, game: this.game, to });
+    } else if (from.startsWith('events_')) {
+      player.discardEventCard({ cardId });
     }
     // else if(from.startsWith('market')) {
     //   this.game.market.discardCard({

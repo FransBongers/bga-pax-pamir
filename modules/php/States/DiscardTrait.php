@@ -186,7 +186,7 @@ trait DiscardTrait
     // 3. Discard all patriots
     array_pop($actionStack);
     foreach ($cardsToDiscard as $index => $card) {
-      $actionStack[] = ActionStack::createAction('discardSingleCard', $playerId, [
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $playerId, [
         'cardId' => $card['id'],
         'from' => COURT,
         'to' => DISCARD

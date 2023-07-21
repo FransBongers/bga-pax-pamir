@@ -138,7 +138,7 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
  */
 const DISCARD = 'discard';
 const TEMP_DISCARD = 'temp_discard';
-const ACTIVE_EVENTS = 'active_events';
+const ACTIVE_EVENTS = 'activeEvents';
 const HAND = 'hand';
 const COURT = 'court';
 
@@ -186,6 +186,9 @@ const LOG_TOKEN_RUPEE = 'rupee';
   const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
   const DISPATCH_DISCARD = 'dispatchDiscard';
   const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
+  const DISPATCH_DISCARD_SINGLE_CARD = 'dispDiscardSingleCard';
+  
+
   const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';
 
   const DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES = 'dispDominanceAfterAbilities';

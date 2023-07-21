@@ -605,6 +605,13 @@ class PPPlayer {
     discardCardAnimation({ cardId, game: this.game, to });
   }
 
+  discardEventCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
+    // Move card to discard pile
+    this.events.removeFromZone(cardId, false);
+    discardCardAnimation({ cardId, game: this.game, to });
+    this.checkEventContainerHeight();
+  }
+
   discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
     if (this.playerId === this.game.getPlayerId()) {
       const node = dojo.byId(cardId);

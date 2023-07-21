@@ -288,6 +288,7 @@ var cardActionClientStateMap = (_a = {},
     _a[MOVE] = CLIENT_CARD_ACTION_MOVE,
     _a[TAX] = CLIENT_CARD_ACTION_TAX,
     _a);
+var ACTIVE_EVENTS = 'activeEvents';
 var DISCARD = 'discard';
 var TEMP_DISCARD = 'temp_discard';
 var HAND = 'hand';
@@ -1285,6 +1286,12 @@ var PPPlayer = (function () {
         node.classList.remove("pp_player_".concat(this.playerId));
         this.court.removeFromZone(cardId, false);
         discardCardAnimation({ cardId: cardId, game: this.game, to: to });
+    };
+    PPPlayer.prototype.discardEventCard = function (_a) {
+        var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
+        this.events.removeFromZone(cardId, false);
+        discardCardAnimation({ cardId: cardId, game: this.game, to: to });
+        this.checkEventContainerHeight();
     };
     PPPlayer.prototype.discardHandCard = function (_a) {
         var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
@@ -4747,6 +4754,13 @@ var NotificationManager = (function () {
         else if (from === HAND) {
             player.discardHandCard({ cardId: cardId, to: to });
             player.incCounter({ counter: 'cards', value: -1 });
+        }
+        else if (from === ACTIVE_EVENTS) {
+            this.game.activeEvents.removeFromZone(cardId, false);
+            discardCardAnimation({ cardId: cardId, game: this.game, to: to });
+        }
+        else if (from.startsWith('events_')) {
+            player.discardEventCard({ cardId: cardId });
         }
     };
     NotificationManager.prototype.notif_returnSpies = function (notif) {

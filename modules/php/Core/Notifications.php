@@ -454,7 +454,9 @@ class Notifications
   public static function discardMessage($card, $player, $from, $cardOwner = null)
   {
     $message = clienttranslate('${player_name} discards ${logTokenCardName} from hand${logTokenNewLine}${logTokenLargeCard}');
-    if ($from === COURT && $cardOwner !== null && $cardOwner->getId() !== $player->getId()) {
+    if ($card['type'] === EVENT_CARD) {
+      $message = clienttranslate('${player_name} discards event card${logTokenNewLine}${logTokenLargeCard}');
+    } if ($from === COURT && $cardOwner !== null && $cardOwner->getId() !== $player->getId()) {
       $message = clienttranslate('${player_name} discards ${logTokenCardName} from ${logTokenOtherPlayerName}\'s court${logTokenNewLine}${logTokenLargeCard}');
     } else if ($from === COURT) {
       $message = clienttranslate('${player_name} discards ${logTokenCardName} from court${logTokenNewLine}${logTokenLargeCard}');
@@ -462,7 +464,7 @@ class Notifications
 
     self::notifyAll("discardMessage", $message, array(
       'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenCardName' => $card['type'] === EVENT_CARD ? '' : Utils::logTokenCardName($card['name']),
       'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
       'logTokenOtherPlayerName' => $cardOwner === null ? '' : Utils::logTokenPlayerName($cardOwner->getId()),
       'cardId' => $card['id'],
@@ -471,6 +473,16 @@ class Notifications
   }
 
   public static function discard($card, $player, $from, $to)
+  {
+    self::notifyAll("discard", '', array(
+      'player' => $player,
+      'cardId' => $card['id'],
+      'from' => $from,
+      'to' => $to,
+    ));
+  }
+
+  public static function discardEventCard($card, $player, $from, $to)
   {
     self::notifyAll("discard", '', array(
       'player' => $player,

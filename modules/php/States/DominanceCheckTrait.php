@@ -123,6 +123,25 @@ trait DominanceCheckTrait
   function dispatchDominanceCheckDiscardEventInPlay($actionStack)
   {
     array_pop($actionStack);
+
+    $eventCardsPossiblyInPlay = ['card_105','card_106','card_107','card_108','card_109','card_110','card_112','card_115'];
+    $eventCards = Cards::get($eventCardsPossiblyInPlay)->toArray();
+
+    foreach(array_reverse($eventCards) as $index => $card)
+    {
+      $location = $card['location'];
+      if(!($location === ACTIVE_EVENTS || Utils::startsWith($location, 'events_'))) {
+        continue;
+      };
+      $isGlobalEvent = $location === ACTIVE_EVENTS;
+      $cardOwnerId = Utils::startsWith($location, 'events_') ? intval(explode('_',$location)[1]) : null;
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD,$isGlobalEvent ? Players::get()->getId() : $cardOwnerId,[
+        'cardId' => $card['id'],
+        'to' => DISCARD,
+        'from' => $location,
+      ]); 
+    }
+
     ActionStack::next($actionStack);
   }
 

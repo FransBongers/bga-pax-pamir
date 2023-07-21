@@ -43,10 +43,12 @@ const cardActionClientStateMap = {
 /**
  * Locations
  */
+const ACTIVE_EVENTS = 'activeEvents';
 const DISCARD = 'discard';
 const TEMP_DISCARD = 'temp_discard';
 const HAND = 'hand';
 const COURT = 'court';
+// const PLAYER_EVENTS = 'playerEvents';
 
 // size of tokens
 const CARD_WIDTH = 150;

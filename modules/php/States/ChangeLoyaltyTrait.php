@@ -89,7 +89,7 @@ trait ChangeLoyaltyTrait
     // 3. Discard all patriots
     array_pop($actionStack);
     foreach ($patriotsToDiscard as $index => $patriot) {
-      $actionStack[] = ActionStack::createAction('discardSingleCard', $playerId, [
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $playerId, [
         'cardId' => $patriot['id'],
         'from' => COURT,
         'to' => DISCARD

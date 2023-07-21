@@ -138,7 +138,7 @@ trait DispatchActionTrait
       case DISPATCH_DISCARD_PATRIOTS:
         $this->dispatchDiscardPatriots($actionStack);
         break;
-      case 'discardSingleCard':
+      case DISPATCH_DISCARD_SINGLE_CARD:
         $this->dispatchDiscardSingleCard($actionStack);
         break;
       case 'playCard':

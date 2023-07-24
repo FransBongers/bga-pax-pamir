@@ -39,13 +39,13 @@ const tplTooltipImpactIcon = ({ impactIcon, loyalty }: { impactIcon: string; loy
   let icon = '';
   switch (impactIcon) {
     case IMPACT_ICON_ARMY:
-      icon = `<div class="pp_army pp_${loyalty || 'neutral'}"></div>`;
+      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_army_${loyalty || 'neutral'}"></div>`;
       break;
     case IMPACT_ICON_ROAD:
-      icon = `<div class="pp_road pp_${loyalty || 'neutral'}"></div>`;
+      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_road_${loyalty || 'neutral'}"></div>`;
       break;
     case IMPACT_ICON_TRIBE:
-      icon = `<div class="pp_tooltip_impact_icon_tribe pp_impact_icon_${impactIcon}"></div>`;
+      icon = `<div class="pp_tooltip_impact_icon pp_impact_icon_${impactIcon}"></div>`;
       break;
     case IMPACT_ICON_LEVERAGE:
     case IMPACT_ICON_SPY:

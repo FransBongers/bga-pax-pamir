@@ -153,7 +153,7 @@ class Events
       default:
         Notifications::log('no match for event', []);
     }
-    return null;
+    return $actionStack;;
   }
 
 

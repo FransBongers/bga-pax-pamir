@@ -159,12 +159,14 @@
 }
 
 .pp_loyalty_dial_cover {
-  background-size: 204px;
+  background-image: url('img/loyalty_dials.png');
+  background-size: 500% 100%;
+  // background-size: 204px;
   width: 204px;
-  height: 204px;
+  height: 160px;
   position: absolute;
   background-repeat: no-repeat;
-  background-position: bottom;
+  margin-top: 44px;
 }
 
 .pp_gift {
@@ -206,27 +208,27 @@
 
 /* Blue */
 .pp_loyalty_dial_cover.pp_player_color_98B3C0 {
-  background-image: url('img/loyalty_dial_blue.png');
+  background-position-x: 25%;
 }
 
 /* Gray */
 .pp_loyalty_dial_cover.pp_player_color_B9B6B1 {
-  background-image: url('img/loyalty_dial_gray.png');
+  background-position-x: 50%;
 }
 
 /* Yellow / tan */
 .pp_loyalty_dial_cover.pp_player_color_DFCFB6 {
-  background-image: url('img/loyalty_dial_yellow.png');
+  background-position-x: 100%;
 }
 
 /* Red */
 .pp_loyalty_dial_cover.pp_player_color_C19B9E {
-  background-image: url('img/loyalty_dial_red.png');
+  background-position-x: 75%;
 }
 
 /* Black */
 .pp_loyalty_dial_cover.pp_player_color_807F7F {
-  background-image: url('img/loyalty_dial_black.png');
+  background-position-x: 0%;
 }
 
 .pp_court {
@@ -284,8 +286,10 @@
 .pp_card_icon_tableau {
   height: 44px;
   width: 32px;
-  background-size: 32px 44px;
-  background-image: url(img/temp/cards/back.jpg);
+  background-size: 1000% 500%;
+  background-image: url('img/cards2.webp');
+  background-position-x: (calc(2/3)) * 100%;
+  background-position-y: 100%;
   /* margin-left: 16px; */
   border-radius: 3px;
 }

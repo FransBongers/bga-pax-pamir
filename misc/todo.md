@@ -49,3 +49,8 @@
 - Slot events cards under 'player tableau' of player who purchased
 - Add counters to roads / armies to show the number in a region (in case total numner exceeds a certain amount)
 
+### Montage commands
+tokens
+montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 160x+2+2 ../tokens.webp
+cards
+montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 400x+0+0 ../cards.webp

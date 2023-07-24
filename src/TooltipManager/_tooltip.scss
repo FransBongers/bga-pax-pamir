@@ -1,3 +1,5 @@
+@use 'sass:math';
+
 .dijitTooltipContainer {
   padding: 0px !important;
   // background-color: yellow !important;
@@ -11,85 +13,125 @@
 }
 
 .pp_tooltip_card_action {
-  width: 35px;
-  height: 35px;
-  background-size: 35px 35px;
+  width: 40px;
+  height: 40px;
+  background-image: url('img/actions.webp');
+  background-size: 1100% 100%;
   background-repeat: no-repeat;
 }
 
 .pp_card_action_betray {
-  background-image: url('img/action_betray.svg');
+  background-position-x: math.div(2,9) * 100%;
 }
 
 .pp_card_action_battle.pp_rank_1 {
-  background-image: url('img/action_battle_one.svg');
+  background-position-x: 0%;
 }
 
 .pp_card_action_battle.pp_rank_2 {
-  background-image: url('img/action_battle_two.svg');
+  background-position-x: math.div(1,10) * 100%;
 }
 
 .pp_card_action_build {
-  background-image: url('img/action_build.svg');
+  background-position-x: math.div(3,10) * 100%;
 }
 
 .pp_card_action_gift {
-  background-image: url('img/action_gift.svg');
+  background-position-x: math.div(4,10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_1 {
-  background-image: url('img/action_march_one.svg');
+  background-position-x: math.div(5,10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_2 {
-  background-image: url('img/action_march_two.svg');
+  background-position-x: math.div(6,10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_3 {
-  background-image: url('img/action_march_three.svg');
+  background-position-x: math.div(7,10) * 100%;
 }
 
 .pp_card_action_tax.pp_rank_1 {
-  background-image: url('img/action_tax_one.svg');
+  background-position-x: math.div(8,10) * 100%;
 }
 
 .pp_card_action_tax.pp_rank_2 {
-  background-image: url('img/action_tax_two.svg');
+  // background-position-x: 100%;
+  background-position-x: math.div(9,10) * 100%;
 }
 
 .pp_tooltip_impact_icon {
-  width: 35px;
-  height: 35px;
-  background-size: 35px 35px;
+  width: 40px;
+  height: 40px;
+  background-image: url('img/impact_icons.webp');
+  background-size: 1500% 100%;
   background-repeat: no-repeat;
 }
 
+.pp_impact_icon_army_afghan {
+  background-position-x: 0%;
+}
+
+.pp_impact_icon_army_british {
+  background-position-x: math.div(1,14) * 100%;
+}
+
+
+.pp_impact_icon_army_russian {
+  background-position-x: math.div(3,14) * 100%;
+}
+
+
+.pp_impact_icon_army_neutral {
+  background-position-x: math.div(2,14) * 100%;
+}
+
+
 .pp_impact_icon_leverage {
-  background-image: url('img/impact_leverage.svg');
+  background-position-x: math.div(4,14) * 100%;
 }
 
 .pp_impact_icon_spy {
-  background-image: url('img/impact_place_spy.svg');
+  background-position-x: math.div(9,14) * 100%;
 }
 
 .pp_impact_icon_tribe {
-  background-image: url('img/impact_place_tribe.svg');
+  background-position-x: 100%;
 }
 
 .pp_impact_icon_economic_suit {
-  background-image: url('img/impact_suit_economic.svg');
+  background-position-x: math.div(10,14) * 100%;
 }
 
 .pp_impact_icon_military_suit {
-  background-image: url('img/impact_suit_military.svg');
+  background-position-x: math.div(12,14) * 100%;
 }
 
 .pp_impact_icon_political_suit {
-  background-image: url('img/impact_suit_political.svg');
+  background-position-x: math.div(13,14) * 100%;
 }
 
 .pp_impact_icon_intelligence_suit {
-  background-image: url('img/impact_suit_intelligence.svg');
+  background-position-x: math.div(11,14) * 100%;
+}
+
+.pp_impact_icon_road_afghan {
+  background-position-x: math.div(5,14) * 100%;
+}
+
+.pp_impact_icon_road_british {
+  background-position-x: math.div(6,14) * 100%;
+}
+
+
+.pp_impact_icon_road_russian {
+  background-position-x: math.div(8,14) * 100%;
+}
+
+
+.pp_impact_icon_road_neutral {
+  background-position-x: math.div(7,14) * 100%;
 }
 
 .pp_impact_icon_text {

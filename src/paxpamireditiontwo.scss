@@ -13,6 +13,7 @@
  *
  */
 
+@use 'sass:math';
 @use 'base';
 @use 'animation/animation';
 @use 'logs/logs';
@@ -24,6 +25,11 @@
 html {
   background: url('') rgb(192, 192, 192);
 }
+
+// Disable drop shadow for safari
+// html.dj_safari .game-element {
+//   filter: none;
+// } //
 
 .player-board {
   background-color: antiquewhite;
@@ -102,8 +108,10 @@ html {
 #pp_market_deck {
   width: 150px;
   height: 209px;
-  background-size: 150px 209px;
-  background-image: url('img/temp/cards/back.jpg');
+  background-size: 1000% 500%;
+  background-image: url('img/cards2.webp');
+  background-position-x: calc(2/3) * 100%;
+  background-position-y: 100%;
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
 }
@@ -116,7 +124,9 @@ html {
 }
 
 .pp_coalition_block {
-  background-size: contain;
+  background-image: url('img/blocks.webp');
+  background-size: 300% 100%;
+  // background-size: contain;
   background-repeat: no-repeat;
   height: 40px;
   width: 25px;
@@ -124,19 +134,20 @@ html {
 }
 
 .pp_coalition_block.pp_afghan {
-  background-image: url('img/block_afghan.svg');
+  background-position-x: 0%;
 }
 
 .pp_coalition_block.pp_british {
-  background-image: url('img/block_british.svg');
+  background-position-x: 50%;
 }
 
 .pp_coalition_block.pp_russian {
-  background-image: url('img/block_russian.svg');
+  background-position-x: 100%;
 }
 
 .pp_army {
-  background-size: contain;
+  background-image: url('img/armies.webp');
+  background-size: 400% 100%;
   background-repeat: no-repeat;
   height: 40px;
   width: 25px;
@@ -165,23 +176,24 @@ html {
 }
 
 .pp_army.pp_afghan {
-  background-image: url('img/army_afghan.svg');
+  background-position-x: 0%;
 }
 
 .pp_army.pp_british {
-  background-image: url('img/army_british.svg');
+  background-position-x: 33.33333%;
 }
 
 .pp_army.pp_russian {
-  background-image: url('img/army_russian.svg');
+  background-position-x: 100%;
 }
 
 .pp_army.pp_neutral {
-  background-image: url('img/army_neutral.svg');
+  background-position-x: 66.66667%;
 }
 
 .pp_road {
-  background-size: contain;
+  background-image: url('img/roads.webp');
+  background-size: 400% 100%;
   background-repeat: no-repeat;
   height: 27px;
   width: 40px;
@@ -190,23 +202,24 @@ html {
 }
 
 .pp_road.pp_afghan {
-  background-image: url('img/road_afghan.svg');
+  background-position-x: 0%;
 }
 
 .pp_road.pp_british {
-  background-image: url('img/road_british.svg');
+  background-position-x: 33.33333%;
 }
 
 .pp_road.pp_russian {
-  background-image: url('img/road_russian.svg');
+  background-position-x: 100%;
 }
 
 .pp_road.pp_neutral {
-  background-image: url('img/road_neutral.svg');
+  background-position-x: 66.66667%;
 }
 
 .pp_cylinder {
-  background-size: contain;
+  background-image: url('img/cylinders.webp');;
+  background-size: 500% 100%;
   background-repeat: no-repeat;
   height: 30px;
   width: 30px;
@@ -227,27 +240,27 @@ html {
 }
 
 .pp_cylinder.pp_player_color_98B3C0 {
-  background-image: url('img/cylinder_blue.svg');
+  background-position-x: 25%;
 }
 
 .pp_cylinder.pp_player_color_B9B6B1 {
-  background-image: url('img/cylinder_grey.svg');
+  background-position-x: 50%;
 }
 
 .pp_cylinder.pp_player_color_DFCFB6 {
-  background-image: url('img/cylinder_yellow.svg');
+  background-position-x: 100%;
 }
 
 .pp_cylinder.pp_player_color_C19B9E {
-  background-image: url('img/cylinder_red.svg');
+  background-position-x: 75%;
 }
 
 .pp_cylinder.pp_player_color_807F7F {
-  background-image: url('img/cylinder_black.svg');
+  background-position-x: 0%;
 }
 
 #pp_market_board {
-  background-image: url('img/temp/paxpamir_market.jpg');
+  background-image: url('img/paxpamir_market.jpg');
   background-size: 1000px 492px;
   background-repeat: no-repeat;
   grid-column: 1 / span 1;
@@ -312,7 +325,7 @@ html {
 .pp_card_in_zone {
   width: 150px;
   height: 209px;
-  background-size: 150px 209px;
+  // background-size: 150px 209px;
   // box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
   box-shadow: 2px 2px 5px -1px #000;
   border-radius: 10px;
@@ -405,10 +418,10 @@ html {
 .pp_rupee {
   width: 50px;
   height: 50px;
-  /* background-image: url('img/temp/rupee.png'); */
   border-radius: 25px;
-  box-shadow: 1px 1px 4px;
+  // box-shadow: 1px 1px 4px;
   z-index: 1;
+  filter: drop-shadow(rgba(0, 0, 0, 0.5) 2px 2px 2px);
 }
 
 .pp_rupee.pp_selectable,
@@ -426,8 +439,9 @@ html {
 }
 
 .pp_rupee_inner {
-  background-size: 100%;
-  background-image: url('img/rupee.svg');
+  background-size: 1100% 100%;
+  background-position-x: 100%;
+  background-image: url('img/actions.webp');
   width: 100%;
   height: 100%;
 }
@@ -444,34 +458,39 @@ html {
   pointer-events: none;
 }
 
+.pp_region_icon {
+  background-image: url('img/region_icons.webp');
+  background-size: 600% 100%;
+}
+
 .pp_herat_icon,
 .pp_herat.pp_region_icon {
-  background-image: url('img/region_herat.svg');
+  background-position-x: 0%;
 }
 
 .pp_kabul_icon,
 .pp_kabul.pp_region_icon {
-  background-image: url('img/region_kabul.svg');
+  background-position-x: 20%;
 }
 
 .pp_kandahar_icon,
 .pp_kandahar.pp_region_icon {
-  background-image: url('img/region_kandahar.svg');
+  background-position-x: 40%;
 }
 
 .pp_persia_icon,
 .pp_persia.pp_region_icon {
-  background-image: url('img/region_persia.svg');
+  background-position-x: 60%;
 }
 
 .pp_punjab_icon,
 .pp_punjab.pp_region_icon {
-  background-image: url('img/region_punjab.svg');
+  background-position-x: 80%;
 }
 
 .pp_transcaspia_icon,
 .pp_transcaspia.pp_region_icon {
-  background-image: url('img/region_transcaspia.svg');
+  background-position-x: 100%;
 }
 
 /* BUTTONS */
@@ -524,14 +543,28 @@ html {
 
 /* ------- CARDS START ------- */
 
-@for $i from 1 through 116 {
+@for $i from 1 through 70 {
   .pp_card_#{$i} {
-    background-image: url('img/temp/cards/#{$i}.jpg');
+    background-image: url('img/cards1.webp');
+    background-size: 1000% 700%;
+    background-position-x: math.div((($i - 1) % 10 * 100%), 9);
+    background-position-y: math.div(math.floor(calc(($i - 1) / 10)) * 100%, 6);
+  }
+}
+
+@for $i from 71 through 116 {
+  .pp_card_#{$i} {
+    background-image: url('img/cards2.webp');
+    background-size: 1000% 500%;
+    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
+    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
   }
 }
 
 .pp_card_back {
-  background-image: url('img/temp/cards/back.jpg');
+  background-image: url('img/cards2.jpg');
+  background-position-x: math.div((117 - 71) % 10 * 100%, 9);
+  background-position-y: math.div(math.floor(calc((117 - 71) / 10)) * 100%, 4);
 }
 
 /* ------- CARDS END ------- */

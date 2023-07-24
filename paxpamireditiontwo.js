@@ -511,13 +511,13 @@ var tplTooltipImpactIcon = function (_a) {
     var icon = '';
     switch (impactIcon) {
         case IMPACT_ICON_ARMY:
-            icon = "<div class=\"pp_army pp_".concat(loyalty || 'neutral', "\"></div>");
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_army_".concat(loyalty || 'neutral', "\"></div>");
             break;
         case IMPACT_ICON_ROAD:
-            icon = "<div class=\"pp_road pp_".concat(loyalty || 'neutral', "\"></div>");
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_road_".concat(loyalty || 'neutral', "\"></div>");
             break;
         case IMPACT_ICON_TRIBE:
-            icon = "<div class=\"pp_tooltip_impact_icon_tribe pp_impact_icon_".concat(impactIcon, "\"></div>");
+            icon = "<div class=\"pp_tooltip_impact_icon pp_impact_icon_".concat(impactIcon, "\"></div>");
             break;
         case IMPACT_ICON_LEVERAGE:
         case IMPACT_ICON_SPY:

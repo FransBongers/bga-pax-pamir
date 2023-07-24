@@ -3,7 +3,7 @@
 /* ------- MAP AND REGIONS ------- */
 
 #pp_map {
-  background-image: url('img/temp/paxpamir_board.jpg');
+  background-image: url('img/paxpamir_board.jpg');
   background-size: 1000px 581px;
   background-repeat: no-repeat;
   grid-column: 1 / span 1;
@@ -153,34 +153,41 @@
 .pp_ruler_token {
   height: 50px;
   width: 50px;
-  background-size: contain;
+  background-image: url('img/ruler_tokens.webp');
+  background-size: 600% 100%;
   background-repeat: no-repeat;
   box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.4);
   border-radius: 50%;
 }
 
 .pp_ruler_token.pp_herat {
-  background-image: url('img/ruler_token_herat.svg');
+  // background-image: url('img/ruler_token_herat.svg');
+  background-position-x: 0%;
 }
 
 .pp_ruler_token.pp_kabul {
-  background-image: url('img/ruler_token_kabul.svg');
+  // background-image: url('img/ruler_token_kabul.svg');
+  background-position-x: 20%;
 }
 
 .pp_ruler_token.pp_kandahar {
-  background-image: url('img/ruler_token_kandahar.svg');
+  // background-image: url('img/ruler_token_kandahar.svg');
+  background-position-x: 40%;
 }
 
 .pp_ruler_token.pp_persia {
-  background-image: url('img/ruler_token_persia.svg');
+  // background-image: url('img/ruler_token_persia.svg');
+  background-position-x: 60%;
 }
 
 .pp_ruler_token.pp_punjab {
-  background-image: url('img/ruler_token_punjab.svg');
+  // background-image: url('img/ruler_token_punjab.svg');
+  background-position-x: 80%;
 }
 
 .pp_ruler_token.pp_transcaspia {
-  background-image: url('img/ruler_token_transcaspia.svg');
+  // background-image: url('img/ruler_token_transcaspia.svg');
+  background-position-x: 100%;
 }
 
 .pp_location.pp_selectable {

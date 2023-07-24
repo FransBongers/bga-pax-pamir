@@ -1,6 +1,44 @@
 <?php
 
 /**
+ * State names
+ */
+
+const ST_GAME_SETUP = 1;
+const ST_PLAYER_SETUP = 2;
+const ST_PREPARE_TURN = 3;
+const ST_NEXT_PLAYER = 3;
+const ST_START_OF_TURN_ABILITIES = 4;
+
+const ST_DISPATCH_ACTION = 10;
+
+
+const ST_PLAYER_ACTIONS = 20;
+const ST_PLACE_ROAD = 21;
+const ST_PLACE_SPY = 22;
+const ST_NEGOTIATE_BRIBE = 23;
+const ST_ACCEPT_PRIZE = 24;
+const ST_DISCARD = 25;
+const ST_SELECT_PIECE = 26;
+
+const ST_CLEANUP = 40;
+const ST_CLEANUP_DISCARD_EVENTS = 41;
+const ST_REFILL_MARKET = 42;
+
+const ST_SA_SAFE_HOUSE = 50;
+const ST_SA_INFRASTRUCTURE = 51;
+
+const ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS = 60;
+const ST_RESOLVE_ECE_PASHTUNWALI_VALUES = 61;
+const ST_RESOLVE_ECE_REBUKE = 62;
+const ST_RESOLVE_ECE_RUMOR = 63;
+
+const ST_CHANGE_ACTIVE_PLAYER = 95;
+const ST_END_GAME = 99;
+
+
+
+/**
  * Actions 
  */
 const PLAY_CARD = 'playCard';
@@ -104,7 +142,7 @@ const SA_CITADEL_TRANSCASPIA_CARD_ID = 'card_97';
 const SA_STRANGE_BEDFELLOWS = 'strangeBedfellows'; // card_21
 const SA_CIVIL_SERVICE_REFORMS = 'civilServiceReforms'; // card_24
 const SA_SAFE_HOUSE = 'safeHouse'; // card_41 card_72
-const SA_SAFE_HOUSE_CARD_IDS = ['card_41','card_72'];
+const SA_SAFE_HOUSE_CARD_IDS = ['card_41', 'card_72'];
 const SA_CHARISMATIC_COURTIERS = 'charismaticCourtiers'; // card_42
 const SA_BLACKMAIL_HERAT = 'blackmailHerat'; // card_54
 const SA_BLACKMAIL_KANDAHAR = 'blackmailKandahar'; // card_43
@@ -178,65 +216,65 @@ const LOG_TOKEN_RUPEE = 'rupee';
  * Stats
  */
 
- /**
-  * Dispatch actions
-  */
-  const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
-  const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
-  const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
-  const DISPATCH_DISCARD = 'dispatchDiscard';
-  const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
-  const DISPATCH_DISCARD_SINGLE_CARD = 'dispDiscardSingleCard';
-  
+/**
+ * Dispatch actions
+ */
+const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
+const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
+const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
+const DISPATCH_DISCARD = 'dispatchDiscard';
+const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
+const DISPATCH_DISCARD_SINGLE_CARD = 'dispDiscardSingleCard';
 
-  const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';
 
-  const DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES = 'dispDominanceAfterAbilities';
-  const DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY = 'dispDominanceCheckDiscardEventsInPlay';
-  const DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK = 'dispDominanceCheckEndGameCheck';
-  const DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS = 'dispDominanceRemoveBlocks';
-  const DISPATCH_DOMINANCE_CHECK_RESOLVE = 'dispDominanceCheckResolve';
-  const DISPATCH_DOMINANCE_CHECK_SETUP = 'dispDominanceCheckSetup';
+const DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE = 'dispatchDiscardAllCourtOfType';
 
-  const DISPATCH_EVENT_RESOLVE_PURCHASED = 'dispEventResolvePurchased';
-  // const DISPATCH_EVENT_RESOLVE_PLAYER_ACTION = 'dispEventResolvePlayerAction';
+const DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES = 'dispDominanceAfterAbilities';
+const DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY = 'dispDominanceCheckDiscardEventsInPlay';
+const DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK = 'dispDominanceCheckEndGameCheck';
+const DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS = 'dispDominanceRemoveBlocks';
+const DISPATCH_DOMINANCE_CHECK_RESOLVE = 'dispDominanceCheckResolve';
+const DISPATCH_DOMINANCE_CHECK_SETUP = 'dispDominanceCheckSetup';
 
-  // const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
-  const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';
-  const DISPATCH_IMPACT_ICON_INTELLIGENCE = 'dispatchImpactIntelligence';
-  const DISPATCH_IMPACT_ICON_MILITARY = 'dispatchImpactMilitary';
-  const DISPATCH_IMPACT_ICON_LEVERAGE = 'dispatchImpactLeverage';
-  const DISPATCH_IMPACT_ICON_POLITICAL = 'dispatchImpactPolitical';
-  const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
-  const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
-  // const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
-  const DISPATCH_PAY_RUPEES_TO_MARKET = 'dispPayRupeesToMarket';
+const DISPATCH_EVENT_RESOLVE_PURCHASED = 'dispEventResolvePurchased';
+// const DISPATCH_EVENT_RESOLVE_PLAYER_ACTION = 'dispEventResolvePlayerAction';
 
-  const DISPATCH_PLACE_ARMY = 'distPlaceArmy';
-  const DISPATCH_PLACE_ROAD = 'dispPlaceRoad';
-  // const DISPATCH_PLACE_SPY = 'dispPlaceSpy';
-  const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
-  
-  const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
-  const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
-  const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
-  
-  const DISPATCH_TRANSITION = 'dispatchTransition';
+// const DISPATCH_IMPACT_ICON_ARMY = 'dispatchImpactArmy';
+const DISPATCH_IMPACT_ICON_ECONOMIC = 'dispatchImpactEconomic';
+const DISPATCH_IMPACT_ICON_INTELLIGENCE = 'dispatchImpactIntelligence';
+const DISPATCH_IMPACT_ICON_MILITARY = 'dispatchImpactMilitary';
+const DISPATCH_IMPACT_ICON_LEVERAGE = 'dispatchImpactLeverage';
+const DISPATCH_IMPACT_ICON_POLITICAL = 'dispatchImpactPolitical';
+const DISPATCH_IMPACT_ICON_ROAD = 'dispatchImpactRoad';
+const DISPATCH_IMPACT_ICON_SPY = 'dispatchImpactSpy';
+// const DISPATCH_IMPACT_ICON_TRIBE = 'dispatchImpactTribe';
+const DISPATCH_PAY_RUPEES_TO_MARKET = 'dispPayRupeesToMarket';
 
-  const IMPACT_ICON_DISPATCH_MAP = [
-    ARMY => DISPATCH_PLACE_ARMY,
-    ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,
-    INTELLIGENCE_SUIT => DISPATCH_IMPACT_ICON_INTELLIGENCE,
-    MILITARY_SUIT => DISPATCH_IMPACT_ICON_MILITARY,
-    LEVERAGE => DISPATCH_IMPACT_ICON_LEVERAGE,
-    POLITICAL_SUIT => DISPATCH_IMPACT_ICON_POLITICAL,
-    ROAD => DISPATCH_IMPACT_ICON_ROAD,
-    SPY => DISPATCH_IMPACT_ICON_SPY,
-    TRIBE => DISPATCH_PLACE_CYLINDER
-  ];
+const DISPATCH_PLACE_ARMY = 'distPlaceArmy';
+const DISPATCH_PLACE_ROAD = 'dispPlaceRoad';
+// const DISPATCH_PLACE_SPY = 'dispPlaceSpy';
+const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
 
-  /**
-   * 
-   */
-  const USED = 1;
-  const NOT_USED = 0;
+const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
+const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
+const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
+
+const DISPATCH_TRANSITION = 'dispatchTransition';
+
+const IMPACT_ICON_DISPATCH_MAP = [
+  ARMY => DISPATCH_PLACE_ARMY,
+  ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,
+  INTELLIGENCE_SUIT => DISPATCH_IMPACT_ICON_INTELLIGENCE,
+  MILITARY_SUIT => DISPATCH_IMPACT_ICON_MILITARY,
+  LEVERAGE => DISPATCH_IMPACT_ICON_LEVERAGE,
+  POLITICAL_SUIT => DISPATCH_IMPACT_ICON_POLITICAL,
+  ROAD => DISPATCH_IMPACT_ICON_ROAD,
+  SPY => DISPATCH_IMPACT_ICON_SPY,
+  TRIBE => DISPATCH_PLACE_CYLINDER
+];
+
+/**
+ * 
+ */
+const USED = 1;
+const NOT_USED = 0;

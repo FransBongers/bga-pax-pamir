@@ -42,30 +42,31 @@
 }
 
 .pp_log_token.pp_log_token_rupee {
-  background-image: url("img/rupee.svg");
+  background-size: 1100% 100%;
+  background-position-x: 100%;
+  background-image: url("img/actions.webp");
   width: 25px;
   height: 25px;
-  background-size: 25px 25px;
   border-radius: 50%;
   margin-bottom: -5px;
   background-repeat: no-repeat;
 }
 
 .pp_log_token.pp_leverage {
-  background-image: url("img/impact_leverage.svg");
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
   width: 25px;
   height: 25px;
-  background-size: 25px 25px;
+  background-position-x: 28.5714285714%;
   background-repeat: no-repeat;
   margin-bottom: -5px;
 }
 
 .pp_log_token.pp_region_icon {
-  width: 15px;
-  height: 15px;
-  background-size: 15px 15px;
+  width: 25px;
+  height: 25px;
   background-repeat: no-repeat;
-  margin-bottom: -2px;
+  margin-bottom: -5px;
   margin-top: 5px;
 }
 
@@ -89,8 +90,7 @@
 
 .pp_log_token.pp_card {
   height: 30px;
-  width: 22px;
-  background-size: 22px 30px;
+  width: 21px;
   border-radius: 2px !important;
   box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.4) !important;
   margin-bottom: -5px;
@@ -98,9 +98,8 @@
 
 .pp_log_token.pp_card.pp_large {
   display: inline-block;
-  width: 75px;
+  width: 74px;
   height: 104px;
-  background-size: 75px 104px;
   border-radius: 5px !important;
   box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
   margin-top: 2px;
@@ -108,7 +107,7 @@
 }
 
 .pp_log_token.pp_army {
-  background-size: contain;
+  background-size: 400% 100%;
   background-repeat: no-repeat;
   height: 30px;
   width: 19px;
@@ -134,24 +133,32 @@
 }
 
 .pp_impact_icon_suit.economic {
-  background-image: url("img/impact_suit_economic.svg");
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
+  background-position-x: 71.4285714286%;
 }
 
 .pp_impact_icon_suit.military {
-  background-image: url("img/impact_suit_military.svg");
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
+  background-position-x: 85.7142857143%;
 }
 
 .pp_impact_icon_suit.political {
-  background-image: url("img/impact_suit_political.svg");
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
+  background-position-x: 92.8571428571%;
 }
 
 .pp_impact_icon_suit.intelligence {
-  background-image: url("img/impact_suit_intelligence.svg");
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
+  background-position-x: 78.5714285714%;
 }
 
 /* ------- MAP AND REGIONS ------- */
 #pp_map {
-  background-image: url("img/temp/paxpamir_board.jpg");
+  background-image: url("img/paxpamir_board.jpg");
   background-size: 1000px 581px;
   background-repeat: no-repeat;
   grid-column: 1/span 1;
@@ -290,34 +297,35 @@
 .pp_ruler_token {
   height: 50px;
   width: 50px;
-  background-size: contain;
+  background-image: url("img/ruler_tokens.webp");
+  background-size: 600% 100%;
   background-repeat: no-repeat;
   box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
   border-radius: 50%;
 }
 
 .pp_ruler_token.pp_herat {
-  background-image: url("img/ruler_token_herat.svg");
+  background-position-x: 0%;
 }
 
 .pp_ruler_token.pp_kabul {
-  background-image: url("img/ruler_token_kabul.svg");
+  background-position-x: 20%;
 }
 
 .pp_ruler_token.pp_kandahar {
-  background-image: url("img/ruler_token_kandahar.svg");
+  background-position-x: 40%;
 }
 
 .pp_ruler_token.pp_persia {
-  background-image: url("img/ruler_token_persia.svg");
+  background-position-x: 60%;
 }
 
 .pp_ruler_token.pp_punjab {
-  background-image: url("img/ruler_token_punjab.svg");
+  background-position-x: 80%;
 }
 
 .pp_ruler_token.pp_transcaspia {
-  background-image: url("img/ruler_token_transcaspia.svg");
+  background-position-x: 100%;
 }
 
 .pp_location.pp_selectable {
@@ -487,22 +495,20 @@
 .pp_suit_icon {
   height: 46px;
   background-size: 44px;
-}
-
-.pp_suit_icon.economic {
-  background-image: url("img/suit_economic.svg");
+  background-image: url("img/suits.webp");
+  background-size: 400% 100%;
 }
 
 .pp_suit_icon.military {
-  background-image: url("img/suit_military.svg");
+  background-position-x: 66.66667%;
 }
 
 .pp_suit_icon.political {
-  background-image: url("img/suit_political.svg");
+  background-position-x: 100%;
 }
 
 .pp_suit_icon.intelligence {
-  background-image: url("img/suit_intelligence.svg");
+  background-position-x: 33.33333%;
 }
 
 .pp_icon_count {
@@ -539,70 +545,72 @@
 }
 
 .pp_loyalty_icon {
-  /* height: 30px; */
+  background-image: url("img/coalition_icons.webp");
   /* background-size: 132px 30px;  */
   /* background-position: -250px 0px; */
-  background-size: contain;
+  background-size: 300% 100%;
   background-repeat: no-repeat;
-  /* width: 44px; */
 }
 
 .pp_loyalty_icon.pp_afghan {
-  background-image: url("img/loyalty_afghan.svg");
   height: 25px;
   padding-bottom: 12px;
+  background-position-x: 0%;
 }
 
 .pp_loyalty_icon.pp_british {
-  background-image: url("img/loyalty_british.svg");
   height: 16px;
   padding-bottom: 22px;
+  background-position-x: 50%;
 }
 
 .pp_loyalty_icon.pp_russian {
-  background-image: url("img/loyalty_russian.svg");
   height: 14px;
   padding-bottom: 22px;
+  background-position-x: 100%;
 }
 
 .pp_cylinder_icon {
-  /* background-image: url(img/temp/tokens.png);
-  background-size: 220px 44px; */
+  background-image: url("img/cylinders.webp");
+  background-size: 500% 100%;
   height: 44px;
 }
 
 .pp_cylinder_icon.pp_player_color_98B3C0 {
-  background-image: url("img/cylinder_blue.svg");
+  background-position-x: 25%;
 }
 
 .pp_cylinder_icon.pp_player_color_B9B6B1 {
-  background-image: url("img/cylinder_grey.svg");
+  background-position-x: 50%;
 }
 
 .pp_cylinder_icon.pp_player_color_DFCFB6 {
-  background-image: url("img/cylinder_yellow.svg");
+  background-position-x: 100%;
 }
 
 .pp_cylinder_icon.pp_player_color_C19B9E {
-  background-image: url("img/cylinder_red.svg");
+  background-position-x: 75%;
 }
 
 .pp_cylinder_icon.pp_player_color_807F7F {
-  background-image: url("img/cylinder_black.svg");
+  background-position-x: 0%;
 }
 
 .pp_player_board_rupee {
   height: 44px;
-  background-size: 44px;
-  background-image: url("img/rupee.svg");
+  background-size: 1100% 100%;
+  background-position-x: 100%;
+  background-image: url("img/actions.webp");
   border-radius: 50%;
 }
 
 .pp_card_icon {
   height: 44px;
   width: 32px;
-  background-size: 32px 44px;
-  background-image: url("img/temp/cards/back.jpg");
+  background-size: 1000% 500%;
+  background-image: url("img/cards2.webp");
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
   margin-left: 16px;
   border-radius: 3px;
 }
@@ -756,12 +764,13 @@
 }
 
 .pp_loyalty_dial_cover {
-  background-size: 204px;
+  background-image: url("img/loyalty_dials.png");
+  background-size: 500% 100%;
   width: 204px;
-  height: 204px;
+  height: 160px;
   position: absolute;
   background-repeat: no-repeat;
-  background-position: bottom;
+  margin-top: 44px;
 }
 
 .pp_gift {
@@ -803,27 +812,27 @@
 
 /* Blue */
 .pp_loyalty_dial_cover.pp_player_color_98B3C0 {
-  background-image: url("img/loyalty_dial_blue.png");
+  background-position-x: 25%;
 }
 
 /* Gray */
 .pp_loyalty_dial_cover.pp_player_color_B9B6B1 {
-  background-image: url("img/loyalty_dial_gray.png");
+  background-position-x: 50%;
 }
 
 /* Yellow / tan */
 .pp_loyalty_dial_cover.pp_player_color_DFCFB6 {
-  background-image: url("img/loyalty_dial_yellow.png");
+  background-position-x: 100%;
 }
 
 /* Red */
 .pp_loyalty_dial_cover.pp_player_color_C19B9E {
-  background-image: url("img/loyalty_dial_red.png");
+  background-position-x: 75%;
 }
 
 /* Black */
 .pp_loyalty_dial_cover.pp_player_color_807F7F {
-  background-image: url("img/loyalty_dial_black.png");
+  background-position-x: 0%;
 }
 
 .pp_court {
@@ -880,8 +889,10 @@
 .pp_card_icon_tableau {
   height: 44px;
   width: 32px;
-  background-size: 32px 44px;
-  background-image: url(img/temp/cards/back.jpg);
+  background-size: 1000% 500%;
+  background-image: url("img/cards2.webp");
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
   /* margin-left: 16px; */
   border-radius: 3px;
 }
@@ -910,85 +921,119 @@
 }
 
 .pp_tooltip_card_action {
-  width: 35px;
-  height: 35px;
-  background-size: 35px 35px;
+  width: 40px;
+  height: 40px;
+  background-image: url("img/actions.webp");
+  background-size: 1100% 100%;
   background-repeat: no-repeat;
 }
 
 .pp_card_action_betray {
-  background-image: url("img/action_betray.svg");
+  background-position-x: 22.2222222222%;
 }
 
 .pp_card_action_battle.pp_rank_1 {
-  background-image: url("img/action_battle_one.svg");
+  background-position-x: 0%;
 }
 
 .pp_card_action_battle.pp_rank_2 {
-  background-image: url("img/action_battle_two.svg");
+  background-position-x: 10%;
 }
 
 .pp_card_action_build {
-  background-image: url("img/action_build.svg");
+  background-position-x: 30%;
 }
 
 .pp_card_action_gift {
-  background-image: url("img/action_gift.svg");
+  background-position-x: 40%;
 }
 
 .pp_card_action_move.pp_rank_1 {
-  background-image: url("img/action_march_one.svg");
+  background-position-x: 50%;
 }
 
 .pp_card_action_move.pp_rank_2 {
-  background-image: url("img/action_march_two.svg");
+  background-position-x: 60%;
 }
 
 .pp_card_action_move.pp_rank_3 {
-  background-image: url("img/action_march_three.svg");
+  background-position-x: 70%;
 }
 
 .pp_card_action_tax.pp_rank_1 {
-  background-image: url("img/action_tax_one.svg");
+  background-position-x: 80%;
 }
 
 .pp_card_action_tax.pp_rank_2 {
-  background-image: url("img/action_tax_two.svg");
+  background-position-x: 90%;
 }
 
 .pp_tooltip_impact_icon {
-  width: 35px;
-  height: 35px;
-  background-size: 35px 35px;
+  width: 40px;
+  height: 40px;
+  background-image: url("img/impact_icons.webp");
+  background-size: 1500% 100%;
   background-repeat: no-repeat;
 }
 
+.pp_impact_icon_army_afghan {
+  background-position-x: 0%;
+}
+
+.pp_impact_icon_army_british {
+  background-position-x: 7.1428571429%;
+}
+
+.pp_impact_icon_army_russian {
+  background-position-x: 21.4285714286%;
+}
+
+.pp_impact_icon_army_neutral {
+  background-position-x: 14.2857142857%;
+}
+
 .pp_impact_icon_leverage {
-  background-image: url("img/impact_leverage.svg");
+  background-position-x: 28.5714285714%;
 }
 
 .pp_impact_icon_spy {
-  background-image: url("img/impact_place_spy.svg");
+  background-position-x: 64.2857142857%;
 }
 
 .pp_impact_icon_tribe {
-  background-image: url("img/impact_place_tribe.svg");
+  background-position-x: 100%;
 }
 
 .pp_impact_icon_economic_suit {
-  background-image: url("img/impact_suit_economic.svg");
+  background-position-x: 71.4285714286%;
 }
 
 .pp_impact_icon_military_suit {
-  background-image: url("img/impact_suit_military.svg");
+  background-position-x: 85.7142857143%;
 }
 
 .pp_impact_icon_political_suit {
-  background-image: url("img/impact_suit_political.svg");
+  background-position-x: 92.8571428571%;
 }
 
 .pp_impact_icon_intelligence_suit {
-  background-image: url("img/impact_suit_intelligence.svg");
+  background-position-x: 78.5714285714%;
+}
+
+.pp_impact_icon_road_afghan {
+  background-position-x: 35.7142857143%;
+}
+
+.pp_impact_icon_road_british {
+  background-position-x: 42.8571428571%;
+}
+
+.pp_impact_icon_road_russian {
+  background-position-x: 57.1428571429%;
+}
+
+.pp_impact_icon_road_neutral {
+  background-position-x: 50%;
 }
 
 .pp_impact_icon_text {
@@ -1160,8 +1205,10 @@ html {
 #pp_market_deck {
   width: 150px;
   height: 209px;
-  background-size: 150px 209px;
-  background-image: url("img/temp/cards/back.jpg");
+  background-size: 1000% 500%;
+  background-image: url("img/cards2.webp");
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
 }
@@ -1174,7 +1221,8 @@ html {
 }
 
 .pp_coalition_block {
-  background-size: contain;
+  background-image: url("img/blocks.webp");
+  background-size: 300% 100%;
   background-repeat: no-repeat;
   height: 40px;
   width: 25px;
@@ -1182,19 +1230,20 @@ html {
 }
 
 .pp_coalition_block.pp_afghan {
-  background-image: url("img/block_afghan.svg");
+  background-position-x: 0%;
 }
 
 .pp_coalition_block.pp_british {
-  background-image: url("img/block_british.svg");
+  background-position-x: 50%;
 }
 
 .pp_coalition_block.pp_russian {
-  background-image: url("img/block_russian.svg");
+  background-position-x: 100%;
 }
 
 .pp_army {
-  background-size: contain;
+  background-image: url("img/armies.webp");
+  background-size: 400% 100%;
   background-repeat: no-repeat;
   height: 40px;
   width: 25px;
@@ -1221,23 +1270,24 @@ html {
 }
 
 .pp_army.pp_afghan {
-  background-image: url("img/army_afghan.svg");
+  background-position-x: 0%;
 }
 
 .pp_army.pp_british {
-  background-image: url("img/army_british.svg");
+  background-position-x: 33.33333%;
 }
 
 .pp_army.pp_russian {
-  background-image: url("img/army_russian.svg");
+  background-position-x: 100%;
 }
 
 .pp_army.pp_neutral {
-  background-image: url("img/army_neutral.svg");
+  background-position-x: 66.66667%;
 }
 
 .pp_road {
-  background-size: contain;
+  background-image: url("img/roads.webp");
+  background-size: 400% 100%;
   background-repeat: no-repeat;
   height: 27px;
   width: 40px;
@@ -1246,23 +1296,24 @@ html {
 }
 
 .pp_road.pp_afghan {
-  background-image: url("img/road_afghan.svg");
+  background-position-x: 0%;
 }
 
 .pp_road.pp_british {
-  background-image: url("img/road_british.svg");
+  background-position-x: 33.33333%;
 }
 
 .pp_road.pp_russian {
-  background-image: url("img/road_russian.svg");
+  background-position-x: 100%;
 }
 
 .pp_road.pp_neutral {
-  background-image: url("img/road_neutral.svg");
+  background-position-x: 66.66667%;
 }
 
 .pp_cylinder {
-  background-size: contain;
+  background-image: url("img/cylinders.webp");
+  background-size: 500% 100%;
   background-repeat: no-repeat;
   height: 30px;
   width: 30px;
@@ -1281,27 +1332,27 @@ html {
 }
 
 .pp_cylinder.pp_player_color_98B3C0 {
-  background-image: url("img/cylinder_blue.svg");
+  background-position-x: 25%;
 }
 
 .pp_cylinder.pp_player_color_B9B6B1 {
-  background-image: url("img/cylinder_grey.svg");
+  background-position-x: 50%;
 }
 
 .pp_cylinder.pp_player_color_DFCFB6 {
-  background-image: url("img/cylinder_yellow.svg");
+  background-position-x: 100%;
 }
 
 .pp_cylinder.pp_player_color_C19B9E {
-  background-image: url("img/cylinder_red.svg");
+  background-position-x: 75%;
 }
 
 .pp_cylinder.pp_player_color_807F7F {
-  background-image: url("img/cylinder_black.svg");
+  background-position-x: 0%;
 }
 
 #pp_market_board {
-  background-image: url("img/temp/paxpamir_market.jpg");
+  background-image: url("img/paxpamir_market.jpg");
   background-size: 1000px 492px;
   background-repeat: no-repeat;
   grid-column: 1/span 1;
@@ -1365,7 +1416,6 @@ html {
 .pp_card_in_zone {
   width: 150px;
   height: 209px;
-  background-size: 150px 209px;
   box-shadow: 2px 2px 5px -1px #000;
   border-radius: 10px;
 }
@@ -1451,10 +1501,9 @@ html {
 .pp_rupee {
   width: 50px;
   height: 50px;
-  /* background-image: url('img/temp/rupee.png'); */
   border-radius: 25px;
-  box-shadow: 1px 1px 4px;
   z-index: 1;
+  filter: drop-shadow(rgba(0, 0, 0, 0.5) 2px 2px 2px);
 }
 
 .pp_rupee.pp_selectable,
@@ -1472,8 +1521,9 @@ html {
 }
 
 .pp_rupee_inner {
-  background-size: 100%;
-  background-image: url("img/rupee.svg");
+  background-size: 1100% 100%;
+  background-position-x: 100%;
+  background-image: url("img/actions.webp");
   width: 100%;
   height: 100%;
 }
@@ -1490,34 +1540,39 @@ html {
   pointer-events: none;
 }
 
+.pp_region_icon {
+  background-image: url("img/region_icons.webp");
+  background-size: 600% 100%;
+}
+
 .pp_herat_icon,
 .pp_herat.pp_region_icon {
-  background-image: url("img/region_herat.svg");
+  background-position-x: 0%;
 }
 
 .pp_kabul_icon,
 .pp_kabul.pp_region_icon {
-  background-image: url("img/region_kabul.svg");
+  background-position-x: 20%;
 }
 
 .pp_kandahar_icon,
 .pp_kandahar.pp_region_icon {
-  background-image: url("img/region_kandahar.svg");
+  background-position-x: 40%;
 }
 
 .pp_persia_icon,
 .pp_persia.pp_region_icon {
-  background-image: url("img/region_persia.svg");
+  background-position-x: 60%;
 }
 
 .pp_punjab_icon,
 .pp_punjab.pp_region_icon {
-  background-image: url("img/region_punjab.svg");
+  background-position-x: 80%;
 }
 
 .pp_transcaspia_icon,
 .pp_transcaspia.pp_region_icon {
-  background-image: url("img/region_transcaspia.svg");
+  background-position-x: 100%;
 }
 
 /* BUTTONS */
@@ -1569,471 +1624,821 @@ html {
 
 /* ------- CARDS START ------- */
 .pp_card_1 {
-  background-image: url("img/temp/cards/1.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 0%;
 }
 
 .pp_card_2 {
-  background-image: url("img/temp/cards/2.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 0%;
 }
 
 .pp_card_3 {
-  background-image: url("img/temp/cards/3.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 0%;
 }
 
 .pp_card_4 {
-  background-image: url("img/temp/cards/4.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 0%;
 }
 
 .pp_card_5 {
-  background-image: url("img/temp/cards/5.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 0%;
 }
 
 .pp_card_6 {
-  background-image: url("img/temp/cards/6.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 0%;
 }
 
 .pp_card_7 {
-  background-image: url("img/temp/cards/7.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 0%;
 }
 
 .pp_card_8 {
-  background-image: url("img/temp/cards/8.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 0%;
 }
 
 .pp_card_9 {
-  background-image: url("img/temp/cards/9.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 0%;
 }
 
 .pp_card_10 {
-  background-image: url("img/temp/cards/10.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 0%;
 }
 
 .pp_card_11 {
-  background-image: url("img/temp/cards/11.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_12 {
-  background-image: url("img/temp/cards/12.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_13 {
-  background-image: url("img/temp/cards/13.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_14 {
-  background-image: url("img/temp/cards/14.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_15 {
-  background-image: url("img/temp/cards/15.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_16 {
-  background-image: url("img/temp/cards/16.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_17 {
-  background-image: url("img/temp/cards/17.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_18 {
-  background-image: url("img/temp/cards/18.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_19 {
-  background-image: url("img/temp/cards/19.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_20 {
-  background-image: url("img/temp/cards/20.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 16.6666666667%;
 }
 
 .pp_card_21 {
-  background-image: url("img/temp/cards/21.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_22 {
-  background-image: url("img/temp/cards/22.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_23 {
-  background-image: url("img/temp/cards/23.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_24 {
-  background-image: url("img/temp/cards/24.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_25 {
-  background-image: url("img/temp/cards/25.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_26 {
-  background-image: url("img/temp/cards/26.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_27 {
-  background-image: url("img/temp/cards/27.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_28 {
-  background-image: url("img/temp/cards/28.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_29 {
-  background-image: url("img/temp/cards/29.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_30 {
-  background-image: url("img/temp/cards/30.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 33.3333333333%;
 }
 
 .pp_card_31 {
-  background-image: url("img/temp/cards/31.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 50%;
 }
 
 .pp_card_32 {
-  background-image: url("img/temp/cards/32.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 50%;
 }
 
 .pp_card_33 {
-  background-image: url("img/temp/cards/33.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 50%;
 }
 
 .pp_card_34 {
-  background-image: url("img/temp/cards/34.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 50%;
 }
 
 .pp_card_35 {
-  background-image: url("img/temp/cards/35.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 50%;
 }
 
 .pp_card_36 {
-  background-image: url("img/temp/cards/36.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 50%;
 }
 
 .pp_card_37 {
-  background-image: url("img/temp/cards/37.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 50%;
 }
 
 .pp_card_38 {
-  background-image: url("img/temp/cards/38.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 50%;
 }
 
 .pp_card_39 {
-  background-image: url("img/temp/cards/39.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 50%;
 }
 
 .pp_card_40 {
-  background-image: url("img/temp/cards/40.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 50%;
 }
 
 .pp_card_41 {
-  background-image: url("img/temp/cards/41.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_42 {
-  background-image: url("img/temp/cards/42.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_43 {
-  background-image: url("img/temp/cards/43.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_44 {
-  background-image: url("img/temp/cards/44.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_45 {
-  background-image: url("img/temp/cards/45.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_46 {
-  background-image: url("img/temp/cards/46.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_47 {
-  background-image: url("img/temp/cards/47.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_48 {
-  background-image: url("img/temp/cards/48.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_49 {
-  background-image: url("img/temp/cards/49.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_50 {
-  background-image: url("img/temp/cards/50.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 66.6666666667%;
 }
 
 .pp_card_51 {
-  background-image: url("img/temp/cards/51.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_52 {
-  background-image: url("img/temp/cards/52.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_53 {
-  background-image: url("img/temp/cards/53.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_54 {
-  background-image: url("img/temp/cards/54.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_55 {
-  background-image: url("img/temp/cards/55.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_56 {
-  background-image: url("img/temp/cards/56.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_57 {
-  background-image: url("img/temp/cards/57.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_58 {
-  background-image: url("img/temp/cards/58.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_59 {
-  background-image: url("img/temp/cards/59.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_60 {
-  background-image: url("img/temp/cards/60.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 83.3333333333%;
 }
 
 .pp_card_61 {
-  background-image: url("img/temp/cards/61.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 0%;
+  background-position-y: 100%;
 }
 
 .pp_card_62 {
-  background-image: url("img/temp/cards/62.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 100%;
 }
 
 .pp_card_63 {
-  background-image: url("img/temp/cards/63.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 100%;
 }
 
 .pp_card_64 {
-  background-image: url("img/temp/cards/64.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 100%;
 }
 
 .pp_card_65 {
-  background-image: url("img/temp/cards/65.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 100%;
 }
 
 .pp_card_66 {
-  background-image: url("img/temp/cards/66.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 100%;
 }
 
 .pp_card_67 {
-  background-image: url("img/temp/cards/67.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
 }
 
 .pp_card_68 {
-  background-image: url("img/temp/cards/68.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 100%;
 }
 
 .pp_card_69 {
-  background-image: url("img/temp/cards/69.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 100%;
 }
 
 .pp_card_70 {
-  background-image: url("img/temp/cards/70.jpg");
+  background-image: url("img/cards1.webp");
+  background-size: 1000% 700%;
+  background-position-x: 100%;
+  background-position-y: 100%;
 }
 
 .pp_card_71 {
-  background-image: url("img/temp/cards/71.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 0%;
 }
 
 .pp_card_72 {
-  background-image: url("img/temp/cards/72.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 0%;
 }
 
 .pp_card_73 {
-  background-image: url("img/temp/cards/73.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 0%;
 }
 
 .pp_card_74 {
-  background-image: url("img/temp/cards/74.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 0%;
 }
 
 .pp_card_75 {
-  background-image: url("img/temp/cards/75.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 0%;
 }
 
 .pp_card_76 {
-  background-image: url("img/temp/cards/76.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 0%;
 }
 
 .pp_card_77 {
-  background-image: url("img/temp/cards/77.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 0%;
 }
 
 .pp_card_78 {
-  background-image: url("img/temp/cards/78.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 0%;
 }
 
 .pp_card_79 {
-  background-image: url("img/temp/cards/79.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 0%;
 }
 
 .pp_card_80 {
-  background-image: url("img/temp/cards/80.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 0%;
 }
 
 .pp_card_81 {
-  background-image: url("img/temp/cards/81.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 25%;
 }
 
 .pp_card_82 {
-  background-image: url("img/temp/cards/82.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 25%;
 }
 
 .pp_card_83 {
-  background-image: url("img/temp/cards/83.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 25%;
 }
 
 .pp_card_84 {
-  background-image: url("img/temp/cards/84.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 25%;
 }
 
 .pp_card_85 {
-  background-image: url("img/temp/cards/85.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 25%;
 }
 
 .pp_card_86 {
-  background-image: url("img/temp/cards/86.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 25%;
 }
 
 .pp_card_87 {
-  background-image: url("img/temp/cards/87.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 25%;
 }
 
 .pp_card_88 {
-  background-image: url("img/temp/cards/88.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 25%;
 }
 
 .pp_card_89 {
-  background-image: url("img/temp/cards/89.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 25%;
 }
 
 .pp_card_90 {
-  background-image: url("img/temp/cards/90.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 25%;
 }
 
 .pp_card_91 {
-  background-image: url("img/temp/cards/91.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 50%;
 }
 
 .pp_card_92 {
-  background-image: url("img/temp/cards/92.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 50%;
 }
 
 .pp_card_93 {
-  background-image: url("img/temp/cards/93.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 50%;
 }
 
 .pp_card_94 {
-  background-image: url("img/temp/cards/94.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 50%;
 }
 
 .pp_card_95 {
-  background-image: url("img/temp/cards/95.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 50%;
 }
 
 .pp_card_96 {
-  background-image: url("img/temp/cards/96.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 50%;
 }
 
 .pp_card_97 {
-  background-image: url("img/temp/cards/97.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 50%;
 }
 
 .pp_card_98 {
-  background-image: url("img/temp/cards/98.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 50%;
 }
 
 .pp_card_99 {
-  background-image: url("img/temp/cards/99.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 50%;
 }
 
 .pp_card_100 {
-  background-image: url("img/temp/cards/100.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 50%;
 }
 
 .pp_card_101 {
-  background-image: url("img/temp/cards/101.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 75%;
 }
 
 .pp_card_102 {
-  background-image: url("img/temp/cards/102.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 75%;
 }
 
 .pp_card_103 {
-  background-image: url("img/temp/cards/103.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 75%;
 }
 
 .pp_card_104 {
-  background-image: url("img/temp/cards/104.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 75%;
 }
 
 .pp_card_105 {
-  background-image: url("img/temp/cards/105.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 75%;
 }
 
 .pp_card_106 {
-  background-image: url("img/temp/cards/106.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 75%;
 }
 
 .pp_card_107 {
-  background-image: url("img/temp/cards/107.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 75%;
 }
 
 .pp_card_108 {
-  background-image: url("img/temp/cards/108.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 75%;
 }
 
 .pp_card_109 {
-  background-image: url("img/temp/cards/109.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 75%;
 }
 
 .pp_card_110 {
-  background-image: url("img/temp/cards/110.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 75%;
 }
 
 .pp_card_111 {
-  background-image: url("img/temp/cards/111.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 100%;
 }
 
 .pp_card_112 {
-  background-image: url("img/temp/cards/112.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 100%;
 }
 
 .pp_card_113 {
-  background-image: url("img/temp/cards/113.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 100%;
 }
 
 .pp_card_114 {
-  background-image: url("img/temp/cards/114.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 100%;
 }
 
 .pp_card_115 {
-  background-image: url("img/temp/cards/115.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 100%;
 }
 
 .pp_card_116 {
-  background-image: url("img/temp/cards/116.jpg");
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 100%;
 }
 
 .pp_card_back {
-  background-image: url("img/temp/cards/back.jpg");
+  background-image: url("img/cards2.jpg");
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
 }
 
 /* ------- CARDS END ------- */

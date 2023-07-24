@@ -443,7 +443,7 @@ $this->cards = array(
   'card_11' => array(
     'id' => 'card_11',
     'actions' => array(
-      BETRAY => array('type' => BETRAY, 'left' => 70, 'top' => 154),
+      TAX => array('type' => TAX, 'left' => 70, 'top' => 154),
       GIFT => array('type' => GIFT, 'left' => 108, 'top' => 154),
     ),
     'flavorText' => clienttranslate("Lapis lazuli has been mined in northwestern Afghanistan for nearly nine thousand years. Prized for its intense blue color, the stone was used in high-end Afghan products, and has been found in ancient Egyptian tombs and throughout Europe and Asia."),

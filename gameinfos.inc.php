@@ -13,7 +13,7 @@
 $gameinfos = array( 
 
 // Name of the game in English (will serve as the basis for translation) 
-'game_name' => "Pax Pamir: Second Edition",
+'game_name' => totranslate("Pax Pamir: Second Edition"),
 
 // Game designer (or game designers, separated by commas)
 'designer' => 'Cole Wehrle',       

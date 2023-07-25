@@ -25,6 +25,7 @@
 
 ## Bugs
 - Return all coalition blocks from map after succesfull dominance check
+- Multiple rupees on card when moving cards in the market
 
 
 ## To check

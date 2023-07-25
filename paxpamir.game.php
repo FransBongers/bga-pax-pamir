@@ -3,13 +3,13 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com>
+ * Paxpamir implementation : © Frans Bongers <fjmbongers@gmail.com>
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  * 
- * paxpamireditiontwo.game.php
+ * paxpamir.game.php
  *
  * This is the main file for your game logic.
  *
@@ -52,7 +52,7 @@ use PaxPamir\Managers\Tokens;
  * For readability, main sections (util, action, state, args) have been splited into Traits with the section name on modules/php directory.
  */
 
-class PaxPamirEditionTwo extends Table
+class Paxpamir extends Table
 {
     use PaxPamir\DebugTrait;
     use PaxPamir\States\ChangeLoyaltyTrait;
@@ -108,7 +108,7 @@ class PaxPamirEditionTwo extends Table
     protected function getGameName()
     {
         // Used for translations and stuff. Please do not modify.
-        return "paxpamireditiontwo";
+        return "paxpamir";
     }
 
     /*

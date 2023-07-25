@@ -5,7 +5,7 @@
     "module": "none",
     "lib": ["dom", "esnext"],  
     "sourceMap": false,
-    "outFile": "paxpamireditiontwo.js",
+    "outFile": "paxpamir.js",
     "removeComments": true
   },
   "files": [
@@ -16,7 +16,7 @@
     "src/animation/types.d.ts",
     "src/animation/index.ts",
     "src/logs/index.ts",
-    "src/paxpamireditiontwo.d.ts",
+    "src/paxpamir.d.ts",
     "src/constants.ts",
     "src/templates.ts",
     "src/utility.ts",
@@ -56,7 +56,7 @@
     "src/states/StartOfTurnAbilities.ts",
     "src/NotificationManager/types.d.ts",
     "src/NotificationManager/index.ts",
-    "src/paxpamireditiontwo.ts",
+    "src/paxpamir.ts",
     "src/define.ts"
   ]
 }

@@ -5,27 +5,27 @@ use PaxPamir\Helpers\Utils;
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com>
+ * Paxpamir implementation : © Frans Bongers <fjmbongers@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on https://boardgamearena.com.
  * See http://en.doc.boardgamearena.com/Studio for more information.
  * -----
  * 
- * paxpamireditiontwo.action.php
+ * paxpamir.action.php
  *
- * PaxPamirEditionTwo main action entry point
+ * Paxpamir main action entry point
  *
  *
  * In this file, you are describing all the methods that can be called from your
  * user interface logic (javascript).
  *       
  * If you define a method "myAction" here, then you can call it from your javascript code with:
- * this.ajaxcall( "/paxpamireditiontwo/paxpamireditiontwo/myAction.html", ...)
+ * this.ajaxcall( "/paxpamir/paxpamir/myAction.html", ...)
  *
  */
 
 
-class action_paxpamireditiontwo extends APP_GameAction
+class action_paxpamir extends APP_GameAction
 {
     // Constructor: please do not modify
     public function __default()
@@ -34,7 +34,7 @@ class action_paxpamireditiontwo extends APP_GameAction
             $this->view = "common_notifwindow";
             $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
         } else {
-            $this->view = "paxpamireditiontwo_paxpamireditiontwo";
+            $this->view = "paxpamir_paxpamir";
             self::trace("Complete reinitialization of board game");
         }
     }

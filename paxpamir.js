@@ -5129,7 +5129,7 @@ var PaxPamir = (function () {
         this.playerCounts = {};
         this._notif_uid_to_log_id = {};
         this._last_notif = null;
-        console.log('paxpamireditiontwo constructor');
+        console.log('paxpamir constructor');
     }
     PaxPamir.prototype.setup = function (gamedatas) {
         var _a;
@@ -5495,5 +5495,5 @@ var PaxPamir = (function () {
     return PaxPamir;
 }());
 define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/stock', 'ebg/zone'], function (dojo, declare) {
-    return declare('bgagame.paxpamireditiontwo', ebg.core.gamegui, new PaxPamir());
+    return declare('bgagame.paxpamir', ebg.core.gamegui, new PaxPamir());
 });

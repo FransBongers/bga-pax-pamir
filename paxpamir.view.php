@@ -2,13 +2,13 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * PaxPamirEditionTwo implementation : © Frans Bongers <fjmbongers@gmail.com>
+ * Paxpamir implementation : © Frans Bongers <fjmbongers@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
  *
- * paxpamireditiontwo.view.php
+ * paxpamir.view.php
  *
  * This is your "view" file.
  *
@@ -17,7 +17,7 @@
  * _ when a player refreshes the game page (F5)
  *
  * "build_page" method allows you to dynamically modify the HTML generated for the game interface. In
- * particular, you can set here the values of variables elements defined in paxpamireditiontwo_paxpamireditiontwo.tpl (elements
+ * particular, you can set here the values of variables elements defined in paxpamir_paxpamir.tpl (elements
  * like {MY_VARIABLE_ELEMENT}), and insert HTML block elements (also defined in your HTML template file)
  *
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
@@ -26,12 +26,12 @@
   
 require_once( APP_BASE_PATH."view/common/game.view.php" );
   
-class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
+class view_paxpamir_paxpamir extends game_view
 {
     protected function getGameName()
     {
         // Used for translations and stuff. Please do not modify.
-        return "paxpamireditiontwo";
+        return "paxpamir";
     }
     
   	function build_page( $viewArgs )
@@ -46,7 +46,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         // self::dump( "current_player_id", $current_player_id );
 
         // Player tableas
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "player_tableau" );
+        $this->page->begin_block( "paxpamir_paxpamir", "player_tableau" );
         
         // Make sure player tableaus are in order with current player at the top.
         // If current player is spectator tableaus are in player order
@@ -66,7 +66,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         }
 
         // Player hand
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "player_hand" );
+        $this->page->begin_block( "paxpamir_paxpamir", "player_hand" );
         
         // only add if current player is playing and nog a spectator
         if (isset($players [$current_player_id])) { // may be not set if spectator
@@ -78,7 +78,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         } 
 
         // Market containers for stock component
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "market" );
+        $this->page->begin_block( "paxpamir_paxpamir", "market" );
         
         $hor_scale = 150;
         $ver_scale = 209;
@@ -96,7 +96,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         }
 
         // VP track positions top
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_top" );
+        $this->page->begin_block( "paxpamir_paxpamir", "vp_track_top" );
     
         $hor_scale = 50;
         for( $vp=0; $vp<=10; $vp++ )
@@ -109,7 +109,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         }        
 
         // VP track positions right
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_right" );
+        $this->page->begin_block( "paxpamir_paxpamir", "vp_track_right" );
 
         $ver_scale = 50;
         for( $vp=11; $vp<=16; $vp++ )
@@ -122,7 +122,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         }
 
         // VP track positions bottom
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "vp_track_bottom" );
+        $this->page->begin_block( "paxpamir_paxpamir", "vp_track_bottom" );
 
         $hor_scale = 50;
         for( $vp=17; $vp<=23; $vp++ )
@@ -158,7 +158,7 @@ class view_paxpamireditiontwo_paxpamireditiontwo extends game_view
         //      <!-- END myblock --> 
         
 
-        $this->page->begin_block( "paxpamireditiontwo_paxpamireditiontwo", "myblock" );
+        $this->page->begin_block( "paxpamir_paxpamir", "myblock" );
         foreach( $players as $player )
         {
             $this->page->insert_block( "myblock", array( 

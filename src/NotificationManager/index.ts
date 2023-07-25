@@ -278,7 +278,7 @@ class NotificationManager {
     const column = Number(splitFrom[2]);
     if (to === 'discard') {
       this.game.market.discardCard({ cardId, row, column });
-    } else if (to === 'active_events') {
+    } else if (to === ACTIVE_EVENTS) {
       this.game.move({
         id: cardId,
         from: this.game.market.getMarketCardZone({ row, column }),

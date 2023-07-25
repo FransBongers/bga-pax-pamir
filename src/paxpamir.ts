@@ -391,6 +391,7 @@ class PaxPamir implements PaxPamirGame {
   }
 
   setCourtCardsSelectable({ callback, loyalty, region, suit }: { callback: (props: { cardId: string }) => void; loyalty?: string; region?: string; suit?: string; }) {
+    debug('setCourtCardsSelectable', loyalty, region, suit);
     const playerId = this.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = 'card_' + node.id.split('_')[1];
@@ -408,8 +409,10 @@ class PaxPamir implements PaxPamirGame {
   }
 
   setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
+    debug('setHandCardsSelectable');
     dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
+      debug('cardId',cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
     });

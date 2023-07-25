@@ -45,7 +45,8 @@ class PlayerActionsState implements State {
       });
       this.setMarketCardsSelectable();
       this.game.setHandCardsSelectable({
-        callback: ({ cardId }: { cardId: string }) =>
+        callback: ({ cardId }: { cardId: string }) => {
+          debug('callback triggered',cardId);
           this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
             args: {
               cardId,
@@ -59,7 +60,8 @@ class PlayerActionsState implements State {
                 } | null;
               }) => this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId, bribe } }),
             },
-          }),
+          });
+        },
       });
       this.setCardActionsSelectable();
     } else {
@@ -222,13 +224,13 @@ class PlayerActionsState implements State {
         dojo.map(node.children, (child: HTMLElement) => {
           if (dojo.hasClass(child, 'pp_card_action')) {
             const cardAction = child.id.split('_')[0] as CardAction;
-            
-            const minActionCost = this.game.getMinimumActionCost({action: cardAction});
-            console.log('cardAction',cardAction,'minActionCost',minActionCost);
+
+            const minActionCost = this.game.getMinimumActionCost({ action: cardAction });
+            console.log('cardAction', cardAction, 'minActionCost', minActionCost);
             if (minActionCost === null || rupees < minActionCost) {
               return;
             }
-            console.log('childId',child.id);
+            console.log('childId', child.id);
             // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
             dojo.addClass(child, 'pp_selectable');
             this.game._connections.push(
@@ -240,7 +242,9 @@ class PlayerActionsState implements State {
                     cardId,
                     action: cardAction,
                     next: ({ bribe }: { bribe: BribeArgs }) =>
-                      this.game.framework().setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[cardAction], { args: { cardId, bribe } }),
+                      this.game
+                        .framework()
+                        .setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[cardAction], { args: { cardId, bribe } }),
                   },
                 });
                 // switch (cardAction) {

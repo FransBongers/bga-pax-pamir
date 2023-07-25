@@ -3938,7 +3938,8 @@ var PlayerActionsState = (function () {
             this.game.setHandCardsSelectable({
                 callback: function (_a) {
                     var cardId = _a.cardId;
-                    return _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
+                    debug('callback triggered', cardId);
+                    _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
                         args: {
                             cardId: cardId,
                             action: 'playCard',
@@ -4104,7 +4105,9 @@ var PlayerActionsState = (function () {
                                     action: cardAction_1,
                                     next: function (_a) {
                                         var bribe = _a.bribe;
-                                        return _this.game.framework().setClientState(cardActionClientStateMap[cardAction_1], { args: { cardId: cardId, bribe: bribe } });
+                                        return _this.game
+                                            .framework()
+                                            .setClientState(cardActionClientStateMap[cardAction_1], { args: { cardId: cardId, bribe: bribe } });
                                     },
                                 },
                             });
@@ -4792,7 +4795,7 @@ var NotificationManager = (function () {
         if (to === 'discard') {
             this.game.market.discardCard({ cardId: cardId, row: row, column: column });
         }
-        else if (to === 'active_events') {
+        else if (to === ACTIVE_EVENTS) {
             this.game.move({
                 id: cardId,
                 from: this.game.market.getMarketCardZone({ row: row, column: column }),
@@ -5314,6 +5317,7 @@ var PaxPamir = (function () {
     PaxPamir.prototype.setCourtCardsSelectable = function (_a) {
         var _this = this;
         var callback = _a.callback, loyalty = _a.loyalty, region = _a.region, suit = _a.suit;
+        debug('setCourtCardsSelectable', loyalty, region, suit);
         var playerId = this.getPlayerId();
         dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[1];
@@ -5330,8 +5334,10 @@ var PaxPamir = (function () {
     PaxPamir.prototype.setHandCardsSelectable = function (_a) {
         var _this = this;
         var callback = _a.callback;
+        debug('setHandCardsSelectable');
         dojo.query('.pp_card_in_hand').forEach(function (node, index) {
             var cardId = node.id;
+            debug('cardId', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
         });

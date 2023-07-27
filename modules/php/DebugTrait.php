@@ -63,7 +63,7 @@ trait DebugTrait
 
     // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    Cards::move('card_1','market_0_0');
+    Cards::move('card_41','courtCard');
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);
@@ -73,8 +73,8 @@ trait DebugTrait
     // $this->debugAddCardToHand('card_2');
     // $this->debugAddCardToHand('card_3');
     // $this->debugAddCardToHand('card_4');
-    $actionStack = ActionStack::get();
-    Notifications::log('actions', $actionStack);
+    // $actionStack = ActionStack::get();
+    // Notifications::log('actions', $actionStack);
     // ActionStack::next($actionStack);
 
     // ActionStack::set([]);

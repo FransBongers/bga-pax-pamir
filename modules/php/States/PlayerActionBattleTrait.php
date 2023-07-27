@@ -283,7 +283,7 @@ trait PlayerActionBattleTrait
     foreach (SA_SAFE_HOUSE_CARD_IDS as $index => $cardId) {
       $location = Cards::get($cardId)['location'];
 
-      if (Utils::startsWith($location, 'court')) {
+      if (Utils::startsWith($location, 'court_')) {
         $owners[] = intval(explode('_', $location)[1]);
       }
     }

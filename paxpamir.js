@@ -859,6 +859,9 @@ var PPPlayer = (function () {
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
+        if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
+            this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
+        }
     };
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
@@ -1125,6 +1128,8 @@ var PPPlayer = (function () {
         });
         dojo.empty(this.events.container_div);
         this.events = undefined;
+        dojo.empty(this.prizes.container_div);
+        this.prizes = undefined;
     };
     PPPlayer.prototype.getColor = function () {
         return this.playerColor;

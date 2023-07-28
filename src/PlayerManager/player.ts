@@ -75,6 +75,10 @@ class PPPlayer {
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.updatePlayerPanel({ playerGamedatas });
+
+    if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
+      this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
+    }
   }
 
   // Setup functions
@@ -378,6 +382,8 @@ class PPPlayer {
     });
     dojo.empty(this.events.container_div);
     this.events = undefined;
+    dojo.empty(this.prizes.container_div);
+    this.prizes = undefined;
   }
 
   // ..######...########.########.########.########.########...######.

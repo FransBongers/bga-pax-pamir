@@ -19,6 +19,7 @@
 
 ## Bugs
 - Multiple rupees on card when moving cards in the market
+- Check why undo after last loyalty pick during setup results in crossed log
 
 
 ## To check

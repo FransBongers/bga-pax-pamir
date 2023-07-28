@@ -100,7 +100,8 @@ trait PlayerActionTrait
     $playerId = Players::getActiveId();
     $coalitionName = $this->loyalty[$coalition]['name'];
 
-    Players::get()->setLoyalty($coalition);
+    // Players::get()->setLoyalty($coalition);
+    Players::setLoyalty($playerId,$coalition);
 
     // Notify
     // TODO (Frans): check i18n for coalition name

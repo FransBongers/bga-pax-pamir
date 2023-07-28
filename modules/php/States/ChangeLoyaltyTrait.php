@@ -40,7 +40,9 @@ trait ChangeLoyaltyTrait
     $playerId = $action['playerId'];
     $coalition = $action['data']['coalition'];
 
-    Players::get($playerId)->setLoyalty($coalition);
+    // Players::get($playerId)->setLoyalty($coalition);
+    Players::setLoyalty($playerId,$coalition);
+
     Notifications::changeLoyalty($coalition);
 
     $this->nextState('dispatchAction');

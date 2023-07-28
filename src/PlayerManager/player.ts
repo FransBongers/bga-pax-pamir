@@ -262,6 +262,10 @@ class PPPlayer {
   updatePlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     const counts = playerGamedatas.counts;
 
+    if (this.game.framework().scoreCtrl?.[this.playerId]) {
+      this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score))
+    }
+
     // Set all values in player panels
     if (this.player.loyalty && this.player.loyalty !== 'null') {
       this.counters.influence.setValue(playerGamedatas.counts.influence);

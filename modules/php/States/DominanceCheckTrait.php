@@ -269,7 +269,7 @@ trait DominanceCheckTrait
             'currentScore' => $currentScore,
             'newScore' => $currentScore + $pointsPerPlayer,
           );
-          Players::get($playerId)->incScore($pointsPerPlayer);
+          Players::incScore($playerId,$pointsPerPlayer);
         }
       }
 

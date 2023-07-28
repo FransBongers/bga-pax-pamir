@@ -562,9 +562,10 @@ html {
 }
 
 .pp_card_back {
-  background-image: url('img/cards2.jpg');
-  background-position-x: math.div((117 - 71) % 10 * 100%, 9);
-  background-position-y: math.div(math.floor(calc((117 - 71) / 10)) * 100%, 4);
+  background-size: 1000% 500%;
+  background-image: url('img/cards2.webp');
+  background-position-x: calc(2/3) * 100%;
+  background-position-y: 100%;
 }
 
 /* ------- CARDS END ------- */

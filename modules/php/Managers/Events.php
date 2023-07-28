@@ -119,11 +119,11 @@ class Events
         break;
         // card 109
       case ECE_RIOTS_IN_PUNJAB:
-        Events::riot(PUNJAB);
+        return array_merge($actionStack, Events::riot(PUNJAB));
         break;
         // card 110
       case ECE_RIOTS_IN_HERAT:
-        Events::riot(HERAT);
+        return array_merge($actionStack, Events::riot(HERAT));
         break;
         // card 111
       case ECE_NO_EFFECT:
@@ -132,11 +132,11 @@ class Events
         break;
         // card 112
       case ECE_RIOTS_IN_KABUL:
-        Events::riot(KABUL);
+        return array_merge($actionStack, Events::riot(KABUL));
         break;
         // card 113
       case ECE_RIOTS_IN_PERSIA:
-        Events::riot(PERSIA);
+        return array_merge($actionStack, Events::riot(PERSIA));
         break;
         // card 114
       case ECE_CONFIDENCE_FAILURE:
@@ -219,15 +219,16 @@ class Events
 
   public static function riot($regionId)
   {
-    $tribeMoves = Map::removeTribesFromRegion($regionId);
+    $tribeResult = Map::removeTribesFromRegion($regionId);
     $armyMoves = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('All tribes and armies are removed from ${logTokenRegionName}');
-    $moves = array_merge($tribeMoves, $armyMoves);
+    $moves = array_merge($tribeResult['moves'], $armyMoves);
     Notifications::moveToken($message, [
       'logTokenRegionName' => Utils::logTokenRegionName($regionId),
       'moves' => $moves
     ]);
     Map::checkRulerChange($regionId);
+    return $tribeResult['actions'];
   }
 
   // .##.....##.########.####.##.......####.########.##....##

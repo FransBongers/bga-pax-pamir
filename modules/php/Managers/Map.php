@@ -142,7 +142,6 @@ class Map
         'weight' => $weight,
       ];
     }
-    Notifications::log('moves', $moves);
     return $moves;
   }
 
@@ -172,13 +171,14 @@ class Map
   public static function removeTribesFromRegion($regionId)
   {
     $moves = [];
+    $playersWithRemovedCylinders = [];
     $from = "tribes_" . $regionId;
     $tribes = Tokens::getInLocation($from)->toArray();
     foreach ($tribes as $index => $tribe) {
 
       $tokenId = $tribe['id'];
-      $playerId = explode('_', $tokenId)[1];
-      $to = 'cylinders_' . $playerId;
+      $cylinderOwnerId = intval(explode('_', $tokenId)[1]);
+      $to = 'cylinders_' . $cylinderOwnerId;
       $weight = Tokens::insertOnTop($tokenId, $to);
       $moves[] =  [
         'from' => $from,
@@ -186,8 +186,19 @@ class Map
         'tokenId' => $tokenId,
         'weight' => $weight,
       ];
+      if (!in_array($cylinderOwnerId,$playersWithRemovedCylinders)) {
+        $playersWithRemovedCylinders[] = $cylinderOwnerId;
+      };
     }
-    Notifications::log('moves', $moves);
-    return $moves;
+    $actions = [];
+    foreach ($playersWithRemovedCylinders as $index => $playerId) {
+      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [
+        'region' => $regionId
+      ]);
+    }
+    return [
+      'actions' => $actions,
+      'moves' => $moves,
+    ];
   }
 }

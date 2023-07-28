@@ -2436,7 +2436,8 @@ html {
 }
 
 .pp_card_back {
-  background-image: url("img/cards2.jpg");
+  background-size: 1000% 500%;
+  background-image: url("img/cards2.webp");
   background-position-x: 66.6666666667%;
   background-position-y: 100%;
 }

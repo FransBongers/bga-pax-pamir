@@ -1025,8 +1025,12 @@ var PPPlayer = (function () {
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
     PPPlayer.prototype.updatePlayerPanel = function (_a) {
+        var _b;
         var playerGamedatas = _a.playerGamedatas;
         var counts = playerGamedatas.counts;
+        if ((_b = this.game.framework().scoreCtrl) === null || _b === void 0 ? void 0 : _b[this.playerId]) {
+            this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score));
+        }
         if (this.player.loyalty && this.player.loyalty !== 'null') {
             this.counters.influence.setValue(playerGamedatas.counts.influence);
         }

@@ -104,17 +104,19 @@ trait ResolveEventTrait
     self::checkAction('eventCardRebuke');
     $actionStack = ActionStack::get();
 
-    $tribeMoves = Map::removeTribesFromRegion($regionId);
+    $tribeResult = Map::removeTribesFromRegion($regionId);
     $armyMoves = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('${player_name} removes all tribes and armies from ${logTokenRegionName}');
-    $moves = array_merge($tribeMoves, $armyMoves);
+    $moves = array_merge($tribeResult['moves'], $armyMoves);
     Notifications::moveToken($message, [
       'player' => Players::get(),
       'logTokenRegionName' => Utils::logTokenRegionName($regionId),
       'moves' => $moves
     ]);
     Map::checkRulerChange($regionId);
-
+    if (count($tribeResult['actions']) > 0) {
+      $actionStack = array_merge($actionStack,$tribeResult['actions']);
+    }
     ActionStack::next($actionStack);
   }
 

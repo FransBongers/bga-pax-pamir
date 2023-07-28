@@ -60,10 +60,14 @@ trait DebugTrait
 
   function test()
   {
-
+    // Notifications::log('array_merge_test', array_merge([
+    //   ActionStack::createAction(DISPATCH_TRANSITION, 'playerId', [
+    //     'transition' => 'eventCardOtherPersuasiveMethods',
+    //   ])
+    // ], []));
     // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    Cards::move('card_41','courtCard');
+    Cards::move('card_109','market_1_1');
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);

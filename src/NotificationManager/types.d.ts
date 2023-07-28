@@ -228,6 +228,10 @@ interface NotifTakeRupeesFromSupplyArgs {
   amount: number;
 }
 
+interface NotifSmallRefreshHandArgs {
+  hand: Token[];
+}
+
 interface NotifTaxMarketArgs {
   playerId: number;
   player_name: string;

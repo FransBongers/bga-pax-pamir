@@ -28,6 +28,7 @@
 - no animation when there is a bribe of 0 rupees. Change text from 0 rupee(s) to no bribe?
 - When betraying a card it's moved to discard pile first before asking for prize. Keep it in separate zone next to discard before player makes choice? (since other cards can be discarded)
 
+
 ### UI
 - Matching colors for selectable / selected
 

@@ -598,18 +598,21 @@ class NotificationManager {
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -amount });
   }
 
-  notif_smallRefreshHand(notif) {
-    console.log('notif_smallRefreshHand', notif);
+  notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
+    debug('notif_smallRefreshHand', notif.args);
+    const player = this.game.getCurrentPlayer();
+    player.clearHand()
+    player.setupHand({hand: notif.args.hand});
   }
 
   notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {
-    console.log('notif_smallRefreshInterface', notif);
+    debug('notif_smallRefreshInterface', notif);
     const updatedGamedatas = {
       ...this.game.gamedatas,
       ...notif.args,
     };
     this.game.clearInterface();
-    console.log('updatedGamedatas', updatedGamedatas);
+    debug('updatedGamedatas', updatedGamedatas);
     this.game.gamedatas = updatedGamedatas;
     this.game.market.setupMarket({ gamedatas: updatedGamedatas });
     this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });

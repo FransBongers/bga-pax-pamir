@@ -863,7 +863,7 @@ var PPPlayer = (function () {
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.players[this.playerId];
-        this.setupHand({ playerGamedatas: playerGamedatas });
+        this.setupHand({ hand: playerGamedatas.hand });
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupEvents({ playerGamedatas: playerGamedatas });
         this.setupPrizes({ playerGamedatas: playerGamedatas });
@@ -982,22 +982,21 @@ var PPPlayer = (function () {
             });
         });
     };
+    PPPlayer.prototype.clearHand = function () {
+        dojo.empty(this.hand.container_div);
+        this.hand = undefined;
+    };
     PPPlayer.prototype.setupHand = function (_a) {
         var _this = this;
-        var playerGamedatas = _a.playerGamedatas;
+        var hand = _a.hand;
         if (!(this.playerId === this.game.getPlayerId())) {
             return;
         }
-        if (this.hand) {
-            this.hand.removeAll();
-        }
-        else {
-            this.hand = new ebg.zone();
-            this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
-            this.hand.item_margin = 16;
-        }
+        this.hand = new ebg.zone();
+        this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
+        this.hand.item_margin = 16;
         this.hand.instantaneous = true;
-        playerGamedatas.hand.forEach(function (card) {
+        hand.forEach(function (card) {
             dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
             _this.hand.placeInZone(card.id);
             _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
@@ -5048,13 +5047,16 @@ var NotificationManager = (function () {
         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -amount });
     };
     NotificationManager.prototype.notif_smallRefreshHand = function (notif) {
-        console.log('notif_smallRefreshHand', notif);
+        debug('notif_smallRefreshHand', notif.args);
+        var player = this.game.getCurrentPlayer();
+        player.clearHand();
+        player.setupHand({ hand: notif.args.hand });
     };
     NotificationManager.prototype.notif_smallRefreshInterface = function (notif) {
-        console.log('notif_smallRefreshInterface', notif);
+        debug('notif_smallRefreshInterface', notif);
         var updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
         this.game.clearInterface();
-        console.log('updatedGamedatas', updatedGamedatas);
+        debug('updatedGamedatas', updatedGamedatas);
         this.game.gamedatas = updatedGamedatas;
         this.game.market.setupMarket({ gamedatas: updatedGamedatas });
         this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });

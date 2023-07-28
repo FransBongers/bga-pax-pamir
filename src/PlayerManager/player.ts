@@ -81,7 +81,7 @@ class PPPlayer {
   setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     const playerGamedatas = gamedatas.players[this.playerId];
 
-    this.setupHand({ playerGamedatas });
+    this.setupHand({ hand: playerGamedatas.hand });
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
     this.setupPrizes({ playerGamedatas });
@@ -209,21 +209,23 @@ class PPPlayer {
     });
   }
 
-  setupHand({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+  clearHand() {
+    dojo.empty(this.hand.container_div);
+    this.hand = undefined;
+  }
+
+  setupHand({ hand }: { hand: PaxPamirPlayer['hand'] }) {
     if (!(this.playerId === this.game.getPlayerId())) {
       return;
     }
-    if (this.hand) {
-      this.hand.removeAll();
-    } else {
-      this.hand = new ebg.zone();
-      this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
-      this.hand.item_margin = 16;
-    }
+
+    this.hand = new ebg.zone();
+    this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
+    this.hand.item_margin = 16;
 
     this.hand.instantaneous = true;
 
-    playerGamedatas.hand.forEach((card) => {
+    hand.forEach((card) => {
       dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
       this.hand.placeInZone(card.id);
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
@@ -263,7 +265,7 @@ class PPPlayer {
     const counts = playerGamedatas.counts;
 
     if (this.game.framework().scoreCtrl?.[this.playerId]) {
-      this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score))
+      this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score));
     }
 
     // Set all values in player panels

@@ -49,8 +49,9 @@ class Notifications
 
   public static function smallRefreshHand($player)
   {
+    $playerDatas = $player->jsonSerialize($player->getId());
     self::notify($player, 'smallRefreshHand', '', [
-      'playerDatas' => $player->jsonSerialize($player->getId()),
+      'hand' => $playerDatas['hand'],
     ]);
   }
 

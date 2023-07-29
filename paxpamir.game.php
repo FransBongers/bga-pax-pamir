@@ -34,6 +34,7 @@ spl_autoload_register($swdNamespaceAutoload, true, true);
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\ActionStack;
@@ -206,9 +207,19 @@ class Paxpamir extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        /**
+         * Progression is calculated as the number of cards that has left the deck since game start
+         */
+        
+        $playerCount = Players::count();
+        // -2 because 10 event / dominance check cards are added and 12 cards are dealt to the market
+        $cardsInDeckStartGame = (5 + $playerCount) * 6 - 2;
+        $deckCount = Cards::countInLocation(DECK);
+       
+        $progression = round((1 - ( $deckCount / $cardsInDeckStartGame)) * 100);
+        Notifications::log('progression',$progression);
 
-        return 0;
+        return $progression;
     }
 
     public static function get()

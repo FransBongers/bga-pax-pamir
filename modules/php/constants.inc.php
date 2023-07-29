@@ -174,6 +174,7 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
 /**
  * Card locations
  */
+const DECK = 'deck';
 const DISCARD = 'discard';
 const TEMP_DISCARD = 'temp_discard';
 const ACTIVE_EVENTS = 'activeEvents';

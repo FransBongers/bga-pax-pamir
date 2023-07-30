@@ -9,12 +9,15 @@
     "removeComments": true
   },
   "files": [
+    "modules/js/bga-animations.d.ts",
     "src/framework.d.ts",
     "src/counter.d.ts",
     "src/stock.d.ts",
     "src/zone.d.ts",
     "src/animation/types.d.ts",
     "src/animation/index.ts",
+    "src/CustomZone/index.ts",
+    "src/CustomZone/types.d.ts",
     "src/logs/index.ts",
     "src/paxpamir.d.ts",
     "src/constants.ts",

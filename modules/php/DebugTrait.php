@@ -67,7 +67,7 @@ trait DebugTrait
     // ], []));
     // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    // Cards::move('card_109','market_1_1');
+    Cards::move('card_1','deck');
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);

@@ -163,6 +163,7 @@ interface PaxPamirGame extends Game {
     specialAbilitySafeHouse: SASafeHouseState;
     startOfTurnAbilities: StartOfTurnAbilitiesState;
   };
+  animationManager: AnimationManager;
   gamedatas: PaxPamirGamedatas;
   map: PPMap;
   market: Market;

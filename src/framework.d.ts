@@ -3,6 +3,7 @@
  */
 
 interface Game {
+  instantaneousMode?: boolean; // cannot add it here, else TS build will say Game interface isn't fulfilled
   gamedatas: any;
   setup: (gamedatas: any) => void;
   onEnteringState: (stateName: string, args: any) => void;
@@ -97,7 +98,7 @@ interface Dojo {
   marginBox: (node: HTMLElement) => DojoBox;
   // https://en.doc.boardgamearena.com/Game_interface_logic:_yourgamename.js#Moving_elements
   // https://dojotoolkit.org/reference-guide/1.7/dojo/place.html
-  place: (html: string, node: string | HTMLElement, pos?: DojoPosition) => void;
+  place: (html: string, node: string | HTMLElement, pos?: DojoPosition) => HTMLElement;
   position: (obj: HTMLElement, includeScroll?: boolean) => { w: number; h: number; x: number; y: number };
   query: (query: string) => any; //HTMLElement[]; with some more functions
   removeClass: (node: string | HTMLElement, className?: string) => void;

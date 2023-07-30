@@ -7,7 +7,7 @@ class SetupState implements State {
 
   onEnteringState() {
     this.updateInterfaceInitialStep();
-    console.log('onEntering setup')
+    console.log('onEntering setup');
   }
 
   onLeavingState() {}

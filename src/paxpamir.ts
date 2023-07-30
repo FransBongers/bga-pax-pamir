@@ -15,7 +15,7 @@
  *
  */
 
-declare const define;
+// declare const define; // TODO: check if we comment here or in bga-animations module?
 declare const ebg;
 declare const $;
 declare const dojo: Dojo;
@@ -25,6 +25,7 @@ declare const playSound;
 
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
+  public animationManager: AnimationManager;
   public map: PPMap;
   public market: Market;
   private notificationManager: NotificationManager;
@@ -136,6 +137,7 @@ class PaxPamir implements PaxPamirGame {
     });
     this.activeEvents.instantaneous = false;
 
+    this.animationManager = new AnimationManager(this);
     this.tooltipManager = new PPTooltipManager(this);
     this.objectManager = new ObjectManager(this);
     this.playerManager = new PlayerManager(this);

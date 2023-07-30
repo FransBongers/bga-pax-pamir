@@ -46,7 +46,7 @@ class PlayerActionsState implements State {
       this.setMarketCardsSelectable();
       this.game.setHandCardsSelectable({
         callback: ({ cardId }: { cardId: string }) => {
-          debug('callback triggered',cardId);
+          debug('callback triggered', cardId);
           this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
             args: {
               cardId,
@@ -417,6 +417,41 @@ class PlayerActionsState implements State {
     if (node) {
       dojo.addClass(node, PP_SELECTED);
     }
+  }
+
+  public setupAnimationTest() {
+    const customHandZone = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      containerDiv: 'pp_player_hand_cards',
+      itemGap: 16,
+    });
+    this.game.addPrimaryActionButton({
+      id: 'move_button',
+      text: _('Move'),
+      callback: async () => {
+        await customHandZone.moveToZone([{ id: 'card_63', weight: 1 }, { id: 'card_60', weight: 4 }]);
+        await customHandZone.moveToZone({ id: 'card_3', weight: 3 });
+      },
+    });
+
+    this.game.addPrimaryActionButton({
+      id: 'place_btn',
+      text: _('Place'),
+      callback: async () => {
+        await customHandZone.placeInZone({ element: tplCard({ cardId: 'card_101' }), id: 'card_101', weight: 2, from: 'pp_market_deck' });
+        await customHandZone.placeInZone({ element: tplCard({ cardId: 'card_102' }), id: 'card_102', weight: -2 });
+      },
+    });
+
+    this.game.addPrimaryActionButton({
+      id: 'remove_button',
+      text: _('Remove'),
+      callback: async () => {
+        await customHandZone.remove({id: 'card_3', destroy: true});
+      },
+    });
   }
 
   //  ..######..##.......####..######..##....##

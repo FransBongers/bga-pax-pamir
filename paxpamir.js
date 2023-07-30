@@ -155,6 +155,199 @@ var positionObjectDirectly = function (mobileObj, x, y) {
     });
     dojo.style(mobileObj, 'left');
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var PaxPamirZone = (function () {
+    function PaxPamirZone(config) {
+        var animationManager = config.animationManager, itemGap = config.itemGap, itemHeight = config.itemHeight, itemWidth = config.itemWidth, containerDiv = config.containerDiv;
+        this.animationManager = animationManager;
+        this.itemGap = itemGap || 0;
+        this.itemHeight = itemHeight;
+        this.itemWidth = itemWidth;
+        this.containerDiv = containerDiv;
+        this.containerElement = document.getElementById(containerDiv);
+        this.items = [];
+        if (!this.containerElement) {
+            console.error('containerElement null');
+            return;
+        }
+        if (this.containerElement.style.position !== 'absolute') {
+            this.containerElement.style.position = 'relative';
+        }
+    }
+    PaxPamirZone.prototype.moveToZone = function (input) {
+        return __awaiter(this, void 0, void 0, function () {
+            var animations, items;
+            var _this = this;
+            return __generator(this, function (_a) {
+                animations = [];
+                items = Array.isArray(input) ? input : [input];
+                items.forEach(function (item) {
+                    var newElement = document.getElementById(item.id);
+                    var id = item.id, weight = item.weight;
+                    if (!newElement) {
+                        console.error('newElement null');
+                        return;
+                    }
+                    _this.items.push({
+                        id: id,
+                        weight: weight,
+                    });
+                    var fromRect = newElement.getBoundingClientRect();
+                    var attachTo = document.getElementById(_this.containerDiv);
+                    attachTo.appendChild(newElement);
+                    animations.push(new BgaSlideAnimation({ element: newElement, transitionTimingFunction: 'ease-out', fromRect: fromRect }));
+                });
+                this.sortItems();
+                return [2, this.animationManager.playParallel(this.getUpdateAnimations().concat(animations))];
+            });
+        });
+    };
+    PaxPamirZone.prototype.placeInZone = function (_a) {
+        var _b;
+        var element = _a.element, id = _a.id, weight = _a.weight, from = _a.from;
+        return __awaiter(this, void 0, void 0, function () {
+            var node, index, _c, top, left, fromRect;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        this.items.push({ id: id, weight: weight });
+                        this.sortItems();
+                        node = dojo.place(element, this.containerDiv);
+                        index = this.items.findIndex(function (item) { return item.id === id; });
+                        _c = this.itemToCoords({ index: index }), top = _c.top, left = _c.left;
+                        node.style.position = 'absolute';
+                        node.style.top = top;
+                        node.style.left = left;
+                        if (!!from) return [3, 2];
+                        node.style.opacity = '0';
+                        return [4, this.animationManager.playParallel(this.getUpdateAnimations())];
+                    case 1:
+                        _d.sent();
+                        node.style.opacity = '1';
+                        return [3, 4];
+                    case 2:
+                        fromRect = (_b = $(from)) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
+                        return [4, this.animationManager.playParallel(__spreadArray(__spreadArray([], this.getUpdateAnimations(), true), [
+                                new BgaSlideAnimation({ element: node, transitionTimingFunction: 'ease-out', fromRect: fromRect }),
+                            ], false))];
+                    case 3:
+                        _d.sent();
+                        _d.label = 4;
+                    case 4: return [2];
+                }
+            });
+        });
+    };
+    PaxPamirZone.prototype.updateDisplay = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.animationManager.playParallel(this.getUpdateAnimations())];
+                    case 1: return [2, _a.sent()];
+                }
+            });
+        });
+    };
+    PaxPamirZone.prototype.getUpdateAnimations = function () {
+        var _this = this;
+        var animations = [];
+        var containerHeight = 0;
+        this.items.forEach(function (item, index) {
+            var element = $(item.id);
+            var fromRect = element.getBoundingClientRect();
+            if (element) {
+                var _a = _this.itemToCoords({ item: item, index: index }), top_1 = _a.top, left = _a.left, containerHeightCalc = _a.containerHeight;
+                element.style.top = top_1;
+                element.style.left = left;
+                animations.push(new BgaSlideAnimation({ element: element, fromRect: fromRect }));
+                containerHeight = Math.max(containerHeight, containerHeightCalc);
+            }
+        });
+        this.containerElement.style.height = "".concat(containerHeight, "px");
+        return animations;
+    };
+    PaxPamirZone.prototype.itemToCoords = function (_a) {
+        var index = _a.index;
+        var numberOfItemsPerRow = 1 + Math.floor((this.containerElement.clientWidth - this.itemWidth) / (this.itemWidth + this.itemGap));
+        var row = Math.floor(index / numberOfItemsPerRow);
+        var column = index % numberOfItemsPerRow;
+        var top = "".concat(row * (this.itemHeight + this.itemGap), "px");
+        var left = "".concat(column * (this.itemWidth + this.itemGap), "px");
+        var containerHeight = Math.max(this.itemHeight + row * (this.itemHeight + this.itemGap));
+        return { top: top, left: left, containerHeight: containerHeight };
+    };
+    PaxPamirZone.prototype.sortItems = function () {
+        return this.items.sort(function (a, b) {
+            var aWeight = a.weight || 0;
+            var bWeight = b.weight || 0;
+            return aWeight > bWeight ? 1 : aWeight < bWeight ? -1 : 0;
+        });
+    };
+    PaxPamirZone.prototype.remove = function (_a) {
+        var id = _a.id, _b = _a.destroy, destroy = _b === void 0 ? false : _b;
+        return __awaiter(this, void 0, void 0, function () {
+            var index, element;
+            return __generator(this, function (_c) {
+                index = this.items.findIndex(function (item) { return item.id === id; });
+                if (index < 0) {
+                    return [2];
+                }
+                this.items.splice(index, 1);
+                if (destroy) {
+                    element = $(id);
+                    element && element.remove();
+                }
+                this.updateDisplay();
+                return [2];
+            });
+        });
+    };
+    return PaxPamirZone;
+}());
 var LOG_TOKEN_ARMY = 'army';
 var LOG_TOKEN_CARD = 'card';
 var LOG_TOKEN_CARD_ICON = 'cardIcon';
@@ -1580,15 +1773,6 @@ var Border = (function () {
     };
     return Border;
 }());
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var Region = (function () {
     function Region(_a) {
         var game = _a.game, region = _a.region;
@@ -4167,6 +4351,64 @@ var PlayerActionsState = (function () {
             dojo.addClass(node, PP_SELECTED);
         }
     };
+    PlayerActionsState.prototype.setupAnimationTest = function () {
+        var _this = this;
+        var customHandZone = new PaxPamirZone({
+            animationManager: this.game.animationManager,
+            itemHeight: CARD_HEIGHT,
+            itemWidth: CARD_WIDTH,
+            containerDiv: 'pp_player_hand_cards',
+            itemGap: 16,
+        });
+        this.game.addPrimaryActionButton({
+            id: 'move_button',
+            text: _('Move'),
+            callback: function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, customHandZone.moveToZone([{ id: 'card_63', weight: 1 }, { id: 'card_60', weight: 4 }])];
+                        case 1:
+                            _a.sent();
+                            return [4, customHandZone.moveToZone({ id: 'card_3', weight: 3 })];
+                        case 2:
+                            _a.sent();
+                            return [2];
+                    }
+                });
+            }); },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'place_btn',
+            text: _('Place'),
+            callback: function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, customHandZone.placeInZone({ element: tplCard({ cardId: 'card_101' }), id: 'card_101', weight: 2, from: 'pp_market_deck' })];
+                        case 1:
+                            _a.sent();
+                            return [4, customHandZone.placeInZone({ element: tplCard({ cardId: 'card_102' }), id: 'card_102', weight: -2 })];
+                        case 2:
+                            _a.sent();
+                            return [2];
+                    }
+                });
+            }); },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'remove_button',
+            text: _('Remove'),
+            callback: function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, customHandZone.remove({ id: 'card_3', destroy: true })];
+                        case 1:
+                            _a.sent();
+                            return [2];
+                    }
+                });
+            }); },
+        });
+    };
     PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())
             return;
@@ -5187,6 +5429,7 @@ var PaxPamir = (function () {
             _this.activeEvents.placeInZone(card.id);
         });
         this.activeEvents.instantaneous = false;
+        this.animationManager = new AnimationManager(this);
         this.tooltipManager = new PPTooltipManager(this);
         this.objectManager = new ObjectManager(this);
         this.playerManager = new PlayerManager(this);
@@ -5511,6 +5754,14 @@ var PaxPamir = (function () {
     };
     return PaxPamir;
 }());
-define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/stock', 'ebg/zone'], function (dojo, declare) {
+define([
+    'dojo',
+    'dojo/_base/declare',
+    'ebg/core/gamegui',
+    'ebg/counter',
+    'ebg/stock',
+    'ebg/zone',
+    g_gamethemeurl + "modules/js/bga-animations.js",
+], function (dojo, declare) {
     return declare('bgagame.paxpamir', ebg.core.gamegui, new PaxPamir());
 });

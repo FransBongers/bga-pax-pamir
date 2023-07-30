@@ -13,11 +13,11 @@ const tplRupee = ({ rupeeId }: { rupeeId: string }) => {
 };
 
 // Rupee with counter in right bottom.
-const tplRupeeCount = ({id}:{id: string;}) => {
-  return `<div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${id}" class="pp_icon_count"><span id="rupee_count_${id}_counter"></span></div></div>`
+const tplRupeeCount = ({ id }: { id: string }) => {
+  return `<div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${id}" class="pp_icon_count"><span id="rupee_count_${id}_counter"></span></div></div>`;
 };
 
 // Card background with counter in right bottom
-const tplHandCount = ({id}:{id: string;}) => {
-  return `<div id="cards_${id}" class="pp_icon pp_card_icon"><div id="card_count_${id}" class="pp_icon_count"><span id="card_count_${id}_counter"></span></div></div>`
+const tplHandCount = ({ id }: { id: string }) => {
+  return `<div id="cards_${id}" class="pp_icon pp_card_icon"><div id="card_count_${id}" class="pp_icon_count"><span id="card_count_${id}_counter"></span></div></div>`;
 };

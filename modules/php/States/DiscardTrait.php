@@ -269,39 +269,46 @@ trait DiscardTrait
   {
     $from = 'spies_' . $cardId;
     $spiesOnCard = Tokens::getInLocation($from)->toArray();
-    $moves = [];
+    $spies = [];
     if (count($spiesOnCard) === 0) {
       return;;
     }
 
     foreach ($spiesOnCard as $index => $spy) {
-      $spyOwner = explode("_", $spy['id'])[1];
-      $to = 'cylinders_' . $spyOwner;
+      $spyOwnerId = explode("_", $spy['id'])[1];
+      $to = 'cylinders_' . $spyOwnerId;
       $state = Tokens::insertOnTop($spy['id'], $to);
-      $moves[] =  [
-        'from' => $from,
-        'to' => $to,
-        'tokenId' => $spy['id'],
-        'weight' => $state,
-      ];
+      if (array_key_exists($spyOwnerId, $spies)) {
+        $spies[$spyOwnerId][] = [
+          'tokenId' => $spy['id'],
+          'weight' => $state,
+        ];
+      } else {
+        $spies[$spyOwnerId] = [
+          [
+            'tokenId' => $spy['id'],
+            'weight' => $state,
+          ]
+        ];
+      }
     };
-    Notifications::returnSpies($player, $moves);
+    Notifications::returnAllSpies($player,$cardId, $spies);
   }
 
-  function reassignCourtState($playerId = null)
-  {
-    $player = Players::get($playerId);
-    $courtCards = $player->getCourtCards();
-    $courtCardStates = [];
-    foreach ($courtCards as $index => $card) {
-      $cardId = $card['id'];
-      $state = $index + 1;
-      Cards::setState($cardId, $state);
-      $courtCardStates[] = [
-        'cardId' => $cardId,
-        'state' => $state,
-      ];
-    };
-    Notifications::updateCourtCardStates($courtCardStates, $player->getId());
-  }
+  // function reassignCourtState($playerId = null)
+  // {
+  //   $player = Players::get($playerId);
+  //   $courtCards = $player->getCourtCards();
+  //   $courtCardStates = [];
+  //   foreach ($courtCards as $index => $card) {
+  //     $cardId = $card['id'];
+  //     $state = $index + 1;
+  //     Cards::setState($cardId, $state);
+  //     $courtCardStates[] = [
+  //       'cardId' => $cardId,
+  //       'state' => $state,
+  //     ];
+  //   };
+  //   Notifications::updateCourtCardStates($courtCardStates, $player->getId());
+  // }
 }

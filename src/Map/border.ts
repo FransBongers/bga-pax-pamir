@@ -9,7 +9,7 @@
 class Border {
   private game: PaxPamirGame;
   private border: string;
-  private roadZone: Zone;
+  private roadZone: PaxPamirZone;
 
   constructor({ game, border }: { game: PaxPamirGame; border: string }) {
     this.game = game;
@@ -20,74 +20,70 @@ class Border {
 
   setupBorder({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     const borderGamedatas = gamedatas.map.borders[this.border];
-    this.roadZone = new ebg.zone();
-    this.createBorderZone({ border: this.border, zone: this.roadZone });
+    this.createBorderZone();
     borderGamedatas.roads.forEach(({ id }) => {
-      placeToken({
-        game: this.game,
-        location: this.roadZone,
+      this.roadZone.placeInZone({
         id,
-        jstpl: 'jstpl_road',
-        jstplProps: {
-          id,
-          coalition: id.split('_')[1],
-        },
+        element: tplRoad({ id, coalition: id.split('_')[1] }),
       });
     });
   }
 
   clearInterface() {
-    dojo.empty(this.roadZone.container_div);
+    dojo.empty(this.roadZone.getContainerId());
     this.roadZone = undefined;
   }
 
-  createBorderZone({ border, zone }: { border: string; zone: Zone }) {
-    zone.create(this.game, `pp_${border}_border`, ROAD_WIDTH, ROAD_HEIGHT);
-    // this[`${border}_border`].item_margin = -10;
-    // this['transcaspia_armies'].setPattern( 'horizontalfit' );
-
-    // TODO (Frans): at some point we need to update this so it looks nice,
-    // probably do a lot more custom
-    const borderPattern = {
-      herat_kabul: 'horizontalfit',
-      herat_kandahar: 'verticalfit',
-      herat_persia: 'verticalfit',
+  // TODO: implement custom pattern and update.
+  createBorderZone() {
+    const border = this.border;
+    const borderPattern: Record<string, PaxPamirZone['pattern']> = {
+      herat_kabul: 'horizontalFit',
+      herat_kandahar: 'verticalFit',
+      herat_persia: 'verticalFit',
       herat_transcaspia: 'custom',
-      kabul_transcaspia: 'verticalfit',
-      kabul_kandahar: 'horizontalfit',
-      kabul_punjab: 'verticalfit',
-      kandahar_punjab: 'verticalfit',
-      persia_transcaspia: 'horizontalfit',
+      kabul_transcaspia: 'verticalFit',
+      kabul_kandahar: 'horizontalFit',
+      kabul_punjab: 'verticalFit',
+      kandahar_punjab: 'verticalFit',
+      persia_transcaspia: 'horizontalFit',
     };
 
-    zone.setPattern(borderPattern[border]);
+    this.roadZone = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_${this.border}_border`,
+      itemHeight: ROAD_HEIGHT,
+      itemWidth: ROAD_WIDTH,
+      pattern: borderPattern[border],
+      customPattern:
+        // border === 'herat_transcaspia' ? (props: PPZoneItemToCoordsProps) => this.customPatternHeratTranscaspia(props) : undefined,
+        border === 'herat_transcaspia' ? this.customPatternHeratTranscaspia : undefined,
+    });
+  }
 
-    if (border === 'herat_transcaspia') {
-      zone.itemIdToCoords = function (i, control_width, no_idea_what_this_is, numberOfItems) {
-        if (i % 8 == 0 && numberOfItems === 1) {
-          return { x: 50, y: 25, w: 40, h: 27 };
-        } else if (i % 8 == 0) {
-          return { x: 90, y: -5, w: 40, h: 27 };
-        } else if (i % 8 == 1) {
-          return { x: 85, y: 5, w: 40, h: 27 };
-        } else if (i % 8 == 2) {
-          return { x: 70, y: 17, w: 40, h: 27 };
-        } else if (i % 8 == 3) {
-          return { x: 55, y: 29, w: 40, h: 27 };
-        } else if (i % 8 == 4) {
-          return { x: 40, y: 41, w: 40, h: 27 };
-        } else if (i % 8 == 5) {
-          return { x: 35, y: 43, w: 40, h: 27 };
-        } else if (i % 8 == 6) {
-          return { x: 47, y: 13, w: 40, h: 27 };
-        } else if (i % 8 == 7) {
-          return { x: 10, y: 63, w: 40, h: 27 };
-        }
-      };
+  customPatternHeratTranscaspia({ index: i, itemCount: numberOfItems }: PPZoneItemToCoordsProps): OriginalZoneItemToCoordsResult {
+    if (i % 8 == 0 && numberOfItems === 1) {
+      return { x: 50, y: 25, w: 40, h: 27 };
+    } else if (i % 8 == 0) {
+      return { x: 90, y: -5, w: 40, h: 27 };
+    } else if (i % 8 == 1) {
+      return { x: 85, y: 5, w: 40, h: 27 };
+    } else if (i % 8 == 2) {
+      return { x: 70, y: 17, w: 40, h: 27 };
+    } else if (i % 8 == 3) {
+      return { x: 55, y: 29, w: 40, h: 27 };
+    } else if (i % 8 == 4) {
+      return { x: 40, y: 41, w: 40, h: 27 };
+    } else if (i % 8 == 5) {
+      return { x: 35, y: 43, w: 40, h: 27 };
+    } else if (i % 8 == 6) {
+      return { x: 47, y: 13, w: 40, h: 27 };
+    } else if (i % 8 == 7) {
+      return { x: 10, y: 63, w: 40, h: 27 };
     }
   }
 
-  getRoadZone() {
+  getRoadZone(): PaxPamirZone {
     return this.roadZone;
   }
 
@@ -99,32 +95,23 @@ class Border {
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  getCoalitionRoads({coalitionId}: {coalitionId: string;}): string[] {
-    return this.roadZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
+  getCoalitionRoads({ coalitionId }: { coalitionId: string }): string[] {
+    return this.roadZone.getItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
   }
 
   getEnemyRoads({ coalitionId }: { coalitionId: string }): string[] {
-    return this.roadZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
+    return this.roadZone.getItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
   }
 
-  public addTempRoad({coalition, index}:{coalition: string; index: number;}) {
-    this.roadZone.instantaneous = true;
-    const id = `temp_road_${index}`
-    placeToken({
-      game: this.game,
-      location: this.roadZone,
+  public addTempRoad({ coalition, index }: { coalition: string; index: number }) {
+    const id = `temp_road_${index}`;
+    this.roadZone.placeInZone({
       id,
-      jstpl: 'jstpl_road',
-      jstplProps: {
-        id,
-        coalition,
-      },
-      classes: ['pp_temporary']
+      element: tplRoad({ id, coalition, classesToAdd: [PP_TEMPORARY] }),
     });
-    this.roadZone.instantaneous = false;
   }
 
-  public removeTempRoad({index}: {index:number}) {
-    this.roadZone.removeFromZone(`temp_road_${index}`,true);
+  public removeTempRoad({ index }: { index: number }) {
+    this.roadZone.remove({ input: `temp_road_${index}`, destroy: true });
   }
 }

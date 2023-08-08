@@ -183,7 +183,7 @@ class ClientCardActionTaxState implements State {
       if (!hasClaimOfAncientLineage) {
         const hasCardRuledByPlayer = player
           .getCourtZone()
-          .getAllItems()
+          .getItems()
           .some((cardId: string) => {
             const cardRegion = (this.game.getCardInfo({ cardId }) as CourtCard).region;
             if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {

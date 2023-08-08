@@ -41,7 +41,7 @@ trait ChangeLoyaltyTrait
     $coalition = $action['data']['coalition'];
 
     // Players::get($playerId)->setLoyalty($coalition);
-    Players::setLoyalty($playerId,$coalition);
+    Players::setLoyalty($playerId, $coalition);
 
     Notifications::changeLoyalty($coalition);
 
@@ -157,28 +157,16 @@ trait ChangeLoyaltyTrait
   function returnGifts($playerId)
   {
     $giftValues = [2, 4, 6];
-    $moves = [];
-    $cylinders = [];
     foreach ($giftValues as $index => $value) {
       $location = 'gift_' . $value . '_' . $playerId;
       $tokenInLocation = Tokens::getInLocation($location)->first();
       if ($tokenInLocation === null) {
         continue;
       }
-      $cylinders[] = $tokenInLocation;
       $to = 'cylinders_' . $playerId;
       $state = Tokens::insertOnTop($tokenInLocation['id'], $to);
-      $moves[] =  [
-        'from' => $location,
-        'to' => $to,
-        'tokenId' => $tokenInLocation['id'],
-        'weight' => $state,
-      ];
-      Notifications::log('in location', $tokenInLocation);
+      Notifications::returnCylinder(Players::get($playerId), $playerId, $location, $tokenInLocation['id'], $state, 'returnGift');
     };
-    if (count($moves) > 0) {
-      Notifications::returnGifts($cylinders, $moves);
-    }
   }
 
   function discardPrizes($playerId)

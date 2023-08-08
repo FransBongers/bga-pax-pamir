@@ -100,10 +100,11 @@
             </div>
         </div>
         <div id="pp_market_deck_container">
-            <div id="pp_temp_discard_pile">
+            <div id="pp_temp_discarded_card">
             </div>
             <div id="pp_discard_pile">
                 <span>Discard</span>
+                <div id="pp_pile_discarded_card" class="pp_discarded_card"></div>
             </div>
             <div id="pp_market_deck"></div>
         </div>
@@ -183,15 +184,6 @@
 <script type="text/javascript">
 
 // Javascript HTML templates
-
-var jstpl_card='<div class="pp_card pp_${card}" id="pp_${card}"></div>';
-var jstpl_rupee='<div class="pp_rupee" id="${id}"></div>';
-var jstpl_army='<div class="pp_army pp_${coalition}" id="${id}"></div>';
-var jstpl_road='<div class="pp_road pp_${coalition}" id="${id}"></div>';
-var jstpl_cylinder='<div class="pp_cylinder pp_player_color_${color}" id="${id}"></div>';
-var jstpl_coalition_block='<div class="pp_coalition_block pp_${coalition}" id="${id}"></div>';
-var jstpl_favored_suit_marker='<div class="pp_favored_suit_marker" id="${id}"></div>';
-var jstpl_ruler_token='<div class="pp_ruler_token pp_${region}" id="${id}"></div>';
 
 var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
     <div class="pp_icon_container">\

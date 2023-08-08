@@ -35,7 +35,6 @@ trait DispatchActionTrait
   {
     // $actionStack = ActionStack::get();
     $actionStack = $actionStack === null ? ActionStack::get() : $actionStack;
-    Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
     switch ($next['type']) {
@@ -129,7 +128,7 @@ trait DispatchActionTrait
       case DISPATCH_DISCARD:
         $this->dispatchDiscard($actionStack);
         break;
-      case 'discardBetrayedCard':
+      case DISPATCH_DISCARD_BETRAYED_CARD:
         $this->dispatchDiscardBetrayedCard($actionStack);
         break;
       case DISPATCH_DISCARD_ALL_COURT_CARDS_OF_TYPE:
@@ -153,7 +152,7 @@ trait DispatchActionTrait
       case 'returnGiftsAndDiscardPrizes':
         $this->dispatchReturnGiftsAndDiscardPrizes($actionStack);
         break;
-      case 'takePrize':
+      case DISPATCH_TAKE_PRIZE:
         $this->dispatchTakePrize($actionStack);
         break;
       default:

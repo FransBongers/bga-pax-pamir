@@ -60,7 +60,7 @@ trait ResolveEventTrait
   function eventCardOtherPersuasiveMethods($selectedPlayerId)
   {
     self::checkAction('eventCardOtherPersuasiveMethods');
-    Notifications::log('selected',$selectedPlayerId);
+    Notifications::log('selected', $selectedPlayerId);
     $actionStack = ActionStack::get();
     $selectedPlayerId = intval($selectedPlayerId);
 
@@ -105,17 +105,12 @@ trait ResolveEventTrait
     $actionStack = ActionStack::get();
 
     $tribeResult = Map::removeTribesFromRegion($regionId);
-    $armyMoves = Map::removeArmiesFromRegion($regionId);
+    $armies = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('${player_name} removes all tribes and armies from ${logTokenRegionName}');
-    $moves = array_merge($tribeResult['moves'], $armyMoves);
-    Notifications::moveToken($message, [
-      'player' => Players::get(),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-      'moves' => $moves
-    ]);
+    Notifications::returnAllToSupply(Players::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId),], $regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     if (count($tribeResult['actions']) > 0) {
-      $actionStack = array_merge($actionStack,$tribeResult['actions']);
+      $actionStack = array_merge($actionStack, $tribeResult['actions']);
     }
     ActionStack::next($actionStack);
   }
@@ -138,16 +133,16 @@ trait ResolveEventTrait
     $from = 'events_' . $playerId;
     $to = 'events_' . $selectedPlayerId;
 
-    $moves = $playerId === $selectedPlayerId ? [] : [[
+    $move = $playerId === $selectedPlayerId ? null : [
       'from' => $from,
       'to' => $to,
       'tokenId' => 'card_108'
-    ]];
+    ];
     Cards::move('card_108', $to);
     Notifications::moveCard($message, [
       'player' => $player,
       'player_name2' => $selectedPlayer->getName(),
-    ], 'MOVE_EVENT', $moves);
+    ], 'MOVE_EVENT', $move);
     $updates = [[
       'playerId' => $selectedPlayerId,
       'value' => $selectedPlayer->getInfluence(),

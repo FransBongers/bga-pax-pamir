@@ -8,8 +8,8 @@
 
 class Market {
   private game: PaxPamirGame;
-  private marketCards: Zone[][];
-  private marketRupees: Zone[][];
+  private marketCards: PaxPamirZone[][];
+  private marketRupees: PaxPamirZone[][];
 
   constructor(game: PaxPamirGame) {
     this.game = game;
@@ -40,57 +40,45 @@ class Market {
   setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     const containerId = `pp_market_${row}_${column}`;
     dojo.place(`<div id="pp_market_${row}_${column}_rupees" class="pp_market_rupees"></div>`, containerId);
-    if (this.marketCards[row][column]) {
-      this.marketCards[row][column].removeAll();
-      // return;
-    } else {
-      this.marketCards[row][column] = new ebg.zone();
-      this.marketCards[row][column].create(this.game, containerId, CARD_WIDTH, CARD_HEIGHT);
-    }
 
-    this.marketCards[row][column].instantaneous = true;
+    this.marketCards[row][column] = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+    });
+
     // add cards
     const cardInMarket = gamedatas.market.cards[row][column];
     if (cardInMarket) {
       const cardId = cardInMarket.id;
-      dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), this.marketCards[row][column].container_div);
-      this.marketCards[row][column].placeInZone(cardId);
+      this.marketCards[row][column].placeInZone({ id: cardId, element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
       this.game.tooltipManager.addTooltipToCard({ cardId });
     }
-    this.marketCards[row][column].instantaneous = false;
   }
 
   setupMarketRupeeZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
     // Set up zone for all rupees in the market
     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
-    if (this.marketRupees[row][column]) {
-      this.marketRupees[row][column].removeAll();
-    } else {
-      this.marketRupees[row][column] = new ebg.zone();
-      setupTokenZone({
-        game: this.game,
-        zone: this.marketRupees[row][column],
-        nodeId: rupeeContainerId,
-        tokenWidth: RUPEE_WIDTH,
-        tokenHeight: RUPEE_HEIGHT,
-        itemMargin: -30,
-      });
-    }
 
-    this.marketRupees[row][column].instantaneous = true;
-    gamedatas.market.rupees
-      .filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`)
-      .forEach((rupee: Token) => {
-        dojo.place(tplRupee({ rupeeId: rupee.id }), this.marketRupees[row][column].container_div);
-        this.marketRupees[row][column].placeInZone(rupee.id);
-      });
-    this.marketRupees[row][column].instantaneous = false;
+    this.marketRupees[row][column] = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: rupeeContainerId,
+      itemHeight: RUPEE_HEIGHT,
+      itemWidth: RUPEE_WIDTH,
+      itemGap: -30,
+    });
+
+    const rupees = gamedatas.market.rupees.filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`);
+    this.marketRupees[row][column].placeInZone(
+      rupees.map((rupee) => ({ id: rupee.id, element: tplRupee({ rupeeId: rupee.id }), zIndex: 11 }))
+    );
   }
 
   clearInterface() {
     for (let row = 0; row <= 1; row++) {
       for (let column = 0; column <= 5; column++) {
-        dojo.empty(this.marketCards[row][column].container_div);
+        dojo.empty(this.marketCards[row][column].getContainerId());
         this.marketCards[row][column] = undefined;
         this.marketRupees[row][column] = undefined;
       }
@@ -98,77 +86,89 @@ class Market {
     console.log('marketCards after clearInterface', this.marketCards);
   }
 
-  getMarketCardZone({ row, column }: { row: number; column: number }): Zone {
+  getMarketCardZone({ row, column }: { row: number; column: number }): PaxPamirZone {
     return this.marketCards[row][column];
   }
 
-  getMarketRupeesZone({ row, column }: { row: number; column: number }): Zone {
+  getMarketRupeesZone({ row, column }: { row: number; column: number }): PaxPamirZone {
     return this.marketRupees[row][column];
   }
 
-  removeSingleRupeeFromCard({row, column, to, rupeeId}: { row: number; column: number; to: string; rupeeId: string; }) {
-    this.marketRupees[row][column].removeFromZone(rupeeId, true, to);
-    const animation = this.game.framework().slideToObject(rupeeId, to);
-    dojo.connect(animation, 'onEnd', () => {
-      dojo.destroy(rupeeId);
+  async removeSingleRupeeFromCard({ row, column, to, rupeeId }: { row: number; column: number; to: string; rupeeId: string }) {
+    await this.marketRupees[row][column].removeTo({ id: rupeeId, to });
+  }
+
+  async removeRupeesFromCard({ row, column, to }: { row: number; column: number; to: string }): Promise<void> {
+    const rupeesToRemove = this.marketRupees[row][column].getItems();
+    return this.marketRupees[row][column].removeTo(rupeesToRemove.map((rupee) => ({ id: rupee, to })));
+  }
+
+  async placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
+    this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 });
+  }
+
+  async addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
+    await this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone({
+      element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }),
+      id: cardId,
+      from: 'pp_market_deck',
+      duration: (this.game.animationManager.getSettings().duration || 0) / 2,
     });
-    animation.play();
-  }
-
-  removeRupeesFromCard({ row, column, to }: { row: number; column: number; to: string }) {
-    this.marketRupees[row][column].getAllItems().forEach((rupeeId) => {
-      this.removeSingleRupeeFromCard({row, column, to, rupeeId});
-    });
-  }
-
-  placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
-    dojo.place(tplRupee({ rupeeId }), fromDiv);
-    const div = this.marketRupees[row][column].container_div;
-    attachToNewParentNoDestroy(rupeeId, div);
-    this.game.framework().slideToObject(rupeeId, div).play();
-    this.marketRupees[row][column].placeInZone(rupeeId);
-  }
-
-  addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
-    dojo.place(tplCard({ cardId, extraClasses: 'pp_market_card' }), 'pp_market_deck');
-    const div = this.getMarketCardZone({ row: to.row, column: to.column }).container_div;
-    attachToNewParentNoDestroy(cardId, div);
-    this.game.framework().slideToObject(cardId, div).play();
-    this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(cardId);
     this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 
   /**
    * Move card and all rupees on it.
    */
-  moveCard({ cardId, from, to }: { cardId: string; from: MarketLocation; to: MarketLocation }) {
-    this.game.move({
-      id: cardId,
-      from: this.getMarketCardZone({ row: from.row, column: from.column }),
-      to: this.getMarketCardZone({ row: to.row, column: to.column }),
-    });
-    // TODO (Frans): check why in case of moving multiple rupees at the same time
-    // they overlap
-    this.getMarketRupeesZone({ row: from.row, column: from.column })
-      .getAllItems()
-      .forEach((rupeeId) => {
-        this.game.move({
-          id: rupeeId,
-          to: this.getMarketRupeesZone({ row: to.row, column: to.column }),
-          from: this.getMarketRupeesZone({ row: from.row, column: from.row }),
-        });
-      });
-    this.game.tooltipManager.addTooltipToCard({ cardId });
+  async moveCard({ cardId, from, to }: { cardId: string; from: MarketLocation; to: MarketLocation }) {
+    const rupeesToMove = this.getMarketRupeesZone({ row: from.row, column: from.column }).getItems();
+    const movePromises = [
+      this.getMarketCardZone({ row: to.row, column: to.column }).moveToZone({
+        elements: { id: cardId },
+        duration: (this.game.animationManager.getSettings().duration || 0) / 2,
+        zIndex: 5,
+      }),
+    ];
+    if (rupeesToMove.length > 0) {
+      movePromises.push(
+        this.getMarketRupeesZone({ row: to.row, column: to.column }).moveToZone({
+          elements: rupeesToMove.map((id) => ({ id })),
+          duration: (this.game.animationManager.getSettings().duration || 0) / 2,
+          zIndex: 11,
+        })
+      );
+    }
+    const rupeesInDestination = this.getMarketRupeesZone({ row: to.row, column: to.column }).getItems();
+    await Promise.all(movePromises);
+    const removePromises = [this.getMarketCardZone({ row: from.row, column: from.column }).remove({ input: cardId })];
+    if (rupeesToMove.length > 0) {
+      movePromises.push(this.getMarketRupeesZone({ row: from.row, column: from.column }).remove({ input: rupeesToMove }));
+    }
+    await Promise.all(removePromises);
   }
 
-  discardCard({ cardId, row, column }: { cardId: string; row: number; column: number }) {
-    // Move card to discard pile
-    const node = dojo.byId(cardId);
-    if (node) {
-      node.classList.remove(PP_MARKET_CARD);
+  // Move card to (temp) discard pile
+  async discardCard({
+    cardId,
+    row,
+    column,
+    to = DISCARD,
+  }: {
+    cardId: string;
+    row: number;
+    column: number;
+    to?: 'discardPile' | 'tempDiscardPile';
+  }) {
+    if (to === TEMP_DISCARD) {
+      this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+        elements: { id: cardId },
+        classesToRemove: [PP_MARKET_CARD],
+      });
+    } else {
+      this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.getMarketCardZone({ row, column }),
+      });
     }
-    this.getMarketCardZone({ row, column }).removeFromZone(cardId, false);
-    discardCardAnimation({cardId, game: this.game});
-    // this.game.framework().slideToObject(cardId, 'pp_discard_pile').play();
   }
 }

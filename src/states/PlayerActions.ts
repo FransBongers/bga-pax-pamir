@@ -79,6 +79,7 @@ class PlayerActionsState implements State {
       text: _('Undo'),
       callback: () => this.game.takeAction({ action: 'restart' }),
     });
+    // this.addDebugButton();
   }
 
   private updateInterfacePass() {
@@ -112,7 +113,7 @@ class PlayerActionsState implements State {
 
     const player = this.game.getCurrentPlayer();
     // card 105 - New Tactics
-    if (cardInfo.suit === MILITARY && player.getEventsZone().getAllItems().includes('card_105')) {
+    if (cardInfo.suit === MILITARY && player.getEventsZone().getItems().includes('card_105')) {
       return true;
     }
     return false;
@@ -190,7 +191,7 @@ class PlayerActionsState implements State {
 
   private currentPlayerHasHandCards(): boolean {
     const currentPlayerId = this.game.getPlayerId();
-    return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemNumber() > 0;
+    return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemCount() > 0;
   }
 
   private handleNegotiatedBribe({ action, cardId, briber }: NegotiatedBribe): void {
@@ -247,123 +248,6 @@ class PlayerActionsState implements State {
                         .setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[cardAction], { args: { cardId, bribe } }),
                   },
                 });
-                // switch (cardAction) {
-                //   case 'battle':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'battle',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BATTLE, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                //   case 'betray':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'betray',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BETRAY, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                //   case 'build':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'build',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_BUILD, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                //   case 'gift':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'gift',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_GIFT, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                //   case 'move':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'move',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_MOVE, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                //   case 'tax':
-                //     this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                //       args: {
-                //         cardId,
-                //         action: 'tax',
-                //         next: ({
-                //           bribe,
-                //         }: {
-                //           bribe: {
-                //             amount: number;
-                //             negotiated?: boolean;
-                //           } | null;
-                //         }) =>
-                //           this.game
-                //             .framework()
-                //             .setClientState<ClientCardActionStateArgs>(CLIENT_CARD_ACTION_TAX, { args: { cardId, bribe } }),
-                //       },
-                //     });
-                //     break;
-                // }
-                // this.updateInterface({ nextStep, args: { cardAction: { cardId } } });
               })
             );
           }
@@ -419,37 +303,14 @@ class PlayerActionsState implements State {
     }
   }
 
-  public setupAnimationTest() {
-    const customHandZone = new PaxPamirZone({
-      animationManager: this.game.animationManager,
-      itemHeight: CARD_HEIGHT,
-      itemWidth: CARD_WIDTH,
-      containerDiv: 'pp_player_hand_cards',
-      itemGap: 16,
-    });
+  public addDebugButton() {
     this.game.addPrimaryActionButton({
-      id: 'move_button',
-      text: _('Move'),
+      id: 'debug_button',
+      text: _('Debug'),
       callback: async () => {
-        await customHandZone.moveToZone([{ id: 'card_63', weight: 1 }, { id: 'card_60', weight: 4 }]);
-        await customHandZone.moveToZone({ id: 'card_3', weight: 3 });
-      },
-    });
-
-    this.game.addPrimaryActionButton({
-      id: 'place_btn',
-      text: _('Place'),
-      callback: async () => {
-        await customHandZone.placeInZone({ element: tplCard({ cardId: 'card_101' }), id: 'card_101', weight: 2, from: 'pp_market_deck' });
-        await customHandZone.placeInZone({ element: tplCard({ cardId: 'card_102' }), id: 'card_102', weight: -2 });
-      },
-    });
-
-    this.game.addPrimaryActionButton({
-      id: 'remove_button',
-      text: _('Remove'),
-      callback: async () => {
-        await customHandZone.remove({id: 'card_3', destroy: true});
+        const zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
+        console.log('zone', zone);
+        await zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] });
       },
     });
   }

@@ -7,16 +7,16 @@
 //  .##........########.##.....##....##....########.##.....##
 
 class PPPlayer {
-  private court: Zone;
-  private events: Zone;
-  private cylinders: Zone;
-  private hand: Zone;
+  private court: PaxPamirZone;
+  private events: PaxPamirZone;
+  private cylinders: PaxPamirZone;
+  private hand: PaxPamirZone;
   private game: PaxPamirGame;
-  private gifts: Record<string, Zone> = {};
+  private gifts: Record<string, PaxPamirZone> = {};
   private playerColor: string;
   private playerId: number;
   private playerName: string;
-  private prizes: Zone;
+  private prizes: PaxPamirZone;
   private counters: {
     cards: Counter;
     cardsTableau: Counter;
@@ -41,7 +41,7 @@ class PPPlayer {
     rupeesTableau: new ebg.counter(),
   };
   private player: PaxPamirPlayer;
-  private rulerTokens: Zone;
+  private rulerTokens: PaxPamirZone;
   private loyalty: string;
 
   constructor({ game, player }: { game: PaxPamirGame; player: PaxPamirPlayer }) {
@@ -95,103 +95,97 @@ class PPPlayer {
     this.setupPlayerPanel({ playerGamedatas });
   }
 
-  setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.court = new ebg.zone();
-    this.court.create(this.game, `pp_court_player_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
-    this.court.item_margin = 16;
-
-    this.court.instantaneous = true;
-    playerGamedatas.court.cards.forEach((card: Token) => {
-      const cardId = card.id;
-      const { actions, region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
-      dojo.place(
-        tplCard({ cardId, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
-        `pp_court_player_${this.playerId}`
-      );
-
-      this.setupCourtCard({ cardId });
-      this.court.placeInZone(cardId, card.state);
-      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-      // Add spies
-      (playerGamedatas.court.spies[cardId] || []).forEach((cylinder: Token) => {
-        const playerId = cylinder.id.split('_')[1];
-        placeToken({
-          game: this.game,
-          location: this.game.spies[cardId],
-          id: cylinder.id,
-          jstpl: 'jstpl_cylinder',
-          jstplProps: {
-            id: cylinder.id,
-            color: this.game.gamedatas.players[playerId].color,
-          },
-        });
-      });
+  async setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    this.court = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_court_player_${this.playerId}`,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      itemGap: 16,
     });
-    this.court.instantaneous = false;
+
+    this.court.setupItems(
+      playerGamedatas.court.cards.map((card) => {
+        const cardId = card.id;
+        const { region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
+        return {
+          id: card.id,
+          element: tplCard({ cardId, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
+          zIndex: 1,
+        };
+      })
+    );
+
+    playerGamedatas.court.cards.map(async (card: Token) => {
+      const cardId = card.id;
+      this.setupCourtCard({ cardId });
+      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+      this.game.spies[cardId].setupItems(
+        (playerGamedatas.court.spies[cardId] || []).map((cylinder: Token) => {
+          const playerId = cylinder.id.split('_')[1];
+          return {
+            id: cylinder.id,
+            element: tplCylinder({ id: cylinder.id, color: this.game.gamedatas.players[playerId].color }),
+          };
+        })
+      );
+    });
   }
 
   setupEvents({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.events = new ebg.zone();
-    this.events.create(this.game, `player_tableau_events_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
-    this.court.item_margin = 16;
-    this.events.instantaneous = true;
+    this.events = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `player_tableau_events_${this.playerId}`,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      itemGap: 16,
+    });
+
     if (playerGamedatas.events.length > 0) {
       const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
       node.style.marginTop = '-57px';
     }
     playerGamedatas.events.forEach((card: EventCard & Token) => {
       const cardId = card.id;
-      dojo.place(tplCard({ cardId }), `player_tableau_events_${this.playerId}`);
-      this.events.placeInZone(cardId, card.state);
+      this.events.placeInZone({
+        id: cardId,
+        element: tplCard({ cardId }),
+      });
+
       this.game.tooltipManager.addTooltipToCard({ cardId });
     });
-    this.events.instantaneous = false;
   }
 
   setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.cylinders = new ebg.zone();
-    setupTokenZone({
-      game: this.game,
-      zone: this.cylinders,
-      nodeId: `pp_cylinders_player_${this.playerId}`,
-      tokenWidth: CYLINDER_WIDTH,
-      tokenHeight: CYLINDER_HEIGHT,
-      itemMargin: 8,
+    this.cylinders = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_cylinders_player_${this.playerId}`,
+      itemWidth: CYLINDER_WIDTH,
+      itemHeight: CYLINDER_HEIGHT,
+      itemGap: 8,
     });
-
-    this.cylinders.instantaneous = true;
-    // Add cylinders to zone
-    playerGamedatas.cylinders.forEach((cylinder: Token) => {
-      placeToken({
-        game: this.game,
-        location: this.cylinders,
+    this.cylinders.placeInZone(
+      playerGamedatas.cylinders.map((cylinder) => ({
         id: cylinder.id,
-        jstpl: 'jstpl_cylinder',
-        jstplProps: {
-          id: cylinder.id,
-          color: playerGamedatas.color,
-        },
+        element: tplCylinder({ id: cylinder.id, color: playerGamedatas.color }),
         weight: cylinder.state,
-      });
-    });
-    this.cylinders.instantaneous = false;
+      }))
+    );
   }
 
   setupGifts({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up gift zones
     ['2', '4', '6'].forEach((value) => {
-      this.gifts[value] = new ebg.zone();
-      setupTokenZone({
-        game: this.game,
-        zone: this.gifts[value],
-        nodeId: `pp_gift_${value}_zone_${this.playerId}`,
-        tokenWidth: 40,
-        tokenHeight: 40,
-        // itemMargin: 10,
+      const customPattern = () => {
+        return { x: 5, y: 5, w: 30, h: 30 };
+      };
+      this.gifts[value] = new PaxPamirZone({
+        animationManager: this.game.animationManager,
+        containerId: `pp_gift_${value}_zone_${this.playerId}`,
+        itemHeight: 40,
+        itemWidth: 40,
+        customPattern,
         pattern: 'custom',
-        customPattern: () => {
-          return { x: 5, y: 5, w: 30, h: 30 };
-        },
       });
     });
 
@@ -199,22 +193,16 @@ class PPPlayer {
     const playerGifts = playerGamedatas.gifts;
     Object.keys(playerGifts).forEach((giftValue) => {
       Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
-        placeToken({
-          game: this.game,
-          location: this.gifts[giftValue],
+        this.gifts[giftValue].placeInZone({
           id: cylinderId,
-          jstpl: 'jstpl_cylinder',
-          jstplProps: {
-            id: cylinderId,
-            color: this.playerColor,
-          },
+          element: tplCylinder({ id: cylinderId, color: this.playerColor }),
         });
       });
     });
   }
 
   clearHand() {
-    dojo.empty(this.hand.container_div);
+    dojo.empty(this.hand.getContainerId());
     this.hand = undefined;
   }
 
@@ -222,19 +210,26 @@ class PPPlayer {
     if (!(this.playerId === this.game.getPlayerId())) {
       return;
     }
-
-    this.hand = new ebg.zone();
-    this.hand.create(this.game, 'pp_player_hand_cards', CARD_WIDTH, CARD_HEIGHT);
-    this.hand.item_margin = 16;
-
-    this.hand.instantaneous = true;
-
-    hand.forEach((card) => {
-      dojo.place(tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
-      this.hand.placeInZone(card.id);
-      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+    this.hand = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      containerId: 'pp_player_hand_cards',
+      itemGap: 16,
     });
-    this.hand.instantaneous = false;
+    // TODO: use setup items?
+    this.hand
+      .placeInZone(
+        hand.map((card) => ({
+          element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
+          id: card.id,
+        }))
+      )
+      .then(() => {
+        hand.forEach((card) => {
+          this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+        });
+      });
   }
 
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -291,27 +286,25 @@ class PPPlayer {
   }
 
   setupPrizes({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.prizes = new ebg.zone();
-    this.prizes.create(this.game, `pp_prizes_${this.playerId}`, CARD_WIDTH, CARD_HEIGHT);
-    this.prizes.setPattern('verticalfit');
-    // const node = dojo.byId(`pp_prizes_${this.playerId}`);
-    const numberOfPrizes = playerGamedatas.prizes.length;
-    // if (numberOfPrizes > 0) {
-    //   // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
-    //   // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
-    //   dojo.style(node, 'margin-bottom', `-194px`);
-    //   dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
-    // }
-    this.updatePrizesStyle({ numberOfPrizes });
-
-    this.prizes.instantaneous = true;
-    playerGamedatas.prizes.forEach((card: CourtCard & Token) => {
-      const cardId = card.id;
-
-      dojo.place(tplCard({ cardId, extraClasses: `pp_prize` }), `pp_prizes_${this.playerId}`);
-      this.prizes.placeInZone(cardId, card.state);
+    this.prizes = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_prizes_${this.playerId}`,
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      pattern: 'verticalFit',
     });
-    this.prizes.instantaneous = false;
+
+    const numberOfPrizes = playerGamedatas.prizes.length;
+    this.updatePrizesStyle({ numberOfPrizes });
+    if (numberOfPrizes > 0) {
+      console.log('prizes', playerGamedatas.prizes);
+    }
+    this.prizes.placeInZone(
+      playerGamedatas.prizes.map((card: CourtCard & Token) => ({
+        id: card.id,
+        element: tplCard({ cardId: card.id, extraClasses: `pp_prize` }),
+      }))
+    );
   }
 
   updatePrizesStyle({ numberOfPrizes }: { numberOfPrizes: number }) {
@@ -325,36 +318,22 @@ class PPPlayer {
   }
 
   setupRulerTokens({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    if (!this.rulerTokens) {
-      this.rulerTokens = new ebg.zone();
-      // Create rulerTokens zone
-      setupTokenZone({
-        game: this.game,
-        zone: this.rulerTokens,
-        nodeId: `pp_ruler_tokens_player_${this.playerId}`,
-        tokenWidth: RULER_TOKEN_WIDTH,
-        tokenHeight: RULER_TOKEN_HEIGHT,
-        itemMargin: 10,
-      });
-    }
+    this.rulerTokens = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_ruler_tokens_player_${this.playerId}`,
+      itemHeight: RULER_TOKEN_HEIGHT,
+      itemWidth: RULER_TOKEN_WIDTH,
+      itemGap: 10,
+    });
 
-    this.rulerTokens.instantaneous = true;
     Object.keys(gamedatas.map.rulers).forEach((region: string) => {
       if (gamedatas.map.rulers[region] === Number(this.playerId)) {
-        console.log('place ruler token player');
-        placeToken({
-          game: this.game,
-          location: this.rulerTokens,
+        this.rulerTokens.placeInZone({
           id: `pp_ruler_token_${region}`,
-          jstpl: 'jstpl_ruler_token',
-          jstplProps: {
-            id: `pp_ruler_token_${region}`,
-            region,
-          },
+          element: tplRulerToken({ id: `pp_ruler_token_${region}`, region }),
         });
       }
     });
-    this.rulerTokens.instantaneous = false;
   }
 
   setupCourtCard({ cardId }: { cardId: string }) {
@@ -370,19 +349,19 @@ class PPPlayer {
   }
 
   clearInterface() {
-    dojo.empty(this.court.container_div);
+    dojo.empty(this.court.getContainerId());
     this.court = undefined;
-    dojo.empty(this.cylinders.container_div);
+    dojo.empty(this.cylinders.getContainerId());
     this.cylinders = undefined;
-    dojo.empty(this.rulerTokens.container_div);
+    dojo.empty(this.rulerTokens.getContainerId());
     this.rulerTokens = undefined;
     ['2', '4', '6'].forEach((value) => {
-      dojo.empty(this.gifts[value].container_div);
+      dojo.empty(this.gifts[value].getContainerId());
       this.gifts[value] = undefined;
     });
-    dojo.empty(this.events.container_div);
+    dojo.empty(this.events.getContainerId());
     this.events = undefined;
-    dojo.empty(this.prizes.container_div);
+    dojo.empty(this.prizes.getContainerId());
     this.prizes = undefined;
   }
 
@@ -407,23 +386,23 @@ class PPPlayer {
   }
 
   getCourtCards(): CourtCard[] {
-    const cardsInZone = this.court.getAllItems();
+    const cardsInZone = this.court.getItems();
     return cardsInZone.map((cardId: string) => this.game.getCardInfo({ cardId })) as CourtCard[];
   }
 
-  getCourtZone(): Zone {
+  getCourtZone(): PaxPamirZone {
     return this.court;
   }
 
-  getEventsZone(): Zone {
+  getEventsZone(): PaxPamirZone {
     return this.events;
   }
 
-  getHandZone(): Zone {
+  getHandZone(): PaxPamirZone {
     return this.hand;
   }
 
-  getCylinderZone(): Zone {
+  getCylinderZone(): PaxPamirZone {
     return this.cylinders;
   }
 
@@ -443,7 +422,7 @@ class PPPlayer {
     return this.playerId;
   }
 
-  getPrizeZone(): Zone {
+  getPrizeZone(): PaxPamirZone {
     return this.prizes;
   }
 
@@ -451,7 +430,7 @@ class PPPlayer {
     return this.counters.rupees.getValue();
   }
 
-  getRulerTokensZone(): Zone {
+  getRulerTokensZone(): PaxPamirZone {
     return this.rulerTokens;
   }
 
@@ -460,13 +439,13 @@ class PPPlayer {
   }
 
   getLowestAvailableGift(): number | null {
-    if (this.gifts['2'].getItemNumber() === 0) {
+    if (this.gifts['2'].getItemCount() === 0) {
       return 2;
     }
-    if (this.gifts['4'].getItemNumber() === 0) {
+    if (this.gifts['4'].getItemCount() === 0) {
       return 4;
     }
-    if (this.gifts['6'].getItemNumber() === 0) {
+    if (this.gifts['6'].getItemCount() === 0) {
       return 6;
     }
     return null;
@@ -478,7 +457,7 @@ class PPPlayer {
 
   getTaxShelter(): number {
     return this.court
-      .getAllItems()
+      .getItems()
       .map((cardId) => this.game.getCardInfo({ cardId }))
       .filter((card: CourtCard) => card.suit === ECONOMIC)
       .reduce((total: number, current: CourtCard) => {
@@ -558,42 +537,40 @@ class PPPlayer {
   //  ..#######.....##....####.########.####....##.......##...
 
   addSideSelectToCourt() {
-    this.court.instantaneous = true;
-    dojo.place(tplCardSelect({ side: 'left' }), `pp_court_player_${this.playerId}`);
-    this.court.placeInZone('pp_card_select_left', -1000);
-    dojo.place(tplCardSelect({ side: 'right' }), `pp_court_player_${this.playerId}`);
-    this.court.placeInZone('pp_card_select_right', 1000);
+    this.court.placeInZone({ element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 });
+    this.court.placeInZone({ element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 });
   }
 
   checkEventContainerHeight() {
     const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
-    if (this.events.getItemNumber() === 0) {
+    if (this.events.getItemCount() === 0) {
       node.style.marginTop = '-209px';
     } else {
       node.style.marginTop = '-57px';
     }
   }
 
-  removeSideSelectFromCourt() {
-    this.court.removeFromZone('pp_card_select_left', true);
-    this.court.removeFromZone('pp_card_select_right', true);
-    this.court.instantaneous = false;
+  async removeSideSelectFromCourt(): Promise<void> {
+    Promise.all([
+      this.court.remove({ input: 'pp_card_select_left', destroy: true }),
+      this.court.remove({ input: 'pp_card_select_right', destroy: true }),
+    ]);
   }
 
   ownsEventCard({ cardId }: { cardId: string }): boolean {
-    return this.events.getAllItems().includes(cardId);
+    return this.events.getItems().includes(cardId);
   }
 
   hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
     return this.court
-      .getAllItems()
+      .getItems()
       .map((cardId: string) => this.game.getCardInfo({ cardId }))
       .some((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
   getCourtCardsWithSpecialAbility({ specialAbility }: { specialAbility: string }): CourtCard[] {
     return this.court
-      .getAllItems()
+      .getItems()
       .map((cardId: string) => this.game.getCardInfo({ cardId }) as CourtCard)
       .filter((card: CourtCard) => card.specialAbility === specialAbility);
   }
@@ -606,120 +583,160 @@ class PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
-    // // Move all spies back to cylinder pools if there are any
-    // this.game.returnSpiesFromCard({ cardId });
-    const node = dojo.byId(cardId);
-    node.classList.remove('pp_card_in_court');
-    node.classList.remove(`pp_player_${this.playerId}`);
-    // Move card to discard pile
-    this.court.removeFromZone(cardId, false);
-    discardCardAnimation({ cardId, game: this.game, to });
-  }
-
-  discardEventCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
-    // Move card to discard pile
-    this.events.removeFromZone(cardId, false);
-    discardCardAnimation({ cardId, game: this.game, to });
-    this.checkEventContainerHeight();
-  }
-
-  discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
-    if (this.playerId === this.game.getPlayerId()) {
-      const node = dojo.byId(cardId);
-      if (node) {
-        node.classList.remove(PP_CARD_IN_HAND);
-      }
-      this.hand.removeFromZone(cardId, false);
-    } else {
-      dojo.place(tplCard({ cardId }), `cards_${this.playerId}`);
+  async discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+    if (cardInfo.loyalty) {
+      this.incCounter({ counter: 'influence', value: -1 });
     }
-    discardCardAnimation({ cardId, game: this.game, to });
-  }
-
-  discardPrize({ cardId, to }: { cardId: string; to?: 'discard' | 'temp_discard' }) {
     const node = dojo.byId(cardId);
-    node.classList.remove('pp_prize');
+    node.classList.remove('pp_card_in_court', `pp_player_${this.playerId}`);
+    if (to === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.court,
+      });
+    } else {
+      await Promise.all([
+        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+          elements: { id: cardId },
+        }),
+        this.court.remove({ input: cardId }),
+      ]);
+    }
+  }
+
+  async discardEventCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
     // Move card to discard pile
-    this.prizes.removeFromZone(cardId, false);
-    discardCardAnimation({ cardId, game: this.game, to });
+    if (to === TEMP_DISCARD) {
+      await Promise.all([
+        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+          elements: { id: cardId },
+        }),
+        this.events.remove({ input: cardId }),
+      ]);
+    } else {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.events,
+      });
+    }
   }
 
-  payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
-    dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${this.playerId}`);
-    attachToNewParentNoDestroy('tempRupee', `rupees_${playerId}`);
-    // this.game.framework().placeOnObject('tempRupee',`rupees_${this.playerId}`);
-    const animation = this.game.framework().slideToObject('tempRupee', `rupees_${playerId}`);
-    dojo.connect(animation, 'onEnd', () => {
-      this.incCounter({ counter: 'rupees', value: -rupees });
-    });
-    dojo.connect(animation, 'onEnd', () => {
-      dojo.destroy('tempRupee');
-      this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
-    });
-    animation.play();
+  async discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }): Promise<void> {
+    this.incCounter({ counter: 'cards', value: -1 });
+    console.log('discardHand', to, discardMap[to]);
+    if (this.playerId === this.game.getPlayerId() && to === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.hand,
+      });
+    } else if (this.playerId === this.game.getPlayerId() && to === TEMP_DISCARD) {
+      await Promise.all([
+        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+          elements: {
+            id: cardId,
+          },
+          classesToRemove: [PP_CARD_IN_HAND],
+        }),
+      ]);
+    } else if (to === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromLocation({ cardId, from: `cards_${this.playerId}` });
+    } else if (to === TEMP_DISCARD) {
+      await this.game.objectManager.tempDiscardPile.getZone().placeInZone({
+        id: cardId,
+        element: tplCard({ cardId }),
+        from: `cards_${this.playerId}`,
+      });
+    }
   }
 
-  playCard({ card }: { card: Token }) {
+  async discardPrize({ cardId }: { cardId: string }) {
+    return await this.game.objectManager.discardPile.discardCardFromZone({ cardId, zone: this.prizes });
+  }
+
+  async payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
+    const element = dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${playerId}`);
+    const fromRect = $(`rupees_${this.playerId}`)?.getBoundingClientRect();
+
+    return await this.game.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element,
+        transitionTimingFunction: 'linear',
+        fromRect,
+        animationStart: () => {
+          this.incCounter({ counter: 'rupees', value: -rupees });
+        },
+        animationEnd: () => {
+          element.remove();
+          this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
+        },
+      })
+    );
+  }
+
+  async playCard({ card }: { card: Token }): Promise<void> {
     const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
     const { region, suit, rank } = cardInfo;
+    this.incCounter({ counter: 'cards', value: -1 });
     if (this.playerId === this.game.getPlayerId()) {
       this.setupCourtCard({ cardId: card.id });
-      this.game.move({
-        id: card.id,
-        to: this.court,
-        from: this.getHandZone(),
-        addClass: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
-        removeClass: ['pp_card_in_hand'],
-        weight: card.state,
-      });
-      this.removeSideSelectFromCourt();
+      await Promise.all([
+        // this.removeSideSelectFromCourt(),
+        this.court.moveToZone({
+          elements: { id: card.id, weight: card.state },
+          classesToAdd: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
+          classesToRemove: ['pp_card_in_hand'],
+          elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
+        }),
+        this.hand.remove({ input: card.id }),
+      ]);
     } else {
-      dojo.place(
-        tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
-        `cards_${this.playerId}`
-      );
-      this.setupCourtCard({ cardId: card.id });
-      dojo.addClass(card.id, 'pp_moving');
-      const div = this.court.container_div;
-      attachToNewParentNoDestroy(card.id, div);
-      const animation = this.game.framework().slideToObject(card.id, div);
-      dojo.connect(animation, 'onEnd', () => {
-        dojo.removeClass(card.id, 'pp_moving');
+      await this.court.placeInZone({
+        id: card.id,
+        element: tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
+        weight: card.state,
+        from: `cards_${this.playerId}`,
       });
-      animation.play();
-      this.court.placeInZone(card.id, card.state);
+      this.setupCourtCard({ cardId: card.id });
+      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     }
     this.incCounter({ counter: suit, value: rank });
-    this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+    if (cardInfo.loyalty) {
+      // TODO: check for loyalty change and then set Counter to 2?
+      this.incCounter({ counter: 'influence', value: 1 });
+    }
   }
 
-  addCardToHand({ cardId, from }: { cardId: string; from?: Zone }) {
+  async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {
     if (this.playerId === this.game.getPlayerId() && from) {
-      this.game.move({ id: cardId, to: this.hand, from, addClass: ['pp_card_in_hand'], removeClass: ['pp_market_card'] });
+      await Promise.all([
+        this.hand.moveToZone({ elements: { id: cardId }, classesToAdd: ['pp_card_in_hand'], classesToRemove: [PP_MARKET_CARD] }),
+        from.remove({ input: cardId }),
+      ]);
     } else if (this.playerId === this.game.getPlayerId()) {
       // No from we need to create card
-      dojo.place(tplCard({ cardId, extraClasses: 'pp_card_in_hand' }), 'pp_player_hand_cards');
-      this.hand.placeInZone(cardId);
+      await this.hand.placeInZone({ id: cardId, element: tplCard({ cardId, extraClasses: 'pp_card_in_hand' }) });
     } else {
-      dojo.addClass(cardId, 'pp_moving');
-      from.removeFromZone(cardId, true, `player_board_${this.playerId}`);
+      // Other player so move to player panel and destroy
+      await from.removeTo({ id: cardId, to: `cards_${this.playerId}` });
     }
-    this.game.tooltipManager.addTooltipToCard({ cardId });
+    this.incCounter({ counter: 'cards', value: 1 });
   }
 
-  addEvent({ cardId, from }: { cardId: string; from: Zone }) {
-    if (this.events.getItemNumber() === 0) {
+  async addCardToEvents({ cardId, from }: { cardId: string; from: PaxPamirZone }): Promise<void> {
+    if (this.events.getItemCount() === 0) {
       const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
       node.style.marginTop = '-57px';
     }
-    this.game.move({
-      id: cardId,
-      from,
-      to: this.getEventsZone(),
-      removeClass: [PP_MARKET_CARD],
-    });
-    this.game.tooltipManager.addTooltipToCard({ cardId });
+
+    await Promise.all([
+      this.events.moveToZone({
+        elements: { id: cardId },
+        classesToRemove: [PP_MARKET_CARD],
+      }),
+      from.remove({ input: cardId }),
+    ]);
   }
 
   removeTaxCounter() {
@@ -729,24 +746,18 @@ class PPPlayer {
     }
   }
 
-  takePrize({ cardId }: { cardId: string }): void {
-    debug('item number', this.prizes.getItemNumber());
-    this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemNumber() + 1 });
-
-    dojo.addClass(cardId, 'pp_prize');
-    const div = this.prizes.container_div;
-    attachToNewParentNoDestroy(cardId, div);
-    const animation = this.game.framework().slideToObject(cardId, div);
-    animation.play();
-    this.prizes.placeInZone(cardId);
-    // this.game.move({
-    //   id: cardId,
-    //   from: this.game.playerManager.getPlayer({ playerId: cardOwnerId }).getCourtZone(),
-    //   to: this.getPrizeZone(),
-    //   addClass: ['pp_prize'],
-    //   removeClass: ['pp_card_in_court', `pp_player_${cardOwnerId}`],
-    //   // weight,
-    // });
+  async takePrize({ cardId }: { cardId: string }): Promise<void> {
+    this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemCount() + 1 });
+    const node = $(cardId);
+    node.style.zIndex = 0;
+    await Promise.all([
+      this.prizes.moveToZone({
+        elements: { id: cardId },
+        classesToAdd: [PP_PRIZE],
+        zIndex: 0,
+      }),
+      this.game.objectManager.tempDiscardPile.getZone().remove({ input: cardId }),
+    ]);
     this.incCounter({ counter: 'influence', value: 1 });
   }
 

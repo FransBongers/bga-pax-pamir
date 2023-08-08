@@ -95,7 +95,7 @@ class ClientCardActionBetrayState implements State {
         own: [],
       };
     }
-    const cylinderIds = spyZone.getAllItems();
+    const cylinderIds = spyZone.getItems();
     return {
       enemy: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()),
       own: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) === this.game.getPlayerId()),

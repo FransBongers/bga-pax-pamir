@@ -94,7 +94,7 @@ class StartOfTurnAbilitiesState implements State {
     dojo.query(`.pp_card_in_court`).forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
       const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
-      if (cardInfo.region === region && (this.game.spies[cardId]?.getAllItems() || []).length === 0) {
+      if (cardInfo.region === region && (this.game.spies[cardId]?.getItems() || []).length === 0) {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
       }

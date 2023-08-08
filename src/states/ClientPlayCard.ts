@@ -141,7 +141,7 @@ class ClientPlayCardState implements State {
     const numberOfCardsInCourt = this.game.playerManager
       .getPlayer({ playerId: this.game.getPlayerId() })
       .getCourtZone()
-      .getAllItems().length;
+      .getItems().length;
     if (numberOfCardsInCourt === 0) {
       this.updateInterfacePlayCardConfirm({ firstCard: true, side: 'left' });
     } else {

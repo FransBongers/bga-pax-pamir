@@ -81,12 +81,17 @@ html {
   display: flex;
 }
 
-#pp_temp_discard_pile {
+#pp_temp_discarded_card {
+  position: relative;
+  margin-right: 10px;
   width: 150px;
   height: 209px;
-  position: relative;
-  // background-color: yellow;
-  margin-right: 10px;
+}
+
+#pp_pile_discarded_card {
+  top: -4px;
+  left: -5px;
+  position: absolute;
 }
 
 #pp_discard_pile {
@@ -99,18 +104,28 @@ html {
   position: relative;
 }
 
-#pp_discard_pile > .pp_card {
-  top: -5px;
-  left: -5px;
-  position: absolute;
+.pp_discarded_card {
+  width: 150px;
+  height: 209px;
+  box-shadow: rgb(0, 0, 0) 2px 2px 5px -1px;
+  border-radius: 10px;
+  background-repeat: no-repeat;
+  border: 1px black solid;
+  opacity: 0;
 }
+
+// #pp_discard_pile > .pp_card {
+//   top: -5px;
+//   left: -5px;
+//   position: absolute;
+// }
 
 #pp_market_deck {
   width: 150px;
   height: 209px;
   background-size: 1000% 500%;
   background-image: url('img/cards2.webp');
-  background-position-x: calc(2/3) * 100%;
+  background-position-x: calc(2 / 3) * 100%;
   background-position-y: 100%;
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
@@ -218,7 +233,7 @@ html {
 }
 
 .pp_cylinder {
-  background-image: url('img/cylinders.webp');;
+  background-image: url('img/cylinders.webp');
   background-size: 500% 100%;
   background-repeat: no-repeat;
   height: 30px;
@@ -564,7 +579,7 @@ html {
 .pp_card_back {
   background-size: 1000% 500%;
   background-image: url('img/cards2.webp');
-  background-position-x: calc(2/3) * 100%;
+  background-position-x: calc(2 / 3) * 100%;
   background-position-y: 100%;
 }
 

@@ -29,20 +29,7 @@ trait DebugTrait
   function debugSetupTokens()
   {
     // $this->debugCreateArmy(KABUL);
-    // $this->debugCreateArmy(KABUL);
-    // $this->debugCreateArmy(KABUL);
-    // $this->debugCreateArmy(KABUL);
-    // $this->debugCreateArmy(HERAT);
-    // $this->debugCreateArmy(HERAT);
-    // $this->debugCreateArmy(HERAT);
-    // $this->debugCreateArmy(PERSIA,RUSSIAN);
-    // $this->debugCreateArmy(PERSIA,RUSSIAN);
-    // $this->debugCreateArmy(PERSIA,RUSSIAN);
-    // $this->debugCreateArmy(PUNJAB);
-    // $this->debugCreateArmy(PUNJAB);
-    // $this->debugCreateArmy(PUNJAB,AFGHAN);
-    // $this->debugCreateRoad('herat_kabul');
-    // $this->debugCreateRoad('herat_persia');
+  
     // $this->debugCreateRoad('kabul_punjab');
     // $this->debugCreateSpy('card_32');
     // $this->debugCreateSpy('card_27');
@@ -60,6 +47,8 @@ trait DebugTrait
 
   function test()
   {
+    // $fromLocations = ['armies_herat','armies_kabul','armies_herat','armies_punjab'];
+    // Notifications::log('array_unique',array_values(array_unique($fromLocations)));
     // Notifications::log('array_merge_test', array_merge([
     //   ActionStack::createAction(DISPATCH_TRANSITION, 'playerId', [
     //     'transition' => 'eventCardOtherPersuasiveMethods',
@@ -67,7 +56,7 @@ trait DebugTrait
     // ], []));
     // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    Cards::move('card_1','deck');
+    Cards::move('card_114', 'market_0_4');
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);
@@ -110,7 +99,7 @@ trait DebugTrait
     $card = Cards::get($cardId);
     $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
     Cards::move($cardId, ['court', $playerId]);
-    $this->reassignCourtState($playerId);
+    // $this->reassignCourtState($playerId);
   }
 
   function debugAddCardToHand($cardId, $playerId = null)
@@ -137,12 +126,10 @@ trait DebugTrait
         'player' => Players::get(),
         'logTokenArmy' => Utils::logTokenArmy($coalition),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
-        'moves' => [
-          [
-            'from' => $location,
-            'to' => $to,
-            'tokenId' => $army['id'],
-          ]
+        'move' => [
+          'from' => $location,
+          'to' => $to,
+          'tokenId' => $army['id'],
         ]
       ]);
       Map::checkRulerChange($region);
@@ -168,12 +155,10 @@ trait DebugTrait
         'logTokenRoad' => Utils::logTokenRoad($coalition),
         'logTokenRegionName0' => Utils::logTokenRegionName($region0),
         'logTokenRegionName1' => Utils::logTokenRegionName($region1),
-        'moves' => [
-          [
-            'from' => $location,
-            'to' => $to,
-            'tokenId' => $road['id'],
-          ]
+        'move' => [
+          'from' => $location,
+          'to' => $to,
+          'tokenId' => $road['id'],
         ]
       ]);
     }
@@ -195,12 +180,10 @@ trait DebugTrait
         'player' => Players::get($playerId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $cylinder['id'],
-          ]
+        'move' => [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinder['id'],
         ]
       ]);
       Map::checkRulerChange($region);
@@ -227,12 +210,10 @@ trait DebugTrait
         'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $cylinder['id'],
-          ]
+        'move' => [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $cylinder['id'],
         ]
       ]);
     }

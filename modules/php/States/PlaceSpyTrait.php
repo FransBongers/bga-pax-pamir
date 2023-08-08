@@ -99,7 +99,6 @@ trait PlaceSpyTrait
       ActionStack::next($actionStack);
       return;
     }
-    Notifications::log('cardId', $cardId);
 
     $specialAbility = $action['data']['specialAbility'];
     if (!Players::get()->hasSpecialAbility($specialAbility)) {

@@ -14,25 +14,11 @@ interface Log {
   args: Record<string, unknown>;
 }
 
-interface NotifBetrayArgs {
-  player_name: string;
-  playerId: number;
-  logTokenCardName: string;
-  logTokenLargeCard: string;
-  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
-}
-
 interface NotifPayBribeArgs {
   player_name: string;
   rulerId: number;
   briberId: number;
   rupees: number;
-}
-
-interface NotifBuildArgs {
-  player_name: string;
-  playerId: number;
-  rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
 interface NotifChangeFavoredSuitArgs {
@@ -60,25 +46,56 @@ interface NotifDiscardArgs {
   player_name: string;
   cardId: string;
   from: 'court' | 'hand' | string;
-  to: 'discard' | 'temp_discard';
+  to: 'discardPile' | 'tempDiscardPile';
 }
 
-interface NotifReturnSpiesArgs {
+interface NotifReturnAllSpiesArgs {
   playerId: number;
   player_name: string;
-  moves: TokenMove[];
+  cardId: string;
+  spies: {
+    [playerId: string]: {
+      tokenId: string;
+      weight?: number;
+    }[];
+  };
 }
 
-// interface NotifDiscardAndTakePrizeArgs {
-//   cardId: string;
-//   courtOwnerPlayerId: string;
-//   playerId: number;
-//   player_name: string;
-//   logTokenCardName: string;
-//   logTokenLargeCard: string;
-//   moves: TokenMove[];
-//   returnedSpiesLog: Log | '';
-// }
+interface NotifReturnAllToSupplyArgs {
+  playerId: number;
+  player_name: string;
+  regionId: string;
+  armies: {
+    [coalition: string]: {
+      tokenId: string;
+      weight?: number;
+    }[];
+  };
+  tribes: {
+    [playerId: string]: {
+      tokenId: string;
+      weight?: number;
+    }[];
+  };
+}
+
+interface NotifReturnCoalitionBlockArgs {
+  playerId: number;
+  player_name: string;
+  from: string;
+  blockId: string;
+  weight?: number;
+  type: 'army' | 'road';
+  coalition: string;
+}
+
+interface NotifReturnCylinderArgs {
+  playerId: number;
+  player_name: string;
+  from: string;
+  cylinderId: string;
+  weight?: number;
+}
 
 interface NotifDiscardFromCourtArgs {
   cardId: string;
@@ -104,13 +121,13 @@ interface NotifDiscardFromMarketArgs {
   playerId: string;
   player_name: string;
   from: string;
-  to: string;
+  to: 'discardPile' | 'tempDiscardPile' | 'activeEvents';
   logTokenLargeCard: string;
 }
 
 interface NotifDiscardPrizesArgs {
   prizes: CourtCard[];
-  playerId: string;
+  playerId: number;
   player_name: string;
 }
 
@@ -124,8 +141,18 @@ interface NotifDominanceCheckScoresArgs {
   };
 }
 
+interface TokenZoneInfo {
+  id: string;
+  weight?: number;
+}
+
 interface NotifDominanceCheckReturnBlocksArgs {
-  moves: TokenMove[];
+  blocks: {
+    [AFGHAN]: TokenZoneInfo[],
+    [BRITISH]: TokenZoneInfo[],
+    [RUSSIAN]: TokenZoneInfo[]
+  };
+  fromLocations: string[];
 }
 
 interface NotifExchangeHandArgs {
@@ -136,23 +163,35 @@ interface NotifExchangeHandArgs {
   };
 }
 
+interface NotifPlaceArmyArgs {
+  move: TokenMove;
+}
+
+interface NotifPlaceCylinderArgs {
+  move: TokenMove;
+}
+
+interface NotifPlaceRoadArgs {
+  move: TokenMove;
+}
+
 interface NotifMoveCardArgs {
-  action: 'PURCHASE_CARD' | 'MOVE_EVENT';
-  moves: TokenMove[];
+  action: 'MOVE_EVENT';
+  move: TokenMove | null;
 }
 
 interface NotifMoveTokenArgs {
-  moves: TokenMove[];
+  move: TokenMove;
 }
 
 interface NotifPayRupeesToMarketArgs {
   playerId: number;
   player_name: string;
-  rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
+  rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
 interface NotifPlayCardArgs {
-  playerId: string;
+  playerId: number;
   player_name: string;
   card: Token;
   cardName: string;
@@ -190,11 +229,11 @@ interface NotifPurchaseGiftArgs {
 }
 
 interface NotifShiftMarketArgs {
-  cardMoves: {
+  move: {
     cardId: string;
     from: string;
     to: string;
-  }[];
+  };
 }
 
 interface NotifDrawMarketCardArgs {
@@ -253,13 +292,13 @@ interface NotifTaxPlayerArgs {
   logTokenPlayerName: string;
 }
 
-interface NotifUpdateCourtCardStatesArgs {
-  playerId: number;
-  cardStates: {
-    cardId: string;
-    state: number;
-  }[];
-}
+// interface NotifUpdateCourtCardStatesArgs {
+//   playerId: number;
+//   cardStates: {
+//     cardId: string;
+//     state: number;
+//   }[];
+// }
 
 interface NotifUpdateInterfaceArgs {
   updates: {

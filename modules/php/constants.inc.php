@@ -175,8 +175,8 @@ const BLOCKS_RUSSIAN_SUPPLY = 'blocks_russian';
  * Card locations
  */
 const DECK = 'deck';
-const DISCARD = 'discard';
-const TEMP_DISCARD = 'temp_discard';
+const DISCARD = 'discardPile';
+const TEMP_DISCARD = 'tempDiscardPile';
 const ACTIVE_EVENTS = 'activeEvents';
 const HAND = 'hand';
 const COURT = 'court';
@@ -224,6 +224,7 @@ const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
 const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
 const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
 const DISPATCH_DISCARD = 'dispatchDiscard';
+const DISPATCH_DISCARD_BETRAYED_CARD = 'dispDiscardBetrayedCard';
 const DISPATCH_DISCARD_PATRIOTS = 'dispatchDiscardPatriots';
 const DISPATCH_DISCARD_SINGLE_CARD = 'dispDiscardSingleCard';
 
@@ -259,7 +260,7 @@ const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
 const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
 const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
 const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
-
+const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
 
 const IMPACT_ICON_DISPATCH_MAP = [

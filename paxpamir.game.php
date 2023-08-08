@@ -217,7 +217,6 @@ class Paxpamir extends Table
         $deckCount = Cards::countInLocation(DECK);
        
         $progression = round((1 - ( $deckCount / $cardsInDeckStartGame)) * 100);
-        Notifications::log('progression',$progression);
 
         return $progression;
     }
@@ -241,29 +240,29 @@ class Paxpamir extends Table
         return $this->cards[$token['id']];
     }
 
-    /**
-     * Calculates current totals for all player information and sends notification to all players
-     */
-    function updatePlayerCounts()
-    {
-        $counts = array();
-        $players = $this->loadPlayersBasicInfos();
-        // $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
-        // $result['players'] = self::getCollectionFromDb( $sql );
-        foreach ($players as $player_id => $player_info) {
-            $player = Players::get($player_id);
-            $counts[$player_id] = array();
-            $counts[$player_id]['rupees'] = $player->getRupees();
-            $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
-            $counts[$player_id]['cards'] = count($player->getHandCards());
-            $counts[$player_id]['suits'] = $player->getSuitTotals();
-            $counts[$player_id]['influence'] = $player->getInfluence();
-        }
+    // /**
+    //  * Calculates current totals for all player information and sends notification to all players
+    //  */
+    // function updatePlayerCounts()
+    // {
+    //     $counts = array();
+    //     $players = $this->loadPlayersBasicInfos();
+    //     // $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
+    //     // $result['players'] = self::getCollectionFromDb( $sql );
+    //     foreach ($players as $player_id => $player_info) {
+    //         $player = Players::get($player_id);
+    //         $counts[$player_id] = array();
+    //         $counts[$player_id]['rupees'] = $player->getRupees();
+    //         $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
+    //         $counts[$player_id]['cards'] = count($player->getHandCards());
+    //         $counts[$player_id]['suits'] = $player->getSuitTotals();
+    //         $counts[$player_id]['influence'] = $player->getInfluence();
+    //     }
 
-        self::notifyAllPlayers("updatePlayerCounts", '', array(
-            'counts' => $counts
-        ));
-    }
+    //     self::notifyAllPlayers("updatePlayerCounts", '', array(
+    //         'counts' => $counts
+    //     ));
+    // }
 
     /**
      * Generic state to handle change of active player in the middle of a transition

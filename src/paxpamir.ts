@@ -34,8 +34,8 @@ class PaxPamir implements PaxPamirGame {
   // global variables
   private defaultWeightZone: number = 0;
   private playerEvents = {}; // events per player
-  public activeEvents: Zone = new ebg.zone(); // active events
-  public spies: Record<string, Zone> = {}; // spies per cards
+  public activeEvents: PaxPamirZone; // active events
+  public spies: Record<string, PaxPamirZone> = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals?
   public tooltipManager: PPTooltipManager;
   private _notif_uid_to_log_id = {};
@@ -126,18 +126,24 @@ class PaxPamir implements PaxPamirGame {
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
     };
 
+    this.animationManager = new AnimationManager(this, {duration: 500});
     // Events
-    this.activeEvents.create(this, 'pp_active_events', CARD_WIDTH, CARD_HEIGHT);
-    this.activeEvents.instantaneous = true;
-    this.activeEvents.item_margin = 16;
-    // Add current event cards
-    gamedatas.activeEvents.forEach((card) => {
-      dojo.place(tplCard({ cardId: card.id }), 'pp_active_events');
-      this.activeEvents.placeInZone(card.id);
+    this.activeEvents = new PaxPamirZone({
+      animationManager: this.animationManager,
+      containerId: 'pp_active_events',
+      itemHeight: CARD_HEIGHT,
+      itemWidth: CARD_WIDTH,
+      itemGap: 16,
     });
-    this.activeEvents.instantaneous = false;
+    // Add current event cards
+    this.activeEvents.placeInZone(
+      (gamedatas.activeEvents || []).map((card) => ({
+        id: card.id,
+        element: tplCard({ cardId: card.id }),
+      }))
+    );
+  
 
-    this.animationManager = new AnimationManager(this);
     this.tooltipManager = new PPTooltipManager(this);
     this.objectManager = new ObjectManager(this);
     this.playerManager = new PlayerManager(this);
@@ -320,7 +326,7 @@ class PaxPamir implements PaxPamirGame {
   public clearInterface() {
     console.log('clear interface');
     Object.keys(this.spies).forEach((key) => {
-      dojo.empty(this.spies[key].container_div);
+      dojo.empty(this.spies[key].getContainerId());
       this.spies[key] = undefined;
     });
 
@@ -392,7 +398,17 @@ class PaxPamir implements PaxPamirGame {
     this.localState = { ...this.localState, ...updates };
   }
 
-  setCourtCardsSelectable({ callback, loyalty, region, suit }: { callback: (props: { cardId: string }) => void; loyalty?: string; region?: string; suit?: string; }) {
+  setCourtCardsSelectable({
+    callback,
+    loyalty,
+    region,
+    suit,
+  }: {
+    callback: (props: { cardId: string }) => void;
+    loyalty?: string;
+    region?: string;
+    suit?: string;
+  }) {
     debug('setCourtCardsSelectable', loyalty, region, suit);
     const playerId = this.getPlayerId();
     dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
@@ -414,7 +430,7 @@ class PaxPamir implements PaxPamirGame {
     debug('setHandCardsSelectable');
     dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
-      debug('cardId',cardId);
+      debug('cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
     });
@@ -572,7 +588,7 @@ class PaxPamir implements PaxPamirGame {
   // }
 
   // returns zone object for given backend location in token database
-  getZoneForLocation({ location }: { location: string }): Zone {
+  getZoneForLocation({ location }: { location: string }): PaxPamirZone {
     const splitLocation = location.split('_');
     switch (splitLocation[0]) {
       case 'armies':
@@ -679,12 +695,15 @@ class PaxPamir implements PaxPamirGame {
 
   // Every time a card is moved or placed in court this function will be called to set up zone.
   setupCardSpyZone({ nodeId, cardId }) {
-    // Note (Frans): we probably need to remove spies before moving / placing card
     if (!this.spies[cardId]) {
       // ** setup for zone
-      this.spies[cardId] = new ebg.zone();
-      this.spies[cardId].create(this, nodeId, CYLINDER_WIDTH, CYLINDER_HEIGHT);
-      this.spies[cardId].item_margin = 4;
+      this.spies[cardId] = new PaxPamirZone({
+        animationManager: this.animationManager,
+        containerId: nodeId,
+        itemHeight: CYLINDER_HEIGHT,
+        itemWidth: CYLINDER_WIDTH,
+        itemGap: 4,
+      });
     }
   }
 

@@ -28,7 +28,6 @@ trait PlayerActionBetrayTrait
   function argAcceptPrize()
   {
     $actionStack = ActionStack::get();
-    Notifications::log('actionStack', $actionStack);
 
     $next = $actionStack[count($actionStack) - 1];
     return [
@@ -55,7 +54,6 @@ trait PlayerActionBetrayTrait
   function acceptPrize($accept)
   {
     self::checkAction('acceptPrize');
-    Notifications::log('acceptPrize', $accept);
     $actionStack = ActionStack::get();
     $current = array_pop($actionStack);
 
@@ -69,7 +67,7 @@ trait PlayerActionBetrayTrait
 
     if ($accept) {
       Notifications::acceptPrize($cardId, $player);
-      $actionStack[] = ActionStack::createAction('takePrize', $player->getId(), [
+      $actionStack[] = ActionStack::createAction(DISPATCH_TAKE_PRIZE, $player->getId(), [
         'cardId' => $cardId
       ],);
 
@@ -153,7 +151,7 @@ trait PlayerActionBetrayTrait
       $actionStack[] = ActionStack::createAction('acceptPrizeCheck', $playerId, ['cardId' => $betrayedCardId,]);
     }
 
-    $actionStack[] = ActionStack::createAction('discardBetrayedCard', $playerId, [
+    $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_BETRAYED_CARD, $playerId, [
       'cardId' => $betrayedCardId,
       'cardOwnerId' => $betrayedPlayerId,
     ]);

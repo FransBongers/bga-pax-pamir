@@ -64,13 +64,11 @@ trait SASafeHouseTrait
       $message = clienttranslate('${player_name} does not use Safe House');
       Notifications::moveToken($message, [
         'player' => Players::get(),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $tokenId,
-            'weight' => $state,
-          ]
+        'move' => [
+          'from' => $from,
+          'to' => $to,
+          'tokenId' => $tokenId,
+          'weight' => $state,
         ]
       ]);
       $this->safeHouseNextStep($data);
@@ -80,7 +78,7 @@ trait SASafeHouseTrait
     // Player selected card with Safe House ability
     $card = Cards::get($cardId);
 
-    if ($card['location'] !== 'court_'.$playerId) {
+    if ($card['location'] !== 'court_' . $playerId) {
       throw new \feException("Card is not in player's court");
     };
     if ($card['specialAbility'] !== SA_SAFE_HOUSE) {
@@ -96,13 +94,11 @@ trait SASafeHouseTrait
       'logTokenCylinder' => Utils::logTokenCylinder($playerId),
       'logTokenCardName' => Utils::logTokenCardName($card['name']),
       'logTokenNewLine' => Utils::logTokenNewLine(),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $tokenId,
-          'weight' => $state,
-        ]
+      'move' => [
+        'from' => $from,
+        'to' => $to,
+        'tokenId' => $tokenId,
+        'weight' => $state,
       ]
     ]);
     $this->safeHouseNextStep($data);

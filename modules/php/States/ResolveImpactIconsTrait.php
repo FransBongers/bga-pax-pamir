@@ -123,19 +123,7 @@ trait ResolveImpactIconsTrait
     Tokens::setUsed($army['id'], USED);
 
     // TODO: (add from log in case it was a selected pieces)
-    $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
-    Notifications::moveToken($message, [
-      'player' => $player,
-      'logTokenArmy' => Utils::logTokenArmy($loyalty),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $army['id'],
-        ]
-      ],
-    ]);
+    Notifications::placeArmy($player, $army['id'], $loyalty, $regionId, $from, $to);
 
     if ($selectedPiece !== null) {
       $fromRegionId = explode('_', $from)[1];
@@ -353,51 +341,6 @@ trait ResolveImpactIconsTrait
     }
 
     return false;
-  }
-
-  function resolvePlaceArmy($regionId, $selectedPiece = null, $playerId = null)
-  {
-    $player = $playerId !== null ? Players::get($playerId) : Players::get();
-    $loyalty = $player->getLoyalty();
-    $location = $this->locations['pools'][$loyalty];
-
-    $army = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($location);
-    if ($army === null) {
-      return false;
-    }
-    $to = $this->locations['armies'][$regionId];
-    $from = $army['location'];
-    Tokens::move($army['id'], $this->locations['armies'][$regionId]);
-    Tokens::setUsed($army['id'], USED);
-
-    // TODO: (add from log in case it was a selected pieces)
-    $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
-    Notifications::moveToken($message, [
-      'player' => $player,
-      'logTokenArmy' => Utils::logTokenArmy($loyalty),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $army['id'],
-        ]
-      ],
-    ]);
-
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      Notifications::log('fromRegionId', $fromRegionId);
-      $isArmy = Utils::startsWith($from, 'armies');
-      Notifications::log('isArmy', $isArmy);
-      if ($isArmy && explode('_', $from)[1] !== $regionId) {
-        Map::checkRulerChange($fromRegionId);
-        Notifications::log('selectedPieceFrom', $fromRegionId);
-      }
-    }
-    Map::checkRulerChange($regionId);
-
-    return true;
   }
 
   function resolveFavoredSuitChange($newSuit, $source = null)

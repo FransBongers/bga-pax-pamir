@@ -10,9 +10,9 @@ class Region {
   private game: PaxPamirGame;
   private region: string;
   private ruler: number | null;
-  private armyZone: Zone;
-  private tribeZone: Zone;
-  private rulerZone: Zone;
+  private armyZone: PaxPamirZone;
+  private tribeZone: PaxPamirZone;
+  private rulerZone: PaxPamirZone;
   // clienttranslated name of region
   private name: string;
   // array with ids of all connected borders
@@ -44,104 +44,65 @@ class Region {
   }
 
   setupArmyZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
-    if (!this.armyZone) {
-      this.armyZone = new ebg.zone();
-    }
-    // Setup army zone
-    setupTokenZone({
-      game: this.game,
-      zone: this.armyZone,
-      nodeId: `pp_${this.region}_armies`,
-      tokenWidth: ARMY_WIDTH,
-      tokenHeight: ARMY_HEIGHT,
-      itemMargin: -5,
+    this.armyZone = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_${this.region}_armies`,
+      itemWidth: ARMY_WIDTH,
+      itemHeight: ARMY_HEIGHT,
+      itemGap: -5,
     });
-
-    this.armyZone.instantaneous = true;
-    // place armies
     regionGamedatas.armies.forEach(({ id }) => {
-      placeToken({
-        game: this.game,
-        location: this.armyZone,
+      this.armyZone.placeInZone({
         id,
-        jstpl: 'jstpl_army',
-        jstplProps: {
+        element: tplArmy({
           id,
           coalition: id.split('_')[1],
-        },
+        }),
       });
     });
-    this.armyZone.instantaneous = false;
   }
 
   setupRulerZone({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    if (!this.rulerZone) {
-      this.rulerZone = new ebg.zone();
-    }
-
-    // Ruler
-    setupTokenZone({
-      game: this.game,
-      zone: this.rulerZone,
-      nodeId: `pp_position_ruler_token_${this.region}`,
-      tokenWidth: RULER_TOKEN_WIDTH,
-      tokenHeight: RULER_TOKEN_HEIGHT,
+    this.rulerZone = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_position_ruler_token_${this.region}`,
+      itemWidth: RULER_TOKEN_WIDTH,
+      itemHeight: RULER_TOKEN_HEIGHT,
     });
-    this.rulerZone.instantaneous = true;
     this.ruler = gamedatas.map.rulers[this.region];
     if (this.ruler === null) {
-      placeToken({
-        game: this.game,
-        location: this.rulerZone,
+      this.rulerZone.placeInZone({
         id: `pp_ruler_token_${this.region}`,
-        jstpl: 'jstpl_ruler_token',
-        jstplProps: {
-          id: `pp_ruler_token_${this.region}`,
-          region: this.region,
-        },
+        element: tplRulerToken({ id: `pp_ruler_token_${this.region}`, region: this.region }),
       });
     }
-    this.rulerZone.instantaneous = false;
   }
 
   setupTribeZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
-    if (!this.tribeZone) {
-      this.tribeZone = new ebg.zone();
-    }
-
-    // tribe zone
-    setupTokenZone({
-      game: this.game,
-      zone: this.tribeZone,
-      nodeId: `pp_${this.region}_tribes`,
-      tokenWidth: TRIBE_WIDTH,
-      tokenHeight: TRIBE_HEIGHT,
-      itemMargin: 12,
+    this.tribeZone = new PaxPamirZone({
+      animationManager: this.game.animationManager,
+      containerId: `pp_${this.region}_tribes`,
+      itemWidth: TRIBE_WIDTH,
+      itemHeight: TRIBE_HEIGHT,
+      itemGap: 12,
     });
-
-    this.tribeZone.instantaneous = true;
-    // tribes
     regionGamedatas.tribes.forEach(({ id }) => {
-      placeToken({
-        game: this.game,
-        location: this.tribeZone,
+      this.tribeZone.placeInZone({
         id,
-        jstpl: 'jstpl_cylinder',
-        jstplProps: {
+        element: tplCylinder({
           id,
           color: this.game.gamedatas.players[id.split('_')[1]].color,
-        },
+        }),
       });
     });
-    this.tribeZone.instantaneous = false;
   }
 
   clearInterface() {
-    dojo.empty(this.armyZone.container_div);
+    dojo.empty(this.armyZone.getContainerId());
     this.armyZone = undefined;
-    dojo.empty(this.rulerZone.container_div);
+    dojo.empty(this.rulerZone.getContainerId());
     this.rulerZone = undefined;
-    dojo.empty(this.tribeZone.container_div);
+    dojo.empty(this.tribeZone.getContainerId());
     this.tribeZone = undefined;
   }
 
@@ -161,7 +122,7 @@ class Region {
   // .##....##.##..........##.......##....##.......##....##.
   // ..######..########....##.......##....########.##.....##
 
-  getArmyZone() {
+  getArmyZone(): PaxPamirZone {
     return this.armyZone;
   }
 
@@ -172,7 +133,7 @@ class Region {
   getRulerTribes(): string[] {
     if (this.ruler) {
       return this.getTribeZone()
-        .getAllItems()
+        .getItems()
         .filter((id: string) => {
           return Number(id.split('_')[1]) === this.ruler;
         });
@@ -184,7 +145,7 @@ class Region {
     this.ruler = playerId;
   }
 
-  getRulerZone(): Zone {
+  getRulerZone(): PaxPamirZone {
     return this.rulerZone;
   }
 
@@ -200,69 +161,98 @@ class Region {
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  public addTempArmy({coalition, index}:{coalition: string; index: number;}) {
-    this.armyZone.instantaneous = true;
-    const id = `temp_army_${index}`
-    placeToken({
-      game: this.game,
-      location: this.armyZone,
+  public async removeAllArmies(
+    armies: {
+      [coalition: string]: {
+        tokenId: string;
+        weight?: number;
+      }[];
+    } = {}
+  ) {
+    await Promise.all([
+      ...Object.entries(armies).map(async ([key, value]) => {
+        await this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: key }).moveToZone({
+          elements: value.map(({ tokenId, weight }) => ({ id: tokenId, weight })),
+          classesToAdd: [PP_COALITION_BLOCK],
+          classesToRemove: [PP_ARMY]
+        });
+      }),
+      this.getArmyZone().removeAll(),
+    ]);
+  }
+
+  public async removeAllTribes(tribes: {
+    [playerId: string]: {
+      tokenId: string;
+      weight?: number;
+    }[];
+  } = {}) {
+    await Promise.all([
+      ...Object.entries(tribes).map(async ([key, value]) => {
+        const player = this.game.playerManager.getPlayer({ playerId: Number(key) });
+        await player.getCylinderZone().moveToZone({
+          elements: value.map(({ tokenId, weight }) => ({ id: tokenId, weight })),
+        });
+        player.incCounter({ counter: 'cylinders', value: -value.length });
+      }),
+      this.getTribeZone().removeAll(),
+    ]);
+  }
+
+  public addTempArmy({ coalition, index }: { coalition: string; index: number }) {
+    const id = `temp_army_${index}`;
+    this.armyZone.placeInZone({
       id,
-      jstpl: 'jstpl_army',
-      jstplProps: {
-        id,
-        coalition,
-      },
-      classes: ['pp_temporary']
+      element: tplArmy({ id, coalition, classesToAdd: [PP_TEMPORARY] }),
     });
-    this.armyZone.instantaneous = false;
   }
 
-  getCoalitionArmies({coalitionId}: {coalitionId: string;}): string[] {
-    return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
+  getCoalitionArmies({ coalitionId }: { coalitionId: string }): string[] {
+    return this.armyZone.getItems().filter((blockId: string) => blockId.split('_')[1] === coalitionId);
   }
 
-  private getEnemyArmies({coalitionId}: {coalitionId: string;}): string[] {
-    return this.armyZone.getAllItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
-  };
+  private getEnemyArmies({ coalitionId }: { coalitionId: string }): string[] {
+    return this.armyZone.getItems().filter((blockId: string) => blockId.split('_')[1] !== coalitionId);
+  }
 
-    /**
+  /**
    * Returns enemy pieces.
    * Enemy pieces are
    * - armies and roads of other coalition
    * - tribes of player loyal to other coalition
    */
-    getEnemyPieces(args: {coalitionId: string;}): string[] {
-      return [...this.getEnemyArmies(args), ...this.getEnemyRoads(args),...this.getEnemyTribes(args)];
-    }
+  getEnemyPieces(args: { coalitionId: string }): string[] {
+    return [...this.getEnemyArmies(args), ...this.getEnemyRoads(args), ...this.getEnemyTribes(args)];
+  }
 
-  private getEnemyRoads({coalitionId}: {coalitionId: string;}): string[] {
+  private getEnemyRoads({ coalitionId }: { coalitionId: string }): string[] {
     let roads = [];
     this.borders.forEach((border: string) => {
-      const enemyRoads = this.game.map.getBorder({border}).getEnemyRoads({coalitionId});
+      const enemyRoads = this.game.map.getBorder({ border }).getEnemyRoads({ coalitionId });
       roads = roads.concat(enemyRoads);
-    })
+    });
     return roads;
   }
 
-  private getEnemyTribes({coalitionId}: {coalitionId: string;}): string[] {
-    return this.tribeZone.getAllItems().filter((cylinderId: string) => {
+  private getEnemyTribes({ coalitionId }: { coalitionId: string }): string[] {
+    return this.tribeZone.getItems().filter((cylinderId: string) => {
       const playerId = Number(cylinderId.split('_')[1]);
-      return coalitionId !== this.game.playerManager.getPlayer({playerId}).getLoyalty();
-    })
+      return coalitionId !== this.game.playerManager.getPlayer({ playerId }).getLoyalty();
+    });
   }
 
-  public getPlayerTribes({playerId}: {playerId: number }) {
-    return this.tribeZone.getAllItems().filter((cylinderId: string) => {
+  public getPlayerTribes({ playerId }: { playerId: number }) {
+    return this.tribeZone.getItems().filter((cylinderId: string) => {
       const cylinderPlayerId = Number(cylinderId.split('_')[1]);
       return cylinderPlayerId === playerId;
-    })
+    });
   }
 
-  public removeTempArmy({index}: {index:number}) {
-    this.armyZone.removeFromZone(`temp_army_${index}`,true);
+  public removeTempArmy({ index }: { index: number }) {
+    this.armyZone.remove({ input: `temp_army_${index}`, destroy: true });
   }
 
-  public setSelectable({callback}: {callback: (props: { regionId: string }) => void;}) {
+  public setSelectable({ callback }: { callback: (props: { regionId: string }) => void }) {
     const element = document.getElementById(`pp_region_${this.region}`);
     if (element) {
       element.classList.add('pp_selectable');
@@ -273,7 +263,7 @@ class Region {
   public clearSelectable() {
     const element = document.getElementById(`pp_region_${this.region}`);
     if (element) {
-      element.classList.remove(PP_SELECTABLE,PP_SELECTED);
+      element.classList.remove(PP_SELECTABLE, PP_SELECTED);
     }
   }
 }

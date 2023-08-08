@@ -37,6 +37,7 @@ interface Framework {
   notifqueue: {
     next_log_id: string;
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
+    onSynchronousNotificationEnd: () => void
   };
   placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;
   player_id: string;
@@ -99,7 +100,7 @@ interface Dojo {
   // https://en.doc.boardgamearena.com/Game_interface_logic:_yourgamename.js#Moving_elements
   // https://dojotoolkit.org/reference-guide/1.7/dojo/place.html
   place: (html: string, node: string | HTMLElement, pos?: DojoPosition) => HTMLElement;
-  position: (obj: HTMLElement, includeScroll?: boolean) => { w: number; h: number; x: number; y: number };
+  position: (obj: HTMLElement | string, includeScroll?: boolean) => { w: number; h: number; x: number; y: number };
   query: (query: string) => any; //HTMLElement[]; with some more functions
   removeClass: (node: string | HTMLElement, className?: string) => void;
   stopEvent: (evt) => void;

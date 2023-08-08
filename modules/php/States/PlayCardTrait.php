@@ -47,7 +47,6 @@ trait PlayCardTrait
     $player = Players::get();
     $playerId = $player->getId();
     $card = Cards::get($cardId);
-    Notifications::log('card', $card);
 
     if ($card['location'] !== Locations::hand($playerId)) {
       throw new \feException("Player does not own the card");
@@ -79,7 +78,6 @@ trait PlayCardTrait
       'cardId' => $cardId,
       'side' => $side,
     ]);
-    Notifications::log('stack', $actionStack);
     ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
   }
@@ -102,22 +100,19 @@ trait PlayCardTrait
     $side = $action['data']['side'];
 
     $card = Cards::get($cardId);
-    $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+    $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
+    $firstCard = count($courtCards) === 0;
 
-    // To check: we could probably just do 100 / +100 and then call reallign?
     if ($side === 'left') {
-      for ($i = 0; $i < count($courtCards); $i++) {
-        Cards::setState($courtCards[$i]['id'], $i + 2);
-      }
-      Cards::move($cardId, ['court', $playerId], 1);
+      Cards::insertAtBottom($cardId, ['court', $playerId]);
     } else {
-      Cards::move($cardId, ['court', $playerId], count($courtCards) + 1);
+      Cards::insertOnTop($cardId, ['court', $playerId]);
     }
     Globals::incRemainingActions(-1);
     // We need to fetch data again to get updated state
-    $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+    // $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
     $card = Cards::get($cardId);
-    Notifications::playCard($card, $courtCards, $side, $playerId);
+    Notifications::playCard($card, $firstCard , $side, $playerId);
 
     $this->nextState('dispatchAction');
   }

@@ -23,64 +23,72 @@ class NotificationManager {
     this.subscriptions = [];
   }
 
-  destroy() {
-    dojo.forEach(this.subscriptions, dojo.unsubscribe);
-  }
-
-  getPlayer({ playerId }: { playerId: number }): PPPlayer {
-    return this.game.playerManager.getPlayer({ playerId });
-  }
+  // ..######..########.########.##.....##.########.
+  // .##....##.##..........##....##.....##.##.....##
+  // .##.......##..........##....##.....##.##.....##
+  // ..######..######......##....##.....##.########.
+  // .......##.##..........##....##.....##.##.......
+  // .##....##.##..........##....##.....##.##.......
+  // ..######..########....##.....#######..##.......
 
   setupNotifications() {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
-      ['battle', 250],
-      ['betray', 250],
-      ['build', 250],
-      ['cardAction', 1],
-      ['changeRuler', 1],
-      ['changeFavoredSuit', 250],
+      // checked
+      ['log', 1],
       ['changeLoyalty', 1],
+      ['changeFavoredSuit', undefined],
+      ['changeRuler', undefined],
       ['clearTurn', 1],
-      ['drawMarketCard', 1000],
-      ['discard', 1000],
-      ['discardFromMarket', 1000], // TODO: check if we can remove this
-      ['discardPrizes', 1000],
-      ['exchangeHand', 100],
-      ['dominanceCheckScores', 1],
-      ['dominanceCheckReturnCoalitionBlocks', 250],
-      ['moveCard', 1000],
-      ['moveToken', 1000],
-      ['payBribe', 1],
-      ['payRupeesToMarket', 100],
-      ['publicWithdrawal', 1000],
-      ['purchaseCard', 2000],
-      // ['purchaseGift', 1],
-      ['playCard', 2000],
-      ['shiftMarket', 250],
-      ['replaceHand', 250],
-      ['returnRupeesToSupply', 250],
-      ['returnSpies', 1000],
+      ['declinePrize', undefined],
+      ['discard', undefined],
+      ['discardFromMarket', undefined],
+      ['discardPrizes', undefined],
+      ['dominanceCheckScores', undefined],
+      ['dominanceCheckReturnCoalitionBlocks', undefined],
+      ['drawMarketCard', undefined],
+      ['exchangeHand', 1],
+      ['moveCard', undefined],
+      ['moveToken', undefined],
+      ['payBribe', undefined],
+      ['payRupeesToMarket', undefined],
+      ['placeArmy', undefined],
+      ['placeCylinder', undefined],
+      ['placeRoad', undefined],
+      ['playCard', undefined],
+      ['publicWithdrawal', undefined],
+      ['purchaseCard', undefined],
+      ['replaceHand', 1],
+      ['returnAllSpies', undefined], // TODO: check if returnSpies can be added to returnToSupply?
+      ['returnAllToSupply', undefined],
+      ['returnCoalitionBlock', undefined],
+      ['returnCylinder', undefined],
+      ['returnRupeesToSupply', 1],
+      ['shiftMarket', undefined],
       ['smallRefreshHand', 1],
       ['smallRefreshInterface', 1],
-      ['declinePrize', 250],
-      ['takePrize', 250],
-      ['takeRupeesFromSupply', 250],
-      ['taxMarket', 250],
-      ['taxPlayer', 250],
-      ['updateCourtCardStates', 1],
-      ['updateInfluence', 1],
-      ['updatePlayerCounts', 1],
-      ['log', 1],
+      ['takePrize', undefined],
+      ['takeRupeesFromSupply', 1],
+      ['taxMarket', undefined],
+      ['taxPlayer', undefined],
+      ['updateInfluence', 1],  
     ];
 
+    // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
     notifs.forEach((notif) => {
-      this.subscriptions.push(dojo.subscribe(notif[0], this, `notif_${notif[0]}`));
+      this.subscriptions.push(
+        dojo.subscribe(notif[0], this, (notifDetails: Notif<unknown>) => {
+          debug(`notif_${notif[0]}`, notifDetails); // log notif params (with Tisaac log method, so only studio side)
+
+          const promise = this[`notif_${notif[0]}`](notifDetails);
+
+          // tell the UI notification ends
+          promise?.then(() => this.game.framework().notifqueue.onSynchronousNotificationEnd());
+        })
+      );
+      // make all notif as synchronous
       this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
     });
-
-    // this.subscriptions.push(dojo.subscribe('updatePlayerCounts', this, 'notif_updatePlayerCounts'));
-    // this.subscriptions.push(dojo.subscribe('log', this, 'notif_log'));
 
     // Use below to add tooltips to add tooltips to the log
     // dojo.connect(this.game.framework().notifqueue, 'addToLog', () => {
@@ -88,255 +96,143 @@ class NotificationManager {
     // });
   }
 
-  // Example of making notif work with promises - https://github.com/thoun/knarr/blob/main/src/knarr.ts
-  //   setupNotifications() {
-  //     const notifs = [
-  //         // ...
-  //         ['recruit', 500], // fixed duration
-  //         ['cardDeckReset', undefined], // unknown duration
-  //         ['lastTurn', 1], // (almost) no duration
-  //     ];
-
-  //     notifs.forEach((notif) => {
-  //         dojo.subscribe(notif[0], this, notifDetails => {
-  //             log(`notif_${notif[0]}`, notifDetails.args); // log notif params (with Tisaac log method, so only studio side)
-
-  //             const promise = this[`notif_${notif[0]}`](notifDetails.args);
-
-  //             // tell the UI notification ends
-  //             promise?.then(() => this.notifqueue.onSynchronousNotificationEnd());
-  //         });
-  //         // make all notif as synchronous
-  //         this.notifqueue.setSynchronous(notif[0], notif[1]);
-  //     });
+  // Example code to show log messags in page title
+  // I wont directly answer your issue, but propose something that will fix it and improve your game
+  // put that inside any notification handler :
+  // let msg = this.format_string_recursive(args.log, args.args);
+  // if (msg != '') {
+  //   $('gameaction_status').innerHTML = msg;
+  //   $('pagemaintitletext').innerHTML = msg;
   // }
 
-  // // ...
+  // .##....##..#######..########.####.########..######.
+  // .###...##.##.....##....##.....##..##.......##....##
+  // .####..##.##.....##....##.....##..##.......##......
+  // .##.##.##.##.....##....##.....##..######....######.
+  // .##..####.##.....##....##.....##..##.............##
+  // .##...###.##.....##....##.....##..##.......##....##
+  // .##....##..#######.....##....####.##........######.
 
-  // notif_cardDeckReset(args) {
-  //     this.tableCenter.cardDeck.setCardNumber(args.cardDeckCount, args.cardDeckTop);
-  //     this.tableCenter.setDiscardCount(args.cardDiscardCount);
-
-  //     // make sure the function returns a promise ! (here, the end of the shuffle animation of the deck)
-  //     return this.tableCenter.cardDeck.shuffle();
-  // }
-
-  notif_battle(notif) {
-    debug('notif_battle', notif);
+  notif_log(notif: Notif<unknown>) {
+    // this is for debugging php side
+    debug('notif_log', notif.args);
   }
 
-  notif_betray(notif: Notif<NotifBetrayArgs>) {
-    debug('notif_betray', notif);
-    const { playerId, rupeesOnCards } = notif.args;
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
-  }
-
-  notif_build(notif: Notif<NotifBuildArgs>) {
-    debug('notif_build', notif);
+  async notif_payRupeesToMarket(notif: Notif<NotifPayRupeesToMarketArgs>) {
     const { playerId, rupeesOnCards } = notif.args;
 
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
-  }
-
-  notif_cardAction(notif) {
-    console.log('notif_cardAction', notif);
-  }
-
-  notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
-    console.log('notif_changeFavoredSuit', notif);
-    const { from, to } = notif.args;
-    const tokenId = 'favored_suit_marker';
-    const fromZone = this.game.getZoneForLocation({ location: `favored_suit_${from}` });
-    const toZone = this.game.getZoneForLocation({ location: `favored_suit_${to}` });
-
-    this.game.objectManager.favoredSuit.change({ suit: to });
-    this.game.move({
-      id: tokenId,
-      from: fromZone,
-      to: toZone,
-    });
+    await Promise.all(
+      (rupeesOnCards || []).map(async (item) => {
+        const { row, column, rupeeId } = item;
+        this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+      })
+    );
   }
 
   notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
-    debug('notif_changeLoyalty', notif.args);
     const { playerId: argsPlayerId, coalition } = notif.args;
     const playerId = Number(argsPlayerId);
-    this.getPlayer({ playerId }).updatePlayerLoyalty({ coalition });
+
     const player = this.getPlayer({ playerId });
+    player.updatePlayerLoyalty({ coalition });
+    console.log('playerInfluence', player.getInfluence());
     // Influence value will be 0 when player chooses loyalty for the first time
     if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
     }
   }
 
-  notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
-    const { args } = notif;
-    console.log('notif_changeRuler', args);
-    const { oldRuler, newRuler, region } = args;
+  async notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
+    const { to } = notif.args;
+    this.game.objectManager.favoredSuit.changeTo({ suit: to });
+  }
+
+  async notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
+    const { oldRuler, newRuler, region } = notif.args;
     const from =
       oldRuler === null
         ? this.game.map.getRegion({ region }).getRulerZone()
         : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
-    const to: Zone =
+    const to =
       newRuler === null
         ? this.game.map.getRegion({ region }).getRulerZone()
         : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
     this.game.map.getRegion({ region }).setRuler({ playerId: newRuler });
-    this.game.move({
-      id: `pp_ruler_token_${region}`,
-      from,
-      to,
-    });
+    await Promise.all([
+      to.moveToZone({ elements: { id: `pp_ruler_token_${region}` } }),
+      from.remove({ input: `pp_ruler_token_${region}` }),
+    ]);
   }
 
   notif_clearTurn(notif) {
     const { args } = notif;
     const notifIds = args.notifIds;
-    console.log('notif_clearTurn', args);
-    console.log('notif_clearTurn notifIds', notifIds);
     this.game.cancelLogs(notifIds);
   }
 
-  notif_declinePrize(notif: Notif<NotifDeclinePrizeArgs>) {
-    debug('notif_declinePrize', notif);
+  async notif_declinePrize(notif: Notif<NotifDeclinePrizeArgs>) {
     this.game.clearPossible();
     const { cardId } = notif.args;
-    discardCardAnimation({ cardId, to: DISCARD, game: this.game });
+    await this.game.objectManager.discardPile.discardCardFromZone({ cardId, zone: this.game.objectManager.tempDiscardPile.getZone() });
   }
 
-  notif_takePrize(notif: Notif<NotifTakePrizeArgs>) {
-    debug('notif_takePrize', notif);
-    this.game.clearPossible();
-    const { cardId, playerId } = notif.args;
-    this.game.playerManager.getPlayer({ playerId }).takePrize({ cardId });
-  }
-
-  notif_discard(notif: Notif<NotifDiscardArgs>) {
-    debug('notif_discard', notif);
+  async notif_discard(notif: Notif<NotifDiscardArgs>): Promise<void> {
     this.game.clearPossible();
     const { cardId, from, playerId, to } = notif.args;
     const player = this.getPlayer({ playerId });
 
     if (from === COURT) {
-      const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
-      player.discardCourtCard({ cardId, to });
-      player.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+      await player.discardCourtCard({ cardId, to });
     } else if (from === HAND) {
-      player.discardHandCard({ cardId, to });
-      player.incCounter({ counter: 'cards', value: -1 });
+      await player.discardHandCard({ cardId, to });
     } else if (from === ACTIVE_EVENTS) {
-      this.game.activeEvents.removeFromZone(cardId, false);
-      discardCardAnimation({ cardId, game: this.game, to });
-    } else if (from.startsWith('events_')) {
-      player.discardEventCard({ cardId });
-    }
-    // else if(from.startsWith('market')) {
-    //   this.game.market.discardCard({
-    //     cardId,
-    //     row
-    //   })
-    // }
-  }
-
-  notif_returnSpies(notif: Notif<NotifReturnSpiesArgs>) {
-    debug('notif_discard', notif);
-    this.game.clearPossible();
-    const { moves } = notif.args;
-    moves.forEach((move: TokenMove) => {
-      const { tokenId, from, to, weight } = move;
-      const fromZone = this.game.getZoneForLocation({ location: from });
-      const toZone = this.game.getZoneForLocation({ location: to });
-
-      this.game.move({
-        id: tokenId,
-        from: fromZone,
-        to: toZone,
-        weight,
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.game.activeEvents,
       });
-      const spyOwnerId = Number(tokenId.split('_')[1]);
-      this.getPlayer({ playerId: spyOwnerId }).incCounter({ counter: 'cylinders', value: -1 });
-    });
+    } else if (from.startsWith('events_')) {
+      await player.discardEventCard({ cardId });
+    }
+    return await Promise.resolve(); // check if necessary
   }
 
-  notif_discardFromMarket(notif: Notif<NotifDiscardFromMarketArgs>) {
-    debug('notif_discardFromMarket', notif);
-
+  async notif_discardFromMarket(notif: Notif<NotifDiscardFromMarketArgs>): Promise<unknown> {
     this.game.clearPossible();
     const { from, cardId, to } = notif.args;
     const splitFrom = from.split('_');
     const row = Number(splitFrom[1]);
     const column = Number(splitFrom[2]);
-    if (to === 'discard') {
-      this.game.market.discardCard({ cardId, row, column });
+
+    if (to === DISCARD || to === TEMP_DISCARD) {
+      return await this.game.market.discardCard({ cardId, row, column, to });
     } else if (to === ACTIVE_EVENTS) {
-      this.game.move({
-        id: cardId,
-        from: this.game.market.getMarketCardZone({ row, column }),
-        to: this.game.activeEvents,
-      });
+      return await Promise.all([
+        this.game.activeEvents.moveToZone({
+          elements: {
+            id: cardId,
+          },
+        }),
+        this.game.market.getMarketCardZone({ row, column }).remove({ input: cardId }),
+      ]);
     }
   }
 
-  notif_discardPrizes(notif: Notif<NotifDiscardPrizesArgs>) {
-    debug('notif_discardPrizes', notif);
+  async notif_discardPrizes(notif: Notif<NotifDiscardPrizesArgs>) {
     this.game.clearPossible();
-    const playerId = Number(notif.args.playerId);
+    const { playerId, prizes } = notif.args;
+
     const player = this.getPlayer({ playerId });
-    notif.args.prizes.forEach((prize) => {
-      player.discardPrize({ cardId: prize.id });
+    for (let prize of prizes) {
+      // notif.args.prizes.forEach((prize) => {
+      await player.discardPrize({ cardId: prize.id });
       player.incCounter({ counter: 'influence', value: -1 });
-    });
-  }
-
-  notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
-    console.log('notif_dominanceCheck', notif);
-    const { scores } = notif.args;
-    Object.keys(scores).forEach((playerId) => {
-      console.log('typeof', typeof playerId);
-      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
-      this.game.move({
-        id: `vp_cylinder_${playerId}`,
-        from: this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`),
-        to: this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`),
-      });
-    });
-  }
-
-  notif_dominanceCheckReturnCoalitionBlocks(notif: Notif<NotifDominanceCheckReturnBlocksArgs>) {
-    const { moves } = notif.args;
-    console.log('moves', moves);
-    (moves || []).forEach((move) => {
-      const { tokenId, from, to, weight } = move;
-      const coalition = to.split('_')[1];
-      const splitFrom = from.split('_');
-      const isArmy = splitFrom[0] == 'armies';
-      this.game.move({
-        id: tokenId,
-        to: this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }),
-        from: isArmy
-          ? this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone()
-          : this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone(),
-        addClass: ['pp_coalition_block'],
-        removeClass: isArmy ? ['pp_army'] : ['pp_road'],
-        weight,
-      });
-    });
+      // });
+    }
   }
 
   notif_exchangeHand(notif: Notif<NotifExchangeHandArgs>) {
-    debug('notif_exchangeHand', notif.args);
     Object.entries(notif.args.newHandCounts).forEach(([key, value]) => {
-      console.log(typeof key);
       const playerId = Number(key);
       // Updates for current player have been sent in separate notification.
       if (playerId === this.game.getPlayerId()) {
@@ -347,231 +243,47 @@ class NotificationManager {
     });
   }
 
-  notif_moveCard(notif: Notif<NotifMoveCardArgs>) {
-    debug('notif_moveCard', notif.args);
-    const { moves, action } = notif.args;
-    moves.forEach((move) => {
-      const { tokenId: cardId, from, to } = move;
-      const fromZone = this.game.getZoneForLocation({ location: from });
-      // const toZone = this.game.getZoneForLocation({ location: to });
-      switch (action) {
-        case 'MOVE_EVENT':
-          this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addEvent({ cardId, from: fromZone });
-          this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight();
-          break;
-        default:
-          debug('unknown action for moveCard');
-      }
-    });
-  }
-
-  notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
-    debug('notif_moveToken', notif);
-    notif.args.moves.forEach((move) => {
-      const { tokenId, from, to, weight } = move;
-
-      // Can be the case when a player needs to select a piece
-      // because pool is empty
-      if (from === to) {
-        return;
-      }
-
-      const fromZone = this.game.getZoneForLocation({ location: from });
-      const toZone = this.game.getZoneForLocation({ location: to });
-
-      // Player is active player and moves have already been executed in client state.
-      // Still send notification so it is handled during replays
-      if (
-        this.game.framework().isCurrentPlayerActive() &&
-        !fromZone.getAllItems().includes(tokenId) &&
-        ((from.startsWith('armies') && to.startsWith('armies')) ||
-          (from.startsWith('spies') && to.startsWith('spies')) ||
-          (from.startsWith('tribes') && to.startsWith('tribes')))
-      ) {
-        debug('no need to execute move');
-        return;
-      }
-
-      // TODO: perhaps create separate function for this
-      const addClass = [];
-      const removeClass = [];
-      if (to.startsWith('armies')) {
-        addClass.push('pp_army');
-      } else if (to.startsWith('roads')) {
-        addClass.push('pp_road');
-      } else if (to.startsWith('blocks')) {
-        addClass.push('pp_coalition_block');
-      }
-      if (from.startsWith('blocks')) {
-        removeClass.push('pp_coalition_block');
-      } else if (from.startsWith('armies') && !to.startsWith('armies')) {
-        removeClass.push('pp_army');
-      } else if (from.startsWith('roads')) {
-        removeClass.push('pp_road');
-      }
-
-      this.game.move({
-        id: tokenId,
-        from: fromZone,
-        to: toZone,
-        addClass,
-        removeClass,
-        weight,
-      });
-    });
-  }
-
-  notif_payBribe(notif: Notif<NotifPayBribeArgs>) {
-    const { args } = notif;
-    console.log('notif_payBribe', args);
-    const { briberId, rulerId, rupees } = args;
-    this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees });
-  }
-
-  notif_payRupeesToMarket(notif: Notif<NotifPayRupeesToMarketArgs>) {
-    debug('notif_payRupeesToMarket', notif.args);
-    const { playerId, rupeesOnCards } = notif.args;
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
-  }
-
-  notif_playCard(notif: Notif<NotifPlayCardArgs>) {
-    console.log('notif_playCard', notif);
-
-    this.game.clearPossible();
-    var playerId = Number(notif.args.playerId);
-
-    const player = this.getPlayer({ playerId });
-    notif.args.courtCards.forEach((card, index) => {
-      const item = player.getCourtZone().items.find((item) => item.id === card.id);
-      if (item) {
-        item.weight = card.state;
-      }
-    });
-
-    player.playCard({
-      card: notif.args.card,
-    });
-
-    this.getPlayer({ playerId }).getCourtZone().updateDisplay();
-  }
-
-  notif_publicWithdrawal(notif: Notif<NotifPublicWithdrawalArgs>) {
-    debug('notif_publicWithdrawal', notif);
-    const { marketLocation } = notif.args;
-    const row = Number(marketLocation.split('_')[1]);
-    const column = Number(marketLocation.split('_')[2]);
-    this.game.market.getMarketRupeesZone({ row, column }).removeAll();
-  }
-
-  notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>) {
-    console.log('notif_purchaseCard', notif);
-    const { marketLocation, newLocation, rupeesOnCards, playerId, receivedRupees } = notif.args;
-    // const playerId = Number(notif.args.playerId);
-    this.game.clearPossible();
-    const row = Number(marketLocation.split('_')[1]);
-    const col = Number(marketLocation.split('_')[2]);
-
-    // Place paid rupees on market cards
-    rupeesOnCards.forEach((item, index) => {
-      const { row, column, rupeeId } = item;
-      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-      this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-    });
-
-    // Remove all rupees that were on the purchased card
-    this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
-    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
-
-    // Move card from markt
-    const cardId = notif.args.card.id;
-    if (newLocation.startsWith('events_')) {
-      // this.game.move({
-      //   id: cardId,
-      //   from: this.game.market.getMarketCardZone({ row, column: col }),
-      //   to: this.game.activeEvents,
-      // });
-      this.getPlayer({ playerId }).addEvent({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
-    } else if (newLocation == 'discard') {
-      this.game.market.getMarketCardZone({ row, column: col }).removeFromZone(cardId, false);
-      discardCardAnimation({ cardId, game: this.game });
-    } else {
-      this.getPlayer({ playerId }).addCardToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+  async notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
+    const { scores } = notif.args;
+    for (let playerId of Object.keys(scores)) {
+      console.log('scores', playerId, typeof playerId, this.game.framework().scoreCtrl);
+      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+      await Promise.all([
+        this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
+        this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`).remove({ input: `vp_cylinder_${playerId}` }),
+      ]);
     }
   }
 
-  // notif_purchaseGift(notif: Notif<NotifPurchaseGiftArgs>) {
-  //   console.log('notif_purchaseGift', notif);
-  //   this.game.clearPossible();
-  //   const { rupeesOnCards, playerId, tokenMove, influenceChange } = notif.args;
-
-  //   // Place paid rupees on market cards
-  //   rupeesOnCards.forEach((item, index) => {
-  //     const { row, column, rupeeId } = item;
-  //     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-  //     this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
-  //   });
-
-  //   // Move cylinder
-  //   const { tokenId, from, to } = tokenMove;
-  //   const fromZone = this.game.getZoneForLocation({ location: from });
-  //   const toZone = this.game.getZoneForLocation({ location: to });
-  //   this.game.move({
-  //     id: tokenId,
-  //     from: fromZone,
-  //     to: toZone,
-  //   });
-
-  //   // Update influence
-  //   this.getPlayer({ playerId: notif.args.playerId }).incCounter({ counter: 'influence', value: influenceChange });
-  // }
-
-  notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>) {
-    console.log('notif_shiftMarket', notif);
-
-    this.game.clearPossible();
-
-    notif.args.cardMoves.forEach((move, index) => {
-      const fromRow = Number(move.from.split('_')[1]);
-      const fromCol = Number(move.from.split('_')[2]);
-      const toRow = Number(move.to.split('_')[1]);
-      const toCol = Number(move.to.split('_')[2]);
-      this.game.market.moveCard({
-        cardId: move.cardId,
-        from: {
-          row: fromRow,
-          column: fromCol,
-        },
-        to: {
-          row: toRow,
-          column: toCol,
-        },
-      });
-    });
-
-    // notif.args.newCards.forEach((move, index) => {
-    //   const row = Number(move.to.split('_')[1]);
-    //   const column = Number(move.to.split('_')[2]);
-    //   this.game.market.addCardFromDeck({
-    //     to: {
-    //       row,
-    //       column,
-    //     },
-    //     cardId: move.cardId,
-    //   });
-    // });
+  async notif_dominanceCheckReturnCoalitionBlocks(notif: Notif<NotifDominanceCheckReturnBlocksArgs>) {
+    const { blocks, fromLocations } = notif.args;
+    await Promise.all(
+      COALITIONS.map((coalition: string) =>
+        this.game.objectManager.supply
+          .getCoalitionBlocksZone({ coalition })
+          .moveToZone({ elements: blocks[coalition], classesToAdd: [PP_COALITION_BLOCK], classesToRemove: [PP_ARMY, PP_ROAD] })
+      )
+    );
+    await Promise.all(
+      fromLocations.map(async (location: string) => {
+        const splitLocation = location.split('_');
+        if (location.startsWith('armies_')) {
+          await this.game.map.getRegion({ region: splitLocation[1] }).getArmyZone().removeAll();
+        } else {
+          await this.game.map
+            .getBorder({ border: `${splitLocation[1]}_${splitLocation[2]}` })
+            .getRoadZone()
+            .removeAll();
+        }
+      })
+    );
   }
 
-  notif_drawMarketCard(notif: Notif<NotifDrawMarketCardArgs>) {
-    debug('notif_drawMarketCard', notif.args);
+  async notif_drawMarketCard(notif: Notif<NotifDrawMarketCardArgs>) {
     const { cardId, to } = notif.args;
     const row = Number(to.split('_')[1]);
     const column = Number(to.split('_')[2]);
-    this.game.market.addCardFromDeck({
+    await this.game.market.addCardFromDeck({
       to: {
         row,
         column,
@@ -580,112 +292,395 @@ class NotificationManager {
     });
   }
 
+  async notif_moveCard(notif: Notif<NotifMoveCardArgs>) {
+    const { move, action } = notif.args;
+
+    const { tokenId: cardId, from, to } = move;
+    const fromZone = this.game.getZoneForLocation({ location: from });
+
+    switch (action) {
+      case 'MOVE_EVENT':
+        await Promise.all([
+          this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addCardToEvents({ cardId, from: fromZone }),
+          this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight(),
+        ]);
+        break;
+      default:
+        debug('unknown action for moveCard');
+    }
+  }
+
+  async notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
+    const { move } = notif.args;
+    return await this.performTokenMove({ move });
+  }
+
+  async notif_payBribe(notif: Notif<NotifPayBribeArgs>) {
+    const { briberId, rulerId, rupees } = notif.args;
+    await this.getPlayer({ playerId: briberId }).payToPlayer({ playerId: rulerId, rupees });
+  }
+
+  async notif_playCard(notif: Notif<NotifPlayCardArgs>): Promise<void> {
+    this.game.clearPossible();
+
+    const { playerId, card } = notif.args;
+    const player = this.getPlayer({ playerId });
+    return await player.playCard({
+      card,
+    });
+  }
+
+  async notif_placeArmy(notif: Notif<NotifPlaceArmyArgs>) {
+    // TODO: check moving multipe armies at the same time if necessary
+    await this.performTokenMove({ move: notif.args.move });
+    // Adjust dominance if token was moved from supply
+  }
+
+  async notif_placeCylinder(notif: Notif<NotifPlaceCylinderArgs>) {
+    const move = notif.args.move;
+    await this.performTokenMove({ move });
+    const playerId = Number(move.tokenId.split('_')[1]);
+    // cylinders is placed from supply somewhere else, increase count
+    if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
+      this.getPlayer({ playerId }).incCounter({ counter: 'cylinders', value: 1 });
+    }
+    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_')) {
+      this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+    }
+  }
+
+  async notif_placeRoad(notif: Notif<NotifPlaceRoadArgs>) {
+    // TODO: check moving multipe armies at the same time if necessary
+    await this.performTokenMove({ move: notif.args.move });
+    // Adjust dominance if token was moved from supply
+  }
+
+  async notif_publicWithdrawal(notif: Notif<NotifPublicWithdrawalArgs>) {
+    const { marketLocation } = notif.args;
+    const row = Number(marketLocation.split('_')[1]);
+    const column = Number(marketLocation.split('_')[2]);
+    await this.game.market.getMarketRupeesZone({ row, column }).removeAll();
+  }
+
+  async notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>): Promise<void> {
+    const { marketLocation, newLocation, rupeesOnCards, playerId, receivedRupees } = notif.args;
+
+    this.game.clearPossible();
+    const row = Number(marketLocation.split('_')[1]);
+    const col = Number(marketLocation.split('_')[2]);
+
+    // Place paid rupees on market cards
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
+    await Promise.all(
+      rupeesOnCards.map(({ row, column, rupeeId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` })
+      )
+    );
+
+    // Remove all rupees that were on the purchased card
+    await this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
+
+    // Move card from markt
+    const cardId = notif.args.card.id;
+    if (newLocation.startsWith('events_')) {
+      this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+    } else if (newLocation === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.game.market.getMarketCardZone({ row, column: col }),
+      });
+    } else if (newLocation === TEMP_DISCARD) {
+      await Promise.all([
+        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+          elements: { id: cardId },
+          classesToRemove: [PP_MARKET_CARD],
+        }),
+        this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
+      ]);
+    } else {
+      await this.getPlayer({ playerId }).addCardToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+    }
+  }
+
   notif_replaceHand(notif: Notif<NotifReplaceHandArgs>) {
-    debug('notif_replaceHand', notif.args);
     const { hand } = notif.args;
     const player = this.game.getCurrentPlayer();
-    const handZone = player.getHandZone();
-    handZone.removeAll();
-    hand.forEach((card: Token) => {
-      player.addCardToHand({ cardId: card.id });
-    });
+    player.clearHand();
+    player.setupHand({ hand });
     player.toValueCounter({ counter: 'cards', value: hand.length });
   }
 
+
+  async notif_returnAllSpies(notif: Notif<NotifReturnAllSpiesArgs>) {
+    this.game.clearPossible();
+    const { spies, cardId } = notif.args;
+
+    await Promise.all([
+      ...Object.entries(spies).map(async ([key, value]) => {
+        const player = this.getPlayer({ playerId: Number(key) });
+        await player.getCylinderZone().moveToZone({
+          elements: value.map(({ tokenId, weight }) => ({ id: tokenId, weight })),
+        });
+        player.incCounter({ counter: 'cylinders', value: -value.length });
+      }),
+      this.game.spies?.[cardId].removeAll(),
+    ]);
+  }
+
+  async notif_returnAllToSupply(notif: Notif<NotifReturnAllToSupplyArgs>): Promise<void> {
+    this.game.clearPossible();
+    const { armies, tribes, regionId } = notif.args;
+    const region = this.game.map.getRegion({ region: regionId });
+    console.log('region', region);
+    await Promise.all([region.removeAllArmies(armies), region.removeAllTribes(tribes)]);
+  }
+
+  async notif_returnCoalitionBlock(notif: Notif<NotifReturnCoalitionBlockArgs>): Promise<void> {
+    this.game.clearPossible();
+    const { from, blockId, weight, coalition, type } = notif.args;
+    const toZone = this.game.objectManager.supply.getCoalitionBlocksZone({ coalition });
+    const splitFrom = from.split('_');
+    const fromZone = from.startsWith('roads_')
+      ? this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone()
+      : this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone();
+    await Promise.all([
+      toZone.moveToZone({
+        elements: {
+          id: blockId,
+          weight,
+        },
+        classesToRemove: [PP_ARMY, PP_ROAD],
+        classesToAdd: [PP_COALITION_BLOCK],
+      }),
+      fromZone.remove({ input: blockId }),
+    ]);
+  }
+
+  async notif_returnCylinder(notif: Notif<NotifReturnCylinderArgs>): Promise<void> {
+    const getCylinderFromZone = (from: string): PaxPamirZone => {
+      if (from.startsWith('card_')) {
+        return this.game.spies[from];
+      } else if (from.startsWith('gift_')) {
+        const splitFrom = from.split('_');
+        return this.getPlayer({ playerId: Number(splitFrom[2]) }).getGiftZone({ value: Number(splitFrom[1]) });
+      } else {
+        return this.game.map.getRegion({ region: from }).getTribeZone();
+      }
+    };
+
+    this.game.clearPossible();
+    const { from, cylinderId, weight } = notif.args;
+    const playerId = Number(cylinderId.split('_')[1]);
+    const player = this.getPlayer({ playerId });
+    const fromZone = getCylinderFromZone(from);
+    await Promise.all([
+      player.getCylinderZone().moveToZone({
+        elements: {
+          id: cylinderId,
+          weight,
+        },
+      }),
+      fromZone.remove({ input: cylinderId }),
+    ]);
+    player.incCounter({ counter: 'cylinders', value: -1 });
+
+    if (from.startsWith('gift_')) {
+      // card_106 is Embarrassment of Riches so cylinder influence counts as 0 and we should not reduce
+      const value = this.game.activeEvents.getItems().includes('card_106') ? 0 : -1;
+      player.incCounter({ counter: 'influence', value });
+    }
+  }
+
   notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {
-    debug('notif_returnRupeesToSupply', notif.args);
     const { playerId, amount } = notif.args;
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -amount });
   }
 
+  async notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>) {
+    this.game.clearPossible();
+    const { move } = notif.args;
+
+    const fromRow = Number(move.from.split('_')[1]);
+    const fromCol = Number(move.from.split('_')[2]);
+    const toRow = Number(move.to.split('_')[1]);
+    const toCol = Number(move.to.split('_')[2]);
+
+    return this.game.market.moveCard({
+      cardId: move.cardId,
+      from: {
+        row: fromRow,
+        column: fromCol,
+      },
+      to: {
+        row: toRow,
+        column: toCol,
+      },
+    });
+  }
+
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
-    debug('notif_smallRefreshHand', notif.args);
     const player = this.game.getCurrentPlayer();
-    player.clearHand()
-    player.setupHand({hand: notif.args.hand});
+    player.clearHand();
+    player.setupHand({ hand: notif.args.hand });
   }
 
   notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {
-    debug('notif_smallRefreshInterface', notif);
     const updatedGamedatas = {
       ...this.game.gamedatas,
       ...notif.args,
     };
     this.game.clearInterface();
-    debug('updatedGamedatas', updatedGamedatas);
     this.game.gamedatas = updatedGamedatas;
     this.game.market.setupMarket({ gamedatas: updatedGamedatas });
     this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
     this.game.map.updateMap({ gamedatas: updatedGamedatas });
     this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
-    // this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+  }
+
+  async notif_takePrize(notif: Notif<NotifTakePrizeArgs>) {
+    this.game.clearPossible();
+    const { cardId, playerId } = notif.args;
+    return await this.game.playerManager.getPlayer({ playerId }).takePrize({ cardId });
   }
 
   notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
-    debug('notif_takeRupeesFromSupply', notif.args);
     const { playerId, amount } = notif.args;
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
-  notif_updatePlayerCounts(notif) {
-    console.log('notif_updatePlayerCounts', notif);
-    this.game.playerCounts = notif.args.counts;
-    const counts = notif.args.counts;
 
-    Object.keys(counts).forEach((playerId) => {
-      const player = this.getPlayer({ playerId: Number(playerId) });
-      player.setCounter({ counter: 'influence', value: counts[playerId].influence });
-      player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
-      player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
-      player.setCounter({ counter: 'cards', value: counts[playerId].cards });
-
-      player.setCounter({ counter: 'economic', value: counts[playerId].suits.economic });
-      player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
-      player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
-      player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
-    });
-  }
-
-  notif_taxMarket(notif: Notif<NotifTaxMarketArgs>) {
-    debug('notif_taxMarket', notif.args);
-    const { selectedRupees, playerId, amount } = notif.args;
-    selectedRupees.forEach((rupee) => {
-      const { row, column, rupeeId } = rupee;
-      this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}` });
-    });
-    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
-  }
-
-  notif_taxPlayer(notif: Notif<NotifTaxPlayerArgs>) {
-    debug('notif_taxPlayer', notif.args);
+  async notif_taxPlayer(notif: Notif<NotifTaxPlayerArgs>) {
     const { playerId, taxedPlayerId, amount } = notif.args;
     const player = this.getPlayer({ playerId: taxedPlayerId });
     player.removeTaxCounter();
-    player.payToPlayer({ playerId, rupees: amount });
+    await player.payToPlayer({ playerId, rupees: amount });
   }
 
-  notif_updateCourtCardStates(notif: Notif<NotifUpdateCourtCardStatesArgs>) {
-    debug('notif_updateCourtCardStates', notif.args);
-    const { playerId, cardStates } = notif.args;
-    const player = this.getPlayer({ playerId });
-    cardStates.forEach(({ cardId, state }, index) => {
-      const item = player.getCourtZone().items.find((item) => item.id === cardId);
-      if (item) {
-        item.weight = state;
-      }
-    });
-    this.getPlayer({ playerId }).getCourtZone().updateDisplay();
+  async notif_taxMarket(notif: Notif<NotifTaxMarketArgs>): Promise<void> {
+    const { selectedRupees, playerId, amount } = notif.args;
+    await Promise.all(
+      selectedRupees.map(async (rupee) => {
+        const { row, column, rupeeId } = rupee;
+        await this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}` });
+      })
+    );
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
   notif_updateInfluence({ args }: Notif<NotifUpdateInterfaceArgs>) {
-    debug('notif_updateInfluence', args);
     args.updates.forEach(({ playerId, value }) => {
       this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
     });
   }
 
-  notif_log(notif) {
-    // this is for debugging php side
-    console.log('notif_log', notif.args);
+  //  .##.....##.########.####.##.......####.########.##....##
+  //  .##.....##....##.....##..##........##.....##.....##..##.
+  //  .##.....##....##.....##..##........##.....##......####..
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  .##.....##....##.....##..##........##.....##.......##...
+  //  ..#######.....##....####.########.####....##.......##...
+
+  destroy() {
+    dojo.forEach(this.subscriptions, dojo.unsubscribe);
   }
+
+  async discardTempCard({ cardId }: { cardId: string }) {}
+
+  getPlayer({ playerId }: { playerId: number }): PPPlayer {
+    return this.game.playerManager.getPlayer({ playerId });
+  }
+
+  getClassChanges({ from, to }: { from: string; to: string }): { classesToAdd: string[]; classesToRemove: string[] } {
+    // TODO: perhaps create separate function for this
+    const classesToAdd = [];
+    const classesToRemove = [];
+    if (to.startsWith('armies')) {
+      classesToAdd.push(PP_ARMY);
+    } else if (to.startsWith('roads')) {
+      classesToAdd.push(PP_ROAD);
+    } else if (to.startsWith('blocks')) {
+      classesToAdd.push(PP_COALITION_BLOCK);
+    }
+    if (from.startsWith('blocks')) {
+      classesToRemove.push(PP_COALITION_BLOCK);
+    } else if (from.startsWith('armies') && !to.startsWith('armies')) {
+      classesToRemove.push(PP_ARMY);
+    } else if (from.startsWith('roads')) {
+      classesToRemove.push(PP_ROAD);
+    }
+    return { classesToAdd, classesToRemove };
+  }
+
+  async performTokenMove({ move }: { move: TokenMove }): Promise<void> {
+    const { tokenId, from, to, weight } = move;
+    // Can be the case when a player needs to select a piece
+    // because pool is empty
+    if (from === to) {
+      return;
+    }
+
+    // TODO: replace getZoneForLocation
+    const fromZone = this.game.getZoneForLocation({ location: from });
+    const toZone = this.game.getZoneForLocation({ location: to });
+
+    // Player is active player and moves have already been executed in client state.
+    // Still send notification so it is handled during replays => check if this is actually the case
+    // check if to already has the token
+    if (
+      this.game.framework().isCurrentPlayerActive() &&
+      toZone.getItems().includes(tokenId) // Perhaps we just make this a generic check?
+    ) {
+      debug('no need to execute move');
+      return;
+    }
+
+    // This could also be part of the input?
+    const { classesToRemove, classesToAdd } = this.getClassChanges({ from, to });
+
+    await Promise.all([
+      toZone.moveToZone({
+        elements: {
+          id: tokenId,
+          weight,
+        },
+        classesToAdd,
+        classesToRemove,
+      }),
+      fromZone.remove({ input: tokenId }),
+    ]);
+  }
+
+  // notif_updatePlayerCounts(notif) {
+  //   console.log('notif_updatePlayerCounts', notif);
+  //   this.game.playerCounts = notif.args.counts;
+  //   const counts = notif.args.counts;
+
+  //   Object.keys(counts).forEach((playerId) => {
+  //     const player = this.getPlayer({ playerId: Number(playerId) });
+  //     player.setCounter({ counter: 'influence', value: counts[playerId].influence });
+  //     player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
+  //     player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
+  //     player.setCounter({ counter: 'cards', value: counts[playerId].cards });
+
+  //     player.setCounter({ counter: 'economic', value: counts[playerId].suits.economic });
+  //     player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
+  //     player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
+  //     player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
+  //   });
+  // }
+
+  // notif_updateCourtCardStates(notif: Notif<NotifUpdateCourtCardStatesArgs>) {
+  // debug('notif_updateCourtCardStates', notif.args);
+  // const { playerId, cardStates } = notif.args;
+  // const player = this.getPlayer({ playerId });
+  // cardStates.forEach(({ cardId, state }, index) => {
+  //   const item = player.getCourtZone().items.find((item) => item.id === cardId);
+  //   if (item) {
+  //     item.weight = state;
+  //   }
+  // });
+  // this.getPlayer({ playerId }).getCourtZone().updateDisplay();
+  // }
 }

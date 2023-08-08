@@ -99,20 +99,8 @@ trait OverthrowTrait
       $tokenId = $tribe['id'];
       $to = implode('_', ['cylinders', $cardOwnerId]);
       $state = Tokens::insertOnTop($tokenId, $to);
-      $moves = [
-        [
-          'from' => 'tribes_' . $region,
-          'to' => $to,
-          'tokenId' => $tokenId,
-          'weight' => $state,
-        ]
-      ];
-      $message = clienttranslate('${player_name} removes ${logTokenRemoved}');
-      Notifications::moveToken($message, [
-        'player' => $cardOwner,
-        'logTokenRemoved' => Utils::logTokenCylinder($cardOwnerId),
-        'moves' => $moves,
-      ]);
+      
+      Notifications::returnCylinder($cardOwner,$cardOwnerId, $region,$tokenId,$state);
     }
     Map::checkRulerChange($region);
   }

@@ -95,12 +95,10 @@ trait PlayerActionMoveTrait
         $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
-          'moves' => [
-            [
-              'from' => $from,
-              'to' => $to,
-              'tokenId' => $pieceId,
-            ]
+          'move' => [
+            'from' => $from,
+            'to' => $to,
+            'tokenId' => $pieceId,
           ],
           'logTokenArmy' => Utils::logTokenArmy(explode('_', $pieceId)[1]),
           'logTokenRegionFrom' => Utils::logTokenRegionName($source),
@@ -112,7 +110,7 @@ trait PlayerActionMoveTrait
         $to = 'tribes_' . $destination;
         array_push($regionsThatNeedRulerCheck, $source, $destination);
 
-        if (!in_array($source,$regionsThatNeedOverthrowCheck)) {
+        if (!in_array($source, $regionsThatNeedOverthrowCheck)) {
           $regionsThatNeedOverthrowCheck[] = $source;
         }
 
@@ -123,12 +121,10 @@ trait PlayerActionMoveTrait
         $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
-          'moves' => [
-            [
-              'from' => $from,
-              'to' => $to,
-              'tokenId' => $pieceId,
-            ]
+          'move' => [
+            'from' => $from,
+            'to' => $to,
+            'tokenId' => $pieceId,
           ],
           'logTokenCylinder' => Utils::logTokenCylinder(explode('_', $pieceId)[1]),
           'logTokenRegionFrom' => Utils::logTokenRegionName($source),
@@ -142,12 +138,10 @@ trait PlayerActionMoveTrait
         $cardTo = Cards::get($destination);
         Notifications::moveToken($message, [
           'player' => $player,
-          'moves' => [
-            [
-              'from' => $from,
-              'to' => $to,
-              'tokenId' => $pieceId,
-            ]
+          'move' => [
+            'from' => $from,
+            'to' => $to,
+            'tokenId' => $pieceId,
           ],
           'logTokenCylinder' => Utils::logTokenCylinder(explode('_', $pieceId)[1]),
           'logTokenCardNameFrom' => Utils::logTokenCardName($cardFrom['name']),
@@ -171,10 +165,10 @@ trait PlayerActionMoveTrait
     }
     $playerId = $player->getId();
     $actions = [
-      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [ 'transition' => 'playerActions']),
+      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, ['transition' => 'playerActions']),
     ];
     foreach ($regionsThatNeedOverthrowCheck as $index => $region) {
-      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [ 'region' => $region]);
+      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, ['region' => $region]);
     }
     $this->pushActionsToActionStack($actions);
     $this->nextState('dispatchAction');

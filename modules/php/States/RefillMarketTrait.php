@@ -96,8 +96,12 @@ trait RefillMarketTrait
     }
 
     if (count($cardMoves) > 0) {
-      Notifications::shiftMarket($cardMoves, $action['playerId']);
+      Notifications::shiftMarketMessage($action['playerId']);
     }
+    foreach ($cardMoves as $index => $move) {
+      Notifications::shiftMarket($move);
+    }
+
 
     ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
@@ -172,7 +176,7 @@ trait RefillMarketTrait
     }
 
     $actionStack[] = ActionStack::createAction(DISPATCH_REFILL_MARKET_SHIFT_CARDS, $playerId, []);
-    $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP,$playerId,[
+    $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
       'cards' => $cards,
     ]);
 

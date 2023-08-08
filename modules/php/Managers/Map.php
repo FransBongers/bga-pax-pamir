@@ -126,42 +126,51 @@ class Map
    */
   public static function removeArmiesFromRegion($regionId)
   {
-    $moves = [];
+    $returnedArmies = [];
     $from = "armies_" . $regionId;
     $armies = Tokens::getInLocation($from)->toArray();
     foreach ($armies as $index => $army) {
-
       $tokenId = $army['id'];
       $coalition = explode('_', $tokenId)[1];
       $to = 'blocks_' . $coalition;
       $weight = Tokens::insertOnTop($tokenId, $to);
-      $moves[] =  [
-        'from' => $from,
-        'to' => $to,
-        'tokenId' => $tokenId,
-        'weight' => $weight,
-      ];
+      if (array_key_exists($coalition, $returnedArmies)) {
+        $returnedArmies[$coalition][] =  [
+          'tokenId' => $tokenId,
+          'weight' => $weight,
+        ];
+      } else {
+        $returnedArmies[$coalition] = [
+          [
+            'tokenId' => $tokenId,
+            'weight' => $weight,
+          ]
+        ];
+      }
     }
-    return $moves;
+    return $returnedArmies;
   }
 
   public static function removeAllBlocksForCoalition($coalition)
   {
-    $moves = [];
+    $returnedBlocks = [];
+    $fromLocations = [];
     // return all coalition blocks to their pools
     $coalitionBlocks = Tokens::getOfType('block_' . $coalition);
     foreach ($coalitionBlocks as $index => $tokenInfo) {
       if (!Utils::startsWith($tokenInfo['location'], "blocks")) {
         $weight = Tokens::insertOnTop($tokenInfo['id'], 'blocks_' . $coalition);
-        $moves[] = array(
-          'tokenId' => $tokenInfo['id'],
-          'from' => $tokenInfo['location'],
-          'to' => 'blocks_' . $coalition,
+        $returnedBlocks[] = [
+          'id' => $tokenInfo['id'],
           'weight' => $weight
-        );
+        ];
+        $fromLocations[] = $tokenInfo['location'];
       };
     };
-    return $moves;
+    return [
+      'returnedBlocks' => $returnedBlocks,
+      'fromLocations' => $fromLocations,
+    ];
   }
 
   /**
@@ -170,7 +179,7 @@ class Map
    */
   public static function removeTribesFromRegion($regionId)
   {
-    $moves = [];
+    $returnedTribes = [];
     $playersWithRemovedCylinders = [];
     $from = "tribes_" . $regionId;
     $tribes = Tokens::getInLocation($from)->toArray();
@@ -180,13 +189,19 @@ class Map
       $cylinderOwnerId = intval(explode('_', $tokenId)[1]);
       $to = 'cylinders_' . $cylinderOwnerId;
       $weight = Tokens::insertOnTop($tokenId, $to);
-      $moves[] =  [
-        'from' => $from,
-        'to' => $to,
-        'tokenId' => $tokenId,
-        'weight' => $weight,
-      ];
-      if (!in_array($cylinderOwnerId,$playersWithRemovedCylinders)) {
+      if (array_key_exists($cylinderOwnerId, $returnedTribes)) {
+        $returnedTribes[$cylinderOwnerId][] =  [
+          'tokenId' => $tokenId,
+          'weight' => $weight,
+        ];
+      } else {
+        $returnedTribes[$cylinderOwnerId] =  [[
+          'tokenId' => $tokenId,
+          'weight' => $weight,
+        ]];
+      }
+
+      if (!in_array($cylinderOwnerId, $playersWithRemovedCylinders)) {
         $playersWithRemovedCylinders[] = $cylinderOwnerId;
       };
     }
@@ -198,7 +213,7 @@ class Map
     }
     return [
       'actions' => $actions,
-      'moves' => $moves,
+      'tribes' => $returnedTribes,
     ];
   }
 }

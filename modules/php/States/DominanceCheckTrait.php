@@ -77,12 +77,20 @@ trait DominanceCheckTrait
 
   function dispatchDominanceCheckRemoveCoalitionBlocks($actionStack)
   {
-    $moves = array_merge(
-      Map::removeAllBlocksForCoalition(AFGHAN),
-      Map::removeAllBlocksForCoalition(BRITISH),
-      Map::removeAllBlocksForCoalition(RUSSIAN)
-    );
-    Notifications::dominanceCheckReturnCoalitionBlocks($moves);
+    $afghanResult = Map::removeAllBlocksForCoalition(AFGHAN);
+    $britishResult = Map::removeAllBlocksForCoalition(BRITISH);
+    $russianResult =  Map::removeAllBlocksForCoalition(RUSSIAN);
+    $blocks = [
+      AFGHAN => $afghanResult['returnedBlocks'],
+      BRITISH => $britishResult['returnedBlocks'],
+      RUSSIAN => $russianResult['returnedBlocks'],
+    ];
+    $fromLocations = array_values(array_unique(array_merge(
+      $afghanResult['fromLocations'],
+      $britishResult['fromLocations'],
+      $russianResult['fromLocations']
+    )));
+    Notifications::dominanceCheckReturnCoalitionBlocks($blocks,$fromLocations);
     array_pop($actionStack);
     ActionStack::next($actionStack);
   }
@@ -102,7 +110,6 @@ trait DominanceCheckTrait
   {
     array_pop($actionStack);
     // SA_INSURRECTION
-    // TODO (Frans): action stack so pieces can be selected if needed
     $card = Cards::get('card_3');
     if (Utils::startsWith($card['location'], 'court_')) {
       $playerId = intval(explode('_', $card['location'])[1]);
@@ -124,22 +131,21 @@ trait DominanceCheckTrait
   {
     array_pop($actionStack);
 
-    $eventCardsPossiblyInPlay = ['card_105','card_106','card_107','card_108','card_109','card_110','card_112','card_115'];
+    $eventCardsPossiblyInPlay = ['card_105', 'card_106', 'card_107', 'card_108', 'card_109', 'card_110', 'card_112', 'card_115'];
     $eventCards = Cards::get($eventCardsPossiblyInPlay)->toArray();
 
-    foreach(array_reverse($eventCards) as $index => $card)
-    {
+    foreach (array_reverse($eventCards) as $index => $card) {
       $location = $card['location'];
-      if(!($location === ACTIVE_EVENTS || Utils::startsWith($location, 'events_'))) {
+      if (!($location === ACTIVE_EVENTS || Utils::startsWith($location, 'events_'))) {
         continue;
       };
       $isGlobalEvent = $location === ACTIVE_EVENTS;
-      $cardOwnerId = Utils::startsWith($location, 'events_') ? intval(explode('_',$location)[1]) : null;
-      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD,$isGlobalEvent ? Players::get()->getId() : $cardOwnerId,[
+      $cardOwnerId = Utils::startsWith($location, 'events_') ? intval(explode('_', $location)[1]) : null;
+      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $isGlobalEvent ? Players::get()->getId() : $cardOwnerId, [
         'cardId' => $card['id'],
         'to' => DISCARD,
         'from' => $location,
-      ]); 
+      ]);
     }
 
     ActionStack::next($actionStack);
@@ -200,6 +206,7 @@ trait DominanceCheckTrait
       return $b['count'] - $a['count'];
     });
 
+    // TODO: we could probably replace this by checking dominance checks in discard or dominance checks left in deck
     $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [10, 6, 2] : [5, 3, 1];
 
     return $this->determineVictoryPoints($loyalPlayers, $availablePoints);
@@ -269,7 +276,7 @@ trait DominanceCheckTrait
             'currentScore' => $currentScore,
             'newScore' => $currentScore + $pointsPerPlayer,
           );
-          Players::incScore($playerId,$pointsPerPlayer);
+          Players::incScore($playerId, $pointsPerPlayer);
         }
       }
 

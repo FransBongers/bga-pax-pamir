@@ -44,10 +44,15 @@ const cardActionClientStateMap = {
  * Locations
  */
 const ACTIVE_EVENTS = 'activeEvents';
-const DISCARD = 'discard';
-const TEMP_DISCARD = 'temp_discard';
+const DISCARD = 'discardPile';
+const TEMP_DISCARD = 'tempDiscardPile';
 const HAND = 'hand';
 const COURT = 'court';
+
+const discardMap = {
+  [DISCARD]: 'pp_pile_discarded_card',
+  [TEMP_DISCARD]: 'pp_temp_discarded_card',
+}
 // const PLAYER_EVENTS = 'playerEvents';
 
 // size of tokens
@@ -135,6 +140,7 @@ const IMPACT_ICON_MILITARY_SUIT = 'military';
 const IMPACT_ICON_POLITICAL_SUIT = 'political';
 const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 
+
 /**
  * Class names
  */
@@ -143,6 +149,11 @@ const PP_SELECTED = 'pp_selected';
 const PP_CARD_IN_HAND = 'pp_card_in_hand';
 const PP_CARD_IN_ZONE = 'pp_card_in_zone';
 const PP_MARKET_CARD = 'pp_market_card';
+const PP_ARMY = 'pp_army';
+const PP_PRIZE = 'pp_prize';
+const PP_ROAD = 'pp_road';
+const PP_COALITION_BLOCK = 'pp_coalition_block';
+const PP_TEMPORARY = 'pp_temporary';
 
 /**
  * Events

@@ -724,7 +724,6 @@
 }
 
 .pp_card.pp_prize {
-  transition: transform 2s;
   transform: rotate(180deg);
   box-shadow: rgba(0, 0, 0, 0.1) -5px -5px 5px 0px;
 }
@@ -929,7 +928,7 @@
 }
 
 .pp_card_action_betray {
-  background-position-x: 22.2222222222%;
+  background-position-x: 20%;
 }
 
 .pp_card_action_battle.pp_rank_1 {
@@ -1179,11 +1178,17 @@ html {
   display: flex;
 }
 
-#pp_temp_discard_pile {
-  width: 150px;
-  height: 209px;
+#pp_temp_discarded_card {
   position: relative;
   margin-right: 10px;
+  width: 150px;
+  height: 209px;
+}
+
+#pp_pile_discarded_card {
+  top: -4px;
+  left: -5px;
+  position: absolute;
 }
 
 #pp_discard_pile {
@@ -1196,10 +1201,14 @@ html {
   position: relative;
 }
 
-#pp_discard_pile > .pp_card {
-  top: -5px;
-  left: -5px;
-  position: absolute;
+.pp_discarded_card {
+  width: 150px;
+  height: 209px;
+  box-shadow: rgb(0, 0, 0) 2px 2px 5px -1px;
+  border-radius: 10px;
+  background-repeat: no-repeat;
+  border: 1px black solid;
+  opacity: 0;
 }
 
 #pp_market_deck {

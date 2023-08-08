@@ -35,7 +35,6 @@ class Events
     $action = array_pop($actionStack);
     $event = $action['data']['event'];
     $playerId = $action['playerId'];
-    Notifications::log('actionStack',$actionStack);
     switch ($event) {
       case ECE_DOMINANCE_CHECK:
         $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
@@ -220,13 +219,9 @@ class Events
   public static function riot($regionId)
   {
     $tribeResult = Map::removeTribesFromRegion($regionId);
-    $armyMoves = Map::removeArmiesFromRegion($regionId);
+    $armies = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('All tribes and armies are removed from ${logTokenRegionName}');
-    $moves = array_merge($tribeResult['moves'], $armyMoves);
-    Notifications::moveToken($message, [
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
-      'moves' => $moves
-    ]);
+    Notifications::returnAllToSupply(Players::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId)],$regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult['actions'];
   }

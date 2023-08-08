@@ -144,7 +144,7 @@ interface AddActionButtonProps extends AddButtonProps {
 }
 
 interface PaxPamirGame extends Game {
-  activeEvents: Zone;
+  activeEvents: PaxPamirZone;
   activeStates: {
     clientCardActionBattle: ClientCardActionBattleState;
     clientCardActionBetray: ClientCardActionBetrayState;
@@ -171,7 +171,7 @@ interface PaxPamirGame extends Game {
   playerManager: PlayerManager;
   playerCounts: Record<string, number>;
   spies: {
-    [cardId: string]: Zone;
+    [cardId: string]: PaxPamirZone;
   };
   tooltipManager: PPTooltipManager;
   _connections: unknown[];
@@ -189,7 +189,7 @@ interface PaxPamirGame extends Game {
   getCurrentPlayer: () => PPPlayer;
   getMinimumActionCost: (props: {action: string;}) => number | null;
   getPlayerId: () => number;
-  getZoneForLocation: ({ location }: { location: string }) => Zone;
+  getZoneForLocation: ({ location }: { location: string }) => PaxPamirZone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;

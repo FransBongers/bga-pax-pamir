@@ -107,20 +107,7 @@ trait PlaceRoadTrait
     $region1 = explode("_", $borderId)[1];
     Tokens::move($road['id'], $to);
     Tokens::setUsed($road['id'], USED);
-    $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
-    Notifications::moveToken($message, [
-      'player' => Players::get(),
-      'logTokenRoad' => Utils::logTokenRoad($loyalty),
-      'logTokenRegionName0' => Utils::logTokenRegionName($region0),
-      'logTokenRegionName1' => Utils::logTokenRegionName($region1),
-      'moves' => [
-        [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $road['id'],
-        ]
-      ]
-    ]);
+    Notifications::placeRoad($player,  $road['id'], $loyalty, $region0,$region1, $from, $to);
 
     if ($selectedPiece !== null) {
       $fromRegionId = explode('_', $from)[1];
@@ -133,43 +120,4 @@ trait PlaceRoadTrait
     array_pop($actionStack);
     ActionStack::next($actionStack);
   }
-
-
-  // function resolvePlaceRoad($borderId, $selectedPiece = null)
-  // {
-  //   $loyalty = Players::get()->getLoyalty();
-  //   $location = $this->locations['pools'][$loyalty];
-  //   $road = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($location);
-  //   if ($road === null) {
-  //     return;
-  //   }
-  //   $to = $this->locations['roads'][$borderId];
-  //   $from = $road['location'];
-  //   $region0 = explode("_", $borderId)[0];
-  //   $region1 = explode("_", $borderId)[1];
-  //   Tokens::move($road['id'], $to);
-  //   Tokens::setUsed($road['id'], USED);
-  //   $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
-  //   Notifications::moveToken($message, [
-  //     'player' => Players::get(),
-  //     'logTokenRoad' => Utils::logTokenRoad($loyalty),
-  //     'logTokenRegionName0' => Utils::logTokenRegionName($region0),
-  //     'logTokenRegionName1' => Utils::logTokenRegionName($region1),
-  //     'moves' => [
-  //       [
-  //         'from' => $from,
-  //         'to' => $to,
-  //         'tokenId' => $road['id'],
-  //       ]
-  //     ]
-  //   ]);
-
-  //   if ($selectedPiece !== null) {
-  //     $fromRegionId = explode('_', $from)[1];
-  //     $isTribe = Utils::startsWith($from, 'armies');
-  //     if ($isTribe) {
-  //       Map::checkRulerChange($fromRegionId);
-  //     }
-  //   }
-  // }
 }

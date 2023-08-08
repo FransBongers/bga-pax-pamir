@@ -156,21 +156,12 @@ trait PlayerActionBattleTrait
         }
       }
       $state = Tokens::insertOnTop($tokenId, $to);
-      $message = clienttranslate('${player_name} removes ${logTokenRemoved}');
 
-
-      Notifications::moveToken($message, [
-        'player' => Players::get(),
-        'logTokenRemoved' => implode(':', [$logTokenType, $logTokenData]),
-        'moves' => [
-          [
-            'from' => $from,
-            'to' => $to,
-            'tokenId' => $tokenId,
-            'weight' => $state,
-          ]
-        ]
-      ]);
+      if ($isCylinder) {
+        Notifications::returnCylinder($player, intval($splitTokenId[1]), $location, $tokenId, $state);
+      } else {
+        Notifications::returnCoalitionBlock($player,$logTokenType,$logTokenData,$from,$tokenId,$state);
+      }
     };
 
     Map::checkRulerChange($location);
@@ -253,12 +244,7 @@ trait PlayerActionBattleTrait
           'weight' => $state,
         ];
       };
-      $message = clienttranslate('${player_name} removes ${logTokenRemoved}');
-      Notifications::moveToken($message, [
-        'player' => Players::get(),
-        'logTokenRemoved' => Utils::logTokenCylinder($cylinderOwnerPlayerId),
-        'moves' => $moves,
-      ]);
+      Notifications::returnCylinder($player, $cylinderOwnerPlayerId, $location, $tokenId, $state);
     };
 
     if (count($protectedBySafeHouse) > 0) {

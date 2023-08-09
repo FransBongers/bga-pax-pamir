@@ -90,7 +90,7 @@ trait DominanceCheckTrait
       $britishResult['fromLocations'],
       $russianResult['fromLocations']
     )));
-    Notifications::dominanceCheckReturnCoalitionBlocks($blocks,$fromLocations);
+    Notifications::dominanceCheckReturnCoalitionBlocks($blocks, $fromLocations);
     array_pop($actionStack);
     ActionStack::next($actionStack);
   }
@@ -133,21 +133,28 @@ trait DominanceCheckTrait
 
     $eventCardsPossiblyInPlay = ['card_105', 'card_106', 'card_107', 'card_108', 'card_109', 'card_110', 'card_112', 'card_115'];
     $eventCards = Cards::get($eventCardsPossiblyInPlay)->toArray();
-
-    foreach (array_reverse($eventCards) as $index => $card) {
+    $updateInfluence = false;
+    $discardActions = [];
+    foreach ($eventCards as $index => $card) {
       $location = $card['location'];
       if (!($location === ACTIVE_EVENTS || Utils::startsWith($location, 'events_'))) {
         continue;
       };
+      if ($card['id'] === 'card_106' || $card['id'] === 'card_108') {
+        $updateInfluence = true;
+      }
       $isGlobalEvent = $location === ACTIVE_EVENTS;
       $cardOwnerId = Utils::startsWith($location, 'events_') ? intval(explode('_', $location)[1]) : null;
-      $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $isGlobalEvent ? Players::get()->getId() : $cardOwnerId, [
+      $discardActions[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $isGlobalEvent ? Players::get()->getId() : $cardOwnerId, [
         'cardId' => $card['id'],
         'to' => DISCARD,
         'from' => $location,
       ]);
     }
-
+    if ($updateInfluence) {
+      $discardActions[] = ActionStack::createAction(DISPATCH_UPDATE_INFLUENCE, Players::get()->getId(), []);
+    }
+    $actionStack = array_merge($actionStack,array_reverse($discardActions));
     ActionStack::next($actionStack);
   }
 

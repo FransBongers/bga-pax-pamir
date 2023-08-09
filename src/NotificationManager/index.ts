@@ -246,7 +246,6 @@ class NotificationManager {
   async notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
     const { scores } = notif.args;
     for (let playerId of Object.keys(scores)) {
-      console.log('scores', playerId, typeof playerId, this.game.framework().scoreCtrl);
       this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
       await Promise.all([
         this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
@@ -294,8 +293,10 @@ class NotificationManager {
 
   async notif_moveCard(notif: Notif<NotifMoveCardArgs>) {
     const { move, action } = notif.args;
-
-    const { tokenId: cardId, from, to } = move;
+    if (move === null) {
+      return;
+    }
+    const { id: cardId, from, to } = move;
     const fromZone = this.game.getZoneForLocation({ location: from });
 
     switch (action) {
@@ -359,7 +360,7 @@ class NotificationManager {
     const { marketLocation } = notif.args;
     const row = Number(marketLocation.split('_')[1]);
     const column = Number(marketLocation.split('_')[2]);
-    await this.game.market.getMarketRupeesZone({ row, column }).removeAll();
+    await this.game.market.getMarketRupeesZone({ row, column }).removeAll({destroy: true});
   }
 
   async notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>): Promise<void> {
@@ -497,7 +498,7 @@ class NotificationManager {
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -amount });
   }
 
-  async notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>) {
+  async notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>): Promise<void> {
     this.game.clearPossible();
     const { move } = notif.args;
 
@@ -506,7 +507,7 @@ class NotificationManager {
     const toRow = Number(move.to.split('_')[1]);
     const toCol = Number(move.to.split('_')[2]);
 
-    return this.game.market.moveCard({
+    await this.game.market.moveCard({
       cardId: move.cardId,
       from: {
         row: fromRow,

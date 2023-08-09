@@ -65,13 +65,13 @@ class PaxPamirZone {
     return this.updateDisplay();
   }
 
-  public async removeAll({destroy}: {destroy: boolean} = {destroy: false}) {
+  public async removeAll({ destroy }: { destroy: boolean } = { destroy: false }) {
     if (destroy) {
       this.items.forEach((item) => {
-        const {id} = item;
+        const { id } = item;
         const node = $(id);
         node.remove();
-      })
+      });
     }
     this.items = [];
     return this.updateDisplay();
@@ -86,7 +86,7 @@ class PaxPamirZone {
     elements,
     classesToAdd,
     classesToRemove,
-    duration,
+    duration = 500,
     zIndex,
     elementsToRemove,
   }: {
@@ -97,7 +97,6 @@ class PaxPamirZone {
     zIndex?: number;
     elementsToRemove?: { elements: string | string[]; destroy?: boolean };
   }) {
-    const animations: BgaAnimation<BgaAnimationSettings>[] = [];
     const items = Array.isArray(elements) ? elements : [elements];
 
     if (elementsToRemove) {
@@ -131,9 +130,9 @@ class PaxPamirZone {
 
     this.sortItems();
 
+    const animations: Promise<void>[] = [];
     items.forEach((item) => {
       const element = document.getElementById(item.id);
-      const { id } = item;
       if (!element) {
         console.error('newElement null');
         return;
@@ -142,24 +141,47 @@ class PaxPamirZone {
       const attachTo = document.getElementById(this.containerId);
       attachTo.appendChild(element);
 
-      animations.push(
-        new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
-          element: element,
-          transitionTimingFunction: 'linear', // 'ease-in-out',
-          fromRect,
-          zIndex,
-          duration,
-          animationStart: (animation: BgaSlideAnimation<BgaAnimationWithOriginSettings>) => {
-            element.classList.remove(...(classesToRemove || []));
-            element.classList.add(...(classesToAdd || []));
-            this.setItemCoords({ node: animation.settings.element });
-          },
-        })
-      );
+      animations.push(this.animateMoveToZone({ element, classesToAdd, classesToRemove, zIndex, duration, fromRect }));
     });
-
-    return this.animationManager.playParallel(this.getUpdateAnimations(items.map(({ id }) => id)).concat(animations));
+    await Promise.all([
+      ...this.getUpdateAnimations(items.map(({ id }) => id)).map((anim) => this.animationManager.play(anim)),
+      ...animations,
+    ]);
   }
+
+  /**
+   * Separate function needed since animationStart is not triggered when animation is not played
+   * and we need to setItemCoords right before animration
+   * @param param0
+   */
+  private animateMoveToZone = async ({
+    fromRect,
+    element,
+    classesToAdd,
+    classesToRemove,
+    zIndex,
+    duration,
+  }: {
+    fromRect: DOMRect;
+    element: HTMLElement;
+    classesToRemove?: string[];
+    classesToAdd?: string[];
+    zIndex?: number;
+    duration?: number;
+  }) => {
+    element.classList.remove(...(classesToRemove || []));
+    element.classList.add(...(classesToAdd || []));
+    this.setItemCoords({ node: element });
+    await this.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element: element,
+        transitionTimingFunction: 'linear', // 'ease-in-out',
+        fromRect,
+        zIndex,
+        duration,
+      })
+    );
+  };
 
   public setItemCoords({ node }: { node: HTMLElement }) {
     const index = this.items.findIndex((item) => item.id === node.id) as number;
@@ -203,14 +225,6 @@ class PaxPamirZone {
       }
     });
     await this.animationManager.playParallel([...this.getUpdateAnimations(inputItems.map(({ id }) => id)), ...animations]);
-
-    // if (!from) {
-    //   node.style.opacity = '0';
-    //   await this.animationManager.playParallel(this.getUpdateAnimations());
-    //   node.style.opacity = '1';
-    // } else {
-
-    // }
   }
 
   /**
@@ -229,11 +243,9 @@ class PaxPamirZone {
       const node = dojo.place(element, this.containerId);
       node.style.position = 'absolute';
       node.style.zIndex = `${zIndex || 0}`;
-
-
     });
 
-    // Using below function sets coords and container width/height. 
+    // Using below function sets coords and container width/height.
     // Keep it sync by not playing the animations
     this.getUpdateAnimations();
   }
@@ -434,7 +446,7 @@ class PaxPamirZone {
   public async removeTo(input: PaxPamirZoneRemoveTo | PaxPamirZoneRemoveTo[]) {
     const inputItems = Array.isArray(input) ? input : [input];
 
-    const animations = [];
+    const animations: Promise<void>[] = [];
     inputItems.forEach(({ id, destroy = true, to }) => {
       const index = this.items.findIndex((item) => item.id === id);
       if (index < 0) {
@@ -453,20 +465,23 @@ class PaxPamirZone {
       element.style.top = `${this.pxNumber(element.style.top) + top}px`;
       element.style.left = `${this.pxNumber(element.style.left) + left}px`;
 
-      animations.push(
-        new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
-          element,
-          fromRect,
-          animationEnd: (animation: IBgaAnimation<BgaAnimationSettings>) => {
-            if (destroy) {
-              element.remove();
-            }
-          },
-        })
-      );
+      animations.push(this.animateRemoveTo({ element, fromRect, destroy }));
     });
     this.sortItems();
-    await this.animationManager.playParallel([...this.getUpdateAnimations(), ...animations]);
+    await Promise.all([...this.getUpdateAnimations().map((anim) => this.animationManager.play(anim)), ...animations]);
+    // await this.animationManager.playParallel([...this.getUpdateAnimations(), ...animations]);
+  }
+
+  private async animateRemoveTo({ element, fromRect, destroy }: { element: HTMLElement; fromRect: DOMRect; destroy?: boolean }) {
+    await this.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element,
+        fromRect,
+      })
+    );
+    if (destroy) {
+      element.remove();
+    }
   }
 
   public getItems(): string[] {

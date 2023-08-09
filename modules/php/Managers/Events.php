@@ -42,7 +42,7 @@ class Events
         ]);
         break;
       case ECE_KOH_I_NOOR_RECOVERED: // card_106
-        // TODO: update player cylinder count
+        Events::updateInfluence();
         break;
       case ECE_RUMOR: // card_108
         $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
@@ -106,7 +106,7 @@ class Events
         break;
         // card 106
       case ECE_EMBARRASSEMENT_OF_RICHES:
-        Events::embarrassementOfRiches();
+        Events::updateInfluence();
         break;
         // card 107
       case ECE_DISREGARD_FOR_CUSTOMS:
@@ -187,7 +187,7 @@ class Events
   }
 
   // card_106
-  public static function embarrassementOfRiches()
+  public static function updateInfluence()
   {
     // recalculate influence ignoring gifts
     $players = Players::getAll();

@@ -621,6 +621,7 @@ class PPPlayer {
         zone: this.events,
       });
     }
+    this.checkEventContainerHeight()
   }
 
   async discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }): Promise<void> {
@@ -655,24 +656,19 @@ class PPPlayer {
     return await this.game.objectManager.discardPile.discardCardFromZone({ cardId, zone: this.prizes });
   }
 
-  async payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }) {
+  async payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }): Promise<void> {
     const element = dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${playerId}`);
     const fromRect = $(`rupees_${this.playerId}`)?.getBoundingClientRect();
-
-    return await this.game.animationManager.play(
+    this.incCounter({ counter: 'rupees', value: -rupees });
+    await this.game.animationManager.play(
       new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
         element,
         transitionTimingFunction: 'linear',
         fromRect,
-        animationStart: () => {
-          this.incCounter({ counter: 'rupees', value: -rupees });
-        },
-        animationEnd: () => {
-          element.remove();
-          this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
-        },
       })
     );
+    element.remove();
+    this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
   }
 
   async playCard({ card }: { card: Token }): Promise<void> {

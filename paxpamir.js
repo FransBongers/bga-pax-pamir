@@ -191,6 +191,31 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var PaxPamirZone = (function () {
     function PaxPamirZone(config) {
+        var _this = this;
+        this.animateMoveToZone = function (_a) {
+            var fromRect = _a.fromRect, element = _a.element, classesToAdd = _a.classesToAdd, classesToRemove = _a.classesToRemove, zIndex = _a.zIndex, duration = _a.duration;
+            return __awaiter(_this, void 0, void 0, function () {
+                var _b, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0:
+                            (_b = element.classList).remove.apply(_b, (classesToRemove || []));
+                            (_c = element.classList).add.apply(_c, (classesToAdd || []));
+                            this.setItemCoords({ node: element });
+                            return [4, this.animationManager.play(new BgaSlideAnimation({
+                                    element: element,
+                                    transitionTimingFunction: 'linear',
+                                    fromRect: fromRect,
+                                    zIndex: zIndex,
+                                    duration: duration,
+                                }))];
+                        case 1:
+                            _d.sent();
+                            return [2];
+                    }
+                });
+            });
+        };
         var animationManager = config.animationManager, itemGap = config.itemGap, itemHeight = config.itemHeight, itemWidth = config.itemWidth, containerId = config.containerId;
         this.animationManager = animationManager;
         this.itemGap = itemGap || 0;
@@ -253,63 +278,56 @@ var PaxPamirZone = (function () {
         });
     };
     PaxPamirZone.prototype.moveToZone = function (_a) {
-        var elements = _a.elements, classesToAdd = _a.classesToAdd, classesToRemove = _a.classesToRemove, duration = _a.duration, zIndex = _a.zIndex, elementsToRemove = _a.elementsToRemove;
+        var elements = _a.elements, classesToAdd = _a.classesToAdd, classesToRemove = _a.classesToRemove, _b = _a.duration, duration = _b === void 0 ? 500 : _b, zIndex = _a.zIndex, elementsToRemove = _a.elementsToRemove;
         return __awaiter(this, void 0, void 0, function () {
-            var animations, items, itemsToRemove;
+            var items, itemsToRemove, animations;
             var _this = this;
-            return __generator(this, function (_b) {
-                animations = [];
-                items = Array.isArray(elements) ? elements : [elements];
-                if (elementsToRemove) {
-                    itemsToRemove = Array.isArray(elementsToRemove.elements) ? elementsToRemove.elements : [elementsToRemove.elements];
-                    itemsToRemove.forEach(function (id) {
-                        var index = _this.items.findIndex(function (item) { return item.id === id; });
-                        if (index < 0) {
-                            return;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        items = Array.isArray(elements) ? elements : [elements];
+                        if (elementsToRemove) {
+                            itemsToRemove = Array.isArray(elementsToRemove.elements) ? elementsToRemove.elements : [elementsToRemove.elements];
+                            itemsToRemove.forEach(function (id) {
+                                var index = _this.items.findIndex(function (item) { return item.id === id; });
+                                if (index < 0) {
+                                    return;
+                                }
+                                _this.items.splice(index, 1);
+                                if (elementsToRemove.destroy) {
+                                    var element = $(id);
+                                    element && element.remove();
+                                }
+                            });
                         }
-                        _this.items.splice(index, 1);
-                        if (elementsToRemove.destroy) {
-                            var element = $(id);
-                            element && element.remove();
-                        }
-                    });
+                        items.forEach(function (_a) {
+                            var id = _a.id, weight = _a.weight;
+                            _this.items.push({
+                                id: id,
+                                weight: weight,
+                            });
+                        });
+                        this.sortItems();
+                        animations = [];
+                        items.forEach(function (item) {
+                            var element = document.getElementById(item.id);
+                            if (!element) {
+                                console.error('newElement null');
+                                return;
+                            }
+                            var fromRect = element.getBoundingClientRect();
+                            var attachTo = document.getElementById(_this.containerId);
+                            attachTo.appendChild(element);
+                            animations.push(_this.animateMoveToZone({ element: element, classesToAdd: classesToAdd, classesToRemove: classesToRemove, zIndex: zIndex, duration: duration, fromRect: fromRect }));
+                        });
+                        return [4, Promise.all(__spreadArray(__spreadArray([], this.getUpdateAnimations(items.map(function (_a) {
+                                var id = _a.id;
+                                return id;
+                            })).map(function (anim) { return _this.animationManager.play(anim); }), true), animations, true))];
+                    case 1:
+                        _c.sent();
+                        return [2];
                 }
-                items.forEach(function (_a) {
-                    var id = _a.id, weight = _a.weight;
-                    _this.items.push({
-                        id: id,
-                        weight: weight,
-                    });
-                });
-                this.sortItems();
-                items.forEach(function (item) {
-                    var element = document.getElementById(item.id);
-                    var id = item.id;
-                    if (!element) {
-                        console.error('newElement null');
-                        return;
-                    }
-                    var fromRect = element.getBoundingClientRect();
-                    var attachTo = document.getElementById(_this.containerId);
-                    attachTo.appendChild(element);
-                    animations.push(new BgaSlideAnimation({
-                        element: element,
-                        transitionTimingFunction: 'linear',
-                        fromRect: fromRect,
-                        zIndex: zIndex,
-                        duration: duration,
-                        animationStart: function (animation) {
-                            var _a, _b;
-                            (_a = element.classList).remove.apply(_a, (classesToRemove || []));
-                            (_b = element.classList).add.apply(_b, (classesToAdd || []));
-                            _this.setItemCoords({ node: animation.settings.element });
-                        },
-                    }));
-                });
-                return [2, this.animationManager.playParallel(this.getUpdateAnimations(items.map(function (_a) {
-                        var id = _a.id;
-                        return id;
-                    })).concat(animations))];
             });
         });
     };
@@ -551,20 +569,31 @@ var PaxPamirZone = (function () {
                             var left = toRect.left - fromRect.left;
                             element.style.top = "".concat(_this.pxNumber(element.style.top) + top, "px");
                             element.style.left = "".concat(_this.pxNumber(element.style.left) + left, "px");
-                            animations.push(new BgaSlideAnimation({
-                                element: element,
-                                fromRect: fromRect,
-                                animationEnd: function (animation) {
-                                    if (destroy) {
-                                        element.remove();
-                                    }
-                                },
-                            }));
+                            animations.push(_this.animateRemoveTo({ element: element, fromRect: fromRect, destroy: destroy }));
                         });
                         this.sortItems();
-                        return [4, this.animationManager.playParallel(__spreadArray(__spreadArray([], this.getUpdateAnimations(), true), animations, true))];
+                        return [4, Promise.all(__spreadArray(__spreadArray([], this.getUpdateAnimations().map(function (anim) { return _this.animationManager.play(anim); }), true), animations, true))];
                     case 1:
                         _a.sent();
+                        return [2];
+                }
+            });
+        });
+    };
+    PaxPamirZone.prototype.animateRemoveTo = function (_a) {
+        var element = _a.element, fromRect = _a.fromRect, destroy = _a.destroy;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4, this.animationManager.play(new BgaSlideAnimation({
+                            element: element,
+                            fromRect: fromRect,
+                        }))];
+                    case 1:
+                        _b.sent();
+                        if (destroy) {
+                            element.remove();
+                        }
                         return [2];
                 }
             });
@@ -1065,6 +1094,7 @@ var DiscardPile = (function () {
             var node = $(this.containterId);
             node.classList.remove("pp_".concat(this.visibleCardId));
             node.style.opacity = "0";
+            this.visibleCardId = undefined;
         }
     };
     DiscardPile.prototype.setVisibleCard = function (_a) {
@@ -1084,27 +1114,20 @@ var DiscardPile = (function () {
         var cardId = _a.cardId, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
             var fromRect, element;
-            var _this = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
                         fromRect = (_b = $(from)) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
                         element = dojo.place(tplCard({ cardId: cardId }), 'pp_pile_discarded_card');
-                        return [4, this.game.animationManager.playSequence([
-                                new BgaSlideAnimation({
-                                    element: element,
-                                    transitionTimingFunction: 'linear',
-                                    fromRect: fromRect,
-                                }),
-                                new BgaPauseAnimation({
-                                    animationStart: function () {
-                                        _this.setVisibleCard({ cardId: cardId });
-                                        $(cardId).remove();
-                                    },
-                                }),
-                            ])];
+                        return [4, this.game.animationManager.play(new BgaSlideAnimation({
+                                element: element,
+                                transitionTimingFunction: 'linear',
+                                fromRect: fromRect,
+                            }))];
                     case 1:
                         _c.sent();
+                        this.setVisibleCard({ cardId: cardId });
+                        $(cardId).remove();
                         return [2];
                 }
             });
@@ -1850,7 +1873,9 @@ var PPPlayer = (function () {
                     case 3:
                         _c.sent();
                         _c.label = 4;
-                    case 4: return [2];
+                    case 4:
+                        this.checkEventContainerHeight();
+                        return [2];
                 }
             });
         });
@@ -1921,25 +1946,22 @@ var PPPlayer = (function () {
         var playerId = _a.playerId, rupees = _a.rupees;
         return __awaiter(this, void 0, void 0, function () {
             var element, fromRect;
-            var _this = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
                         element = dojo.place(tplRupee({ rupeeId: 'tempRupee' }), "rupees_".concat(playerId));
                         fromRect = (_b = $("rupees_".concat(this.playerId))) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
+                        this.incCounter({ counter: 'rupees', value: -rupees });
                         return [4, this.game.animationManager.play(new BgaSlideAnimation({
                                 element: element,
                                 transitionTimingFunction: 'linear',
                                 fromRect: fromRect,
-                                animationStart: function () {
-                                    _this.incCounter({ counter: 'rupees', value: -rupees });
-                                },
-                                animationEnd: function () {
-                                    element.remove();
-                                    _this.game.playerManager.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: rupees });
-                                },
                             }))];
-                    case 1: return [2, _c.sent()];
+                    case 1:
+                        _c.sent();
+                        element.remove();
+                        this.game.playerManager.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: rupees });
+                        return [2];
                 }
             });
         });
@@ -2656,7 +2678,7 @@ var Market = (function () {
     Market.prototype.moveCard = function (_a) {
         var cardId = _a.cardId, from = _a.from, to = _a.to;
         return __awaiter(this, void 0, void 0, function () {
-            var rupeesToMove, movePromises, rupeesInDestination, removePromises;
+            var rupeesToMove, movePromises, removePromises;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -2675,7 +2697,6 @@ var Market = (function () {
                                 zIndex: 11,
                             }));
                         }
-                        rupeesInDestination = this.getMarketRupeesZone({ row: to.row, column: to.column }).getItems();
                         return [4, Promise.all(movePromises)];
                     case 1:
                         _b.sent();
@@ -5640,7 +5661,6 @@ var NotificationManager = (function () {
                     case 1:
                         if (!(_i < _a.length)) return [3, 4];
                         playerId = _a[_i];
-                        console.log('scores', playerId, typeof playerId, this.game.framework().scoreCtrl);
                         this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
                         return [4, Promise.all([
                                 this.game.objectManager.vpTrack.getZone("".concat(scores[playerId].newScore)).moveToZone({ elements: { id: "vp_cylinder_".concat(playerId) } }),
@@ -5731,7 +5751,10 @@ var NotificationManager = (function () {
                 switch (_c.label) {
                     case 0:
                         _a = notif.args, move = _a.move, action = _a.action;
-                        cardId = move.tokenId, from = move.from, to = move.to;
+                        if (move === null) {
+                            return [2];
+                        }
+                        cardId = move.id, from = move.from, to = move.to;
                         fromZone = this.game.getZoneForLocation({ location: from });
                         _b = action;
                         switch (_b) {
@@ -5853,7 +5876,7 @@ var NotificationManager = (function () {
                         marketLocation = notif.args.marketLocation;
                         row = Number(marketLocation.split('_')[1]);
                         column = Number(marketLocation.split('_')[2]);
-                        return [4, this.game.market.getMarketRupeesZone({ row: row, column: column }).removeAll()];
+                        return [4, this.game.market.getMarketRupeesZone({ row: row, column: column }).removeAll({ destroy: true })];
                     case 1:
                         _a.sent();
                         return [2];
@@ -6067,23 +6090,29 @@ var NotificationManager = (function () {
         return __awaiter(this, void 0, void 0, function () {
             var move, fromRow, fromCol, toRow, toCol;
             return __generator(this, function (_a) {
-                this.game.clearPossible();
-                move = notif.args.move;
-                fromRow = Number(move.from.split('_')[1]);
-                fromCol = Number(move.from.split('_')[2]);
-                toRow = Number(move.to.split('_')[1]);
-                toCol = Number(move.to.split('_')[2]);
-                return [2, this.game.market.moveCard({
-                        cardId: move.cardId,
-                        from: {
-                            row: fromRow,
-                            column: fromCol,
-                        },
-                        to: {
-                            row: toRow,
-                            column: toCol,
-                        },
-                    })];
+                switch (_a.label) {
+                    case 0:
+                        this.game.clearPossible();
+                        move = notif.args.move;
+                        fromRow = Number(move.from.split('_')[1]);
+                        fromCol = Number(move.from.split('_')[2]);
+                        toRow = Number(move.to.split('_')[1]);
+                        toCol = Number(move.to.split('_')[2]);
+                        return [4, this.game.market.moveCard({
+                                cardId: move.cardId,
+                                from: {
+                                    row: fromRow,
+                                    column: fromCol,
+                                },
+                                to: {
+                                    row: toRow,
+                                    column: toCol,
+                                },
+                            })];
+                    case 1:
+                        _a.sent();
+                        return [2];
+                }
             });
         });
     };
@@ -6394,7 +6423,10 @@ var PaxPamir = (function () {
         var _this = this;
         console.log('clear interface');
         Object.keys(this.spies).forEach(function (key) {
-            dojo.empty(_this.spies[key].getContainerId());
+            var _a;
+            if (((_a = _this.spies[key]) === null || _a === void 0 ? void 0 : _a.getContainerId()) && $(_this.spies[key].getContainerId())) {
+                dojo.empty(_this.spies[key].getContainerId());
+            }
             _this.spies[key] = undefined;
         });
         this.market.clearInterface();

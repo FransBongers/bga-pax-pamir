@@ -243,8 +243,9 @@ trait PlayerActionBattleTrait
           'tokenId' => $tokenId,
           'weight' => $state,
         ];
+        Notifications::returnCylinder($player, $cylinderOwnerPlayerId, $location, $tokenId, $state);
       };
-      Notifications::returnCylinder($player, $cylinderOwnerPlayerId, $location, $tokenId, $state);
+      
     };
 
     if (count($protectedBySafeHouse) > 0) {

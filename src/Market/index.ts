@@ -122,7 +122,7 @@ class Market {
    */
   async moveCard({ cardId, from, to }: { cardId: string; from: MarketLocation; to: MarketLocation }) {
     const rupeesToMove = this.getMarketRupeesZone({ row: from.row, column: from.column }).getItems();
-    const movePromises = [
+    const movePromises: Promise<unknown>[] = [
       this.getMarketCardZone({ row: to.row, column: to.column }).moveToZone({
         elements: { id: cardId },
         duration: (this.game.animationManager.getSettings().duration || 0) / 2,
@@ -138,7 +138,7 @@ class Market {
         })
       );
     }
-    const rupeesInDestination = this.getMarketRupeesZone({ row: to.row, column: to.column }).getItems();
+    // const rupeesInDestination = this.getMarketRupeesZone({ row: to.row, column: to.column }).getItems();
     await Promise.all(movePromises);
     const removePromises = [this.getMarketCardZone({ row: from.row, column: from.column }).remove({ input: cardId })];
     if (rupeesToMove.length > 0) {

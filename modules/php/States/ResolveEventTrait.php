@@ -136,7 +136,7 @@ trait ResolveEventTrait
     $move = $playerId === $selectedPlayerId ? null : [
       'from' => $from,
       'to' => $to,
-      'tokenId' => 'card_108'
+      'id' => 'card_108'
     ];
     Cards::move('card_108', $to);
     Notifications::moveCard($message, [

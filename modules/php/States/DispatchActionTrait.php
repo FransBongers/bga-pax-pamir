@@ -116,6 +116,9 @@ trait DispatchActionTrait
       case DISPATCH_TRANSITION:
         $this->dispatchTransition($actionStack);
         break;
+      case DISPATCH_UPDATE_INFLUENCE:
+        $this->dispatchUpdateInfluence($actionStack);
+        break;
       case 'acceptPrizeCheck':
         $this->dispatchAcceptPrizeCheck($actionStack);
         break;
@@ -240,6 +243,13 @@ trait DispatchActionTrait
 
     ActionStack::set($actionStack);
     $this->nextState($next['data']['transition'], $next['playerId']);
+  }
+
+  function dispatchUpdateInfluence($actionStack)
+  {
+    array_pop($actionStack);
+    Events::updateInfluence();
+    ActionStack::next($actionStack);
   }
 
 

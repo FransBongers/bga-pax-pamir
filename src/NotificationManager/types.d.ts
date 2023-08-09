@@ -148,9 +148,9 @@ interface TokenZoneInfo {
 
 interface NotifDominanceCheckReturnBlocksArgs {
   blocks: {
-    [AFGHAN]: TokenZoneInfo[],
-    [BRITISH]: TokenZoneInfo[],
-    [RUSSIAN]: TokenZoneInfo[]
+    [AFGHAN]: TokenZoneInfo[];
+    [BRITISH]: TokenZoneInfo[];
+    [RUSSIAN]: TokenZoneInfo[];
   };
   fromLocations: string[];
 }
@@ -177,7 +177,11 @@ interface NotifPlaceRoadArgs {
 
 interface NotifMoveCardArgs {
   action: 'MOVE_EVENT';
-  move: TokenMove | null;
+  move: {
+    from: string;
+    id: string;
+    to: string;
+  } | null;
 }
 
 interface NotifMoveTokenArgs {

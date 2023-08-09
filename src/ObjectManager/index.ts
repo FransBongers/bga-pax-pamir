@@ -32,6 +32,7 @@ class DiscardPile {
       const node: HTMLElement = $(this.containterId);
       node.classList.remove(`pp_${this.visibleCardId}`);
       node.style.opacity = `0`;
+      this.visibleCardId = undefined;
     }
   }
 
@@ -49,21 +50,18 @@ class DiscardPile {
   public async discardCardFromLocation({ cardId, from }: { cardId: string; from: string }) {
     const fromRect = $(from)?.getBoundingClientRect();
     const element = dojo.place(tplCard({ cardId }), 'pp_pile_discarded_card');
-    await this.game.animationManager.playSequence([
+    await this.game.animationManager.play(
       new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
         element,
         transitionTimingFunction: 'linear',
         fromRect,
-      }),
-      // TODO: check how we can remove this. Right now without pause animation
-      // the market starts refreshing which causes a 'shocky' animation
-      new BgaPauseAnimation<BgaAnimationSettings>({
-        animationStart: () => {
-          this.setVisibleCard({ cardId });
-          $(cardId).remove();
-        },
-      }),
-    ]);
+      })
+    );
+    this.setVisibleCard({ cardId });
+    $(cardId).remove();
+    // TODO: check how we can remove this. Right now without pause animation
+    // the market starts refreshing which causes a 'shocky' animation
+    // await this.game.animationManager.play(new BgaPauseAnimation<BgaAnimationSettings>({}));
   }
 
   public async discardCardFromZone({ cardId, zone }: { cardId: string; zone: PaxPamirZone }) {
@@ -325,7 +323,7 @@ class ObjectManager {
     this.game = game;
 
     this.discardPile = new DiscardPile({ game, containerId: 'pp_pile_discarded_card', type: 'discardPile' });
-    this.tempDiscardPile = new TempDiscardPile({game});
+    this.tempDiscardPile = new TempDiscardPile({ game });
     this.favoredSuit = new FavoredSuit({ game });
     this.supply = new Supply({ game });
     this.vpTrack = new VpTrack({ game });

@@ -47,6 +47,7 @@ trait DebugTrait
 
   function test()
   {
+    // Globals::setRemainingActions(1);
     // $fromLocations = ['armies_herat','armies_kabul','armies_herat','armies_punjab'];
     // Notifications::log('array_unique',array_values(array_unique($fromLocations)));
     // Notifications::log('array_merge_test', array_merge([
@@ -56,7 +57,11 @@ trait DebugTrait
     // ], []));
     // $this->debugSetupTokens();
     // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
-    Cards::move('card_114', 'market_0_4');
+    // Cards::move('card_114', 'deck');
+    Cards::move('card_106', 'market_0_1');
+    // Cards::move('card_19', 'prizes_2371053');
+    
+    
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);

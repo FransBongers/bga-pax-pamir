@@ -19,7 +19,9 @@
 
 ## Bugs
 - Check why undo after last loyalty pick during setup results in crossed log
-- Check events that are discarded during dominance check and revert effect in stats
+- Check zIndex of tokens on the board
+- purchasing cards when suit is military => first rupee appears instantly, only 2nd is animated
+- public withdrawal => rupees should be removed immediately
 
 
 ## To check
@@ -52,52 +54,52 @@ montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 400x+
 /**
  * Event card effects & cardIds
  */
-ECE_BACKING_OF_PERSIAN_ARISTOCRACY // card_113
-ECE_CONFIDENCE_FAILURE // card_114
-ECE_CONFLICT_FATIGUE // card_109
-ECE_COURTLY_MANNERS // card_107
-ECE_DISREGARD_FOR_CUSTOMS // card_107
-ECE_DOMINANCE_CHECK
-ECE_EMBARRASSEMENT_OF_RICHES // card_106
-ECE_FAILURE_TO_IMPRESS // card_108
-ECE_INTELLIGENCE_SUIT // card_115
-ECE_KOH_I_NOOR_RECOVERED // card_106
-ECE_MILITARY_SUIT // card_105
-ECE_NATION_BUILDING // card_112
-ECE_NATIONALISM // card_110
-ECE_NEW_TACTICS // card_105
-ECE_NO_EFFECT // card_111
-ECE_OTHER_PERSUASIVE_METHODS // card_114
-ECE_PASHTUNWALI_VALUES // card_115
-ECE_POLITICAL_SUIT // card_116
-ECE_PUBLIC_WITHDRAWAL // card_111
-ECE_REBUKE // card_116
-ECE_RIOTS_IN_HERAT // card_110
-ECE_RIOTS_IN_KABUL // card_112
-ECE_RIOTS_IN_PERSIA // card_113
-ECE_RIOTS_IN_PUNJAB // card_109
-ECE_RUMOR // card_108
+x ECE_BACKING_OF_PERSIAN_ARISTOCRACY // card_113
+x ECE_CONFIDENCE_FAILURE // card_114
+x ECE_CONFLICT_FATIGUE // card_109
+x ECE_COURTLY_MANNERS // card_107
+x ECE_DISREGARD_FOR_CUSTOMS // card_107
+x ECE_DOMINANCE_CHECK
+x ECE_EMBARRASSEMENT_OF_RICHES // card_106 / test for influence after dominance check
+x ECE_FAILURE_TO_IMPRESS // card_108
+x ECE_INTELLIGENCE_SUIT // card_115
+x ECE_KOH_I_NOOR_RECOVERED // card_106  / test for influence after dominance check
+x ECE_MILITARY_SUIT // card_105
+x ECE_NATION_BUILDING // card_112
+x ECE_NATIONALISM // card_110
+x ECE_NEW_TACTICS // card_105
+x ECE_NO_EFFECT // card_111
+x ECE_OTHER_PERSUASIVE_METHODS // card_114
+x ECE_PASHTUNWALI_VALUES // card_115
+x ECE_POLITICAL_SUIT // card_116
+x ECE_PUBLIC_WITHDRAWAL // card_111
+x ECE_REBUKE // card_116
+x ECE_RIOTS_IN_HERAT // card_110
+x ECE_RIOTS_IN_KABUL // card_112
+x ECE_RIOTS_IN_PERSIA // card_113
+x ECE_RIOTS_IN_PUNJAB // card_109
+x ECE_RUMOR // card_108
 
 /**
  * Special abilities
  */
-SA_INDISPENSABLE_ADVISORS // card_1
-SA_INSURRESCTION // card_3
-SA_CLAIM_OF_ANCIENT_LINEAGE // card_5
-SA_BODYGUARDS // card_15 card_83
-SA_CITADEL_KABUL // card_17
-SA_CITADEL_TRANSCASPIA // card_97
-SA_STRANGE_BEDFELLOWS // card_21
-SA_CIVIL_SERVICE_REFORMS // card_24
-SA_SAFE_HOUSE // card_41 card_72
-SA_CHARISMATIC_COURTIERS // card_42
-SA_BLACKMAIL_HERAT // card_54
-SA_BLACKMAIL_KANDAHAR // card_43
-SA_INDIAN_SUPPLIES // card_51
-SA_WELL_CONNECTED // card_56
-SA_HERAT_INFLUENCE // card_66
-SA_PERSIAN_INFLUENCE // card_68
-SA_RUSSIAN_INFLUENCE // card_70
-SA_INFRASTRUCTURE // card_78
-SA_SAVVY_OPERATOR // card_91
-SA_IRREGULARS // card_99
+x SA_INDISPENSABLE_ADVISORS // card_1
+x SA_INSURRESCTION // card_3
+x SA_CLAIM_OF_ANCIENT_LINEAGE // card_5
+x SA_BODYGUARDS // card_15 card_83
+x SA_CITADEL_KABUL // card_17
+x SA_CITADEL_TRANSCASPIA // card_97
+x SA_STRANGE_BEDFELLOWS // card_21
+x SA_CIVIL_SERVICE_REFORMS // card_24
+x SA_SAFE_HOUSE // card_41 card_72
+x SA_CHARISMATIC_COURTIERS // card_42
+x SA_BLACKMAIL_HERAT // card_54
+x SA_BLACKMAIL_KANDAHAR // card_43
+x SA_INDIAN_SUPPLIES // card_51
+x SA_WELL_CONNECTED // card_56
+x SA_HERAT_INFLUENCE // card_66
+x SA_PERSIAN_INFLUENCE // card_68
+x SA_RUSSIAN_INFLUENCE // card_70
+x SA_INFRASTRUCTURE // card_78
+x SA_SAVVY_OPERATOR // card_91
+x SA_IRREGULARS // card_99

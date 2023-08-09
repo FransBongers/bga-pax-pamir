@@ -262,6 +262,7 @@ const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
 const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
 const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
+const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';
 
 const IMPACT_ICON_DISPATCH_MAP = [
   ARMY => DISPATCH_PLACE_ARMY,

@@ -326,7 +326,9 @@ class PaxPamir implements PaxPamirGame {
   public clearInterface() {
     console.log('clear interface');
     Object.keys(this.spies).forEach((key) => {
-      dojo.empty(this.spies[key].getContainerId());
+      if (this.spies[key]?.getContainerId() && $(this.spies[key].getContainerId())) {
+        dojo.empty(this.spies[key].getContainerId());
+      }
       this.spies[key] = undefined;
     });
 
@@ -347,16 +349,6 @@ class PaxPamir implements PaxPamirGame {
     dojo.query('.pp_selected').removeClass('pp_selected');
 
     this.map.clearSelectable();
-    // REGIONS.forEach((region) => {
-    //   const element = document.getElementById(`pp_region_${region}`);
-    //   if (element) {
-    //     element.classList.remove('pp_selectable');
-    //   }
-    // });
-    // const mapArea = document.getElementById('pp_map_areas');
-    // if (mapArea) {
-    //   mapArea.classList.remove('pp_selectable');
-    // }
   }
 
   public getCardInfo({ cardId }: { cardId: string }): Card {

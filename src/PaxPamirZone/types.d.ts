@@ -33,7 +33,6 @@ interface PaxPamirZoneRemoveTo {
   id: string;
   to: string;
   destroy?: boolean;
-  // onAnimationEnd?: (animation: IBgaAnimation<BgaAnimationSettings>) => void;
 }
 
 interface PPZoneItemToCoordsProps {

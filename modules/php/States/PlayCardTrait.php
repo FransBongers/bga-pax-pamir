@@ -102,17 +102,19 @@ trait PlayCardTrait
     $card = Cards::get($cardId);
     $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
     $firstCard = count($courtCards) === 0;
-
-    if ($side === 'left') {
+    if ($firstCard) {
+      Cards::move($cardId, ['court', $playerId], 0);
+    } else if ($side === 'left') {
       Cards::insertAtBottom($cardId, ['court', $playerId]);
     } else {
       Cards::insertOnTop($cardId, ['court', $playerId]);
     }
     Globals::incRemainingActions(-1);
     // We need to fetch data again to get updated state
-    // $courtCards = Cards::getInLocationOrdered(['court', $playerId])->toArray();
+    // can replace this with state returned by insertAtBottom / insertOnTop instead of
+    // getting and returning all card data
     $card = Cards::get($cardId);
-    Notifications::playCard($card, $firstCard , $side, $playerId);
+    Notifications::playCard($card, $firstCard, $side, $playerId);
 
     $this->nextState('dispatchAction');
   }

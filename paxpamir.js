@@ -307,6 +307,7 @@ var PaxPamirZone = (function () {
                                 weight: weight,
                             });
                         });
+                        debug('items after push', this.items);
                         this.sortItems();
                         animations = [];
                         items.forEach(function (item) {
@@ -1423,6 +1424,7 @@ var PPPlayer = (function () {
                     var region = _this.game.gamedatas.staticData.cards[cardId].region;
                     return {
                         id: card.id,
+                        weight: card.state,
                         element: tplCard({ cardId: cardId, extraClasses: "pp_card_in_court pp_player_".concat(_this.playerId, " pp_").concat(region) }),
                         zIndex: 1,
                     };

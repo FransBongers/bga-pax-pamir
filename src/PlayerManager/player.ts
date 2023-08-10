@@ -110,6 +110,7 @@ class PPPlayer {
         const { region } = this.game.gamedatas.staticData.cards[cardId] as CourtCard;
         return {
           id: card.id,
+          weight: card.state,
           element: tplCard({ cardId, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
           zIndex: 1,
         };

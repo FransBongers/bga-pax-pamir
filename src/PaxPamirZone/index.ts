@@ -127,7 +127,7 @@ class PaxPamirZone {
         weight,
       });
     });
-
+    debug('items after push',this.items);
     this.sortItems();
 
     const animations: Promise<void>[] = [];

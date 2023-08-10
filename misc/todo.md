@@ -16,12 +16,16 @@
 - For bribes: should ruler be able to demand higher amount than briber has available even though briber can never accept?
 - For discard: instead of moving card div change discard background to show certain card and remove the card div?
 - Reduce size of notifications as much as possible (ie remove all unnecessary data like card info)
+- Points disk not on center of pts
 
 ## Bugs
 - Check why undo after last loyalty pick during setup results in crossed log
 - Check zIndex of tokens on the board
 - purchasing cards when suit is military => first rupee appears instantly, only 2nd is animated
 - public withdrawal => rupees should be removed immediately
+
+- when events that reduce influence are already active, new influence should also be ignored 
+- Undo should not be possible when nothing to undo
 
 
 ## To check
@@ -49,6 +53,11 @@ montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 160x+
 cards
 montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 400x+0+0 ../cards.webp
 
+
+From error logs:
+http://boardgamearena.com/2/paxpamir/paxpamir/specialAbilityPlaceSpyStartOfTurn.html?cardId=card_64&lock=dae483c0-0aa6-47f5-8d88-43bb8801011e&table=404548677&noerrortracking=true&dojo.preventCache=1691564403457
+09/08 16:48:36 [error] [T405531929] [207.201.216.62] [91571818/joeklein9] Unexpected exception: Class Pieces: getMany, some pieces have not been found ![null]
+#0 /var/tournoi/release/games/paxpamir/230728-2300/modules/php/Helpers/Pieces.php(238): PaxPamir\Helpers\Pieces::getMany()
 
 
 /**

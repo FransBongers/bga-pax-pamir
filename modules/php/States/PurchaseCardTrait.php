@@ -107,7 +107,7 @@ trait PurchaseCardTrait
         'event' => $card['purchased']['effect']
       ]);
     };
-    Cards::move($cardId, $newLocation);
+    Cards::insertOnTop($cardId, $newLocation);
 
     Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
 

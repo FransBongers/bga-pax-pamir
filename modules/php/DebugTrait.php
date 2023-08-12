@@ -29,7 +29,7 @@ trait DebugTrait
   function debugSetupTokens()
   {
     // $this->debugCreateArmy(KABUL);
-  
+
     // $this->debugCreateRoad('kabul_punjab');
     // $this->debugCreateSpy('card_32');
     // $this->debugCreateSpy('card_27');
@@ -47,21 +47,18 @@ trait DebugTrait
 
   function test()
   {
-    // Globals::setRemainingActions(1);
-    // $fromLocations = ['armies_herat','armies_kabul','armies_herat','armies_punjab'];
-    // Notifications::log('array_unique',array_values(array_unique($fromLocations)));
-    // Notifications::log('array_merge_test', array_merge([
-    //   ActionStack::createAction(DISPATCH_TRANSITION, 'playerId', [
-    //     'transition' => 'eventCardOtherPersuasiveMethods',
-    //   ])
-    // ], []));
-    // $this->debugSetupTokens();
-    // Notifications::log('order',Events::confidenceFailure(Players::get()->getId()));
+ 
+    $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
+    $discardPileCount = count($discardPile);
+
+
+    Notifications::log('discardPile', $discardPile);
+
     // Cards::move('card_114', 'deck');
-    Cards::move('card_106', 'market_0_1');
+    // Cards::move('card_106', 'market_0_1');
     // Cards::move('card_19', 'prizes_2371053');
-    
-    
+
+
     // Cards::move('card_107',ACTIVE_EVENTS);
 
     // $this->dispatchRefillMarketDrawCards([]);

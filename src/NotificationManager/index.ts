@@ -71,7 +71,7 @@ class NotificationManager {
       ['takeRupeesFromSupply', 1],
       ['taxMarket', undefined],
       ['taxPlayer', undefined],
-      ['updateInfluence', 1],  
+      ['updateInfluence', 1],
     ];
 
     // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
@@ -282,6 +282,8 @@ class NotificationManager {
     const { cardId, to } = notif.args;
     const row = Number(to.split('_')[1]);
     const column = Number(to.split('_')[2]);
+
+    this.game.objectManager.incCardCounter({ cardId, location: 'deck' });
     await this.game.market.addCardFromDeck({
       to: {
         row,
@@ -360,7 +362,7 @@ class NotificationManager {
     const { marketLocation } = notif.args;
     const row = Number(marketLocation.split('_')[1]);
     const column = Number(marketLocation.split('_')[2]);
-    await this.game.market.getMarketRupeesZone({ row, column }).removeAll({destroy: true});
+    await this.game.market.getMarketRupeesZone({ row, column }).removeAll({ destroy: true });
   }
 
   async notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>): Promise<void> {
@@ -411,7 +413,6 @@ class NotificationManager {
     player.setupHand({ hand });
     player.toValueCounter({ counter: 'cards', value: hand.length });
   }
-
 
   async notif_returnAllSpies(notif: Notif<NotifReturnAllSpiesArgs>) {
     this.game.clearPossible();
@@ -549,7 +550,6 @@ class NotificationManager {
     const { playerId, amount } = notif.args;
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
-
 
   async notif_taxPlayer(notif: Notif<NotifTaxPlayerArgs>) {
     const { playerId, taxedPlayerId, amount } = notif.args;

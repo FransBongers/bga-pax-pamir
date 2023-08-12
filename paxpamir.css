@@ -1193,7 +1193,7 @@ html {
 
 #pp_discard_pile {
   width: 149px;
-  height: 208px;
+  height: 209px;
   border-radius: 10px;
   border: 4px dashed black;
   box-sizing: border-box;
@@ -1204,6 +1204,7 @@ html {
 .pp_discarded_card {
   width: 150px;
   height: 209px;
+  box-sizing: border-box;
   box-shadow: rgb(0, 0, 0) 2px 2px 5px -1px;
   border-radius: 10px;
   background-repeat: no-repeat;
@@ -1220,6 +1221,52 @@ html {
   background-position-y: 100%;
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pp_deck_counters_container {
+  height: 24px;
+  width: 90px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid rgb(0, 0, 0);
+  justify-self: flex-end;
+  margin-top: auto;
+  display: flex;
+  flex-direction: row;
+  font-weight: bold;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.pp_card_counter_container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.pp_card_counter {
+  margin-left: 2px;
+}
+
+.pp_court_card_icon {
+  background-position-x: 66.6666666667%;
+  background-position-y: 100%;
+}
+
+.pp_deck_counter_icon {
+  height: 20px;
+  width: 14px;
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  border-radius: 2px;
+}
+
+.pp_dominance_check_icon {
+  background-position-x: 0%;
+  background-position-y: 75%;
 }
 
 .pp_coalition_blocks {
@@ -1425,6 +1472,7 @@ html {
 .pp_card_in_zone {
   width: 150px;
   height: 209px;
+  box-sizing: border-box;
   box-shadow: 2px 2px 5px -1px #000;
   border-radius: 10px;
 }

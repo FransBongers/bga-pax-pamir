@@ -84,7 +84,15 @@ interface LocalState {
  */
 interface PaxPamirGamedatas extends Gamedatas {
   canceledNotifIds: string[];
-  discardPile: Card | null;
+  deck: {
+    cardCount: number;
+    dominanceCheckCount: number;
+  };
+  discardPile: {
+    cardCount: number;
+    dominanceCheckCount: number;
+    topCard: Card | null;
+  };
   tempDiscardPile: Card | null;
   staticData: {
     borders: {

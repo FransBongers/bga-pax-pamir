@@ -105,8 +105,29 @@
             <div id="pp_discard_pile">
                 <span>Discard</span>
                 <div id="pp_pile_discarded_card" class="pp_discarded_card"></div>
+                <div class="pp_deck_counters_container" style="position: absolute; right: -4px; bottom: -4px;">
+                    <div id="pp_discard_pile_counter_container" class="pp_card_counter_container">
+                        <div class="pp_court_card_icon pp_deck_counter_icon"></div style="margin-bottom: 2px;"><span>:</span>
+                        <span id="pp_discard_pile_counter" class="pp_card_counter"></span>
+                    </div>
+                    <div id="pp_discard_pile_counter_dominance_check_container" class="pp_card_counter_container">
+                        <div class="pp_dominance_check_icon pp_deck_counter_icon"></div style="margin-bottom: 2px;"><span>:</span>
+                        <span id="pp_discard_pile_counter_dominance_check" class="pp_card_counter"></span>
+                    </div>
+                </div>
             </div>
-            <div id="pp_market_deck"></div>
+            <div id="pp_market_deck">
+                <div class="pp_deck_counters_container">
+                    <div id="pp_deck_counter_container" class="pp_card_counter_container">
+                        <div class="pp_court_card_icon pp_deck_counter_icon"></div style="margin-bottom: 2px;"><span>:</span>
+                        <span id="pp_deck_counter" class="pp_card_counter"></span>
+                    </div>
+                    <div id="pp_deck_counter_dominance_check_container" class="pp_card_counter_container">
+                        <div class="pp_dominance_check_icon pp_deck_counter_icon"></div style="margin-bottom: 2px;"><span>:</span>
+                        <span id="pp_deck_counter_dominance_check" class="pp_card_counter"></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

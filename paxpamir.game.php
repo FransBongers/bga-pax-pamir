@@ -37,6 +37,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -158,6 +159,11 @@ class Paxpamir extends Table
     {
         $pId = $pId ?? Players::getCurrentId();
 
+        $deck = Cards::getInLocation(DECK)->toArray();
+        $deckCount = count($deck);
+        $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
+        $discardPileCount = count($discardPile);
+
         $data = [
             // TODO (Frans): data from material.inc.php. We might also replace this?
             'staticData' => [
@@ -174,7 +180,19 @@ class Paxpamir extends Table
             // 'rupees' => Tokens::getOfType('rupee'),
             'favoredSuit' => Globals::getFavoredSuit(),
             'canceledNotifIds' => Log::getCanceledNotifIds(),
-            'discardPile' => Cards::getTopOf(DISCARD),
+            'deck' => [
+                'cardCount' => $deckCount,
+                'dominanceCheckCount' => $deckCount === 0 ? 0 : count(Utils::filter($deck, function ($card) {
+                    return $card['type'] === EVENT_CARD && $card['discarded']['effect'] === ECE_DOMINANCE_CHECK;
+                }))
+            ],
+            'discardPile' => [
+                'cardCount' => $discardPileCount,
+                'dominanceCheckCount' => $discardPileCount === 0 ?  0 : count(Utils::filter($discardPile, function ($card) {
+                    return $card['type'] === EVENT_CARD && $card['discarded']['effect'] === ECE_DOMINANCE_CHECK;
+                })),
+                'topCard' => $discardPileCount === 0 ? null : $discardPile[$discardPileCount - 1],
+            ],
             'tempDiscardPile' => Cards::getTopOf(TEMP_DISCARD),
         ];
         $activePlayerId = Players::getActiveId();
@@ -210,13 +228,13 @@ class Paxpamir extends Table
         /**
          * Progression is calculated as the number of cards that has left the deck since game start
          */
-        
+
         $playerCount = Players::count();
         // -2 because 10 event / dominance check cards are added and 12 cards are dealt to the market
         $cardsInDeckStartGame = (5 + $playerCount) * 6 - 2;
         $deckCount = Cards::countInLocation(DECK);
-       
-        $progression = round((1 - ( $deckCount / $cardsInDeckStartGame)) * 100);
+
+        $progression = round((1 - ($deckCount / $cardsInDeckStartGame)) * 100);
 
         return $progression;
     }
@@ -240,29 +258,6 @@ class Paxpamir extends Table
         return $this->cards[$token['id']];
     }
 
-    // /**
-    //  * Calculates current totals for all player information and sends notification to all players
-    //  */
-    // function updatePlayerCounts()
-    // {
-    //     $counts = array();
-    //     $players = $this->loadPlayersBasicInfos();
-    //     // $sql = "SELECT player_id id, player_score score, loyalty, rupees FROM player ";
-    //     // $result['players'] = self::getCollectionFromDb( $sql );
-    //     foreach ($players as $player_id => $player_info) {
-    //         $player = Players::get($player_id);
-    //         $counts[$player_id] = array();
-    //         $counts[$player_id]['rupees'] = $player->getRupees();
-    //         $counts[$player_id]['cylinders'] = 10 - count(Tokens::getInLocation(['cylinders', $player_id]));
-    //         $counts[$player_id]['cards'] = count($player->getHandCards());
-    //         $counts[$player_id]['suits'] = $player->getSuitTotals();
-    //         $counts[$player_id]['influence'] = $player->getInfluence();
-    //     }
-
-    //     self::notifyAllPlayers("updatePlayerCounts", '', array(
-    //         'counts' => $counts
-    //     ));
-    // }
 
     /**
      * Generic state to handle change of active player in the middle of a transition

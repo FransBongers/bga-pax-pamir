@@ -163,6 +163,7 @@ class PaxPamir implements PaxPamirGame {
       this.addLogClass();
     });
     // this.setupNotifications();
+    this.tooltipManager.setupTooltips();
     debug('Ending game setup');
   }
 

@@ -17,6 +17,7 @@ interface Game {
 // TODO (Frans): check if thre is a better way to define these so we don't need to cast.
 interface Framework {
   addActionButton: (id: string, label: string, method: string | Function, destination?: string, blinking?: boolean, color?: string) => void;
+  addTooltip: (nodeId: string, helpStringTranslated: string, actionStringTranslated: string, delay?: number) => void;
   addTooltipHtml: (nodeId: string, html: string, delay?: number) => void;
   addTooltipHtmlToClass: (cssClass: string, html: string, delay?: number) => void;
   ajaxcall: (
@@ -37,7 +38,7 @@ interface Framework {
   notifqueue: {
     next_log_id: string;
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
-    onSynchronousNotificationEnd: () => void
+    onSynchronousNotificationEnd: () => void;
   };
   placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;
   player_id: string;
@@ -46,7 +47,7 @@ interface Framework {
   scoreCtrl: {
     [playerId: number | string]: Counter;
   };
-  setClientState: <T>(newState: string, args: { args: T; descriptionmyturn?: string; [key: string]: unknown; }) => void;
+  setClientState: <T>(newState: string, args: { args: T; descriptionmyturn?: string; [key: string]: unknown }) => void;
   showMessage: (msg: string, type: string) => void;
   slideToObject: (mobile_obj: HTMLElement | string, target_obj: HTMLElement | string, duration?: number, delay?: number) => Animation;
   slideToObjectPos: (

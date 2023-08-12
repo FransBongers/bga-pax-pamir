@@ -1064,30 +1064,41 @@ var PPTooltipManager = (function () {
         var cardId = _a.cardId;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         if (cardInfo.type === COURT_CARD) {
-            var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities, });
-            this.game.framework().addTooltipHtml(cardId, html, 1000);
+            var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
+            this.game.framework().addTooltipHtml(cardId, html, 500);
         }
         else {
             var html = tplEventCardTooltip({ cardId: cardId, cardInfo: cardInfo });
-            this.game.framework().addTooltipHtml(cardId, html, 1000);
+            this.game.framework().addTooltipHtml(cardId, html, 500);
         }
+    };
+    PPTooltipManager.prototype.setupTooltips = function () {
+        this.setupCardCounterTooltips();
+    };
+    PPTooltipManager.prototype.setupCardCounterTooltips = function () {
+        this.game.framework().addTooltip('pp_deck_counter_container', _('Total number of cards in the deck'), '', 500);
+        this.game
+            .framework()
+            .addTooltip('pp_deck_counter_dominance_check_container', _('Number of Dominance Check cards in the deck'), '', 500);
+        this.game.framework().addTooltip('pp_discard_pile_counter_container', _('Total number of cards in the discard pile'), '', 500);
+        this.game
+            .framework()
+            .addTooltip('pp_discard_pile_counter_dominance_check_container', _('Number of Dominance Check cards in the discard pile'), '', 500);
     };
     return PPTooltipManager;
 }());
 var DiscardPile = (function () {
     function DiscardPile(_a) {
-        var game = _a.game, containerId = _a.containerId, type = _a.type;
+        var game = _a.game, containerId = _a.containerId;
         this.visibleCardId = undefined;
-        console.log('Constructor DiscardPile');
         this.game = game;
-        this.type = type;
         this.containterId = containerId;
         this.setup({ gamedatas: game.gamedatas });
     }
     DiscardPile.prototype.setup = function (_a) {
         var gamedatas = _a.gamedatas;
-        if (gamedatas[this.type]) {
-            this.setVisibleCard({ cardId: gamedatas[this.type].id });
+        if (gamedatas.discardPile.topCard) {
+            this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
         }
     };
     DiscardPile.prototype.clearInterface = function () {
@@ -1129,6 +1140,7 @@ var DiscardPile = (function () {
                         _c.sent();
                         this.setVisibleCard({ cardId: cardId });
                         $(cardId).remove();
+                        this.game.objectManager.incCardCounter({ cardId: cardId, location: 'discardPile' });
                         return [2];
                 }
             });
@@ -1148,6 +1160,7 @@ var DiscardPile = (function () {
                         _b.sent();
                         this.setVisibleCard({ cardId: cardId });
                         $(cardId).remove();
+                        this.game.objectManager.incCardCounter({ cardId: cardId, location: 'discardPile' });
                         return [2];
                 }
             });
@@ -1331,13 +1344,24 @@ var VpTrack = (function () {
 }());
 var ObjectManager = (function () {
     function ObjectManager(game) {
+        this.counters = {
+            deck: {
+                cards: new ebg.counter(),
+                dominanceCheckCards: new ebg.counter(),
+            },
+            discardPile: {
+                cards: new ebg.counter(),
+                dominanceCheckCards: new ebg.counter(),
+            },
+        };
         console.log('ObjectManager');
         this.game = game;
-        this.discardPile = new DiscardPile({ game: game, containerId: 'pp_pile_discarded_card', type: 'discardPile' });
+        this.discardPile = new DiscardPile({ game: game, containerId: 'pp_pile_discarded_card' });
         this.tempDiscardPile = new TempDiscardPile({ game: game });
         this.favoredSuit = new FavoredSuit({ game: game });
         this.supply = new Supply({ game: game });
         this.vpTrack = new VpTrack({ game: game });
+        this.setupCardCounters({ gamedatas: game.gamedatas });
     }
     ObjectManager.prototype.updateInterface = function (_a) {
         var gamedatas = _a.gamedatas;
@@ -1346,6 +1370,7 @@ var ObjectManager = (function () {
         this.supply.setup({ gamedatas: gamedatas });
         this.tempDiscardPile.setup({ gamedatas: gamedatas });
         this.vpTrack.setupVpTrack({ gamedatas: gamedatas });
+        this.updateCardCounters({ gamedatas: gamedatas });
     };
     ObjectManager.prototype.clearInterface = function () {
         this.discardPile.clearInterface();
@@ -1353,6 +1378,31 @@ var ObjectManager = (function () {
         this.supply.clearInterface();
         this.tempDiscardPile.clearInterface();
         this.vpTrack.clearInterface();
+    };
+    ObjectManager.prototype.setupCardCounters = function (_a) {
+        var gamedatas = _a.gamedatas;
+        this.counters.deck.cards.create('pp_deck_counter');
+        this.counters.deck.dominanceCheckCards.create('pp_deck_counter_dominance_check');
+        this.counters.discardPile.cards.create('pp_discard_pile_counter');
+        this.counters.discardPile.dominanceCheckCards.create('pp_discard_pile_counter_dominance_check');
+        this.updateCardCounters({ gamedatas: gamedatas });
+    };
+    ObjectManager.prototype.updateCardCounters = function (_a) {
+        var gamedatas = _a.gamedatas;
+        this.counters.deck.cards.setValue(gamedatas.deck.cardCount);
+        this.counters.deck.dominanceCheckCards.setValue(gamedatas.deck.dominanceCheckCount);
+        this.counters.discardPile.cards.setValue(gamedatas.discardPile.cardCount);
+        this.counters.discardPile.dominanceCheckCards.setValue(gamedatas.discardPile.dominanceCheckCount);
+    };
+    ObjectManager.prototype.incCardCounter = function (_a) {
+        var cardId = _a.cardId, location = _a.location;
+        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var isDominanceCheck = cardInfo.type === EVENT_CARD && cardInfo.discarded.effect === ECE_DOMINANCE_CHECK;
+        var increase = location === 'deck' ? -1 : 1;
+        this.game.objectManager.counters[location].cards.incValue(increase);
+        if (isDominanceCheck) {
+            this.game.objectManager.counters[location].dominanceCheckCards.incValue(increase);
+        }
     };
     return ObjectManager;
 }());
@@ -5732,6 +5782,7 @@ var NotificationManager = (function () {
                         _a = notif.args, cardId = _a.cardId, to = _a.to;
                         row = Number(to.split('_')[1]);
                         column = Number(to.split('_')[2]);
+                        this.game.objectManager.incCardCounter({ cardId: cardId, location: 'deck' });
                         return [4, this.game.market.addCardFromDeck({
                                 to: {
                                     row: row,
@@ -6350,6 +6401,7 @@ var PaxPamir = (function () {
             _this.checkLogCancel(_this._last_notif == null ? null : _this._last_notif.msg.uid);
             _this.addLogClass();
         });
+        this.tooltipManager.setupTooltips();
         debug('Ending game setup');
     };
     PaxPamir.prototype.onEnteringState = function (stateName, args) {

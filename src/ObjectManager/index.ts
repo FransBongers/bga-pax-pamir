@@ -10,20 +10,17 @@ class DiscardPile {
   private game: PaxPamirGame;
   private visibleCardId?: string = undefined;
   private containterId: string;
-  private type: 'discardPile' | 'tempDiscardPile';
 
-  constructor({ game, containerId, type }: { game: PaxPamirGame; containerId: string; type: 'discardPile' | 'tempDiscardPile' }) {
-    console.log('Constructor DiscardPile');
+  constructor({ game, containerId }: { game: PaxPamirGame; containerId: string }) {
     this.game = game;
-    this.type = type;
     this.containterId = containerId;
 
     this.setup({ gamedatas: game.gamedatas });
   }
 
   setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    if (gamedatas[this.type]) {
-      this.setVisibleCard({ cardId: gamedatas[this.type].id });
+    if (gamedatas.discardPile.topCard) {
+      this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
     }
   }
 
@@ -59,9 +56,7 @@ class DiscardPile {
     );
     this.setVisibleCard({ cardId });
     $(cardId).remove();
-    // TODO: check how we can remove this. Right now without pause animation
-    // the market starts refreshing which causes a 'shocky' animation
-    // await this.game.animationManager.play(new BgaPauseAnimation<BgaAnimationSettings>({}));
+    this.game.objectManager.incCardCounter({ cardId, location: 'discardPile' });
   }
 
   public async discardCardFromZone({ cardId, zone }: { cardId: string; zone: PaxPamirZone }) {
@@ -72,6 +67,7 @@ class DiscardPile {
     });
     this.setVisibleCard({ cardId });
     $(cardId).remove();
+    this.game.objectManager.incCardCounter({ cardId, location: 'discardPile' });
   }
 }
 
@@ -317,16 +313,37 @@ class ObjectManager {
   public favoredSuit: FavoredSuit;
   public supply: Supply;
   public vpTrack: VpTrack;
+  // counters
+  public counters: {
+    deck: {
+      cards: Counter;
+      dominanceCheckCards: Counter;
+    };
+    discardPile: {
+      cards: Counter;
+      dominanceCheckCards: Counter;
+    };
+  } = {
+    deck: {
+      cards: new ebg.counter(),
+      dominanceCheckCards: new ebg.counter(),
+    },
+    discardPile: {
+      cards: new ebg.counter(),
+      dominanceCheckCards: new ebg.counter(),
+    },
+  };
 
   constructor(game: PaxPamirGame) {
     console.log('ObjectManager');
     this.game = game;
 
-    this.discardPile = new DiscardPile({ game, containerId: 'pp_pile_discarded_card', type: 'discardPile' });
+    this.discardPile = new DiscardPile({ game, containerId: 'pp_pile_discarded_card' });
     this.tempDiscardPile = new TempDiscardPile({ game });
     this.favoredSuit = new FavoredSuit({ game });
     this.supply = new Supply({ game });
     this.vpTrack = new VpTrack({ game });
+    this.setupCardCounters({ gamedatas: game.gamedatas });
   }
 
   updateInterface({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
@@ -335,6 +352,7 @@ class ObjectManager {
     this.supply.setup({ gamedatas });
     this.tempDiscardPile.setup({ gamedatas });
     this.vpTrack.setupVpTrack({ gamedatas });
+    this.updateCardCounters({ gamedatas });
   }
 
   clearInterface() {
@@ -343,5 +361,30 @@ class ObjectManager {
     this.supply.clearInterface();
     this.tempDiscardPile.clearInterface();
     this.vpTrack.clearInterface();
+  }
+
+  setupCardCounters({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    this.counters.deck.cards.create('pp_deck_counter');
+    this.counters.deck.dominanceCheckCards.create('pp_deck_counter_dominance_check');
+    this.counters.discardPile.cards.create('pp_discard_pile_counter');
+    this.counters.discardPile.dominanceCheckCards.create('pp_discard_pile_counter_dominance_check');
+    this.updateCardCounters({ gamedatas });
+  }
+
+  updateCardCounters({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    this.counters.deck.cards.setValue(gamedatas.deck.cardCount);
+    this.counters.deck.dominanceCheckCards.setValue(gamedatas.deck.dominanceCheckCount);
+    this.counters.discardPile.cards.setValue(gamedatas.discardPile.cardCount);
+    this.counters.discardPile.dominanceCheckCards.setValue(gamedatas.discardPile.dominanceCheckCount);
+  }
+
+  incCardCounter({ cardId, location }: { cardId: string; location: 'deck' | 'discardPile' }) {
+    const cardInfo = this.game.getCardInfo({ cardId });
+    const isDominanceCheck = cardInfo.type === EVENT_CARD && cardInfo.discarded.effect === ECE_DOMINANCE_CHECK;
+    const increase = location === 'deck' ? -1 : 1;
+    this.game.objectManager.counters[location].cards.incValue(increase);
+    if (isDominanceCheck) {
+      this.game.objectManager.counters[location].dominanceCheckCards.incValue(increase);
+    }
   }
 }

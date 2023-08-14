@@ -24,6 +24,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "currentEvent" => "obj",
     "setup" => "int",
     "specialAbilityData" => "obj",
+    "openHands" => 'bool',
   ];
 
   protected static $table = 'global_variables';
@@ -164,5 +165,6 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setBribeClearLogs(true);
     self::setNegotiatedBribe([]);
     self::setActionStack([]);
+    self::setOpenHands(($options[\PaxPamir\OPTION_OPEN_HANDS] ?? null) == \PaxPamir\OPTION_OPEN_HANDS_ENABLED);
   }
 }

@@ -2,8 +2,20 @@ const tplArmy = ({ coalition, id, classesToAdd }: { id: string; coalition: strin
   return `<div class="pp_army pp_${coalition}${(classesToAdd || []).map((classToAdd) => ` ${classToAdd}`)}" id="${id}"></div>`;
 };
 
-const tplCard = ({ cardId, extraClasses }: { cardId: string; extraClasses?: string }): string => {
-  return `<div id="${cardId}" class="pp_card pp_card_in_zone pp_${cardId}${extraClasses ? ' ' + extraClasses : ''}"></div>`;
+const tplCard = ({
+  cardId,
+  cardIdSuffix = '',
+  extraClasses,
+  style,
+}: {
+  cardId: string;
+  cardIdSuffix?: string;
+  extraClasses?: string;
+  style?: string;
+}): string => {
+  return `<div id="${cardId}${cardIdSuffix}" class="pp_card pp_card_in_zone pp_${cardId}${
+    extraClasses ? ' ' + extraClasses : ''
+  }"${style ? ` style="${style}"` : ''}></div>`;
 };
 
 const tplCardSelect = ({ side }: { side: string }): string => {
@@ -44,4 +56,18 @@ const tplRupeeCount = ({ id }: { id: string }) => {
 // Card background with counter in right bottom
 const tplHandCount = ({ id }: { id: string }) => {
   return `<div id="cards_${id}" class="pp_icon pp_card_icon"><div id="card_count_${id}" class="pp_icon_count"><span id="card_count_${id}_counter"></span></div></div>`;
+};
+
+const createCards = ({ cards }: { cards: string[] }) => {
+  let result: string = '';
+  cards.forEach((cardId) => {
+    result += tplCard({ cardId, cardIdSuffix: '_modal' });
+  });
+  return result;
+};
+
+const tplPlayerHandModal = ({ cards }: { cards: string[] }) => {
+  return `<div class="pp_player_hand_modal_content">
+            ${createCards({ cards })}
+          </div>`;
 };

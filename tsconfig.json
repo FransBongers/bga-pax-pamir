@@ -10,6 +10,8 @@
   },
   "files": [
     "modules/js/bga-animations.d.ts",
+    "modules/js/modal/modal.ts",
+    "modules/js/modal/modal.d.ts",
     "src/framework.d.ts",
     "src/counter.d.ts",
     "src/stock.d.ts",

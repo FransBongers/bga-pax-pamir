@@ -272,6 +272,7 @@ interface NotifTakeRupeesFromSupplyArgs {
 }
 
 interface NotifSmallRefreshHandArgs {
+  playerId: number;
   hand: Token[];
 }
 

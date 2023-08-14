@@ -1,0 +1,6 @@
+<?php
+namespace PaxPamir;
+
+const OPTION_OPEN_HANDS = 100;
+const OPTION_OPEN_HANDS_DISABLED = 0;
+const OPTION_OPEN_HANDS_ENABLED = 1;

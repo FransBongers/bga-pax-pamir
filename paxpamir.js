@@ -1,3 +1,295 @@
+var Modal = (function () {
+    function Modal(id, config) {
+        var _this = this;
+        this.open = false;
+        this.container = 'ebd-body';
+        this.class = 'custom_popin';
+        this.autoShow = false;
+        this.modalTpl = "\n    <div id='popin_${id}_container' class=\"${class}_container\">\n      <div id='popin_${id}_underlay' class=\"${class}_underlay\"></div>\n      <div id='popin_${id}_wrapper' class=\"${class}_wrapper\">\n        <div id=\"popin_${id}\" class=\"${class}\">\n          ${titleTpl}\n          ${closeIconTpl}\n          ${helpIconTpl}\n          ${contentsTpl}\n        </div>\n      </div>\n    </div>\n  ";
+        this.closeIcon = 'fa-times-circle';
+        this.closeIconTpl = '<a id="popin_${id}_close" class="${class}_closeicon"><i class="fa ${closeIcon} fa-2x" aria-hidden="true"></i></a>';
+        this.closeAction = 'destroy';
+        this.closeWhenClickOnUnderlay = true;
+        this.helpIcon = null;
+        this.helpLink = '#';
+        this.helpIconTpl = '<a href="${helpLink}" target="_blank" id="popin_${id}_help" class="${class}_helpicon"><i class="fa ${helpIcon} fa-2x" aria-hidden="true"></i></a>';
+        this.title = null;
+        this.titleTpl = '<h2 id="popin_${id}_title" class="${class}_title">${title}</h2>';
+        this.contentsTpl = "\n      <div id=\"popin_${id}_contents\" class=\"${class}_contents\">\n        ${contents}\n      </div>";
+        this.contents = '';
+        this.verticalAlign = 'center';
+        this.animationDuration = 500;
+        this.fadeIn = true;
+        this.fadeOut = true;
+        this.openAnimation = false;
+        this.openAnimationTarget = null;
+        this.openAnimationDelta = 200;
+        this.onShow = null;
+        this.onHide = null;
+        this.statusElt = null;
+        this.scale = 1;
+        this.breakpoint = null;
+        if (id === undefined) {
+            console.error('You need an ID to create a modal');
+            throw 'You need an ID to create a modal';
+        }
+        this.id = id;
+        Object.entries(config).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
+            if (value !== undefined) {
+                _this[key] = value;
+            }
+        });
+        this.create();
+        if (this.autoShow)
+            this.show();
+    }
+    Modal.prototype.isDisplayed = function () {
+        return this.open;
+    };
+    Modal.prototype.isCreated = function () {
+        return this.id != null;
+    };
+    Modal.prototype.create = function () {
+        var _this = this;
+        dojo.destroy('popin_' + this.id + '_container');
+        var titleTpl = this.title == null ? '' : dojo.string.substitute(this.titleTpl, this);
+        var closeIconTpl = this.closeIcon == null ? '' : dojo.string.substitute(this.closeIconTpl, this);
+        var helpIconTpl = this.helpIcon == null ? '' : dojo.string.substitute(this.helpIconTpl, this);
+        var contentsTpl = dojo.string.substitute(this.contentsTpl, this);
+        var modalTpl = dojo.string.substitute(this.modalTpl, {
+            id: this.id,
+            class: this.class,
+            titleTpl: titleTpl,
+            closeIconTpl: closeIconTpl,
+            helpIconTpl: helpIconTpl,
+            contentsTpl: contentsTpl,
+        });
+        dojo.place(modalTpl, this.container);
+        dojo.style('popin_' + this.id + '_container', {
+            display: 'none',
+            position: 'absolute',
+            left: '0px',
+            top: '0px',
+            width: '100%',
+            height: '100%',
+        });
+        dojo.style('popin_' + this.id + '_underlay', {
+            position: 'absolute',
+            left: '0px',
+            top: '0px',
+            width: '100%',
+            height: '100%',
+            zIndex: 949,
+            opacity: 0,
+            backgroundColor: 'white',
+        });
+        dojo.style('popin_' + this.id + '_wrapper', {
+            position: 'fixed',
+            left: '0px',
+            top: '0px',
+            width: 'min(100%,100vw)',
+            height: '100vh',
+            zIndex: 950,
+            opacity: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: this.verticalAlign,
+            paddingTop: this.verticalAlign == 'center' ? 0 : '125px',
+            transformOrigin: 'top left',
+        });
+        this.adjustSize();
+        this.resizeListener = dojo.connect(window, 'resize', function () { return _this.adjustSize(); });
+        if (this.closeIcon != null && $('popin_' + this.id + '_close')) {
+            dojo.connect($('popin_' + this.id + '_close'), 'click', function () { return _this[_this.closeAction](); });
+        }
+        if (this.closeWhenClickOnUnderlay) {
+            dojo.connect($('popin_' + this.id + '_underlay'), 'click', function () { return _this[_this.closeAction](); });
+            dojo.connect($('popin_' + this.id + '_wrapper'), 'click', function () { return _this[_this.closeAction](); });
+            dojo.connect($('popin_' + this.id), 'click', function (evt) { return evt.stopPropagation(); });
+        }
+    };
+    Modal.prototype.updateContent = function (newContent) {
+        var contentContainerId = "popin_".concat(this.id, "_contents");
+        dojo.empty(contentContainerId);
+        dojo.place(newContent, contentContainerId);
+    };
+    Modal.prototype.adjustSize = function () {
+        var bdy = dojo.position(this.container);
+        dojo.style('popin_' + this.id + '_container', {
+            width: bdy.w + 'px',
+            height: bdy.h + 'px',
+        });
+        if (this.breakpoint != null) {
+            var newModalWidth = bdy.w * this.scale;
+            var modalScale = newModalWidth / this.breakpoint;
+            if (modalScale > 1)
+                modalScale = 1;
+            dojo.style('popin_' + this.id, {
+                transform: "scale(".concat(modalScale, ")"),
+                transformOrigin: this.verticalAlign == 'center' ? 'center center' : 'top center',
+            });
+        }
+    };
+    Modal.prototype.getOpeningTargetCenter = function () {
+        var startTop, startLeft;
+        if (this.openAnimationTarget == null) {
+            startLeft = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) / 2;
+            startTop = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) / 2;
+        }
+        else {
+            var target = dojo.position(this.openAnimationTarget);
+            startLeft = target.x + target.w / 2;
+            startTop = target.y + target.h / 2;
+        }
+        return {
+            x: startLeft,
+            y: startTop,
+        };
+    };
+    Modal.prototype.fadeInAnimation = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var containerId = 'popin_' + _this.id + '_container';
+            if (!$(containerId))
+                reject();
+            if (_this.runningAnimation)
+                _this.runningAnimation.stop();
+            var duration = _this.fadeIn ? _this.animationDuration : 0;
+            var animations = [];
+            animations.push(dojo.fadeIn({
+                node: 'popin_' + _this.id + '_wrapper',
+                duration: duration,
+            }));
+            animations.push(dojo.animateProperty({
+                node: 'popin_' + _this.id + '_underlay',
+                duration: duration,
+                properties: { opacity: { start: 0, end: 0.7 } },
+            }));
+            if (_this.openAnimation) {
+                var pos = _this.getOpeningTargetCenter();
+                animations.push(dojo.animateProperty({
+                    node: 'popin_' + _this.id + '_wrapper',
+                    properties: {
+                        transform: { start: 'scale(0)', end: 'scale(1)' },
+                        top: { start: pos.y, end: 0 },
+                        left: { start: pos.x, end: 0 },
+                    },
+                    duration: _this.animationDuration + _this.openAnimationDelta,
+                }));
+            }
+            _this.runningAnimation = dojo.fx.combine(animations);
+            dojo.connect(_this.runningAnimation, 'onEnd', function () { return resolve(); });
+            _this.runningAnimation.play();
+            setTimeout(function () {
+                if ($('popin_' + _this.id + '_container'))
+                    dojo.style('popin_' + _this.id + '_container', 'display', 'block');
+            }, 10);
+        });
+    };
+    Modal.prototype.show = function () {
+        var _this = this;
+        if (this.isOpening || this.open)
+            return;
+        if (this.statusElt !== null) {
+            dojo.addClass(this.statusElt, 'opened');
+        }
+        this.adjustSize();
+        this.isOpening = true;
+        this.isClosing = false;
+        this.fadeInAnimation().then(function () {
+            if (!_this.isOpening)
+                return;
+            _this.isOpening = false;
+            _this.open = true;
+            if (_this.onShow !== null) {
+                _this.onShow();
+            }
+        });
+    };
+    Modal.prototype.fadeOutAnimation = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var containerId = 'popin_' + _this.id + '_container';
+            if (!$(containerId))
+                reject();
+            if (_this.runningAnimation)
+                _this.runningAnimation.stop();
+            var duration = _this.fadeOut ? _this.animationDuration + (_this.openAnimation ? _this.openAnimationDelta : 0) : 0;
+            var animations = [];
+            animations.push(dojo.fadeOut({
+                node: 'popin_' + _this.id + '_wrapper',
+                duration: duration,
+            }));
+            animations.push(dojo.animateProperty({
+                node: 'popin_' + _this.id + '_underlay',
+                duration: duration,
+                properties: { opacity: { start: 0.7, end: 0 } },
+            }));
+            if (_this.openAnimation) {
+                var pos = _this.getOpeningTargetCenter();
+                animations.push(dojo.animateProperty({
+                    node: 'popin_' + _this.id + '_wrapper',
+                    properties: {
+                        transform: { start: 'scale(1)', end: 'scale(0)' },
+                        top: { start: 0, end: pos.y },
+                        left: { start: 0, end: pos.x },
+                    },
+                    duration: _this.animationDuration,
+                }));
+            }
+            _this.runningAnimation = dojo.fx.combine(animations);
+            dojo.connect(_this.runningAnimation, 'onEnd', function () { return resolve(); });
+            _this.runningAnimation.play();
+        });
+    };
+    Modal.prototype.hide = function () {
+        var _this = this;
+        if (this.isClosing)
+            return;
+        this.isClosing = true;
+        this.isOpening = false;
+        this.fadeOutAnimation().then(function () {
+            if (!_this.isClosing || _this.isOpening)
+                return;
+            _this.isClosing = false;
+            _this.open = false;
+            dojo.style('popin_' + _this.id + '_container', 'display', 'none');
+            if (_this.onHide !== null) {
+                _this.onHide();
+            }
+            if (_this.statusElt !== null) {
+                dojo.removeClass(_this.statusElt, 'opened');
+            }
+        });
+    };
+    Modal.prototype.destroy = function () {
+        var _this = this;
+        if (this.isClosing)
+            return;
+        this.isOpening = false;
+        this.isClosing = true;
+        this.fadeOutAnimation().then(function () {
+            if (!_this.isClosing || _this.isOpening)
+                return;
+            _this.isClosing = false;
+            _this.open = false;
+            _this.kill();
+        });
+    };
+    Modal.prototype.kill = function () {
+        if (this.runningAnimation)
+            this.runningAnimation.stop();
+        var underlayId = 'popin_' + this.id + '_container';
+        dojo.destroy(underlayId);
+        dojo.disconnect(this.resizeListener);
+        this.id = null;
+        if (this.statusElt !== null) {
+            dojo.removeClass(this.statusElt, 'opened');
+        }
+    };
+    return Modal;
+}());
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -887,8 +1179,8 @@ var tplArmy = function (_a) {
     return "<div class=\"pp_army pp_".concat(coalition).concat((classesToAdd || []).map(function (classToAdd) { return " ".concat(classToAdd); }), "\" id=\"").concat(id, "\"></div>");
 };
 var tplCard = function (_a) {
-    var cardId = _a.cardId, extraClasses = _a.extraClasses;
-    return "<div id=\"".concat(cardId, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"></div>");
+    var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b, extraClasses = _a.extraClasses, style = _a.style;
+    return "<div id=\"".concat(cardId).concat(cardIdSuffix, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"").concat(style ? " style=\"".concat(style, "\"") : '', "></div>");
 };
 var tplCardSelect = function (_a) {
     var side = _a.side;
@@ -925,6 +1217,18 @@ var tplRupeeCount = function (_a) {
 var tplHandCount = function (_a) {
     var id = _a.id;
     return "<div id=\"cards_".concat(id, "\" class=\"pp_icon pp_card_icon\"><div id=\"card_count_").concat(id, "\" class=\"pp_icon_count\"><span id=\"card_count_").concat(id, "_counter\"></span></div></div>");
+};
+var createCards = function (_a) {
+    var cards = _a.cards;
+    var result = '';
+    cards.forEach(function (cardId) {
+        result += tplCard({ cardId: cardId, cardIdSuffix: '_modal' });
+    });
+    return result;
+};
+var tplPlayerHandModal = function (_a) {
+    var cards = _a.cards;
+    return "<div class=\"pp_player_hand_modal_content\">\n            ".concat(createCards({ cards: cards }), "\n          </div>");
 };
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 var debug = isDebug ? console.info.bind(window.console) : function () { };
@@ -1061,15 +1365,15 @@ var PPTooltipManager = (function () {
         this.game = game;
     }
     PPTooltipManager.prototype.addTooltipToCard = function (_a) {
-        var cardId = _a.cardId;
+        var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
         if (cardInfo.type === COURT_CARD) {
             var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
-            this.game.framework().addTooltipHtml(cardId, html, 500);
+            this.game.framework().addTooltipHtml("".concat(cardId).concat(cardIdSuffix), html, 500);
         }
         else {
             var html = tplEventCardTooltip({ cardId: cardId, cardInfo: cardInfo });
-            this.game.framework().addTooltipHtml(cardId, html, 500);
+            this.game.framework().addTooltipHtml("".concat(cardId).concat(cardIdSuffix), html, 500);
         }
     };
     PPTooltipManager.prototype.setupTooltips = function () {
@@ -1456,6 +1760,43 @@ var PPPlayer = (function () {
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.setupPlayerPanel({ playerGamedatas: playerGamedatas });
+        if (this.game.gameOptions.openHands) {
+            this.setupPlayerHandModal();
+        }
+    };
+    PPPlayer.prototype.getHandCards = function () {
+        return this.handCards;
+    };
+    PPPlayer.prototype.updateModalContentAndOpen = function () {
+        var _this = this;
+        this.modal.updateContent(tplPlayerHandModal({
+            cards: this.handCards,
+        }));
+        this.modal.show();
+        this.handCards.forEach(function (cardId) {
+            _this.game.tooltipManager.addTooltipToCard({ cardId: cardId, cardIdSuffix: '_modal' });
+        });
+    };
+    PPPlayer.prototype.setupPlayerHandModal = function () {
+        var _this = this;
+        this.modal = new Modal("player_hand_".concat(this.playerId), {
+            class: 'pp_player_hand_popin',
+            closeIcon: 'fa-times',
+            openAnimation: true,
+            openAnimationTarget: "cards_".concat(this.playerId),
+            titleTpl: '<h2 id="popin_${id}_title" class="${class}_title" style="background-color: #' + this.playerColor + ';">${title}</h2>',
+            title: dojo.string.substitute(_("${playerName}'s hand"), {
+                playerName: this.playerName,
+            }),
+            contents: tplPlayerHandModal({
+                cards: this.handCards,
+            }),
+            closeAction: 'hide',
+            verticalAlign: 'flex-start',
+            breakpoint: 1020,
+        });
+        dojo.connect($("cards_tableau_".concat(this.playerId)), 'onclick', function () { return _this.updateModalContentAndOpen(); });
+        dojo.connect($("cards_".concat(this.playerId)), 'onclick', function () { return _this.updateModalContentAndOpen(); });
     };
     PPPlayer.prototype.setupCourt = function (_a) {
         var playerGamedatas = _a.playerGamedatas;
@@ -1565,12 +1906,18 @@ var PPPlayer = (function () {
         });
     };
     PPPlayer.prototype.clearHand = function () {
-        dojo.empty(this.hand.getContainerId());
-        this.hand = undefined;
+        this.handCards = [];
+        if (this.playerId === this.game.getPlayerId()) {
+            dojo.empty(this.hand.getContainerId());
+            this.hand = undefined;
+        }
     };
     PPPlayer.prototype.setupHand = function (_a) {
         var _this = this;
         var hand = _a.hand;
+        if (this.game.gameOptions.openHands) {
+            this.handCards = hand.map(function (token) { return token.id; });
+        }
         if (!(this.playerId === this.game.getPlayerId())) {
             return;
         }
@@ -1866,6 +2213,22 @@ var PPPlayer = (function () {
             .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
             .filter(function (card) { return card.specialAbility === specialAbility; });
     };
+    PPPlayer.prototype.updateHandCards = function (_a) {
+        var action = _a.action, cardId = _a.cardId;
+        if (!this.game.gameOptions.openHands) {
+            return;
+        }
+        if (action === 'ADD') {
+            this.handCards.push(cardId);
+        }
+        else if (action === 'REMOVE') {
+            var index = this.handCards.findIndex(function (item) { return item === cardId; });
+            if (index < 0) {
+                return;
+            }
+            this.handCards.splice(index, 1);
+        }
+    };
     PPPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
         return __awaiter(this, void 0, void 0, function () {
@@ -1977,7 +2340,9 @@ var PPPlayer = (function () {
                     case 7:
                         _c.sent();
                         _c.label = 8;
-                    case 8: return [2];
+                    case 8:
+                        this.updateHandCards({ cardId: cardId, action: 'REMOVE' });
+                        return [2];
                 }
             });
         });
@@ -2058,6 +2423,7 @@ var PPPlayer = (function () {
                         if (cardInfo.loyalty) {
                             this.incCounter({ counter: 'influence', value: 1 });
                         }
+                        this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
                         return [2];
                 }
             });
@@ -2089,6 +2455,7 @@ var PPPlayer = (function () {
                         _b.label = 6;
                     case 6:
                         this.incCounter({ counter: 'cards', value: 1 });
+                        this.updateHandCards({ cardId: cardId, action: 'ADD' });
                         return [2];
                 }
             });
@@ -6170,9 +6537,10 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_smallRefreshHand = function (notif) {
-        var player = this.game.getCurrentPlayer();
+        var _a = notif.args, hand = _a.hand, playerId = _a.playerId;
+        var player = this.getPlayer({ playerId: playerId });
         player.clearHand();
-        player.setupHand({ hand: notif.args.hand });
+        player.setupHand({ hand: hand });
     };
     NotificationManager.prototype.notif_smallRefreshInterface = function (notif) {
         var updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
@@ -6346,6 +6714,7 @@ var PaxPamir = (function () {
         var _this = this;
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
         this.gamedatas = gamedatas;
+        this.gameOptions = gamedatas.gameOptions;
         debug('gamedatas', gamedatas);
         this._connections = [];
         this.localState = gamedatas.localState;
@@ -6722,6 +7091,8 @@ var PaxPamir = (function () {
 define([
     'dojo',
     'dojo/_base/declare',
+    'dojo/fx',
+    'dojox/fx/ext-dojo/complex',
     'ebg/core/gamegui',
     'ebg/counter',
     'ebg/stock',

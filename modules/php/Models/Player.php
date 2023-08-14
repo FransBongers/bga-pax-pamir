@@ -47,7 +47,7 @@ class Player extends \PaxPamir\Helpers\DB_Model
     $cylinders = $this->getCylinders();
     $hand = $this->getHandCards();
     $data = array_merge($data, [
-      'hand' => $current ? $hand : [],
+      'hand' => $current || Globals::getOpenHands() ? $hand : [],
       'court' => [
         'cards' => $this->getCourtCards()
       ],

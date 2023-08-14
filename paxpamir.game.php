@@ -113,6 +113,16 @@ class Paxpamir extends Table
         return "paxpamir";
     }
 
+    public function getGameOptionValue($optionId)
+    {
+      $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
+      $val = $query
+        ->where('global_id', $optionId)
+        ->get()
+        ->first();
+      return is_null($val) ? null : $val['global_value'];
+    }
+
     /*
         setupNewGame:
         
@@ -166,6 +176,9 @@ class Paxpamir extends Table
 
         $data = [
             // TODO (Frans): data from material.inc.php. We might also replace this?
+            'gameOptions' => [
+                'openHands' => Globals::getOpenHands(),
+            ],
             'staticData' => [
                 'borders' => $this->borders,
                 'cards' => $this->cards,

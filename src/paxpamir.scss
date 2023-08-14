@@ -385,12 +385,11 @@ html {
   margin: 10px 20px;
 }
 
+// TODO: we can just put this in pp_card?
 .pp_card_in_zone {
   width: 150px;
   height: 209px;
   box-sizing: border-box;
-  // background-size: 150px 209px;
-  // box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
   box-shadow: 2px 2px 5px -1px #000;
   border-radius: 10px;
 }

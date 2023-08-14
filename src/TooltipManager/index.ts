@@ -21,14 +21,14 @@ class PPTooltipManager {
     this.game = game;
   }
 
-  public addTooltipToCard({ cardId }: { cardId: string }): void {
+  public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string; }): void {
     const cardInfo = this.game.getCardInfo({ cardId });
     if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({ cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
-      this.game.framework().addTooltipHtml(cardId, html, 500);
+      this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     } else {
       const html = tplEventCardTooltip({ cardId, cardInfo });
-      this.game.framework().addTooltipHtml(cardId, html, 500);
+      this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     }
   }
 

@@ -908,6 +908,62 @@
   border-radius: 10px;
 }
 */
+.pp_player_hand_modal_content {
+  min-height: 241px;
+  box-sizing: border-box;
+  background-color: white;
+  padding: 16px;
+  grid-gap: 16px;
+  display: grid;
+  grid-auto-flow: dense;
+  grid-template-columns: 150px 150px 150px 150px 150px;
+  grid-template-rows: 209px;
+}
+
+.pp_player_hand_popin {
+  background-color: white;
+  box-shadow: rgb(0, 0, 0) 1px 1px 5px;
+  position: fixed;
+  top: 10vh;
+  min-width: 500px;
+}
+.pp_player_hand_popin .pp_player_hand_popin_closeicon {
+  background-color: #a47a77;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  font-size: 90%;
+  color: white !important;
+  border: 1px solid #dfbda8;
+}
+.pp_player_hand_popin .pp_player_hand_popin_closeicon:hover {
+  text-decoration: none;
+  color: #ccc !important;
+  transform: scale(1.1);
+}
+.pp_player_hand_popin .pp_player_hand_popin_closeicon i {
+  margin-top: -2px;
+}
+.pp_player_hand_popin h2 {
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+  margin: 0px;
+  padding: 7px 0px;
+  border-bottom: 1px solid black;
+}
+.pp_player_hand_popin .reserve {
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .dijitTooltipContainer {
   padding: 0px !important;
 }

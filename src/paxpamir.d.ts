@@ -93,6 +93,9 @@ interface PaxPamirGamedatas extends Gamedatas {
     dominanceCheckCount: number;
     topCard: Card | null;
   };
+  gameOptions: {
+    openHands: boolean;
+  };
   tempDiscardPile: Card | null;
   staticData: {
     borders: {
@@ -173,6 +176,7 @@ interface PaxPamirGame extends Game {
   };
   animationManager: AnimationManager;
   gamedatas: PaxPamirGamedatas;
+  gameOptions: PaxPamirGamedatas['gameOptions'];
   map: PPMap;
   market: Market;
   objectManager: ObjectManager;

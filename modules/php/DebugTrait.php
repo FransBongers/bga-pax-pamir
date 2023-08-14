@@ -47,12 +47,16 @@ trait DebugTrait
 
   function test()
   {
- 
-    $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
-    $discardPileCount = count($discardPile);
+    $openHandsGlobals = Globals::getOpenHands();
+    Notifications::log('openHands',$openHandsGlobals);
+    // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);
+    // Notifications::log('option open hands', $openHands);
+    // Notifications::log('option open null', $openHands === null);
+    // $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
+    // $discardPileCount = count($discardPile);
 
 
-    Notifications::log('discardPile', $discardPile);
+    // Notifications::log('discardPile', $discardPile);
 
     // Cards::move('card_114', 'deck');
     // Cards::move('card_106', 'market_0_1');

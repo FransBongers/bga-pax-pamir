@@ -10,9 +10,11 @@ class PPPlayer {
   private court: PaxPamirZone;
   private events: PaxPamirZone;
   private cylinders: PaxPamirZone;
+  private handCards: string[];
   private hand: PaxPamirZone;
   private game: PaxPamirGame;
   private gifts: Record<string, PaxPamirZone> = {};
+  private modal: Modal;
   private playerColor: string;
   private playerId: number;
   private playerName: string;
@@ -93,6 +95,47 @@ class PPPlayer {
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.setupPlayerPanel({ playerGamedatas });
+    if (this.game.gameOptions.openHands) {
+      this.setupPlayerHandModal();
+    }
+  }
+
+  getHandCards(): string[] {
+    return this.handCards;
+  }
+
+  updateModalContentAndOpen() {
+    this.modal.updateContent(
+      tplPlayerHandModal({
+        cards: this.handCards,
+      })
+    );
+    this.modal.show();
+    this.handCards.forEach((cardId) => {
+      this.game.tooltipManager.addTooltipToCard({ cardId, cardIdSuffix: '_modal' });
+    });
+  }
+
+  setupPlayerHandModal() {
+    this.modal = new Modal(`player_hand_${this.playerId}`, {
+      class: 'pp_player_hand_popin',
+      closeIcon: 'fa-times',
+      openAnimation: true,
+      openAnimationTarget: `cards_${this.playerId}`,
+      titleTpl: '<h2 id="popin_${id}_title" class="${class}_title" style="background-color: #' + this.playerColor + ';">${title}</h2>',
+      title: dojo.string.substitute(_("${playerName}'s hand"), {
+        playerName: this.playerName,
+      }),
+      contents: tplPlayerHandModal({
+        cards: this.handCards,
+      }),
+      closeAction: 'hide',
+      verticalAlign: 'flex-start',
+      breakpoint: 1020,
+    });
+
+    dojo.connect($(`cards_tableau_${this.playerId}`), 'onclick', () => this.updateModalContentAndOpen());
+    dojo.connect($(`cards_${this.playerId}`), 'onclick', () => this.updateModalContentAndOpen());
   }
 
   async setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -203,11 +246,18 @@ class PPPlayer {
   }
 
   clearHand() {
-    dojo.empty(this.hand.getContainerId());
-    this.hand = undefined;
+    this.handCards = [];
+    if (this.playerId === this.game.getPlayerId()) {
+      dojo.empty(this.hand.getContainerId());
+      this.hand = undefined;
+    }
   }
 
   setupHand({ hand }: { hand: PaxPamirPlayer['hand'] }) {
+    if (this.game.gameOptions.openHands) {
+      this.handCards = hand.map((token) => token.id);
+    }
+
     if (!(this.playerId === this.game.getPlayerId())) {
       return;
     }
@@ -576,6 +626,21 @@ class PPPlayer {
       .filter((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
+  updateHandCards({action, cardId}: {action: 'ADD' | 'REMOVE'; cardId: string;}) {
+    if (!this.game.gameOptions.openHands) {
+      return;
+    }
+    if (action === 'ADD') {
+      this.handCards.push(cardId)
+    } else if (action === 'REMOVE') {
+      const index = this.handCards.findIndex((item) => item === cardId);
+      if (index < 0) {
+        return;
+      }
+      this.handCards.splice(index, 1);
+    }
+  }
+
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
   // ..##...##..##..........##.....##..##.....##.####..##.##......
@@ -622,7 +687,7 @@ class PPPlayer {
         zone: this.events,
       });
     }
-    this.checkEventContainerHeight()
+    this.checkEventContainerHeight();
   }
 
   async discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }): Promise<void> {
@@ -651,6 +716,7 @@ class PPPlayer {
         from: `cards_${this.playerId}`,
       });
     }
+    this.updateHandCards({cardId, action: 'REMOVE'});
   }
 
   async discardPrize({ cardId }: { cardId: string }) {
@@ -703,6 +769,7 @@ class PPPlayer {
       // TODO: check for loyalty change and then set Counter to 2?
       this.incCounter({ counter: 'influence', value: 1 });
     }
+    this.updateHandCards({cardId: card.id, action: 'REMOVE'});
   }
 
   async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {
@@ -719,6 +786,7 @@ class PPPlayer {
       await from.removeTo({ id: cardId, to: `cards_${this.playerId}` });
     }
     this.incCounter({ counter: 'cards', value: 1 });
+    this.updateHandCards({cardId, action: 'ADD'});
   }
 
   async addCardToEvents({ cardId, from }: { cardId: string; from: PaxPamirZone }): Promise<void> {

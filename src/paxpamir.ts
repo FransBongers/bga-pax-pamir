@@ -26,6 +26,7 @@ declare const playSound;
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
   public animationManager: AnimationManager;
+  public gameOptions: PaxPamirGamedatas['gameOptions'];
   public map: PPMap;
   public market: Market;
   private notificationManager: NotificationManager;
@@ -94,6 +95,7 @@ class PaxPamir implements PaxPamirGame {
     // const playAreaWidth = document.getElementById('pp_play_area').offsetWidth;
     // console.log('playAreaWidth',playAreaWidth);
     this.gamedatas = gamedatas;
+    this.gameOptions = gamedatas.gameOptions;
     debug('gamedatas', gamedatas);
 
     this._connections = [];

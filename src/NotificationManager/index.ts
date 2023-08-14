@@ -522,9 +522,10 @@ class NotificationManager {
   }
 
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
-    const player = this.game.getCurrentPlayer();
+    const {hand, playerId} = notif.args;
+    const player = this.getPlayer({playerId});
     player.clearHand();
-    player.setupHand({ hand: notif.args.hand });
+    player.setupHand({ hand });
   }
 
   notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {

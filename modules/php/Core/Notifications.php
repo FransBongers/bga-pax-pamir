@@ -50,9 +50,17 @@ class Notifications
   public static function smallRefreshHand($player)
   {
     $playerDatas = $player->jsonSerialize($player->getId());
-    self::notify($player, 'smallRefreshHand', '', [
-      'hand' => $playerDatas['hand'],
-    ]);
+    if (Globals::getOpenHands()) {
+      self::notifyAll('smallRefreshHand', '', [
+        'playerId' => $player->getId(),
+        'hand' => $playerDatas['hand'],
+      ]);
+    } else {
+      self::notify($player, 'smallRefreshHand', '', [
+        'playerId' => $player->getId(),
+        'hand' => $playerDatas['hand'],
+      ]);
+    }
   }
 
   public static function clearTurn($player, $notifIds)

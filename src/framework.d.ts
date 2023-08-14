@@ -75,10 +75,15 @@ type DojoBox = { l: number; t: number; w: number; h: number };
 type DojoPosition = 'replace' | 'first' | 'last' | 'before' | 'after' | 'only' | number;
 type CssPosition = 'static' | 'absolute' | 'fixed' | 'relative' | 'sticky' | 'initial' | 'inherit';
 
+interface DojoAnimation {
+  play: () => void;
+  stop: () => void;
+}
+
 /* TODO repace Function by (..params) => void */
 interface Dojo {
   addClass: (node: string | HTMLElement, className: string) => void;
-  animateProperty: (params: { node: string; properties: any }) => any;
+  animateProperty: (params: { node: string; duration?: number; properties: any }) => any;
   byId: (nodeId: string) => HTMLElement;
   // https://dojotoolkit.org/reference-guide/1.7/dojo/clone.html
   clone: (something: any) => any;
@@ -89,8 +94,10 @@ interface Dojo {
   disconnect: Function;
   empty: (node: string | HTMLElement) => void;
   fadeIn: Function;
+  fadeOut: Function;
   forEach: Function;
   fx: {
+    combine: (props: unknown[]) => DojoAnimation;
     slideTo: (params: { node: HTMLElement; top: number; left: number; delay: number; duration: number; unit: string }) => any;
   };
   hasClass: (node: string | HTMLElement, className: string) => boolean;

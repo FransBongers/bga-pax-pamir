@@ -54,6 +54,9 @@ cards
 montage -colorspace sRGB *.webp -tile 10 -background transparent -geometry 400x+0+0 ../cards.webp
 
 
+Event card tooltip
+105, 115, 116 change suit, 111 until discarded
+
 From error logs:
 http://boardgamearena.com/2/paxpamir/paxpamir/specialAbilityPlaceSpyStartOfTurn.html?cardId=card_64&lock=dae483c0-0aa6-47f5-8d88-43bb8801011e&table=404548677&noerrortracking=true&dojo.preventCache=1691564403457
 09/08 16:48:36 [error] [T405531929] [207.201.216.62] [91571818/joeklein9] Unexpected exception: Class Pieces: getMany, some pieces have not been found ![null]

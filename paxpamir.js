@@ -1254,7 +1254,7 @@ var substituteKeywords = function (_a) {
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
 var tplCardTooltipContainer = function (_a) {
-    var cardId = _a.cardId, content = _a.content;
+    var cardId = _a.cardId, cardType = _a.cardType, content = _a.content;
     return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n</div>");
 };
 var getImpactIconText = function (_a) {
@@ -1337,14 +1337,14 @@ var tplCourtCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo, specialAbilities = _a.specialAbilities;
     var impactIcons = '';
     if (cardInfo.impactIcons.length > 0) {
-        impactIcons += "<span class=\"section_title\">".concat(_('Impact icons'), "</span>");
+        impactIcons += "<span class=\"pp_section_title\">".concat(_('Impact icons'), "</span>");
         new Set(cardInfo.impactIcons).forEach(function (icon) {
             impactIcons += tplTooltipImpactIcon({ impactIcon: icon, loyalty: cardInfo.loyalty });
         });
     }
     var cardActions = '';
     if (Object.values(cardInfo.actions).length > 0) {
-        cardActions += "<span class=\"section_title\">".concat(_('Card actions'), "</span>");
+        cardActions += "<span class=\"pp_section_title\">".concat(_('Card actions'), "</span>");
         Object.values(cardInfo.actions).forEach(function (_a) {
             var type = _a.type;
             cardActions += tplTooltipCardAction({ type: type, rank: cardInfo.rank });
@@ -1352,13 +1352,37 @@ var tplCourtCardTooltip = function (_a) {
     }
     var specialAbility = '';
     if (cardInfo.specialAbility) {
-        specialAbility = "<span class=\"section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
+        specialAbility = "<span class=\"pp_section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"pp_special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
     }
-    return tplCardTooltipContainer({ cardId: cardId, content: "\n  <span class=\"title\">".concat(cardInfo.name, "</span>\n  <span class=\"flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  ") });
+    return tplCardTooltipContainer({
+        cardId: cardId,
+        cardType: 'court',
+        content: "\n  <span class=\"pp_title\">".concat(cardInfo.name, "</span>\n  <span class=\"pp_flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  "),
+    });
+};
+var tplEventCardTooltipDiscarded = function (_a) {
+    var _b;
+    var title = _a.title, description = _a.description, effect = _a.effect;
+    if ([ECE_INTELLIGENCE_SUIT, ECE_MILITARY_SUIT, ECE_POLITICAL_SUIT].includes(effect)) {
+        var eventEffectImpactIconMap = (_b = {},
+            _b[ECE_INTELLIGENCE_SUIT] = IMPACT_ICON_INTELLIGENCE_SUIT,
+            _b[ECE_MILITARY_SUIT] = IMPACT_ICON_MILITARY_SUIT,
+            _b[ECE_POLITICAL_SUIT] = IMPACT_ICON_POLITICAL_SUIT,
+            _b);
+        var impactIcon = eventEffectImpactIconMap[effect];
+        return tplTooltipImpactIcon({ impactIcon: impactIcon, loyalty: null });
+    }
+    else {
+        return "<span class=\"pp_event_effect_text\" style=\"margin-bottom: 16px;\">".concat(description || '', "</span>");
+    }
 };
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
-    return tplCardTooltipContainer({ cardId: cardId, content: "\n    <span class=\"title\">".concat(_('If discarded'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.discarded.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.discarded.description || '', "</span>\n    <span class=\"title\" style=\"margin-top: 32px;\">").concat(_('If purchased'), "</span>\n    <span class=\"pp_tooltip_description_text\" style=\"font-weight: bold;\">").concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_tooltip_description_text\">").concat(cardInfo.purchased.description || '', "</span>\n  ") });
+    return tplCardTooltipContainer({
+        cardId: cardId,
+        cardType: 'event',
+        content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(cardInfo.discarded.title || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(cardInfo.purchased.description || '', "</span>\n  "),
+    });
 };
 var PPTooltipManager = (function () {
     function PPTooltipManager(game) {

@@ -1096,11 +1096,6 @@
   text-align: left;
 }
 
-.pp_tooltip_description_text {
-  font-size: medium;
-  text-align: left;
-}
-
 .pp_card_tooltip {
   display: flex;
   flex-direction: row;
@@ -1118,13 +1113,13 @@
   justify-content: flex-start;
   width: 274px;
 }
-.pp_card_tooltip .pp_card_tooltip_inner_container .title {
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_title {
   font-size: large;
   font-weight: bold;
   text-align: left;
   margin-bottom: 4px;
 }
-.pp_card_tooltip .pp_card_tooltip_inner_container .section_title {
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_section_title {
   font-size: medium;
   font-weight: bold;
   text-align: left;
@@ -1142,11 +1137,11 @@
   display: flex;
   justify-content: center;
 }
-.pp_card_tooltip .pp_card_tooltip_inner_container .special_ability_text {
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_special_ability_text {
   text-align: left;
   font-size: small;
 }
-.pp_card_tooltip .pp_card_tooltip_inner_container .flavor_text {
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_flavor_text {
   text-align: left;
   font-size: small;
   font-style: italic;

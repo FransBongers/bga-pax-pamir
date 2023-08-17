@@ -1,12 +1,19 @@
-
-const tplCardTooltipContainer = ({cardId, content}: {cardId: string; content: string;}): string => {
+const tplCardTooltipContainer = ({
+  cardId,
+  cardType,
+  content,
+}: {
+  cardId: string;
+  cardType: 'event' | 'court';
+  content: string;
+}): string => {
   return `<div class="pp_card_tooltip">
   <div class="pp_card_tooltip_inner_container">
     ${content}
   </div>
   <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
-</div>`
-}
+</div>`;
+};
 
 const getImpactIconText = ({ impactIcon }: { impactIcon: string }) => {
   switch (impactIcon) {
@@ -111,7 +118,7 @@ const tplCourtCardTooltip = ({
 }): string => {
   let impactIcons = '';
   if (cardInfo.impactIcons.length > 0) {
-    impactIcons += `<span class="section_title">${_('Impact icons')}</span>`;
+    impactIcons += `<span class="pp_section_title">${_('Impact icons')}</span>`;
     new Set(cardInfo.impactIcons).forEach((icon) => {
       impactIcons += tplTooltipImpactIcon({ impactIcon: icon, loyalty: cardInfo.loyalty });
     });
@@ -119,7 +126,7 @@ const tplCourtCardTooltip = ({
 
   let cardActions = '';
   if (Object.values(cardInfo.actions).length > 0) {
-    cardActions += `<span class="section_title">${_('Card actions')}</span>`;
+    cardActions += `<span class="pp_section_title">${_('Card actions')}</span>`;
     Object.values(cardInfo.actions).forEach(({ type }: { type: string; left: number; top: number }) => {
       cardActions += tplTooltipCardAction({ type, rank: cardInfo.rank });
     });
@@ -127,33 +134,53 @@ const tplCourtCardTooltip = ({
 
   let specialAbility = '';
   if (cardInfo.specialAbility) {
-    specialAbility = `<span class="section_title">${_(specialAbilities[cardInfo.specialAbility].title)}</span>
-    <span class="special_ability_text">${_(specialAbilities[cardInfo.specialAbility].description)}</span>
+    specialAbility = `<span class="pp_section_title">${_(specialAbilities[cardInfo.specialAbility].title)}</span>
+    <span class="pp_special_ability_text">${_(specialAbilities[cardInfo.specialAbility].description)}</span>
     `;
   }
 
-  return tplCardTooltipContainer({cardId, content: `
-  <span class="title">${cardInfo.name}</span>
-  <span class="flavor_text">${(cardInfo as CourtCard).flavorText}</span>
+  return tplCardTooltipContainer({
+    cardId,
+    cardType: 'court',
+    content: `
+  <span class="pp_title">${cardInfo.name}</span>
+  <span class="pp_flavor_text">${(cardInfo as CourtCard).flavorText}</span>
   ${impactIcons}
   ${cardActions}
   ${specialAbility}
-  `  });
+  `,
+  });
 };
 
-const tplEventCardTooltip = ({
-  cardId,
-  cardInfo,
-}: {
-  cardId: string;
-  cardInfo: EventCard;
-}): string => {
-  return tplCardTooltipContainer({cardId, content: `
-    <span class="title">${_('If discarded')}</span>
-    <span class="pp_tooltip_description_text" style="font-weight: bold;">${cardInfo.discarded.title || ''}</span>
-    <span class="pp_tooltip_description_text">${cardInfo.discarded.description || ''}</span>
-    <span class="title" style="margin-top: 32px;">${_('If purchased')}</span>
-    <span class="pp_tooltip_description_text" style="font-weight: bold;">${cardInfo.purchased.title || ''}</span>
-    <span class="pp_tooltip_description_text">${cardInfo.purchased.description || ''}</span>
-  `})
-} 
+const tplEventCardTooltipDiscarded = ({ title, description, effect }: EventCard['discarded']) => {
+  if ([ECE_INTELLIGENCE_SUIT, ECE_MILITARY_SUIT, ECE_POLITICAL_SUIT].includes(effect)) {
+    const eventEffectImpactIconMap = {
+      [ECE_INTELLIGENCE_SUIT]: IMPACT_ICON_INTELLIGENCE_SUIT,
+      [ECE_MILITARY_SUIT]: IMPACT_ICON_MILITARY_SUIT,
+      [ECE_POLITICAL_SUIT]: IMPACT_ICON_POLITICAL_SUIT,
+    };
+    const impactIcon = eventEffectImpactIconMap[effect];
+    return tplTooltipImpactIcon({ impactIcon, loyalty: null });
+  } else {
+    return `<span class="pp_event_effect_text" style="margin-bottom: 16px;">${description || ''}</span>`;
+  }
+};
+
+const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: EventCard }): string => {
+  return tplCardTooltipContainer({
+    cardId,
+    cardType: 'event',
+    content: `
+    <span class="pp_title">${_('Event card')}</span>
+    <span class="pp_flavor_text">${_(
+      "Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."
+    )}</span>
+    <span class="pp_section_title">${_('If discarded: ')}${cardInfo.discarded.title || ''}</span>
+     ${tplEventCardTooltipDiscarded(cardInfo.discarded)} 
+    <span class="pp_section_title">${
+      cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')
+    }${cardInfo.purchased.title || ''}</span>
+    <span class="pp_event_effect_text">${cardInfo.purchased.description || ''}</span>
+  `,
+  });
+};

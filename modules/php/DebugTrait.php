@@ -47,8 +47,8 @@ trait DebugTrait
 
   function test()
   {
-    $openHandsGlobals = Globals::getOpenHands();
-    Notifications::log('openHands',$openHandsGlobals);
+    // $openHandsGlobals = Globals::getOpenHands();
+    // Notifications::log('openHands',$openHandsGlobals);
     // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);
     // Notifications::log('option open hands', $openHands);
     // Notifications::log('option open null', $openHands === null);
@@ -58,8 +58,14 @@ trait DebugTrait
 
     // Notifications::log('discardPile', $discardPile);
 
-    // Cards::move('card_114', 'deck');
-    // Cards::move('card_106', 'market_0_1');
+    // Cards::move('card_35', 'deck');
+    // Cards::move('card_71', 'deck');
+    // Cards::move('card_6', 'deck');
+    // Cards::move('card_81', 'deck');
+    Cards::move('card_105', 'market_0_0');
+    Cards::move('card_115', 'market_0_1');
+    Cards::move('card_116', 'market_0_2');
+    Cards::move('card_111', 'market_0_3');
     // Cards::move('card_19', 'prizes_2371053');
 
 

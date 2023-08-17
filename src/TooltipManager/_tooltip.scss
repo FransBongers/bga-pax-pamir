@@ -21,7 +21,7 @@
 }
 
 .pp_card_action_betray {
-  background-position-x: math.div(2,10) * 100%;
+  background-position-x: math.div(2, 10) * 100%;
 }
 
 .pp_card_action_battle.pp_rank_1 {
@@ -29,36 +29,36 @@
 }
 
 .pp_card_action_battle.pp_rank_2 {
-  background-position-x: math.div(1,10) * 100%;
+  background-position-x: math.div(1, 10) * 100%;
 }
 
 .pp_card_action_build {
-  background-position-x: math.div(3,10) * 100%;
+  background-position-x: math.div(3, 10) * 100%;
 }
 
 .pp_card_action_gift {
-  background-position-x: math.div(4,10) * 100%;
+  background-position-x: math.div(4, 10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_1 {
-  background-position-x: math.div(5,10) * 100%;
+  background-position-x: math.div(5, 10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_2 {
-  background-position-x: math.div(6,10) * 100%;
+  background-position-x: math.div(6, 10) * 100%;
 }
 
 .pp_card_action_move.pp_rank_3 {
-  background-position-x: math.div(7,10) * 100%;
+  background-position-x: math.div(7, 10) * 100%;
 }
 
 .pp_card_action_tax.pp_rank_1 {
-  background-position-x: math.div(8,10) * 100%;
+  background-position-x: math.div(8, 10) * 100%;
 }
 
 .pp_card_action_tax.pp_rank_2 {
   // background-position-x: 100%;
-  background-position-x: math.div(9,10) * 100%;
+  background-position-x: math.div(9, 10) * 100%;
 }
 
 .pp_tooltip_impact_icon {
@@ -74,26 +74,23 @@
 }
 
 .pp_impact_icon_army_british {
-  background-position-x: math.div(1,14) * 100%;
+  background-position-x: math.div(1, 14) * 100%;
 }
-
 
 .pp_impact_icon_army_russian {
-  background-position-x: math.div(3,14) * 100%;
+  background-position-x: math.div(3, 14) * 100%;
 }
-
 
 .pp_impact_icon_army_neutral {
-  background-position-x: math.div(2,14) * 100%;
+  background-position-x: math.div(2, 14) * 100%;
 }
 
-
 .pp_impact_icon_leverage {
-  background-position-x: math.div(4,14) * 100%;
+  background-position-x: math.div(4, 14) * 100%;
 }
 
 .pp_impact_icon_spy {
-  background-position-x: math.div(9,14) * 100%;
+  background-position-x: math.div(9, 14) * 100%;
 }
 
 .pp_impact_icon_tribe {
@@ -101,37 +98,35 @@
 }
 
 .pp_impact_icon_economic_suit {
-  background-position-x: math.div(10,14) * 100%;
+  background-position-x: math.div(10, 14) * 100%;
 }
 
 .pp_impact_icon_military_suit {
-  background-position-x: math.div(12,14) * 100%;
+  background-position-x: math.div(12, 14) * 100%;
 }
 
 .pp_impact_icon_political_suit {
-  background-position-x: math.div(13,14) * 100%;
+  background-position-x: math.div(13, 14) * 100%;
 }
 
 .pp_impact_icon_intelligence_suit {
-  background-position-x: math.div(11,14) * 100%;
+  background-position-x: math.div(11, 14) * 100%;
 }
 
 .pp_impact_icon_road_afghan {
-  background-position-x: math.div(5,14) * 100%;
+  background-position-x: math.div(5, 14) * 100%;
 }
 
 .pp_impact_icon_road_british {
-  background-position-x: math.div(6,14) * 100%;
+  background-position-x: math.div(6, 14) * 100%;
 }
-
 
 .pp_impact_icon_road_russian {
-  background-position-x: math.div(8,14) * 100%;
+  background-position-x: math.div(8, 14) * 100%;
 }
 
-
 .pp_impact_icon_road_neutral {
-  background-position-x: math.div(7,14) * 100%;
+  background-position-x: math.div(7, 14) * 100%;
 }
 
 .pp_impact_icon_text {
@@ -139,10 +134,10 @@
   text-align: left;
 }
 
-.pp_tooltip_description_text {
-  font-size: medium;
-  text-align: left;
-}
+// .pp_tooltip_description_text {
+//   font-size: medium;
+//   text-align: left;
+// }
 
 .pp_card_tooltip {
   display: flex;
@@ -160,17 +155,16 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    // background-color: yellow;
     width: 274px;
 
-    .title {
+    .pp_title {
       font-size: large;
       font-weight: bold;
       text-align: left;
       margin-bottom: 4px;
     }
 
-    .section_title {
+    .pp_section_title {
       font-size: medium;
       font-weight: bold;
       text-align: left;
@@ -191,12 +185,12 @@
       }
     }
 
-    .special_ability_text {
+    .pp_special_ability_text {
       text-align: left;
       font-size: small;
     }
 
-    .flavor_text {
+    .pp_flavor_text {
       text-align: left;
       font-size: small;
       font-style: italic;
@@ -217,7 +211,7 @@
   width: 240px;
   height: 334px;
   background-size: 240px 334px;
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.4);
+  box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
   // transform: perspective(60em) rotateY(-10deg)// scale(.93);
   // animation: ea-wiggle 5s infinite alternate;

@@ -197,6 +197,7 @@ interface PaxPamirGame extends Game {
   cancelLogs: (notifIds: string[]) => void;
   clearInterface: () => void;
   clearPossible: () => void;
+  format_string_recursive: (log: string, args: Record<string,unknown>) => string;
   getCardInfo: ({ cardId }: { cardId: string }) => Card;
   getCurrentPlayer: () => PPPlayer;
   getMinimumActionCost: (props: {action: string;}) => number | null;

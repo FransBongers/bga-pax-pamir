@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -44,6 +45,12 @@ trait ChangeLoyaltyTrait
     Players::setLoyalty($playerId, $coalition);
 
     Notifications::changeLoyalty($coalition);
+
+    // TODO: Only check regions where player has tribes for ruler change?
+    foreach (Game::get()->regions as $region => $regionInfo) {
+      Map::checkRulerChange($region);
+    }
+    
 
     $this->nextState('dispatchAction');
   }

@@ -154,6 +154,9 @@ const PP_PRIZE = 'pp_prize';
 const PP_ROAD = 'pp_road';
 const PP_COALITION_BLOCK = 'pp_coalition_block';
 const PP_TEMPORARY = 'pp_temporary';
+const PP_AFGHAN = 'pp_afghan';
+const PP_BRITISH = 'pp_british';
+const PP_RUSSIAN = 'pp_russian';
 
 /**
  * Events

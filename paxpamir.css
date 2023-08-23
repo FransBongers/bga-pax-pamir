@@ -1217,12 +1217,33 @@ html {
   box-sizing: border-box;
 }
 
+#pp_dominant_coalition_banner {
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: large;
+  font-weight: bold;
+}
+
+#pp_dominant_coalition_banner.pp_afghan {
+  background-color: #5fc89e;
+}
+
+#pp_dominant_coalition_banner.pp_british {
+  background-color: #eb97d1;
+}
+
+#pp_dominant_coalition_banner.pp_russian {
+  background-color: #f3f35a;
+}
+
 #pp_coalition_blocks_container {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
-  width: 360px;
+  justify-content: space-between;
+  margin-right: auto;
+  width: 470px;
 }
 
 #pp_market_deck_container {

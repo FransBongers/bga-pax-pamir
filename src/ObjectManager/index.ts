@@ -214,7 +214,7 @@ class Supply {
         itemGap: 15,
       });
 
-      this.coalitionBlocks[coalition].placeInZone(
+      this.coalitionBlocks[coalition].setupItems(
         gamedatas.coalitionBlocks[coalition].map((block) => ({
           id: block.id,
           element: tplCoalitionBlock({ id: block.id, coalition }),
@@ -222,6 +222,7 @@ class Supply {
         }))
       );
     });
+    this.checkDominantCoalition();
   }
 
   clearInterface() {
@@ -233,6 +234,46 @@ class Supply {
 
   getCoalitionBlocksZone({ coalition }: { coalition: string }): PaxPamirZone {
     return this.coalitionBlocks[coalition];
+  }
+
+  public checkDominantCoalition() {
+    debug('checkDominantCoalition')
+    const coalitions = [
+      {
+        coalition: AFGHAN,
+        supplyCount: this.coalitionBlocks[AFGHAN].getItemCount(),
+      },
+      {
+        coalition: BRITISH,
+        supplyCount: this.coalitionBlocks[BRITISH].getItemCount(),
+      },
+      {
+        coalition: RUSSIAN,
+        supplyCount: this.coalitionBlocks[RUSSIAN].getItemCount(),
+      },
+    ];
+    const isConflictFatigueActive = this.game.playerManager
+      .getPlayers()
+      .some((player) => player.ownsEventCard({ cardId: ECE_CONFLICT_FATIGUE_CARD_ID }));
+    const requiredDifferenceToBeDominant = isConflictFatigueActive ? 2 : 4;
+    coalitions.sort((a, b) => a.supplyCount - b.supplyCount);
+
+    const node: HTMLElement = $('pp_dominant_coalition_banner');
+    if (coalitions[1].supplyCount - coalitions[0].supplyCount >= requiredDifferenceToBeDominant) {
+      const dominantCoalition = coalitions[0].coalition;
+      // Update UI dominant coalition
+      const log = _('Dominant coalition: ${logTokenCoalition}');
+      // const log = _('${logTokenCoalition} dominant');
+      node.innerHTML = this.game.format_string_recursive(log, {
+        logTokenCoalition: `coalition:${dominantCoalition}`,
+      });
+      node.classList.remove(PP_AFGHAN,PP_BRITISH,PP_RUSSIAN);
+      node.classList.add(`pp_${dominantCoalition}`);
+    } else {
+      node.innerHTML = _('No dominant coalition');
+      node.classList.remove(PP_AFGHAN,PP_BRITISH,PP_RUSSIAN);
+      // Update UI no dominant coalition
+    }
   }
 }
 

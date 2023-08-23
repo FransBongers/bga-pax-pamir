@@ -147,11 +147,10 @@ class PaxPamir implements PaxPamirGame {
   
 
     this.tooltipManager = new PPTooltipManager(this);
-    this.objectManager = new ObjectManager(this);
     this.playerManager = new PlayerManager(this);
     this.map = new PPMap(this);
     this.market = new Market(this);
-
+    this.objectManager = new ObjectManager(this);
     if (this.notificationManager != undefined) {
       this.notificationManager.destroy();
     }
@@ -460,7 +459,7 @@ class PaxPamir implements PaxPamirGame {
   // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
 
   /* @Override */
-  format_string_recursive(log, args) {
+  format_string_recursive(log: string, args: Record<string,unknown>): string {
     try {
       if (log && args && !args.processed) {
         args.processed = true;

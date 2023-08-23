@@ -92,6 +92,12 @@ trait DominanceCheckTrait
     )));
     Notifications::dominanceCheckReturnCoalitionBlocks($blocks, $fromLocations);
     array_pop($actionStack);
+    foreach($fromLocations as $index => $location) {
+      $exploded = explode('_',$location);
+      if ($exploded[0] === 'armies') {
+        Map::checkRulerChange($exploded[1]);
+      }
+    } 
     ActionStack::next($actionStack);
   }
 

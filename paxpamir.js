@@ -1125,6 +1125,9 @@ var PP_PRIZE = 'pp_prize';
 var PP_ROAD = 'pp_road';
 var PP_COALITION_BLOCK = 'pp_coalition_block';
 var PP_TEMPORARY = 'pp_temporary';
+var PP_AFGHAN = 'pp_afghan';
+var PP_BRITISH = 'pp_british';
+var PP_RUSSIAN = 'pp_russian';
 var ECE_BACKING_OF_PERSIAN_ARISTOCRACY = 'backingOfPersianAristocracy';
 var ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
 var ECE_CONFLICT_FATIGUE = 'conflictFatigue';
@@ -1611,12 +1614,13 @@ var Supply = (function () {
                 itemWidth: COALITION_BLOCK_WIDTH,
                 itemGap: 15,
             });
-            _this.coalitionBlocks[coalition].placeInZone(gamedatas.coalitionBlocks[coalition].map(function (block) { return ({
+            _this.coalitionBlocks[coalition].setupItems(gamedatas.coalitionBlocks[coalition].map(function (block) { return ({
                 id: block.id,
                 element: tplCoalitionBlock({ id: block.id, coalition: coalition }),
                 weight: block.state,
             }); }));
         });
+        this.checkDominantCoalition();
     };
     Supply.prototype.clearInterface = function () {
         var _this = this;
@@ -1628,6 +1632,42 @@ var Supply = (function () {
     Supply.prototype.getCoalitionBlocksZone = function (_a) {
         var coalition = _a.coalition;
         return this.coalitionBlocks[coalition];
+    };
+    Supply.prototype.checkDominantCoalition = function () {
+        debug('checkDominantCoalition');
+        var coalitions = [
+            {
+                coalition: AFGHAN,
+                supplyCount: this.coalitionBlocks[AFGHAN].getItemCount(),
+            },
+            {
+                coalition: BRITISH,
+                supplyCount: this.coalitionBlocks[BRITISH].getItemCount(),
+            },
+            {
+                coalition: RUSSIAN,
+                supplyCount: this.coalitionBlocks[RUSSIAN].getItemCount(),
+            },
+        ];
+        var isConflictFatigueActive = this.game.playerManager
+            .getPlayers()
+            .some(function (player) { return player.ownsEventCard({ cardId: ECE_CONFLICT_FATIGUE_CARD_ID }); });
+        var requiredDifferenceToBeDominant = isConflictFatigueActive ? 2 : 4;
+        coalitions.sort(function (a, b) { return a.supplyCount - b.supplyCount; });
+        var node = $('pp_dominant_coalition_banner');
+        if (coalitions[1].supplyCount - coalitions[0].supplyCount >= requiredDifferenceToBeDominant) {
+            var dominantCoalition = coalitions[0].coalition;
+            var log = _('Dominant coalition: ${logTokenCoalition}');
+            node.innerHTML = this.game.format_string_recursive(log, {
+                logTokenCoalition: "coalition:".concat(dominantCoalition),
+            });
+            node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
+            node.classList.add("pp_".concat(dominantCoalition));
+        }
+        else {
+            node.innerHTML = _('No dominant coalition');
+            node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
+        }
     };
     return Supply;
 }());
@@ -6159,6 +6199,7 @@ var NotificationManager = (function () {
                             }); }))];
                     case 2:
                         _b.sent();
+                        this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
@@ -6272,6 +6313,7 @@ var NotificationManager = (function () {
                     case 0: return [4, this.performTokenMove({ move: notif.args.move })];
                     case 1:
                         _a.sent();
+                        this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
@@ -6306,6 +6348,7 @@ var NotificationManager = (function () {
                     case 0: return [4, this.performTokenMove({ move: notif.args.move })];
                     case 1:
                         _a.sent();
+                        this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
@@ -6351,20 +6394,25 @@ var NotificationManager = (function () {
                         _b.sent();
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
                         cardId = notif.args.card.id;
-                        if (!newLocation.startsWith('events_')) return [3, 3];
-                        this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) });
-                        return [3, 9];
+                        if (!newLocation.startsWith('events_')) return [3, 4];
+                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
                     case 3:
-                        if (!(newLocation === DISCARD)) return [3, 5];
+                        _b.sent();
+                        if (cardId === 'card_109') {
+                            this.game.objectManager.supply.checkDominantCoalition();
+                        }
+                        return [3, 10];
+                    case 4:
+                        if (!(newLocation === DISCARD)) return [3, 6];
                         return [4, this.game.objectManager.discardPile.discardCardFromZone({
                                 cardId: cardId,
                                 zone: this.game.market.getMarketCardZone({ row: row, column: col }),
                             })];
-                    case 4:
-                        _b.sent();
-                        return [3, 9];
                     case 5:
-                        if (!(newLocation === TEMP_DISCARD)) return [3, 7];
+                        _b.sent();
+                        return [3, 10];
+                    case 6:
+                        if (!(newLocation === TEMP_DISCARD)) return [3, 8];
                         return [4, Promise.all([
                                 this.game.objectManager.tempDiscardPile.getZone().moveToZone({
                                     elements: { id: cardId },
@@ -6372,14 +6420,14 @@ var NotificationManager = (function () {
                                 }),
                                 this.game.market.getMarketCardZone({ row: row, column: col }).remove({ input: cardId }),
                             ])];
-                    case 6:
+                    case 7:
                         _b.sent();
-                        return [3, 9];
-                    case 7: return [4, this.getPlayer({ playerId: playerId }).addCardToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
-                    case 8:
+                        return [3, 10];
+                    case 8: return [4, this.getPlayer({ playerId: playerId }).addCardToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
+                    case 9:
                         _b.sent();
-                        _b.label = 9;
-                    case 9: return [2];
+                        _b.label = 10;
+                    case 10: return [2];
                 }
             });
         });
@@ -6441,10 +6489,10 @@ var NotificationManager = (function () {
                         this.game.clearPossible();
                         _a = notif.args, armies = _a.armies, tribes = _a.tribes, regionId = _a.regionId;
                         region = this.game.map.getRegion({ region: regionId });
-                        console.log('region', region);
                         return [4, Promise.all([region.removeAllArmies(armies), region.removeAllTribes(tribes)])];
                     case 1:
                         _b.sent();
+                        this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
@@ -6476,6 +6524,7 @@ var NotificationManager = (function () {
                             ])];
                     case 1:
                         _b.sent();
+                        this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
@@ -6781,10 +6830,10 @@ var PaxPamir = (function () {
             element: tplCard({ cardId: card.id }),
         }); }));
         this.tooltipManager = new PPTooltipManager(this);
-        this.objectManager = new ObjectManager(this);
         this.playerManager = new PlayerManager(this);
         this.map = new PPMap(this);
         this.market = new Market(this);
+        this.objectManager = new ObjectManager(this);
         if (this.notificationManager != undefined) {
             this.notificationManager.destroy();
         }

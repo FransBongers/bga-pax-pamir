@@ -92,6 +92,7 @@
     
     <div id="pp_supply">
         <div id="pp_coalition_blocks_container">
+            <div id="pp_dominant_coalition_banner"></div>
             <div id="pp_afghan_coalition_blocks" class="pp_coalition_blocks">
             </div>
             <div id="pp_british_coalition_blocks" class="pp_coalition_blocks">

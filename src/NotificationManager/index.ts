@@ -276,6 +276,7 @@ class NotificationManager {
         }
       })
     );
+    this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_drawMarketCard(notif: Notif<NotifDrawMarketCardArgs>) {
@@ -336,7 +337,7 @@ class NotificationManager {
   async notif_placeArmy(notif: Notif<NotifPlaceArmyArgs>) {
     // TODO: check moving multipe armies at the same time if necessary
     await this.performTokenMove({ move: notif.args.move });
-    // Adjust dominance if token was moved from supply
+    this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_placeCylinder(notif: Notif<NotifPlaceCylinderArgs>) {
@@ -355,7 +356,7 @@ class NotificationManager {
   async notif_placeRoad(notif: Notif<NotifPlaceRoadArgs>) {
     // TODO: check moving multipe armies at the same time if necessary
     await this.performTokenMove({ move: notif.args.move });
-    // Adjust dominance if token was moved from supply
+    this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_publicWithdrawal(notif: Notif<NotifPublicWithdrawalArgs>) {
@@ -387,7 +388,10 @@ class NotificationManager {
     // Move card from markt
     const cardId = notif.args.card.id;
     if (newLocation.startsWith('events_')) {
-      this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      if (cardId === 'card_109') {
+        this.game.objectManager.supply.checkDominantCoalition();
+      }
     } else if (newLocation === DISCARD) {
       await this.game.objectManager.discardPile.discardCardFromZone({
         cardId,
@@ -434,8 +438,9 @@ class NotificationManager {
     this.game.clearPossible();
     const { armies, tribes, regionId } = notif.args;
     const region = this.game.map.getRegion({ region: regionId });
-    console.log('region', region);
+
     await Promise.all([region.removeAllArmies(armies), region.removeAllTribes(tribes)]);
+    this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_returnCoalitionBlock(notif: Notif<NotifReturnCoalitionBlockArgs>): Promise<void> {
@@ -457,6 +462,7 @@ class NotificationManager {
       }),
       fromZone.remove({ input: blockId }),
     ]);
+    this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_returnCylinder(notif: Notif<NotifReturnCylinderArgs>): Promise<void> {

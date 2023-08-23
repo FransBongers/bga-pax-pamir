@@ -120,11 +120,11 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "acceptPrize" => ST_ACCEPT_PRIZE,
+            "calculateTieBreaker" => ST_CALCULATE_TIE_BREAKER,
             "cleanup" => ST_CLEANUP,
             "nextTurn" => ST_NEXT_PLAYER,
             "discard" => ST_DISCARD,
             "dispatchAction" => ST_DISPATCH_ACTION,
-            "endGame" => ST_END_GAME,
             'eventCardOtherPersuasiveMethods' => ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS,
             'eventCardPashtunwaliValues' => ST_RESOLVE_ECE_PASHTUNWALI_VALUES,
             'eventCardRebuke' => ST_RESOLVE_ECE_REBUKE,
@@ -339,6 +339,16 @@ $machinestates = array(
         'type' => 'game',
         'action' => 'stChangeActivePlayer',
     ],
+
+    ST_CALCULATE_TIE_BREAKER => array(
+        "name" => "calculateTieBreaker",
+        "type" => "game",
+        "action" => "stCalculateTieBreaker",
+        "updateGameProgression" => false,
+        "transitions" => array(
+            "endGame" => ST_END_GAME,
+        )
+    ),
 
     // Final state.
     // Please do not modify (and do not overload action/args methods).

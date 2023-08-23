@@ -57,12 +57,13 @@ use PaxPamir\Managers\Tokens;
 class Paxpamir extends Table
 {
     use PaxPamir\DebugTrait;
+    use PaxPamir\States\BribeTrait;
     use PaxPamir\States\ChangeLoyaltyTrait;
     use PaxPamir\States\CleanupTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DispatchActionTrait;
     use PaxPamir\States\DominanceCheckTrait;
-    use PaxPamir\States\BribeTrait;
+    use PaxPamir\States\EndGameTrait;
     use PaxPamir\States\NextPlayerTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;

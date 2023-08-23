@@ -105,7 +105,7 @@ trait DominanceCheckTrait
   function dispatchDominanceCheckEndGameCheck($actionStack)
   {
     if ($this->didPlayerWin()) {
-      $this->nextState('endGame');
+      $this->nextState('calculateTieBreaker');
       return;
     }
     array_pop($actionStack);

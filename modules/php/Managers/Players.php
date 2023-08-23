@@ -101,6 +101,11 @@ class Players extends \PaxPamir\Helpers\DB_Manager
     return self::DB()->update(['player_score' => $value], $pId);
   }
 
+  public static function setPlayerScoreAux($pId, $value)
+  {
+    return self::DB()->update(['player_score_aux' => $value], $pId);
+  }
+
   public static function setLoyalty($pId, $coalition)
   {
     return self::DB()->update(['loyalty' => $coalition], $pId);

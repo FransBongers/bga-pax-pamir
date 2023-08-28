@@ -91,32 +91,6 @@ trait PlayerActionTrait
   // .##.....##..######.....##....####..#######..##....##..######.
 
   /**
-   * Part of set up when players need to select loyalty.
-   */
-  function chooseLoyalty($coalition)
-  {
-    self::checkAction('chooseLoyalty');
-
-    $playerId = Players::getActiveId();
-    $coalitionName = $this->loyalty[$coalition]['name'];
-
-    // Players::get()->setLoyalty($coalition);
-    Players::setLoyalty($playerId,$coalition);
-
-    // Notify
-    // TODO (Frans): check i18n for coalition name
-    self::notifyAllPlayers("changeLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
-      'playerId' => $playerId,
-      'player_name' => Game::get()->getActivePlayerName(),
-      'coalition' => $coalition,
-      'coalitionName' => $coalitionName,
-      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
-    ));
-
-    $this->gamestate->nextState('next');
-  }
-
-  /**
    * Used to either:
    * 1. End player's turn
    * 2. Skip start of turn abilities

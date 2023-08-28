@@ -95,6 +95,7 @@ interface PaxPamirGamedatas extends Gamedatas {
   };
   gameOptions: {
     openHands: boolean;
+    wakhanEnabled: boolean;
   };
   tempDiscardPile: Card | null;
   staticData: {
@@ -138,6 +139,8 @@ interface PaxPamirGamedatas extends Gamedatas {
     cards: Token[][];
     rupees: Token[];
   };
+  paxPamirPlayerOrder: number[];
+  paxPamirPlayers: Record<number, PaxPamirPlayer>;
   players: Record<number, PaxPamirPlayer>;
   localState: LocalState;
   // rupees: Token[];
@@ -182,6 +185,7 @@ interface PaxPamirGame extends Game {
   objectManager: ObjectManager;
   playerManager: PlayerManager;
   playerCounts: Record<string, number>;
+  playerOrder: number[];
   spies: {
     [cardId: string]: PaxPamirZone;
   };

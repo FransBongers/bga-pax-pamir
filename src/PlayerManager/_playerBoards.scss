@@ -90,30 +90,35 @@
 
 .pp_cylinder_icon {
   background-image: url('img/cylinders.webp');;
-  background-size: 500% 100%;
+  background-size: 600% 100%;
   height: 44px;
 }
 
 // TODO: check duplicate code below
 .pp_cylinder_icon.pp_player_color_98B3C0 {
-  background-position-x: 25%;
+  background-position-x: 20%;
 }
 
 .pp_cylinder_icon.pp_player_color_B9B6B1 {
-  background-position-x: 50%;
+  background-position-x: 40%;
 }
 
 .pp_cylinder_icon.pp_player_color_DFCFB6 {
-  background-position-x: 100%;
+  background-position-x: 80%;
 }
 
 .pp_cylinder_icon.pp_player_color_C19B9E {
-  background-position-x: 75%;
+  background-position-x: 60%;
 }
 
 .pp_cylinder_icon.pp_player_color_807F7F {
   background-position-x: 0%;
 }
+
+.pp_cylinder_icon.pp_player_color_C3B1D6 {
+  background-position-x: 100%;
+}
+
 
 .pp_player_board_rupee {
   height: 44px;

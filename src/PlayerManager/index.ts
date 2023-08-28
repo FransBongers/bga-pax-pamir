@@ -25,8 +25,12 @@ class PlayerManager {
 
     for (const playerId in game.gamedatas.players) {
       const player = game.gamedatas.players[playerId];
+      console.log('playerId type',typeof playerId);
       // console.log("playerManager", playerId, player);
-      this.players[playerId] = new PPPlayer({ player, game: this.game });
+      if (Number(playerId) !== 1) {
+        this.players[playerId] = new PPPlayer({ player, game: this.game });
+      }
+      
     }
     // console.log("players", this.players);
   }

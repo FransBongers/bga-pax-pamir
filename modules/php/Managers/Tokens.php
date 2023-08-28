@@ -70,7 +70,7 @@ class Tokens extends \PaxPamir\Helpers\Pieces
    */
   public static function setupNewGame($players, $options)
   {
-    self::createTokens(count($players));
+    self::createTokens();
   }
 
   private function createTokens()

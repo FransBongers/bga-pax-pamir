@@ -12,8 +12,10 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
+use PaxPamir\Models\PaxPamirPlayer;
 use PaxPamir\Models\Player;
 
 trait DebugTrait
@@ -47,6 +49,13 @@ trait DebugTrait
 
   function test()
   {
+    
+    // Notifications::log('loyalty',PaxPamirPlayers::get()->getLoyalty() === null);
+    // Notifications::log('wakhan_enabled',Globals::getWakhanEnabled());
+    // Notifications::log('next',PaxPamirPlayers::getPrevId(2371052));
+    Notifications::log('order',PaxPamirPlayers::getPlayerOrder());
+    
+    
     // $openHandsGlobals = Globals::getOpenHands();
     // Notifications::log('openHands',$openHandsGlobals);
     // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);
@@ -63,7 +72,7 @@ trait DebugTrait
     // Cards::move('card_6', 'deck');
     // Cards::move('card_81', 'deck');
     // Cards::move(ECE_CONFLICT_FATIGUE_CARD_ID, 'events_2371053');
-    Cards::move('card_101', 'market_0_0');
+    // Cards::move('card_101', 'market_0_0');
     // Cards::move('card_115', 'market_0_1');
     // Cards::move('card_116', 'market_0_2');
     // Cards::move('card_111', 'market_0_3');

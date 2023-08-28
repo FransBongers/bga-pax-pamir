@@ -56,6 +56,11 @@ class PPPlayer {
     this.playerColor = player.color;
 
     const gamedatas = game.gamedatas;
+
+    if (this.playerId === this.game.getPlayerId()) {
+      dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
+    }
+
     this.setupPlayer({ gamedatas });
   }
 
@@ -287,7 +292,7 @@ class PPPlayer {
     // Set up panels
     const player_board_div = $('player_board_' + this.playerId);
     dojo.place(
-      (this.game as unknown as Framework).format_block('jstpl_player_board', { ...this.player, p_color: this.playerColor }),
+      tplPlayerBoard({playerId: this.playerId}),
       player_board_div
     );
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
@@ -626,12 +631,12 @@ class PPPlayer {
       .filter((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
-  updateHandCards({action, cardId}: {action: 'ADD' | 'REMOVE'; cardId: string;}) {
+  updateHandCards({ action, cardId }: { action: 'ADD' | 'REMOVE'; cardId: string }) {
     if (!this.game.gameOptions.openHands) {
       return;
     }
     if (action === 'ADD') {
-      this.handCards.push(cardId)
+      this.handCards.push(cardId);
     } else if (action === 'REMOVE') {
       const index = this.handCards.findIndex((item) => item === cardId);
       if (index < 0) {
@@ -716,7 +721,7 @@ class PPPlayer {
         from: `cards_${this.playerId}`,
       });
     }
-    this.updateHandCards({cardId, action: 'REMOVE'});
+    this.updateHandCards({ cardId, action: 'REMOVE' });
   }
 
   async discardPrize({ cardId }: { cardId: string }) {
@@ -769,7 +774,7 @@ class PPPlayer {
       // TODO: check for loyalty change and then set Counter to 2?
       this.incCounter({ counter: 'influence', value: 1 });
     }
-    this.updateHandCards({cardId: card.id, action: 'REMOVE'});
+    this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
   }
 
   async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {
@@ -786,7 +791,7 @@ class PPPlayer {
       await from.removeTo({ id: cardId, to: `cards_${this.playerId}` });
     }
     this.incCounter({ counter: 'cards', value: 1 });
-    this.updateHandCards({cardId, action: 'ADD'});
+    this.updateHandCards({ cardId, action: 'ADD' });
   }
 
   async addCardToEvents({ cardId, from }: { cardId: string; from: PaxPamirZone }): Promise<void> {

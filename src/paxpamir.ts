@@ -34,10 +34,11 @@ class PaxPamir implements PaxPamirGame {
   public playerManager: PlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
-  private playerEvents = {}; // events per player
+  private playerEvents = {}; // events per player => can we remove?
   public activeEvents: PaxPamirZone; // active events
   public spies: Record<string, PaxPamirZone> = {}; // spies per cards
-  public playerCounts = {}; // rename to playerTotals?
+  public playerCounts = {}; // rename to playerTotals? => can we remove?
+  public playerOrder: number[];
   public tooltipManager: PPTooltipManager;
   private _notif_uid_to_log_id = {};
   private _last_notif = null;
@@ -97,6 +98,19 @@ class PaxPamir implements PaxPamirGame {
     this.gamedatas = gamedatas;
     this.gameOptions = gamedatas.gameOptions;
     debug('gamedatas', gamedatas);
+    this.setupPlayerOrder({ paxPamirPlayerOrder: gamedatas.paxPamirPlayerOrder });
+    // this.gamedatas.playerorder = this.playerOrder;
+    if (this.gameOptions.wakhanEnabled) {
+      const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 1;
+      dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
+    }
+    // Templates from .tpl file. Todo: check if we can move to other files
+    dojo.place(tplActiveEvents(), 'pp_player_tableaus');
+        
+    this.playerOrder.forEach((playerId) => {
+      const player = gamedatas.paxPamirPlayers[playerId];
+      dojo.place(tplPlayerTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+    });
 
     this._connections = [];
     // Will store all data for active player and gets refreshed with entering player actions state
@@ -128,7 +142,7 @@ class PaxPamir implements PaxPamirGame {
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
     };
 
-    this.animationManager = new AnimationManager(this, {duration: 500});
+    this.animationManager = new AnimationManager(this, { duration: 500 });
     // Events
     this.activeEvents = new PaxPamirZone({
       animationManager: this.animationManager,
@@ -144,7 +158,6 @@ class PaxPamir implements PaxPamirGame {
         element: tplCard({ cardId: card.id }),
       }))
     );
-  
 
     this.tooltipManager = new PPTooltipManager(this);
     this.playerManager = new PlayerManager(this);
@@ -430,6 +443,19 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
+  // Sets player order with current player at index 0 if player is in the game
+  setupPlayerOrder({ paxPamirPlayerOrder }: { paxPamirPlayerOrder: number[] }) {
+    const currentPlayerId = this.getPlayerId();
+    const isInGame = paxPamirPlayerOrder.includes(currentPlayerId);
+    if (isInGame) {
+      while (paxPamirPlayerOrder[0] !== currentPlayerId) {
+        const firstItem = paxPamirPlayerOrder.shift();
+        paxPamirPlayerOrder.push(firstItem);
+      }
+    }
+    this.playerOrder = paxPamirPlayerOrder;
+  }
+
   // TODO: check if we can make below functions a single function and just update both since framework
   // will only show one?
   clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
@@ -459,7 +485,7 @@ class PaxPamir implements PaxPamirGame {
   // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
 
   /* @Override */
-  format_string_recursive(log: string, args: Record<string,unknown>): string {
+  format_string_recursive(log: string, args: Record<string, unknown>): string {
     try {
       if (log && args && !args.processed) {
         args.processed = true;
@@ -548,6 +574,16 @@ class PaxPamir implements PaxPamirGame {
     // debug('Loading complete');
     this.cancelLogs(this.gamedatas.canceledNotifIds);
   }
+
+  
+	// updatePlayerOrdering() {
+  //   console.log('updatePlayerOrdering');
+  //   (this as any).inherited(arguments);
+  //   // if (this.gameOptions.wakhanEnabled) {
+  //   //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
+  //   //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
+  //   // }
+	// }
 
   // .########..#######......######..##.....##.########..######..##....##
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.

@@ -19,6 +19,7 @@
 - Points disk not on center of pts
 
 ## Bugs
+- When moving after clicking 'pay bribe' the confirm button is missing and will only appear after all moves are done
 - Check why undo after last loyalty pick during setup results in crossed log
 - Check zIndex of tokens on the board
 - purchasing cards when suit is military => first rupee appears instantly, only 2nd is animated
@@ -29,6 +30,8 @@
 
 
 ## To check
+- Check undo functionality of Akropolis for improvements?
+
 - Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
 - Check totals in player panels. Seem to be off for cylinders
 - do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args

@@ -233,16 +233,28 @@ trait DispatchActionTrait
     $this->changeLoyaltyReturnGiftsDiscardPrizes($action);
   }
 
+  /**
+   * Transition to next state. 
+   * Data:
+   * - pop: set to true if actions needs to be popped from stack. Will also pop if not set at all
+   * - giveExtraTime: set if player needs to receive extra time
+   */
   function dispatchTransition($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
+    $playerId = $next['playerId'];
+
     $popSet = isset($next['data']['pop']);
     if (!$popSet || ($popSet && $next['data']['pop'])) {
       array_pop($actionStack);
     }
+    $giveExtraTimeSet = isset($next['data']['giveExtraTime']);
+    if ($giveExtraTimeSet && $next['data']['giveExtraTime']) {
+      $this->giveExtraTime($playerId);
+    }
 
     ActionStack::set($actionStack);
-    $this->nextState($next['data']['transition'], $next['playerId']);
+    $this->nextState($next['data']['transition'], $playerId);
   }
 
   function dispatchUpdateInfluence($actionStack)

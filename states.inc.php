@@ -63,7 +63,7 @@ $machinestates = array(
         "type" => "manager",
         "action" => "stGameSetup",
         "transitions" => array(
-            "" => ST_PLAYER_SETUP
+            "" => ST_DISPATCH_ACTION
         )
     ),
 
@@ -76,7 +76,7 @@ $machinestates = array(
         "type" => "activeplayer",
         "possibleactions" => array("chooseLoyalty"),
         "transitions" => array(
-            "next" => ST_NEXT_PLAYER
+            "dispatchAction" => ST_DISPATCH_ACTION,
         )
     ),
 
@@ -132,10 +132,13 @@ $machinestates = array(
             "placeRoad" => ST_PLACE_ROAD,
             "placeSpy" => ST_PLACE_SPY,
             "playerActions" => ST_PLAYER_ACTIONS,
+            "playerSetup" => ST_PLAYER_SETUP,
+            "prepareNextTurn" => ST_PREPARE_TURN,
             "refillMarket" => ST_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             'startOfTurnAbilities' => ST_START_OF_TURN_ABILITIES,
+            'wakhanTurn' => ST_WAKHAN_TURN,
         )
     ),
 
@@ -328,6 +331,18 @@ $machinestates = array(
         "possibleactions" => ["eventCardRumor"],
         "transitions" => [
             "dispatchAction" => ST_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_WAKHAN_TURN => [
+        'name' => 'wakhanTurn',
+        'description' => '',
+        'descriptionmyturn' => '',
+        'type' => 'game',
+        'action' => 'stWakhanTurn',
+        "transitions" => [
+            "prepareNextTurn" => ST_PREPARE_TURN,
+            // "dispatchAction" => ST_DISPATCH_ACTION,
         ]
     ],
 

@@ -42,6 +42,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Market;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -83,6 +84,7 @@ class Paxpamir extends Table
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
+    use PaxPamir\States\WakhanTurnTrait;
 
     // Declare objects from material.inc.php to remove IntelliSense errors
     public $borders;
@@ -116,12 +118,12 @@ class Paxpamir extends Table
 
     public function getGameOptionValue($optionId)
     {
-      $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
-      $val = $query
-        ->where('global_id', $optionId)
-        ->get()
-        ->first();
-      return is_null($val) ? null : $val['global_value'];
+        $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
+        $val = $query
+            ->where('global_id', $optionId)
+            ->get()
+            ->first();
+        return is_null($val) ? null : $val['global_value'];
     }
 
     /*
@@ -136,6 +138,12 @@ class Paxpamir extends Table
         Globals::setupNewGame($players, $options);
         Preferences::setupNewGame($players, $options);
         Players::setupNewGame($players, $options);
+        foreach (Players::getAll() as $playerId => $player) {
+            PaxPamirPlayers::setupPlayer($player);
+        };
+        if (Globals::getWakhanEnabled()) {
+            PaxPamirPlayers::setupWakhan();
+        }
         Cards::setupNewGame($players, $options);
         Tokens::setupNewGame($players, $options);
         Market::setupNewGame($players, $options);
@@ -154,7 +162,41 @@ class Paxpamir extends Table
         /************ End of the game initialization *****/
 
 
-        $this->activeNextPlayer();
+        // $this->activeNextPlayer();
+        ActionStack::set($this->createSetupActions());
+    }
+
+    public function createSetupActions()
+    {
+        $actionStack = [];
+        $players = PaxPamirPlayers::getAll()->toArray();
+        usort($players, function ($a, $b) {
+            return $b->getNo() - $a->getNo();
+        });
+        if (Globals::getWakhanEnabled()) {
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, WAKHAN_PLAYER_ID, [
+                'transition' => 'wakhanTurn'
+            ]);
+        } else {
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $players[0]->getId(), [
+                'transition' => 'prepareNextTurn',
+                'giveExtraTime' => true,
+            ]);
+        }
+        foreach ($players as $index => $player) {
+            $playerId = $player->getId();
+            if ($playerId === WAKHAN_PLAYER_ID) {
+                continue;
+              }
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+                'transition' => 'playerSetup',
+                'giveExtraTime' => true,
+                'pop' => false,
+            ]);
+        }
+
+        Notifications::log('actionStack', $actionStack);
+        return $actionStack;
     }
 
     /*
@@ -179,6 +221,7 @@ class Paxpamir extends Table
             // TODO (Frans): data from material.inc.php. We might also replace this?
             'gameOptions' => [
                 'openHands' => Globals::getOpenHands(),
+                'wakhanEnabled' => Globals::getWakhanEnabled(),
             ],
             'staticData' => [
                 'borders' => $this->borders,
@@ -188,6 +231,8 @@ class Paxpamir extends Table
                 'specialAbilities' => $this->specialAbilities,
                 'suits' => $this->suits,
             ],
+            'paxPamirPlayers' => PaxPamirPlayers::getUiData($pId),
+            'paxPamirPlayerOrder' => PaxPamirPlayers::getPlayerOrder(),
             'players' => Players::getUiData($pId),
             'map' => Map::getUiData(),
             'market' => Market::getUiData(),
@@ -209,6 +254,8 @@ class Paxpamir extends Table
             ],
             'tempDiscardPile' => Cards::getTopOf(TEMP_DISCARD),
         ];
+
+        // Is below needed?
         $activePlayerId = Players::getActiveId();
         $data['localState'] = [
             'activePlayer' => $data['players'][$activePlayerId],
@@ -318,7 +365,7 @@ class Paxpamir extends Table
         }
 
         $pId = is_null($pId) || is_int($pId) ? $pId : $pId->getId();
-        if (is_null($pId) || $pId == $this->getActivePlayerId()) {
+        if (is_null($pId) || $pId == $this->getActivePlayerId() || $pId === WAKHAN_PLAYER_ID) {
             $this->gamestate->nextState($transition);
         } else {
             if ($state['type'] == 'game') {

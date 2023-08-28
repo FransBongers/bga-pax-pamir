@@ -68,7 +68,8 @@ class Cards extends \PaxPamir\Helpers\Pieces
    */
   public static function setupNewGame($players, $options)
   {
-    self::createDeck(count($players));
+    $wakhan = Globals::getWakhanEnabled() ? 1 : 0;
+    self::createDeck(count($players) + $wakhan);
   }
 
   private function createDeck($player_count)

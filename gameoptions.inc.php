@@ -40,6 +40,29 @@ $game_options = [
                 'tmdisplay' => totranslate('Open hands'),
             ]
         ]
+    ],
+    OPTION_WAKHAN => [
+        'name' => totranslate('Wakhan opponent'),
+        'values' => [
+            OPTION_WAKHAN_DISABLED => [
+                'name' => totranslate('Disabled'),
+            ],
+            OPTION_WAKHAN_ENABLED => [
+                'name' => totranslate('Enabled'),
+                'tmdisplay' => totranslate('Wakhan opponent'),
+            ]
+        ],
+        'displaycondition' => [
+            // [
+            //     'type' => 'minplayers',
+            //     'value' => 1
+            // ],
+            [
+                'type' => 'maxplayers',
+                'value' => [1,2]
+            ],
+        ]
+            
     ]
 ];
 

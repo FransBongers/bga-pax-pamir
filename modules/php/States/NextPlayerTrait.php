@@ -2,6 +2,8 @@
 namespace PaxPamir\States;
 
 use PaxPamir\Core\Globals;
+use PaxPamir\Core\Notifications;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 
 trait NextPlayerTrait
@@ -9,12 +11,13 @@ trait NextPlayerTrait
   function stNextPlayer()
   {
     $setup = Globals::getSetup();
-    self::dump("setup in stNextPlayer", $setup);
+
     // Active next player
     if ($setup == 1) {
       // setup
-      $playerId = self::activeNextPlayer();
-      if (Players::get($playerId)->getLoyalty() == null) {
+      $playerId = self::activeNextPlayer(); // TODO: replace with custom method that checks for Wakhan
+      Notifications::log('loyalty in next player',PaxPamirPlayers::get($playerId)->getLoyalty());
+      if (PaxPamirPlayers::get($playerId)->getLoyalty() === null) {
         // choose next loyalty
         $this->giveExtraTime($playerId);
 

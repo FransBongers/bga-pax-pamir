@@ -16,21 +16,18 @@ use PaxPamir\Managers\Players;
  * Player: all utility functions concerning a player
  */
 
-class Player extends \PaxPamir\Helpers\DB_Model
+class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
 {
-  protected $table = 'player';
+  protected $table = 'player_extra';
   protected $primary = 'player_id';
   protected $attributes = [
     'id' => ['player_id', 'int'],
     'no' => ['player_no', 'int'],
-    'avatar' => 'player_avatar',
     'name' => 'player_name',
     'color' => 'player_color',
-    'eliminated' => 'player_eliminated',
     'score' => ['player_score', 'int'],
-    'zombie' => 'player_zombie',
-    'loyalty' => 'loyalty',
-    'rupees' => ['rupees', 'int'],
+    'loyalty' => 'player_loyalty',
+    'rupees' => ['player_rupees', 'int'],
   ];
 
   /*

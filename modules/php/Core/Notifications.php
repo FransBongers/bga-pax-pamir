@@ -312,6 +312,18 @@ class Notifications
     ]);
   }
 
+  public static function setupLoyalty($player,$coalition) {
+
+    $coalitionName = Game::Get()->loyalty[$coalition]['name'];
+    self::notifyAll("changeLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
+      'player' => $player,
+      'coalition' => $coalition,
+      'coalitionName' => $coalitionName,
+      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
+      'i18n' => ['coalitionName'],
+    ));
+  }
+
   public static function moveCard($message, $messageArgs, $action, $move)
   {
     self::notifyAll(

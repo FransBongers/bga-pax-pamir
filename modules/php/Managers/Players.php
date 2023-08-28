@@ -40,17 +40,6 @@ class Players extends \PaxPamir\Helpers\DB_Manager
     foreach ($players as $pId => $player) {
       $color = array_shift($colors);
       $values[] = [$pId, $color, $player['player_canal'], $player['player_name'], $player['player_avatar'], 0, 4];
-
-      Tokens::create([
-        [
-          "id" => "cylinder_" . $pId . "_{INDEX}",
-          "nbr" => 10,
-          "nbrStart" => 1,
-          "location" => "cylinders_" . $pId,
-          "used" => 0,
-        ]
-      ]);
-      Tokens::shuffle("cylinders_" . $pId);
     }
     $query->values($values);
 

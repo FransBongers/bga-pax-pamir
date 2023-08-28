@@ -46,36 +46,36 @@ class view_paxpamir_paxpamir extends game_view
         // self::dump( "current_player_id", $current_player_id );
 
         // Player tableas
-        $this->page->begin_block( "paxpamir_paxpamir", "player_tableau" );
+        // $this->page->begin_block( "paxpamir_paxpamir", "player_tableau" );
         
-        // Make sure player tableaus are in order with current player at the top.
-        // If current player is spectator tableaus are in player order
-        if (isset($players [$current_player_id])) { // may be not set if spectator
-            $player_id = $current_player_id;
-        } else {
-            $player_id = $this->game->getNextPlayerTable()[0];
-        }
+        // // Make sure player tableaus are in order with current player at the top.
+        // // If current player is spectator tableaus are in player order
+        // if (isset($players [$current_player_id])) { // may be not set if spectator
+        //     $player_id = $current_player_id;
+        // } else {
+        //     $player_id = $this->game->getNextPlayerTable()[0];
+        // }
 
-        for ($x = 0; $x < $players_nbr; $x++) {
-            $this->page->insert_block("player_tableau", array (
-                "player_id" => $player_id,
-                "player_name" => $players[$player_id]['player_name'],
-                "player_color" => $players[$player_id]['player_color']
-            ));            
-            $player_id = $this->game->getPlayerAfter($player_id);
-        }
+        // for ($x = 0; $x < $players_nbr; $x++) {
+        //     $this->page->insert_block("player_tableau", array (
+        //         "player_id" => $player_id,
+        //         "player_name" => $players[$player_id]['player_name'],
+        //         "player_color" => $players[$player_id]['player_color']
+        //     ));            
+        //     $player_id = $this->game->getPlayerAfter($player_id);
+        // }
 
-        // Player hand
-        $this->page->begin_block( "paxpamir_paxpamir", "player_hand" );
+        // // Player hand
+        // $this->page->begin_block( "paxpamir_paxpamir", "player_hand" );
         
-        // only add if current player is playing and nog a spectator
-        if (isset($players [$current_player_id])) { // may be not set if spectator
-            $player_id = $current_player_id;
-            $this->page->insert_block("player_hand", array (
-                "player_id" => $player_id,
-                "player_name" => $players[$player_id]['player_name']
-            )); 
-        } 
+        // // only add if current player is playing and nog a spectator
+        // if (isset($players [$current_player_id])) { // may be not set if spectator
+        //     $player_id = $current_player_id;
+        //     $this->page->insert_block("player_hand", array (
+        //         "player_id" => $player_id,
+        //         "player_name" => $players[$player_id]['player_name']
+        //     )); 
+        // } 
 
         // Market containers for stock component
         $this->page->begin_block( "paxpamir_paxpamir", "market" );

@@ -25,6 +25,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "setup" => "int",
     "specialAbilityData" => "obj",
     "openHands" => 'bool',
+    "wakhanEnabled" => 'bool',
   ];
 
   protected static $table = 'global_variables';
@@ -166,5 +167,6 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setNegotiatedBribe([]);
     self::setActionStack([]);
     self::setOpenHands(($options[\PaxPamir\OPTION_OPEN_HANDS] ?? null) == \PaxPamir\OPTION_OPEN_HANDS_ENABLED);
+    self::setWakhanEnabled(($options[\PaxPamir\OPTION_WAKHAN] ?? null) == \PaxPamir\OPTION_WAKHAN_ENABLED);
   }
 }

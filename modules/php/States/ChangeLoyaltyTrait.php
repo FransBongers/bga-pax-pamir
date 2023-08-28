@@ -10,12 +10,52 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Models\PaxPamirPlayer;
 
 trait ChangeLoyaltyTrait
 {
 
+  //  .########..##..........###....##....##.########.########.
+  //  .##.....##.##.........##.##....##..##..##.......##.....##
+  //  .##.....##.##........##...##....####...##.......##.....##
+  //  .########..##.......##.....##....##....######...########.
+  //  .##........##.......#########....##....##.......##...##..
+  //  .##........##.......##.....##....##....##.......##....##.
+  //  .##........########.##.....##....##....########.##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  /**
+   * Part of set up when players need to select loyalty.
+   */
+  function chooseLoyalty($coalition)
+  {
+    self::checkAction('chooseLoyalty');
+
+    $player = PaxPamirPlayers::get();
+    $playerId = $player->getId();
+
+    $actionStack = ActionStack::get();
+    $action = array_pop($actionStack);
+
+    if ($action['playerId'] !== $playerId) {
+      throw new \feException("Not a valid action for player");
+    }
+
+    PaxPamirPlayers::setLoyalty($playerId, $coalition);
+    Notifications::setupLoyalty($player,$coalition);
+
+    ActionStack::next($actionStack);
+  }
 
   // .########..####..######..########.....###....########..######..##.....##
   // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
@@ -50,7 +90,7 @@ trait ChangeLoyaltyTrait
     foreach (Game::get()->regions as $region => $regionInfo) {
       Map::checkRulerChange($region);
     }
-    
+
 
     $this->nextState('dispatchAction');
   }

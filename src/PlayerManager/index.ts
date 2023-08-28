@@ -23,8 +23,8 @@ class PlayerManager {
     this.game = game;
     this.players = {};
 
-    for (const playerId in game.gamedatas.players) {
-      const player = game.gamedatas.players[playerId];
+    for (const playerId in game.gamedatas.paxPamirPlayers) {
+      const player = game.gamedatas.paxPamirPlayers[playerId];
       console.log('playerId type',typeof playerId);
       // console.log("playerManager", playerId, player);
       if (Number(playerId) !== 1) {
@@ -48,7 +48,7 @@ class PlayerManager {
   }
 
   updatePlayers({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    for (const playerId in gamedatas.players) {
+    for (const playerId in gamedatas.paxPamirPlayers) {
       this.players[playerId].updatePlayer({ gamedatas });
     }
   }

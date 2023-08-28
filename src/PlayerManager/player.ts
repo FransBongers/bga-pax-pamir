@@ -73,7 +73,7 @@ class PPPlayer {
   // ..######..########....##.....#######..##.......
 
   updatePlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    const playerGamedatas = gamedatas.players[this.playerId];
+    const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
@@ -90,7 +90,7 @@ class PPPlayer {
 
   // Setup functions
   setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    const playerGamedatas = gamedatas.players[this.playerId];
+    const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     this.setupHand({ hand: playerGamedatas.hand });
     this.setupCourt({ playerGamedatas });
@@ -174,7 +174,7 @@ class PPPlayer {
           const playerId = cylinder.id.split('_')[1];
           return {
             id: cylinder.id,
-            element: tplCylinder({ id: cylinder.id, color: this.game.gamedatas.players[playerId].color }),
+            element: tplCylinder({ id: cylinder.id, color: this.game.gamedatas.paxPamirPlayers[playerId].color }),
           };
         })
       );

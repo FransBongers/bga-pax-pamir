@@ -39,6 +39,18 @@ const ST_CALCULATE_TIE_BREAKER = 98;
 const ST_END_GAME = 99;
 
 
+/**
+ * Player color map
+ */
+const COLOR_MAP = [
+  '98B3C0' => 'blue',
+  'C19B9E' => 'red',
+  'DFCFB6' => 'yellow',
+  'B9B6B1' => 'gray',
+  '807F7F' => 'black',
+  'C3B1D6' => 'purple'
+];
+
 
 /**
  * Actions 

@@ -1715,8 +1715,8 @@ var VpTrack = (function () {
                 pattern: 'ellipticalFit',
             });
         }
-        for (var playerId in gamedatas.players) {
-            var player = gamedatas.players[playerId];
+        for (var playerId in gamedatas.paxPamirPlayers) {
+            var player = gamedatas.paxPamirPlayers[playerId];
             var zone = this.getZone(player.score);
             zone.placeInZone({
                 id: "vp_cylinder_".concat(playerId),
@@ -1823,7 +1823,7 @@ var PPPlayer = (function () {
     }
     PPPlayer.prototype.updatePlayer = function (_a) {
         var gamedatas = _a.gamedatas;
-        var playerGamedatas = gamedatas.players[this.playerId];
+        var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupEvents({ playerGamedatas: playerGamedatas });
         this.setupPrizes({ playerGamedatas: playerGamedatas });
@@ -1837,7 +1837,7 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
-        var playerGamedatas = gamedatas.players[this.playerId];
+        var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
         this.setupHand({ hand: playerGamedatas.hand });
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupEvents({ playerGamedatas: playerGamedatas });
@@ -1917,7 +1917,7 @@ var PPPlayer = (function () {
                             var playerId = cylinder.id.split('_')[1];
                             return {
                                 id: cylinder.id,
-                                element: tplCylinder({ id: cylinder.id, color: _this.game.gamedatas.players[playerId].color }),
+                                element: tplCylinder({ id: cylinder.id, color: _this.game.gamedatas.paxPamirPlayers[playerId].color }),
                             };
                         }));
                         return [2];
@@ -2639,7 +2639,7 @@ var PPWakhan = (function () {
     };
     PPWakhan.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
-        var playerGamedatas = gamedatas.players[this.playerId];
+        var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
     };
     return PPWakhan;
 }());
@@ -2648,8 +2648,8 @@ var PlayerManager = (function () {
         console.log('Constructor PlayerManager');
         this.game = game;
         this.players = {};
-        for (var playerId in game.gamedatas.players) {
-            var player = game.gamedatas.players[playerId];
+        for (var playerId in game.gamedatas.paxPamirPlayers) {
+            var player = game.gamedatas.paxPamirPlayers[playerId];
             console.log('playerId type', typeof playerId);
             if (Number(playerId) !== 1) {
                 this.players[playerId] = new PPPlayer({ player: player, game: this.game });
@@ -2668,7 +2668,7 @@ var PlayerManager = (function () {
     };
     PlayerManager.prototype.updatePlayers = function (_a) {
         var gamedatas = _a.gamedatas;
-        for (var playerId in gamedatas.players) {
+        for (var playerId in gamedatas.paxPamirPlayers) {
             this.players[playerId].updatePlayer({ gamedatas: gamedatas });
         }
     };
@@ -2850,7 +2850,7 @@ var Region = (function () {
                 id: id,
                 element: tplCylinder({
                     id: id,
-                    color: _this.game.gamedatas.players[id.split('_')[1]].color,
+                    color: _this.game.gamedatas.paxPamirPlayers[id.split('_')[1]].color,
                 }),
             });
         });

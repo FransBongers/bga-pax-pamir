@@ -85,7 +85,7 @@ class PPWakhan {
 
   // Setup functions
   setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    const playerGamedatas = gamedatas.players[this.playerId];
+    const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     // this.setupHand({ hand: playerGamedatas.hand });
     // this.setupCourt({ playerGamedatas });

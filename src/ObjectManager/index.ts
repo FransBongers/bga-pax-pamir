@@ -316,8 +316,8 @@ class VpTrack {
     }
 
     // Add cylinders
-    for (const playerId in gamedatas.players) {
-      const player = gamedatas.players[playerId];
+    for (const playerId in gamedatas.paxPamirPlayers) {
+      const player = gamedatas.paxPamirPlayers[playerId];
       const zone = this.getZone(player.score);
       zone.placeInZone({
         id: `vp_cylinder_${playerId}`,

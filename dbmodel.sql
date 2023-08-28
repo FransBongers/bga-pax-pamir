@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `player_extra` (
   `player_id` int(10) unsigned NOT NULL,
   `player_name` varchar(32) NOT NULL,
   `player_avatar` varchar(10) NOT NULL,
+  `player_hex_color` varchar(6) NOT NULL,
   `player_color` varchar(6) NOT NULL,
   `player_no` int(10) NOT NULL,
   `player_score` int(10) NOT NULL DEFAULT '0',

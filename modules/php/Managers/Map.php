@@ -54,7 +54,7 @@ class Map
   public static function determineRuler($region)
   {
     $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
-    $playerIds = Players::getAll()->getIds();
+    $playerIds = PaxPamirPlayers::getAll()->getIds();
     $rulingPieces = array();
     $tribesPerPlayer = array();
     foreach ($playerIds as $playerId) {
@@ -76,7 +76,7 @@ class Map
     }
 
     foreach ($playerIds as $playerId) {
-      $loyalty = Players::get($playerId)->getLoyalty();
+      $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
       $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
     };
 

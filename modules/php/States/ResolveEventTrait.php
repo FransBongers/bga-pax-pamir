@@ -11,6 +11,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -65,8 +66,8 @@ trait ResolveEventTrait
     $selectedPlayerId = intval($selectedPlayerId);
 
 
-    $selectedPlayer = Players::get($selectedPlayerId);
-    $player = Players::get();
+    $selectedPlayer = PaxPamirPlayers::get($selectedPlayerId);
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     if ($playerId === $selectedPlayerId) {
@@ -107,7 +108,7 @@ trait ResolveEventTrait
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('${player_name} removes all tribes and armies from ${logTokenRegionName}');
-    Notifications::returnAllToSupply(Players::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId),], $regionId, $armies, $tribeResult['tribes']);
+    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId),], $regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     if (count($tribeResult['actions']) > 0) {
       $actionStack = array_merge($actionStack, $tribeResult['actions']);
@@ -122,11 +123,11 @@ trait ResolveEventTrait
     self::checkAction('eventCardRumor');
     $actionStack = ActionStack::get();
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     $selectedPlayerId = intval($selectedPlayerId);
-    $selectedPlayer = Players::get($selectedPlayerId);
+    $selectedPlayer = PaxPamirPlayers::get($selectedPlayerId);
 
     $message = clienttranslate('${player_name} chooses ${player_name2}');
 

@@ -10,6 +10,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -37,13 +38,14 @@ trait EndGameTrait
    */
   function stCalculateTieBreaker()
   {
-    $players = Players::getAll()->toArray();
+    $players = PaxPamirPlayers::getAll()->toArray();
 
     foreach($players as $index => $player) {
       $militaryTotal = $player->getSuitTotals()[MILITARY];
       $rupees = $player->getRupees();
-      
+      // TODO: handle Wakhan
       $playerScoreAux = $militaryTotal * 100 + $rupees;
+      Players::setPlayerScore($player->getId(),$player->getScore());
       Players::setPlayerScoreAux($player->getId(),$playerScoreAux);
     }
     $this->nextState('endGame');

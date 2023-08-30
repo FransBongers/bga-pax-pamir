@@ -11,6 +11,7 @@ use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -77,7 +78,7 @@ trait BribeTrait
      * player has amount
      * card has action
      */
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $card = Cards::get($cardId);
     if ($action === 'playCard' && $card['location'] !== Locations::hand($playerId)) {
@@ -150,7 +151,7 @@ trait BribeTrait
     $bribeState = Globals::getNegotiatedBribe();
     Notifications::log('amount', $amount);
     Notifications::log('bribeState', $bribeState);
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $bribeeId = $bribeState['bribee']['playerId'];
     $briberId = $bribeState['briber']['playerId'];
@@ -205,7 +206,7 @@ trait BribeTrait
     self::checkAction('declineBribe');
 
     $bribeState = Globals::getNegotiatedBribe();
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $isBribee = $bribeState['bribee']['playerId'] === $playerId;
     $declinedAmount = $isBribee ? $bribeState['briber']['currentAmount'] : $bribeState['bribee']['currentAmount'];
@@ -263,8 +264,8 @@ trait BribeTrait
   function payBribe($briberId, $bribeeId, $amount)
   {
     if ($amount > 0) {
-      Players::incRupees($bribeeId, $amount);
-      Players::incRupees($briberId, -$amount);
+      PaxPamirPlayers::incRupees($bribeeId, $amount);
+      PaxPamirPlayers::incRupees($briberId, -$amount);
       Notifications::payBribe($briberId, $bribeeId, $amount);
     }
   }

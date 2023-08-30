@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -81,7 +82,7 @@ trait SelectPieceTrait
     $availablePieces = [];
 
     if (in_array($action['type'], [DISPATCH_PLACE_ARMY, DISPATCH_PLACE_ROAD])) {
-      $loyalty = Players::get($playerId)->getLoyalty();
+      $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
       $availablePieces = Tokens::getOfType('block_' . $loyalty);
     } else if (in_array($action['type'], [DISPATCH_PLACE_CYLINDER, DISPATCH_IMPACT_ICON_SPY])) {
       $availablePieces = Tokens::getOfType('cylinder_' . $playerId);

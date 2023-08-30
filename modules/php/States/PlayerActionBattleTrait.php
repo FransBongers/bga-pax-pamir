@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -45,7 +46,7 @@ trait PlayerActionBattleTrait
 
     $this->isValidCardAction($cardInfo, BATTLE);
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     $resolved = $this->resolveBribe($cardInfo, $player, BATTLE, $offeredBribeAmount);
     if (!$resolved) {
@@ -87,7 +88,7 @@ trait PlayerActionBattleTrait
     }
 
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $loyalty = $player->getLoyalty();
     $numberOfLoyalPieces = $this->getNumberOfLoyalArmies($player, $location);
     // Needs loyal pieces to remove enemy pieces
@@ -107,7 +108,7 @@ trait PlayerActionBattleTrait
       if ($isBlock && $splitTokenId[1] === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
-      if ($isCylinder && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
+      if ($isCylinder && PaxPamirPlayers::get($splitTokenId[1])->getLoyalty() === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
       if ($location === KABUL && $isCylinder && Cards::get(SA_CITADEL_KABUL_CARD_ID)['location'] === Locations::court($splitTokenId[1])) {
@@ -187,7 +188,7 @@ trait PlayerActionBattleTrait
 
   function resolveBattleOnCourtCard($cardInfo, $location, $removedPieces)
   {
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     if ($this->getNumberLoyalSpies($player, $location) < count($removedPieces)) {
       throw new \feException("Not enough loyal pieces");
@@ -197,7 +198,7 @@ trait PlayerActionBattleTrait
     foreach ($removedPieces as $index => $tokenId) {
       $splitTokenId = explode("_", $tokenId);
 
-      if (Players::get($splitTokenId[1])->hasSpecialAbility(SA_INDISPENSABLE_ADVISORS)) {
+      if (PaxPamirPlayers::get($splitTokenId[1])->hasSpecialAbility(SA_INDISPENSABLE_ADVISORS)) {
         throw new \feException("Player's spies can not be removed in battles with other spies");
       }
       $tokenInfo = Tokens::get($tokenId);
@@ -284,7 +285,7 @@ trait PlayerActionBattleTrait
     $loyalArmies = array_values(array_filter($armiesInLocation, function ($army) use ($loyalty) {
       return explode("_", $army['id'])[1] === $loyalty;
     }));
-    // $player = Players::get(); // to check: is there a reason we get $player again?
+    // $player = PaxPamirPlayers::get(); // to check: is there a reason we get $player again?
     $extraPiecesActive = 0;
     if (Events::isNationalismActive($player)) {
       $extraPiecesActive += count(Map::getPlayerTribesInRegion($location, $player));

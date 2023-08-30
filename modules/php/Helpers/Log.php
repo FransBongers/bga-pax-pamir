@@ -125,7 +125,7 @@ class Log extends \APP_DbObject
         ->run();
 
       $notifIds = self::getCanceledNotifIds();
-      Notifications::clearTurn(Players::getCurrent(), $notifIds);
+      Notifications::clearTurn(PaxPamirPlayers::getCurrent(), $notifIds);
     }
 
     // // Notify

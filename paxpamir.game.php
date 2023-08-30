@@ -210,7 +210,7 @@ class Paxpamir extends Table
     */
     public function getAllDatas($pId = null)
     {
-        $pId = $pId ?? Players::getCurrentId();
+        $pId = $pId ?? PaxPamirPlayers::getCurrentId();
 
         $deck = Cards::getInLocation(DECK)->toArray();
         $deckCount = count($deck);
@@ -256,7 +256,7 @@ class Paxpamir extends Table
         ];
 
         // Is below needed?
-        $activePlayerId = Players::getActiveId();
+        $activePlayerId = PaxPamirPlayers::getActiveId();
         $data['localState'] = [
             'activePlayer' => $data['players'][$activePlayerId],
             // 'favoredSuit' => $data['favoredSuit'],
@@ -290,7 +290,7 @@ class Paxpamir extends Table
          * Progression is calculated as the number of cards that has left the deck since game start
          */
 
-        $playerCount = Players::count();
+        $playerCount = PaxPamirPlayers::count();
         // -2 because 10 event / dominance check cards are added and 12 cards are dealt to the market
         $cardsInDeckStartGame = (5 + $playerCount) * 6 - 2;
         $deckCount = Cards::countInLocation(DECK);

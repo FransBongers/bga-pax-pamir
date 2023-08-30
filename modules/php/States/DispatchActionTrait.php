@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -196,10 +197,10 @@ trait DispatchActionTrait
     $card = Cards::get($current['data']['cardId']);
     $this->resolveDiscardCard(
       $card,
-      Players::get($current['playerId']),
+      PaxPamirPlayers::get($current['playerId']),
       COURT,
       $card['prize'] !== null ? TEMP_DISCARD : DISCARD,
-      Players::get($current['data']['cardOwnerId'])
+      PaxPamirPlayers::get($current['data']['cardOwnerId'])
     );
   }
 
@@ -209,10 +210,10 @@ trait DispatchActionTrait
     ActionStack::set($actionStack);
 
     $card = Cards::get($action['data']['cardId']);
-    $player = Players::get($action['playerId']);
+    $player = PaxPamirPlayers::get($action['playerId']);
     $from = $action['data']['from'];
     $to = $action['data']['to'];
-    $cardOwner = isset($action['data']['cardOwnerId']) ? Players::get($action['data']['cardOwnerId']) : null;
+    $cardOwner = isset($action['data']['cardOwnerId']) ? PaxPamirPlayers::get($action['data']['cardOwnerId']) : null;
 
     $this->resolveDiscardCard($card, $player, $from, $to, $cardOwner);
   }

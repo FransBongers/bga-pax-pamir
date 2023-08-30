@@ -119,7 +119,7 @@ trait DebugTrait
   function debugAddCardToCourt($cardId, $playerId = null)
   {
     $card = Cards::get($cardId);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
     Cards::move($cardId, ['court', $playerId]);
     // $this->reassignCourtState($playerId);
   }
@@ -127,13 +127,13 @@ trait DebugTrait
   function debugAddCardToHand($cardId, $playerId = null)
   {
     $card = Cards::get($cardId);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
     Cards::move($cardId, ['hand', $playerId]);
   }
 
   function debugCreateArmy($region, $coalition = null)
   {
-    $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
+    $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->regions[$region] && $this->loyalty[$coalition])) {
       return;
     }
@@ -145,7 +145,7 @@ trait DebugTrait
       Tokens::move($army['id'], $this->locations['armies'][$region]);
       $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => PaxPamirPlayers::get(),
         'logTokenArmy' => Utils::logTokenArmy($coalition),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
         'move' => [
@@ -160,7 +160,7 @@ trait DebugTrait
 
   function debugCreateRoad($border, $coalition = null)
   {
-    $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
+    $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->borders[$border] && $this->loyalty[$coalition])) {
       return;
     }
@@ -173,7 +173,7 @@ trait DebugTrait
       Tokens::move($road['id'], $to);
       $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => PaxPamirPlayers::get(),
         'logTokenRoad' => Utils::logTokenRoad($coalition),
         'logTokenRegionName0' => Utils::logTokenRegionName($region0),
         'logTokenRegionName1' => Utils::logTokenRegionName($region1),
@@ -199,7 +199,7 @@ trait DebugTrait
       Tokens::move($cylinder['id'], $to);
       $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
-        'player' => Players::get($playerId),
+        'player' => PaxPamirPlayers::get($playerId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
         'move' => [
@@ -228,7 +228,7 @@ trait DebugTrait
       Tokens::move($cylinder['id'], $to);
       $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
       Notifications::moveToken($message, [
-        'player' => Players::get($playerId),
+        'player' => PaxPamirPlayers::get($playerId),
         'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
@@ -244,14 +244,14 @@ trait DebugTrait
   function debugIncPlayerRupees($rupees, $playerId = null)
   {
     $rupees = intval($rupees);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
-    Players::incRupees($playerId, $rupees);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
+    PaxPamirPlayers::incRupees($playerId, $rupees);
   }
 
   function debugIncScore($score, $playerId = null)
   {
     $score = intval($score);
-    $player = $playerId === null ? Players::get() : Players::get(intval($playerId));
+    $player = $playerId === null ? PaxPamirPlayers::get() : PaxPamirPlayers::get(intval($playerId));
     $player->incScore($score);
   }
 
@@ -302,6 +302,6 @@ trait DebugTrait
 
   function debugGetPlayerId($playerId = null)
   {
-    return $playerId === null ? Players::get()->getId() : intval($playerId);
+    return $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
   }
 }

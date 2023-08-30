@@ -10,6 +10,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -63,7 +64,7 @@ trait SASafeHouseTrait
       $state = Tokens::insertOnTop($tokenId, $to);
       $message = clienttranslate('${player_name} does not use Safe House');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => PaxPamirPlayers::get(),
         'move' => [
           'from' => $from,
           'to' => $to,
@@ -89,7 +90,7 @@ trait SASafeHouseTrait
     $state = Tokens::insertOnTop($tokenId, $to);
     $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
     Notifications::moveToken($message, [
-      'player' => Players::get(),
+      'player' => PaxPamirPlayers::get(),
       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
       'logTokenCylinder' => Utils::logTokenCylinder($playerId),
       'logTokenCardName' => Utils::logTokenCardName($card['name']),

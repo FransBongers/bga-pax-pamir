@@ -82,7 +82,7 @@ trait ChangeLoyaltyTrait
     $coalition = $action['data']['coalition'];
 
     // Players::get($playerId)->setLoyalty($coalition);
-    Players::setLoyalty($playerId, $coalition);
+    PaxPamirPlayers::setLoyalty($playerId, $coalition);
 
     Notifications::changeLoyalty($coalition);
 
@@ -106,7 +106,7 @@ trait ChangeLoyaltyTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $courtCards = $player->getCourtCards();
     $loyalty =  $player->getLoyalty();
@@ -212,7 +212,7 @@ trait ChangeLoyaltyTrait
       }
       $to = 'cylinders_' . $playerId;
       $state = Tokens::insertOnTop($tokenInLocation['id'], $to);
-      Notifications::returnCylinder(Players::get($playerId), $playerId, $location, $tokenInLocation['id'], $state, 'returnGift');
+      Notifications::returnCylinder(PaxPamirPlayers::get($playerId), $playerId, $location, $tokenInLocation['id'], $state, 'returnGift');
     };
   }
 

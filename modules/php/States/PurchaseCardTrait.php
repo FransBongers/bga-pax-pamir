@@ -11,6 +11,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -41,7 +42,7 @@ trait PurchaseCardTrait
     self::checkAction('purchaseCard');
 
     $card = Cards::get($cardId);
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $baseCost = Globals::getFavoredSuit() === MILITARY ? 2 : 1;
 
@@ -53,7 +54,7 @@ trait PurchaseCardTrait
     $rowAlt = $checkData['rowAlt'];
     $marketLocation = $checkData['marketLocation'];
 
-    Players::incRupees($playerId, -$cost);
+    PaxPamirPlayers::incRupees($playerId, -$cost);
     Globals::incRemainingActions(-1);
 
 
@@ -87,7 +88,7 @@ trait PurchaseCardTrait
 
     // add all rupees on card to player totals. Then put them in rupee_pool location
     $receivedRupees = count(Tokens::getInLocation([$marketLocation, 'rupees']));
-    Players::incRupees($playerId, $receivedRupees);
+    PaxPamirPlayers::incRupees($playerId, $receivedRupees);
     Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
     $actionStack = [
@@ -125,7 +126,7 @@ trait PurchaseCardTrait
 
   function getCardCost($column, $card, $baseCost)
   {
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
       return 0;
     };

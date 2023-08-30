@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -70,7 +71,7 @@ trait DiscardTrait
       throw new \feException("Card does not have the required loyalty");
     }
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     $explodedLocation = explode('_', $card['location']);
@@ -113,7 +114,7 @@ trait DiscardTrait
     $playerId = $next['playerId'];
     $from = $next['data']['from'];
     $loyalty = isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null;
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
     $data = $next['data'];
 
     // Determine if there are cards left to discard
@@ -152,7 +153,7 @@ trait DiscardTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $courtCards = $player->getCourtCards();
     // $loyalty =  $player->getLoyalty();
@@ -243,7 +244,7 @@ trait DiscardTrait
     $rupees = $player->getRupees();
     $amountOfRupeesToReturn = min($rupees, 2);
     if ($amountOfRupeesToReturn > 0) {
-      Players::incRupees($player->getId(), -$amountOfRupeesToReturn);
+      PaxPamirPlayers::incRupees($player->getId(), -$amountOfRupeesToReturn);
       Notifications::returnRupeesForDiscardingLeveragedCard($player, $amountOfRupeesToReturn);
     }
 
@@ -294,21 +295,4 @@ trait DiscardTrait
     };
     Notifications::returnAllSpies($player,$cardId, $spies);
   }
-
-  // function reassignCourtState($playerId = null)
-  // {
-  //   $player = Players::get($playerId);
-  //   $courtCards = $player->getCourtCards();
-  //   $courtCardStates = [];
-  //   foreach ($courtCards as $index => $card) {
-  //     $cardId = $card['id'];
-  //     $state = $index + 1;
-  //     Cards::setState($cardId, $state);
-  //     $courtCardStates[] = [
-  //       'cardId' => $cardId,
-  //       'state' => $state,
-  //     ];
-  //   };
-  //   Notifications::updateCourtCardStates($courtCardStates, $player->getId());
-  // }
 }

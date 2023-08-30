@@ -160,8 +160,8 @@ class Events
   // card_113 - purchase
   public static function backingOfPersianAristocracy($playerId)
   {
-    $player = Players::get($playerId);
-    Players::incRupees($playerId, 3);
+    $player = PaxPamirPlayers::get($playerId);
+    PaxPamirPlayers::incRupees($playerId, 3);
     Notifications::takeRupeesFromSupply($player, 3);
   }
 
@@ -175,7 +175,7 @@ class Events
 
     while (!in_array($nextPlayerId, $playerOrder)) {
       $playerOrder[] = $nextPlayerId;
-      $nextPlayerId = Players::getNextId($nextPlayerId);
+      $nextPlayerId = PaxPamirPlayers::getNextId($nextPlayerId);
     }
     $extraActions = array_map(function ($id) {
       return ActionStack::createAction(DISPATCH_DISCARD, $id, [
@@ -190,7 +190,7 @@ class Events
   public static function updateInfluence()
   {
     // recalculate influence ignoring gifts
-    $players = Players::getAll();
+    $players = PaxPamirPlayers::getAll();
     $updates = [];
     foreach ($players as $playerId => $player) {
       $updates[] = [
@@ -204,7 +204,7 @@ class Events
   // card_108
   public static function failureToImpress()
   {
-    $players = Players::getAll();
+    $players = PaxPamirPlayers::getAll();
     foreach ($players as $playerId => $player) {
       Game::get()->discardPrizes($playerId, $player->getLoyalty());
     }
@@ -221,7 +221,7 @@ class Events
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('All tribes and armies are removed from ${logTokenRegionName}');
-    Notifications::returnAllToSupply(Players::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId)],$regionId, $armies, $tribeResult['tribes']);
+    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId)],$regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult['actions'];
   }
@@ -233,31 +233,6 @@ class Events
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
-
-  // public static function confidenceFailureNextStep($currentEvent, $playerId)
-  // {
-  //   $player = Players::get($playerId);
-  //   if (in_array($playerId, $currentEvent['resolvedForPlayers'])) {
-  //     // Made full round, can get back to discardEvents
-  //     Game::get()->nextState($currentEvent['transition'], $currentEvent['activePlayerId']);
-  //     return;
-  //   }
-  //   $handCards = $player->getHandCards();
-  //   $number = count($handCards);
-  //   if ($number === 0) {
-  //     $nextPlayerId = Players::getNextId($player);
-  //     $currentEvent['resolvedForPlayers'][] = $playerId;
-  //     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
-  //   } else if ($number === 1) {
-  //     Cards::insertOnTop($handCards[0]['id'], DISCARD);
-  //     Notifications::discardFromHand($handCards[0], $player);
-  //     $nextPlayerId = Players::getNextId($player);
-  //     $currentEvent['resolvedForPlayers'][] = $playerId;
-  //     Events::confidenceFailureNextStep($currentEvent, $nextPlayerId);
-  //   } else if ($number > 1) {
-  //     Game::get()->nextState("resolveEvent", $playerId);
-  //   }
-  // }
 
   public static function getPurchasedEventLocation($event, $playerId)
   {

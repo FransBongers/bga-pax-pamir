@@ -11,6 +11,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -39,7 +40,7 @@ trait PlayerActionMoveTrait
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, MOVE);
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     $resolved = $this->resolveBribe($cardInfo, $player, MOVE, $offeredBribeAmount);
     if (!$resolved) {
@@ -246,7 +247,7 @@ trait PlayerActionMoveTrait
     if ($playerId !== intval(explode('_', $pieceId)[1])) {
       throw new \feException("Cylinder is not owned by player");
     };
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
     $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
     $courtCards = $this->getAllCourtCardsOrdered();
@@ -274,7 +275,7 @@ trait PlayerActionMoveTrait
 
   function getAllCourtCardsOrdered()
   {
-    $players = Players::getAll()->toArray();
+    $players = PaxPamirPlayers::getAll()->toArray();
     usort($players, function ($a, $b) {
       return $a->getNo() - $b->getNo();
     });

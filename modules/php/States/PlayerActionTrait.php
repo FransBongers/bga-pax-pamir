@@ -13,6 +13,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -32,7 +33,7 @@ trait PlayerActionTrait
     $bribe = Globals::getNegotiatedBribe();
     return [
       // TODO: remove activePlayer here
-      'activePlayer' => Players::getActive()->jsonSerialize(null),
+      'activePlayer' => PaxPamirPlayers::getActive()->jsonSerialize(null),
       'remainingActions' => Globals::getRemainingActions(),
       'usedCards' => Cards::getUnavailableCards(),
       'bribe' => isset($bribe['action']) ? $bribe : null,
@@ -62,9 +63,9 @@ trait PlayerActionTrait
     $playerId = $action['playerId'];
     Notifications::log('dispatchPayRupeesToMarket',$action);
     $rupeesOnCards = $this->payActionCosts($cost);
-    Players::incRupees($playerId, -$cost);
+    PaxPamirPlayers::incRupees($playerId, -$cost);
 
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     Notifications::payRupeesToMarket(
       $player,
@@ -133,7 +134,7 @@ trait PlayerActionTrait
     unset($datas['canceledNotifIds']);
 
     Notifications::smallRefreshInterface($datas);
-    $player = Players::getCurrent();
+    $player = PaxPamirPlayers::getCurrent();
     Notifications::smallRefreshHand($player);
 
     $this->gamestate->jumpToState(Globals::getLogState());
@@ -178,7 +179,7 @@ trait PlayerActionTrait
     if ($cardInfo['specialAbility'] === SA_SAVVY_OPERATOR || $cardInfo['specialAbility'] === SA_IRREGULARS) {
       return true;
     };
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $isNewTacticsActive = Events::isNewTacticsActive($player);
     if ($cardInfo['suit'] === MILITARY && $isNewTacticsActive) {
       return true;

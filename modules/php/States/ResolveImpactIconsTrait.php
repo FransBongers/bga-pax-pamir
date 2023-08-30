@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -101,7 +102,7 @@ trait ResolveImpactIconsTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
     $loyalty = $player->getLoyalty();
 
     $regionId = $action['data']['region'];
@@ -149,7 +150,7 @@ trait ResolveImpactIconsTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $pool = "cylinders_" . $playerId;
 
@@ -252,9 +253,9 @@ trait ResolveImpactIconsTrait
     ActionStack::set($actionStack);
 
     $playerId = $action['playerId'];
-    Players::incRupees($playerId, 2);
+    PaxPamirPlayers::incRupees($playerId, 2);
 
-    Notifications::leveragedCardPlay(Players::get($playerId), 2);
+    Notifications::leveragedCardPlay(PaxPamirPlayers::get($playerId), 2);
 
     $this->nextState('dispatchAction');
   }
@@ -312,7 +313,7 @@ trait ResolveImpactIconsTrait
     }
 
     $playerId = $action['playerId'];
-    $loyalty = Players::get($playerId)->getLoyalty();
+    $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
     $location = $this->locations['pools'][$loyalty];
     $road = Tokens::getTopOf($location);
     if ($road !== null) {

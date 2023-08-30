@@ -6,6 +6,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Helpers\Log;
@@ -53,7 +54,7 @@ trait TurnTrait
     // Log::checkpoint();
     Log::clearAll();
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $actionStack = [
       ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
@@ -109,7 +110,7 @@ trait TurnTrait
 
   function existsCourtCardWithoutSpy($region)
   {
-    $players = Players::getAll()->toArray();
+    $players = PaxPamirPlayers::getAll()->toArray();
     $allCourtCards = array_merge(...array_map(function ($player) {
       return $player->getCourtCards();
     }, $players));

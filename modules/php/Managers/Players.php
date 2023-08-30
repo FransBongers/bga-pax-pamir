@@ -33,13 +33,13 @@ class Players extends \PaxPamir\Helpers\DB_Manager
       'player_name',
       'player_avatar',
       'player_score',
-      'rupees'
+      // 'rupees'
     ]);
 
     $values = [];
     foreach ($players as $pId => $player) {
       $color = array_shift($colors);
-      $values[] = [$pId, $color, $player['player_canal'], $player['player_name'], $player['player_avatar'], 0, 4];
+      $values[] = [$pId, $color, $player['player_canal'], $player['player_name'], $player['player_avatar'],0];
     }
     $query->values($values);
 
@@ -78,27 +78,32 @@ class Players extends \PaxPamir\Helpers\DB_Manager
    * Workaroud function since db calls from Player model don't seem to be logged
    * TODO: check if we can handle it from Player model
    */
-  public static function incRupees($pId, $increment)
-  {
-    $value = self::get($pId)->getRupees() + $increment;
-    return self::DB()->update(['rupees' => $value], $pId);
-  }
+  // public static function incRupees($pId, $increment)
+  // {
+  //   $value = self::get($pId)->getRupees() + $increment;
+  //   return self::DB()->update(['rupees' => $value], $pId);
+  // }
 
-  public static function incScore($pId, $increment)
-  {
-    $value = self::get($pId)->getScore() + $increment;
-    return self::DB()->update(['player_score' => $value], $pId);
-  }
+  // public static function incScore($pId, $increment)
+  // {
+  //   $value = self::get($pId)->getScore() + $increment;
+  //   return self::DB()->update(['player_score' => $value], $pId);
+  // }
 
   public static function setPlayerScoreAux($pId, $value)
   {
     return self::DB()->update(['player_score_aux' => $value], $pId);
   }
 
-  public static function setLoyalty($pId, $coalition)
+  public static function setPlayerScore($pId, $value)
   {
-    return self::DB()->update(['loyalty' => $coalition], $pId);
+    return self::DB()->update(['player_score' => $value], $pId);
   }
+
+  // public static function setLoyalty($pId, $coalition)
+  // {
+  //   return self::DB()->update(['loyalty' => $coalition], $pId);
+  // }
 
   public function getMany($pIds)
   {

@@ -10,34 +10,11 @@ trait NextPlayerTrait
 {
   function stNextPlayer()
   {
-    $setup = Globals::getSetup();
+      $nextPlayerId = PaxPamirPlayers::getNextId(PaxPamirPlayers::get());
+      // TODO: check Wakhan
 
-    // Active next player
-    if ($setup == 1) {
-      // setup
-      $playerId = self::activeNextPlayer(); // TODO: replace with custom method that checks for Wakhan
-      Notifications::log('loyalty in next player',PaxPamirPlayers::get($playerId)->getLoyalty());
-      if (PaxPamirPlayers::get($playerId)->getLoyalty() === null) {
-        // choose next loyalty
-        $this->giveExtraTime($playerId);
+      $this->giveExtraTime($nextPlayerId);
 
-        $this->gamestate->nextState('setup');
-      } else {
-        // setup complete, go to player actions
-        $playerId = self::activePrevPlayer();
-        $this->giveExtraTime($playerId);
-
-        Globals::setSetup(0);
-
-        $this->gamestate->nextState('prepareNextTurn');
-      }
-    } else {
-      // player turn
-      $playerId = self::activeNextPlayer();
-      
-      $this->giveExtraTime($playerId);
-
-      $this->gamestate->nextState('prepareNextTurn');
-    }
+      $this->nextState('prepareNextTurn',$nextPlayerId);
   }
 }

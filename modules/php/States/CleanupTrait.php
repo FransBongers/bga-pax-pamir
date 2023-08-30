@@ -10,6 +10,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -48,7 +49,7 @@ trait CleanupTrait
     Cards::resetUsed();
     Tokens::resetUsed();
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     $actionStack = [
@@ -85,7 +86,7 @@ trait CleanupTrait
   {
     $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $totals = $player->getSuitTotals();
 
@@ -105,7 +106,7 @@ trait CleanupTrait
   {
     $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $totals = $player->getSuitTotals();
     $handCards = $player->getHandCards();
@@ -130,7 +131,7 @@ trait CleanupTrait
     $location = $action['data']['location'];
     $card = Cards::get($cardId);
 
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $to = in_array($cardId, ['card_106', 'card_107']) ? ACTIVE_EVENTS : DISCARD;
 

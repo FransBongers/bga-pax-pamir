@@ -68,8 +68,8 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
       'player_id' => WAKHAN_PLAYER_ID,
       'player_name' => 'Wakhan',
       'player_avatar' => '000000', // Check if we can use an avatar?
-      'player_hex_color' => 'C3B1D6',
-      'player_color' => COLOR_MAP['C3B1D6'],
+      'player_hex_color' => '8A70B2',
+      'player_color' => COLOR_MAP['8A70B2'],
       'player_no' => 2,
       'player_score' => 0,
       'player_score_aux' => 0,

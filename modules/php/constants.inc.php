@@ -43,12 +43,12 @@ const ST_END_GAME = 99;
  * Player color map
  */
 const COLOR_MAP = [
-  '98B3C0' => 'blue',
-  'C19B9E' => 'red',
-  'DFCFB6' => 'yellow',
-  'B9B6B1' => 'gray',
-  '807F7F' => 'black',
-  'C3B1D6' => 'purple'
+  '006A8F' => 'blue',
+  'AB2C29' => 'red',
+  'D7A461' => 'yellow',
+  '7A6E66' => 'gray',
+  '231F20' => 'black',
+  '8A70B2' => 'purple'
 ];
 
 

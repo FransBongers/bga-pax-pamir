@@ -1251,7 +1251,7 @@ var tplPlayerTableau = function (_a) {
 };
 var tplWakhanPlayerPanel = function (_a) {
     var name = _a.name;
-    return "<div id=\"overall_player_board_1\" class=\"player-board\">\n            <div class=\"player-name\" id=\"player_name_1\">\n              <a style=\"color: #C3B1D6\">".concat(name, "</a>\n            </div>\n            <div id=\"player_board_1\" class=\"player_board_content\">\n            </div>\n          </div>");
+    return "<div id=\"overall_player_board_1\" class=\"player-board\">\n            <div class=\"player-name\" id=\"player_name_1\">\n              <a style=\"color: #8A70B2\">".concat(name, "</a>\n            </div>\n            <div id=\"player_board_1\" class=\"player_board_content\">\n            </div>\n          </div>");
 };
 var tplWakhanTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;

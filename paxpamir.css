@@ -1750,32 +1750,32 @@ html {
 
 /* Blue */
 .pp_player_button.pp_player_color_blue {
-  background-color: #98B3C0;
+  background-color: #006A8F;
 }
 
 /* Gray */
 .pp_player_button.pp_player_color_gray {
-  background-color: #B9B6B1;
+  background-color: #7A6E66;
 }
 
 /* Yellow / tan */
 .pp_player_button.pp_player_color_yellow {
-  background-color: #DFCFB6;
+  background-color: #D7A461;
 }
 
 /* Red */
 .pp_player_button.pp_player_color_red {
-  background-color: #C19B9E;
+  background-color: #AB2C29;
 }
 
 /* Black */
 .pp_player_button.pp_player_color_black {
-  background-color: #807F7F;
+  background-color: #231F20;
 }
 
 /* Purple */
 .pp_player_button.pp_player_color_purple {
-  background-color: #C3B1D6;
+  background-color: #8A70B2;
 }
 
 .pp_player_button {

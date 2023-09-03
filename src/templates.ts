@@ -153,7 +153,7 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
 const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
   return `<div id="overall_player_board_1" class="player-board">
             <div class="player-name" id="player_name_1">
-              <a style="color: #C3B1D6">${name}</a>
+              <a style="color: #8A70B2">${name}</a>
             </div>
             <div id="player_board_1" class="player_board_content">
             </div>

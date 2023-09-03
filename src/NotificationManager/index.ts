@@ -143,7 +143,7 @@ class NotificationManager {
     if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   async notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
@@ -587,12 +587,16 @@ class NotificationManager {
 
   async notif_wakhanDrawCard({ args }: Notif<WakhanDrawCard>) {
     const { deck, discardPile } = args;
+    this.game.framework().removeTooltip('pp_wakhan_deck');
+    this.game.framework().removeTooltip('pp_wakhan_discard');
     const deckNode = dojo.byId('pp_wakhan_deck');
     const discardNode = dojo.byId('pp_wakhan_discard');
 
     // Place element on discard
 
-    const element = !discardPile.from ? discardNode :  dojo.place(`<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`, `pp_wakhan_discard`);
+    const element = !discardPile.from
+      ? discardNode
+      : dojo.place(`<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`, `pp_wakhan_discard`);
     // Execute move animation from deck
     const fromRect = $(`pp_wakhan_deck`)?.getBoundingClientRect();
 
@@ -618,22 +622,27 @@ class NotificationManager {
 
     // discardNode.classList.add(`pp_${discardPile.to}_front`);
     // if (discardPile.from) {
-      
 
     if (discardPile.from) {
-      discardNode.classList.replace(`pp_${discardPile.from}_front`,`pp_${discardPile.to}_front`);
+      discardNode.classList.replace(`pp_${discardPile.from}_front`, `pp_${discardPile.to}_front`);
       element.remove();
+    }
+    if (deck.to) {
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: deck.to, location: 'deck' });
+    }
+    if (discardPile.to) {
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: discardPile.to, location: 'discard' });
     }
   }
 
   async notif_wakhanReshuffleDeck({ args }: Notif<WakhanReshuffleDeck>) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     const { topOfDiscardPile, topOfDeck } = args;
     const deckNode = dojo.byId(`pp_wakhan_deck`);
     const discardNode = dojo.byId('pp_wakhan_discard');
     deckNode.classList.add(`pp_${topOfDeck}_back`);
     const fromRect = $(`pp_wakhan_discard`)?.getBoundingClientRect();
-        
+
     discardNode.style.opacity = '0';
     deckNode.style.opacity = '1';
     await this.game.animationManager.play(
@@ -647,7 +656,7 @@ class NotificationManager {
     // const deckNode = dojo.byId('pp_wakhan_deck');
 
     // element.remove();
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

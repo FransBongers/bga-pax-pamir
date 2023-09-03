@@ -479,6 +479,11 @@ class Paxpamir extends Table
     
     */
 
+    /**
+     * TODO: 
+     * - Changes for PaxPamirPlayers.
+     * - Updated player colors 
+     */
     function upgradeTableDb($from_version)
     {
         // $from_version is the current version of this game database, in numerical form.

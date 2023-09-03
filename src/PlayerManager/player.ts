@@ -100,7 +100,7 @@ class PPPlayer {
 
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
-    
+
     if (this.playerId !== WAKHAN_PLAYER_ID) {
       this.setupHand({ hand: playerGamedatas.hand });
       // TODO: wakhan prizes
@@ -114,7 +114,7 @@ class PPPlayer {
       this.setupPlayerHandModal();
     }
     if (this.playerId === WAKHAN_PLAYER_ID && gamedatas.wakhanCards) {
-      this.setupWakhanDeck({wakhanCards: gamedatas.wakhanCards})
+      this.setupWakhanDeck({ wakhanCards: gamedatas.wakhanCards });
     }
   }
 
@@ -414,21 +414,24 @@ class PPPlayer {
     });
   }
 
-  setupWakhanDeck({wakhanCards}: {wakhanCards: PaxPamirGamedatas['wakhanCards']}) {
+  setupWakhanDeck({ wakhanCards }: { wakhanCards: PaxPamirGamedatas['wakhanCards'] }) {
     const deckNode = dojo.byId('pp_wakhan_deck');
-    
+
     deckNode.classList.value = '';
     deckNode.classList.add('pp_wakhan_card');
     if (wakhanCards.deck.topCard !== null) {
-      deckNode.classList.add(`pp_${wakhanCards.deck.topCard.id}_back`);
+      const wakhanCardId = wakhanCards.deck.topCard.id;
+      deckNode.classList.add(`pp_${wakhanCardId}_back`);
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId, location: 'deck' });
     } else {
       deckNode.style.opacity = '0';
     }
-    
+
     const discardNode = dojo.byId('pp_wakhan_discard');
     if (wakhanCards.discardPile.topCard) {
       discardNode.classList.value = '';
-      discardNode.classList.add('pp_wakhan_card',`pp_${wakhanCards.discardPile.topCard.id}_front`);
+      discardNode.classList.add('pp_wakhan_card', `pp_${wakhanCards.discardPile.topCard.id}_front`);
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCards.discardPile.topCard.id, location: 'discard' });
     } else {
       discardNode.style.opacity = '0';
     }

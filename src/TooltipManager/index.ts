@@ -17,11 +17,11 @@
 class PPTooltipManager {
   private game: PaxPamirGame;
 
-  constructor(game) {
+  constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string; }): void {
+  public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string }): void {
     const cardInfo = this.game.getCardInfo({ cardId });
     if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({ cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
@@ -30,6 +30,11 @@ class PPTooltipManager {
       const html = tplEventCardTooltip({ cardId, cardInfo });
       this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     }
+  }
+
+  public addWakhanCardTooltip({ wakhanCardId, location }: { wakhanCardId: string; location: 'deck' | 'discard' }): void {
+    const html = tplWakhanCardTooltip({ wakhanCardId, side: location === 'deck' ? 'back' : 'front' });
+    this.game.framework().addTooltipHtml(`pp_wakhan_${location}`, html, 500);
   }
 
   // Function for setup of generic tooltips as last step of setup

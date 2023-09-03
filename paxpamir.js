@@ -1281,8 +1281,8 @@ var substituteKeywords = function (_a) {
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
 var tplCardTooltipContainer = function (_a) {
-    var cardId = _a.cardId, cardType = _a.cardType, content = _a.content;
-    return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  <div class=\"pp_card pp_card_in_tooltip pp_").concat(cardId, "\"></div>\n</div>");
+    var card = _a.card, content = _a.content;
+    return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  ").concat(card, "\n</div>");
 };
 var getImpactIconText = function (_a) {
     var impactIcon = _a.impactIcon;
@@ -1382,8 +1382,7 @@ var tplCourtCardTooltip = function (_a) {
         specialAbility = "<span class=\"pp_section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"pp_special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
     }
     return tplCardTooltipContainer({
-        cardId: cardId,
-        cardType: 'court',
+        card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
         content: "\n  <span class=\"pp_title\">".concat(cardInfo.name, "</span>\n  <span class=\"pp_flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  "),
     });
 };
@@ -1406,9 +1405,15 @@ var tplEventCardTooltipDiscarded = function (_a) {
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
     return tplCardTooltipContainer({
-        cardId: cardId,
-        cardType: 'event',
+        card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
         content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(cardInfo.discarded.title || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(cardInfo.purchased.description || '', "</span>\n  "),
+    });
+};
+var tplWakhanCardTooltip = function (_a) {
+    var wakhanCardId = _a.wakhanCardId, side = _a.side;
+    return tplCardTooltipContainer({
+        card: "<div class=\"pp_wakhan_card_in_tooltip pp_".concat(wakhanCardId, "_").concat(side, "\"></div>"),
+        content: '',
     });
 };
 var PPTooltipManager = (function () {
@@ -1426,6 +1431,11 @@ var PPTooltipManager = (function () {
             var html = tplEventCardTooltip({ cardId: cardId, cardInfo: cardInfo });
             this.game.framework().addTooltipHtml("".concat(cardId).concat(cardIdSuffix), html, 500);
         }
+    };
+    PPTooltipManager.prototype.addWakhanCardTooltip = function (_a) {
+        var wakhanCardId = _a.wakhanCardId, location = _a.location;
+        var html = tplWakhanCardTooltip({ wakhanCardId: wakhanCardId, side: location === 'deck' ? 'back' : 'front' });
+        this.game.framework().addTooltipHtml("pp_wakhan_".concat(location), html, 500);
     };
     PPTooltipManager.prototype.setupTooltips = function () {
         this.setupCardCounterTooltips();
@@ -2142,7 +2152,9 @@ var PPPlayer = (function () {
         deckNode.classList.value = '';
         deckNode.classList.add('pp_wakhan_card');
         if (wakhanCards.deck.topCard !== null) {
-            deckNode.classList.add("pp_".concat(wakhanCards.deck.topCard.id, "_back"));
+            var wakhanCardId = wakhanCards.deck.topCard.id;
+            deckNode.classList.add("pp_".concat(wakhanCardId, "_back"));
+            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCardId, location: 'deck' });
         }
         else {
             deckNode.style.opacity = '0';
@@ -2151,6 +2163,7 @@ var PPPlayer = (function () {
         if (wakhanCards.discardPile.topCard) {
             discardNode.classList.value = '';
             discardNode.classList.add('pp_wakhan_card', "pp_".concat(wakhanCards.discardPile.topCard.id, "_front"));
+            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCards.discardPile.topCard.id, location: 'discard' });
         }
         else {
             discardNode.style.opacity = '0';
@@ -6778,9 +6791,13 @@ var NotificationManager = (function () {
                 switch (_c.label) {
                     case 0:
                         deck = args.deck, discardPile = args.discardPile;
+                        this.game.framework().removeTooltip('pp_wakhan_deck');
+                        this.game.framework().removeTooltip('pp_wakhan_discard');
                         deckNode = dojo.byId('pp_wakhan_deck');
                         discardNode = dojo.byId('pp_wakhan_discard');
-                        element = !discardPile.from ? discardNode : dojo.place("<div id=\"temp_wakhan_card\" class=\"pp_wakhan_card pp_".concat(discardPile.to, "_front\"></div>"), "pp_wakhan_discard");
+                        element = !discardPile.from
+                            ? discardNode
+                            : dojo.place("<div id=\"temp_wakhan_card\" class=\"pp_wakhan_card pp_".concat(discardPile.to, "_front\"></div>"), "pp_wakhan_discard");
                         fromRect = (_b = $("pp_wakhan_deck")) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
                         deckNode.classList.remove("pp_".concat(deck.from, "_back"));
                         if (deck.to !== null) {
@@ -6803,6 +6820,12 @@ var NotificationManager = (function () {
                         if (discardPile.from) {
                             discardNode.classList.replace("pp_".concat(discardPile.from, "_front"), "pp_".concat(discardPile.to, "_front"));
                             element.remove();
+                        }
+                        if (deck.to) {
+                            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: deck.to, location: 'deck' });
+                        }
+                        if (discardPile.to) {
+                            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: discardPile.to, location: 'discard' });
                         }
                         return [2];
                 }

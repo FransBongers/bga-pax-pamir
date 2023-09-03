@@ -1,17 +1,9 @@
-const tplCardTooltipContainer = ({
-  cardId,
-  cardType,
-  content,
-}: {
-  cardId: string;
-  cardType: 'event' | 'court';
-  content: string;
-}): string => {
+const tplCardTooltipContainer = ({ card, content }: { card: string; content: string }): string => {
   return `<div class="pp_card_tooltip">
   <div class="pp_card_tooltip_inner_container">
     ${content}
   </div>
-  <div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>
+  ${card}
 </div>`;
 };
 
@@ -140,8 +132,7 @@ const tplCourtCardTooltip = ({
   }
 
   return tplCardTooltipContainer({
-    cardId,
-    cardType: 'court',
+    card: `<div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>`,
     content: `
   <span class="pp_title">${cardInfo.name}</span>
   <span class="pp_flavor_text">${(cardInfo as CourtCard).flavorText}</span>
@@ -168,8 +159,7 @@ const tplEventCardTooltipDiscarded = ({ title, description, effect }: EventCard[
 
 const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: EventCard }): string => {
   return tplCardTooltipContainer({
-    cardId,
-    cardType: 'event',
+    card: `<div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>`,
     content: `
     <span class="pp_title">${_('Event card')}</span>
     <span class="pp_flavor_text">${_(
@@ -177,10 +167,17 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
     )}</span>
     <span class="pp_section_title">${_('If discarded: ')}${cardInfo.discarded.title || ''}</span>
      ${tplEventCardTooltipDiscarded(cardInfo.discarded)} 
-    <span class="pp_section_title">${
-      cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')
-    }${cardInfo.purchased.title || ''}</span>
+    <span class="pp_section_title">${cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')}${
+      cardInfo.purchased.title || ''
+    }</span>
     <span class="pp_event_effect_text">${cardInfo.purchased.description || ''}</span>
   `,
+  });
+};
+
+const tplWakhanCardTooltip = ({ wakhanCardId, side }: { wakhanCardId: string; side: 'front' | 'back' }) => {
+  return tplCardTooltipContainer({
+    card: `<div class="pp_wakhan_card_in_tooltip pp_${wakhanCardId}_${side}"></div>`,
+    content: '',
   });
 };

@@ -151,11 +151,46 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
 }
 
 const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
-  return `<div id="player_board_wakhan" class="player-board">
+  return `<div id="overall_player_board_1" class="player-board">
             <div class="player-name" id="player_name_1">
               <a style="color: #C3B1D6">${name}</a>
             </div>
             <div id="player_board_1" class="player_board_content">
+            </div>
+          </div>`
+}
+
+const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number; playerColor: string; playerName: string;}) => {
+  return `<div id="player_tableau_${playerId}" >
+            <div class="pp_player_tableau pp_player_color_${playerColor}">
+                <div class="pp_wakhan_tableau_left">
+                    <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>
+                    <div class="pp_wakhan_deck_container">
+                      <div id="pp_wakhan_deck" class="pp_wakhan_card"></div>
+                      <div id="pp_wakhan_discard" class="pp_wakhan_card"></div>
+                    </div>
+                </div>
+                <div class="pp_player_tableau_right">
+                    <div class="pp_player_tableau_title_container">
+                        <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title"><span>${playerName}'s court</span></div>
+                        <div id="pp_tableau_title_icons_player_${playerId}" class="pp_player_tableau_icons">
+                            <div id="rupees_tableau_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_${playerId}" class="pp_icon_count"><span id="rupee_count_tableau_${playerId}_counter"></span></div></div>
+                            <div id="cards_tableau_${playerId}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_${playerId}" class="pp_icon_count"><span id="card_count_tableau_${playerId}_counter"></span></div></div>
+                        </div>
+                    </div>
+                    <div class="pp_tableau_inner_container">
+                        <div class="pp_tableau_inner_left">
+                            <div id="pp_cylinders_player_${playerId}" class="pp_cylinders pp_cylinders_player_${playerId}"></div>
+                        </div>
+                        <div class="pp_tableau_inner_right">
+                            <div id="pp_court_player_${playerId}" class="pp_court pp_court_player_${playerId}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pp_player_events_container_${playerId}" class="pp_player_events_container">
+                <div id="player_tableau_events_${playerId}">
+                </div>
             </div>
           </div>`
 }

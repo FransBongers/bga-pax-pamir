@@ -312,4 +312,20 @@ interface NotifUpdateInterfaceArgs {
   }[];
 }
 
+interface WakhanDrawCard {
+  deck: {
+    from: string;
+    to: string | null;
+  },
+  discardPile: {
+    from: string | null;
+    to: string;
+  }
+}
+
+interface WakhanReshuffleDeck {
+  topOfDeck: string;
+  topOfDiscardPile: string;
+}
+
 type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;

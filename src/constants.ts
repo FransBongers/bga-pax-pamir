@@ -217,3 +217,8 @@ const SA_RUSSIAN_INFLUENCE = 'russianInfluence'; // card_70
 const SA_INFRASTRUCTURE = 'infrastructure'; // card_78
 const SA_SAVVY_OPERATOR = 'savvyOperator'; // card_91
 const SA_IRREGULARS = 'irregulars'; // card_99
+
+/**
+ * Wakhan
+ */
+const WAKHAN_PLAYER_ID = 1;

@@ -619,6 +619,20 @@
   border-radius: 3px;
 }
 
+.pp_wakhan_deck_container {
+  display: flex;
+  padding-left: 10px;
+}
+
+.pp_wakhan_tableau_left {
+  display: flex;
+  flex-direction: column;
+}
+
+#pp_wakhan_deck {
+  margin-right: 10px;
+}
+
 .pp_player_hand {
   display: flex;
   flex-direction: column;
@@ -758,17 +772,17 @@
 
 .pp_loyalty_dial.pp_afghan {
   transform: rotate(0deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial_cover {
@@ -1769,7 +1783,7 @@ html {
   text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
 }
 
-/* ------- CARDS START ------- */
+/* ------- CARDS ------- */
 .pp_card_1 {
   background-image: url("img/cards1.webp");
   background-size: 1000% 700%;
@@ -2589,6 +2603,576 @@ html {
   background-position-y: 100%;
 }
 
-/* ------- CARDS END ------- */
+/* ------- WAKHAN CARDS ------- */
+.pp_wakhan_card {
+  width: 150px;
+  height: 209px;
+  background-size: 800% 700%;
+  background-image: url(img/wakhan_cards.webp);
+  box-shadow: 1px 1px 4px;
+  border-radius: 10px;
+}
+
+.pp_wakhan_card_1_front {
+  background-position-x: 0%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_1_back {
+  background-position-x: 0%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_2_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_2_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_3_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_3_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_4_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_4_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_5_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_5_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_6_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_6_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_7_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_7_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_8_front {
+  background-position-x: 100%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_8_back {
+  background-position-x: 100%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_9_front {
+  background-position-x: 0%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_9_back {
+  background-position-x: 0%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_10_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_10_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_11_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_11_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_12_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_12_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_13_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_13_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_14_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_14_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_15_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_15_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_16_front {
+  background-position-x: 100%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_16_back {
+  background-position-x: 100%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_17_front {
+  background-position-x: 0%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_17_back {
+  background-position-x: 0%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_18_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_18_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_19_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_19_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_20_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_20_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_21_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_21_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_22_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_22_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_23_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_23_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_24_front {
+  background-position-x: 100%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_24_back {
+  background-position-x: 100%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_card_71 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 0%;
+}
+
+.pp_card_72 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 0%;
+}
+
+.pp_card_73 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 0%;
+}
+
+.pp_card_74 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 0%;
+}
+
+.pp_card_75 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 0%;
+}
+
+.pp_card_76 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 0%;
+}
+
+.pp_card_77 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 0%;
+}
+
+.pp_card_78 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 0%;
+}
+
+.pp_card_79 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 0%;
+}
+
+.pp_card_80 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 0%;
+}
+
+.pp_card_81 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 25%;
+}
+
+.pp_card_82 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 25%;
+}
+
+.pp_card_83 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 25%;
+}
+
+.pp_card_84 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 25%;
+}
+
+.pp_card_85 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 25%;
+}
+
+.pp_card_86 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 25%;
+}
+
+.pp_card_87 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 25%;
+}
+
+.pp_card_88 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 25%;
+}
+
+.pp_card_89 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 25%;
+}
+
+.pp_card_90 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 25%;
+}
+
+.pp_card_91 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 50%;
+}
+
+.pp_card_92 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 50%;
+}
+
+.pp_card_93 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 50%;
+}
+
+.pp_card_94 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 50%;
+}
+
+.pp_card_95 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 50%;
+}
+
+.pp_card_96 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 50%;
+}
+
+.pp_card_97 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 50%;
+}
+
+.pp_card_98 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 50%;
+}
+
+.pp_card_99 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 50%;
+}
+
+.pp_card_100 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 50%;
+}
+
+.pp_card_101 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 75%;
+}
+
+.pp_card_102 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 75%;
+}
+
+.pp_card_103 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 75%;
+}
+
+.pp_card_104 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 75%;
+}
+
+.pp_card_105 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 75%;
+}
+
+.pp_card_106 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 75%;
+}
+
+.pp_card_107 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 75%;
+}
+
+.pp_card_108 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 75%;
+}
+
+.pp_card_109 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 75%;
+}
+
+.pp_card_110 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 75%;
+}
+
+.pp_card_111 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 100%;
+}
+
+.pp_card_112 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 100%;
+}
+
+.pp_card_113 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 100%;
+}
+
+.pp_card_114 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 100%;
+}
+
+.pp_card_115 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 100%;
+}
+
+.pp_card_116 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 100%;
+}
 
 /*# sourceMappingURL=paxpamir.css.map */

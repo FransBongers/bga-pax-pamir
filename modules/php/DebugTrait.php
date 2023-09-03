@@ -15,6 +15,7 @@ use PaxPamir\Managers\Map;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
+use PaxPamir\Managers\WakhanCards;
 use PaxPamir\Models\PaxPamirPlayer;
 use PaxPamir\Models\Player;
 
@@ -53,7 +54,7 @@ trait DebugTrait
     // Notifications::log('loyalty',PaxPamirPlayers::get()->getLoyalty() === null);
     // Notifications::log('wakhan_enabled',Globals::getWakhanEnabled());
     // Notifications::log('next',PaxPamirPlayers::getPrevId(2371052));
-    Notifications::log('order',PaxPamirPlayers::getPlayerOrder());
+    Notifications::log('top_deck',WakhanCards::getTopOf(DECK));
     
     
     // $openHandsGlobals = Globals::getOpenHands();

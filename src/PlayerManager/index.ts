@@ -27,9 +27,9 @@ class PlayerManager {
       const player = game.gamedatas.paxPamirPlayers[playerId];
       console.log('playerId type',typeof playerId);
       // console.log("playerManager", playerId, player);
-      if (Number(playerId) !== 1) {
+      // if (Number(playerId) !== 1) {
         this.players[playerId] = new PPPlayer({ player, game: this.game });
-      }
+      // }
       
     }
     // console.log("players", this.players);

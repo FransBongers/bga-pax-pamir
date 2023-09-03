@@ -16,6 +16,7 @@ class PPPlayer {
   private gifts: Record<string, PaxPamirZone> = {};
   private modal: Modal;
   private playerColor: string;
+  private playerHexColor: string;
   private playerId: number;
   private playerName: string;
   private prizes: PaxPamirZone;
@@ -54,7 +55,7 @@ class PPPlayer {
     this.player = player;
     this.playerName = player.name;
     this.playerColor = player.color;
-
+    this.playerHexColor = player.hexColor;
     const gamedatas = game.gamedatas;
 
     if (this.playerId === this.game.getPlayerId()) {
@@ -77,7 +78,12 @@ class PPPlayer {
 
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
-    this.setupPrizes({ playerGamedatas });
+
+    // TODO: wakhan prizes
+    if (this.playerId !== WAKHAN_PLAYER_ID) {
+      this.setupPrizes({ playerGamedatas });
+    }
+
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
@@ -92,16 +98,23 @@ class PPPlayer {
   setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
-    this.setupHand({ hand: playerGamedatas.hand });
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
-    this.setupPrizes({ playerGamedatas });
+    
+    if (this.playerId !== WAKHAN_PLAYER_ID) {
+      this.setupHand({ hand: playerGamedatas.hand });
+      // TODO: wakhan prizes
+      this.setupPrizes({ playerGamedatas });
+    }
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.setupPlayerPanel({ playerGamedatas });
-    if (this.game.gameOptions.openHands) {
+    if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
       this.setupPlayerHandModal();
+    }
+    if (this.playerId === WAKHAN_PLAYER_ID && gamedatas.wakhanCards) {
+      this.setupWakhanDeck({wakhanCards: gamedatas.wakhanCards})
     }
   }
 
@@ -291,10 +304,7 @@ class PPPlayer {
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up panels
     const player_board_div = $('player_board_' + this.playerId);
-    dojo.place(
-      tplPlayerBoard({playerId: this.playerId}),
-      player_board_div
-    );
+    dojo.place(tplPlayerBoard({ playerId: this.playerId }), player_board_div);
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
     // TODO: check how player loyalty is returned with new setup. Seems to be empty string?
@@ -404,6 +414,26 @@ class PPPlayer {
     });
   }
 
+  setupWakhanDeck({wakhanCards}: {wakhanCards: PaxPamirGamedatas['wakhanCards']}) {
+    const deckNode = dojo.byId('pp_wakhan_deck');
+    
+    deckNode.classList.value = '';
+    deckNode.classList.add('pp_wakhan_card');
+    if (wakhanCards.deck.topCard !== null) {
+      deckNode.classList.add(`pp_${wakhanCards.deck.topCard.id}_back`);
+    } else {
+      deckNode.style.opacity = '0';
+    }
+    
+    const discardNode = dojo.byId('pp_wakhan_discard');
+    if (wakhanCards.discardPile.topCard) {
+      discardNode.classList.value = '';
+      discardNode.classList.add('pp_wakhan_card',`pp_${wakhanCards.discardPile.topCard.id}_front`);
+    } else {
+      discardNode.style.opacity = '0';
+    }
+  }
+
   clearInterface() {
     dojo.empty(this.court.getContainerId());
     this.court = undefined;
@@ -456,6 +486,10 @@ class PPPlayer {
 
   getHandZone(): PaxPamirZone {
     return this.hand;
+  }
+
+  getHexColor(): string {
+    return this.playerHexColor;
   }
 
   getCylinderZone(): PaxPamirZone {

@@ -11,10 +11,13 @@ trait NextPlayerTrait
   function stNextPlayer()
   {
       $nextPlayerId = PaxPamirPlayers::getNextId(PaxPamirPlayers::get());
-      // TODO: check Wakhan
 
-      $this->giveExtraTime($nextPlayerId);
+      if ($nextPlayerId === WAKHAN_PLAYER_ID) {
+        $this->nextState('wakhanTurn');
+      } else {
+        $this->giveExtraTime($nextPlayerId);
 
-      $this->nextState('prepareNextTurn',$nextPlayerId);
+        $this->nextState('prepareNextTurn',$nextPlayerId);
+      }
   }
 }

@@ -65,6 +65,13 @@ CREATE TABLE IF NOT EXISTS `cards` (
   PRIMARY KEY (`card_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
+CREATE TABLE IF NOT EXISTS `wakhan_cards` (
+  `wakhan_card_id` varchar(32) NOT NULL,
+  `wakhan_card_location` varchar(32) NOT NULL,
+  `wakhan_card_state` int(10) DEFAULT 0,
+  PRIMARY KEY (`wakhan_card_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
 CREATE TABLE IF NOT EXISTS `tokens` (
   `token_id` varchar(32) NOT NULL,
   `token_location` varchar(32) NOT NULL,

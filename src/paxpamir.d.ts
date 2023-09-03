@@ -43,6 +43,21 @@ interface EventCard {
   type: 'eventCard';
 }
 
+interface WakhanCard {
+  id: string;
+  back: {
+    columnNumbers: number[];
+    rowSide: string[];
+  },
+  front: {
+    actions: string[];
+    columnArrow: number;
+    pragmaticLoyalty: string[];
+    regionOrder: string[];
+    rowSideArrow: number;
+  }
+}
+
 // TODO(Frans): check what we need
 interface Suit {
   change: string;
@@ -141,8 +156,18 @@ interface PaxPamirGamedatas extends Gamedatas {
   };
   paxPamirPlayerOrder: number[];
   paxPamirPlayers: Record<number, PaxPamirPlayer>;
-  players: Record<number, PaxPamirPlayer>;
+  players: Record<number, BgaPlayer>;
   localState: LocalState;
+  wakhanCards?: {
+    deck: {
+      cardCount: number;
+      topCard: null | WakhanCard;
+    },
+    discardPile: {
+      cardCount: number;
+      topCard: null | WakhanCard;
+    }
+  }
   // rupees: Token[];
 }
 
@@ -234,7 +259,8 @@ interface PaxPamirPlayer extends BgaPlayer {
       [cylinderId: string]: Token;
     }
   >;
-  hand: Token[]; // Will only contain cards if player is current player (or with open hands variant?)
+  hand: Token[]; // Will only contain cards if player is current player (or with open hands variant)
+  hexColor: string;
   events: (EventCard & Token)[];
   loyalty: string;
   rupees: number;

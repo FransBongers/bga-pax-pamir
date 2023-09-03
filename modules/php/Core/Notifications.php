@@ -870,6 +870,24 @@ class Notifications
     ));
   }
 
+  public static function wakhanDrawCard($deck,$discardPile) 
+  {
+    self::notifyAll("wakhanDrawCard", clienttranslate('${logTokenPlayerName} draws a new AI card'), array(
+      'logTokenPlayerName' => Utils::logTokenPlayerName(1),
+      'deck' => $deck,
+      'discardPile' => $discardPile,
+    ));
+  }
+
+  public static function wakhanReshuffleDeck($deck,$discardPile)
+  {
+    self::notifyAll("wakhanReshuffleDeck", clienttranslate('${logTokenPlayerName} reshuffles the AI cards, because the draw deck is empty'), array(
+      'logTokenPlayerName' => Utils::logTokenPlayerName(1),
+      'topOfDeck' => $deck,
+      'topOfDiscardPile' => $discardPile,
+    ));
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

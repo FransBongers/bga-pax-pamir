@@ -951,7 +951,7 @@ var getLogTokenDiv = function (_a) {
             return '<br>';
         case LOG_TOKEN_PLAYER_NAME:
             var player = game.playerManager.getPlayer({ playerId: Number(data) });
-            return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
+            return tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() });
         case LOG_TOKEN_REGION_NAME:
             return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
         case LOG_TOKEN_ROAD:
@@ -1177,6 +1177,7 @@ var SA_RUSSIAN_INFLUENCE = 'russianInfluence';
 var SA_INFRASTRUCTURE = 'infrastructure';
 var SA_SAVVY_OPERATOR = 'savvyOperator';
 var SA_IRREGULARS = 'irregulars';
+var WAKHAN_PLAYER_ID = 1;
 var tplArmy = function (_a) {
     var coalition = _a.coalition, id = _a.id, classesToAdd = _a.classesToAdd;
     return "<div class=\"pp_army pp_".concat(coalition).concat((classesToAdd || []).map(function (classToAdd) { return " ".concat(classToAdd); }), "\" id=\"").concat(id, "\"></div>");
@@ -1250,7 +1251,11 @@ var tplPlayerTableau = function (_a) {
 };
 var tplWakhanPlayerPanel = function (_a) {
     var name = _a.name;
-    return "<div id=\"player_board_wakhan\" class=\"player-board\">\n            <div class=\"player-name\" id=\"player_name_1\">\n              <a style=\"color: #C3B1D6\">".concat(name, "</a>\n            </div>\n            <div id=\"player_board_1\" class=\"player_board_content\">\n            </div>\n          </div>");
+    return "<div id=\"overall_player_board_1\" class=\"player-board\">\n            <div class=\"player-name\" id=\"player_name_1\">\n              <a style=\"color: #C3B1D6\">".concat(name, "</a>\n            </div>\n            <div id=\"player_board_1\" class=\"player_board_content\">\n            </div>\n          </div>");
+};
+var tplWakhanTableau = function (_a) {
+    var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
+    return "<div id=\"player_tableau_".concat(playerId, "\" >\n            <div class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n                <div class=\"pp_wakhan_tableau_left\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div class=\"pp_wakhan_deck_container\">\n                      <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                      <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                    </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(playerName, "'s court</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                            <div id=\"cards_tableau_").concat(playerId, "\" class=\"pp_icon pp_card_icon_tableau\"><div id=\"card_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"card_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                        <div class=\"pp_tableau_inner_left\">\n                            <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                        </div>\n                        <div class=\"pp_tableau_inner_right\">\n                            <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
 };
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 var debug = isDebug ? console.info.bind(window.console) : function () { };
@@ -1815,6 +1820,7 @@ var PPPlayer = (function () {
         this.player = player;
         this.playerName = player.name;
         this.playerColor = player.color;
+        this.playerHexColor = player.hexColor;
         var gamedatas = game.gamedatas;
         if (this.playerId === this.game.getPlayerId()) {
             dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
@@ -1826,7 +1832,9 @@ var PPPlayer = (function () {
         var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupEvents({ playerGamedatas: playerGamedatas });
-        this.setupPrizes({ playerGamedatas: playerGamedatas });
+        if (this.playerId !== WAKHAN_PLAYER_ID) {
+            this.setupPrizes({ playerGamedatas: playerGamedatas });
+        }
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
@@ -1838,16 +1846,21 @@ var PPPlayer = (function () {
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
         var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
-        this.setupHand({ hand: playerGamedatas.hand });
         this.setupCourt({ playerGamedatas: playerGamedatas });
         this.setupEvents({ playerGamedatas: playerGamedatas });
-        this.setupPrizes({ playerGamedatas: playerGamedatas });
+        if (this.playerId !== WAKHAN_PLAYER_ID) {
+            this.setupHand({ hand: playerGamedatas.hand });
+            this.setupPrizes({ playerGamedatas: playerGamedatas });
+        }
         this.setupCylinders({ playerGamedatas: playerGamedatas });
         this.setupGifts({ playerGamedatas: playerGamedatas });
         this.setupRulerTokens({ gamedatas: gamedatas });
         this.setupPlayerPanel({ playerGamedatas: playerGamedatas });
-        if (this.game.gameOptions.openHands) {
+        if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
             this.setupPlayerHandModal();
+        }
+        if (this.playerId === WAKHAN_PLAYER_ID && gamedatas.wakhanCards) {
+            this.setupWakhanDeck({ wakhanCards: gamedatas.wakhanCards });
         }
     };
     PPPlayer.prototype.getHandCards = function () {
@@ -2123,6 +2136,26 @@ var PPPlayer = (function () {
             dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
         });
     };
+    PPPlayer.prototype.setupWakhanDeck = function (_a) {
+        var wakhanCards = _a.wakhanCards;
+        var deckNode = dojo.byId('pp_wakhan_deck');
+        deckNode.classList.value = '';
+        deckNode.classList.add('pp_wakhan_card');
+        if (wakhanCards.deck.topCard !== null) {
+            deckNode.classList.add("pp_".concat(wakhanCards.deck.topCard.id, "_back"));
+        }
+        else {
+            deckNode.style.opacity = '0';
+        }
+        var discardNode = dojo.byId('pp_wakhan_discard');
+        if (wakhanCards.discardPile.topCard) {
+            discardNode.classList.value = '';
+            discardNode.classList.add('pp_wakhan_card', "pp_".concat(wakhanCards.discardPile.topCard.id, "_front"));
+        }
+        else {
+            discardNode.style.opacity = '0';
+        }
+    };
     PPPlayer.prototype.clearInterface = function () {
         var _this = this;
         dojo.empty(this.court.getContainerId());
@@ -2156,6 +2189,9 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.getHandZone = function () {
         return this.hand;
+    };
+    PPPlayer.prototype.getHexColor = function () {
+        return this.playerHexColor;
     };
     PPPlayer.prototype.getCylinderZone = function () {
         return this.cylinders;
@@ -2622,27 +2658,6 @@ var PPPlayer = (function () {
     };
     return PPPlayer;
 }());
-var PPWakhan = (function () {
-    function PPWakhan(_a) {
-        var game = _a.game, player = _a.player;
-        this.game = game;
-        var playerId = player.id;
-        this.playerId = Number(playerId);
-        this.player = player;
-        this.playerName = player.name;
-        this.playerColor = player.color;
-        var gamedatas = game.gamedatas;
-        this.setupPlayer({ gamedatas: gamedatas });
-    }
-    PPWakhan.prototype.updatePlayer = function (_a) {
-        var gamedatas = _a.gamedatas;
-    };
-    PPWakhan.prototype.setupPlayer = function (_a) {
-        var gamedatas = _a.gamedatas;
-        var playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
-    };
-    return PPWakhan;
-}());
 var PlayerManager = (function () {
     function PlayerManager(game) {
         console.log('Constructor PlayerManager');
@@ -2651,9 +2666,7 @@ var PlayerManager = (function () {
         for (var playerId in game.gamedatas.paxPamirPlayers) {
             var player = game.gamedatas.paxPamirPlayers[playerId];
             console.log('playerId type', typeof playerId);
-            if (Number(playerId) !== 1) {
-                this.players[playerId] = new PPPlayer({ player: player, game: this.game });
-            }
+            this.players[playerId] = new PPPlayer({ player: player, game: this.game });
         }
     }
     PlayerManager.prototype.getPlayer = function (_a) {
@@ -5929,7 +5942,7 @@ var NotificationManager = (function () {
         console.log('notifications subscriptions setup');
         var notifs = [
             ['log', 1],
-            ['changeLoyalty', 1],
+            ['changeLoyalty', undefined],
             ['changeFavoredSuit', undefined],
             ['changeRuler', undefined],
             ['clearTurn', 1],
@@ -5965,6 +5978,8 @@ var NotificationManager = (function () {
             ['taxMarket', undefined],
             ['taxPlayer', undefined],
             ['updateInfluence', 1],
+            ['wakhanDrawCard', undefined],
+            ['wakhanReshuffleDeck', undefined],
         ];
         notifs.forEach(function (notif) {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, function (notifDetails) {
@@ -6003,14 +6018,26 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_changeLoyalty = function (notif) {
-        var _a = notif.args, argsPlayerId = _a.playerId, coalition = _a.coalition;
-        var playerId = Number(argsPlayerId);
-        var player = this.getPlayer({ playerId: playerId });
-        player.updatePlayerLoyalty({ coalition: coalition });
-        console.log('playerInfluence', player.getInfluence());
-        if (player.getInfluence() === 0) {
-            player.setCounter({ counter: 'influence', value: 1 });
-        }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, argsPlayerId, coalition, playerId, player;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = notif.args, argsPlayerId = _a.playerId, coalition = _a.coalition;
+                        playerId = Number(argsPlayerId);
+                        player = this.getPlayer({ playerId: playerId });
+                        player.updatePlayerLoyalty({ coalition: coalition });
+                        console.log('playerInfluence', player.getInfluence());
+                        if (player.getInfluence() === 0) {
+                            player.setCounter({ counter: 'influence', value: 1 });
+                        }
+                        return [4, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
+                    case 1:
+                        _b.sent();
+                        return [2];
+                }
+            });
+        });
     };
     NotificationManager.prototype.notif_changeFavoredSuit = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -6742,6 +6769,79 @@ var NotificationManager = (function () {
             _this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value: value });
         });
     };
+    NotificationManager.prototype.notif_wakhanDrawCard = function (_a) {
+        var _b;
+        var args = _a.args;
+        return __awaiter(this, void 0, void 0, function () {
+            var deck, discardPile, deckNode, discardNode, element, fromRect;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        deck = args.deck, discardPile = args.discardPile;
+                        deckNode = dojo.byId('pp_wakhan_deck');
+                        discardNode = dojo.byId('pp_wakhan_discard');
+                        element = !discardPile.from ? discardNode : dojo.place("<div id=\"temp_wakhan_card\" class=\"pp_wakhan_card pp_".concat(discardPile.to, "_front\"></div>"), "pp_wakhan_discard");
+                        fromRect = (_b = $("pp_wakhan_deck")) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
+                        deckNode.classList.remove("pp_".concat(deck.from, "_back"));
+                        if (deck.to !== null) {
+                            deckNode.classList.add("pp_".concat(deck.to, "_back"));
+                        }
+                        else {
+                            deckNode.style.opacity = '0';
+                        }
+                        if (!discardPile.from) {
+                            discardNode.classList.add("pp_".concat(discardPile.to, "_front"));
+                            discardNode.style.opacity = '1';
+                        }
+                        return [4, this.game.animationManager.play(new BgaSlideAnimation({
+                                element: element,
+                                transitionTimingFunction: 'linear',
+                                fromRect: fromRect,
+                            }))];
+                    case 1:
+                        _c.sent();
+                        if (discardPile.from) {
+                            discardNode.classList.replace("pp_".concat(discardPile.from, "_front"), "pp_".concat(discardPile.to, "_front"));
+                            element.remove();
+                        }
+                        return [2];
+                }
+            });
+        });
+    };
+    NotificationManager.prototype.notif_wakhanReshuffleDeck = function (_a) {
+        var _b;
+        var args = _a.args;
+        return __awaiter(this, void 0, void 0, function () {
+            var topOfDiscardPile, topOfDeck, deckNode, discardNode, fromRect;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4, new Promise(function (resolve) { return setTimeout(resolve, 500); })];
+                    case 1:
+                        _c.sent();
+                        topOfDiscardPile = args.topOfDiscardPile, topOfDeck = args.topOfDeck;
+                        deckNode = dojo.byId("pp_wakhan_deck");
+                        discardNode = dojo.byId('pp_wakhan_discard');
+                        deckNode.classList.add("pp_".concat(topOfDeck, "_back"));
+                        fromRect = (_b = $("pp_wakhan_discard")) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
+                        discardNode.style.opacity = '0';
+                        deckNode.style.opacity = '1';
+                        return [4, this.game.animationManager.play(new BgaSlideAnimation({
+                                element: deckNode,
+                                transitionTimingFunction: 'linear',
+                                fromRect: fromRect,
+                            }))];
+                    case 2:
+                        _c.sent();
+                        discardNode.classList.remove("pp_".concat(topOfDiscardPile, "_front"));
+                        return [4, new Promise(function (resolve) { return setTimeout(resolve, 500); })];
+                    case 3:
+                        _c.sent();
+                        return [2];
+                }
+            });
+        });
+    };
     NotificationManager.prototype.destroy = function () {
         dojo.forEach(this.subscriptions, dojo.unsubscribe);
     };
@@ -6837,13 +6937,17 @@ var PaxPamir = (function () {
         debug('gamedatas', gamedatas);
         this.setupPlayerOrder({ paxPamirPlayerOrder: gamedatas.paxPamirPlayerOrder });
         if (this.gameOptions.wakhanEnabled) {
-            var wakhanPosition = this.playerOrder.findIndex(function (id) { return id === 1; }) + 1;
-            dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', wakhanPosition);
+            dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
         }
         dojo.place(tplActiveEvents(), 'pp_player_tableaus');
         this.playerOrder.forEach(function (playerId) {
             var player = gamedatas.paxPamirPlayers[playerId];
-            dojo.place(tplPlayerTableau({ playerId: playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+            if (playerId === 1) {
+                dojo.place(tplWakhanTableau({ playerId: playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+            }
+            else {
+                dojo.place(tplPlayerTableau({ playerId: playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+            }
         });
         this._connections = [];
         this.localState = gamedatas.localState;
@@ -7141,6 +7245,12 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.onLoadingComplete = function () {
         this.cancelLogs(this.gamedatas.canceledNotifIds);
+    };
+    PaxPamir.prototype.updatePlayerOrdering = function () {
+        console.log('updatePlayerOrdering', this.playerOrder);
+        this.playerOrder.forEach(function (playerId, index) {
+            dojo.place("overall_player_board_" + playerId, "player_boards", index);
+        });
     };
     PaxPamir.prototype.getZoneForLocation = function (_a) {
         var location = _a.location;

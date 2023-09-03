@@ -36,7 +36,7 @@ class NotificationManager {
     const notifs: [id: string, wait: number][] = [
       // checked
       ['log', 1],
-      ['changeLoyalty', 1],
+      ['changeLoyalty', undefined],
       ['changeFavoredSuit', undefined],
       ['changeRuler', undefined],
       ['clearTurn', 1],
@@ -72,6 +72,8 @@ class NotificationManager {
       ['taxMarket', undefined],
       ['taxPlayer', undefined],
       ['updateInfluence', 1],
+      ['wakhanDrawCard', undefined],
+      ['wakhanReshuffleDeck', undefined],
     ];
 
     // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
@@ -130,7 +132,7 @@ class NotificationManager {
     );
   }
 
-  notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
+  async notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
     const { playerId: argsPlayerId, coalition } = notif.args;
     const playerId = Number(argsPlayerId);
 
@@ -141,6 +143,7 @@ class NotificationManager {
     if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
     }
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   async notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
@@ -528,8 +531,8 @@ class NotificationManager {
   }
 
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
-    const {hand, playerId} = notif.args;
-    const player = this.getPlayer({playerId});
+    const { hand, playerId } = notif.args;
+    const player = this.getPlayer({ playerId });
     player.clearHand();
     player.setupHand({ hand });
   }
@@ -580,6 +583,71 @@ class NotificationManager {
     args.updates.forEach(({ playerId, value }) => {
       this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
     });
+  }
+
+  async notif_wakhanDrawCard({ args }: Notif<WakhanDrawCard>) {
+    const { deck, discardPile } = args;
+    const deckNode = dojo.byId('pp_wakhan_deck');
+    const discardNode = dojo.byId('pp_wakhan_discard');
+
+    // Place element on discard
+
+    const element = !discardPile.from ? discardNode :  dojo.place(`<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`, `pp_wakhan_discard`);
+    // Execute move animation from deck
+    const fromRect = $(`pp_wakhan_deck`)?.getBoundingClientRect();
+
+    deckNode.classList.remove(`pp_${deck.from}_back`);
+    if (deck.to !== null) {
+      deckNode.classList.add(`pp_${deck.to}_back`);
+    } else {
+      deckNode.style.opacity = '0';
+    }
+
+    if (!discardPile.from) {
+      discardNode.classList.add(`pp_${discardPile.to}_front`);
+      discardNode.style.opacity = '1';
+    }
+
+    await this.game.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element,
+        transitionTimingFunction: 'linear',
+        fromRect,
+      })
+    );
+
+    // discardNode.classList.add(`pp_${discardPile.to}_front`);
+    // if (discardPile.from) {
+      
+
+    if (discardPile.from) {
+      discardNode.classList.replace(`pp_${discardPile.from}_front`,`pp_${discardPile.to}_front`);
+      element.remove();
+    }
+  }
+
+  async notif_wakhanReshuffleDeck({ args }: Notif<WakhanReshuffleDeck>) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const { topOfDiscardPile, topOfDeck } = args;
+    const deckNode = dojo.byId(`pp_wakhan_deck`);
+    const discardNode = dojo.byId('pp_wakhan_discard');
+    deckNode.classList.add(`pp_${topOfDeck}_back`);
+    const fromRect = $(`pp_wakhan_discard`)?.getBoundingClientRect();
+        
+    discardNode.style.opacity = '0';
+    deckNode.style.opacity = '1';
+    await this.game.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element: deckNode,
+        transitionTimingFunction: 'linear',
+        fromRect,
+      })
+    );
+    discardNode.classList.remove(`pp_${topOfDiscardPile}_front`);
+    // const deckNode = dojo.byId('pp_wakhan_deck');
+
+    // element.remove();
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

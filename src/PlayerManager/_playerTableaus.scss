@@ -1,4 +1,25 @@
+@use 'sass:math';
 @use '../base';
+
+.pp_wakhan_deck_container {
+  display: flex;
+  padding-left: 10px;
+}
+
+.pp_wakhan_tableau_left {
+  display: flex;
+  flex-direction: column;
+}
+
+#pp_wakhan_deck {
+  margin-right: 10px;
+}
+
+// #pp_wakhan_discard {
+//   background-position-x: 0%;
+//   background-position-y: math.div(4, 6) * 100%;
+//   // background-position-y: math.div(4,6) * 100%;
+// }
 
 .pp_player_hand {
   display: flex;
@@ -151,17 +172,17 @@
 
 .pp_loyalty_dial.pp_afghan {
   transform: rotate(0deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial_cover {

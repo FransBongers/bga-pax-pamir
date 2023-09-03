@@ -29,7 +29,6 @@
     "src/TooltipManager/index.ts",
     "src/ObjectManager/index.ts",
     "src/PlayerManager/player.ts",
-    "src/PlayerManager/wakhan.ts",
     "src/PlayerManager/index.ts",
     "src/Map/border.ts",
     "src/Map/region.ts",

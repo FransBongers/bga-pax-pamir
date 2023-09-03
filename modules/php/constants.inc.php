@@ -296,4 +296,17 @@ const IMPACT_ICON_DISPATCH_MAP = [
 const USED = 1;
 const NOT_USED = 0;
 
+/**
+ * Wakhan
+ */
 const WAKHAN_PLAYER_ID = 1;
+
+const TOP_LEFT = 'topLeft';
+const BOTTOM_RIGHT = 'bottomRight';
+
+const RADICALIZE = 'radicalize';
+const RADICALIZE_SPECIAL_1 = 'radicalizeSpecial1';
+const RADICALIZE_SPECIAL_2 = 'radicalizeSpecial2';
+const RADICALIZE_SPECIAL_3 = 'radicalizeSpecial3';
+const RADICALIZE_SPECIAL_4 = 'radicalizeSpecial4';
+const RADICALIZE_SPECIAL_5 = 'radicalizeSpecial5';

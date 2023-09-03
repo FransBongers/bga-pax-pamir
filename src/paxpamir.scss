@@ -635,7 +635,7 @@ html {
   text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
 }
 
-/* ------- CARDS START ------- */
+/* ------- CARDS ------- */
 
 @for $i from 1 through 70 {
   .pp_card_#{$i} {
@@ -662,4 +662,34 @@ html {
   background-position-y: 100%;
 }
 
-/* ------- CARDS END ------- */
+/* ------- WAKHAN CARDS ------- */
+
+.pp_wakhan_card {
+  width: 150px;
+  height: 209px;
+  background-size: 800% 700%;
+  background-image: url(img/wakhan_cards.webp);
+  box-shadow: 1px 1px 4px;
+  border-radius: 10px;
+}
+
+@for $i from 1 through 24 {
+  .pp_wakhan_card_#{$i}_front {
+    background-position-x: math.div((($i + 24 - 1) % 8 * 100%), 7);
+    background-position-y: math.div(math.floor(calc(($i + 24 - 1) / 8)) * 100%, 6);
+  }
+
+  .pp_wakhan_card_#{$i}_back {
+    background-position-x: math.div((($i - 1) % 8 * 100%), 7);
+    background-position-y: math.div(math.floor(calc(($i - 1) / 8)) * 100%, 6);
+  }
+}
+
+@for $i from 71 through 116 {
+  .pp_card_#{$i} {
+    background-image: url('img/cards2.webp');
+    background-size: 1000% 500%;
+    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
+    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
+  }
+}

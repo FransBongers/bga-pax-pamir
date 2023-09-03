@@ -41,7 +41,7 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
       return '<br>';
     case LOG_TOKEN_PLAYER_NAME:
       const player = game.playerManager.getPlayer({ playerId: Number(data) });
-      return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
+      return tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() });
     case LOG_TOKEN_REGION_NAME:
       return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
     case LOG_TOKEN_ROAD:

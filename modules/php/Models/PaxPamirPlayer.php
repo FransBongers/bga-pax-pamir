@@ -25,6 +25,7 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
     'no' => ['player_no', 'int'],
     'name' => 'player_name',
     'color' => 'player_color',
+    'hexColor' => 'player_hex_color',
     'score' => ['player_score', 'int'],
     'loyalty' => 'player_loyalty',
     'rupees' => ['player_rupees', 'int'],

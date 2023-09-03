@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -32,32 +33,32 @@ $this->card_types = array(
 
 */
 
-$this->locations = array (
+$this->locations = array(
   'pools' => array(
     AFGHAN => BLOCKS_AFGHAN_SUPPLY,
     BRITISH => BLOCKS_BRITISH_SUPPLY,
     RUSSIAN => BLOCKS_RUSSIAN_SUPPLY
   ),
 
-  'armies' => array (
-    TRANSCASPIA => "armies_".TRANSCASPIA,
-    KABUL => "armies_".KABUL,
-    PERSIA => "armies_".PERSIA,
-    HERAT => "armies_".HERAT,
-    KANDAHAR => "armies_".KANDAHAR,
-    PUNJAB => "armies_".PUNJAB,
+  'armies' => array(
+    TRANSCASPIA => "armies_" . TRANSCASPIA,
+    KABUL => "armies_" . KABUL,
+    PERSIA => "armies_" . PERSIA,
+    HERAT => "armies_" . HERAT,
+    KANDAHAR => "armies_" . KANDAHAR,
+    PUNJAB => "armies_" . PUNJAB,
   ),
 
-  'tribes' => array (
-    TRANSCASPIA => "tribes_".TRANSCASPIA,
-    KABUL => "tribes_".KABUL,
-    PERSIA => "tribes_".PERSIA,
-    HERAT => "tribes_".HERAT,
-    KANDAHAR => "tribes_".KANDAHAR,
-    PUNJAB => "tribes_".PUNJAB,
+  'tribes' => array(
+    TRANSCASPIA => "tribes_" . TRANSCASPIA,
+    KABUL => "tribes_" . KABUL,
+    PERSIA => "tribes_" . PERSIA,
+    HERAT => "tribes_" . HERAT,
+    KANDAHAR => "tribes_" . KANDAHAR,
+    PUNJAB => "tribes_" . PUNJAB,
   ),
 
-  'roads' => array (
+  'roads' => array(
     'herat_kabul' => "roads_herat_kabul",
     'herat_kandahar' => "roads_herat_kandahar",
     'herat_persia' => "roads_herat_persia",
@@ -73,44 +74,44 @@ $this->locations = array (
 // TODO: delete tooltip / icon here
 $this->loyalty = array(
   'afghan' => array(
-      'id' => 'afghan',
-      'name' => clienttranslate("Afghan"),
-      'icon' => 0,
-      'tooltip' => clienttranslate("Afghan")
+    'id' => 'afghan',
+    'name' => clienttranslate("Afghan"),
+    'icon' => 0,
+    'tooltip' => clienttranslate("Afghan")
   ),
   'russian' => array(
-      'id' => 'russian',
-      'name' => clienttranslate("Russian"),
-      'icon' => 1,
-      'tooltip' => clienttranslate("Russian")
+    'id' => 'russian',
+    'name' => clienttranslate("Russian"),
+    'icon' => 1,
+    'tooltip' => clienttranslate("Russian")
   ),
   'british' => array(
-      'id' => 'british',
-      'name' => clienttranslate("British"),
-      'icon' => 2,
-      'tooltip' => clienttranslate("British")
+    'id' => 'british',
+    'name' => clienttranslate("British"),
+    'icon' => 2,
+    'tooltip' => clienttranslate("British")
   ),
 );
 
 // TODO: delete tooltip / change messages here
 $this->suits = array(
   'political' => array(
-      'id' => 'political',
-      'name' => clienttranslate("Political"),
-      'tooltip' => clienttranslate("The favored suit is Political"),
-      'change' => clienttranslate("The favored suit changed to Political")
+    'id' => 'political',
+    'name' => clienttranslate("Political"),
+    'tooltip' => clienttranslate("The favored suit is Political"),
+    'change' => clienttranslate("The favored suit changed to Political")
   ),
   'intelligence' => array(
-      'id' => 'intelligence',
-      'name' => clienttranslate("Intelligence"),
-      'tooltip' => clienttranslate("The favored suit is Intelligence"),
-      'change' => clienttranslate("The favored suit changed to Intelligence")
+    'id' => 'intelligence',
+    'name' => clienttranslate("Intelligence"),
+    'tooltip' => clienttranslate("The favored suit is Intelligence"),
+    'change' => clienttranslate("The favored suit changed to Intelligence")
   ),
   'economic' => array(
-      'id' => 'economic',
-      'name' => clienttranslate("Economic"),
-      'tooltip' => clienttranslate("The favored suit is Economic"),
-      'change' => clienttranslate("The favored suit changed to Economic")
+    'id' => 'economic',
+    'name' => clienttranslate("Economic"),
+    'tooltip' => clienttranslate("The favored suit is Economic"),
+    'change' => clienttranslate("The favored suit changed to Economic")
   ),
   'military' => array(
     'id' => 'military',
@@ -154,7 +155,7 @@ $this->regions = array(
 );
 
 
-$this->borders = array (
+$this->borders = array(
   'herat_kabul' => array(
     'name' => clienttranslate("Herat-Kabul border"),
     'regions' => ['kabul', 'herat']
@@ -194,83 +195,83 @@ $this->borders = array (
 );
 
 $this->specialAbilities = array(
-  SA_INDISPENSABLE_ADVISORS => array( 
+  SA_INDISPENSABLE_ADVISORS => array(
     'title' => clienttranslate('Indispensable Advisors'),
     'description' => clienttranslate('Your spies cannot be removed in battles with other spies.')
   ),
-  SA_INSURRESCTION => array( 
+  SA_INSURRESCTION => array(
     'title' => clienttranslate('Insurrection'),
     'description' => clienttranslate('After resolving a Dominance Check, place two Afghan armies in Kabul.')
   ),
-  SA_CLAIM_OF_ANCIENT_LINEAGE => array(  
+  SA_CLAIM_OF_ANCIENT_LINEAGE => array(
     'title' => clienttranslate('Claim of Ancient Lineage'),
     'description' => clienttranslate('When you take the tax action, act as if you rule every region.')
   ),
-  SA_BODYGUARDS => array( 
+  SA_BODYGUARDS => array(
     'title' => clienttranslate('Bodyguards'),
     'description' => clienttranslate('Your political cards cannot be targets of the betray action.')
   ),
-  SA_CITADEL_KABUL => array( 
+  SA_CITADEL_KABUL => array(
     'title' => clienttranslate('Citadel'),
     'description' => clienttranslate('Your tribes in Kabul cannot be attacked.')
   ),
-  SA_CITADEL_TRANSCASPIA => array( 
+  SA_CITADEL_TRANSCASPIA => array(
     'title' => clienttranslate('Citadel'),
     'description' => clienttranslate('Your tribes in Transcaspia cannot be attacked.')
   ),
-  SA_STRANGE_BEDFELLOWS => array( 
+  SA_STRANGE_BEDFELLOWS => array(
     'title' => clienttranslate('Strange Bedfellows'),
     'description' => clienttranslate('For spy travel, you treat cards that share a region as adjacent.')
   ),
-  SA_CIVIL_SERVICE_REFORMS => array( 
+  SA_CIVIL_SERVICE_REFORMS => array(
     'title' => clienttranslate('Civil Service Reforms'),
     'description' => clienttranslate('You do not pay bribes when taking hostage actions.')
   ),
-  SA_SAFE_HOUSE => array( 
+  SA_SAFE_HOUSE => array(
     'title' => clienttranslate('Safe House'),
     'description' => clienttranslate('When another player removes your spy in battle, you may place it on this card instead.')
   ),
-  SA_CHARISMATIC_COURTIERS => array( 
+  SA_CHARISMATIC_COURTIERS => array(
     'title' => clienttranslate('Charismatic Courtiers'),
     'description' => clienttranslate('You do not pay bribes when playing cards.')
   ),
-  SA_BLACKMAIL_HERAT => array( 
+  SA_BLACKMAIL_HERAT => array(
     'title' => clienttranslate('Blackmail'),
     'description' => clienttranslate('At start of turn, you may place a spy on any Herat court card without a spy.')
   ),
-  SA_BLACKMAIL_KANDAHAR => array( 
+  SA_BLACKMAIL_KANDAHAR => array(
     'title' => clienttranslate('Blackmail'),
     'description' => clienttranslate('At start of turn, you may place a spy on any Kandahar court card without a spy.')
   ),
-  SA_INDIAN_SUPPLIES => array( 
+  SA_INDIAN_SUPPLIES => array(
     'title' => clienttranslate('Indian Supplies'),
     'description' => clienttranslate('Your armies may move without a road.')
   ),
-  SA_WELL_CONNECTED => array( 
+  SA_WELL_CONNECTED => array(
     'title' => clienttranslate('Well-Connected'),
     'description' => clienttranslate('Your spies may double their distance moved when using a move action.')
   ),
-  SA_HERAT_INFLUENCE => array( 
+  SA_HERAT_INFLUENCE => array(
     'title' => clienttranslate('Herat Influence'),
     'description' => clienttranslate('You do not pay for Herat cards in the market.')
   ),
-  SA_PERSIAN_INFLUENCE => array( 
+  SA_PERSIAN_INFLUENCE => array(
     'title' => clienttranslate('Persian Influence'),
     'description' => clienttranslate('You do not pay for Persia cards in the market.')
   ),
-  SA_RUSSIAN_INFLUENCE => array( 
+  SA_RUSSIAN_INFLUENCE => array(
     'title' => clienttranslate('Russian Influence'),
     'description' => clienttranslate('You do not pay for Russian Patriots in the market.')
   ),
-  SA_INFRASTRUCTURE => array( 
+  SA_INFRASTRUCTURE => array(
     'title' => clienttranslate('Infrastructure'),
     'description' => clienttranslate('After you take the build action, place one additional block in a legal space.')
   ),
-  SA_SAVVY_OPERATOR => array( 
+  SA_SAVVY_OPERATOR => array(
     'title' => clienttranslate('Savvy Operator'),
     'description' => clienttranslate('This card is always treated as if it were in the favored suit.')
   ),
-  SA_IRREGULARS => array( 
+  SA_IRREGULARS => array(
     'title' => clienttranslate('Irregulars'),
     'description' => clienttranslate('This card is always treated as if it were in the favored suit.')
   ),
@@ -692,7 +693,8 @@ $this->cards = array(
   'card_26' => array(
     'id' => 'card_26',
     'actions' => array(
-      BETRAY => array('type' => BETRAY, 'left' => 108, 'top' => 154),),
+      BETRAY => array('type' => BETRAY, 'left' => 108, 'top' => 154),
+    ),
     'flavorText' => clienttranslate("An Italian veteran of the Napoleonic Wars, Avitabile traveled east after Waterloo, peddling his military expertise. He served as governor of Peshawar under Ranjit Singh. He was a brutal ruler and was infamous for his unorthodox execution techniques, including throwing the condemned from the top of the Mahabat Mosque."),
     'impactIcons' => [TRIBE, ARMY],
     'loyalty' => null,
@@ -2128,7 +2130,7 @@ $this->cards = array(
       'title' => clienttranslate('Confidence Failure'),
       'description' => clienttranslate('All players must immediately discard a card from their hand.'),
     ),
-    'purchased' => array( 
+    'purchased' => array(
       'effect' => ECE_OTHER_PERSUASIVE_METHODS,
       'title' => clienttranslate("Other Persuasive Methods"),
       'description' => clienttranslate('Exchange your hand with another player. You may exchange an empty hand.'),
@@ -2160,3 +2162,88 @@ $this->cards = array(
   ),
 );
 
+$this->wakhanCards = [
+  'wakhan_card_1' => [
+    'id' => 'wakhan_card_1',
+    'back' => [
+      'columnNumbers' => [3, 4, 5, 0, 1, 2],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [TAX, RADICALIZE_SPECIAL_1, RADICALIZE],
+      'columnArrow' => 2,
+      'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
+      'regionOrder' => [TRANSCASPIA, KABUL, KANDAHAR, PERSIA, HERAT, PUNJAB],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_2' => [
+    'id' => 'wakhan_card_2',
+    'back' => [
+      'columnNumbers' => [4, 5, 0, 1, 2, 3],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_SPECIAL_2, RADICALIZE_SPECIAL_3, RADICALIZE],
+      'columnArrow' => 1,
+      'pragmaticLoyalty' => [AFGHAN, BRITISH, RUSSIAN],
+      'regionOrder' => [PERSIA, PUNJAB, KANDAHAR, HERAT, TRANSCASPIA, KABUL],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_3' => [
+    'id' => 'wakhan_card_3',
+    'back' => [
+      'columnNumbers' => [2, 3, 4, 5, 0, 1],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [TAX, RADICALIZE_SPECIAL_4, RADICALIZE],
+      'columnArrow' => 3,
+      'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
+      'regionOrder' => [PUNJAB, PERSIA, HERAT, KANDAHAR, TRANSCASPIA, KABUL],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_4' => [
+    'id' => 'wakhan_card_4',
+    'back' => [
+      'columnNumbers' => [1, 2, 3, 4, 5, 0],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_SPECIAL_5, BUILD, RADICALIZE],
+      'columnArrow' => 4,
+      'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
+      'regionOrder' => [KANDAHAR, KABUL, HERAT, PUNJAB, TRANSCASPIA, PERSIA],
+      'rowSideArrow' => 0
+    ]
+  ],
+];
+
+$this->radicalizeActions = [
+  RADICALIZE => [
+    'id' => RADICALIZE,
+    'text' => clienttranslate('Radizalize.'),
+  ],
+  RADICALIZE_SPECIAL_1 => [
+    'id' => RADICALIZE_SPECIAL_1,
+    'text' => clienttranslate('If military cards are favored, radicalize the highest ranked military card.'),
+  ],
+  RADICALIZE_SPECIAL_2 => [
+    'id' => RADICALIZE_SPECIAL_2,
+    'text' => clienttranslate('If political cards are favored, radicalize the highest ranked economic card.'),
+  ],
+  RADICALIZE_SPECIAL_3 => [
+    'id' => RADICALIZE_SPECIAL_3,
+    'text' => clienttranslate('Radicalize the highest ranked political card.'),
+  ],
+  RADICALIZE_SPECIAL_4 => [
+    'id' => RADICALIZE_SPECIAL_4,
+    'text' => clienttranslate('Radicalize the highest ranked intelligence card.'),
+  ],
+  RADICALIZE_SPECIAL_5 => [
+    'id' => RADICALIZE_SPECIAL_5,
+    'text' => clienttranslate('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees.'),
+  ],
+];

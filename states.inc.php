@@ -97,7 +97,8 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "prepareNextTurn" => ST_PREPARE_TURN,
-            "setup" => ST_PLAYER_SETUP,
+            'wakhanTurn' => ST_WAKHAN_TURN,
+            // "setup" => ST_PLAYER_SETUP,
         )
     ),
 

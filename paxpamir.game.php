@@ -45,6 +45,7 @@ use PaxPamir\Managers\Market;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Managers\WakhanCards;
 
 // // Todo check why PPPlayer import is needed
 // require_once('modules/php/PPUtilityFunctions.php');
@@ -93,6 +94,8 @@ class Paxpamir extends Table
     public $regions;
     public $specialAbilities;
     public $suits;
+    public $wakhanCards;
+    public $radicalizeActions;
 
     public static $instance = null;
     function __construct()
@@ -143,6 +146,7 @@ class Paxpamir extends Table
         };
         if (Globals::getWakhanEnabled()) {
             PaxPamirPlayers::setupWakhan();
+            WakhanCards::setupNewGame($players, $options);
         }
         Cards::setupNewGame($players, $options);
         Tokens::setupNewGame($players, $options);
@@ -230,6 +234,8 @@ class Paxpamir extends Table
                 'regions' => $this->regions,
                 'specialAbilities' => $this->specialAbilities,
                 'suits' => $this->suits,
+                'wakhanCards' => $this->wakhanCards,
+                'radicalizeActions' => $this->radicalizeActions,
             ],
             'paxPamirPlayers' => PaxPamirPlayers::getUiData($pId),
             'paxPamirPlayerOrder' => PaxPamirPlayers::getPlayerOrder(),
@@ -254,6 +260,23 @@ class Paxpamir extends Table
             ],
             'tempDiscardPile' => Cards::getTopOf(TEMP_DISCARD),
         ];
+
+        if (Globals::getWakhanEnabled()) {
+            $wakhanDeck = WakhanCards::getInLocationOrdered(DECK)->toArray();
+            $wakhanDeckCount = count($wakhanDeck);
+            $wakhanDiscardPile = WakhanCards::getInLocationOrdered(DISCARD)->toArray();
+            $wakhanDiscardPileCount = count($wakhanDiscardPile);
+            $data['wakhanCards'] = [
+                'deck' => [
+                    'cardCount' => $wakhanDeckCount,
+                    'topCard' => $wakhanDeckCount === 0 ? null : $wakhanDeck[$wakhanDeckCount - 1],
+                ],
+                'discardPile' => [
+                    'cardCount' => $wakhanDiscardPileCount,
+                    'topCard' => $wakhanDiscardPileCount === 0 ? null : $wakhanDiscardPile[$wakhanDiscardPileCount - 1],
+                ],
+            ];
+        }
 
         // Is below needed?
         $activePlayerId = PaxPamirPlayers::getActiveId();
@@ -308,6 +331,11 @@ class Paxpamir extends Table
     function getCard($card_id)
     {
         return $this->cards[$card_id];
+    }
+
+    function getWakhanCard($wakhan_card_id)
+    {
+        return $this->wakhanCards[$wakhan_card_id];
     }
 
     /**

@@ -99,17 +99,19 @@ class PaxPamir implements PaxPamirGame {
     this.gameOptions = gamedatas.gameOptions;
     debug('gamedatas', gamedatas);
     this.setupPlayerOrder({ paxPamirPlayerOrder: gamedatas.paxPamirPlayerOrder });
-    // this.gamedatas.playerorder = this.playerOrder;
     if (this.gameOptions.wakhanEnabled) {
-      const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 1;
-      dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
+      dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', 0);
     }
     // Templates from .tpl file. Todo: check if we can move to other files
     dojo.place(tplActiveEvents(), 'pp_player_tableaus');
         
     this.playerOrder.forEach((playerId) => {
       const player = gamedatas.paxPamirPlayers[playerId];
-      dojo.place(tplPlayerTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+      if (playerId === 1) {
+        dojo.place(tplWakhanTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+      } else {
+        dojo.place(tplPlayerTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+      }
     });
 
     this._connections = [];
@@ -576,14 +578,17 @@ class PaxPamir implements PaxPamirGame {
   }
 
   
-	// updatePlayerOrdering() {
-  //   console.log('updatePlayerOrdering');
-  //   (this as any).inherited(arguments);
-  //   // if (this.gameOptions.wakhanEnabled) {
-  //   //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
-  //   //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
-  //   // }
-	// }
+	updatePlayerOrdering() {
+    console.log('updatePlayerOrdering',this.playerOrder);
+    // (this as any).inherited(arguments);
+    this.playerOrder.forEach((playerId: number, index: number) => {
+      dojo.place("overall_player_board_" + playerId, "player_boards", index)
+    })
+    // if (this.gameOptions.wakhanEnabled) {
+    //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
+    //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
+    // }
+	}
 
   // .########..#######......######..##.....##.########..######..##....##
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.

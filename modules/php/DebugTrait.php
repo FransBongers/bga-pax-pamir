@@ -50,13 +50,17 @@ trait DebugTrait
 
   function test()
   {
-    
+    Notifications::log('stack', ActionStack::get());
+    Notifications::log('Wakhan active', Globals::getWakhanActive());
+    // $this->radicalize(WakhanCards::getTopOf(DECK),WakhanCards::getTopOf(DISCARD));
+    // $result = $this->radicalizeSelectCardInRow(1, 1, 1);
+    // Notifications::log('radicalizeSelectCardInRow',$result);
     // Notifications::log('loyalty',PaxPamirPlayers::get()->getLoyalty() === null);
     // Notifications::log('wakhan_enabled',Globals::getWakhanEnabled());
     // Notifications::log('next',PaxPamirPlayers::getPrevId(2371052));
-    Notifications::log('top_deck',WakhanCards::getTopOf(DECK));
-    
-    
+    // Notifications::log('top_deck',WakhanCards::getTopOf(DECK));
+
+
     // $openHandsGlobals = Globals::getOpenHands();
     // Notifications::log('openHands',$openHandsGlobals);
     // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);

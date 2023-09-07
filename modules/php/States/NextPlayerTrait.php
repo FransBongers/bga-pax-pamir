@@ -15,6 +15,7 @@ trait NextPlayerTrait
       if ($nextPlayerId === WAKHAN_PLAYER_ID) {
         $this->nextState('wakhanTurn');
       } else {
+        Globals::setWakhanActive(false);
         $this->giveExtraTime($nextPlayerId);
 
         $this->nextState('prepareNextTurn',$nextPlayerId);

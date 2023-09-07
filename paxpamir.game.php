@@ -67,6 +67,7 @@ class Paxpamir extends Table
     use PaxPamir\States\DominanceCheckTrait;
     use PaxPamir\States\EndGameTrait;
     use PaxPamir\States\NextPlayerTrait;
+    use PaxPamir\States\PlaceArmyTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayCardTrait;

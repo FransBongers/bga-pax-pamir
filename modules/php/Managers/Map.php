@@ -76,8 +76,12 @@ class Map
     }
 
     foreach ($playerIds as $playerId) {
-      $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
-      $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
+      if ($playerId === WAKHAN_PLAYER_ID) {
+        $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + max($armyCounts[AFGHAN],$armyCounts[BRITISH],$armyCounts[RUSSIAN]);
+      } else {
+        $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
+        $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
+      }
     };
 
     $playersWithHighestStrength = array_keys($rulingPieces, max($rulingPieces));

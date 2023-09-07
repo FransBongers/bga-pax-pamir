@@ -83,7 +83,12 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
 
   public static function getActiveId()
   {
-    return (int) Game::get()->getActivePlayerId();
+    if (Globals::getWakhanActive(true)) {
+      return WAKHAN_PLAYER_ID;
+    } else {
+      return (int) Game::get()->getActivePlayerId();
+    }
+
   }
 
   public static function getCurrentId()

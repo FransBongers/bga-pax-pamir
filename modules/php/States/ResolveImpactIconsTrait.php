@@ -93,53 +93,6 @@ trait ResolveImpactIconsTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  /**
-   * Place army
-   * NOTE: might be a better place to put this instead of with impact icons?
-   */
-  function dispatchPlaceArmy($actionStack)
-  {
-    $action = $actionStack[count($actionStack) - 1];
-
-    $playerId = $action['playerId'];
-    $player = PaxPamirPlayers::get($playerId);
-    $loyalty = $player->getLoyalty();
-
-    $regionId = $action['data']['region'];
-    $pool = $this->locations['pools'][$loyalty];
-
-    $selectedPiece = isset($action['data']['selectedPiece']) ? $action['data']['selectedPiece'] : null;
-    $army = $selectedPiece !== null ? Tokens::get($selectedPiece) : Tokens::getTopOf($pool);
-
-    // There is no army in the pool. Player needs to select piece
-    if ($army === null) {
-      $this->nextState('selectPiece', $playerId);
-      return;
-    }
-
-    $to = $this->locations['armies'][$regionId];
-    $from = $army['location'];
-
-    Tokens::move($army['id'], $this->locations['armies'][$regionId]);
-    Tokens::setUsed($army['id'], USED);
-
-    // TODO: (add from log in case it was a selected pieces)
-    Notifications::placeArmy($player, $army['id'], $loyalty, $regionId, $from, $to);
-
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      $isArmy = Utils::startsWith($from, 'armies');
-
-      if ($isArmy && $fromRegionId !== $regionId) {
-        Map::checkRulerChange($fromRegionId);
-      }
-    }
-    Map::checkRulerChange($regionId);
-
-    array_pop($actionStack);
-    ActionStack::next($actionStack);
-  }
-
 
   /**
    * Place cylinder

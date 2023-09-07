@@ -13,6 +13,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     'changeActivePlayer' => 'obj', // Used for the generic "changeActivePlayer" state
     'logState' => 'int', // Used to store state id when enabling the log
     'actionStack' => 'obj',
+    // 'activePlayerId' => 'int',
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
@@ -25,6 +26,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "setup" => "int",
     "specialAbilityData" => "obj",
     "openHands" => 'bool',
+    'wakhanActive' => 'bool',
     "wakhanEnabled" => 'bool',
   ];
 

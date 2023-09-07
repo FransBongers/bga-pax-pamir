@@ -312,7 +312,7 @@ interface NotifUpdateInterfaceArgs {
   }[];
 }
 
-interface WakhanDrawCard {
+interface NotifWakhanDrawCardArgs {
   deck: {
     from: string;
     to: string | null;
@@ -323,7 +323,15 @@ interface WakhanDrawCard {
   }
 }
 
-interface WakhanReshuffleDeck {
+interface NotifWakhanRadicalizeArgs {
+  marketLocation: string;
+  newLocation: string;
+  card: Token;
+  receivedRupees: number;
+  rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
+}
+
+interface NotifWakhanReshuffleDeckArgs {
   topOfDeck: string;
   topOfDiscardPile: string;
 }

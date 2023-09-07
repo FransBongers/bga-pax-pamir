@@ -73,6 +73,7 @@ class NotificationManager {
       ['taxPlayer', undefined],
       ['updateInfluence', 1],
       ['wakhanDrawCard', undefined],
+      ['wakhanRadicalize', undefined],
       ['wakhanReshuffleDeck', undefined],
     ];
 
@@ -585,7 +586,7 @@ class NotificationManager {
     });
   }
 
-  async notif_wakhanDrawCard({ args }: Notif<WakhanDrawCard>) {
+  async notif_wakhanDrawCard({ args }: Notif<NotifWakhanDrawCardArgs>) {
     const { deck, discardPile } = args;
     this.game.framework().removeTooltip('pp_wakhan_deck');
     this.game.framework().removeTooltip('pp_wakhan_discard');
@@ -635,7 +636,55 @@ class NotificationManager {
     }
   }
 
-  async notif_wakhanReshuffleDeck({ args }: Notif<WakhanReshuffleDeck>) {
+  async notif_wakhanRadicalize({ args }: Notif<NotifWakhanRadicalizeArgs>) {
+    const { marketLocation, newLocation, rupeesOnCards, receivedRupees, card } = args;
+    const playerId = WAKHAN_PLAYER_ID;
+
+    this.game.clearPossible();
+    const row = Number(marketLocation.split('_')[1]);
+    const col = Number(marketLocation.split('_')[2]);
+
+    // Place paid rupees on market cards
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
+    await Promise.all(
+      rupeesOnCards.map(({ row, column, rupeeId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` })
+      )
+    );
+
+    // Remove all rupees that were on the purchased card
+    await this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
+
+    // Move card from markt
+    const cardId = card.id;
+    if (newLocation.startsWith('events_')) {
+      // await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      // if (cardId === 'card_109') {
+      //   this.game.objectManager.supply.checkDominantCoalition();
+      // }
+    } else if (newLocation === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.game.market.getMarketCardZone({ row, column: col }),
+      });
+    } else if (newLocation === TEMP_DISCARD) {
+      // await Promise.all([
+      //   this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+      //     elements: { id: cardId },
+      //     classesToRemove: [PP_MARKET_CARD],
+      //   }),
+      //   this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
+      // ]);
+    } else {
+      await this.getPlayer({ playerId }).radicalizeCardWakhan({
+        card,
+        from: this.game.market.getMarketCardZone({ row, column: col }),
+      });
+    }
+  }
+
+  async notif_wakhanReshuffleDeck({ args }: Notif<NotifWakhanReshuffleDeckArgs>) {
     await new Promise((resolve) => setTimeout(resolve, 500));
     const { topOfDiscardPile, topOfDeck } = args;
     const deckNode = dojo.byId(`pp_wakhan_deck`);

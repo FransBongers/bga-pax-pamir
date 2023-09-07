@@ -2564,6 +2564,36 @@ var PPPlayer = (function () {
             });
         });
     };
+    PPPlayer.prototype.radicalizeCardWakhan = function (_a) {
+        var card = _a.card, from = _a.from;
+        return __awaiter(this, void 0, void 0, function () {
+            var cardInfo, region, suit, rank;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        cardInfo = this.game.getCardInfo({ cardId: card.id });
+                        region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
+                        this.setupCourtCard({ cardId: card.id });
+                        return [4, Promise.all([
+                                this.court.moveToZone({
+                                    elements: { id: card.id, weight: card.state },
+                                    classesToAdd: ['pp_card_in_court', "pp_player_".concat(this.playerId), "pp_".concat(region)],
+                                    classesToRemove: ['pp_market_card'],
+                                    elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
+                                }),
+                                from.remove({ input: card.id }),
+                            ])];
+                    case 1:
+                        _b.sent();
+                        this.incCounter({ counter: suit, value: rank });
+                        if (cardInfo.loyalty) {
+                            this.incCounter({ counter: 'influence', value: 1 });
+                        }
+                        return [2];
+                }
+            });
+        });
+    };
     PPPlayer.prototype.addCardToHand = function (_a) {
         var cardId = _a.cardId, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
@@ -5992,6 +6022,7 @@ var NotificationManager = (function () {
             ['taxPlayer', undefined],
             ['updateInfluence', 1],
             ['wakhanDrawCard', undefined],
+            ['wakhanRadicalize', undefined],
             ['wakhanReshuffleDeck', undefined],
         ];
         notifs.forEach(function (notif) {
@@ -6828,6 +6859,57 @@ var NotificationManager = (function () {
                             this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: discardPile.to, location: 'discard' });
                         }
                         return [2];
+                }
+            });
+        });
+    };
+    NotificationManager.prototype.notif_wakhanRadicalize = function (_a) {
+        var args = _a.args;
+        return __awaiter(this, void 0, void 0, function () {
+            var marketLocation, newLocation, rupeesOnCards, receivedRupees, card, playerId, row, col, cardId;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        marketLocation = args.marketLocation, newLocation = args.newLocation, rupeesOnCards = args.rupeesOnCards, receivedRupees = args.receivedRupees, card = args.card;
+                        playerId = WAKHAN_PLAYER_ID;
+                        this.game.clearPossible();
+                        row = Number(marketLocation.split('_')[1]);
+                        col = Number(marketLocation.split('_')[2]);
+                        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
+                        return [4, Promise.all(rupeesOnCards.map(function (_a) {
+                                var row = _a.row, column = _a.column, rupeeId = _a.rupeeId;
+                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+                            }))];
+                    case 1:
+                        _b.sent();
+                        return [4, this.game.market.removeRupeesFromCard({ row: row, column: col, to: "rupees_".concat(playerId) })];
+                    case 2:
+                        _b.sent();
+                        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
+                        cardId = card.id;
+                        if (!newLocation.startsWith('events_')) return [3, 3];
+                        return [3, 8];
+                    case 3:
+                        if (!(newLocation === DISCARD)) return [3, 5];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
+                                cardId: cardId,
+                                zone: this.game.market.getMarketCardZone({ row: row, column: col }),
+                            })];
+                    case 4:
+                        _b.sent();
+                        return [3, 8];
+                    case 5:
+                        if (!(newLocation === TEMP_DISCARD)) return [3, 6];
+                        return [3, 8];
+                    case 6: return [4, this.getPlayer({ playerId: playerId }).radicalizeCardWakhan({
+                            card: card,
+                            from: this.game.market.getMarketCardZone({ row: row, column: col }),
+                        })];
+                    case 7:
+                        _b.sent();
+                        _b.label = 8;
+                    case 8: return [2];
                 }
             });
         });

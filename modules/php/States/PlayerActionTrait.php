@@ -99,18 +99,10 @@ trait PlayerActionTrait
   function pass()
   {
     self::checkAction('pass');
-    $playerId = self::getActivePlayerId();
 
-    $remainingActions = Globals::getRemainingActions();
-    $state = $this->gamestate->state();
-
-    // TODO: (check if it is necessary to set remaining actions to 0 here, also done in turn trait?)
-    if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
-      Globals::setRemainingActions(0);
-    }
-    // Notify
     Notifications::pass();
 
+    // $this->stCleanup(PaxPamirPlayers::get());
     $this->gamestate->nextState('cleanup');
   }
 

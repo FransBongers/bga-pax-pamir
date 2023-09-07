@@ -266,7 +266,7 @@ class Notifications
     ));
   }
 
-  public static function dominanceCheckReturnCoalitionBlocks($blocks,$fromLocations)
+  public static function dominanceCheckReturnCoalitionBlocks($blocks, $fromLocations)
   {
     self::notifyAll("dominanceCheckReturnCoalitionBlocks", clienttranslate('All coalition blocks are removed from the board'), [
       'blocks' => $blocks,
@@ -313,7 +313,8 @@ class Notifications
     ]);
   }
 
-  public static function setupLoyalty($player,$coalition) {
+  public static function setupLoyalty($player, $coalition)
+  {
 
     $coalitionName = Game::Get()->loyalty[$coalition]['name'];
     self::notifyAll("changeLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
@@ -870,7 +871,7 @@ class Notifications
     ));
   }
 
-  public static function wakhanDrawCard($deck,$discardPile) 
+  public static function wakhanDrawCard($deck, $discardPile)
   {
     self::notifyAll("wakhanDrawCard", clienttranslate('${logTokenPlayerName} draws a new AI card'), array(
       'logTokenPlayerName' => Utils::logTokenPlayerName(1),
@@ -879,7 +880,47 @@ class Notifications
     ));
   }
 
-  public static function wakhanReshuffleDeck($deck,$discardPile)
+  public static function wakhanRadicalize($card, $firstCard, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
+  {
+    $message = $firstCard
+      ? clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to their court ${logTokenNewLine}${logTokenLargeCard}')
+      : clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of their court ${logTokenNewLine}${logTokenLargeCard}');
+    $cardId = $card['id'];
+
+    self::notifyAll("wakhanRadicalize", $message, array(
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'marketLocation' => $marketLocation,
+      'newLocation' => $newLocation,
+      'card' => $card,
+      'receivedRupees' => $receivedRupees,
+      'rupeesOnCards' => $rupeesOnCards,
+      'side' => $side === 'left' ? clienttranslate('left') : clienttranslate('right'),
+      'i18n' => ['side'],
+    ));
+  }
+
+  public static function wakhanRadicalizeDiscard($card, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
+  {
+    $message = clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and discards it ${logTokenNewLine}${logTokenLargeCard}');
+    $cardId = $card['id'];
+
+    self::notifyAll("wakhanRadicalize", $message, array(
+      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
+      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'marketLocation' => $marketLocation,
+      'newLocation' => $newLocation,
+      'card' => $card,
+      'receivedRupees' => $receivedRupees,
+      'rupeesOnCards' => $rupeesOnCards,
+    ));
+  }
+
+  public static function wakhanReshuffleDeck($deck, $discardPile)
   {
     self::notifyAll("wakhanReshuffleDeck", clienttranslate('${logTokenPlayerName} reshuffles the AI cards, because the draw deck is empty'), array(
       'logTokenPlayerName' => Utils::logTokenPlayerName(1),

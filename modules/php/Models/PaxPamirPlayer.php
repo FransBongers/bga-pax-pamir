@@ -181,6 +181,11 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
     return $suits;
   }
 
+  function isWakhan()
+  {
+    return $this->getId() === WAKHAN_PLAYER_ID;
+  }
+
   function checkDiscards()
   {
     //

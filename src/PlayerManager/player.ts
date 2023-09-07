@@ -814,6 +814,28 @@ class PPPlayer {
     this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
   }
 
+  async radicalizeCardWakhan({ card, from }: { card: Token; from: PaxPamirZone }): Promise<void> {
+    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
+    const { region, suit, rank } = cardInfo;
+
+    this.setupCourtCard({ cardId: card.id });
+    await Promise.all([
+      this.court.moveToZone({
+        elements: { id: card.id, weight: card.state },
+        classesToAdd: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
+        classesToRemove: ['pp_market_card'],
+        elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
+      }),
+      from.remove({ input: card.id }),
+    ]);
+
+    this.incCounter({ counter: suit, value: rank });
+    if (cardInfo.loyalty) {
+      // TODO: check for loyalty change and then set Counter to 2?
+      this.incCounter({ counter: 'influence', value: 1 });
+    }
+  }
+
   async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {
     if (this.playerId === this.game.getPlayerId() && from) {
       await Promise.all([

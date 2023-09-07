@@ -132,13 +132,16 @@ trait DiscardTrait
     }
     // If cards available transition to discard state
     // otherwise cancel action and continue to next action
-    if ($availableCards > 0) {
+    if ($availableCards > 0 && $playerId === WAKHAN_PLAYER_ID) {
+      // TODO: add logic to discard card
+      array_pop($actionStack);
+      ActionStack::next($actionStack);
+    } else if ($availableCards > 0) {
       // ActionStack::set($actionStack);
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);
-      ActionStack::set($actionStack);
-      $this->nextState('dispatchAction');
+      ActionStack::next($actionStack);
     }
   }
 

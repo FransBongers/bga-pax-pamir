@@ -113,13 +113,10 @@ trait RefillMarketTrait
     $player = PaxPamirPlayers::get();
 
     $cards = Cards::getOfTypeInLocation('card', 'market');
-    Notifications::log('cards', $cards);
 
     $dominanceCheckCards = Utils::filter($cards, function ($card) {
       return $this->isDominanceCheck($card);
     });
-
-    Notifications::log('$numberOfDominanceChecksInMarket', count($dominanceCheckCards));
 
     for ($column = 0; $column <= 5; $column++) {
       for ($row = 0; $row <= 1; $row++) {

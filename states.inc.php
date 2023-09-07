@@ -337,12 +337,13 @@ $machinestates = array(
 
     ST_WAKHAN_TURN => [
         'name' => 'wakhanTurn',
-        'description' => '',
+        "description" => clienttranslate('Wakhan performs actions'),
         'descriptionmyturn' => '',
         'type' => 'game',
         'action' => 'stWakhanTurn',
         "transitions" => [
-            "prepareNextTurn" => ST_PREPARE_TURN,
+            "cleanup" => ST_CLEANUP,
+            // "prepareNextTurn" => ST_PREPARE_TURN,
             // "dispatchAction" => ST_DISPATCH_ACTION,
         ]
     ],

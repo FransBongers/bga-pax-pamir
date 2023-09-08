@@ -71,7 +71,7 @@ class WakhanCards extends \PaxPamir\Helpers\Pieces
     $cards = [];
     array_push($cards, [
       "id" => "wakhan_card_{INDEX}",
-      "nbr" => 4,
+      "nbr" => 8,
       "nbrStart" => 1,
       "location" => DECK,
     ]);

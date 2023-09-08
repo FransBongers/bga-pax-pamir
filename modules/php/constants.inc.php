@@ -72,6 +72,12 @@ const EVENT_CARD = 'eventCard';
 const COURT_CARD = 'courtCard';
 
 /**
+ * Influence types (used in frontend for notifs)
+ */
+const PLAYER_INFLUENCE = 'playerInfluence';
+const WAKHAN_INFLUENCE = 'wakhanInfluence';
+
+/**
  * Coalitions
  */
 const AFGHAN = 'afghan';
@@ -310,3 +316,5 @@ const RADICALIZE_SPECIAL_2 = 'radicalizeSpecial2';
 const RADICALIZE_SPECIAL_3 = 'radicalizeSpecial3';
 const RADICALIZE_SPECIAL_4 = 'radicalizeSpecial4';
 const RADICALIZE_SPECIAL_5 = 'radicalizeSpecial5';
+const RADICALIZE_SPECIAL_6 = 'radicalizeSpecial6';
+const RADICALIZE_SPECIAL_7 = 'radicalizeSpecial7';

@@ -222,3 +222,9 @@ const SA_IRREGULARS = 'irregulars'; // card_99
  * Wakhan
  */
 const WAKHAN_PLAYER_ID = 1;
+
+/**
+ * Influence types (used in frontend for notifs)
+ */
+const PLAYER_INFLUENCE = 'playerInfluence';
+const WAKHAN_INFLUENCE = 'wakhanInfluence';

@@ -250,7 +250,11 @@ class NotificationManager {
   async notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
     const { scores } = notif.args;
     for (let playerId of Object.keys(scores)) {
-      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+      if (Number(playerId) === WAKHAN_PLAYER_ID) {
+        (this.game.playerManager.getPlayer({playerId: Number(playerId)}) as PPWakhanPlayer).wakhanScore.toValue(scores[playerId].newScore)
+      } else {
+        this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+      }
       await Promise.all([
         this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
         this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`).remove({ input: `vp_cylinder_${playerId}` }),
@@ -580,9 +584,13 @@ class NotificationManager {
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
-  notif_updateInfluence({ args }: Notif<NotifUpdateInterfaceArgs>) {
-    args.updates.forEach(({ playerId, value }) => {
-      this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
+  notif_updateInfluence({ args }: Notif<NotifUpdateInfluenceArgs>) {
+    args.updates.forEach((update) => {
+      if (update.type === 'playerInfluence') {
+        const { playerId, value } = update;
+        this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
+      } else if (update.type === 'wakhanInfluence') {
+      }
     });
   }
 
@@ -677,10 +685,13 @@ class NotificationManager {
       //   this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
       // ]);
     } else {
-      await this.getPlayer({ playerId }).radicalizeCardWakhan({
-        card,
-        from: this.game.market.getMarketCardZone({ row, column: col }),
-      });
+      const player = this.getPlayer({ playerId });
+      if (player instanceof PPWakhanPlayer) {
+        await player.radicalizeCardWakhan({
+          card,
+          from: this.game.market.getMarketCardZone({ row, column: col }),
+        });
+      }
     }
   }
 

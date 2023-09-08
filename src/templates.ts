@@ -103,6 +103,24 @@ const tplPlayerBoard = ({playerId}: {playerId: number}) => {
 </div>`
 }
 
+const tplPlayerBoardWakhan = ({playerId}: {playerId: number}) => {
+  return `<div id="pp_player_board_${playerId}" class="pp_player_board">
+    <div class="pp_icon_container">
+        <div id="loyalty_icon_${playerId}_afghan" class="pp_icon pp_loyalty_icon pp_afghan"><div id="influence_${playerId}_afghan" class="pp_icon_count"><span id="influence_${playerId}_afghan_counter"></span></div></div>
+        <div id="loyalty_icon_${playerId}_british" class="pp_icon pp_loyalty_icon pp_british"><div id="influence_${playerId}_british" class="pp_icon_count"><span id="influence_${playerId}_british_counter"></span></div></div>
+        <div id="loyalty_icon_${playerId}_russian" class="pp_icon pp_loyalty_icon pp_russian"><div id="influence_${playerId}_russian" class="pp_icon_count"><span id="influence_${playerId}_russian_counter"></span></div></div>
+        <div id="cylinders_${playerId}" class="pp_icon pp_cylinder_icon"><div id="cylinder_count_${playerId}" class="pp_icon_count"><span id="cylinder_count_${playerId}_counter"></span></div></div>        
+    </div>
+    <div id="suits_${playerId}" class="pp_icon_container">
+        <div class="pp_icon pp_suit_icon political"><div id="political_${playerId}" class="pp_icon_count"><span id="political_${playerId}_counter"></span></div></div>
+        <div class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${playerId}" class="pp_icon_count"><span id="intelligence_${playerId}_counter"></span></div></div>
+        <div class="pp_icon pp_suit_icon economic"><div id="economic_${playerId}" class="pp_icon_count"><span id="economic_${playerId}_counter"></span></div></div>
+        <div class="pp_icon pp_suit_icon military"><div id="military_${playerId}" class="pp_icon_count"><span id="military_${playerId}_counter"></span></div></div>
+        <div id="rupees_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${playerId}" class="pp_icon_count"><span id="rupee_count_${playerId}_counter"></span></div></div>
+    </div>
+</div>`
+}
+
 const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number; playerColor: string; playerName: string;}) => {
   return `<div id="player_tableau_${playerId}" >
   <div class="pp_player_tableau pp_player_color_${playerColor}">
@@ -152,10 +170,19 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
 
 const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
   return `<div id="overall_player_board_1" class="player-board">
-            <div class="player-name" id="player_name_1">
-              <a style="color: #8A70B2">${name}</a>
-            </div>
-            <div id="player_board_1" class="player_board_content">
+            <div class="player_board_inner" id="player_board_inner_8A70B2">
+              <div class="emblemwrap" id="avatarwrap_1">
+                  <div class="pp_wakhan_avatar avatar emblem" id="avatar_1"></div>
+              </div>
+              <div class="player-name" id="player_name_1">
+                <a style="color: #8A70B2">${name}</a>
+              </div>
+              <div id="player_board_1" class="player_board_content">
+                <div class="player_score">
+                  <span id="player_score_1" class="player_score_value"></span> <i class="fa fa-star" id="icon_point_1"></i>
+                  <span class="player_elo_wrap">• <div class="gamerank gamerank_average "><span class="icon20 icon20_rankw"></span> <span class="gamerank_value" id="player_elo_1" "="">9001</span></div></span>                              
+                </div>
+              </div>
             </div>
           </div>`
 }
@@ -175,7 +202,6 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
                         <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title"><span>${playerName}'s court</span></div>
                         <div id="pp_tableau_title_icons_player_${playerId}" class="pp_player_tableau_icons">
                             <div id="rupees_tableau_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_${playerId}" class="pp_icon_count"><span id="rupee_count_tableau_${playerId}_counter"></span></div></div>
-                            <div id="cards_tableau_${playerId}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_${playerId}" class="pp_icon_count"><span id="card_count_tableau_${playerId}_counter"></span></div></div>
                         </div>
                     </div>
                     <div class="pp_tableau_inner_container">

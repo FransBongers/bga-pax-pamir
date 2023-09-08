@@ -7,20 +7,20 @@
 //  .##........########.##.....##....##....########.##.....##
 
 class PPPlayer {
-  private court: PaxPamirZone;
+  protected court: PaxPamirZone;
   private events: PaxPamirZone;
   private cylinders: PaxPamirZone;
   private handCards: string[];
   private hand: PaxPamirZone;
-  private game: PaxPamirGame;
+  protected game: PaxPamirGame;
   private gifts: Record<string, PaxPamirZone> = {};
   private modal: Modal;
-  private playerColor: string;
+  protected playerColor: string;
   private playerHexColor: string;
-  private playerId: number;
+  protected playerId: number;
   private playerName: string;
   private prizes: PaxPamirZone;
-  private counters: {
+  protected counters: {
     cards: Counter;
     cardsTableau: Counter;
     cylinders: Counter;
@@ -43,6 +43,7 @@ class PPPlayer {
     rupees: new ebg.counter(),
     rupeesTableau: new ebg.counter(),
   };
+
   private player: PaxPamirPlayer;
   private rulerTokens: PaxPamirZone;
   private loyalty: string;
@@ -61,7 +62,7 @@ class PPPlayer {
     if (this.playerId === this.game.getPlayerId()) {
       dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
     }
-
+    console.log('isWakhan', this.isWakhan(), this.playerId);
     this.setupPlayer({ gamedatas });
   }
 
@@ -135,6 +136,9 @@ class PPPlayer {
   }
 
   setupPlayerHandModal() {
+    if (this.isWakhan()) {
+      return;
+    }
     this.modal = new Modal(`player_hand_${this.playerId}`, {
       class: 'pp_player_hand_popin',
       closeIcon: 'fa-times',
@@ -334,8 +338,8 @@ class PPPlayer {
     }
 
     // Set all values in player panels
-    if (this.player.loyalty && this.player.loyalty !== 'null') {
-      this.counters.influence.setValue(playerGamedatas.counts.influence);
+    if (this.player.loyalty && this.player.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
+      this.counters.influence.setValue(playerGamedatas.counts.influence.value);
     } else {
       this.counters.influence.disable();
     }
@@ -561,10 +565,7 @@ class PPPlayer {
   setCounter({
     counter,
     value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.setValue(value);
@@ -582,10 +583,7 @@ class PPPlayer {
   incCounter({
     counter,
     value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.incValue(value);
@@ -603,10 +601,7 @@ class PPPlayer {
   toValueCounter({
     counter,
     value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.toValue(value);
@@ -654,6 +649,13 @@ class PPPlayer {
     return this.events.getItems().includes(cardId);
   }
 
+  getCourtCardsWithSpecialAbility({ specialAbility }: { specialAbility: string }): CourtCard[] {
+    return this.court
+      .getItems()
+      .map((cardId: string) => this.game.getCardInfo({ cardId }) as CourtCard)
+      .filter((card: CourtCard) => card.specialAbility === specialAbility);
+  }
+
   hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
     return this.court
       .getItems()
@@ -661,11 +663,8 @@ class PPPlayer {
       .some((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
-  getCourtCardsWithSpecialAbility({ specialAbility }: { specialAbility: string }): CourtCard[] {
-    return this.court
-      .getItems()
-      .map((cardId: string) => this.game.getCardInfo({ cardId }) as CourtCard)
-      .filter((card: CourtCard) => card.specialAbility === specialAbility);
+  public isWakhan(): boolean {
+    return this.playerId === WAKHAN_PLAYER_ID;
   }
 
   updateHandCards({ action, cardId }: { action: 'ADD' | 'REMOVE'; cardId: string }) {
@@ -809,31 +808,10 @@ class PPPlayer {
     this.incCounter({ counter: suit, value: rank });
     if (cardInfo.loyalty) {
       // TODO: check for loyalty change and then set Counter to 2?
+      // TODO: check for event where patriots don't count?
       this.incCounter({ counter: 'influence', value: 1 });
     }
     this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
-  }
-
-  async radicalizeCardWakhan({ card, from }: { card: Token; from: PaxPamirZone }): Promise<void> {
-    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
-    const { region, suit, rank } = cardInfo;
-
-    this.setupCourtCard({ cardId: card.id });
-    await Promise.all([
-      this.court.moveToZone({
-        elements: { id: card.id, weight: card.state },
-        classesToAdd: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
-        classesToRemove: ['pp_market_card'],
-        elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
-      }),
-      from.remove({ input: card.id }),
-    ]);
-
-    this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty) {
-      // TODO: check for loyalty change and then set Counter to 2?
-      this.incCounter({ counter: 'influence', value: 1 });
-    }
   }
 
   async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {

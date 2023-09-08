@@ -305,11 +305,23 @@ interface NotifTaxPlayerArgs {
 //   }[];
 // }
 
-interface NotifUpdateInterfaceArgs {
-  updates: {
-    playerId: number;
-    value: number;
-  }[];
+interface PlayerInfluence {
+  type: 'playerInfluence';
+  playerId: number;
+  value: number;
+}
+
+interface WakhanInfluence {
+  type: 'wakhanInfluence';
+  influence: {
+    afghan: number;
+    british: number;
+    russian: number;
+  }
+}
+
+interface NotifUpdateInfluenceArgs {
+  updates: (PlayerInfluence | WakhanInfluence)[];
 }
 
 interface NotifWakhanDrawCardArgs {

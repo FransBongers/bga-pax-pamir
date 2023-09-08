@@ -148,6 +148,7 @@ trait ResolveEventTrait
       'playerId' => $selectedPlayerId,
       'value' => $selectedPlayer->getInfluence(),
     ]];
+    // TODO: Wakhan influence
     Notifications::updateInfluence($updates);
 
     ActionStack::next($actionStack);

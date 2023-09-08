@@ -1,7 +1,7 @@
 interface PlayerCounts {
   cards: number;
   cylinders: number;
-  influence: number;
+  influence: PlayerInfluence | WakhanInfluence;
   rupees: number; // TODO (Frans): return as Number
   suits: {
     economic: number;

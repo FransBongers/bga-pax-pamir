@@ -50,8 +50,8 @@ trait DebugTrait
 
   function test()
   {
-    Notifications::log('stack', ActionStack::get());
-    Notifications::log('Wakhan active', Globals::getWakhanActive());
+    // Notifications::log('stack', ActionStack::get());
+    // Notifications::log('Wakhan active', Globals::getWakhanActive());
     // $this->radicalize(WakhanCards::getTopOf(DECK),WakhanCards::getTopOf(DISCARD));
     // $result = $this->radicalizeSelectCardInRow(1, 1, 1);
     // Notifications::log('radicalizeSelectCardInRow',$result);
@@ -77,7 +77,7 @@ trait DebugTrait
     // Cards::move('card_6', 'deck');
     // Cards::move('card_81', 'deck');
     // Cards::move(ECE_CONFLICT_FATIGUE_CARD_ID, 'events_2371053');
-    // Cards::move('card_101', 'market_0_0');
+    Cards::move('card_102', 'market_0_0');
     // Cards::move('card_115', 'market_0_1');
     // Cards::move('card_116', 'market_0_2');
     // Cards::move('card_111', 'market_0_3');

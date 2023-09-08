@@ -193,10 +193,18 @@ class Events
     $players = PaxPamirPlayers::getAll();
     $updates = [];
     foreach ($players as $playerId => $player) {
-      $updates[] = [
-        'playerId' => $playerId,
-        'value' => $player->getInfluence(),
-      ];
+      if ($playerId !== WAKHAN_PLAYER_ID) {
+        $updates[] = [
+          'type' => PLAYER_INFLUENCE,
+          'playerId' => $playerId,
+          'value' => $player->getInfluence(),
+        ];
+      } else {
+        $updates[] = [
+          'type' => WAKHAN_INFLUENCE,
+          'influence' => $player->getWakhanInfluence(),
+        ];
+      }
     }
     Notifications::updateInfluence($updates);
   }

@@ -13,6 +13,7 @@ use PaxPamir\Managers\Map;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Models\PaxPamirPlayer;
 
 trait DominanceCheckTrait
 {
@@ -207,10 +208,10 @@ trait DominanceCheckTrait
     // Create array of players loyal to dominant coalition and their total influence
     $loyalPlayers = [];
     foreach ($players as $playerId => $player) {
-      if ($player->getLoyalty() === $dominantCoalition) {
+      if ($player->getLoyalty() === $dominantCoalition || $player->isWakhan()) {
         $loyalPlayers[] = [
           'playerId' => $playerId,
-          'count' => $player->getInfluence(),
+          'count' => $player->getInfluence($dominantCoalition),
         ];
       }
     };
@@ -244,9 +245,9 @@ trait DominanceCheckTrait
   function getCylindersInPlayPerPlayer()
   {
     $counts = array();
-    $players = $this->loadPlayersBasicInfos();
+    $players = PaxPamirPlayers::getAll();
     $i = 0;
-    foreach ($players as $playerId => $playerInfo) {
+    foreach ($players as $playerId => $player) {
       $counts[$i] = array(
         'count' => 10 - Tokens::countInLocation(['cylinders', $playerId]),
         'playerId' => $playerId,

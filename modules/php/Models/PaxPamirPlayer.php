@@ -55,7 +55,14 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
       'counts' => [
         'cards' => count($hand),
         'cylinders' => 10 - count($cylinders),
-        'influence' => $this->getInfluence(),
+        'influence' => $this->id === WAKHAN_PLAYER_ID ? [
+          'type' => WAKHAN_INFLUENCE,
+          'influence' => $this->getWakhanInfluence(),
+        ] : [
+          'playerId' => $this->id,
+          'type' => PLAYER_INFLUENCE,
+          'value' => $this->getInfluence()
+        ],
         'suits' => $this->getSuitTotals()
       ],
       'prizes' => $this->getPrizes()
@@ -111,14 +118,23 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
     return Tokens::getInLocation(['cylinders', $this->id])->toArray();
   }
 
+  function getWakhanInfluence()
+  {
+    return [
+      AFGHAN => $this->getInfluence(AFGHAN),
+      BRITISH => $this->getInfluence(BRITISH),
+      RUSSIAN => $this->getInfluence(RUSSIAN),
+    ];
+  }
+
   /**
    *   Returns total influence for player
    */
-  function getInfluence()
+  function getInfluence($loyalty = null)
   {
 
     $influence = 1;
-    $player_loyalty = $this->getLoyalty();
+    $playerLoyalty = $loyalty === null ? $this->getLoyalty() : $loyalty;
 
     // Patriots
     $isRumorActive = Events::isRumorActive($this);
@@ -126,7 +142,7 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
       $court_cards = $this->getCourtCards();
       foreach ($court_cards as $card) {
         $card_loyalty = Game::get()->getCardInfo($card)['loyalty'];
-        if ($card_loyalty === $player_loyalty) {
+        if ($card_loyalty === $playerLoyalty) {
           $influence += 1;
         }
       }
@@ -146,7 +162,9 @@ class PaxPamirPlayer extends \PaxPamir\Helpers\DB_Model
       }
     }
 
-    $prizes = $this->getPrizes();
+    $prizes = Utils::filter($this->getPrizes(), function ($card) use ($playerLoyalty) {
+      return $card['prize'] === $playerLoyalty;
+    });
     $influence += count($prizes);
 
     return $influence;

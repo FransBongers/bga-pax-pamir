@@ -535,6 +535,11 @@
   flex-direction: row;
   align-items: flex-end;
   margin: 3px;
+  flex-wrap: wrap;
+}
+
+.pp_wakhan_avatar {
+  background-image: url("img/wakhan_avatar_32.jpeg");
 }
 
 .pp_icon {

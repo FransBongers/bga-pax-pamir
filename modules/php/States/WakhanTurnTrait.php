@@ -114,10 +114,6 @@ trait WakhanTurnTrait
     }
     // Court Card
 
-    // return [
-    //   'bribeeId' => $rulers[$region],
-    //   'amount' => count($rulerTribes)
-    // ];
     $bribe = $this->determineBribe($card, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), null, 'playCard');
 
     if ($bribe !== null && $bribe['amount'] > PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees()) {
@@ -130,6 +126,8 @@ trait WakhanTurnTrait
     // Play card to court and resolve impact icons
     $side = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 'left' : 'right';
     $firstCard = $this->moveCardToCourt(WAKHAN_PLAYER_ID, $card['id'], $side);
+    // Get card data again to have up to date state
+    $card = Cards::get($card['id']);
     Notifications::wakhanRadicalize($card, $firstCard, $side, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), Locations::court(WAKHAN_PLAYER_ID));
     $this->wakhanResolveImpactIcons($card, $back, $front);
   }
@@ -187,14 +185,23 @@ trait WakhanTurnTrait
       switch ($icon) {
         case ARMY:
           $this->wakhanPlaceArmy($card, $loyalty, $front);
+          break;
         case LEVERAGE:
         case ROAD:
         case SPY:
         case TRIBE:
         case ECONOMIC_SUIT:
+          $this->resolveFavoredSuitChange(ECONOMIC);
+          break;
         case INTELLIGENCE_SUIT:
+          $this->resolveFavoredSuitChange(INTELLIGENCE);
+          break;
         case MILITARY_SUIT:
+          $this->resolveFavoredSuitChange(MILITARY);
+          break;
         case POLITICAL_SUIT:
+          $this->resolveFavoredSuitChange(POLITICAL);
+          break;
       }
     }
   }

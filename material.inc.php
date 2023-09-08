@@ -2219,6 +2219,62 @@ $this->wakhanCards = [
       'rowSideArrow' => 0
     ]
   ],
+  'wakhan_card_5' => [
+    'id' => 'wakhan_card_5',
+    'back' => [
+      'columnNumbers' => [4, 5, 0, 1, 2, 3],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_SPECIAL_6, BATTLE, RADICALIZE],
+      'columnArrow' => 1,
+      'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
+      'regionOrder' => [PERSIA, KANDAHAR, HERAT, TRANSCASPIA, KABUL, PUNJAB],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_6' => [
+    'id' => 'wakhan_card_6',
+    'back' => [
+      'columnNumbers' => [5, 0, 1, 2, 3, 4],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_SPECIAL_7, MOVE, RADICALIZE],
+      'columnArrow' => 0,
+      'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
+      'regionOrder' => [HERAT, PERSIA, TRANSCASPIA, KABUL, PUNJAB, KANDAHAR],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_7' => [
+    'id' => 'wakhan_card_7',
+    'back' => [
+      'columnNumbers' => [1, 2, 3, 4, 5, 0],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [BUILD, MOVE, RADICALIZE],
+      'columnArrow' => 4,
+      'pragmaticLoyalty' => [AFGHAN, RUSSIAN, BRITISH],
+      'regionOrder' => [PUNJAB, TRANSCASPIA, KABUL, PERSIA, KANDAHAR, HERAT],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_8' => [
+    'id' => 'wakhan_card_8',
+    'back' => [
+      'columnNumbers' => [1, 2, 3, 4, 5, 0],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [TAX, BETRAY, RADICALIZE],
+      'columnArrow' => 4,
+      'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
+      'regionOrder' => [TRANSCASPIA, PERSIA, PUNJAB, KANDAHAR, HERAT, KABUL],
+      'rowSideArrow' => 1
+    ]
+  ],
 ];
 
 $this->radicalizeActions = [
@@ -2245,5 +2301,13 @@ $this->radicalizeActions = [
   RADICALIZE_SPECIAL_5 => [
     'id' => RADICALIZE_SPECIAL_5,
     'text' => clienttranslate('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees.'),
+  ],
+  RADICALIZE_SPECIAL_6 => [
+    'id' => RADICALIZE_SPECIAL_6,
+    'text' => clienttranslate('Radicalize a card that will gain Wakhan control of a region.'),
+  ],
+  RADICALIZE_SPECIAL_7 => [
+    'id' => RADICALIZE_SPECIAL_7,
+    'text' => clienttranslate('Radicalize an intelligence card.'),
   ],
 ];

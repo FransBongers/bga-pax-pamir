@@ -177,6 +177,7 @@ trait WakhanTurnTrait
     return $result;
   }
 
+
   function wakhanResolveImpactIcons($card, $back, $front)
   {
     $loyalty = $this->getWakhanLoyalty($front['pragmaticLoyalty']);
@@ -187,9 +188,14 @@ trait WakhanTurnTrait
           $this->wakhanPlaceArmy($card, $loyalty, $front);
           break;
         case LEVERAGE:
+          $this->resolveLeverage(WAKHAN_PLAYER_ID);
+          break;
         case ROAD:
+          break;
         case SPY:
+          break;
         case TRIBE:
+          break;
         case ECONOMIC_SUIT:
           $this->resolveFavoredSuitChange(ECONOMIC);
           break;

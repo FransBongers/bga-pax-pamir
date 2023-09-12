@@ -93,7 +93,7 @@ trait CleanupTrait
     $playerHasToDiscard = $totals['courtCards'] - $totals['political'] - 3 > 0;
 
     if ($playerHasToDiscard && $playerId === WAKHAN_PLAYER_ID) {
-      // TODO: add logic to select wakhan card to discard
+      $this->wakhanDiscardCourtCards($totals['courtCards'] - $totals['political'] - 3);
       array_pop($actionStack);
     } else if ($playerHasToDiscard) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
@@ -117,7 +117,8 @@ trait CleanupTrait
     $playerHasToDiscard = count($handCards) - $totals['intelligence'] - 2 > 0;
 
     if ($playerHasToDiscard && $playerId === WAKHAN_PLAYER_ID) {
-      // TODO: add logic to select wakhan card to discard
+      // Wakhan does not have hand cards, we can pop action and continue
+      array_pop($actionStack);
     } else if ($playerHasToDiscard) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
         'from' => [HAND]

@@ -50,75 +50,11 @@ trait DebugTrait
 
   function test()
   {
-    // Notifications::log('stack', ActionStack::get());
-    // Notifications::log('Wakhan active', Globals::getWakhanActive());
-    // $this->radicalize(WakhanCards::getTopOf(DECK),WakhanCards::getTopOf(DISCARD));
-    // $result = $this->radicalizeSelectCardInRow(1, 1, 1);
-    // Notifications::log('radicalizeSelectCardInRow',$result);
-    // Notifications::log('loyalty',PaxPamirPlayers::get()->getLoyalty() === null);
-    // Notifications::log('wakhan_enabled',Globals::getWakhanEnabled());
-    // Notifications::log('next',PaxPamirPlayers::getPrevId(2371052));
-    // Notifications::log('top_deck',WakhanCards::getTopOf(DECK));
+    // $this->wakhanDiscardCourtCards(1);
 
-
-    // $openHandsGlobals = Globals::getOpenHands();
-    // Notifications::log('openHands',$openHandsGlobals);
-    // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);
-    // Notifications::log('option open hands', $openHands);
-    // Notifications::log('option open null', $openHands === null);
-    // $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
-    // $discardPileCount = count($discardPile);
-
-
-    // Notifications::log('discardPile', $discardPile);
-
-    // Cards::move('card_35', 'deck');
-    // Cards::move('card_71', 'deck');
-    // Cards::move('card_6', 'deck');
-    // Cards::move('card_81', 'deck');
-    // Cards::move(ECE_CONFLICT_FATIGUE_CARD_ID, 'events_2371053');
-    Cards::move('card_102', 'market_0_0');
-    // Cards::move('card_115', 'market_0_1');
-    // Cards::move('card_116', 'market_0_2');
-    // Cards::move('card_111', 'market_0_3');
-    // Cards::move('card_19', 'prizes_2371053');
-
-
-    // Cards::move('card_107',ACTIVE_EVENTS);
-
-    // $this->dispatchRefillMarketDrawCards([]);
-
-    // Notifications::log('getInLocation',Cards::getOfTypeInLocation('card','market'));
-    // $this->debugAddCardToHand('card_1');
-    // $this->debugAddCardToHand('card_2');
-    // $this->debugAddCardToHand('card_3');
-    // $this->debugAddCardToHand('card_4');
-    // $actionStack = ActionStack::get();
-    // Notifications::log('actions', $actionStack);
-    // ActionStack::next($actionStack);
-
-    // ActionStack::set([]);
-    // $this->nextState('playerActions');
-    // $this->pushActionsToActionStack([
-    //   [
-    //     'action' => 'discard',
-    //     'data' => [
-    //       'source' => 'hand',
-    //     ],
-    //   ],
-    //   [
-    //     'action' => 'discard',
-    //     'data' => [
-    //       'source' => 'court',
-    //     ],
-    //   ],
-    // ]);
     // Notifications::log('actionStack', ActionStack::get());
-    // $actionStack = ActionStack::get();
-    // Notifications::log('actionStack before', $actionStack);
-    // $action = array_pop($actionStack);
-    // Notifications::log('action', $action);
-    // Notifications::log('actionStack after', $actionStack);
+    Cards::move('card_101', 'market_0_0');
+
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)

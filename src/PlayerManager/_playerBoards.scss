@@ -55,7 +55,6 @@
 }
 
 .pp_wakhan_avatar {
-  // background-image: url('img/coalition_icons.webp');
   background-image: url('img/wakhan_avatar_32.jpeg');
 }
 
@@ -71,7 +70,7 @@
   background-image: url('img/coalition_icons.webp');
   /* background-size: 132px 30px;  */
   /* background-position: -250px 0px; */
-  background-size: 300% 100%;
+  background-size: 600% 100%;
   background-repeat: no-repeat;
   // width: 44px;
 }
@@ -79,13 +78,13 @@
 .pp_loyalty_icon.pp_afghan {
   height: 25px;
   padding-bottom: 12px;
-  background-position-x: 0%;
+  background-position-x: 60%;
 }
 
 .pp_loyalty_icon.pp_british {
   height: 16px;
   padding-bottom: 22px;
-  background-position-x: 50%;
+  background-position-x: 80%;
 }
 
 .pp_loyalty_icon.pp_russian {

@@ -292,6 +292,10 @@ trait DominanceCheckTrait
             'newScore' => $currentScore + $pointsPerPlayer,
           );
           PaxPamirPlayers::incScore($playerId, $pointsPerPlayer);
+          if ($playerId !== WAKHAN_PLAYER_ID) {
+            // Also need to update in Players table since refresh of page loads data from there
+            Players::incScore($playerId, $pointsPerPlayer);
+          }
         }
       }
 

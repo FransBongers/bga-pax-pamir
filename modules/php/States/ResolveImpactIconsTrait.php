@@ -206,9 +206,8 @@ trait ResolveImpactIconsTrait
     ActionStack::set($actionStack);
 
     $playerId = $action['playerId'];
-    PaxPamirPlayers::incRupees($playerId, 2);
 
-    Notifications::leveragedCardPlay(PaxPamirPlayers::get($playerId), 2);
+    $this->resolveLeverage($playerId);
 
     $this->nextState('dispatchAction');
   }
@@ -314,5 +313,11 @@ trait ResolveImpactIconsTrait
     // Suit change notification
     $currentSuitId = $this->suits[$currentSuit]['id'];
     Notifications::changeFavoredSuit($currentSuitId, $newSuit, $customMessage);
+  }
+
+  function resolveLeverage($playerId)
+  {
+    PaxPamirPlayers::incRupees($playerId, 2);
+    Notifications::leveragedCardPlay(PaxPamirPlayers::get($playerId), 2);
   }
 }

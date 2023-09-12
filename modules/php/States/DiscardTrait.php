@@ -80,6 +80,7 @@ trait DiscardTrait
     }
 
     $this->resolveDiscardCard($card, $player, $from);
+    $this->nextState('dispatchAction');
   }
 
   // .########..####..######..########.....###....########..######..##.....##
@@ -231,8 +232,6 @@ trait DiscardTrait
     if ($from === COURT) {
       $this->checkLeverage($card, $cardOwner);
     }
-
-    $this->nextState('dispatchAction');
   }
 
   /**
@@ -252,7 +251,7 @@ trait DiscardTrait
     }
 
     $additionalDiscards = 2 - $amountOfRupeesToReturn;
-    if ($additionalDiscards === 0) {
+    if ($additionalDiscards === 0 || $player->isWakhan()) {
       return;
     }
     Notifications::additionalDiscardsForDiscardingLeveragedCard($player, $additionalDiscards);

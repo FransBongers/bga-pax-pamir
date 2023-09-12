@@ -202,6 +202,7 @@ trait DispatchActionTrait
       $card['prize'] !== null ? TEMP_DISCARD : DISCARD,
       PaxPamirPlayers::get($current['data']['cardOwnerId'])
     );
+    $this->nextState('dispatchAction');
   }
 
   function dispatchDiscardSingleCard($actionStack)
@@ -216,6 +217,7 @@ trait DispatchActionTrait
     $cardOwner = isset($action['data']['cardOwnerId']) ? PaxPamirPlayers::get($action['data']['cardOwnerId']) : null;
 
     $this->resolveDiscardCard($card, $player, $from, $to, $cardOwner);
+    $this->nextState('dispatchAction');
   }
 
   // TODO: replace with dispatchTransition

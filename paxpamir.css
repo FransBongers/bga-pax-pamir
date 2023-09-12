@@ -553,20 +553,20 @@
   background-image: url("img/coalition_icons.webp");
   /* background-size: 132px 30px;  */
   /* background-position: -250px 0px; */
-  background-size: 300% 100%;
+  background-size: 600% 100%;
   background-repeat: no-repeat;
 }
 
 .pp_loyalty_icon.pp_afghan {
   height: 25px;
   padding-bottom: 12px;
-  background-position-x: 0%;
+  background-position-x: 60%;
 }
 
 .pp_loyalty_icon.pp_british {
   height: 16px;
   padding-bottom: 22px;
-  background-position-x: 50%;
+  background-position-x: 80%;
 }
 
 .pp_loyalty_icon.pp_russian {
@@ -1268,15 +1268,15 @@ html {
 }
 
 #pp_dominant_coalition_banner.pp_afghan {
-  background-color: #5fc89e;
+  background-color: #58c1a6;
 }
 
 #pp_dominant_coalition_banner.pp_british {
-  background-color: #eb97d1;
+  background-color: #e8a9cc;
 }
 
 #pp_dominant_coalition_banner.pp_russian {
-  background-color: #f3f35a;
+  background-color: #f7f079;
 }
 
 #pp_coalition_blocks_container {
@@ -1751,15 +1751,15 @@ html {
 
 /* BUTTONS */
 #afghan_button {
-  background-color: #5fc89e;
+  background-color: #58c1a6;
 }
 
 #british_button {
-  background-color: #eb97d1;
+  background-color: #e8a9cc;
 }
 
 #russian_button {
-  background-color: #f3f35a;
+  background-color: #f7f079;
 }
 
 .loyalty_button {

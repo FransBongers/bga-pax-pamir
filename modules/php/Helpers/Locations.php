@@ -4,6 +4,11 @@ namespace PaxPamir\Helpers;
 
 abstract class Locations extends \APP_DbObject
 {
+  public static function armies($region)
+  {
+    return 'armies_' . $region;
+  }
+
   public static function court($playerId)
   {
     return 'court_' . $playerId;
@@ -37,6 +42,11 @@ abstract class Locations extends \APP_DbObject
   public static function prizes($playerId)
   {
     return 'prizes_' . $playerId;
+  }
+
+  public static function roads($borderName)
+  {
+    return 'roads_'.$borderName;
   }
 
   public static function spies($cardId)

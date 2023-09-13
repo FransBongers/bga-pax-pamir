@@ -50,10 +50,21 @@ trait DebugTrait
 
   function test()
   {
+    Notifications::log('wakhanEnabled',Globals::getWakhanEnabled());
+    Notifications::log('wakhanOption',Globals::getWakhanOption());
+    
+    Notifications::log('getWakhanVariantSavvyPurchasing',Globals::getWakhanVariantSavvyPurchasing());
+    Notifications::log('getWakhanVariantSpyMovement',Globals::getWakhanVariantSpyMovement());
+    Notifications::log('getWakhanVariantSteadfastPragmaticLoyalty',Globals::getWakhanVariantSteadfastPragmaticLoyalty());
+
+    // Tokens::move('block_afghan_6','roads_'.KANDAHAR.'_'.PUNJAB);
+    // $front = WakhanCards::getTopOf(DISCARD)['front'];
+    // $block = $this->wakhanSelectBlockToPlace(AFGHAN, $front);
+    // Notifications::log('block',$block);
     // $this->wakhanDiscardCourtCards(1);
 
     // Notifications::log('actionStack', ActionStack::get());
-    Cards::move('card_101', 'market_0_0');
+    // Cards::move('card_101', 'market_0_0');
 
   }
 

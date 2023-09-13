@@ -222,6 +222,13 @@ abstract class Utils extends \APP_DbObject
     return intval(explode('_', $cylinderId)[1]);
   }
 
+  public static function getBorderName($region1, $region2)
+  {
+    $border = [$region1, $region2];
+    sort($border);
+    return implode('_', $border);
+  }
+
   // .##.....##....###....##.......####.########.....###....########.####..#######..##....##
   // .##.....##...##.##...##........##..##.....##...##.##......##.....##..##.....##.###...##
   // .##.....##..##...##..##........##..##.....##..##...##.....##.....##..##.....##.####..##

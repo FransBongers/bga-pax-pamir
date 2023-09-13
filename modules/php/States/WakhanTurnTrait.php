@@ -269,6 +269,7 @@ trait WakhanTurnTrait
     $army = Tokens::getTopOf($pool);
     if ($army === null) {
       // Pool is empty. Select piece according to card order
+      $army = $this->wakhanSelectBlockToPlace($loyalty, $front);
     }
     $this->resolvePlaceArmy(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $army, $loyalty, $regionId);
   }
@@ -284,5 +285,35 @@ trait WakhanTurnTrait
     return Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
       return !in_array($coalition, $otherPlayerLoyalties);
     })[0];
+  }
+
+  // Remove tribes first, then armies, then roads and then spies, in that order. Use the current AI card to decide between locations of Tribes, Armies and Roads removed. For Spies, use card priority order.
+  function wakhanSelectBlockToPlace($loyalty, $front)
+  {
+    $regionOrder = $front['regionOrder'];
+    // Select army of possible
+    foreach ($regionOrder as $index => $region) {
+      $armies = Utils::filter(Tokens::getInLocation(Locations::armies($region))->toArray(), function ($block) use ($loyalty) {
+        return explode('_',$block['id'])[1] === $loyalty && intval($block['used']) === 0;
+      });
+      if (count($armies) > 0) {
+        return $armies[count($armies) - 1];
+      }
+    }
+    // otherwise select road
+    foreach ($regionOrder as $index => $region) {
+      $borders = $this->regions[$region]['borders'];
+      foreach ($regionOrder as $index => $region2) {
+        $borderName = Utils::getBorderName($region,$region2); 
+        if (in_array($borderName,$borders)) {
+          $roads = Utils::filter(Tokens::getInLocation(Locations::roads($borderName))->toArray(), function ($block) use ($loyalty) {
+            return explode('_',$block['id'])[1] === $loyalty && intval($block['used']) === 0;
+          });
+          if (count($roads) > 0) {
+            return $roads[count($roads) - 1];
+          }
+        }
+      }
+    }
   }
 }

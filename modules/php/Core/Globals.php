@@ -1,11 +1,14 @@
 <?php
+
 namespace PaxPamir\Core;
+
 use PaxPamir\Core\Game;
 use PaxPamir\Managers\Players;
 
 /*
  * Globals
  */
+
 class Globals extends \PaxPamir\Helpers\DB_Manager
 {
   protected static $initialized = false;
@@ -27,7 +30,11 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "specialAbilityData" => "obj",
     "openHands" => 'bool',
     'wakhanActive' => 'bool',
-    "wakhanEnabled" => 'bool',
+    'wakhanEnabled' => 'bool',
+    'wakhanOption' => 'str',
+    'wakhanVariantSavvyPurchasing' => 'bool',
+    'wakhanVariantSpyMovement' => 'bool',
+    'wakhanVariantSteadfastPragmaticLoyalty' => 'bool',
   ];
 
   protected static $table = 'global_variables';
@@ -48,12 +55,10 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     $tmp = self::$log;
     self::$log = false;
 
-    foreach (
-      self::DB()
+    foreach (self::DB()
         ->select(['value', 'name'])
         ->get()
-      as $name => $variable
-    ) {
+      as $name => $variable) {
       if (\array_key_exists($name, self::$variables)) {
         self::$data[$name] = $variable;
       }
@@ -169,6 +174,14 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setNegotiatedBribe([]);
     self::setActionStack([]);
     self::setOpenHands(($options[\PaxPamir\OPTION_OPEN_HANDS] ?? null) == \PaxPamir\OPTION_OPEN_HANDS_ENABLED);
-    self::setWakhanEnabled(($options[\PaxPamir\OPTION_WAKHAN] ?? null) == \PaxPamir\OPTION_WAKHAN_ENABLED);
+    $optionWakhan = $options[\PaxPamir\OPTION_WAKHAN] ?? 'null';
+    self::setWakhanOption($optionWakhan);
+    self::setWakhanEnabled(in_array($optionWakhan, [\PaxPamir\OPTION_WAKHAN_BASIC, \PaxPamir\OPTION_WAKHAN_IMPROVED, \PaxPamir\OPTION_WAKHAN_CUSTOM]));
+    
+    $optionImprovedWakhan = $optionWakhan == \PaxPamir\OPTION_WAKHAN_IMPROVED;
+    self::setWakhanVariantSavvyPurchasing($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING_ENABLED);
+    self::setWakhanVariantSpyMovement($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT_ENABLED);
+    self::setWakhanVariantSteadfastPragmaticLoyalty($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_STEADFAST_PRAGMATIC_LOYALTY] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_STEADFAST_PRAGMATIC_LOYALTY_ENABLED);
+    
   }
 }

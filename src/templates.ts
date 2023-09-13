@@ -167,7 +167,7 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
   </div>
 </div>`
 }
-
+// <span class="player_elo_wrap">• <div class="gamerank gamerank_average "><span class="icon20 icon20_rankw"></span> <span class="gamerank_value" id="player_elo_1" "="">9001</span></div></span>
 const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
   return `<div id="overall_player_board_1" class="player-board">
             <div class="player_board_inner" id="player_board_inner_8A70B2">
@@ -178,9 +178,8 @@ const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
                 <a style="color: #8A70B2">${name}</a>
               </div>
               <div id="player_board_1" class="player_board_content">
-                <div class="player_score">
+                <div class="player_score" style="margin-top: 5px;">
                   <span id="player_score_1" class="player_score_value"></span> <i class="fa fa-star" id="icon_point_1"></i>
-                  <span class="player_elo_wrap">• <div class="gamerank gamerank_average "><span class="icon20 icon20_rankw"></span> <span class="gamerank_value" id="player_elo_1" "="">9001</span></div></span>                              
                 </div>
               </div>
             </div>

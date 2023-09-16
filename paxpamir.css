@@ -70,19 +70,19 @@
   margin-top: 5px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_afghan {
+.pp_log_token.pp_loyalty_icon.pp_afghan, .pp_log_token.pp_loyalty_icon_black.pp_afghan {
   height: 20px;
   width: 38px;
   padding-bottom: 0px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_british {
+.pp_log_token.pp_loyalty_icon.pp_british, .pp_log_token.pp_loyalty_icon_black.pp_british {
   height: 20px;
   width: 34px;
   padding-bottom: 0px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_russian {
+.pp_log_token.pp_loyalty_icon.pp_russian, .pp_log_token.pp_loyalty_icon_black.pp_russian {
   height: 20px;
   width: 35px;
   padding-bottom: 0px;
@@ -557,6 +557,12 @@
   background-repeat: no-repeat;
 }
 
+.pp_loyalty_icon_black {
+  background-image: url("img/coalition_icons.webp");
+  background-size: 600% 100%;
+  background-repeat: no-repeat;
+}
+
 .pp_loyalty_icon.pp_afghan {
   height: 25px;
   padding-bottom: 12px;
@@ -573,6 +579,24 @@
   height: 14px;
   padding-bottom: 22px;
   background-position-x: 100%;
+}
+
+.pp_loyalty_icon_black.pp_afghan {
+  height: 25px;
+  padding-bottom: 12px;
+  background-position-x: 0%;
+}
+
+.pp_loyalty_icon_black.pp_british {
+  height: 16px;
+  padding-bottom: 22px;
+  background-position-x: 20%;
+}
+
+.pp_loyalty_icon_black.pp_russian {
+  height: 14px;
+  padding-bottom: 22px;
+  background-position-x: 40%;
 }
 
 .pp_cylinder_icon {

@@ -98,7 +98,6 @@ class Map
     $playerTribes = Utils::filter($tribes, function ($cylinder) use ($playerId) {
       return Utils::getPlayerIdForCylinderId($cylinder['id']) === $playerId;
     });
-    Notifications::log('playerTribes', $playerTribes);
     return $playerTribes;
   }
 

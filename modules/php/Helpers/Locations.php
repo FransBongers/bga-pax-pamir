@@ -53,4 +53,9 @@ abstract class Locations extends \APP_DbObject
   {
     return 'spies_' . $cardId;
   }
+
+  public static function tribes($region)
+  {
+    return 'tribes_' . $region;
+  }
 }

@@ -116,39 +116,8 @@ trait ResolveImpactIconsTrait
     }
 
     $cylinderType = $action['data']['type'];
-    $cylinderId = $cylinder['id'];
-    $from = $cylinder['location'];
-    $to = '';
 
-    if ($cylinderType === TRIBE) {
-      $regionId = $action['data']['region'];
-      $to = $this->locations["tribes"][$regionId];
-      Notifications::placeTribe($cylinderId, $player, $regionId, $from, $to);
-    } else if ($cylinderType === SPY) {
-      $cardId = $action['data']['cardId'];
-      $to = 'spies_' . $cardId;
-      Notifications::placeSpy($cylinderId, $player, $cardId, $from, $to);
-    } else if ($cylinderType === GIFT) {
-      $value = $action['data']['value'];
-      $to = 'gift_' . $value . '_' . $playerId;
-      Notifications::placeGift($cylinderId, $player, $from, $to);
-    }
-
-    Tokens::move($cylinderId, $to);
-    Tokens::setUsed($cylinderId, USED);
-
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      $isTribe = Utils::startsWith($from, 'tribes');
-      if ($isTribe && ($cylinderType === SPY || $cylinderType === GIFT) || (isset($regionId) &&  $fromRegionId !== $regionId)) {
-        Map::checkRulerChange($fromRegionId);
-      }
-    }
-
-    if ($action['data']['type'] === TRIBE) {
-      $regionId = $action['data']['region'];
-      Map::checkRulerChange($regionId);
-    }
+    $this->resolvePlaceCylinder($player, $cylinder, $cylinderType, $action['data']);
 
     array_pop($actionStack);
     ActionStack::next($actionStack);
@@ -319,5 +288,49 @@ trait ResolveImpactIconsTrait
   {
     PaxPamirPlayers::incRupees($playerId, 2);
     Notifications::leveragedCardPlay(PaxPamirPlayers::get($playerId), 2);
+  }
+
+  function resolvePlaceCylinder($player, $cylinder, $cylinderType, $actionData)
+  {
+
+    $cylinderId = $cylinder['id'];
+    $from = $cylinder['location'];
+    $to = '';
+    $playerId = $player->getId();
+
+    if ($cylinderType === TRIBE) {
+      $regionId = $actionData['region'];
+      $to = $this->locations["tribes"][$regionId];
+      Notifications::placeTribe($cylinderId, $player, $regionId, $from, $to);
+    } else if ($cylinderType === SPY) {
+      $cardId = $actionData['cardId'];
+      $to = 'spies_' . $cardId;
+      Notifications::placeSpy($cylinderId, $player, $cardId, $from, $to);
+    } else if ($cylinderType === GIFT) {
+      $value = $actionData['value'];
+      $to = 'gift_' . $value . '_' . $playerId;
+      Notifications::placeGift($cylinderId, $player, $from, $to);
+    }
+
+    Tokens::move($cylinderId, $to);
+    Tokens::setUsed($cylinderId, USED);
+
+    $fromRegionId = explode('_', $from)[1];
+    $wasTribe = Utils::startsWith($from, 'tribes');
+    // Ruler change in former region: 
+    // - the moved piece was a tribe
+    // - from region is not the same as the to region
+    if ($wasTribe && $from !== $to) {
+      Map::checkRulerChange($fromRegionId);
+    }
+    // $isTribe = Utils::startsWith($from, 'tribes');
+    // if ($from !== "cylinders_" . $playerId && ($isTribe && (($cylinderType === SPY || $cylinderType === GIFT) || (isset($regionId) &&  $fromRegionId !== $regionId)))) {
+    //   Map::checkRulerChange($fromRegionId);
+    // }
+
+    if ($cylinderType === TRIBE) {
+      $regionId = $actionData['region'];
+      Map::checkRulerChange($regionId);
+    }
   }
 }

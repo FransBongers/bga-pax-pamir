@@ -913,6 +913,7 @@ var LOG_TOKEN_CARD = 'card';
 var LOG_TOKEN_CARD_ICON = 'cardIcon';
 var LOG_TOKEN_CARD_NAME = 'cardName';
 var LOG_TOKEN_COALITION = 'coalition';
+var LOG_TOKEN_COALITION_BLACK = 'coalitionBlack';
 var LOG_TOKEN_COALITION_NAME = 'coalitionName';
 var LOG_TOKEN_CYLINDER = 'cylinder';
 var LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
@@ -943,6 +944,8 @@ var getLogTokenDiv = function (_a) {
             return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(data) }).getColor() });
         case LOG_TOKEN_COALITION:
             return tplLogTokenCoalition({ coalition: data });
+        case LOG_TOKEN_COALITION_BLACK:
+            return tplLogTokenCoalition({ coalition: data, black: true });
         case LOG_TOKEN_COALITION_NAME:
             return tlpLogTokenBoldText({ text: game.gamedatas.staticData.loyalty[data].name });
         case LOG_TOKEN_LEVERAGE:
@@ -975,8 +978,8 @@ var tplLogTokenCard = function (_a) {
     return "<div class=\"pp_card pp_log_token pp_".concat(cardId).concat(large ? ' pp_large' : '', "\"></div>");
 };
 var tplLogTokenCoalition = function (_a) {
-    var coalition = _a.coalition;
-    return "<div class=\"pp_log_token pp_loyalty_icon pp_".concat(coalition, "\"></div>");
+    var coalition = _a.coalition, black = _a.black;
+    return "<div class=\"pp_log_token pp_loyalty_icon".concat(black ? '_black' : '', " pp_").concat(coalition, "\"></div>");
 };
 var tplLogTokenCylinder = function (_a) {
     var color = _a.color;
@@ -1699,7 +1702,7 @@ var Supply = (function () {
             var dominantCoalition = coalitions[0].coalition;
             var log = _('Dominant coalition: ${logTokenCoalition}');
             node.innerHTML = this.game.format_string_recursive(log, {
-                logTokenCoalition: "coalition:".concat(dominantCoalition),
+                logTokenCoalition: "coalitionBlack:".concat(dominantCoalition),
             });
             node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
             node.classList.add("pp_".concat(dominantCoalition));

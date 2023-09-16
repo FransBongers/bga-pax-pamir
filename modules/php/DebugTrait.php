@@ -50,12 +50,58 @@ trait DebugTrait
 
   function test()
   {
-    Notifications::log('wakhanEnabled',Globals::getWakhanEnabled());
-    Notifications::log('wakhanOption',Globals::getWakhanOption());
+    // $courtCards = $this->getAllCourtCardsOrdered();
+    // $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) {
+    //   $spyOwnerIds = array_map(function ($spy) {
+    //     return intval(explode('_',$spy['id'])[1]);
+    //   }, Tokens::getInLocation(['spies', $card['id']])->toArray());
+    //   return in_array(WAKHAN_PLAYER_ID,$spyOwnerIds);
+    // });
+    // $cardToRemoveSpyFrom = $this->wakhanSelectCard($cardsWithWakhanSpies);
+    // Notifications::log('selectedCard',$cardToRemoveSpyFrom);
+    // $spies = Tokens::getInLocation(['spies', $cardToRemoveSpyFrom['id']])->toArray();
+    // $wakhanSpies = Utils::filter($spies, function ($spy) {
+    //   return intval(explode('_',$spy['id'])[1]) === WAKHAN_PLAYER_ID;
+    // });
+    // return $wakhanSpies[count($wakhanSpies) - 1];
+
+    // Tokens::move('cylinder_1_8',Locations::spies('card_95'));
+    // Cards::move('card_14',DISCARD);
+    // Cards::move('card_52',DISCARD);
+    // Cards::move('card_5','market_0_0');
+    // Cards::move('card_6','market_1_0');
+    // $this->debugCreateSpy('card_68',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_7',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_6',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_44',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_95',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_58',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_58',WAKHAN_PLAYER_ID);
+    // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
+    $this->debugCreateTribe(TRANSCASPIA,WAKHAN_PLAYER_ID);
+    $this->debugCreateTribe(PUNJAB,WAKHAN_PLAYER_ID);
+    $this->debugCreateTribe(PERSIA,WAKHAN_PLAYER_ID);
+
+    // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);
+    // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);
+    // $this->debugCreateRoad(KABUL.'_'.TRANSCASPIA ,RUSSIAN);
+    // $this->debugCreateRoad(KABUL.'_'.KANDAHAR ,RUSSIAN);
+    // $this->debugCreateRoad(KANDAHAR.'_'.PUNJAB ,RUSSIAN);
+    // $this->debugCreateRoad(KANDAHAR.'_'.PUNJAB ,RUSSIAN);
+    // $this->debugCreateRoad(PERSIA.'_'.TRANSCASPIA ,RUSSIAN);
+    // $this->debugCreateRoad(HERAT.'_'.TRANSCASPIA ,RUSSIAN);
+    // $this->debugCreateRoad(HERAT.'_'.PERSIA ,RUSSIAN);
+    // $this->debugCreateRoad(HERAT.'_'.KANDAHAR ,RUSSIAN);
+    // $this->debugCreateRoad(HERAT.'_'.KABUL ,RUSSIAN);
+    // $this->debugCreateRoad(HERAT.'_'.KABUL ,RUSSIAN);
     
-    Notifications::log('getWakhanVariantSavvyPurchasing',Globals::getWakhanVariantSavvyPurchasing());
-    Notifications::log('getWakhanVariantSpyMovement',Globals::getWakhanVariantSpyMovement());
-    Notifications::log('getWakhanVariantSteadfastPragmaticLoyalty',Globals::getWakhanVariantSteadfastPragmaticLoyalty());
+    // Notifications::log('wakhanEnabled',Globals::getWakhanEnabled());
+    // Notifications::log('wakhanOption',Globals::getWakhanOption());
+    
+    // Notifications::log('getWakhanVariantSavvyPurchasing',Globals::getWakhanVariantSavvyPurchasing());
+    // Notifications::log('getWakhanVariantSpyMovement',Globals::getWakhanVariantSpyMovement());
+    // Notifications::log('getWakhanVariantSteadfastPragmaticLoyalty',Globals::getWakhanVariantSteadfastPragmaticLoyalty());
 
     // Tokens::move('block_afghan_6','roads_'.KANDAHAR.'_'.PUNJAB);
     // $front = WakhanCards::getTopOf(DISCARD)['front'];

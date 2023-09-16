@@ -86,7 +86,10 @@ class Paxpamir extends Table
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
+    use PaxPamir\States\WakhanCardPriorityTrait;
     use PaxPamir\States\WakhanDiscardTrait;
+    use PaxPamir\States\WakhanRadicalizeTrait;
+    use PaxPamir\States\WakhanResolveImpactIconsTrait;
     use PaxPamir\States\WakhanTurnTrait;
 
     // Declare objects from material.inc.php to remove IntelliSense errors

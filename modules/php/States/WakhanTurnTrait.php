@@ -38,44 +38,35 @@ trait WakhanTurnTrait
   function stWakhanTurn()
   {
     Globals::setWakhanActive(true);
+    // Used to determine which of the three actions on the card needs to be performed
+    Globals::setWakhanCurrentAction(0);
+    // Used to determine if there are no valid actions left
+    Globals::setWakhanActionsSkipped(0);
     Globals::setRemainingActions(2);
-    Notifications::message('Wakhan starts their turn');
+    Notifications::message('${logTokenPlayerName} starts their turn', [
+      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
+    ]);
 
-    // 1. Draw Wakhan card
-    $wakhanCards = $this->drawWakhanCard();
-    if ($wakhanCards[DECK] === null) {
-      $this->reshuffleWakhanDeck();
-      $wakhanCards = $this->drawWakhanCard();
-    }
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, WAKHAN_PLAYER_ID, [
+        'transition' => 'cleanup',
+      ]),
+      // free actions
+      ActionStack::createAction(DISPATCH_WAKHAN_ACTIONS, WAKHAN_PLAYER_ID, []),
+      // start of turn abilities
+      ActionStack::createAction(DISPATCH_WAKHAN_DRAW_AI_CARD, WAKHAN_PLAYER_ID, []),
+    ];
 
-    // 2. Start of turn abilities
-
-    // 3. Actions:
-    // Check Wakhan ambition
-    // Execute actions in order until both actions used or no valid choices available
-    $this->radicalize($wakhanCards[DECK], $wakhanCards[DISCARD]);
-
-    // Available bonus actions
-
-
-
-    // $nextPlayerId = PaxPamirPlayers::getNextId(WAKHAN_PLAYER_ID);
-    // Globals::setWakhanActive(false);
-    // $this->stCleanup(PaxPamirPlayers::get(WAKHAN_PLAYER_ID));
-    // // Below two can be removed when Wakhan does cleanup?
-    // Cards::resetUsed();
-    // Tokens::resetUsed();
-    // $this->nextState('prepareNextTurn', $nextPlayerId);
-    $this->gamestate->nextState('cleanup');
+    ActionStack::next($actionStack);
   }
 
-  // .##......##....###....##....##.##.....##....###....##....##
-  // .##..##..##...##.##...##...##..##.....##...##.##...###...##
-  // .##..##..##..##...##..##..##...##.....##..##...##..####..##
-  // .##..##..##.##.....##.#####....#########.##.....##.##.##.##
-  // .##..##..##.#########.##..##...##.....##.#########.##..####
-  // .##..##..##.##.....##.##...##..##.....##.##.....##.##...###
-  // ..###..###..##.....##.##....##.##.....##.##.....##.##....##
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
 
   // ....###.....######..########.####..#######..##....##..######.
   // ...##.##...##....##....##.....##..##.....##.###...##.##....##
@@ -84,6 +75,19 @@ trait WakhanTurnTrait
   // .#########.##..........##.....##..##.....##.##..####.......##
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
+
+  function dispatchWakhanDrawAICard($actionStack)
+  {
+    // 1. Draw Wakhan card
+    $wakhanCards = $this->drawWakhanCard();
+    if ($wakhanCards[DECK] === null) {
+      $this->reshuffleWakhanDeck();
+      $wakhanCards = $this->drawWakhanCard();
+    }
+
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
 
 
   // .##.....##.########.####.##.......####.########.##....##
@@ -147,5 +151,4 @@ trait WakhanTurnTrait
       return !in_array($coalition, $otherPlayerLoyalties);
     })[0];
   }
-
 }

@@ -86,6 +86,7 @@ class Paxpamir extends Table
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
+    use PaxPamir\States\WakhanActionTrait;
     use PaxPamir\States\WakhanCardPriorityTrait;
     use PaxPamir\States\WakhanDiscardTrait;
     use PaxPamir\States\WakhanRadicalizeTrait;

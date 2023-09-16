@@ -35,16 +35,18 @@ trait WakhanRadicalizeTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function radicalize($deckCard, $discardCard)
+  function wakhanRadicalize($deckCard, $discardCard)
   {
     $back = $deckCard['back'];
     $front = $discardCard['front'];
 
     $result = $this->radicalizeSelectCard($back, $front);
-    Notifications::log('result', $result);
+    Notifications::log('radicalizeResult',$result);
     if ($result === null) {
+      $this->wakhanActionNotValid();
       return;
     }
+    $this->wakhanActionValid();
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$result['cost']);
     Globals::incRemainingActions(-1);
     $card = $result['card'];
@@ -96,11 +98,13 @@ trait WakhanRadicalizeTrait
 
     // Get card from row specified by card
     $result = $this->radicalizeSelectCardInRow($row, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
+    Notifications::log('radicalizeSelectCardInRowInitial', $result);
     if ($result !== null) {
       return $result;
     }
     // If no card was available in specified row, try again with other row
     $result = $this->radicalizeSelectCardInRow($row === 0 ? 1 : 0, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
+    Notifications::log('radicalizeSelectCardInRowAlt', $result);
     return $result;
   }
 
@@ -112,7 +116,7 @@ trait WakhanRadicalizeTrait
       if ($courtCard === null) {
         continue;
       }
-      Notifications::log('card', $courtCard);
+
       $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $column, $courtCard);
       // Card is valid for purchase if it is not a dominance check, has not had rupees placed on it, and Wakhan has enough rupees
       if ($courtCard['used'] === 0 && !$this->isDominanceCheck($courtCard) && $cost <= $wakhanRupees) {

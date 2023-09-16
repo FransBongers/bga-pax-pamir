@@ -120,6 +120,12 @@ trait DispatchActionTrait
       case DISPATCH_UPDATE_INFLUENCE:
         $this->dispatchUpdateInfluence($actionStack);
         break;
+      case DISPATCH_WAKHAN_ACTIONS:
+        $this->dispatchWakhanActions($actionStack);
+        break;
+      case DISPATCH_WAKHAN_DRAW_AI_CARD:
+        $this->dispatchWakhanDrawAICard($actionStack);
+        break;
       case 'acceptPrizeCheck':
         $this->dispatchAcceptPrizeCheck($actionStack);
         break;

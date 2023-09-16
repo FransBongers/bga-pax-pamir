@@ -284,6 +284,10 @@ const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
 const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';
 
+const DISPATCH_WAKHAN_ACTIONS = 'dispWakhanActions';
+const DISPATCH_WAKHAN_DRAW_AI_CARD = 'dispWakhanDrawAICard';
+
+
 const IMPACT_ICON_DISPATCH_MAP = [
   ARMY => DISPATCH_PLACE_ARMY,
   ECONOMIC_SUIT => DISPATCH_IMPACT_ICON_ECONOMIC,

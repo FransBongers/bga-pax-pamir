@@ -342,7 +342,8 @@ $machinestates = array(
         'type' => 'game',
         'action' => 'stWakhanTurn',
         "transitions" => [
-            "cleanup" => ST_CLEANUP,
+            "dispatchAction" => ST_DISPATCH_ACTION,
+            // "cleanup" => ST_CLEANUP,
             // "prepareNextTurn" => ST_PREPARE_TURN,
             // "dispatchAction" => ST_DISPATCH_ACTION,
         ]

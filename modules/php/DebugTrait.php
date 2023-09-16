@@ -50,6 +50,7 @@ trait DebugTrait
 
   function test()
   {
+    Notifications::log('playerIds',PaxPamirPlayers::getAll()->getIds());
     // $courtCards = $this->getAllCourtCardsOrdered();
     // $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) {
     //   $spyOwnerIds = array_map(function ($spy) {
@@ -79,9 +80,9 @@ trait DebugTrait
     // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
     // $this->debugCreateSpy('card_58',WAKHAN_PLAYER_ID);
     // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
-    $this->debugCreateTribe(TRANSCASPIA,WAKHAN_PLAYER_ID);
-    $this->debugCreateTribe(PUNJAB,WAKHAN_PLAYER_ID);
-    $this->debugCreateTribe(PERSIA,WAKHAN_PLAYER_ID);
+    // $this->debugCreateTribe(TRANSCASPIA,WAKHAN_PLAYER_ID);
+    // $this->debugCreateTribe(PUNJAB,WAKHAN_PLAYER_ID);
+    // $this->debugCreateTribe(PERSIA,WAKHAN_PLAYER_ID);
 
     // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);
     // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);

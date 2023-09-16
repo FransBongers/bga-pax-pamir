@@ -85,16 +85,16 @@ trait WakhanCardPriorityTrait
           break;
         case 6:
           $filtered = Utils::filter($current, function ($card) {
-            return in_array(LEVERAGE,$card['impactIcons']);
+            return in_array(LEVERAGE, $card['impactIcons']);
           });
           break;
-        case 7: 
+        case 7:
           $filtered = $this->wakhanFilterHighestRank($current);
           break;
         case 8:
           $filtered = $this->wakhanFilterHighestCardNumber($current);
       }
-      Notifications::log('filtered '.$i,$filtered);
+      Notifications::log('filtered ' . $i, $filtered);
       // if count is 0 we do not change current and continue to the next priority
       if (count($filtered) === 1) {
         return $filtered[0];
@@ -105,6 +105,76 @@ trait WakhanCardPriorityTrait
 
     return null;
   }
+
+  // Select the card to place a spy on when resolving impact icons.
+  function wakhanSelectCardToPlaceSpy($region)
+  {
+    $courtCards = $this->getAllCourtCardsOrdered();
+    $cardsAssociatedWithRegion = Utils::filter($courtCards, function ($card) use ($region) {
+      return $card['region'] === $region;
+    });
+    // Should always return at least 1 card, the card that was played to resolve the impact icon.
+    if (count($cardsAssociatedWithRegion) === 1) {
+      return $cardsAssociatedWithRegion[0];
+    }
+
+    // Filter cards where Wakhan does not have the most spies
+    $otherPlayerIds = Utils::filter(PaxPamirPlayers::getAll()->getIds(), function ($id) {
+      return $id !== WAKHAN_PLAYER_ID;
+    });
+
+    $cardsWhereWakhanDoesNotHaveMostSpies = Utils::filter($cardsAssociatedWithRegion, function ($card) use ($otherPlayerIds) {
+      $spies = Tokens::getInLocation(['spies', $card['id']])->toArray();
+
+      // calculate number of Wakhan Spies
+      $numberOfWakhanSpies = count(Utils::filter($spies, function ($spy) {
+        return intval(explode('_', $spy['id'])[1]) === WAKHAN_PLAYER_ID;
+      }));
+
+      // Check if there is a player with the same number or more spies
+      return Utils::array_some($otherPlayerIds, function ($playerId) use ($spies, $numberOfWakhanSpies) {
+        $numberOfPlayerSpies = count(Utils::filter($spies, function ($spy) use ($playerId) {
+          return intval(explode('_', $spy['id'])[1]) === $playerId;
+        }));
+        return $numberOfPlayerSpies >= $numberOfWakhanSpies;
+      });
+    });
+
+    if (count($cardsWhereWakhanDoesNotHaveMostSpies) === 1) {
+      return $cardsAssociatedWithRegion[0];
+    } else if (count($cardsWhereWakhanDoesNotHaveMostSpies) > 1) {
+      // need to select a card from those that are left based on card priority
+      return $this->wakhanSelectCard($cardsWhereWakhanDoesNotHaveMostSpies);
+    } else {
+      // no cards where wakhan does not have the most spies, so select from 
+      // cards associated with region.
+      return $this->wakhanSelectCard($cardsAssociatedWithRegion);
+      
+    }
+  }
+
+  // function wakhanDiscardFilterMostSpiesMoreThanWakhanSpies($current)
+  // {
+  //   $spyDifferencePerCard = [];
+  //   $spyDifference = [];
+
+  //   foreach($current as $index => $card) {
+  //     $spies = Tokens::getInLocation(Locations::spies($card['id']))->toArray();
+  //     $numberOfWakhanSpies = count(Utils::filter($spies, function ($spy) {
+  //       return explode('_',$spy['id'])[1] === '1';
+  //     }));
+  //     $numberOfOtherPlayerSpies = count($spies) - $numberOfWakhanSpies;
+  //     $spiesMoreThanWakhanSpies = $numberOfOtherPlayerSpies - $numberOfWakhanSpies;
+  //     $spyDifferencePerCard[$card['id']] = $spiesMoreThanWakhanSpies;
+  //     $spyDifference[] = $spiesMoreThanWakhanSpies;
+  //   }
+
+  //   $mostMore = max($spyDifference);
+
+  //   return Utils::filter($current, function ($card) use ($mostMore, $spyDifferencePerCard) {
+  //     return $spyDifferencePerCard[$card['id']] === $mostMore;
+  //   });
+  // }
 
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
@@ -128,9 +198,8 @@ trait WakhanCardPriorityTrait
   function wakhanFilterHighestCardNumber($current)
   {
     usort($current, function ($a, $b) {
-      return intval(explode('_',$b['id'])[1]) - intval(explode('_',$a['id'])[1]);
+      return intval(explode('_', $b['id'])[1]) - intval(explode('_', $a['id'])[1]);
     });
     return [$current[0]];
   }
-
 }

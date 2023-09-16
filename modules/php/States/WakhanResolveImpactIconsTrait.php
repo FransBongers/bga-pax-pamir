@@ -55,6 +55,7 @@ trait WakhanResolveImpactIconsTrait
           }
           break;
         case SPY:
+          $this->wakhanPlaceSpy($card,$front);
           break;
         case TRIBE:
           $this->wakhanPlaceTribe($card,$front);
@@ -129,6 +130,21 @@ trait WakhanResolveImpactIconsTrait
 
       $this->resolvePlaceRoad(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $block, $loyalty, $borderId);
     }
+  }
+
+  function wakhanPlaceSpy($card,$front)
+  {
+    $region = $card['region'];
+    $cardToPlaceSpy = $this->wakhanSelectCardToPlaceSpy($region);
+
+    $pool = "cylinders_" . WAKHAN_PLAYER_ID;
+    $cylinder = Tokens::getTopOf($pool);
+
+    if ($cylinder === null) {
+      $cylinder = $this->wakhanSelectCylinderToPlace($front);
+    }
+
+    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, SPY, ['cardId' => $cardToPlaceSpy['id']]);
   }
 
   function wakhanPlaceTribe($card, $front)

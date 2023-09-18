@@ -50,7 +50,13 @@ trait DebugTrait
 
   function test()
   {
-    Notifications::log('playerIds',PaxPamirPlayers::getAll()->getIds());
+    // $this->wakhanTax();
+    $this->wakhanPlayCardsFromHand();
+    // Cards::move('card_41',Locations::hand(WAKHAN_PLAYER_ID));
+    // Cards::move('card_36',Locations::hand(WAKHAN_PLAYER_ID));
+    // Cards::move('card_1',Locations::hand(WAKHAN_PLAYER_ID));
+    // Cards::move('card_116','market_1_2');
+    // Notifications::log('min',min(1,2));
     // $courtCards = $this->getAllCourtCardsOrdered();
     // $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) {
     //   $spyOwnerIds = array_map(function ($spy) {

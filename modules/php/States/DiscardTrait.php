@@ -168,7 +168,6 @@ trait DiscardTrait
       $checkSuit = isset($data['suit']) ? $data['suit'] === $card['suit'] : true;
       $checkRegion = isset($data['region']) ? $data['region'] === $card['region'] : true;
       return $checkLoyalty && $checkSuit && $checkRegion;
-      // return $card['loyalty'] !== null && $card['loyalty'] === $loyalty;
     });
 
     // 1. Player has no cards of type, so next action can be resolved
@@ -181,14 +180,14 @@ trait DiscardTrait
     $hasCardsWithLeverage = Utils::array_some($cardsToDiscard, function ($card) {
       return in_array(LEVERAGE, $card['impactIcons']);
     });
-    // Transition to discard step where player needs to select patriots
-    if ($hasCardsWithLeverage) {
+    // Transition to discard step where player needs to select cards one by one
+    if ($hasCardsWithLeverage && !$player->isWakhan()) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, array_merge($data, ['from' => [COURT]]));
       ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
-    // 3. Discard all patriots
+    // 3. Discard all cards
     array_pop($actionStack);
     foreach ($cardsToDiscard as $index => $card) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $playerId, [

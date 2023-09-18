@@ -2750,6 +2750,60 @@ var PPWakhanPlayer = (function (_super) {
         this.counters.political.setValue(counts.suits.political);
         this.counters.intelligence.setValue(counts.suits.intelligence);
     };
+    PPWakhanPlayer.prototype.discardHandCard = function (_a) {
+        var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        if (!(to === DISCARD)) return [3, 2];
+                        return [4, this.game.objectManager.discardPile.discardCardFromLocation({ cardId: cardId, from: "cylinders_".concat(this.playerId) })];
+                    case 1:
+                        _c.sent();
+                        return [3, 4];
+                    case 2:
+                        if (!(to === TEMP_DISCARD)) return [3, 4];
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().placeInZone({
+                                id: cardId,
+                                element: tplCard({ cardId: cardId }),
+                                from: "cylinders_".concat(this.playerId),
+                            })];
+                    case 3:
+                        _c.sent();
+                        _c.label = 4;
+                    case 4: return [2];
+                }
+            });
+        });
+    };
+    PPWakhanPlayer.prototype.playCard = function (_a) {
+        var card = _a.card;
+        return __awaiter(this, void 0, void 0, function () {
+            var cardInfo, region, suit, rank;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        cardInfo = this.game.getCardInfo({ cardId: card.id });
+                        region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
+                        return [4, this.court.placeInZone({
+                                id: card.id,
+                                element: tplCard({ cardId: card.id, extraClasses: "pp_card_in_court pp_player_".concat(this.playerId, " pp_").concat(region) }),
+                                weight: card.state,
+                                from: "cylinders_".concat(this.playerId),
+                            })];
+                    case 1:
+                        _b.sent();
+                        this.setupCourtCard({ cardId: card.id });
+                        this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+                        this.incCounter({ counter: suit, value: rank });
+                        if (cardInfo.loyalty) {
+                            this.wakhanInfluence[cardInfo.loyalty].incValue(1);
+                        }
+                        return [2];
+                }
+            });
+        });
+    };
     PPWakhanPlayer.prototype.radicalizeCardWakhan = function (_a) {
         var card = _a.card, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
@@ -4686,6 +4740,9 @@ var ClientCardActionTaxState = (function () {
                     return;
                 }
             }
+            else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
+                return;
+            }
             var taxShelter = player.getTaxShelter();
             var playerRupees = player.getRupees();
             if (playerRupees <= taxShelter) {
@@ -6349,7 +6406,7 @@ var NotificationManager = (function () {
         Object.entries(notif.args.newHandCounts).forEach(function (_a) {
             var key = _a[0], value = _a[1];
             var playerId = Number(key);
-            if (playerId === _this.game.getPlayerId()) {
+            if (playerId === _this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
                 return;
             }
             var player = _this.getPlayer({ playerId: Number(key) });

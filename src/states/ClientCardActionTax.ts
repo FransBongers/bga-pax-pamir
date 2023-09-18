@@ -193,6 +193,8 @@ class ClientCardActionTaxState implements State {
         if (!hasCardRuledByPlayer) {
           return;
         }
+      } else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
+        return;
       }
       const taxShelter = player.getTaxShelter();
       const playerRupees = player.getRupees();

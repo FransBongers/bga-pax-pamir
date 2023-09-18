@@ -177,7 +177,7 @@ class Map
   }
 
   /**
-   * Moves all armies in region to supply. Returns array of moves
+   * Moves all tribes in region to supply. Returns array of moves
    * that can be used for notification
    */
   public static function removeTribesFromRegion($regionId)

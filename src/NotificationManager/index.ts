@@ -239,7 +239,8 @@ class NotificationManager {
     Object.entries(notif.args.newHandCounts).forEach(([key, value]) => {
       const playerId = Number(key);
       // Updates for current player have been sent in separate notification.
-      if (playerId === this.game.getPlayerId()) {
+      // Wakhan does not have a hand count to update and will play all card to court
+      if (playerId === this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
         return;
       }
       const player = this.getPlayer({ playerId: Number(key) });

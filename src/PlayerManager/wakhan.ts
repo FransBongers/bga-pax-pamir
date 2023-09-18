@@ -75,6 +75,41 @@ class PPWakhanPlayer extends PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  // Only used for OtherPersuasiveMethods event
+  async discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }): Promise<void> {
+    if (to === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromLocation({ cardId, from: `cylinders_${this.playerId}` });
+    } else if (to === TEMP_DISCARD) {
+      await this.game.objectManager.tempDiscardPile.getZone().placeInZone({
+        id: cardId,
+        element: tplCard({ cardId }),
+        from: `cylinders_${this.playerId}`,
+      });
+    }
+  }
+
+  // Only used for OtherPersuasiveMethods event
+  async playCard({ card }: { card: Token }): Promise<void> {
+    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
+    const { region, suit, rank } = cardInfo;
+
+    await this.court.placeInZone({
+      id: card.id,
+      element: tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
+      weight: card.state,
+      from: `cylinders_${this.playerId}`, // Wakhan has no hand cards icon
+    });
+    this.setupCourtCard({ cardId: card.id });
+    this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+
+    this.incCounter({ counter: suit, value: rank });
+    if (cardInfo.loyalty) {
+      // TODO: check for loyalty change and then set Counter to 2?
+      // TODO: check for event where patriots don't count?
+      this.wakhanInfluence[cardInfo.loyalty].incValue(1);
+    }
+  }
+
   async radicalizeCardWakhan({ card, from }: { card: Token; from: PaxPamirZone }): Promise<void> {
     const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
     const { region, suit, rank } = cardInfo;

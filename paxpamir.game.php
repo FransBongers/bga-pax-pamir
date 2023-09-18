@@ -86,6 +86,7 @@ class Paxpamir extends Table
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
+    use PaxPamir\States\WakhanActionTaxTrait;
     use PaxPamir\States\WakhanActionTrait;
     use PaxPamir\States\WakhanCardPriorityTrait;
     use PaxPamir\States\WakhanDiscardTrait;
@@ -399,6 +400,9 @@ class Paxpamir extends Table
         }
 
         $pId = is_null($pId) || is_int($pId) ? $pId : $pId->getId();
+        if (!is_null($pId) && $pId !== WAKHAN_PLAYER_ID && Globals::getWakhanActive()) {
+            Globals::setWakhanActive(false);
+        }
         if (is_null($pId) || $pId == $this->getActivePlayerId() || $pId === WAKHAN_PLAYER_ID) {
             $this->gamestate->nextState($transition);
         } else {

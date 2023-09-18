@@ -119,9 +119,7 @@ trait WakhanCardPriorityTrait
     }
 
     // Filter cards where Wakhan does not have the most spies
-    $otherPlayerIds = Utils::filter(PaxPamirPlayers::getAll()->getIds(), function ($id) {
-      return $id !== WAKHAN_PLAYER_ID;
-    });
+    $otherPlayerIds = $this->wakhanGetOtherPlayerIds();
 
     $cardsWhereWakhanDoesNotHaveMostSpies = Utils::filter($cardsAssociatedWithRegion, function ($card) use ($otherPlayerIds) {
       $spies = Tokens::getInLocation(['spies', $card['id']])->toArray();
@@ -201,5 +199,12 @@ trait WakhanCardPriorityTrait
       return intval(explode('_', $b['id'])[1]) - intval(explode('_', $a['id'])[1]);
     });
     return [$current[0]];
+  }
+
+  function wakhanGetOtherPlayerIds() 
+  {
+    return Utils::filter(PaxPamirPlayers::getAll()->getIds(), function ($id) {
+      return $id !== WAKHAN_PLAYER_ID;
+    });
   }
 }

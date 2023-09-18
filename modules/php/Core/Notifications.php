@@ -537,18 +537,18 @@ class Notifications
     ));
   }
 
-  public static function discardFromHand($card, $player)
-  {
-    $message = clienttranslate('${player_name} discards ${logTokenCardName} from hand${logTokenNewLine}${logTokenLargeCard}');
+  // public static function discardFromHand($card, $player)
+  // {
+  //   $message = clienttranslate('${player_name} discards ${logTokenCardName} from hand${logTokenNewLine}${logTokenLargeCard}');
 
-    self::notifyAll("discardFromHand", $message, array(
-      'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'cardId' => $card['id'],
-      'logTokenNewLine' => Utils::logTokenNewLine(),
-    ));
-  }
+  //   self::notifyAll("discardFromHand", $message, array(
+  //     'player' => $player,
+  //     'logTokenCardName' => Utils::logTokenCardName($card['name']),
+  //     'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
+  //     'cardId' => $card['id'],
+  //     'logTokenNewLine' => Utils::logTokenNewLine(),
+  //   ));
+  // }
 
   public static function discardEventCardFromMarket($card, $location, $to)
   {
@@ -880,15 +880,18 @@ class Notifications
     ));
   }
 
-  public static function wakhanRadicalize($card, $firstCard, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
+  public static function wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
   {
-    $message = $firstCard
-      ? clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to their court ${logTokenNewLine}${logTokenLargeCard}')
-      : clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of their court ${logTokenNewLine}${logTokenLargeCard}');
+    $messages = [
+      'firstCourtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to their court ${logTokenNewLine}${logTokenLargeCard}'),
+      'courtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of their court ${logTokenNewLine}${logTokenLargeCard}'),
+      'eventCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} ${logTokenNewLine}${logTokenLargeCard}'),
+    ];
+    $message = $messages[$type];
     $cardId = $card['id'];
 
     self::notifyAll("wakhanRadicalize", $message, array(
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'logTokenCardName' => Utils::logTokenCardName($card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title']),
       'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
       'logTokenNewLine' => Utils::logTokenNewLine(),

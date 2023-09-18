@@ -35,6 +35,41 @@ trait WakhanRadicalizeTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  // Used when Wakhan gets cards from OtherPersuasiveMethods events
+  function wakhanPlayCardsFromHand()
+  {
+    $handCards = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getHandCards();
+    if (count($handCards) === 0) {
+      return;
+    }
+
+    shuffle($handCards);
+    
+    $back = WakhanCards::getTopOf(DECK)['back'];
+    $front = WakhanCards::getTopOf(DISCARD)['front'];
+    
+    foreach($handCards as $index => $card) {
+      $bribe = $this->determineBribe($card, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), null, 'playCard');
+
+      if ($bribe !== null && $bribe['amount'] > PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees()) {
+        Cards::insertOnTop($card['id'], DISCARD);
+        Notifications::discardMessage($card, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), HAND, null);
+        Notifications::discard($card, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), HAND, DISCARD);
+        return;
+      } else if ($bribe !== null) {
+        $this->payBribe(WAKHAN_PLAYER_ID, $bribe['bribeeId'], $bribe['amount']);
+      }
+      // Play card to court and resolve impact icons
+      $side = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 'left' : 'right';
+      $firstCard = $this->moveCardToCourt(WAKHAN_PLAYER_ID, $card['id'], $side);
+      // Get card data again to have up to date state
+      $card = Cards::get($card['id']);
+      
+      Notifications::playCard($card, $firstCard, $side, WAKHAN_PLAYER_ID);
+      $this->wakhanResolveImpactIcons($card, $back, $front);
+    }
+  }
+
   function wakhanRadicalize($deckCard, $discardCard)
   {
     $back = $deckCard['back'];
@@ -61,7 +96,11 @@ trait WakhanRadicalizeTrait
     Tokens::moveAllInLocation(Locations::marketRupees($result['row'], $result['column']), RUPEE_SUPPLY);
 
     if ($card['type'] === EVENT_CARD) {
+      $newLocation = Events::getPurchasedEventLocation($card['purchased']['effect'], WAKHAN_PLAYER_ID);
+      Cards::insertOnTop($card['id'], $newLocation);
       // Execute event / move to player events
+      Notifications::wakhanRadicalize($card, 'eventCard', null, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), $newLocation);
+      $this->wakhanResolvePurchasedEventEffect($card);
       return;
     }
     // Court Card
@@ -73,14 +112,15 @@ trait WakhanRadicalizeTrait
       Notifications::wakhanRadicalizeDiscard($card, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), DISCARD);
       return;
     } else if ($bribe !== null) {
-      // Pay bribe
+      $this->payBribe(WAKHAN_PLAYER_ID, $bribe['bribeeId'], $bribe['amount']);
     }
     // Play card to court and resolve impact icons
     $side = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 'left' : 'right';
     $firstCard = $this->moveCardToCourt(WAKHAN_PLAYER_ID, $card['id'], $side);
     // Get card data again to have up to date state
     $card = Cards::get($card['id']);
-    Notifications::wakhanRadicalize($card, $firstCard, $side, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), Locations::court(WAKHAN_PLAYER_ID));
+    $type = $firstCard ? 'firstCourtCard' : 'courtCard';
+    Notifications::wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), Locations::court(WAKHAN_PLAYER_ID));
     $this->wakhanResolveImpactIcons($card, $back, $front);
   }
 
@@ -138,5 +178,75 @@ trait WakhanRadicalizeTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  function wakhanResolvePlayCard()
+  {
+    
+  }
+
+  function wakhanResolvePurchasedEventEffect($card)
+  {
+    $event = $card['purchased']['effect'];
+    $playerId = WAKHAN_PLAYER_ID;
+    switch ($event) {
+      case ECE_DOMINANCE_CHECK:
+        ActionStack::push(ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
+          'cards' => [$card['id']],
+        ]));
+        break;
+      case ECE_KOH_I_NOOR_RECOVERED: // card_106
+        Events::updateInfluence();
+        break;
+      case ECE_RUMOR: // card_108
+        $this->wakhanResolveEventCardRumor();
+        break;
+      case ECE_BACKING_OF_PERSIAN_ARISTOCRACY: // card_113
+        Events::backingOfPersianAristocracy($playerId);
+        break;
+      case ECE_OTHER_PERSUASIVE_METHODS: // card_114
+        $this->wakhanResolveEventCardOtherPersuasiveMethods();
+        break;
+
+      case ECE_REBUKE: // card_116
+        $this->wakhanResolveEventCardRebuke();
+        break;
+      case ECE_PASHTUNWALI_VALUES: // card_115 // Wakhan selects current favored suit so nothing happens
+      case ECE_NEW_TACTICS: // card_105
+      case ECE_COURTLY_MANNERS: // card_107
+      case ECE_CONFLICT_FATIGUE: // card_109
+      case ECE_NATIONALISM: // card_110
+      case ECE_PUBLIC_WITHDRAWAL: // card_111
+
+      default:
+        break;
+    }
+  }
+
+  // Switch all cards with player, then play them to court straight away
+  function wakhanResolveEventCardOtherPersuasiveMethods()
+  {
+    // choose player based on red arrow
+    $redArrow = $this->wakhanGetRedArrowValue();
+    $playerId = $redArrow === TOP_LEFT ? PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID) : PaxPamirPlayers::getNextId(WAKHAN_PLAYER_ID);
+    $this->resolveEventCardOtherPersuasiveMethods(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), PaxPamirPlayers::get($playerId));
+  }
+
+  function wakhanResolveEventCardRebuke()
+  {
+    $regionId = WakhanCards::getTopOf(DISCARD)['front']['regionOrder'][0];
+    $tribeResult = $this->resolveEventCardRebuke($regionId);
+    Notifications::log('tribeResult',$tribeResult);
+    if (count($tribeResult['actions']) > 0) {
+      ActionStack::push($tribeResult['actions']);
+    }
+  }
+
+  function wakhanResolveEventCardRumor()
+  {
+    // choose player based on red arrow
+    $redArrow = $this->wakhanGetRedArrowValue();
+    $playerId = $redArrow === TOP_LEFT ? PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID) : PaxPamirPlayers::getNextId(WAKHAN_PLAYER_ID);
+    $this->resolveEventCardRumor(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), PaxPamirPlayers::get($playerId));
+  }
 
 }

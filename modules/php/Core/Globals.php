@@ -29,11 +29,11 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "setup" => "int",
     "specialAbilityData" => "obj",
     "openHands" => 'bool',
-    'wakhanActionsSkipped' => 'int',
-    'wakhanActive' => 'bool',
-    'wakhanCurrentAction' => 'int',
-    'wakhanEnabled' => 'bool',
-    'wakhanOption' => 'str',
+    'wakhanActionsSkipped' => 'int', // number of actions skipped because they were not valid
+    'wakhanActive' => 'bool', // Wakhan is currently active player
+    'wakhanCurrentAction' => 'int', // index of current action on AI card
+    'wakhanEnabled' => 'bool', // Wakhan is playing in this game
+    'wakhanOption' => 'str', // Rulebook, Improved, Custom
     'wakhanVariantSavvyPurchasing' => 'bool',
     'wakhanVariantSpyMovement' => 'bool',
     'wakhanVariantSteadfastPragmaticLoyalty' => 'bool',

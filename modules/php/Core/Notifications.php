@@ -932,6 +932,13 @@ class Notifications
     ));
   }
 
+  public static function wakhansAmbition()
+  {
+    Notifications::message(clienttranslate('${logTokenPlayerName}\'s Ambition triggers'),[
+      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
+    ]);
+  }
+
   /*********************
    **** UPDATE ARGS ****
    *********************/

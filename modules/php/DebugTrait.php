@@ -51,7 +51,7 @@ trait DebugTrait
   function test()
   {
     // $this->wakhanTax();
-    $this->wakhanPlayCardsFromHand();
+    Notifications::log('ambition',$this->wakhanCheckAmbition());
     // Cards::move('card_41',Locations::hand(WAKHAN_PLAYER_ID));
     // Cards::move('card_36',Locations::hand(WAKHAN_PLAYER_ID));
     // Cards::move('card_1',Locations::hand(WAKHAN_PLAYER_ID));

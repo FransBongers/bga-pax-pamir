@@ -40,14 +40,26 @@ trait EndGameTrait
   {
     $players = PaxPamirPlayers::getAll()->toArray();
 
-    foreach($players as $index => $player) {
-      $militaryTotal = $player->getSuitTotals()[MILITARY];
-      $rupees = $player->getRupees();
+    foreach ($players as $index => $player) {
+      $playerScoreAux = $this->getPlayerTieBreaker($player);
       // TODO: handle Wakhan
-      $playerScoreAux = $militaryTotal * 100 + $rupees;
-      Players::setPlayerScore($player->getId(),$player->getScore());
-      Players::setPlayerScoreAux($player->getId(),$playerScoreAux);
+      Players::setPlayerScore($player->getId(), $player->getScore());
+      Players::setPlayerScoreAux($player->getId(), $playerScoreAux);
     }
     $this->nextState('endGame');
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function getPlayerTieBreaker($player) {
+    $militaryTotal = $player->getSuitTotals()[MILITARY];
+    $rupees = $player->getRupees();
+    return $militaryTotal * 100 + $rupees;
   }
 }

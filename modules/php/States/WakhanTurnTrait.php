@@ -43,7 +43,7 @@ trait WakhanTurnTrait
     // Used to determine if there are no valid actions left
     Globals::setWakhanActionsSkipped(0);
     Globals::setRemainingActions(2);
-    Notifications::message('${logTokenPlayerName} starts their turn', [
+    Notifications::message('${logTokenPlayerName} starts her turn', [
       'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
     ]);
 

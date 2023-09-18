@@ -66,7 +66,7 @@ trait DominanceCheckTrait
     $checkSuccessful = $dominantCoalition !== null;
 
     // Determine scores
-    $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition) : $this->getScoresUnsuccessFulCheck();
+    $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition,Globals::getDominanceChecksResolved()) : $this->getScoresUnsuccessFulCheck(Globals::getDominanceChecksResolved());
 
     Notifications::dominanceCheckResult($scores, $checkSuccessful, $dominantCoalition);
 
@@ -201,7 +201,7 @@ trait DominanceCheckTrait
     return null;
   }
 
-  function getScoresSuccessFulCheck($dominantCoalition)
+  function getScoresSuccessFulCheck($dominantCoalition,$numberOfChecksResolved,$updateDatabase = true)
   {
     $players = PaxPamirPlayers::getAll();
 
@@ -222,12 +222,12 @@ trait DominanceCheckTrait
     });
 
     // TODO: we could probably replace this by checking dominance checks in discard or dominance checks left in deck
-    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [10, 6, 2] : [5, 3, 1];
+    $availablePoints = $numberOfChecksResolved === 4 ? [10, 6, 2] : [5, 3, 1];
 
-    return $this->determineVictoryPoints($loyalPlayers, $availablePoints);
+    return $this->determineVictoryPoints($loyalPlayers, $availablePoints,$updateDatabase);
   }
 
-  function getScoresUnsuccessFulCheck()
+  function getScoresUnsuccessFulCheck($numberOfChecksResolved,$updateDatabase = true)
   {
     // Determine number of cylinders in play by each player
     $cylinderCounts = $this->getCylindersInPlayPerPlayer();
@@ -238,8 +238,8 @@ trait DominanceCheckTrait
     });
 
     // Determine VPs
-    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [6, 2] :  [3, 1];
-    return $this->determineVictoryPoints($cylinderCounts, $availablePoints);
+    $availablePoints = $numberOfChecksResolved === 4 ? [6, 2] :  [3, 1];
+    return $this->determineVictoryPoints($cylinderCounts, $availablePoints,$updateDatabase);
   }
 
   function getCylindersInPlayPerPlayer()
@@ -262,7 +262,7 @@ trait DominanceCheckTrait
    * Calculates VPs based on an array with available point [5,3,1] and 
    * a ranking of players and count with first player on position 0.
    */
-  function determineVictoryPoints($playerRanking, $availablePoints)
+  function determineVictoryPoints($playerRanking, $availablePoints,$updateDatabase = true)
   {
     $scores = [];
     while (count($availablePoints) > 0 && count($playerRanking) > 0) {
@@ -291,10 +291,12 @@ trait DominanceCheckTrait
             'currentScore' => $currentScore,
             'newScore' => $currentScore + $pointsPerPlayer,
           );
-          PaxPamirPlayers::incScore($playerId, $pointsPerPlayer);
-          if ($playerId !== WAKHAN_PLAYER_ID) {
-            // Also need to update in Players table since refresh of page loads data from there
-            Players::incScore($playerId, $pointsPerPlayer);
+          if ($updateDatabase) {
+            PaxPamirPlayers::incScore($playerId, $pointsPerPlayer);
+            if ($playerId !== WAKHAN_PLAYER_ID) {
+              // Also need to update in Players table since refresh of page loads data from there
+              Players::incScore($playerId, $pointsPerPlayer);
+            }
           }
         }
       }

@@ -47,19 +47,7 @@ trait PurchaseCardTrait
     
 
     $checkData = $this->isValidPurchaseCard($player, $card);
-
     $cost = $checkData['cost'];
-    $marketLocation = $checkData['marketLocation'];
-
-    PaxPamirPlayers::incRupees($playerId, -$cost);
-    Globals::incRemainingActions(-1);
-
-    $rupeesOnCards = $this->putRupeesOnCards($cost,$checkData['row'],$checkData['column']);
-
-    // add all rupees on card to player totals. Then put them in rupee_pool location
-    $receivedRupees = count(Tokens::getInLocation([$marketLocation, 'rupees']));
-    PaxPamirPlayers::incRupees($playerId, $receivedRupees);
-    Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
 
     $actionStack = [
       ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
@@ -67,20 +55,8 @@ trait PurchaseCardTrait
       ]),
     ];
 
-
-    // move card based on card type
-    // TODO (event cards)
-    $newLocation = 'hand_' . $playerId;
-    if ($card['type'] === EVENT_CARD) {
-      $newLocation = Events::getPurchasedEventLocation($card['purchased']['effect'], $playerId);
-      $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PURCHASED, $playerId, [
-        'cardId' => $cardId,
-        'event' => $card['purchased']['effect']
-      ]);
-    };
-    Cards::insertOnTop($cardId, $newLocation);
-
-    Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
+    $extraActions = $this->resolvePurchaseCard($card, $playerId, $cost);
+    $actionStack = array_merge($actionStack, $extraActions);
 
     ActionStack::set($actionStack);
     $this->nextState('dispatchAction');
@@ -181,5 +157,40 @@ trait PurchaseCardTrait
     }
 
     return $rupeesOnCards;
+  }
+
+  function resolvePurchaseCard($card, $playerId, $cost)
+  {
+    $actionStack = [];
+    $cardId = $card['id'];
+    $marketLocation = $card['location'];
+    $explodedLocation = explode("_", $card['location']);
+    $row = intval($explodedLocation[1]);
+    $column = intval($explodedLocation[2]);
+
+    PaxPamirPlayers::incRupees($playerId, -$cost);
+    Globals::incRemainingActions(-1);
+
+    $rupeesOnCards = $this->putRupeesOnCards($cost,$row,$column);
+
+    // add all rupees on card to player totals. Then put them in rupee_pool location
+    $receivedRupees = count(Tokens::getInLocation([$marketLocation, 'rupees']));
+    PaxPamirPlayers::incRupees($playerId, $receivedRupees);
+    Tokens::moveAllInLocation([$marketLocation, 'rupees'], RUPEE_SUPPLY);
+
+    // move card based on card type
+    // TODO (event cards)
+    $newLocation = 'hand_' . $playerId;
+    if ($card['type'] === EVENT_CARD) {
+      $newLocation = Events::getPurchasedEventLocation($card['purchased']['effect'], $playerId);
+      $actionStack[] = ActionStack::createAction(DISPATCH_EVENT_RESOLVE_PURCHASED, $playerId, [
+        'cardId' => $cardId,
+        'event' => $card['purchased']['effect']
+      ]);
+    };
+    Cards::insertOnTop($cardId, $newLocation);
+
+    Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
+    return $actionStack;
   }
 }

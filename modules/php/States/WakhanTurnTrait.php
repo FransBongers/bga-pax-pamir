@@ -54,7 +54,7 @@ trait WakhanTurnTrait
       // free actions
       ActionStack::createAction(DISPATCH_WAKHAN_ACTIONS, WAKHAN_PLAYER_ID, []),
       // start of turn abilities
-      // ActionStack::createAction(DISPATCH_WAKHAN_DRAW_AI_CARD, WAKHAN_PLAYER_ID, []),
+      ActionStack::createAction(DISPATCH_WAKHAN_DRAW_AI_CARD, WAKHAN_PLAYER_ID, []),
     ];
 
     ActionStack::next($actionStack);

@@ -75,7 +75,7 @@ trait PurchaseCardTrait
     return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
   }
 
-  function getCardCost($player, $column, $card)
+  function getCardCost($player, $card)
   {
     if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
       return 0;
@@ -86,6 +86,7 @@ trait PurchaseCardTrait
     if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
       return 0;
     };
+    $column = intval(explode('_',$card['location'])[2]);
     return $column * $this->getCardCostBase();
   }
 
@@ -110,7 +111,7 @@ trait PurchaseCardTrait
     $explodedLocation = explode("_", $card['location']);
     $row = intval($explodedLocation[1]);
     $column = intval($explodedLocation[2]);
-    $cost = $this->getCardCost($player, $column, $card);
+    $cost = $this->getCardCost($player, $card);
     // Player should be able to afford card
     if ($cost > $player->getRupees()) {
       throw new \feException("Not enough rupees");

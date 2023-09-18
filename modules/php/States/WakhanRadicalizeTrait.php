@@ -44,11 +44,11 @@ trait WakhanRadicalizeTrait
     }
 
     shuffle($handCards);
-    
+
     $back = WakhanCards::getTopOf(DECK)['back'];
     $front = WakhanCards::getTopOf(DISCARD)['front'];
-    
-    foreach($handCards as $index => $card) {
+
+    foreach ($handCards as $index => $card) {
       $bribe = $this->determineBribe($card, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), null, 'playCard');
 
       if ($bribe !== null && $bribe['amount'] > PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees()) {
@@ -64,7 +64,7 @@ trait WakhanRadicalizeTrait
       $firstCard = $this->moveCardToCourt(WAKHAN_PLAYER_ID, $card['id'], $side);
       // Get card data again to have up to date state
       $card = Cards::get($card['id']);
-      
+
       Notifications::playCard($card, $firstCard, $side, WAKHAN_PLAYER_ID);
       $this->wakhanResolveImpactIcons($card, $back, $front);
     }
@@ -74,9 +74,9 @@ trait WakhanRadicalizeTrait
   {
     $back = $deckCard['back'];
     $front = $discardCard['front'];
-
-    $result = $this->radicalizeSelectCard($back, $front);
-    Notifications::log('radicalizeResult',$result);
+    $marketHasDominanceCheck = $this->marketHasDominanceCheck();
+    $result = $marketHasDominanceCheck ? $this->radicalizeSelectCardDominanceCheckInMarket() : $this->radicalizeSelectCard($back, $front);
+    Notifications::log('radicalizeResult', $result);
     if ($result === null) {
       $this->wakhanActionNotValid();
       return;
@@ -126,12 +126,6 @@ trait WakhanRadicalizeTrait
 
   function radicalizeSelectCard($back, $front)
   {
-    $marketHasDominanceCheck = $this->marketHasDominanceCheck();
-    if ($marketHasDominanceCheck) {
-      // if dominant coalition: choose cheapest patriot loyal to dominant coalition, then cheapest card with mose army and or road impact icons
-      // if no dominance coalition: cheapest card with most spy / tribe impact icons
-      // in case of tie use highest card number
-    }
     $row = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 0 : 1;
     $column = $back['columnNumbers'][$front['columnArrow']];
     Notifications::log('radicalize', ['row' => $row, 'column' => $column]);
@@ -157,7 +151,7 @@ trait WakhanRadicalizeTrait
         continue;
       }
 
-      $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $column, $courtCard);
+      $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $courtCard);
       // Card is valid for purchase if it is not a dominance check, has not had rupees placed on it, and Wakhan has enough rupees
       if ($courtCard['used'] === 0 && !$this->isDominanceCheck($courtCard) && $cost <= $wakhanRupees) {
         return [
@@ -171,6 +165,44 @@ trait WakhanRadicalizeTrait
     return $result;
   }
 
+  function radicalizeSelectCardDominanceCheckInMarket()
+  {
+    $wakhanRupees = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees();
+    // Get all court cards that Wakhan can afford and have not been used yet
+    $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees) {
+      $isCourtCard = $card['type'] === COURT_CARD;
+      $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
+      $wakhanCanAfforCard = $cost <= $wakhanRupees;
+      $notUsed = $card['used'] === 0;
+      return $isCourtCard && $wakhanCanAfforCard && $notUsed;
+    });
+    if (count($courtCardsInMarket) === 0) {
+      return null;
+    }
+
+    $dominantCoalition = $this->getDominantCoalition();
+
+    if ($dominantCoalition !== null) {
+      /**
+       * 1. cheapest Patriot loyal to dominant coalition
+       * 2. Cheapest card with most Army + Road impact icons
+       * Tie breaker: Highest card number
+       */
+      $patriot = $this->wakhanRadicalizeGetLoyalPatriot($courtCardsInMarket, $dominantCoalition);
+      if ($patriot !== null) {
+        return $patriot;
+      }
+      return $this->wakhanRadicalizeGetCardWithMostBlocks($courtCardsInMarket);
+    } else {
+      /**
+       * 1. Most spy / tribe impact icons
+       * 2. Highest card number
+       */
+      return $this->wakhanRadicalizeGetCardWithMostCylinders($courtCardsInMarket);
+    }
+    return null;
+  }
+
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
   // .##.....##....##.....##..##........##.....##......####..
@@ -179,9 +211,81 @@ trait WakhanRadicalizeTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function wakhanResolvePlayCard()
+  function wakhanRadicalizeGetLoyalPatriot($courtCardsInMarket, $dominantCoalition)
   {
-    
+    $patriots = Utils::filter($courtCardsInMarket, function ($card) use ($dominantCoalition) {
+
+      $cardIsLoyalToDominantCoalition = $card['loyalty'] === $dominantCoalition;
+
+      return $cardIsLoyalToDominantCoalition;
+    });
+    return $this->getCheapestThenHighestCardNumber($patriots);
+  }
+
+  function getImpactIconCount($card, $icons)
+  {
+    $total = 0;
+    $array_count_values = array_count_values($card['impactIcons']);
+    foreach ($icons as $index => $icon) {
+      $iconCount = isset($array_count_values[$icon]) ? $array_count_values[$icon] : 0;
+      $total += $iconCount;
+    }
+    return $total;
+  }
+
+  function getCheapestThenHighestCardNumber($cards)
+  {
+    $count = count($cards);
+    if ($count === 0) {
+      return null;
+    }
+
+    usort($cards, function ($a, $b) {
+      $costDifference = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $a) - $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $b);
+      if ($costDifference !== 0) {
+        return $costDifference;
+      } else {
+        return intval(explode('_', $b['id'])[1]) - intval(explode('_', $a['id'])[1]);
+      }
+    });
+
+    $row = intval(explode('_',$cards[0]['location'])[1]);
+    $column = intval(explode('_',$cards[0]['location'])[2]);
+
+    return [
+      'card' => $cards[0],
+      'column' => $column,
+      'cost' => $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cards[0]),
+      'row' => $row,
+    ];
+  }
+
+  function wakhanRadicalizeGetCardWithMostBlocks($courtCardsInMarket)
+  {
+    $numberOfBlocksPlaced = array_map(function ($card) {
+      return $this->getImpactIconCount($card, [ARMY, ROAD]);
+    }, $courtCardsInMarket);
+    Notifications::log('numberOfBlocksPlaced', $numberOfBlocksPlaced);
+    $mostArmyPlusRoads = max($numberOfBlocksPlaced);
+    Notifications::log('mostArmyPlusRoads', $mostArmyPlusRoads);
+    $cardsThatPlaceMostBlocks = Utils::filter($courtCardsInMarket, function ($card) use ($mostArmyPlusRoads) {
+      return $this->getImpactIconCount($card, [ARMY, ROAD]) === $mostArmyPlusRoads;
+    });
+    return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostBlocks);
+  }
+
+  function wakhanRadicalizeGetCardWithMostCylinders($courtCardsInMarket)
+  {
+    $numberOfCylindersPlaced = array_map(function ($card) {
+      return $this->getImpactIconCount($card, [TRIBE, SPY]);
+    }, $courtCardsInMarket);
+    Notifications::log('numberOfCylindersPlaced', $numberOfCylindersPlaced);
+    $mostCylinders = max($numberOfCylindersPlaced);
+    Notifications::log('mostCylinders', $mostCylinders);
+    $cardsThatPlaceMostCylinders = Utils::filter($courtCardsInMarket, function ($card) use ($mostCylinders) {
+      return $this->getImpactIconCount($card, [TRIBE, SPY]) === $mostCylinders;
+    });
+    return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostCylinders);
   }
 
   function wakhanResolvePurchasedEventEffect($card)
@@ -235,7 +339,7 @@ trait WakhanRadicalizeTrait
   {
     $regionId = WakhanCards::getTopOf(DISCARD)['front']['regionOrder'][0];
     $tribeResult = $this->resolveEventCardRebuke($regionId);
-    Notifications::log('tribeResult',$tribeResult);
+    Notifications::log('tribeResult', $tribeResult);
     if (count($tribeResult['actions']) > 0) {
       ActionStack::push($tribeResult['actions']);
     }
@@ -248,5 +352,4 @@ trait WakhanRadicalizeTrait
     $playerId = $redArrow === TOP_LEFT ? PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID) : PaxPamirPlayers::getNextId(WAKHAN_PLAYER_ID);
     $this->resolveEventCardRumor(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), PaxPamirPlayers::get($playerId));
   }
-
 }

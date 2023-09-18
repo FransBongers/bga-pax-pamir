@@ -51,6 +51,7 @@ trait WakhanActionTrait
 
     $wakhanAmbition = $this->wakhanCheckAmbition();
 
+    // check Wakhan's Ambition
     if ($wakhanAmbition !== null) {
       Notifications::wakhansAmbition();
       // Purchase card
@@ -61,26 +62,16 @@ trait WakhanActionTrait
       return;
     }
 
+    // Perform action
     $topOfWakhanDeck = WakhanCards::getTopOf(DECK);
     $topOfWakhanDiscard = WakhanCards::getTopOf(DISCARD);
 
     $currentAction = Globals::getWakhanCurrentAction();
     $action = $topOfWakhanDiscard['front']['actions'][$currentAction];
-    Notifications::log('wakhanCurrentAction', [
-      'index' => $currentAction,
-      'action' => $action,
-    ]);
 
-    // check Wakhan's Ambition
     $this->wakhanPerformAction($action, $topOfWakhanDeck, $topOfWakhanDiscard);
 
     Globals::setWakhanCurrentAction(($currentAction + 1) % 3);
-
-    Notifications::log('wakhanAfterAction', [
-      'skipped' =>  Globals::getWakhanActionsSkipped(),
-      'currentAction' => Globals::getWakhanCurrentAction(),
-      'remainingActions' => Globals::getRemainingActions(),
-    ]);
 
     $this->nextState('dispatchAction');
   }
@@ -119,8 +110,7 @@ trait WakhanActionTrait
     }
     $dominanceCheck = $dominanceCheckCards[0];
 
-    $column = intval(explode('_', $dominanceCheck['location'])[2]);
-    $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $column, $dominanceCheck);
+    $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $dominanceCheck);
 
     if ($cost > PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees()) {
       return null;

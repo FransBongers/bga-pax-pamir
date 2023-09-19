@@ -138,6 +138,7 @@ $machinestates = array(
             "refillMarket" => ST_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
+            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             'startOfTurnAbilities' => ST_START_OF_TURN_ABILITIES,
             'wakhanTurn' => ST_WAKHAN_TURN,
         )
@@ -153,7 +154,6 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => ST_PLAYER_ACTIONS,
             "dispatchAction" => ST_DISPATCH_ACTION,
-            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "negotiateBribe" => ST_NEGOTIATE_BRIBE,
             "cleanup" => ST_CLEANUP,
         )
@@ -275,8 +275,7 @@ $machinestates = array(
         "args" => "argSpecialAbilitySafeHouse",
         "possibleactions" => ["specialAbilitySafeHouse"],
         "transitions" => [
-            "playerActions" => ST_PLAYER_ACTIONS,
-            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
+            "dispatchAction" => ST_DISPATCH_ACTION,
         ]
     ],
 

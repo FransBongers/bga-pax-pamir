@@ -56,9 +56,11 @@ trait WakhanActionTrait
       Notifications::wakhansAmbition();
       // Purchase card
       $extraActions = $this->resolvePurchaseCard($wakhanAmbition['card'], WAKHAN_PLAYER_ID, $wakhanAmbition['cost']);
+      Notifications::log('ambition_extraActions',$extraActions);
       $actionStack = array_merge($actionStack, $extraActions);
+      Notifications::log('ambition_stack',$actionStack);
       $this->wakhanActionValid();
-      $this->nextState('dispatchAction');
+      ActionStack::next($actionStack);
       return;
     }
 
@@ -146,7 +148,7 @@ trait WakhanActionTrait
     // If she does not score most points check of she can win the game.
     if ($numberOfResolvedChecks < 4) {
       // does not end the game and she does not score most points so Wakhan does not win
-      return false;
+      return null;
     }
     $playerIds = PaxPamirPlayers::getAll()->getIds();
 
@@ -187,6 +189,9 @@ trait WakhanActionTrait
   function wakhanPerformAction($action, $topOfWakhanDeck, $topOfWakhanDiscard)
   {
     switch ($action) {
+      case BATTLE:
+        $this->wakhanBattle();
+        break;
       case RADICALIZE:
         $this->wakhanRadicalize($topOfWakhanDeck, $topOfWakhanDiscard);
         break;
@@ -205,6 +210,16 @@ trait WakhanActionTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
+
+  function wakhanPayHostageBribeIfNeeded($card, $action)
+  {
+    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    $bribe = $this->determineBribe($card, $wakhanPlayer, null, $action);
+    $bribeAmount = $bribe === null ? 0 : $bribe['amount'];
+    if ($bribeAmount > 0) {
+      $this->payBribe(WAKHAN_PLAYER_ID, $bribe['bribeeId'], $bribe['amount']);
+    }
+  }
 
   function wakhanActionNotValid()
   {
@@ -249,13 +264,7 @@ trait WakhanActionTrait
       return $cardHasNotBeenUsed && $wakhanCanPayForAction;
     });
 
-    if (count($validCards) === 0) {
-      return null;
-    } else if (count($validCards) === 1) {
-      return $validCards[0];
-    } else {
-      return $this->wakhanSelectCard($validCards);
-    }
+    return $this->wakhanSelectCard($validCards);
   }
 
   function wakhanGetRedArrowValue()

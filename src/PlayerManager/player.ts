@@ -806,9 +806,8 @@ class PPPlayer {
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     }
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty) {
+    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
       // TODO: check for loyalty change and then set Counter to 2?
-      // TODO: check for event where patriots don't count?
       this.incCounter({ counter: 'influence', value: 1 });
     }
     this.updateHandCards({ cardId: card.id, action: 'REMOVE' });

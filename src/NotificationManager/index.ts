@@ -252,7 +252,9 @@ class NotificationManager {
     const { scores } = notif.args;
     for (let playerId of Object.keys(scores)) {
       if (Number(playerId) === WAKHAN_PLAYER_ID) {
-        (this.game.playerManager.getPlayer({playerId: Number(playerId)}) as PPWakhanPlayer).wakhanScore.toValue(scores[playerId].newScore)
+        (this.game.playerManager.getPlayer({ playerId: Number(playerId) }) as PPWakhanPlayer).wakhanScore.toValue(
+          scores[playerId].newScore
+        );
       } else {
         this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
       }
@@ -591,6 +593,7 @@ class NotificationManager {
         const { playerId, value } = update;
         this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
       } else if (update.type === 'wakhanInfluence') {
+        (this.getPlayer({ playerId: WAKHAN_PLAYER_ID }) as PPWakhanPlayer).toValueWakhanInfluence({ wakhanInfluence: update });
       }
     });
   }
@@ -668,10 +671,10 @@ class NotificationManager {
     // Move card from markt
     const cardId = card.id;
     if (newLocation.startsWith('events_')) {
-      // await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
-      // if (cardId === 'card_109') {
-      //   this.game.objectManager.supply.checkDominantCoalition();
-      // }
+      await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      if (cardId === 'card_109') {
+        this.game.objectManager.supply.checkDominantCoalition();
+      }
     } else if (newLocation === DISCARD) {
       await this.game.objectManager.discardPile.discardCardFromZone({
         cardId,

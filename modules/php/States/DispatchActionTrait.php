@@ -114,6 +114,9 @@ trait DispatchActionTrait
       case DISPATCH_REFILL_MARKET_SHIFT_CARDS:
         $this->dispatchRefillMarketShiftCards($actionStack);
         break;
+      case DISPATCH_SA_SAFE_HOUSE:
+        $this->dispatchSASafeHouse($actionStack);
+        break;
       case DISPATCH_TRANSITION:
         $this->dispatchTransition($actionStack);
         break;

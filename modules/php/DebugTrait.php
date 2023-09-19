@@ -50,14 +50,19 @@ trait DebugTrait
 
   function test()
   {
-    // $this->wakhanTax();
+    // $this->specialAbilitySafeHouse();
+    // Globals::setRemainingActions(2);
+    // Cards::setUsed('card_69', 0);
+    // $this->wakhanBattle();
+
+    Notifications::log('wakhanGetSASafeHouseCourtCard',$this->wakhanGetSASafeHouseCourtCard());
     // Cards::move('card_71',DISCARD);
-    Notifications::log('radicalizeSelectCardDominanceCheckInMarket',$this->radicalizeSelectCardDominanceCheckInMarket());
+    // Notifications::log('radicalizeSelectCardDominanceCheckInMarket',$this->radicalizeSelectCardDominanceCheckInMarket());
     // Cards::move('card_31',Locations::hand(DISCARD));
     // Cards::move('card_33',DISCARD);
     // Cards::move('card_40',DISCARD);
     // Cards::move('card_81',Locations::market(1,4));
-    // Cards::move('card_84',Locations::market(1,5));
+    // Cards::move('card_108',Locations::market(0,0));
   
     // Cards::move('card_41',Locations::hand(WAKHAN_PLAYER_ID));
     // Cards::move('card_36',Locations::hand(WAKHAN_PLAYER_ID));

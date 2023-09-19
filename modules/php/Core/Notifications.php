@@ -112,11 +112,11 @@ class Notifications
     ]);
   }
 
-  public static function battleRegion($regionId)
+  public static function battleRegion($player,$regionId)
   {
     $message = clienttranslate('${player_name} battles in ${logTokenLocation}');
     self::notifyAll('battle', $message, [
-      'player' => PaxPamirPlayers::get(),
+      'player' => $player,
       'logTokenLocation' => Utils::logTokenRegionName($regionId),
     ]);
   }

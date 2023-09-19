@@ -1160,6 +1160,7 @@ var ECE_RIOTS_IN_KABUL = 'riotsInKabul';
 var ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
 var ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
 var ECE_RUMOR = 'rumor';
+var ECE_RUMOR_CARD_ID = 'card_108';
 var SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors';
 var SA_INSURRESCTION = 'insurrection';
 var SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage';
@@ -2571,7 +2572,7 @@ var PPPlayer = (function () {
                         _b.label = 4;
                     case 4:
                         this.incCounter({ counter: suit, value: rank });
-                        if (cardInfo.loyalty) {
+                        if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
                             this.incCounter({ counter: 'influence', value: 1 });
                         }
                         this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
@@ -2796,7 +2797,7 @@ var PPWakhanPlayer = (function (_super) {
                         this.setupCourtCard({ cardId: card.id });
                         this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
                         this.incCounter({ counter: suit, value: rank });
-                        if (cardInfo.loyalty) {
+                        if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
                             this.wakhanInfluence[cardInfo.loyalty].incValue(1);
                         }
                         return [2];
@@ -2826,7 +2827,7 @@ var PPWakhanPlayer = (function (_super) {
                     case 1:
                         _b.sent();
                         this.incCounter({ counter: suit, value: rank });
-                        if (cardInfo.loyalty) {
+                        if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
                             this.wakhanInfluence[cardInfo.loyalty].incValue(1);
                         }
                         return [2];
@@ -2854,6 +2855,14 @@ var PPWakhanPlayer = (function (_super) {
             return;
         }
         _super.prototype.toValueCounter.call(this, { counter: counter, value: value });
+    };
+    PPWakhanPlayer.prototype.toValueWakhanInfluence = function (_a) {
+        var wakhanInfluence = _a.wakhanInfluence;
+        console.log('toValueWakhanInfluence');
+        var influence = wakhanInfluence.influence;
+        this.wakhanInfluence.afghan.setValue(influence.afghan);
+        this.wakhanInfluence.british.setValue(influence.british);
+        this.wakhanInfluence.russian.setValue(influence.russian);
     };
     return PPWakhanPlayer;
 }(PPPlayer));
@@ -6983,6 +6992,7 @@ var NotificationManager = (function () {
                 _this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value: value });
             }
             else if (update.type === 'wakhanInfluence') {
+                _this.getPlayer({ playerId: WAKHAN_PLAYER_ID }).toValueWakhanInfluence({ wakhanInfluence: update });
             }
         });
     };
@@ -7061,31 +7071,37 @@ var NotificationManager = (function () {
                         _b.sent();
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
                         cardId = card.id;
-                        if (!newLocation.startsWith('events_')) return [3, 3];
-                        return [3, 8];
+                        if (!newLocation.startsWith('events_')) return [3, 4];
+                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
                     case 3:
-                        if (!(newLocation === DISCARD)) return [3, 5];
+                        _b.sent();
+                        if (cardId === 'card_109') {
+                            this.game.objectManager.supply.checkDominantCoalition();
+                        }
+                        return [3, 9];
+                    case 4:
+                        if (!(newLocation === DISCARD)) return [3, 6];
                         return [4, this.game.objectManager.discardPile.discardCardFromZone({
                                 cardId: cardId,
                                 zone: this.game.market.getMarketCardZone({ row: row, column: col }),
                             })];
-                    case 4:
-                        _b.sent();
-                        return [3, 8];
                     case 5:
-                        if (!(newLocation === TEMP_DISCARD)) return [3, 6];
-                        return [3, 8];
+                        _b.sent();
+                        return [3, 9];
                     case 6:
+                        if (!(newLocation === TEMP_DISCARD)) return [3, 7];
+                        return [3, 9];
+                    case 7:
                         player = this.getPlayer({ playerId: playerId });
-                        if (!(player instanceof PPWakhanPlayer)) return [3, 8];
+                        if (!(player instanceof PPWakhanPlayer)) return [3, 9];
                         return [4, player.radicalizeCardWakhan({
                                 card: card,
                                 from: this.game.market.getMarketCardZone({ row: row, column: col }),
                             })];
-                    case 7:
+                    case 8:
                         _b.sent();
-                        _b.label = 8;
-                    case 8: return [2];
+                        _b.label = 9;
+                    case 9: return [2];
                 }
             });
         });

@@ -151,6 +151,7 @@ const PUNJAB = 'punjab';
  * Special abilities
  */
 const SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors'; // card_1
+const SA_INDISPENSABLE_ADVISORS_CARD_ID = 'card_1';
 const SA_INSURRESCTION = 'insurrection'; // card_3
 const SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage'; // card_5
 const SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID = 'card_5';
@@ -280,6 +281,9 @@ const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
 const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
 const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
 const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
+
+const DISPATCH_SA_SAFE_HOUSE = 'dispSASafeHouse';
+
 const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
 const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';

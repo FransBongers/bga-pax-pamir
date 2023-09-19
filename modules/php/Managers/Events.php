@@ -32,6 +32,7 @@ class Events
 
   public static function dispatchResolvePurchasedEffect($actionStack)
   {
+    Notifications::log('dispatchResolvePurchasedEffect',$actionStack);
     $action = array_pop($actionStack);
     $event = $action['data']['event'];
     $playerId = $action['playerId'];
@@ -76,7 +77,7 @@ class Events
       default:
         break;
     }
-
+    Notifications::log('actionStack before next',$actionStack);
     ActionStack::next($actionStack);
   }
 
@@ -315,10 +316,10 @@ class Events
     return self::isPlayerEventActive(ECE_KOH_I_NOOR_RECOVERED, $player);
   }
 
-  public static function isNationalismActive($player)
+  public static function isNationalismActive($playerId)
   {
     $card = Cards::get(ECE_NATIONALISM_CARD_ID);
-    return $card['location'] === 'events_' . $player->getId();
+    return $card['location'] === 'events_' . $playerId;
   }
 
   public static function isNationBuildingActive($player)

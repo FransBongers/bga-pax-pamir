@@ -37,7 +37,7 @@ trait WakhanResolveImpactIconsTrait
 
   function wakhanResolveImpactIcons($card, $back, $front)
   {
-    $loyalty = $this->getWakhanLoyalty($front['pragmaticLoyalty']);
+    $loyalty = $this->getWakhanPragmaticLoyalty();
     $impactIcons = $card['impactIcons'];
     $roadsPlaced = false;
     foreach ($impactIcons as $index => $icon) {

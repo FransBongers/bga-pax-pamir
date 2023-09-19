@@ -49,6 +49,13 @@ trait WakhanCardPriorityTrait
    */
   function wakhanSelectCard($cards)
   {
+    if (count($cards) === 0) {
+      return null;
+    }
+    if (count($cards) === 1) {
+      return $cards[0];
+    }
+
     $current = $cards;
     $dominantCoalition = $this->getDominantCoalition();
     for ($i = 1; $i <= 8; $i++) {

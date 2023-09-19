@@ -213,7 +213,7 @@ trait PlayerActionMoveTrait
 
   function validateTribeMoves($pieceId, $moves, $player)
   {
-    if (!Events::isNationalismActive($player)) {
+    if (!Events::isNationalismActive($player->getId())) {
       throw new \feException("Not allowed to move tribes");
     }
 

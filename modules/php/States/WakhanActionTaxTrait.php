@@ -69,6 +69,8 @@ trait WakhanActionTaxTrait
       return;
     }
 
+    $this->wakhanPayHostageBribeIfNeeded($card, TAX);
+    
     $numberOfRupeesToTax = $card['rank'];
     $numberOfRupeesTaxed = 0;
 

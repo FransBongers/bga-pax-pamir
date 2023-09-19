@@ -193,6 +193,7 @@ const ECE_RIOTS_IN_KABUL = 'riotsInKabul';
 const ECE_RIOTS_IN_PERSIA = 'riotsInPersia';
 const ECE_RIOTS_IN_PUNJAB = 'riotsInPunjab';
 const ECE_RUMOR = 'rumor';
+const ECE_RUMOR_CARD_ID = 'card_108';
 
 /**
  * Special abilities

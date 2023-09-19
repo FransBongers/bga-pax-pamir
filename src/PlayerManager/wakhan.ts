@@ -103,9 +103,8 @@ class PPWakhanPlayer extends PPPlayer {
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
 
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty) {
+    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
       // TODO: check for loyalty change and then set Counter to 2?
-      // TODO: check for event where patriots don't count?
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }
   }
@@ -126,8 +125,7 @@ class PPWakhanPlayer extends PPPlayer {
     ]);
 
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty) {
-      // TODO: check for event where patriots don't count?
+    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }
   }
@@ -167,5 +165,13 @@ class PPWakhanPlayer extends PPPlayer {
       return;
     }
     super.toValueCounter({ counter, value });
+  }
+
+  toValueWakhanInfluence({wakhanInfluence}: {wakhanInfluence: WakhanInfluence}): void {
+    console.log('toValueWakhanInfluence');
+    const {influence} = wakhanInfluence;
+    this.wakhanInfluence.afghan.setValue(influence.afghan);
+    this.wakhanInfluence.british.setValue(influence.british);
+    this.wakhanInfluence.russian.setValue(influence.russian);
   }
 }

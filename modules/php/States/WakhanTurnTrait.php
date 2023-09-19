@@ -139,7 +139,16 @@ trait WakhanTurnTrait
     Notifications::wakhanReshuffleDeck($topOfDeck, $currentTopDiscardPile);
   }
 
-  function getWakhanLoyalty($pragmaticLoyalty)
+  function getWakhanPragmaticLoyalty()
+  {
+    $pragmaticLoyalty = WakhanCards::getTopOf(DISCARD)['front']['pragmaticLoyalty'];
+    $otherPlayerLoyalties = $this->getOtherPlayerLoyalties();
+    return Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
+      return !in_array($coalition, $otherPlayerLoyalties);
+    })[0];
+  }
+
+  function getOtherPlayerLoyalties()
   {
     $otherPlayers = Utils::filter(PaxPamirPlayers::getAll()->toArray(), function ($player) {
       return $player->getId() !== WAKHAN_PLAYER_ID;
@@ -147,8 +156,6 @@ trait WakhanTurnTrait
     $otherPlayerLoyalties = array_map(function ($player) {
       return $player->getLoyalty();
     }, $otherPlayers);
-    return Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
-      return !in_array($coalition, $otherPlayerLoyalties);
-    })[0];
+    return $otherPlayerLoyalties;
   }
 }

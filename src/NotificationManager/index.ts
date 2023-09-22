@@ -359,8 +359,21 @@ class NotificationManager {
     if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
       this.getPlayer({ playerId }).incCounter({ counter: 'cylinders', value: 1 });
     }
-    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_')) {
-      this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.getItems().includes('card_106')) {
+      if (playerId === WAKHAN_PLAYER_ID) {
+        (this.getPlayer({ playerId }) as PPWakhanPlayer).incWakhanInfluence({
+          wakhanInfluence: {
+            type: 'wakhanInfluence',
+            influence: {
+              afghan: 1,
+              british: 1,
+              russian: 1,
+            },
+          },
+        });
+      } else {
+        this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+      }
     }
   }
 

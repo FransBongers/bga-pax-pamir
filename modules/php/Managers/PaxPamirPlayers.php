@@ -88,7 +88,6 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
     } else {
       return (int) Game::get()->getActivePlayerId();
     }
-
   }
 
   public static function getCurrentId()
@@ -155,6 +154,20 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
   public static function getCurrent()
   {
     return self::get(self::getCurrentId());
+  }
+
+  public static function getAllCourtCardsOrdered()
+  {
+    $players = self::getAll()->toArray();
+    usort($players, function ($a, $b) {
+      return $a->getNo() - $b->getNo();
+    });
+    $courtCards = [];
+    foreach ($players as $index => $player) {
+      $playerCourtCards = $player->getCourtCards();
+      array_push($courtCards, ...$playerCourtCards);
+    }
+    return $courtCards;
   }
 
   public static function getPlayerOrder()

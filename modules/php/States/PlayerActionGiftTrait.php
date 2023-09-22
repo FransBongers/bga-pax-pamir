@@ -34,7 +34,7 @@ trait PlayerActionGiftTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function purchaseGift($value, $cardId,$offeredBribeAmount = null)
+  function purchaseGift($value, $cardId, $offeredBribeAmount = null)
   {
     self::checkAction('purchaseGift');
 
@@ -45,7 +45,7 @@ trait PlayerActionGiftTrait
 
     $value = intval($value);
     $player = PaxPamirPlayers::get();
-    $resolved = $this->resolveBribe($cardInfo, $player,GIFT, $offeredBribeAmount);
+    $resolved = $this->resolveBribe($cardInfo, $player, GIFT, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
       return;

@@ -4,6 +4,7 @@ namespace PaxPamir\Managers;
 
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Notifications;
 
@@ -40,6 +41,16 @@ class Map
     return Game::get()->regions[$region];
   }
 
+  public static function getRegionsAdjacentToRegion($region) 
+  {
+    $borders = Map::getRegionInfo($region)['borders'];
+    $adjecentRegions = array_map(function ($border) use ($region) {
+      $borderRegions = explode('_',$border);
+      return $region === $borderRegions[0] ? $borderRegions[1] : $borderRegions[0];
+    },$borders);
+    return $adjecentRegions;
+  }
+
   public static function borderHasRoadForCoalition($border, $coalition)
   {
     $roads = Tokens::getInLocation(['roads', $border])->toArray();
@@ -51,9 +62,11 @@ class Map
   /**
    * Returns playerId if there is a ruler. Otherwise returns 0.
    */
-  public static function determineRuler($region)
+  public static function determineRuler($region, $piecesToIgnore = [])
   {
-    $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
+    $tribes = Utils::filter(Tokens::getInLocation('tribes_' . $region)->toArray(), function ($tribe) use ($piecesToIgnore) {
+      return !in_array($tribe['id'], $piecesToIgnore);
+    });
     $playerIds = PaxPamirPlayers::getAll()->getIds();
     $rulingPieces = array();
     $tribesPerPlayer = array();
@@ -70,14 +83,14 @@ class Map
     $armies = Tokens::getInLocation('armies_' . $region);
     $armyCounts = array();
     foreach (COALITIONS as $coalition) {
-      $armyCounts[$coalition] = count($armies->filter(function ($army) use ($coalition) {
-        return explode('_', $army['id'])[1] === $coalition;
+      $armyCounts[$coalition] = count($armies->filter(function ($army) use ($coalition, $piecesToIgnore) {
+        return explode('_', $army['id'])[1] === $coalition && !in_array($army['id'], $piecesToIgnore);
       }));
     }
 
     foreach ($playerIds as $playerId) {
       if ($playerId === WAKHAN_PLAYER_ID) {
-        $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + max($armyCounts[AFGHAN],$armyCounts[BRITISH],$armyCounts[RUSSIAN]);
+        $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + max($armyCounts[AFGHAN], $armyCounts[BRITISH], $armyCounts[RUSSIAN]);
       } else {
         $loyalty = PaxPamirPlayers::get($playerId)->getLoyalty();
         $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
@@ -91,9 +104,17 @@ class Map
     return null;
   }
 
+  public static function getLoyalArmiesInRegion($region,$loyalty)
+  {
+    $loyalArmies = Utils::filter(Tokens::getInLocationOrdered(Locations::armies($region))->toArray(), function ($army) use ($loyalty) {
+      return explode('_', $army['id'])[1] === $loyalty;
+    });
+    return $loyalArmies;
+  }
+
   public static function getPlayerTribesInRegion($region, $playerId)
   {
-    $tribes = Tokens::getInLocation('tribes_' . $region)->toArray();
+    $tribes = Tokens::getInLocationOrdered('tribes_' . $region)->toArray();
     $playerTribes = Utils::filter($tribes, function ($cylinder) use ($playerId) {
       return Utils::getPlayerIdForCylinderId($cylinder['id']) === $playerId;
     });

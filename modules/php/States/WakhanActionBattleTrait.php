@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
@@ -59,7 +60,7 @@ trait WakhanActionBattleTrait
     $card = $this->wakhanGetCourtCardToPerformAction(BATTLE);
     Notifications::log('card', $card);
     if ($card === null) {
-      $this->wakhanActionNotValid();
+      Wakhan::actionNotValid();
       return;
     }
 
@@ -71,7 +72,7 @@ trait WakhanActionBattleTrait
     if ($battleInRegionData !== null) {
       $this->wakhanPayHostageBribeIfNeeded($card, BATTLE);
       $this->wakhanResolveBattleInRegion($card, $battleInRegionData);
-      $this->wakhanActionValid();
+      Wakhan::actionValid();
       return;
     }
 
@@ -79,11 +80,11 @@ trait WakhanActionBattleTrait
     if ($cardToBattleOn !== null) {
       $this->wakhanPayHostageBribeIfNeeded($card, BATTLE);
       $this->wakhanResolveBattleOnCourtCard($card, $cardToBattleOn);
-      $this->wakhanActionValid();
+      Wakhan::actionValid();
       return;
     }
 
-    $this->wakhanActionNotValid();
+    Wakhan::actionNotValid();
   }
 
   // ..######.....###....########..########.
@@ -142,7 +143,7 @@ trait WakhanActionBattleTrait
 
   function wakhanGetCardToBattleOn()
   {
-    $courtCards = $this->getAllCourtCardsOrdered();
+    $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
     $courtCardsWakhanCanBattleOn = Utils::filter($courtCards, function ($card) {
       $wakhanSpyCount = $this->getLoyalSpyCount(WAKHAN_PLAYER_ID, $card['id']);
       if ($wakhanSpyCount === 0) {
@@ -160,7 +161,7 @@ trait WakhanActionBattleTrait
     } else if ($count === 1) {
       return $courtCardsWakhanCanBattleOn[0];
     } else {
-      return $this->wakhanSelectCard($courtCardsWakhanCanBattleOn);
+      return Wakhan::selectCard($courtCardsWakhanCanBattleOn);
     }
   }
 
@@ -270,7 +271,7 @@ trait WakhanActionBattleTrait
 
   function wakhanLoyalArmyCount($region)
   {
-    $pragmaticLoyalty = $this->getWakhanPragmaticLoyalty();
+    $pragmaticLoyalty = Wakhan::getPragmaticLoyalty();
     $armies = Tokens::getInLocation(Locations::armies($region))->toArray();
     $count = count(Utils::filter($armies, function ($army) use ($pragmaticLoyalty) {
       return explode('_', $army['id'])[1] === $pragmaticLoyalty;
@@ -297,7 +298,7 @@ trait WakhanActionBattleTrait
 
   function wakhanGetEnemyArmies($region)
   {
-    $otherPlayerLoyalties = $this->getOtherPlayerLoyalties();
+    $otherPlayerLoyalties = Wakhan::getOtherPlayerLoyalties();
 
     $armies = Tokens::getInLocation(Locations::armies($region))->toArray();
     $armiesLoyalToOtherPlayer = Utils::filter($armies, function ($army) use ($otherPlayerLoyalties) {
@@ -309,7 +310,7 @@ trait WakhanActionBattleTrait
 
   function wakhanGetEnemyRoads($region)
   {
-    $otherPlayerLoyalties = $this->getOtherPlayerLoyalties();
+    $otherPlayerLoyalties = Wakhan::getOtherPlayerLoyalties();
     $borders = $this->regions[$region]['borders'];
 
     $roads = array_merge(...array_map(function ($border) {

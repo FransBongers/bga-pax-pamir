@@ -39,6 +39,11 @@ abstract class Locations extends \APP_DbObject
     return 'events_' . $playerId;
   }
 
+  public static function pool($coalition)
+  {
+    return 'blocks_' . $coalition;
+  }
+
   public static function prizes($playerId)
   {
     return 'prizes_' . $playerId;

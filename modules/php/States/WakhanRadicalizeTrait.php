@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
@@ -66,7 +67,7 @@ trait WakhanRadicalizeTrait
       $card = Cards::get($card['id']);
 
       Notifications::playCard($card, $firstCard, $side, WAKHAN_PLAYER_ID);
-      $this->wakhanResolveImpactIcons($card, $back, $front);
+      $this->wakhanResolveImpactIcons($card);
     }
   }
 
@@ -78,10 +79,10 @@ trait WakhanRadicalizeTrait
     $result = $marketHasDominanceCheck ? $this->radicalizeSelectCardDominanceCheckInMarket() : $this->radicalizeSelectCard($back, $front);
     Notifications::log('radicalizeResult', $result);
     if ($result === null) {
-      $this->wakhanActionNotValid();
+      Wakhan::actionNotValid();
       return;
     }
-    $this->wakhanActionValid();
+    Wakhan::actionValid();
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$result['cost']);
     Globals::incRemainingActions(-1);
     $card = $result['card'];
@@ -121,7 +122,7 @@ trait WakhanRadicalizeTrait
     $card = Cards::get($card['id']);
     $type = $firstCard ? 'firstCourtCard' : 'courtCard';
     Notifications::wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, Locations::market($row, $column), Locations::court(WAKHAN_PLAYER_ID));
-    $this->wakhanResolveImpactIcons($card, $back, $front);
+    $this->wakhanResolveImpactIcons($card);
   }
 
   function radicalizeSelectCard($back, $front)

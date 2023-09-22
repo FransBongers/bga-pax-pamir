@@ -190,11 +190,22 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
   return `<div id="player_tableau_${playerId}" >
             <div class="pp_player_tableau pp_player_color_${playerColor}">
                 <div class="pp_wakhan_tableau_left">
-                    <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>
-                    <div class="pp_wakhan_deck_container">
-                      <div id="pp_wakhan_deck" class="pp_wakhan_card"></div>
-                      <div id="pp_wakhan_discard" class="pp_wakhan_card"></div>
+                  <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>
+                  <div id="pp_wakhan_gifts">
+                    <div id="pp_gift_2_${playerId}" class="pp_wakhan_gift pp_wakhan_gift_2">
+                      <div id="pp_gift_2_zone_${playerId}" class="pp_gift_zone"></div>
                     </div>
+                    <div id="pp_gift_4_${playerId}" class="pp_wakhan_gift pp_wakhan_gift_4">
+                      <div id="pp_gift_4_zone_${playerId}" class="pp_gift_zone"></div>
+                    </div>
+                    <div id="pp_gift_6_${playerId}" class="pp_wakhan_gift pp_wakhan_gift_6">
+                      <div id="pp_gift_6_zone_${playerId}" class="pp_gift_zone"></div>
+                    </div>
+                  </div>
+                  <div class="pp_wakhan_deck_container">
+                    <div id="pp_wakhan_deck" class="pp_wakhan_card"></div>
+                    <div id="pp_wakhan_discard" class="pp_wakhan_card"></div>
+                  </div>
                 </div>
                 <div class="pp_player_tableau_right">
                     <div class="pp_player_tableau_title_container">

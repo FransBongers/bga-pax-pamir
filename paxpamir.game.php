@@ -87,9 +87,12 @@ class Paxpamir extends Table
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
     use PaxPamir\States\WakhanActionBattleTrait;
+    use PaxPamir\States\WakhanActionBetrayTrait;
+    use PaxPamir\States\WakhanActionBuildTrait;
+    use PaxPamir\States\WakhanActionGiftTrait;
+    use PaxPamir\States\WakhanActionMoveTrait;
     use PaxPamir\States\WakhanActionTaxTrait;
     use PaxPamir\States\WakhanActionTrait;
-    use PaxPamir\States\WakhanCardPriorityTrait;
     use PaxPamir\States\WakhanDiscardTrait;
     use PaxPamir\States\WakhanRadicalizeTrait;
     use PaxPamir\States\WakhanResolveImpactIconsTrait;

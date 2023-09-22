@@ -50,86 +50,17 @@ trait DebugTrait
 
   function test()
   {
-    // $this->specialAbilitySafeHouse();
+    // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
+    
+    // Notifications::log('adjacent',$this->wakhanGetNextMove());
+    // Notifications::log('piece',Map::determineRuler(KABUL,['cylinder_1_5','block_british_6']));
+    // Notifications::log('piece',$this->wakhanGetPieceToMove(PUNJAB));
+    
     // Globals::setRemainingActions(2);
     // Cards::setUsed('card_69', 0);
-    // $this->wakhanBattle();
+    $this->wakhanMove();
 
-    Notifications::log('wakhanGetSASafeHouseCourtCard',$this->wakhanGetSASafeHouseCourtCard());
-    // Cards::move('card_71',DISCARD);
-    // Notifications::log('radicalizeSelectCardDominanceCheckInMarket',$this->radicalizeSelectCardDominanceCheckInMarket());
-    // Cards::move('card_31',Locations::hand(DISCARD));
-    // Cards::move('card_33',DISCARD);
-    // Cards::move('card_40',DISCARD);
-    // Cards::move('card_81',Locations::market(1,4));
-    // Cards::move('card_108',Locations::market(0,0));
   
-    // Cards::move('card_41',Locations::hand(WAKHAN_PLAYER_ID));
-    // Cards::move('card_36',Locations::hand(WAKHAN_PLAYER_ID));
-    // Cards::move('card_1',Locations::hand(WAKHAN_PLAYER_ID));
-    // Cards::move('card_116','market_1_2');
-    // Notifications::log('min',min(1,2));
-    // $courtCards = $this->getAllCourtCardsOrdered();
-    // $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) {
-    //   $spyOwnerIds = array_map(function ($spy) {
-    //     return intval(explode('_',$spy['id'])[1]);
-    //   }, Tokens::getInLocation(['spies', $card['id']])->toArray());
-    //   return in_array(WAKHAN_PLAYER_ID,$spyOwnerIds);
-    // });
-    // $cardToRemoveSpyFrom = $this->wakhanSelectCard($cardsWithWakhanSpies);
-    // Notifications::log('selectedCard',$cardToRemoveSpyFrom);
-    // $spies = Tokens::getInLocation(['spies', $cardToRemoveSpyFrom['id']])->toArray();
-    // $wakhanSpies = Utils::filter($spies, function ($spy) {
-    //   return intval(explode('_',$spy['id'])[1]) === WAKHAN_PLAYER_ID;
-    // });
-    // return $wakhanSpies[count($wakhanSpies) - 1];
-
-    // Tokens::move('cylinder_1_8',Locations::spies('card_95'));
-    // Cards::move('card_14',DISCARD);
-    // Cards::move('card_52',DISCARD);
-    // Cards::move('card_5','market_0_0');
-    // Cards::move('card_6','market_1_0');
-    // $this->debugCreateSpy('card_68',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_7',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_6',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_44',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_95',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_58',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_58',WAKHAN_PLAYER_ID);
-    // $this->debugCreateSpy('card_30',WAKHAN_PLAYER_ID);
-    // $this->debugCreateTribe(TRANSCASPIA,WAKHAN_PLAYER_ID);
-    // $this->debugCreateTribe(PUNJAB,WAKHAN_PLAYER_ID);
-    // $this->debugCreateTribe(PERSIA,WAKHAN_PLAYER_ID);
-
-    // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);
-    // $this->debugCreateRoad(KABUL.'_'.PUNJAB ,RUSSIAN);
-    // $this->debugCreateRoad(KABUL.'_'.TRANSCASPIA ,RUSSIAN);
-    // $this->debugCreateRoad(KABUL.'_'.KANDAHAR ,RUSSIAN);
-    // $this->debugCreateRoad(KANDAHAR.'_'.PUNJAB ,RUSSIAN);
-    // $this->debugCreateRoad(KANDAHAR.'_'.PUNJAB ,RUSSIAN);
-    // $this->debugCreateRoad(PERSIA.'_'.TRANSCASPIA ,RUSSIAN);
-    // $this->debugCreateRoad(HERAT.'_'.TRANSCASPIA ,RUSSIAN);
-    // $this->debugCreateRoad(HERAT.'_'.PERSIA ,RUSSIAN);
-    // $this->debugCreateRoad(HERAT.'_'.KANDAHAR ,RUSSIAN);
-    // $this->debugCreateRoad(HERAT.'_'.KABUL ,RUSSIAN);
-    // $this->debugCreateRoad(HERAT.'_'.KABUL ,RUSSIAN);
-    
-    // Notifications::log('wakhanEnabled',Globals::getWakhanEnabled());
-    // Notifications::log('wakhanOption',Globals::getWakhanOption());
-    
-    // Notifications::log('getWakhanVariantSavvyPurchasing',Globals::getWakhanVariantSavvyPurchasing());
-    // Notifications::log('getWakhanVariantSpyMovement',Globals::getWakhanVariantSpyMovement());
-    // Notifications::log('getWakhanVariantSteadfastPragmaticLoyalty',Globals::getWakhanVariantSteadfastPragmaticLoyalty());
-
-    // Tokens::move('block_afghan_6','roads_'.KANDAHAR.'_'.PUNJAB);
-    // $front = WakhanCards::getTopOf(DISCARD)['front'];
-    // $block = $this->wakhanSelectBlockToPlace(AFGHAN, $front);
-    // Notifications::log('block',$block);
-    // $this->wakhanDiscardCourtCards(1);
-
-    // Notifications::log('actionStack', ActionStack::get());
-    // Cards::move('card_101', 'market_0_0');
 
   }
 

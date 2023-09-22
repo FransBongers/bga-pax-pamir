@@ -167,6 +167,13 @@ class PPWakhanPlayer extends PPPlayer {
     super.toValueCounter({ counter, value });
   }
 
+  incWakhanInfluence({wakhanInfluence}: {wakhanInfluence: WakhanInfluence}): void {
+    const {influence} = wakhanInfluence;
+    this.wakhanInfluence.afghan.incValue(influence.afghan);
+    this.wakhanInfluence.british.incValue(influence.british);
+    this.wakhanInfluence.russian.incValue(influence.russian);
+  }
+
   toValueWakhanInfluence({wakhanInfluence}: {wakhanInfluence: WakhanInfluence}): void {
     console.log('toValueWakhanInfluence');
     const {influence} = wakhanInfluence;

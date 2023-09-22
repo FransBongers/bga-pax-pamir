@@ -204,6 +204,36 @@
   z-index: 1;
 }
 
+.pp_wakhan_gift {
+  background-image: url('img/gifts.webp');
+  border-radius: 50%;
+  background-size: 600% 100%;
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+}
+
+#pp_wakhan_gifts {
+  display: flex;
+  flex-direction: row;
+  height: 45px;
+  width: 150px;
+  margin-left: 10px;
+  justify-content: space-evenly;
+}
+
+.pp_wakhan_gift_2 {
+  background-position: 60%;
+}
+
+.pp_wakhan_gift_4 {
+  background-position: 80%;
+}
+
+.pp_wakhan_gift_6 {
+  background-position: 100%;
+}
+
 .pp_gift.pp_selectable {
   box-shadow: 0px 0px 0px 3px base.$selectable-color !important;
   cursor: pointer !important;

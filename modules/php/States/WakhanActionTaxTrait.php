@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -57,7 +58,7 @@ trait WakhanActionTaxTrait
   {
     $card = $this->wakhanGetCourtCardToPerformAction(TAX);
     if ($card === null) {
-      $this->wakhanActionNotValid();
+      Wakhan::actionNotValid();
       return;
     }
 
@@ -65,7 +66,7 @@ trait WakhanActionTaxTrait
     $marketRupees = $this->wakhanGetMarketRupees();
 
     if (count($playersToTax) === 0 && count($marketRupees) === 0) {
-      $this->wakhanActionNotValid();
+      Wakhan::actionNotValid();
       return;
     }
 
@@ -153,7 +154,7 @@ trait WakhanActionTaxTrait
 
   function wakhanGetPlayersToTax()
   {
-    $otherPlayerIds = $this->wakhanGetOtherPlayerIds();
+    $otherPlayerIds = Wakhan::getOtherPlayerIds();
     $taxablePlayers = [];
     $rulers = Globals::getRulers();
     $wakhanHasClaimOfAncientLineage = Cards::get(SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID)['location'] === Locations::court(WAKHAN_PLAYER_ID);

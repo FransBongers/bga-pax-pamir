@@ -15,9 +15,8 @@ use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\WakhanCards;
-use PaxPamir\Models\PaxPamirPlayer;
 
-trait WakhanSpecialAbilitiesTrait
+trait WakhanActionGiftTrait
 {
 
   // .########..####..######..########.....###....########..######..##.....##
@@ -54,35 +53,44 @@ trait WakhanSpecialAbilitiesTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanSASafeHouse($actionStack) {
-    $action = array_pop($actionStack);
-    $data = $action['data'];
+  function wakhanGift()
+  {
+    $card = $this->wakhanGetCourtCardToPerformAction(GIFT);
 
-    $cylinderId = $data['cylinderId'];
-    $fromCardId = $data['fromCardId'];
+    if ($card === null) {
+      Wakhan::actionNotValid();
+      return;
+    }
 
-    $safeHouseCard = $this->wakhanGetSASafeHouseCourtCard();
-    $cardId = $safeHouseCard['id'];
+    // if $card !== null we know Wakhan is able to pay for the gift and for the bribe
+    $giftValue = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getLowestAvailableGift();
 
-    $to = Locations::spies($cardId);
-    $state = Tokens::insertOnTop($cylinderId, $to);
-    $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
-    Notifications::moveToken($message, [
-      'player' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenCylinder' => Utils::logTokenCylinder(WAKHAN_PLAYER_ID),
-      'logTokenCardName' => Utils::logTokenCardName($safeHouseCard['name']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
-      'move' => [
-        'from' => 'spies_'.$fromCardId,
-        'to' => $to,
-        'tokenId' => $cylinderId,
-        'weight' => $state,
-      ]
-    ]);
-    ActionStack::next($actionStack);
+    $this->wakhanPayHostageBribeIfNeeded($card, GIFT);
+
+    Notifications::purchaseGift(
+      PaxPamirPlayers::get(WAKHAN_PLAYER_ID),
+      $giftValue,
+    );
+
+    Cards::setUsed($card['id'], 1); // unavailable
+    // if not free action reduce remaining actions.
+    if (!$this->isCardFavoredSuit($card)) {
+      Globals::incRemainingActions(-1);
+    }
+
+    $rupeesOnCards = $this->payActionCosts($giftValue);
+    PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$giftValue);
+
+    $player = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+
+    Notifications::payRupeesToMarket(
+      $player,
+      $rupeesOnCards
+    );
+
+    $this->wakhanPlaceGift($giftValue);
+    Wakhan::actionValid();
   }
-
 
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
@@ -92,13 +100,13 @@ trait WakhanSpecialAbilitiesTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
-  function wakhanGetSASafeHouseCourtCard()
+  function wakhanPlaceGift($value)
   {
-    $courtCards = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getCourtCards();
-    $cardsWithSafeHouse = Utils::filter($courtCards, function ($card) {
-      return $card['specialAbility'] === SA_SAFE_HOUSE;
-    });
-    return Wakhan::selectCard($cardsWithSafeHouse);
-  }
+    $cylinder = Wakhan::getCylinderToPlace();
 
+    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, GIFT, [
+      'value' => $value,
+      'type' => GIFT,
+    ]);
+  }
 }

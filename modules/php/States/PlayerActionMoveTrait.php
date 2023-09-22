@@ -80,6 +80,33 @@ trait PlayerActionMoveTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::move($cardId, $player);
+
+    $extraActions = $this->resolveMoves($player, $moves);
+
+    $playerId = $player->getId();
+    $actionStack = array_merge(
+      [
+        ActionStack::createAction(DISPATCH_TRANSITION, $playerId, ['transition' => 'playerActions']),
+      ],
+      $extraActions
+    );
+
+    ActionStack::next($actionStack);
+  }
+
+
+
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function resolveMoves($player, $moves)
+  {
     $regionsThatNeedRulerCheck  = [];
     $regionsThatNeedOverthrowCheck = [];
     foreach ($moves as $pieceId => $pieceMoves) {
@@ -160,31 +187,12 @@ trait PlayerActionMoveTrait
       Map::checkRulerChange($region);
     };
 
-    if (count($regionsThatNeedOverthrowCheck) === 0) {
-      $this->gamestate->nextState('playerActions');
-      return;
-    }
-    $playerId = $player->getId();
-    $actions = [
-      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, ['transition' => 'playerActions']),
-    ];
+    $extraActions = [];
     foreach ($regionsThatNeedOverthrowCheck as $index => $region) {
-      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, ['region' => $region]);
+      $extraActions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $player->getId(), ['region' => $region]);
     }
-    $this->pushActionsToActionStack($actions);
-    $this->nextState('dispatchAction');
+    return $extraActions;
   }
-
-
-
-
-  // .##.....##.########.####.##.......####.########.##....##
-  // .##.....##....##.....##..##........##.....##.....##..##.
-  // .##.....##....##.....##..##........##.....##......####..
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // ..#######.....##....####.########.####....##.......##...
 
 
   function validateArmyMoves($pieceId, $moves, $player)
@@ -250,7 +258,7 @@ trait PlayerActionMoveTrait
     $player = PaxPamirPlayers::get();
     $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
     $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
-    $courtCards = $this->getAllCourtCardsOrdered();
+    $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
     // Each move should be valid (spy should be at specified location and cards need to be adjacent)
     foreach ($moves as $index => $move) {
       // block should be in db location for first move or in destination of previous move
@@ -271,20 +279,6 @@ trait PlayerActionMoveTrait
         throw new \feException("Destination is not adjacent to current location");
       }
     }
-  }
-
-  function getAllCourtCardsOrdered()
-  {
-    $players = PaxPamirPlayers::getAll()->toArray();
-    usort($players, function ($a, $b) {
-      return $a->getNo() - $b->getNo();
-    });
-    $courtCards = [];
-    foreach ($players as $index => $player) {
-      $playerCourtCards = $player->getCourtCards();
-      array_push($courtCards, ...$playerCourtCards);
-    }
-    return $courtCards;
   }
 
   function getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility)

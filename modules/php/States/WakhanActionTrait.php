@@ -191,6 +191,9 @@ trait WakhanActionTrait
       case BATTLE:
         $this->wakhanBattle();
         break;
+      case BETRAY:
+        $this->wakhanBetray();
+        break;
       case BUILD:
         $this->wakhanBuild();
       case GIFT:

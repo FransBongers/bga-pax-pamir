@@ -39,6 +39,9 @@ trait DispatchActionTrait
 
     $next = $actionStack[count($actionStack) - 1];
     switch ($next['type']) {
+      case DISPATCH_ACCEPT_PRIZE_CHECK:
+        $this->dispatchAcceptPrizeCheck($actionStack);
+        break;
       case DISPATCH_CLEANUP_CHECK_COURT:
         $this->dispatchCleanupCheckCourt($actionStack);
         break;
@@ -90,9 +93,9 @@ trait DispatchActionTrait
       case DISPATCH_IMPACT_ICON_SPY:
         $this->dispatchResolveImpactIconSpy($actionStack);
         break;
-      // case DISPATCH_IMPACT_ICON_TRIBE:
-      //   $this->dispatchResolveImpactIconTribe($actionStack);
-      //   break;
+        // case DISPATCH_IMPACT_ICON_TRIBE:
+        //   $this->dispatchResolveImpactIconTribe($actionStack);
+        //   break;
       case DISPATCH_OVERTHROW_TRIBE:
         $this->dispatchOverthrowTribe($actionStack);
         break;
@@ -100,7 +103,7 @@ trait DispatchActionTrait
         $this->dispatchPayRupeesToMarket($actionStack);
         break;
       case DISPATCH_PLACE_ARMY:
-        $this->dispatchPlaceArmy($actionStack);      
+        $this->dispatchPlaceArmy($actionStack);
         break;
       case DISPATCH_PLACE_CYLINDER:
         $this->dispatchPlaceCylinder($actionStack);
@@ -128,9 +131,6 @@ trait DispatchActionTrait
         break;
       case DISPATCH_WAKHAN_DRAW_AI_CARD:
         $this->dispatchWakhanDrawAICard($actionStack);
-        break;
-      case 'acceptPrizeCheck':
-        $this->dispatchAcceptPrizeCheck($actionStack);
         break;
       case 'changeLoyalty':
         $this->dispatchChangeLoyalty($actionStack);
@@ -186,8 +186,12 @@ trait DispatchActionTrait
   function dispatchAcceptPrizeCheck($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
-    ActionStack::set($actionStack);
-    $this->nextState('acceptPrize', $next['playerId']);
+    if ($next['playerId'] === WAKHAN_PLAYER_ID) {
+      $this->wakhanAcceptPrize($actionStack);
+    } else {
+      ActionStack::set($actionStack);
+      $this->nextState('acceptPrize', $next['playerId']);
+    }
   }
 
   // TODO: replace with dispatchTransition

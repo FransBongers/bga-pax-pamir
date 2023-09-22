@@ -50,6 +50,14 @@ trait DebugTrait
 
   function test()
   {
+    // Cards::setUsed('card_45',0);
+    // $actionStack = [
+    //   ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::get()->getId(), [
+    //     'transition' => 'playerActions'
+    //   ])
+    // ];
+    // ActionStack::set($actionStack);
+    // Notifications::log('stack',ActionStack::get());
     // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
     
     // Notifications::log('adjacent',$this->wakhanGetNextMove());
@@ -58,10 +66,7 @@ trait DebugTrait
     
     // Globals::setRemainingActions(2);
     // Cards::setUsed('card_69', 0);
-    $this->wakhanMove();
-
-  
-
+    $this->wakhanBetray();
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)

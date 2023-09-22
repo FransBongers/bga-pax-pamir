@@ -80,10 +80,7 @@ class PPPlayer {
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
 
-    // TODO: wakhan prizes
-    if (this.playerId !== WAKHAN_PLAYER_ID) {
-      this.setupPrizes({ playerGamedatas });
-    }
+    this.setupPrizes({ playerGamedatas });
 
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
@@ -103,10 +100,9 @@ class PPPlayer {
     this.setupEvents({ playerGamedatas });
 
     if (this.playerId !== WAKHAN_PLAYER_ID) {
-      this.setupHand({ hand: playerGamedatas.hand });
-      // TODO: wakhan prizes
-      this.setupPrizes({ playerGamedatas });
+      this.setupHand({ hand: playerGamedatas.hand });      
     }
+    this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
@@ -382,7 +378,7 @@ class PPPlayer {
       const node = dojo.byId(`pp_prizes_${this.playerId}`);
       // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
       // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
-      dojo.style(node, 'margin-bottom', `-194px`);
+      dojo.style(node, 'margin-bottom', this.playerId === WAKHAN_PLAYER_ID ? '-184px' : `-194px`);
       dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
     }
   }
@@ -562,10 +558,7 @@ class PPPlayer {
       }, 0);
   }
 
-  setCounter({
-    counter,
-    value,
-  }: PlayerCounterInput): void {
+  setCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.setValue(value);
@@ -580,10 +573,7 @@ class PPPlayer {
     }
   }
 
-  incCounter({
-    counter,
-    value,
-  }: PlayerCounterInput): void {
+  incCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.incValue(value);
@@ -598,10 +588,7 @@ class PPPlayer {
     }
   }
 
-  toValueCounter({
-    counter,
-    value,
-  }: PlayerCounterInput): void {
+  toValueCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.toValue(value);
@@ -806,7 +793,7 @@ class PPPlayer {
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     }
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.incCounter({ counter: 'influence', value: 1 });
     }

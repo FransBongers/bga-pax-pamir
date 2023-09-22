@@ -241,6 +241,8 @@ const LOG_TOKEN_RUPEE = 'rupee';
 /**
  * Dispatch actions
  */
+const DISPATCH_ACCEPT_PRIZE_CHECK = 'dispAcceptPrizeCheck';
+
 const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
 const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
 const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';

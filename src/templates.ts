@@ -202,6 +202,7 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
                       <div id="pp_gift_6_zone_${playerId}" class="pp_gift_zone"></div>
                     </div>
                   </div>
+                  <div id="pp_prizes_${playerId}" class="pp_prizes" style="left: 10px;"></div>
                   <div class="pp_wakhan_deck_container">
                     <div id="pp_wakhan_deck" class="pp_wakhan_card"></div>
                     <div id="pp_wakhan_discard" class="pp_wakhan_card"></div>

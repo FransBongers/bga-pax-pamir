@@ -58,7 +58,7 @@ trait PlayerActionBetrayTrait
     $actionStack = ActionStack::get();
     $current = array_pop($actionStack);
 
-    if ($current['type'] !== 'acceptPrizeCheck') {
+    if ($current['type'] !== DISPATCH_ACCEPT_PRIZE_CHECK) {
       throw new \feException("Not a valid action");
     }
     $cardId = $current['data']['cardId'];
@@ -149,7 +149,7 @@ trait PlayerActionBetrayTrait
       ];
 
     if ($betrayedCardInfo['prize'] !== null) {
-      $actionStack[] = ActionStack::createAction('acceptPrizeCheck', $playerId, ['cardId' => $betrayedCardId,]);
+      $actionStack[] = ActionStack::createAction(DISPATCH_ACCEPT_PRIZE_CHECK, $playerId, ['cardId' => $betrayedCardId,]);
     }
 
     $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_BETRAYED_CARD, $playerId, [

@@ -651,6 +651,7 @@
 .pp_wakhan_deck_container {
   display: flex;
   padding-left: 10px;
+  z-index: 1;
 }
 
 .pp_wakhan_tableau_left {

@@ -55,13 +55,16 @@ trait WakhanActionBattleTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanBattle()
+  function wakhanBattle($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(BATTLE);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(BATTLE);
+    }
+    
     Notifications::log('card', $card);
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
     // Perform action
@@ -70,21 +73,22 @@ trait WakhanActionBattleTrait
     $battleInRegionData = $this->wakhanGetRegionToBattle($topOfWakhanDiscard['front']['regionOrder']);
 
     if ($battleInRegionData !== null) {
+      Wakhan::actionValid();
       $this->wakhanPayHostageBribeIfNeeded($card, BATTLE);
       $this->wakhanResolveBattleInRegion($card, $battleInRegionData);
-      Wakhan::actionValid();
-      return;
+      return true;
     }
 
     $cardToBattleOn = $this->wakhanGetCardToBattleOn();
     if ($cardToBattleOn !== null) {
+      Wakhan::actionValid();
       $this->wakhanPayHostageBribeIfNeeded($card, BATTLE);
       $this->wakhanResolveBattleOnCourtCard($card, $cardToBattleOn);
-      Wakhan::actionValid();
-      return;
+      return true;
     }
 
     Wakhan::actionNotValid();
+    return false;
   }
 
   // ..######.....###....########..########.
@@ -237,7 +241,7 @@ trait WakhanActionBattleTrait
 
     $extraActions = [];
     foreach ($playersWithRemovedCylinders as $index => $playerId) {
-      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [
+      $extraActions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [
         'region' => $data['region']
       ]);
     }

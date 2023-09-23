@@ -8,9 +8,8 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
-use Paxpamir\Managers\PaxPamirPlayers;
-use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Managers\PaxPamirPlayers;
 
 trait SelectPieceTrait
 {

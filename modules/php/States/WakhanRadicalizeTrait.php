@@ -129,17 +129,14 @@ trait WakhanRadicalizeTrait
   {
     $row = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 0 : 1;
     $column = $back['columnNumbers'][$front['columnArrow']];
-    Notifications::log('radicalize', ['row' => $row, 'column' => $column]);
 
     // Get card from row specified by card
     $result = $this->radicalizeSelectCardInRow($row, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
-    Notifications::log('radicalizeSelectCardInRowInitial', $result);
     if ($result !== null) {
       return $result;
     }
     // If no card was available in specified row, try again with other row
     $result = $this->radicalizeSelectCardInRow($row === 0 ? 1 : 0, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
-    Notifications::log('radicalizeSelectCardInRowAlt', $result);
     return $result;
   }
 

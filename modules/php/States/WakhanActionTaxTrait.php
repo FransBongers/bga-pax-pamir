@@ -54,12 +54,15 @@ trait WakhanActionTaxTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanTax()
+  function wakhanTax($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(TAX);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(TAX);
+    }
+
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
     $playersToTax = $this->wakhanGetPlayersToTax();
@@ -67,11 +70,12 @@ trait WakhanActionTaxTrait
 
     if (count($playersToTax) === 0 && count($marketRupees) === 0) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
+    Wakhan::actionValid();
 
     $this->wakhanPayHostageBribeIfNeeded($card, TAX);
-    
+
     $numberOfRupeesToTax = $card['rank'];
     $numberOfRupeesTaxed = 0;
 
@@ -85,21 +89,20 @@ trait WakhanActionTaxTrait
 
     Notifications::tax($cardId, PaxPamirPlayers::get(WAKHAN_PLAYER_ID));
 
-    
-    foreach($playersToTax as $index => $playerTaxInfo) {
+
+    foreach ($playersToTax as $index => $playerTaxInfo) {
       if ($numberOfRupeesTaxed >= $numberOfRupeesToTax) {
         continue;
       }
       $stillToTax = $numberOfRupeesToTax - $numberOfRupeesTaxed;
-      $taxedFromPlayer = min($stillToTax,$playerTaxInfo['maxTaxable']);
+      $taxedFromPlayer = min($stillToTax, $playerTaxInfo['maxTaxable']);
       PaxPamirPlayers::incRupees($playerTaxInfo['playerId'], -$taxedFromPlayer);
       Notifications::taxPlayer($taxedFromPlayer, PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $playerTaxInfo['playerId']);
       $numberOfRupeesTaxed += $taxedFromPlayer;
     }
 
     $taxedFromMarket = [];
-    foreach($marketRupees as $index => $rupee)
-    {
+    foreach ($marketRupees as $index => $rupee) {
       if ($numberOfRupeesTaxed >= $numberOfRupeesToTax) {
         continue;
       }
@@ -116,6 +119,7 @@ trait WakhanActionTaxTrait
       Notifications::taxMarket(count($taxedFromMarket), PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $taxedFromMarket);
     }
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, $numberOfRupeesTaxed);
+    return true;
   }
 
 

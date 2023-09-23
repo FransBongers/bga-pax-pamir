@@ -362,9 +362,6 @@ class PPPlayer {
 
     const numberOfPrizes = playerGamedatas.prizes.length;
     this.updatePrizesStyle({ numberOfPrizes });
-    if (numberOfPrizes > 0) {
-      console.log('prizes', playerGamedatas.prizes);
-    }
     this.prizes.placeInZone(
       playerGamedatas.prizes.map((card: CourtCard & Token) => ({
         id: card.id,

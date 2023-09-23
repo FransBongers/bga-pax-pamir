@@ -50,6 +50,25 @@ trait DebugTrait
 
   function test()
   {
+    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    $blackMailHerat = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT);
+    Notifications::log('blackMailHerat',$blackMailHerat);
+
+    $blackMailKandahar = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR);
+    Notifications::log('blackMailKandahar',$blackMailKandahar);
+    // $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    // // Add start of turn abilities to action stack
+
+    // $addPause = false;
+    // Notifications::log('blachMailHerat',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT));
+    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
+    //   // $addPause = $addPause || $this->wakhanBlackmail(HERAT);
+    // }
+    // Notifications::log('blachMailKandahar',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR));
+    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
+    //   // $addPause = $addPause || $this->wakhanBlackmail(KANDAHAR);
+    // }
+    // Globals::setFavoredSuit(INTELLIGENCE);
     // Cards::setUsed('card_45',0);
     // $actionStack = [
     //   ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::get()->getId(), [
@@ -58,6 +77,7 @@ trait DebugTrait
     // ];
     // ActionStack::set($actionStack);
     // Notifications::log('stack',ActionStack::get());
+    // Notifications::log('stack',Globals::getWakhanActive());
     // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
     
     // Notifications::log('adjacent',$this->wakhanGetNextMove());
@@ -66,7 +86,7 @@ trait DebugTrait
     
     // Globals::setRemainingActions(2);
     // Cards::setUsed('card_69', 0);
-    $this->wakhanBetray();
+    // $this->dispatchWakhanSetupBonusActions();
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)

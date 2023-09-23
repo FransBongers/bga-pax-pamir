@@ -5,7 +5,7 @@ namespace PaxPamir\Helpers;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 
 /**
  * Class that allows to log DB change: useful for undo feature

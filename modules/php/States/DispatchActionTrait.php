@@ -10,7 +10,6 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\PaxPamirPlayers;
-use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait DispatchActionTrait
@@ -129,8 +128,17 @@ trait DispatchActionTrait
       case DISPATCH_WAKHAN_ACTIONS:
         $this->dispatchWakhanActions($actionStack);
         break;
+      case DISPATCH_WAKHAN_BONUS_ACTION:
+        $this->dispatchWakhanBonusAction($actionStack);
+        break;
       case DISPATCH_WAKHAN_DRAW_AI_CARD:
         $this->dispatchWakhanDrawAICard($actionStack);
+        break;
+      case DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS:
+        $this->dispatchWakhanSetupBonusActions($actionStack);
+        break;
+      case DISPATCH_WAKHAN_START_OF_TURN_ABILITIES:
+        $this->dispatchWakhanStartOfTurnAbilities($actionStack);
         break;
       case 'changeLoyalty':
         $this->dispatchChangeLoyalty($actionStack);

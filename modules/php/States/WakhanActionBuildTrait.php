@@ -54,25 +54,27 @@ trait WakhanActionBuildTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanBuild()
+  function wakhanBuild($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(BUILD);
-    Notifications::log('card', $card);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(BUILD);
+    }
+
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
     $region = $this->wakhanGetRegionToBuild();
     if ($region === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
+    Wakhan::actionValid();
     // if $card !== null we know Wakhan is able to pay for the build and for the bribe
-    $this->wakhanPayHostageBribeIfNeeded($card, GIFT);
+    $this->wakhanPayHostageBribeIfNeeded($card, BUILD);
 
-    Notifications::log('region', $region);
 
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     $numberOfArmiesWakhanCanAfford = floor($wakhanPlayer->getRupees() / 2);
@@ -104,7 +106,7 @@ trait WakhanActionBuildTrait
       $this->wakhanPlaceArmy($region, $pragmaticLoyalty);
     }
     Map::checkRulerChange($region);
-    Wakhan::actionValid();
+    return true;
   }
 
   // .##.....##.########.####.##.......####.########.##....##

@@ -8,13 +8,19 @@ use PaxPamir\Helpers\DominanceCheck;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\WakhanCards;
 
 class Wakhan
 {
-
+  public static function addPause()
+  {
+    ActionStack::push(ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID), [
+      'transition' => 'wakhanPause',
+    ]));
+  }
 
   public static function actionNotValid()
   {
@@ -23,6 +29,7 @@ class Wakhan
 
   public static function actionValid()
   {
+    Wakhan::addPause();
     Globals::setWakhanActionsSkipped(0);
   }
 

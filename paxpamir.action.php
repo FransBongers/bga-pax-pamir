@@ -331,6 +331,13 @@ class action_paxpamir extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function wakhanNext()
+    {
+        self::setAjaxMode();
+        $result = $this->game->wakhanNext();
+        self::ajaxResponse();
+    }
+
     /*
     
     Example:

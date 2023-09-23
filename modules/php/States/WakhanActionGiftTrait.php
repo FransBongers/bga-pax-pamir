@@ -53,15 +53,17 @@ trait WakhanActionGiftTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanGift()
+  function wakhanGift($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(GIFT);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(GIFT);
+    }
 
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
-
+    Wakhan::actionValid();
     // if $card !== null we know Wakhan is able to pay for the gift and for the bribe
     $giftValue = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getLowestAvailableGift();
 
@@ -89,7 +91,7 @@ trait WakhanActionGiftTrait
     );
 
     $this->wakhanPlaceGift($giftValue);
-    Wakhan::actionValid();
+    return true;
   }
 
   // .##.....##.########.####.##.......####.########.##....##

@@ -10,7 +10,6 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\PaxPamirPlayers;
-use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 trait DiscardTrait

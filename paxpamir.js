@@ -1265,7 +1265,7 @@ var tplWakhanPlayerPanel = function (_a) {
 };
 var tplWakhanTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
-    return "<div id=\"player_tableau_".concat(playerId, "\" >\n            <div class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                  <div id=\"pp_wakhan_gifts\">\n                    <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                      <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                    </div>\n                    <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\">\n                      <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                    </div>\n                    <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\">\n                      <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(playerName, "'s court</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                        <div class=\"pp_tableau_inner_left\">\n                            <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                        </div>\n                        <div class=\"pp_tableau_inner_right\">\n                            <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
+    return "<div id=\"player_tableau_".concat(playerId, "\" >\n            <div class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div style=\"flex-grow: 1;\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div id=\"pp_wakhan_gifts\">\n                      <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                        <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(playerName, "'s court</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                        <div class=\"pp_tableau_inner_left\">\n                            <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                        </div>\n                        <div class=\"pp_tableau_inner_right\">\n                            <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
 };
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 var debug = isDebug ? console.info.bind(window.console) : function () { };
@@ -2114,9 +2114,6 @@ var PPPlayer = (function () {
         });
         var numberOfPrizes = playerGamedatas.prizes.length;
         this.updatePrizesStyle({ numberOfPrizes: numberOfPrizes });
-        if (numberOfPrizes > 0) {
-            console.log('prizes', playerGamedatas.prizes);
-        }
         this.prizes.placeInZone(playerGamedatas.prizes.map(function (card) { return ({
             id: card.id,
             element: tplCard({ cardId: card.id, extraClasses: "pp_prize" }),
@@ -6153,6 +6150,31 @@ var StartOfTurnAbilitiesState = (function () {
     };
     return StartOfTurnAbilitiesState;
 }());
+var WakhanPauseState = (function () {
+    function WakhanPauseState(game) {
+        this.game = game;
+    }
+    WakhanPauseState.prototype.onEnteringState = function (args) {
+        this.updateInterfaceInitialStep();
+    };
+    WakhanPauseState.prototype.onLeavingState = function () { };
+    WakhanPauseState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} must click next to let Wakhan continue her turn'),
+            args: {
+                you: '${you}',
+            }
+        });
+        this.game.addPrimaryActionButton({
+            id: 'wakhan_next_button',
+            text: _('Next'),
+            callback: function () { return _this.game.takeAction({ action: 'wakhanNext' }); }
+        });
+    };
+    return WakhanPauseState;
+}());
 var NotificationManager = (function () {
     function NotificationManager(game) {
         this.game = game;
@@ -7292,6 +7314,7 @@ var PaxPamir = (function () {
             _a.specialAbilityInfrastructure = new ClientCardActionBuildState(this, true),
             _a.specialAbilitySafeHouse = new SASafeHouseState(this),
             _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),
+            _a.wakhanPause = new WakhanPauseState(this),
             _a);
         this.animationManager = new AnimationManager(this, { duration: 500 });
         this.activeEvents = new PaxPamirZone({

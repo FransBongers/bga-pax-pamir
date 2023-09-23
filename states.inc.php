@@ -140,6 +140,7 @@ $machinestates = array(
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
             "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             'startOfTurnAbilities' => ST_START_OF_TURN_ABILITIES,
+            'wakhanPause' => ST_WAKHAN_PAUSE,
             'wakhanTurn' => ST_WAKHAN_TURN,
         )
     ),
@@ -342,9 +343,17 @@ $machinestates = array(
         'action' => 'stWakhanTurn',
         "transitions" => [
             "dispatchAction" => ST_DISPATCH_ACTION,
-            // "cleanup" => ST_CLEANUP,
-            // "prepareNextTurn" => ST_PREPARE_TURN,
-            // "dispatchAction" => ST_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_WAKHAN_PAUSE => [
+        "name" => "wakhanPause",
+        "description" => clienttranslate('${actplayer} must click next to let Wakhan continue'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["wakhanNext"],
+        "transitions" => [
+            "dispatchAction" => ST_DISPATCH_ACTION,
         ]
     ],
 

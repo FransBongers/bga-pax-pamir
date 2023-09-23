@@ -54,20 +54,23 @@ trait WakhanActionMoveTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function wakhanMove()
+  function wakhanMove($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(MOVE);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(MOVE);
+    }
 
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
     Notifications::log('card', $card);
     if ($this->wakhanGetNextMove() === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
+    Wakhan::actionValid();
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     Notifications::move($card['id'], $wakhanPlayer);
     $this->wakhanPayHostageBribeIfNeeded($card, MOVE);
@@ -97,7 +100,7 @@ trait WakhanActionMoveTrait
       ActionStack::push($extraActions);
     }
 
-    Wakhan::actionValid();
+    return true;
   }
 
   // .##.....##.########.####.##.......####.########.##....##

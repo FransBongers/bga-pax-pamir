@@ -34,6 +34,7 @@ const ST_RESOLVE_ECE_REBUKE = 62;
 const ST_RESOLVE_ECE_RUMOR = 63;
 
 const ST_WAKHAN_TURN = 90;
+const ST_WAKHAN_PAUSE = 91;
 const ST_CHANGE_ACTIVE_PLAYER = 95;
 const ST_CALCULATE_TIE_BREAKER = 98;
 const ST_END_GAME = 99;
@@ -291,7 +292,10 @@ const DISPATCH_TRANSITION = 'dispatchTransition';
 const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';
 
 const DISPATCH_WAKHAN_ACTIONS = 'dispWakhanActions';
+const DISPATCH_WAKHAN_BONUS_ACTION = 'dispWakhanBonusAction';
 const DISPATCH_WAKHAN_DRAW_AI_CARD = 'dispWakhanDrawAICard';
+const DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS = 'dispWakhanSetupBonusActions';
+const DISPATCH_WAKHAN_START_OF_TURN_ABILITIES = 'dispWakhanStartOfTurnAbilities';
 
 
 const IMPACT_ICON_DISPATCH_MAP = [

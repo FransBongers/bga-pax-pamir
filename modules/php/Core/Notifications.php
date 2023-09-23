@@ -883,8 +883,8 @@ class Notifications
   public static function wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
   {
     $messages = [
-      'firstCourtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to their court ${logTokenNewLine}${logTokenLargeCard}'),
-      'courtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of their court ${logTokenNewLine}${logTokenLargeCard}'),
+      'firstCourtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to her court ${logTokenNewLine}${logTokenLargeCard}'),
+      'courtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of her court ${logTokenNewLine}${logTokenLargeCard}'),
       'eventCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} ${logTokenNewLine}${logTokenLargeCard}'),
     ];
     $message = $messages[$type];

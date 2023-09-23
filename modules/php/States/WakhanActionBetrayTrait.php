@@ -67,21 +67,21 @@ trait WakhanActionBetrayTrait
     ActionStack::next($actionStack);
   }
 
-  function wakhanBetray()
+  function wakhanBetray($card = null)
   {
-    $card = $this->wakhanGetCourtCardToPerformAction(BETRAY);
-    Notifications::log('card', $card);
+    if ($card === null) {
+      $card = $this->wakhanGetCourtCardToPerformAction(BETRAY);
+    }
+    
     if ($card === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
 
-
     $cardToBetray = $this->wakhanGetCardToBetray();
-    Notifications::log('cardToBetray', $cardToBetray);
     if ($cardToBetray === null) {
       Wakhan::actionNotValid();
-      return;
+      return false;
     }
     Wakhan::actionValid();
 
@@ -108,6 +108,7 @@ trait WakhanActionBetrayTrait
     ]);
 
     ActionStack::push($actionStack);
+    return true;
   }
 
   // .##.....##.########.####.##.......####.########.##....##

@@ -54,11 +54,11 @@ trait WakhanActionTrait
 
     // check Wakhan's Ambition
     if ($wakhanAmbition !== null) {
+      Wakhan::actionValid();
       Notifications::wakhansAmbition();
       // Purchase card
       $extraActions = $this->resolvePurchaseCard($wakhanAmbition['card'], WAKHAN_PLAYER_ID, $wakhanAmbition['cost']);
       $actionStack = array_merge($actionStack, $extraActions);
-      Wakhan::actionValid();
       ActionStack::next($actionStack);
       return;
     }
@@ -75,6 +75,67 @@ trait WakhanActionTrait
     Globals::setWakhanCurrentAction(($currentAction + 1) % 3);
 
     $this->nextState('dispatchAction');
+  }
+
+  function dispatchWakhanBonusAction($actionStack)
+  {
+    $action = array_pop($actionStack);
+    $cardId = $action['data']['cardId'];
+    $card = Cards::get($cardId);
+    ActionStack::set($actionStack);
+
+    foreach ($card['actions'] as $action => $actionInfo) {
+      Notifications::log('action', $action);
+      if (!$this->wakhanCanPayForCardAction($card, $action)) {
+        continue;
+      }
+      $result = false;
+      switch ($action) {
+        case BATTLE:
+          $this->wakhanBattle($card);
+          break;
+        case BETRAY:
+          $this->wakhanBetray($card);
+          break;
+        case BUILD:
+          $this->wakhanBuild($card);
+          break;
+        case GIFT:
+          $this->wakhanGift($card);
+          break;
+        case MOVE:
+          $this->wakhanMove($card);
+          break;
+        case TAX:
+          $this->wakhanTax($card);
+          break;
+      }
+      if ($result) {
+        $this->nextState('dispatchAction');
+        return;
+      }
+    };
+
+
+    $this->nextState('dispatchAction');
+  }
+
+  function dispatchWakhanSetupBonusActions($actionStack)
+  {
+    array_pop($actionStack);
+
+    $courtCards = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getCourtCards();
+    $availableForBonusActions = Utils::filter($courtCards, function ($card) {
+      return $card['used'] === 0 && $this->isCardFavoredSuit($card);
+    });
+    Notifications::log('available', $availableForBonusActions);
+
+    foreach (array_reverse($availableForBonusActions) as $index => $card) {
+      $actionStack[] = ActionStack::createAction(DISPATCH_WAKHAN_BONUS_ACTION, WAKHAN_PLAYER_ID, [
+        'cardId' => $card['id'],
+      ]);
+    }
+    ActionStack::next($actionStack);
   }
 
   // .##......##....###....##....##.##.....##....###....##....##
@@ -196,6 +257,7 @@ trait WakhanActionTrait
         break;
       case BUILD:
         $this->wakhanBuild();
+        break;
       case GIFT:
         $this->wakhanGift();
         break;
@@ -231,6 +293,23 @@ trait WakhanActionTrait
     }
   }
 
+  function wakhanCanPayForCardAction($card, $action)
+  {
+    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    $wakhanRupees = $wakhanPlayer->getRupees();
+
+    // Can pay for the card action and possible bribe
+    $bribe = $this->determineBribe($card, $wakhanPlayer, null, $action);
+    $bribeAmount = $bribe === null ? 0 : $bribe['amount'];
+
+    $minimumActionCost = $this->getMinimumActionCost($action, $wakhanPlayer);
+    if ($minimumActionCost === null) {
+      return false;
+    }
+    $wakhanCanPayForAction = $bribeAmount + $minimumActionCost <= $wakhanRupees;
+    return $wakhanCanPayForAction;
+  }
+
   function wakhanGetCourtCardToPerformAction($action)
   {
     $courtCards = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getCourtCards();
@@ -249,20 +328,9 @@ trait WakhanActionTrait
      * - wakhan can pay for the card action and possible bribe
      */
     $validCards = Utils::filter($cardsWithAction, function ($card) use ($action) {
-      $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
-      $wakhanRupees = $wakhanPlayer->getRupees();
-
       // Not used
       $cardHasNotBeenUsed = $card['used'] === 0;
-      // Can pay for the card action and possible bribe
-      $bribe = $this->determineBribe($card, $wakhanPlayer, null, $action);
-      $bribeAmount = $bribe === null ? 0 : $bribe['amount'];
-
-      $minimumActionCost = $this->getMinimumActionCost($action, $wakhanPlayer);
-      if ($minimumActionCost === null) {
-        return false;
-      }
-      $wakhanCanPayForAction = $bribeAmount + $minimumActionCost <= $wakhanRupees;
+      $wakhanCanPayForAction = $this->wakhanCanPayForCardAction($card, $action);
 
       return $cardHasNotBeenUsed && $wakhanCanPayForAction;
     });

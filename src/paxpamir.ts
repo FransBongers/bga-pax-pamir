@@ -72,6 +72,7 @@ class PaxPamir implements PaxPamirGame {
     specialAbilityInfrastructure: ClientCardActionBuildState;
     specialAbilitySafeHouse: SASafeHouseState;
     startOfTurnAbilities: StartOfTurnAbilitiesState;
+    wakhanPause: WakhanPauseState;
   };
 
   constructor() {
@@ -142,6 +143,7 @@ class PaxPamir implements PaxPamirGame {
       specialAbilityInfrastructure: new ClientCardActionBuildState(this, true),
       specialAbilitySafeHouse: new SASafeHouseState(this),
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
+      wakhanPause: new WakhanPauseState(this),
     };
 
     this.animationManager = new AnimationManager(this, { duration: 500 });

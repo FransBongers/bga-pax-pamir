@@ -12,7 +12,6 @@ use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\PaxPamirPlayers;
-use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
 /**

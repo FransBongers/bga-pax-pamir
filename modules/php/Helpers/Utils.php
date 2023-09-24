@@ -2,6 +2,8 @@
 
 namespace PaxPamir\Helpers;
 
+use PaxPamir\Core\Globals;
+
 abstract class Utils extends \APP_DbObject
 {
 
@@ -215,6 +217,26 @@ abstract class Utils extends \APP_DbObject
   public static function isCylinder($pieceId)
   {
     return Utils::startsWith($pieceId, "cylinder");
+  }
+
+  public static function getCardCostBase()
+  {
+    return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
+  }
+
+  public static function getCardCost($player, $card)
+  {
+    if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
+      return 0;
+    };
+    $column = intval(explode('_',$card['location'])[2]);
+    return $column * Utils::getCardCostBase();
   }
 
   public static function getPlayerIdForCylinderId($cylinderId)

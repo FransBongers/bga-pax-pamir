@@ -88,11 +88,14 @@ trait WakhanTurnTrait
       ActionStack::createAction(DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS, WAKHAN_PLAYER_ID, []),
       ActionStack::createAction(DISPATCH_WAKHAN_ACTIONS, WAKHAN_PLAYER_ID, []),
       ActionStack::createAction(DISPATCH_WAKHAN_START_OF_TURN_ABILITIES, WAKHAN_PLAYER_ID, []),
-      ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID), [
-        'transition' => 'wakhanPause',
-      ]),
-      ActionStack::createAction(DISPATCH_WAKHAN_DRAW_AI_CARD, WAKHAN_PLAYER_ID, []),
     ];
+
+    if (!Globals::getWakhanAutoResolve()) {
+      $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID), [
+        'transition' => 'wakhanPause',
+      ]);
+    }
+    $actionStack[] = ActionStack::createAction(DISPATCH_WAKHAN_DRAW_AI_CARD, WAKHAN_PLAYER_ID, []);
 
     ActionStack::next($actionStack);
   }

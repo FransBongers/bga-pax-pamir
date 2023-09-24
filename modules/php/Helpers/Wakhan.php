@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Managers\ActionStack;
+use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\WakhanCards;
@@ -17,9 +18,11 @@ class Wakhan
 {
   public static function addPause()
   {
-    ActionStack::push(ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID), [
-      'transition' => 'wakhanPause',
-    ]));
+    if (!Globals::getWakhanAutoResolve()) {
+      ActionStack::push(ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::getPrevId(WAKHAN_PLAYER_ID), [
+        'transition' => 'wakhanPause',
+      ]));
+    }
   }
 
   public static function actionNotValid()
@@ -60,6 +63,20 @@ class Wakhan
       $block = Wakhan::selectBlockToPlace($loyalty);
     }
     return $block;
+  }
+  
+  public static function getCourtCardsWakhanCanPurchase()
+  {
+    $wakhanRupees = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees();
+    // Get all court cards that Wakhan can afford and have not been used yet
+    $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees) {
+      $isCourtCard = $card['type'] === COURT_CARD;
+      $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
+      $wakhanCanAfforCard = $cost <= $wakhanRupees;
+      $notUsed = $card['used'] === 0;
+      return $isCourtCard && $wakhanCanAfforCard && $notUsed;
+    });
+    return $courtCardsInMarket;
   }
 
   public static function getCylinderToPlace()

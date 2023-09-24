@@ -130,6 +130,27 @@ $game_options = [
             ],
         ]
 
+    ],
+    OPTION_WAKHAN_AUTO_RESOLVE => [
+        'name' => totranslate('Fully automated Wakhan actions'),
+        'values' => [
+            OPTION_WAKHAN_AUTO_RESOLVE_DISABLED => [
+                'name' => totranslate('Disabled'),
+            ],
+            OPTION_WAKHAN_AUTO_RESOLVE_ENABLED => [
+                'name' => totranslate('Enabled'),
+                'description' => totranslate('Wakhan opponent will perform all her actions without manual intervention'),
+                'tmdisplay' => totranslate('Fully automated Wakhan actions'),
+            ]
+        ],
+        'displaycondition' => [
+            [
+                'type' => 'otheroption',
+                'id' => OPTION_WAKHAN, // Game specific option defined in the same array above
+                'value' => [OPTION_WAKHAN_BASIC, OPTION_WAKHAN_CUSTOM, OPTION_WAKHAN_IMPROVED]
+            ],
+        ]
+
     ]
 ];
 

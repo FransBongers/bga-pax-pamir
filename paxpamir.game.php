@@ -92,6 +92,7 @@ class Paxpamir extends Table
     use PaxPamir\States\WakhanActionGiftTrait;
     use PaxPamir\States\WakhanActionMoveTrait;
     use PaxPamir\States\WakhanActionTaxTrait;
+    use PaxPamir\States\WakhanActionWithInstructionsTrait;
     use PaxPamir\States\WakhanActionTrait;
     use PaxPamir\States\WakhanDiscardTrait;
     use PaxPamir\States\WakhanRadicalizeTrait;

@@ -172,7 +172,7 @@ trait WakhanActionTrait
     }
     $dominanceCheck = $dominanceCheckCards[0];
 
-    $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $dominanceCheck);
+    $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $dominanceCheck);
 
     if ($cost > PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees()) {
       return null;

@@ -31,6 +31,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "openHands" => 'bool',
     'wakhanActionsSkipped' => 'int', // number of actions skipped because they were not valid
     'wakhanActive' => 'bool', // Wakhan is currently active player
+    'wakhanAutoResolve' => 'bool',
     'wakhanCurrentAction' => 'int', // index of current action on AI card
     'wakhanEnabled' => 'bool', // Wakhan is playing in this game
     'wakhanOption' => 'str', // Rulebook, Improved, Custom
@@ -179,7 +180,8 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     $optionWakhan = $options[\PaxPamir\OPTION_WAKHAN] ?? 'null';
     self::setWakhanOption($optionWakhan);
     self::setWakhanEnabled(in_array($optionWakhan, [\PaxPamir\OPTION_WAKHAN_BASIC, \PaxPamir\OPTION_WAKHAN_IMPROVED, \PaxPamir\OPTION_WAKHAN_CUSTOM]));
-    
+    self::setWakhanAutoResolve(($options[\PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE] ?? null) == \PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE_ENABLED);
+
     $optionImprovedWakhan = $optionWakhan == \PaxPamir\OPTION_WAKHAN_IMPROVED;
     self::setWakhanVariantSavvyPurchasing($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING_ENABLED);
     self::setWakhanVariantSpyMovement($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT_ENABLED);

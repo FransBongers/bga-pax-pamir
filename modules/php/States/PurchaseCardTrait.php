@@ -70,25 +70,25 @@ trait PurchaseCardTrait
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  function getCardCostBase()
-  {
-    return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
-  }
+  // function getCardCostBase()
+  // {
+  //   return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
+  // }
 
-  function getCardCost($player, $card)
-  {
-    if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
-      return 0;
-    };
-    if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
-      return 0;
-    };
-    if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
-      return 0;
-    };
-    $column = intval(explode('_',$card['location'])[2]);
-    return $column * $this->getCardCostBase();
-  }
+  // function getCardCost($player, $card)
+  // {
+  //   if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
+  //     return 0;
+  //   };
+  //   if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
+  //     return 0;
+  //   };
+  //   if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
+  //     return 0;
+  //   };
+  //   $column = intval(explode('_',$card['location'])[2]);
+  //   return $column * $this->getCardCostBase();
+  // }
 
   function isValidPurchaseCard($player, $card)
   {
@@ -111,7 +111,7 @@ trait PurchaseCardTrait
     $explodedLocation = explode("_", $card['location']);
     $row = intval($explodedLocation[1]);
     $column = intval($explodedLocation[2]);
-    $cost = $this->getCardCost($player, $card);
+    $cost = Utils::getCardCost($player, $card);
     // Player should be able to afford card
     if ($cost > $player->getRupees()) {
       throw new \feException("Not enough rupees");
@@ -130,7 +130,7 @@ trait PurchaseCardTrait
     if ($cost === 0) {
       return $rupeesOnCards;
     }
-    $baseCost = $this->getCardCostBase();
+    $baseCost = Utils::getCardCostBase();
     $rowAlt = ($row == 0) ? 1 : 0;
     // Place rupees on market cards
     for ($i = $column - 1; $i >= 0; $i--) {

@@ -43,7 +43,11 @@ trait EndGameTrait
     foreach ($players as $index => $player) {
       $playerScoreAux = $this->getPlayerTieBreaker($player);
       // TODO: handle Wakhan
-      Players::setPlayerScore($player->getId(), $player->getScore());
+      $scoreToSubtract = 0;
+      if (Globals::getWakhanEnabled()) {
+        $scoreToSubtract = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getScore();
+      }
+      Players::setPlayerScore($player->getId(), $player->getScore() - $scoreToSubtract);
       Players::setPlayerScoreAux($player->getId(), $playerScoreAux);
     }
     $this->nextState('endGame');

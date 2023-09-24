@@ -77,24 +77,32 @@ trait WakhanRadicalizeTrait
     $front = $discardCard['front'];
     $marketHasDominanceCheck = $this->marketHasDominanceCheck();
     $result = $marketHasDominanceCheck ? $this->radicalizeSelectCardDominanceCheckInMarket() : $this->radicalizeSelectCard($back, $front);
-    Notifications::log('radicalizeResult', $result);
+
     if ($result === null) {
       Wakhan::actionNotValid();
       return;
     }
-    Wakhan::actionValid();
-    PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$result['cost']);
-    Globals::incRemainingActions(-1);
     $card = $result['card'];
     $row = $result['row'];
     $column = $result['column'];
-    $rupeesOnCards = $this->putRupeesOnCards($result['cost'], $row, $column);
+    $cost = $result['cost'];
+    $this->wakhanResolveRadicalizeCard($card, $row, $column, $cost);
+  }
+
+  function wakhanResolveRadicalizeCard($card, $row, $column, $cost)
+  {
+    Wakhan::actionValid();
+
+    PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$cost);
+    Globals::incRemainingActions(-1);
+
+    $rupeesOnCards = $this->putRupeesOnCards($cost, $row, $column);
 
     // add all rupees on card to player totals. Then put them in rupee_pool location
 
-    $receivedRupees = count(Tokens::getInLocation(Locations::marketRupees($result['row'], $result['column'])));
+    $receivedRupees = count(Tokens::getInLocation(Locations::marketRupees($row, $column)));
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, $receivedRupees);
-    Tokens::moveAllInLocation(Locations::marketRupees($result['row'], $result['column']), RUPEE_SUPPLY);
+    Tokens::moveAllInLocation(Locations::marketRupees($row, $column), RUPEE_SUPPLY);
 
     if ($card['type'] === EVENT_CARD) {
       $newLocation = Events::getPurchasedEventLocation($card['purchased']['effect'], WAKHAN_PLAYER_ID);
@@ -115,8 +123,10 @@ trait WakhanRadicalizeTrait
     } else if ($bribe !== null) {
       $this->payBribe(WAKHAN_PLAYER_ID, $bribe['bribeeId'], $bribe['amount']);
     }
+
     // Play card to court and resolve impact icons
-    $side = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 'left' : 'right';
+    // $side = $this->wakhanGetRedArrowValue();
+    $side = $this->wakhanGetRedArrowValue() === TOP_LEFT ? 'left' : 'right';
     $firstCard = $this->moveCardToCourt(WAKHAN_PLAYER_ID, $card['id'], $side);
     // Get card data again to have up to date state
     $card = Cards::get($card['id']);
@@ -149,7 +159,7 @@ trait WakhanRadicalizeTrait
         continue;
       }
 
-      $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $courtCard);
+      $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $courtCard);
       // Card is valid for purchase if it is not a dominance check, has not had rupees placed on it, and Wakhan has enough rupees
       if ($courtCard['used'] === 0 && !$this->isDominanceCheck($courtCard) && $cost <= $wakhanRupees) {
         return [
@@ -169,7 +179,7 @@ trait WakhanRadicalizeTrait
     // Get all court cards that Wakhan can afford and have not been used yet
     $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees) {
       $isCourtCard = $card['type'] === COURT_CARD;
-      $cost = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
+      $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
       $wakhanCanAfforCard = $cost <= $wakhanRupees;
       $notUsed = $card['used'] === 0;
       return $isCourtCard && $wakhanCanAfforCard && $notUsed;
@@ -239,7 +249,7 @@ trait WakhanRadicalizeTrait
     }
 
     usort($cards, function ($a, $b) {
-      $costDifference = $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $a) - $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $b);
+      $costDifference = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $a) - Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $b);
       if ($costDifference !== 0) {
         return $costDifference;
       } else {
@@ -253,7 +263,7 @@ trait WakhanRadicalizeTrait
     return [
       'card' => $cards[0],
       'column' => $column,
-      'cost' => $this->getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cards[0]),
+      'cost' => Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cards[0]),
       'row' => $row,
     ];
   }

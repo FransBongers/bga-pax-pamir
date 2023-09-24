@@ -50,12 +50,22 @@ trait DebugTrait
 
   function test()
   {
-    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
-    $blackMailHerat = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT);
-    Notifications::log('blackMailHerat',$blackMailHerat);
+    // $table = [
+    //   ["one", "two", "three"],    // This is my first line
+    //   ["four", "five", "six"],    // This is my second line
+    //   ["seven", "height", "nine"]    // This is my third line
+    // ];
+    // $this->notifyAllPlayers("tableWindow", '', array(
+    //   "id" => 'finalScoring',
+    //   "title" => clienttranslate("Title of the scoring dialog"),
+    //   "table" => $table
+    // ));
+    PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
+    PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);
+    $this->gamestate->jumpToState(ST_CALCULATE_TIE_BREAKER);
+    // Globals::setFavoredSuit(MILITARY);
+    // $this->wakhanMilitaryFavoredRadicalizeHighestRankedMilitary();
 
-    $blackMailKandahar = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR);
-    Notifications::log('blackMailKandahar',$blackMailKandahar);
     // $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     // // Add start of turn abilities to action stack
 
@@ -79,11 +89,11 @@ trait DebugTrait
     // Notifications::log('stack',ActionStack::get());
     // Notifications::log('stack',Globals::getWakhanActive());
     // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
-    
+
     // Notifications::log('adjacent',$this->wakhanGetNextMove());
     // Notifications::log('piece',Map::determineRuler(KABUL,['cylinder_1_5','block_british_6']));
     // Notifications::log('piece',$this->wakhanGetPieceToMove(PUNJAB));
-    
+
     // Globals::setRemainingActions(2);
     // Cards::setUsed('card_69', 0);
     // $this->dispatchWakhanSetupBonusActions();

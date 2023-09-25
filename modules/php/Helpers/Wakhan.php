@@ -53,18 +53,64 @@ class Wakhan
     return $borderOrder;
   }
 
-  public static function getCoalitionBlockToPlace($loyalty)
+  public static function getCoalitionBlockToPlace($loyalty, $blocksToIgnore = [])
   {
     $pool = Locations::pool($loyalty);
 
-    $block = Tokens::getTopOf($pool);
+    $blocks = Utils::filter(Tokens::getInLocationOrdered($pool)->toArray(), function ($block) use ($blocksToIgnore) {
+      return !in_array($block['id'], $blocksToIgnore);
+    });
+    $count = count($blocks);
+    $block = $count > 0 ? $blocks[$count - 1] : null;
     if ($block === null) {
       // Pool is empty. Select piece according to card order
-      $block = Wakhan::selectBlockToPlace($loyalty);
+      $block = Wakhan::selectBlockToPlace($loyalty, $blocksToIgnore);
     }
     return $block;
   }
-  
+
+  public static function getCourtCards()
+  {
+    return PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getCourtCards();
+  }
+
+  public static function getCourtCardsThatWouldPlaceMostBlocks($cards)
+  {
+    if (count($cards) === 0) {
+      return [];
+    }
+    // Determine max number of blocks placed
+    $numberOfBlocksPlaced = array_map(function ($card) {
+      return Utils::getImpactIconCount($card, [ARMY, ROAD]);
+    }, $cards);
+    $mostArmyPlusRoads = max($numberOfBlocksPlaced);
+
+    // Return all cards that place that number of blocks
+    $cardsThatPlaceMostBlocks = Utils::filter($cards, function ($card) use ($mostArmyPlusRoads) {
+      return Utils::getImpactIconCount($card, [ARMY, ROAD]) === $mostArmyPlusRoads;
+    });
+    return $cardsThatPlaceMostBlocks;
+  }
+
+  public static function getCourtCardsThatWouldPlaceMostCylinders($cards)
+  {
+    if (count($cards) === 0) {
+      return [];
+    }
+    // Determine max number of cylinders placed
+    $numberOfCylindersPlaced = array_map(function ($card) {
+      return Utils::getImpactIconCount($card, [TRIBE, SPY]);
+    }, $cards);
+    $mostCylinders = max($numberOfCylindersPlaced);
+    Notifications::log('mostCylinders',$mostCylinders);
+    
+    // Return all cards that place most cylinde4rs
+    $cardsThatPlaceMostCylinders = Utils::filter($cards, function ($card) use ($mostCylinders) {
+      return Utils::getImpactIconCount($card, [TRIBE, SPY]) === $mostCylinders;
+    });
+    return $cardsThatPlaceMostCylinders;
+  }
+
   public static function getCourtCardsWakhanCanPurchase()
   {
     $wakhanRupees = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees();
@@ -79,14 +125,18 @@ class Wakhan
     return $courtCardsInMarket;
   }
 
-  public static function getCylinderToPlace()
+  public static function getCylinderToPlace($cylindersToIgnore = [])
   {
     $pool = "cylinders_" . WAKHAN_PLAYER_ID;
-    $cylinder = Tokens::getTopOf($pool);
 
-    $front = WakhanCards::getTopOf(DISCARD);
+    $cylinders = Utils::filter(Tokens::getInLocationOrdered($pool)->toArray(), function ($cylinder) use ($cylindersToIgnore) {
+      return !in_array($cylinder['id'], $cylindersToIgnore);
+    });
+    $count = count($cylinders);
+    $cylinder = $count > 0 ? $cylinders[$count - 1] : null;
+
     if ($cylinder === null) {
-      $cylinder = Wakhan::selectCylinderToPlace();
+      $cylinder = Wakhan::selectCylinderToPlace($cylindersToIgnore);
     }
     return $cylinder;
   }
@@ -119,13 +169,13 @@ class Wakhan
 
   // Remove tribes first, then armies, then roads and then spies, in that order. Use the current AI card to decide between locations of Tribes,
   // Armies and Roads removed. For Spies, use card priority order.
-  public static function selectBlockToPlace($loyalty)
+  public static function selectBlockToPlace($loyalty, $blocksToIgnore = [])
   {
     $regionOrder = Wakhan::getRegionOrder();
-    // Select army of possible
+    // Select army if possible
     foreach ($regionOrder as $index => $region) {
-      $armies = Utils::filter(Tokens::getInLocation(Locations::armies($region))->toArray(), function ($block) use ($loyalty) {
-        return explode('_', $block['id'])[1] === $loyalty && intval($block['used']) === 0;
+      $armies = Utils::filter(Tokens::getInLocation(Locations::armies($region))->toArray(), function ($block) use ($loyalty, $blocksToIgnore) {
+        return explode('_', $block['id'])[1] === $loyalty && intval($block['used']) === 0 && !in_array($block['id'], $blocksToIgnore);
       });
       if (count($armies) > 0) {
         return $armies[count($armies) - 1];
@@ -136,8 +186,8 @@ class Wakhan
       $borderOrder = Wakhan::getBorderOrder($region);
 
       foreach ($borderOrder as $index => $border) {
-        $roads = Utils::filter(Tokens::getInLocation(Locations::roads($border))->toArray(), function ($block) use ($loyalty) {
-          return explode('_', $block['id'])[1] === $loyalty && intval($block['used']) === 0;
+        $roads = Utils::filter(Tokens::getInLocation(Locations::roads($border))->toArray(), function ($block) use ($loyalty, $blocksToIgnore) {
+          return explode('_', $block['id'])[1] === $loyalty && intval($block['used']) === 0 && !in_array($block['id'], $blocksToIgnore);
         });
         if (count($roads) > 0) {
           return $roads[count($roads) - 1];
@@ -148,13 +198,13 @@ class Wakhan
 
   // Remove tribes first, then armies, then roads and then spies, in that order. Use the current AI card to decide between locations of
   //  Tribes, Armies and Roads removed. For Spies, use card priority order.
-  public static function selectCylinderToPlace()
+  public static function selectCylinderToPlace($cylindersToIgnore = [])
   {
 
     $regionOrder = Wakhan::getRegionOrder();
     foreach ($regionOrder as $index => $region) {
-      $tribes = Utils::filter(Tokens::getInLocation(Locations::tribes($region))->toArray(), function ($block) {
-        return intval(explode('_', $block['id'])[1]) === WAKHAN_PLAYER_ID && intval($block['used']) === 0;
+      $tribes = Utils::filter(Tokens::getInLocation(Locations::tribes($region))->toArray(), function ($cylinder) use ($cylindersToIgnore) {
+        return intval(explode('_', $cylinder['id'])[1]) === WAKHAN_PLAYER_ID && intval($cylinder['used']) === 0 && !in_array($cylinder['id'], $cylindersToIgnore);
       });
       if (count($tribes) > 0) {
         return $tribes[count($tribes) - 1];
@@ -162,14 +212,19 @@ class Wakhan
     }
 
     $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
-    $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) {
+    $cardsWithWakhanSpies = Utils::filter($courtCards, function ($card) use ($cylindersToIgnore) {
+      $spies = Utils::filter(Tokens::getInLocation(['spies', $card['id']])->toArray(), function ($cylinder) use ($cylindersToIgnore) {
+        return !in_array($cylinder['id'], $cylindersToIgnore);
+      });
       $spyOwnerIds = array_map(function ($spy) {
         return intval(explode('_', $spy['id'])[1]);
-      }, Tokens::getInLocation(['spies', $card['id']])->toArray());
+      }, $spies);
       return in_array(WAKHAN_PLAYER_ID, $spyOwnerIds);
     });
     $cardToRemoveSpyFrom = Wakhan::selectCard($cardsWithWakhanSpies);
-    $spies = Tokens::getInLocation(['spies', $cardToRemoveSpyFrom['id']])->toArray();
+    $spies = Utils::filter(Tokens::getInLocationOrdered(['spies', $cardToRemoveSpyFrom['id']])->toArray(), function ($cylinder) use ($cylindersToIgnore) {
+      return !in_array($cylinder['id'], $cylindersToIgnore);
+    });
     $wakhanSpies = Utils::filter($spies, function ($spy) {
       return intval(explode('_', $spy['id'])[1]) === WAKHAN_PLAYER_ID;
     });

@@ -89,8 +89,12 @@ trait WakhanRadicalizeTrait
     $this->wakhanResolveRadicalizeCard($card, $row, $column, $cost);
   }
 
-  function wakhanResolveRadicalizeCard($card, $row, $column, $cost)
+  function wakhanResolveRadicalizeCard($card, $row = null, $column = null, $cost = null)
   {
+    $row = $row === null ? explode('_',$card['location'])[1] : $row;
+    $column = $column === null ? explode('_',$card['location'])[2] : $column;
+    $cost = $cost === null ? Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID),$card) : $cost;
+
     Wakhan::actionValid();
 
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$cost);
@@ -230,17 +234,6 @@ trait WakhanRadicalizeTrait
     return $this->getCheapestThenHighestCardNumber($patriots);
   }
 
-  function getImpactIconCount($card, $icons)
-  {
-    $total = 0;
-    $array_count_values = array_count_values($card['impactIcons']);
-    foreach ($icons as $index => $icon) {
-      $iconCount = isset($array_count_values[$icon]) ? $array_count_values[$icon] : 0;
-      $total += $iconCount;
-    }
-    return $total;
-  }
-
   function getCheapestThenHighestCardNumber($cards)
   {
     $count = count($cards);
@@ -270,29 +263,13 @@ trait WakhanRadicalizeTrait
 
   function wakhanRadicalizeGetCardWithMostBlocks($courtCardsInMarket)
   {
-    $numberOfBlocksPlaced = array_map(function ($card) {
-      return $this->getImpactIconCount($card, [ARMY, ROAD]);
-    }, $courtCardsInMarket);
-    Notifications::log('numberOfBlocksPlaced', $numberOfBlocksPlaced);
-    $mostArmyPlusRoads = max($numberOfBlocksPlaced);
-    Notifications::log('mostArmyPlusRoads', $mostArmyPlusRoads);
-    $cardsThatPlaceMostBlocks = Utils::filter($courtCardsInMarket, function ($card) use ($mostArmyPlusRoads) {
-      return $this->getImpactIconCount($card, [ARMY, ROAD]) === $mostArmyPlusRoads;
-    });
+    $cardsThatPlaceMostBlocks = Wakhan::getCourtCardsThatWouldPlaceMostBlocks($courtCardsInMarket);
     return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostBlocks);
   }
 
   function wakhanRadicalizeGetCardWithMostCylinders($courtCardsInMarket)
   {
-    $numberOfCylindersPlaced = array_map(function ($card) {
-      return $this->getImpactIconCount($card, [TRIBE, SPY]);
-    }, $courtCardsInMarket);
-    Notifications::log('numberOfCylindersPlaced', $numberOfCylindersPlaced);
-    $mostCylinders = max($numberOfCylindersPlaced);
-    Notifications::log('mostCylinders', $mostCylinders);
-    $cardsThatPlaceMostCylinders = Utils::filter($courtCardsInMarket, function ($card) use ($mostCylinders) {
-      return $this->getImpactIconCount($card, [TRIBE, SPY]) === $mostCylinders;
-    });
+    $cardsThatPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($courtCardsInMarket);
     return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostCylinders);
   }
 

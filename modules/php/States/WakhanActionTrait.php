@@ -270,6 +270,48 @@ trait WakhanActionTrait
       case TAX:
         $this->wakhanTax();
         break;
+      case RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY:
+        $this->wakhanIfMilitaryFavoredRadicalizeHighestRankedMilitary();
+        break;
+      case RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC:
+        $this->wakhanIfPoliticalFavoredRadicalizeHighestRankedEconomic();
+        break;
+      case RADICALIZE_HIGHEST_RANKED_POLITICAL:
+        $this->wakhanRadicalizeHighestRankedOfSuit(POLITICAL);
+        break;
+      case RADICALIZE_HIGHEST_RANKED_INTELLIGENCE:
+        $this->wakhanRadicalizeHighestRankedOfSuit(INTELLIGENCE);
+        break;
+      case RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES:
+        $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
+        break;
+      case RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION:
+        $this->wakhanRadicalizeCardThatGivesControlOfARegion();
+        break;
+      case RADICALIZE_INTELLIGENCE:
+        $this->wakhanRadicalizeCardOfSuit(INTELLIGENCE);
+        break;
+      case RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS:
+        $this->wakhanRadicalizeCardThatWouldPlaceMostBlocks();
+        break;
+      case RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS:
+        $this->wakhanRadicalizeIfNoDominantCoalitionCardThatWouldPlaceMostCylinders();
+        break;
+      case RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION:  
+        $this->wakhanRadicalizeIfNoCardWithMoveCardWithMove();
+        break;
+      case RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT:
+        $this->wakhanRadicalizeIfDominantCoalitionMatchingPatriot();
+        break;
+      case RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL:
+        $this->wakhanRadicalizeIfCourtSizeAtLimitHighestRankedPolitical();
+        break;
+      case RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE:
+        $this->wakhanRadicalizeIfFewerSpiesThanAnotherPlayerHighestRankedIntelligence();
+        break;
+      case BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY:
+        $this->battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy();
+        break;
       default:
         Globals::incWakhanActionsSkipped(1);
     }

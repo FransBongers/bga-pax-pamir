@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
@@ -50,21 +51,15 @@ trait DebugTrait
 
   function test()
   {
-    // $table = [
-    //   ["one", "two", "three"],    // This is my first line
-    //   ["four", "five", "six"],    // This is my second line
-    //   ["seven", "height", "nine"]    // This is my third line
-    // ];
-    // $this->notifyAllPlayers("tableWindow", '', array(
-    //   "id" => 'finalScoring',
-    //   "title" => clienttranslate("Title of the scoring dialog"),
-    //   "table" => $table
-    // ));
-    PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
-    PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);
-    $this->gamestate->jumpToState(ST_CALCULATE_TIE_BREAKER);
+    $this->battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy();
     // Globals::setFavoredSuit(MILITARY);
-    // $this->wakhanMilitaryFavoredRadicalizeHighestRankedMilitary();
+    // PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
+    // PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);
+    // $this->gamestate->jumpToState(ST_CALCULATE_TIE_BREAKER);
+    // Globals::setFavoredSuit(MILITARY);
+    // $this->determineRuler(KABUL, $piecesToIgnore = [], $armiesToAdd = [], $tribesToAdd = []);
+    // $ruler = Map::determineRuler(KABUL,['block_russian_12'],[],['cylinder_1_8']);
+    // Notifications::log('ruler',$ruler);
 
     // $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     // // Add start of turn abilities to action stack

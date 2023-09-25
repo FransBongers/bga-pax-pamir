@@ -41,13 +41,13 @@ class Map
     return Game::get()->regions[$region];
   }
 
-  public static function getRegionsAdjacentToRegion($region) 
+  public static function getRegionsAdjacentToRegion($region)
   {
     $borders = Map::getRegionInfo($region)['borders'];
     $adjecentRegions = array_map(function ($border) use ($region) {
-      $borderRegions = explode('_',$border);
+      $borderRegions = explode('_', $border);
       return $region === $borderRegions[0] ? $borderRegions[1] : $borderRegions[0];
-    },$borders);
+    }, $borders);
     return $adjecentRegions;
   }
 
@@ -60,32 +60,48 @@ class Map
   }
 
   /**
-   * Returns playerId if there is a ruler. Otherwise returns 0.
+   * Returns playerId if there is a ruler. Otherwise returns null.
+   * Additional arguments are there to make a virtual calculation: who would rule if certain pieces
+   * would be removed or added
    */
-  public static function determineRuler($region, $piecesToIgnore = [])
+  public static function determineRuler($region, $piecesToIgnore = [], $armiesToAdd = [], $tribesToAdd = [])
   {
-    $tribes = Utils::filter(Tokens::getInLocation('tribes_' . $region)->toArray(), function ($tribe) use ($piecesToIgnore) {
-      return !in_array($tribe['id'], $piecesToIgnore);
+    $tribeIds = array_map(function ($tribe) {
+      return $tribe['id'];
+    }, Tokens::getInLocation('tribes_' . $region)->toArray());
+    // Filter tribes that need to be ignored
+    $tribeIds = Utils::filter($tribeIds, function ($tribeId) use ($piecesToIgnore) {
+      return !in_array($tribeId, $piecesToIgnore);
     });
+    $tribeIds = array_unique(array_merge($tribeIds, $tribesToAdd));
+
     $playerIds = PaxPamirPlayers::getAll()->getIds();
-    $rulingPieces = array();
-    $tribesPerPlayer = array();
+    $rulingPieces = [];
+    $tribesPerPlayer = [];
     foreach ($playerIds as $playerId) {
       // $rulingPieces[$playerId] = 0;
       $tribesPerPlayer[$playerId] = 0;
     }
-
-    foreach ($tribes as $tribe) {
-      $playerId = explode("_", $tribe['id'])[1];
+    
+    foreach ($tribeIds as $index => $tribeId) {
+      $playerId = explode("_", $tribeId)[1];
       $tribesPerPlayer[$playerId] += 1;
     };
 
-    $armies = Tokens::getInLocation('armies_' . $region);
-    $armyCounts = array();
+    $armyIds = array_map(function ($army) {
+      return $army['id'];
+    }, Tokens::getInLocation('armies_' . $region)->toArray());
+    $armyIds = Utils::filter($armyIds, function ($armyId) use ($piecesToIgnore) {
+      return !in_array($armyId, $piecesToIgnore);
+    });
+    $armyIds = array_unique(array_merge($armyIds, $armiesToAdd));
+
+    $armyCounts = [];
     foreach (COALITIONS as $coalition) {
-      $armyCounts[$coalition] = count($armies->filter(function ($army) use ($coalition, $piecesToIgnore) {
-        return explode('_', $army['id'])[1] === $coalition && !in_array($army['id'], $piecesToIgnore);
-      }));
+      $armiesLoyalToCoalition = Utils::filter($armyIds, function ($armyId) use ($coalition) {
+        return explode('_', $armyId)[1] === $coalition;
+      });
+      $armyCounts[$coalition] = count($armiesLoyalToCoalition);
     }
 
     foreach ($playerIds as $playerId) {
@@ -96,7 +112,6 @@ class Map
         $rulingPieces[$playerId] = $tribesPerPlayer[$playerId] + $armyCounts[$loyalty];
       }
     };
-
     $playersWithHighestStrength = array_keys($rulingPieces, max($rulingPieces));
     if (count($playersWithHighestStrength) === 1 && $tribesPerPlayer[$playersWithHighestStrength[0]]  > 0) {
       return $playersWithHighestStrength[0];
@@ -104,7 +119,7 @@ class Map
     return null;
   }
 
-  public static function getLoyalArmiesInRegion($region,$loyalty)
+  public static function getLoyalArmiesInRegion($region, $loyalty)
   {
     $loyalArmies = Utils::filter(Tokens::getInLocationOrdered(Locations::armies($region))->toArray(), function ($army) use ($loyalty) {
       return explode('_', $army['id'])[1] === $loyalty;

@@ -235,8 +235,19 @@ abstract class Utils extends \APP_DbObject
     if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
       return 0;
     };
-    $column = intval(explode('_',$card['location'])[2]);
+    $column = intval(explode('_', $card['location'])[2]);
     return $column * Utils::getCardCostBase();
+  }
+
+  public static function getImpactIconCount($card, $icons)
+  {
+    $total = 0;
+    $array_count_values = array_count_values($card['impactIcons']);
+    foreach ($icons as $index => $icon) {
+      $iconCount = isset($array_count_values[$icon]) ? $array_count_values[$icon] : 0;
+      $total += $iconCount;
+    }
+    return $total;
   }
 
   public static function getPlayerIdForCylinderId($cylinderId)

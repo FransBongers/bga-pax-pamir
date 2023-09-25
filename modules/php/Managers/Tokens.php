@@ -50,6 +50,15 @@ class Tokens extends \PaxPamir\Helpers\Pieces
       ->toArray();
   }
 
+  public static function getOfTypeInLocation($type, $location)
+  {
+    return self::getSelectQuery()
+      ->where(static::$prefix . 'id', 'LIKE', $type . '%')
+      ->where(static::$prefix . 'location', 'LIKE', $location . '%')
+      ->get()
+      ->toArray();
+  }
+
   // public static function getOfTypeInLocation($type, $location)
   // {
   //   return self::getSelectQuery()

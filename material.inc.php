@@ -2170,7 +2170,7 @@ $this->wakhanCards = [
       'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
     ],
     'front' => [
-      'actions' => [TAX, RADICALIZE_SPECIAL_1, RADICALIZE],
+      'actions' => [TAX, RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY, RADICALIZE],
       'columnArrow' => 2,
       'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
       'regionOrder' => [TRANSCASPIA, KABUL, KANDAHAR, PERSIA, HERAT, PUNJAB],
@@ -2184,7 +2184,7 @@ $this->wakhanCards = [
       'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
     ],
     'front' => [
-      'actions' => [RADICALIZE_SPECIAL_2, RADICALIZE_SPECIAL_3, RADICALIZE],
+      'actions' => [RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC, RADICALIZE_HIGHEST_RANKED_POLITICAL, RADICALIZE],
       'columnArrow' => 1,
       'pragmaticLoyalty' => [AFGHAN, BRITISH, RUSSIAN],
       'regionOrder' => [PERSIA, PUNJAB, KANDAHAR, HERAT, TRANSCASPIA, KABUL],
@@ -2198,7 +2198,7 @@ $this->wakhanCards = [
       'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
     ],
     'front' => [
-      'actions' => [TAX, RADICALIZE_SPECIAL_4, RADICALIZE],
+      'actions' => [TAX, RADICALIZE_HIGHEST_RANKED_INTELLIGENCE, RADICALIZE],
       'columnArrow' => 3,
       'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
       'regionOrder' => [PUNJAB, PERSIA, HERAT, KANDAHAR, TRANSCASPIA, KABUL],
@@ -2212,7 +2212,7 @@ $this->wakhanCards = [
       'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
     ],
     'front' => [
-      'actions' => [RADICALIZE_SPECIAL_5, BUILD, RADICALIZE],
+      'actions' => [RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES, BUILD, RADICALIZE],
       'columnArrow' => 4,
       'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
       'regionOrder' => [KANDAHAR, KABUL, HERAT, PUNJAB, TRANSCASPIA, PERSIA],
@@ -2226,7 +2226,7 @@ $this->wakhanCards = [
       'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
     ],
     'front' => [
-      'actions' => [RADICALIZE_SPECIAL_6, BATTLE, RADICALIZE],
+      'actions' => [RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION, BATTLE, RADICALIZE],
       'columnArrow' => 1,
       'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
       'regionOrder' => [PERSIA, KANDAHAR, HERAT, TRANSCASPIA, KABUL, PUNJAB],
@@ -2240,7 +2240,7 @@ $this->wakhanCards = [
       'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
     ],
     'front' => [
-      'actions' => [RADICALIZE_SPECIAL_7, MOVE, RADICALIZE],
+      'actions' => [RADICALIZE_INTELLIGENCE, MOVE, RADICALIZE],
       'columnArrow' => 0,
       'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
       'regionOrder' => [HERAT, PERSIA, TRANSCASPIA, KABUL, PUNJAB, KANDAHAR],
@@ -2275,39 +2275,292 @@ $this->wakhanCards = [
       'rowSideArrow' => 1
     ]
   ],
+  'wakhan_card_9' => [
+    'id' => 'wakhan_card_9',
+    'back' => [
+      'columnNumbers' => [0, 1, 2, 3, 4, 5],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS, RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS, RADICALIZE],
+      'columnArrow' => 5,
+      'pragmaticLoyalty' => [RUSSIAN, BRITISH, AFGHAN],
+      'regionOrder' => [KABUL, PUNJAB, KANDAHAR, PERSIA, HERAT, TRANSCASPIA],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_10' => [
+    'id' => 'wakhan_card_10',
+    'back' => [
+      'columnNumbers' => [5, 0, 1, 2, 3, 4],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION, MOVE, RADICALIZE],
+      'columnArrow' => 0,
+      'pragmaticLoyalty' => [AFGHAN, BRITISH, RUSSIAN],
+      'regionOrder' => [PERSIA, KANDAHAR, KABUL, HERAT, PUNJAB, TRANSCASPIA],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_11' => [
+    'id' => 'wakhan_card_11',
+    'back' => [
+      'columnNumbers' => [5, 0, 1, 2, 3, 4],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS, RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY, RADICALIZE],
+      'columnArrow' => 0,
+      'pragmaticLoyalty' => [AFGHAN, RUSSIAN, BRITISH],
+      'regionOrder' => [PUNJAB, PERSIA, HERAT, KANDAHAR, KABUL, TRANSCASPIA],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_12' => [
+    'id' => 'wakhan_card_12',
+    'back' => [
+      'columnNumbers' => [1, 2, 3, 4, 5, 0],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [MOVE, BETRAY, RADICALIZE],
+      'columnArrow' => 4,
+      'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
+      'regionOrder' => [KANDAHAR, HERAT, PERSIA, KABUL, TRANSCASPIA, PUNJAB],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_13' => [
+    'id' => 'wakhan_card_13',
+    'back' => [
+      'columnNumbers' => [3, 4, 5, 0, 1, 2],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT, RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS, RADICALIZE],
+      'columnArrow' => 2,
+      'pragmaticLoyalty' => [AFGHAN, BRITISH, RUSSIAN],
+      'regionOrder' => [HERAT, KABUL, TRANSCASPIA, PUNJAB, PERSIA, KANDAHAR],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_14' => [
+    'id' => 'wakhan_card_14',
+    'back' => [
+      'columnNumbers' => [2, 3, 4, 5, 0, 1],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY, BATTLE, RADICALIZE],
+      'columnArrow' => 3,
+      'pragmaticLoyalty' => [AFGHAN, RUSSIAN, BRITISH],
+      'regionOrder' => [KABUL, TRANSCASPIA, PERSIA, PUNJAB, KANDAHAR, HERAT],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_15' => [
+    'id' => 'wakhan_card_15',
+    'back' => [
+      'columnNumbers' => [3, 4, 5, 0, 1, 2],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [MOVE, BATTLE, RADICALIZE],
+      'columnArrow' => 2,
+      'pragmaticLoyalty' => [RUSSIAN, BRITISH, AFGHAN],
+      'regionOrder' => [TRANSCASPIA, KABUL, PUNJAB, PERSIA, HERAT, KANDAHAR],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_16' => [
+    'id' => 'wakhan_card_16',
+    'back' => [
+      'columnNumbers' => [0, 1, 2, 3, 4, 5],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS, BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY, RADICALIZE],
+      'columnArrow' => 5,
+      'pragmaticLoyalty' => [AFGHAN, RUSSIAN, BRITISH],
+      'regionOrder' => [PUNJAB, TRANSCASPIA, PERSIA, KANDAHAR, KABUL, HERAT],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_17' => [
+    'id' => 'wakhan_card_17',
+    'back' => [
+      'columnNumbers' => [5, 0, 1, 2, 3, 4],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL, TAX, RADICALIZE],
+      'columnArrow' => 0,
+      'pragmaticLoyalty' => [RUSSIAN, BRITISH, AFGHAN],
+      'regionOrder' => [TRANSCASPIA, KANDAHAR, PERSIA, HERAT, PUNJAB, KABUL],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_18' => [
+    'id' => 'wakhan_card_18',
+    'back' => [
+      'columnNumbers' => [2, 3, 4, 5, 0, 1],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [TAX, BETRAY, RADICALIZE],
+      'columnArrow' => 3,
+      'pragmaticLoyalty' => [RUSSIAN, BRITISH, AFGHAN],
+      'regionOrder' => [KABUL, PUNJAB, KANDAHAR, HERAT, PERSIA, TRANSCASPIA],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_19' => [
+    'id' => 'wakhan_card_19',
+    'back' => [
+      'columnNumbers' => [3, 4, 5, 0, 1, 2],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [BUILD, MOVE, RADICALIZE],
+      'columnArrow' => 2,
+      'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
+      'regionOrder' => [KANDAHAR, HERAT, PUNJAB, TRANSCASPIA, KABUL, PERSIA],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_20' => [
+    'id' => 'wakhan_card_20',
+    'back' => [
+      'columnNumbers' => [2, 3, 4, 5, 0, 1],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES, BUILD, RADICALIZE],
+      'columnArrow' => 1,
+      'pragmaticLoyalty' => [RUSSIAN, AFGHAN, BRITISH],
+      'regionOrder' => [KANDAHAR, HERAT, KABUL, TRANSCASPIA, PERSIA, PUNJAB],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_21' => [
+    'id' => 'wakhan_card_21',
+    'back' => [
+      'columnNumbers' => [0, 1, 2, 3, 4, 5],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION, BUILD, RADICALIZE],
+      'columnArrow' => 5,
+      'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
+      'regionOrder' => [HERAT, KANDAHAR, TRANSCASPIA, KABUL, PUNJAB, PERSIA],
+      'rowSideArrow' => 0
+    ]
+  ],
+  'wakhan_card_22' => [
+    'id' => 'wakhan_card_22',
+    'back' => [
+      'columnNumbers' => [0, 1, 2, 3, 4, 5],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [BETRAY, BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY, RADICALIZE],
+      'columnArrow' => 5,
+      'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
+      'regionOrder' => [KABUL, HERAT, PUNJAB, TRANSCASPIA, PERSIA, KANDAHAR],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_23' => [
+    'id' => 'wakhan_card_23',
+    'back' => [
+      'columnNumbers' => [2, 3, 4, 5, 0, 1],
+      'rowSide' => [BOTTOM_RIGHT, TOP_LEFT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_HIGHEST_RANKED_POLITICAL, RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY, RADICALIZE],
+      'columnArrow' => 3,
+      'pragmaticLoyalty' => [BRITISH, RUSSIAN, AFGHAN],
+      'regionOrder' => [HERAT, PUNJAB, TRANSCASPIA, KABUL, KANDAHAR, PERSIA],
+      'rowSideArrow' => 1
+    ]
+  ],
+  'wakhan_card_24' => [
+    'id' => 'wakhan_card_24',
+    'back' => [
+      'columnNumbers' => [4, 5, 0, 1, 2, 3],
+      'rowSide' => [TOP_LEFT, BOTTOM_RIGHT],
+    ],
+    'front' => [
+      'actions' => [RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE, BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY, RADICALIZE],
+      'columnArrow' => 1,
+      'pragmaticLoyalty' => [AFGHAN, BRITISH, RUSSIAN],
+      'regionOrder' => [PERSIA, TRANSCASPIA, KABUL, PUNJAB, KANDAHAR, HERAT],
+      'rowSideArrow' => 1
+    ]
+  ],
 ];
 
 $this->radicalizeActions = [
   RADICALIZE => [
     'id' => RADICALIZE,
-    'text' => clienttranslate('Radizalize.'),
+    'text' => clienttranslate('Radizalize'),
   ],
-  RADICALIZE_SPECIAL_1 => [
-    'id' => RADICALIZE_SPECIAL_1,
-    'text' => clienttranslate('If military cards are favored, radicalize the highest ranked military card.'),
+  RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY => [
+    'id' => RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY,
+    'text' => clienttranslate('If military cards are favored, radicalize the highest ranked military card'),
   ],
-  RADICALIZE_SPECIAL_2 => [
-    'id' => RADICALIZE_SPECIAL_2,
-    'text' => clienttranslate('If political cards are favored, radicalize the highest ranked economic card.'),
+  RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC => [
+    'id' => RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC,
+    'text' => clienttranslate('If political cards are favored, radicalize the highest ranked economic card'),
   ],
-  RADICALIZE_SPECIAL_3 => [
-    'id' => RADICALIZE_SPECIAL_3,
-    'text' => clienttranslate('Radicalize the highest ranked political card.'),
+  RADICALIZE_HIGHEST_RANKED_POLITICAL => [
+    'id' => RADICALIZE_HIGHEST_RANKED_POLITICAL,
+    'text' => clienttranslate('Radicalize the highest ranked political card'),
   ],
-  RADICALIZE_SPECIAL_4 => [
-    'id' => RADICALIZE_SPECIAL_4,
-    'text' => clienttranslate('Radicalize the highest ranked intelligence card.'),
+  RADICALIZE_HIGHEST_RANKED_INTELLIGENCE => [
+    'id' => RADICALIZE_HIGHEST_RANKED_INTELLIGENCE,
+    'text' => clienttranslate('Radicalize the highest ranked intelligence card'),
   ],
-  RADICALIZE_SPECIAL_5 => [
-    'id' => RADICALIZE_SPECIAL_5,
-    'text' => clienttranslate('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees.'),
+  RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES => [
+    'id' => RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES,
+    'text' => clienttranslate('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees'),
   ],
-  RADICALIZE_SPECIAL_6 => [
-    'id' => RADICALIZE_SPECIAL_6,
-    'text' => clienttranslate('Radicalize a card that will gain Wakhan control of a region.'),
+  RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION => [
+    'id' => RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION,
+    'text' => clienttranslate('Radicalize a card that will gain Wakhan control of a region'),
   ],
-  RADICALIZE_SPECIAL_7 => [
-    'id' => RADICALIZE_SPECIAL_7,
-    'text' => clienttranslate('Radicalize an intelligence card.'),
+  RADICALIZE_INTELLIGENCE => [
+    'id' => RADICALIZE_INTELLIGENCE,
+    'text' => clienttranslate('Radicalize an intelligence card'),
+  ],
+  RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS => [
+    'id' => RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS,
+    'text' => clienttranslate('Radicalize the card that would place most armies and/or roads'),
+  ],
+  RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS => [
+    'id' => RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS,
+    'text' => clienttranslate('If no coalition has dominance, radicalize the card that would place the most spies and/or tribes'),
+  ],
+  RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION => [
+    'id' => RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION,
+    'text' => clienttranslate('If Wakhan has no card with the move action, radicalize a card with the move action'),
+  ],
+  RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT => [
+    'id' => RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT,
+    'text' => clienttranslate('If a coalition has dominance radicalize a matching patriot'),
+  ],
+  RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL => [
+    'id' => RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL,
+    'text' => clienttranslate('If Wakhan\'s court size is at its limit, radicalize the highest ranked political card'),
+  ],
+  RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE => [
+    'id' => RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE,
+    'text' => clienttranslate('If Wakhan has fewer spies than another player then radicalize the highest ranked intelligence card'),
+  ],
+
+  BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY => [
+    'id' => BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY,
+    'text' => clienttranslate('Battle on the highest priority court card with the most spies where Wakhan also has at least one spy'),
   ],
 ];

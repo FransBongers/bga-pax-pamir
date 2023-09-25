@@ -51,7 +51,9 @@ trait DebugTrait
 
   function test()
   {
-    $this->battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy();
+    $loyalty = Wakhan::getPragmaticLoyalty();
+    Notifications::log('loyalty',$loyalty);
+
     // Globals::setFavoredSuit(MILITARY);
     // PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
     // PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);

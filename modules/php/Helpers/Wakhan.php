@@ -102,8 +102,8 @@ class Wakhan
       return Utils::getImpactIconCount($card, [TRIBE, SPY]);
     }, $cards);
     $mostCylinders = max($numberOfCylindersPlaced);
-    Notifications::log('mostCylinders',$mostCylinders);
-    
+    Notifications::log('mostCylinders', $mostCylinders);
+
     // Return all cards that place most cylinde4rs
     $cardsThatPlaceMostCylinders = Utils::filter($cards, function ($card) use ($mostCylinders) {
       return Utils::getImpactIconCount($card, [TRIBE, SPY]) === $mostCylinders;
@@ -157,9 +157,24 @@ class Wakhan
   {
     $pragmaticLoyalty = WakhanCards::getTopOf(DISCARD)['front']['pragmaticLoyalty'];
     $otherPlayerLoyalties = Wakhan::getOtherPlayerLoyalties();
-    return Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
+    $loyaltiesNotSharedByOtherPlayer = Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
       return !in_array($coalition, $otherPlayerLoyalties);
-    })[0];
+    });
+    if (Globals::getWakhanVariantSteadfastPragmaticLoyalty()) {
+      $blocksInPlayPerCoalition = [];
+      foreach ($loyaltiesNotSharedByOtherPlayer as $index => $coalition) {
+        $blocksInPlayPerCoalition[] = [
+          'blockCount' => 12 - Tokens::countInLocation(Locations::pool($coalition)),
+          'coalition' => $coalition
+        ];
+      }
+      usort($blocksInPlayPerCoalition, function ($a, $b) {
+        return $b['blockCount'] - $a['blockCount'];
+      });
+      return $blocksInPlayPerCoalition[0]['coalition'];
+    } else {
+      return $loyaltiesNotSharedByOtherPlayer[0];
+    }
   }
 
   public static function getRegionOrder()

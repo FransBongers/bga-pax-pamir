@@ -76,24 +76,20 @@ trait WakhanRadicalizeTrait
     $back = $deckCard['back'];
     $front = $discardCard['front'];
     $marketHasDominanceCheck = $this->marketHasDominanceCheck();
-    $result = $marketHasDominanceCheck ? $this->radicalizeSelectCardDominanceCheckInMarket() : $this->radicalizeSelectCard($back, $front);
+    $card = $marketHasDominanceCheck ? $this->radicalizeSelectCardDominanceCheckInMarket() : $this->radicalizeSelectCard($back, $front);
 
-    if ($result === null) {
+    if ($card === null) {
       Wakhan::actionNotValid();
       return;
     }
-    $card = $result['card'];
-    $row = $result['row'];
-    $column = $result['column'];
-    $cost = $result['cost'];
-    $this->wakhanResolveRadicalizeCard($card, $row, $column, $cost);
+    $this->wakhanResolveRadicalizeCard($card);
   }
 
-  function wakhanResolveRadicalizeCard($card, $row = null, $column = null, $cost = null)
+  function wakhanResolveRadicalizeCard($card)
   {
-    $row = $row === null ? explode('_',$card['location'])[1] : $row;
-    $column = $column === null ? explode('_',$card['location'])[2] : $column;
-    $cost = $cost === null ? Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID),$card) : $cost;
+    $row = explode('_',$card['location'])[1];
+    $column = explode('_',$card['location'])[2];
+    $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID),$card);
 
     Wakhan::actionValid();
 
@@ -139,24 +135,62 @@ trait WakhanRadicalizeTrait
     $this->wakhanResolveImpactIcons($card);
   }
 
+  function wakhanCheckForSavvyPurchasingAndReturn($selectedCard)
+  {
+    if (!Globals::getWakhanVariantSavvyPurchasing() || $selectedCard === null || $selectedCard['type'] === EVENT_CARD) {
+      return $selectedCard;
+    }
+    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    $selectedCardCost = Utils::getCardCost($wakhanPlayer, $selectedCard);
+    $availbleCards = Wakhan::getCourtCardsWakhanCanPurchase();
+
+    // cheaper card of same suit and equal or higher rank
+    $alternativeCards = [];
+    
+    foreach($availbleCards as $index => $card) {
+      $cost = Utils::getCardCost($wakhanPlayer, $card);
+      $cardIsCheaper = $cost  < $selectedCardCost;
+      $sameSuit = $card['suit'] === $selectedCard['suit'];
+      $equalOrHigherRank = $card['rank'] >= $selectedCard['rank'];
+      if (!($cardIsCheaper && $sameSuit && $equalOrHigherRank)) {
+        continue;
+      }
+      $card['cost'] = $cost;
+      $alternativeCards[] = $card;
+    }
+
+    if (count($alternativeCards) === 0) {
+      return $selectedCard;
+    }
+
+    $lowestCost = min(array_map(function ($card) {
+      return $card['cost'];
+    },$alternativeCards));
+
+    $cardsWithLowestCost = Utils::filter($alternativeCards, function ($card) use ($lowestCost) {
+      return $card['cost'] === $lowestCost;
+    });
+    return Wakhan::selectCard($cardsWithLowestCost);
+  }
+
   function radicalizeSelectCard($back, $front)
   {
     $row = $back['rowSide'][$front['rowSideArrow']] === TOP_LEFT ? 0 : 1;
     $column = $back['columnNumbers'][$front['columnArrow']];
 
     // Get card from row specified by card
-    $result = $this->radicalizeSelectCardInRow($row, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
-    if ($result !== null) {
-      return $result;
+    $card = $this->radicalizeSelectCardInRow($row, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
+    if ($card !== null) {
+      return $this->wakhanCheckForSavvyPurchasingAndReturn($card);
     }
     // If no card was available in specified row, try again with other row
-    $result = $this->radicalizeSelectCardInRow($row === 0 ? 1 : 0, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
-    return $result;
+    $card = $this->radicalizeSelectCardInRow($row === 0 ? 1 : 0, $column, PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees());
+
+    return $this->wakhanCheckForSavvyPurchasingAndReturn($card);
   }
 
   function radicalizeSelectCardInRow($row, $startColumn, $wakhanRupees)
   {
-    $result = null;
     for ($column = $startColumn; $column >= 0; $column--) {
       $courtCard = Cards::getInLocation(Locations::market($row, $column))->first();
       if ($courtCard === null) {
@@ -166,28 +200,16 @@ trait WakhanRadicalizeTrait
       $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $courtCard);
       // Card is valid for purchase if it is not a dominance check, has not had rupees placed on it, and Wakhan has enough rupees
       if ($courtCard['used'] === 0 && !$this->isDominanceCheck($courtCard) && $cost <= $wakhanRupees) {
-        return [
-          'card' => $courtCard,
-          'column' => $column,
-          'cost' => $cost,
-          'row' => $row,
-        ];
+        return $courtCard;
       }
     }
-    return $result;
+    return null;
   }
 
   function radicalizeSelectCardDominanceCheckInMarket()
   {
-    $wakhanRupees = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees();
     // Get all court cards that Wakhan can afford and have not been used yet
-    $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees) {
-      $isCourtCard = $card['type'] === COURT_CARD;
-      $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
-      $wakhanCanAfforCard = $cost <= $wakhanRupees;
-      $notUsed = $card['used'] === 0;
-      return $isCourtCard && $wakhanCanAfforCard && $notUsed;
-    });
+    $courtCardsInMarket = Wakhan::getCourtCardsWakhanCanPurchase();
     if (count($courtCardsInMarket) === 0) {
       return null;
     }
@@ -250,15 +272,7 @@ trait WakhanRadicalizeTrait
       }
     });
 
-    $row = intval(explode('_',$cards[0]['location'])[1]);
-    $column = intval(explode('_',$cards[0]['location'])[2]);
-
-    return [
-      'card' => $cards[0],
-      'column' => $column,
-      'cost' => Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cards[0]),
-      'row' => $row,
-    ];
+    return $cards[0];
   }
 
   function wakhanRadicalizeGetCardWithMostBlocks($courtCardsInMarket)

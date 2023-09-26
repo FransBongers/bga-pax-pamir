@@ -377,7 +377,7 @@ trait WakhanActionTrait
       return $cardHasNotBeenUsed && $wakhanCanPayForAction;
     });
 
-    return Wakhan::selectCard($validCards);
+    return Wakhan::selectHighestPriorityCard($validCards);
   }
 
   function wakhanGetRedArrowValue()

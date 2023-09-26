@@ -404,7 +404,7 @@ trait WakhanActionWithInstructionsTrait
       return $card['spyCount'] === $maxSpyCount;
     });
 
-    $cardToBattleOn = Wakhan::selectCard($cardsWithMaxSpyCount);
+    $cardToBattleOn = Wakhan::selectHighestPriorityCard($cardsWithMaxSpyCount);
 
     if ($card === null) {
       Wakhan::actionNotValid();

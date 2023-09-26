@@ -255,7 +255,7 @@ class Wakhan
       }, $spies);
       return in_array(WAKHAN_PLAYER_ID, $spyOwnerIds);
     });
-    $cardToRemoveSpyFrom = Wakhan::selectCard($cardsWithWakhanSpies);
+    $cardToRemoveSpyFrom = Wakhan::selectHighestPriorityCard($cardsWithWakhanSpies);
     $spies = Utils::filter(Tokens::getInLocationOrdered(['spies', $cardToRemoveSpyFrom['id']])->toArray(), function ($cylinder) use ($cylindersToIgnore) {
       return !in_array($cylinder['id'], $cylindersToIgnore);
     });
@@ -294,7 +294,7 @@ class Wakhan
    * 7. Highest Ranking
    * 8. Highest numbered card
    */
-  public static function selectCard($cards)
+  public static function selectHighestPriorityCard($cards)
   {
     if (count($cards) === 0) {
       return null;
@@ -360,6 +360,22 @@ class Wakhan
     return null;
   }
 
+  public static function selectLowestPriorityCard($cards)
+  {
+    if (count($cards) === 0) {
+      return null;
+    }
+    if (count($cards) === 1) {
+      return $cards[0];
+    }
+    usort($cards, function ($a, $b) {
+      $aCardNumber = intval(explode('_',$a['id'])[1]);
+      $bCardNumber = intval(explode('_',$b['id'])[1]);
+      return $bCardNumber - $aCardNumber;
+    });
+    return $cards[0];
+  }
+
   // Select the card to place a spy on when resolving impact icons.
   public static function selectCardToPlaceSpy($region)
   {
@@ -396,11 +412,11 @@ class Wakhan
       return $cardsAssociatedWithRegion[0];
     } else if (count($cardsWhereWakhanDoesNotHaveMostSpies) > 1) {
       // need to select a card from those that are left based on card priority
-      return Wakhan::selectCard($cardsWhereWakhanDoesNotHaveMostSpies);
+      return Wakhan::selectHighestPriorityCard($cardsWhereWakhanDoesNotHaveMostSpies);
     } else {
       // no cards where wakhan does not have the most spies, so select from 
       // cards associated with region.
-      return Wakhan::selectCard($cardsAssociatedWithRegion);
+      return Wakhan::selectHighestPriorityCard($cardsAssociatedWithRegion);
     }
   }
 

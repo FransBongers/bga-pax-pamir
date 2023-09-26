@@ -51,15 +51,18 @@ trait DebugTrait
 
   function test()
   {
-    Cards::setUsed('card_81',0);
+    // $this->wakhanMove();
+    $nextSpyMove = $this->wakhanGetNextSpyMove();
+    Notifications::log('nextSpyMove',$nextSpyMove);
+    // Cards::setUsed('card_81',0);
     // Cards::move('card_31',Locations::market(1,2));
     // Cards::move('card_45',DISCARD);
     // Cards::move('card_23',DISCARD);
     // Cards::move('card_25',DISCARD);
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_83',DISCARD);
-    $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());
-    Notifications::log('result',$result);
+    // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());
+    // Notifications::log('result',$result);
     // Cards::move('card_68', ['court', WAKHAN_PLAYER_ID],-10);
     // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
     // Cards::move('card_26', DISCARD);

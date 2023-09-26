@@ -256,9 +256,9 @@ trait PlayerActionMoveTrait
       throw new \feException("Cylinder is not owned by player");
     };
     $player = PaxPamirPlayers::get();
-    $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
-    $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
-    $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
+    // $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
+    // $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
+    // $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
     // Each move should be valid (spy should be at specified location and cards need to be adjacent)
     foreach ($moves as $index => $move) {
       // block should be in db location for first move or in destination of previous move
@@ -266,19 +266,38 @@ trait PlayerActionMoveTrait
         throw new \feException("Spy is not in the specified location");
       };
 
-      $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
+      // $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
 
-      if ($hasWellConnectedAbility) {
-        $arrayCopy = $adjacentCards;
-        foreach ($arrayCopy as $index => $cardId) {
-          $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
-        }
-      };
+      // if ($hasWellConnectedAbility) {
+      //   $arrayCopy = $adjacentCards;
+      //   foreach ($arrayCopy as $index => $cardId) {
+      //     $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+      //   }
+      // };
+      $adjacentCards = $this->getAllAdjecentCardsForSpyMovement($move['from'],$player);
 
       if (!in_array($move['to'], $adjacentCards)) {
         throw new \feException("Destination is not adjacent to current location");
       }
     }
+  }
+
+  function getAllAdjecentCardsForSpyMovement($originCardId, $player)
+  {
+    $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
+    $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
+    $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
+
+    $adjacentCards = $this->getAdjacentCards($originCardId, $courtCards, $hasStrangeBedfellowsAbility);
+
+    if ($hasWellConnectedAbility) {
+      $arrayCopy = $adjacentCards;
+      foreach ($arrayCopy as $index => $cardId) {
+        $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+      }
+    };
+
+    return $adjacentCards;
   }
 
   function getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility)

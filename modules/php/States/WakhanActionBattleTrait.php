@@ -165,7 +165,7 @@ trait WakhanActionBattleTrait
     } else if ($count === 1) {
       return $courtCardsWakhanCanBattleOn[0];
     } else {
-      return Wakhan::selectCard($courtCardsWakhanCanBattleOn);
+      return Wakhan::selectHighestPriorityCard($courtCardsWakhanCanBattleOn);
     }
   }
 

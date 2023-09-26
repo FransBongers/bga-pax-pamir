@@ -218,7 +218,7 @@ trait WakhanTurnTrait
       $spies = Tokens::getInLocation(['spies', $card['id']])->toArray();
       return count($spies) === 0;
     });
-    $card = Wakhan::selectCard($validCards);
+    $card = Wakhan::selectHighestPriorityCard($validCards);
     if ($card === null) {
       return null;
     }

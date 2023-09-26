@@ -98,7 +98,7 @@ trait WakhanSpecialAbilitiesTrait
     $cardsWithSafeHouse = Utils::filter($courtCards, function ($card) {
       return $card['specialAbility'] === SA_SAFE_HOUSE;
     });
-    return Wakhan::selectCard($cardsWithSafeHouse);
+    return Wakhan::selectHighestPriorityCard($cardsWithSafeHouse);
   }
 
 }

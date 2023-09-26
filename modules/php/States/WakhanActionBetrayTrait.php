@@ -139,6 +139,6 @@ trait WakhanActionBetrayTrait
       }
       return true;
     });
-    return Wakhan::selectCard($cardsWithPrizeAndWakhanSpy);
+    return Wakhan::selectHighestPriorityCard($cardsWithPrizeAndWakhanSpy);
   }
 }

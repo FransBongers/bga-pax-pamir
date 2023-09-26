@@ -51,8 +51,24 @@ trait DebugTrait
 
   function test()
   {
-    $loyalty = Wakhan::getPragmaticLoyalty();
-    Notifications::log('loyalty',$loyalty);
+    Cards::setUsed('card_81',0);
+    // Cards::move('card_31',Locations::market(1,2));
+    // Cards::move('card_45',DISCARD);
+    // Cards::move('card_23',DISCARD);
+    // Cards::move('card_25',DISCARD);
+    // Cards::move('card_99',DISCARD);
+    // Cards::move('card_83',DISCARD);
+    $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());
+    Notifications::log('result',$result);
+    // Cards::move('card_68', ['court', WAKHAN_PLAYER_ID],-10);
+    // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
+    // Cards::move('card_26', DISCARD);
+    // Cards::move('card_116', Locations::market(0,5));
+    // Cards::move('card_78', Locations::market(1,5));
+    // Cards::move('card_114', DISCARD);
+    // Cards::move('card_28', Locations::market(1,2));
+    // Cards::move('card_100', DISCARD);
+    // Cards::move('card_9', Locations::market(0,1));
 
     // Globals::setFavoredSuit(MILITARY);
     // PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);

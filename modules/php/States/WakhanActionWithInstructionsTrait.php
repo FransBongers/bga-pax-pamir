@@ -115,19 +115,7 @@ trait WakhanActionWithInstructionsTrait
 
     $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
 
-    $cardsWithNetRupees = array_map(function ($card) use ($wakhanPlayer) {
-      $card['netRupees'] = $this->getNetRupeesForMarketCard($card, $wakhanPlayer);
-      return $card;
-    }, $availableCards);
-
-    $maxGain = max(array_map(function ($card) {
-      return $card['netRupees'];
-    }, $cardsWithNetRupees));
-
-    $potentialCards = Utils::filter($cardsWithNetRupees, function ($card) use ($maxGain) {
-      return $card['netRupees'] === $maxGain;
-    });
-    $selectedCard = Wakhan::selectCard($potentialCards);
+    $selectedCard = $this->selectCardThatWouldNetMostRupees($availableCards);
 
     if ($selectedCard === null) {
       Wakhan::actionNotValid();
@@ -172,8 +160,8 @@ trait WakhanActionWithInstructionsTrait
       return false;
     });
 
-    $card = Wakhan::selectCard($cardsThatGainWakhanControlOfARegion);
-    Notifications::log('card', $card);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsThatGainWakhanControlOfARegion);
+
     if ($card === null) {
       Wakhan::actionNotValid();
       return;
@@ -194,7 +182,7 @@ trait WakhanActionWithInstructionsTrait
       return $card['suit'] === $suit;
     });
 
-    $card = Wakhan::selectCard($cardsOfSuit);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsOfSuit);
 
     if ($card === null) {
       Wakhan::actionNotValid();
@@ -214,7 +202,7 @@ trait WakhanActionWithInstructionsTrait
 
     $cardsThatWouldPlaceMostBlocks = Wakhan::getCourtCardsThatWouldPlaceMostBlocks($availableCards);
 
-    $card = Wakhan::selectCard($cardsThatWouldPlaceMostBlocks);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsThatWouldPlaceMostBlocks);
 
     if ($card === null) {
       Wakhan::actionNotValid();
@@ -240,7 +228,7 @@ trait WakhanActionWithInstructionsTrait
 
     $cardsThatWouldPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($availableCards);
 
-    $card = Wakhan::selectCard($cardsThatWouldPlaceMostCylinders);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsThatWouldPlaceMostCylinders);
 
     if ($card === null) {
       Wakhan::actionNotValid();
@@ -272,7 +260,7 @@ trait WakhanActionWithInstructionsTrait
       return in_array(MOVE, array_keys($card['actions']));
     });
 
-    $card = Wakhan::selectCard($cardsWithMoveAction);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsWithMoveAction);
 
     if ($card === null) {
       Wakhan::actionNotValid();
@@ -300,7 +288,7 @@ trait WakhanActionWithInstructionsTrait
       return $card['loyalty'] === $dominantCoalition;
     });
 
-    $card = Wakhan::selectCard($cardsWithMatchingPatriot);
+    $card = Wakhan::getCheapestThenHighestCardNumber($cardsWithMatchingPatriot);
 
     if ($card === null) {
       Wakhan::actionNotValid();
@@ -436,6 +424,26 @@ trait WakhanActionWithInstructionsTrait
   // .##.....##....##.....##..##........##.....##.......##...
   // ..#######.....##....####.########.####....##.......##...
 
+  function selectCardThatWouldNetMostRupees($availableCards)
+  {
+    $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+
+    $cardsWithNetRupees = array_map(function ($card) use ($wakhanPlayer) {
+      $card['netRupees'] = $this->getNetRupeesForMarketCard($card, $wakhanPlayer);
+      return $card;
+    }, $availableCards);
+
+    $maxGain = max(array_map(function ($card) {
+      return $card['netRupees'];
+    }, $cardsWithNetRupees));
+
+    $potentialCards = Utils::filter($cardsWithNetRupees, function ($card) use ($maxGain) {
+      return $card['netRupees'] === $maxGain;
+    });
+    $selectedCard = Wakhan::getCheapestThenHighestCardNumber($potentialCards);
+    return $selectedCard;
+  }
+
   // Net rupees is rupees on card minus cost + leverage
   function getNetRupeesForMarketCard($card, $player)
   {
@@ -460,7 +468,7 @@ trait WakhanActionWithInstructionsTrait
       return $card['rank'];
     }, $cardsOfSuit));
 
-    return Wakhan::selectCard(Utils::filter($cardsOfSuit, function ($card) use ($maxRank) {
+    return Wakhan::getCheapestThenHighestCardNumber(Utils::filter($cardsOfSuit, function ($card) use ($maxRank) {
       return $card['rank'] === $maxRank;
     }));
   }

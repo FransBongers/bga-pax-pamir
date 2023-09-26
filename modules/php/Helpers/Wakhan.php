@@ -53,6 +53,25 @@ class Wakhan
     return $borderOrder;
   }
 
+  public static function getCheapestThenHighestCardNumber($cards)
+  {
+    $count = count($cards);
+    if ($count === 0) {
+      return null;
+    }
+
+    usort($cards, function ($a, $b) {
+      $costDifference = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $a) - Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $b);
+      if ($costDifference !== 0) {
+        return $costDifference;
+      } else {
+        return intval(explode('_', $b['id'])[1]) - intval(explode('_', $a['id'])[1]);
+      }
+    });
+
+    return $cards[0];
+  }
+
   public static function getCoalitionBlockToPlace($loyalty, $blocksToIgnore = [])
   {
     $pool = Locations::pool($loyalty);

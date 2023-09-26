@@ -87,9 +87,9 @@ trait WakhanRadicalizeTrait
 
   function wakhanResolveRadicalizeCard($card)
   {
-    $row = explode('_',$card['location'])[1];
-    $column = explode('_',$card['location'])[2];
-    $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID),$card);
+    $row = explode('_', $card['location'])[1];
+    $column = explode('_', $card['location'])[2];
+    $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
 
     Wakhan::actionValid();
 
@@ -146,8 +146,8 @@ trait WakhanRadicalizeTrait
 
     // cheaper card of same suit and equal or higher rank
     $alternativeCards = [];
-    
-    foreach($availbleCards as $index => $card) {
+
+    foreach ($availbleCards as $index => $card) {
       $cost = Utils::getCardCost($wakhanPlayer, $card);
       $cardIsCheaper = $cost  < $selectedCardCost;
       $sameSuit = $card['suit'] === $selectedCard['suit'];
@@ -165,12 +165,30 @@ trait WakhanRadicalizeTrait
 
     $lowestCost = min(array_map(function ($card) {
       return $card['cost'];
-    },$alternativeCards));
+    }, $alternativeCards));
 
     $cardsWithLowestCost = Utils::filter($alternativeCards, function ($card) use ($lowestCost) {
       return $card['cost'] === $lowestCost;
     });
-    return Wakhan::selectCard($cardsWithLowestCost);
+
+    usort($cardsWithLowestCost, function ($a, $b) {
+      $costDifference = $a['cost'] - $b['cost'];
+      if ($costDifference !== 0) {
+        return $costDifference;
+      }
+      $columnNumberDifference = intval(explode('_', $a['location'])[2]) - intval(explode('_', $b['location'])[2]);
+      if ($columnNumberDifference !== 0) {
+        return $columnNumberDifference;
+      }
+      $redArrow = $this->wakhanGetRedArrowValue();
+      $aRow = intval(explode('_', $a['location'])[1]);
+      $bRow = intval(explode('_', $b['location'])[1]);
+      $bInRedArrowRow = ($redArrow === BOTTOM_RIGHT && $bRow === 1) || ($redArrow === TOP_LEFT && $bRow === 0) ? 1 : 0;
+      $aInRedArrowRow = ($redArrow === BOTTOM_RIGHT && $aRow === 1) || ($redArrow === TOP_LEFT && $aRow === 0) ? 1 : 0;
+      return $bInRedArrowRow - $aInRedArrowRow;
+    });
+
+    return $cardsWithLowestCost[0];
   }
 
   function radicalizeSelectCard($back, $front)
@@ -253,38 +271,28 @@ trait WakhanRadicalizeTrait
 
       return $cardIsLoyalToDominantCoalition;
     });
-    return $this->getCheapestThenHighestCardNumber($patriots);
-  }
-
-  function getCheapestThenHighestCardNumber($cards)
-  {
-    $count = count($cards);
-    if ($count === 0) {
-      return null;
-    }
-
-    usort($cards, function ($a, $b) {
-      $costDifference = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $a) - Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $b);
-      if ($costDifference !== 0) {
-        return $costDifference;
-      } else {
-        return intval(explode('_', $b['id'])[1]) - intval(explode('_', $a['id'])[1]);
-      }
-    });
-
-    return $cards[0];
+    return Wakhan::getCheapestThenHighestCardNumber($patriots);
   }
 
   function wakhanRadicalizeGetCardWithMostBlocks($courtCardsInMarket)
   {
     $cardsThatPlaceMostBlocks = Wakhan::getCourtCardsThatWouldPlaceMostBlocks($courtCardsInMarket);
-    return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostBlocks);
+    return Wakhan::getCheapestThenHighestCardNumber($cardsThatPlaceMostBlocks);
   }
 
+  /**
+   * If there is a Dominance Check in the market and no coalition is dominant but Wakhan cannot purchase a card with any Spies/Tribes, what does she do? She will purchase the card in the 0 spot with the highest card number. 
+   * Savvy Purchasing Variant: instead, purchase the card that will net her the most coins; only then use the cheapest card with the highest card number as the fallback tie-breaker.
+   */
   function wakhanRadicalizeGetCardWithMostCylinders($courtCardsInMarket)
   {
     $cardsThatPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($courtCardsInMarket);
-    return $this->getCheapestThenHighestCardNumber($cardsThatPlaceMostCylinders);
+
+    if(Globals::getWakhanVariantSavvyPurchasing() && Utils::getImpactIconCount($cardsThatPlaceMostCylinders[0], [TRIBE, SPY]) === 0) {
+      return $this->selectCardThatWouldNetMostRupees($courtCardsInMarket);
+    }
+
+    return Wakhan::getCheapestThenHighestCardNumber($cardsThatPlaceMostCylinders);
   }
 
   function wakhanResolvePurchasedEventEffect($card)

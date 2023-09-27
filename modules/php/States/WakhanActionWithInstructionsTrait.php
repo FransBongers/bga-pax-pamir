@@ -108,6 +108,7 @@ trait WakhanActionWithInstructionsTrait
   {
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     $rupees = $wakhanPlayer->getRupees();
+    Notifications::log('rupees',$rupees);
     if ($rupees >= 2) {
       Wakhan::actionNotValid();
       return;
@@ -117,7 +118,7 @@ trait WakhanActionWithInstructionsTrait
 
     $selectedCard = $this->selectCardThatWouldNetMostRupees($availableCards);
 
-    if ($selectedCard === null) {
+    if ($selectedCard === null || $selectedCard['netRupees'] <= 0) {
       Wakhan::actionNotValid();
       return;
     }
@@ -203,8 +204,8 @@ trait WakhanActionWithInstructionsTrait
     $cardsThatWouldPlaceMostBlocks = Wakhan::getCourtCardsThatWouldPlaceMostBlocks($availableCards);
 
     $card = Wakhan::getCheapestThenHighestCardNumber($cardsThatWouldPlaceMostBlocks);
-
-    if ($card === null) {
+    $numberOfBlocksPlaced = Utils::getImpactIconCount($card, [ARMY, ROAD]);
+    if ($card === null || $numberOfBlocksPlaced === 0) {
       Wakhan::actionNotValid();
       return;
     }
@@ -229,8 +230,8 @@ trait WakhanActionWithInstructionsTrait
     $cardsThatWouldPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($availableCards);
 
     $card = Wakhan::getCheapestThenHighestCardNumber($cardsThatWouldPlaceMostCylinders);
-
-    if ($card === null) {
+    $numberOfCylindersPlaced = Utils::getImpactIconCount($card, [SPY, TRIBE]);
+    if ($card === null || $numberOfCylindersPlaced === 0) {
       Wakhan::actionNotValid();
       return;
     }

@@ -1253,6 +1253,8 @@
   border-radius: 10px;
   background-size: 800% 700%;
   background-image: url(img/wakhan_cards.webp);
+  border: 1px solid black;
+  box-sizing: border-box;
 }
 
 /**
@@ -2684,6 +2686,8 @@ html {
   background-image: url(img/wakhan_cards.webp);
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
+  border: 1px solid black;
+  box-sizing: border-box;
 }
 
 .pp_wakhan_card_1_front {

@@ -65,6 +65,26 @@ class PPWakhanPlayer extends PPPlayer {
     this.counters.military.setValue(counts.suits.military);
     this.counters.political.setValue(counts.suits.political);
     this.counters.intelligence.setValue(counts.suits.intelligence);
+
+    if (this.game.gamedatas.wakhanPragmaticLoyalty) {
+      this.updateLoyaltyIcon({ pragmaticLoyalty: this.game.gamedatas.wakhanPragmaticLoyalty });
+    }
+  }
+
+  updateLoyaltyIcon({ pragmaticLoyalty }: { pragmaticLoyalty: string }) {
+    COALITIONS.forEach((coalition) => {
+      const node = dojo.byId(`loyalty_icon_1_${coalition}`);
+      if (!node) {
+        return;
+      }
+      if (pragmaticLoyalty === coalition) {
+        node.classList.remove('pp_loyalty_icon_black');
+        node.classList.add('pp_loyalty_icon');
+      } else {
+        node.classList.remove('pp_loyalty_icon');
+        node.classList.add('pp_loyalty_icon_black');
+      }
+    });
   }
 
   // ....###.....######..########.####..#######..##....##..######.
@@ -103,7 +123,7 @@ class PPWakhanPlayer extends PPPlayer {
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
 
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }
@@ -125,7 +145,7 @@ class PPWakhanPlayer extends PPPlayer {
     ]);
 
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty && !this.ownsEventCard({cardId: ECE_RUMOR_CARD_ID})) {
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }
   }
@@ -167,16 +187,16 @@ class PPWakhanPlayer extends PPPlayer {
     super.toValueCounter({ counter, value });
   }
 
-  incWakhanInfluence({wakhanInfluence}: {wakhanInfluence: WakhanInfluence}): void {
-    const {influence} = wakhanInfluence;
+  incWakhanInfluence({ wakhanInfluence }: { wakhanInfluence: WakhanInfluence }): void {
+    const { influence } = wakhanInfluence;
     this.wakhanInfluence.afghan.incValue(influence.afghan);
     this.wakhanInfluence.british.incValue(influence.british);
     this.wakhanInfluence.russian.incValue(influence.russian);
   }
 
-  toValueWakhanInfluence({wakhanInfluence}: {wakhanInfluence: WakhanInfluence}): void {
+  toValueWakhanInfluence({ wakhanInfluence }: { wakhanInfluence: WakhanInfluence }): void {
     console.log('toValueWakhanInfluence');
-    const {influence} = wakhanInfluence;
+    const { influence } = wakhanInfluence;
     this.wakhanInfluence.afghan.setValue(influence.afghan);
     this.wakhanInfluence.british.setValue(influence.british);
     this.wakhanInfluence.russian.setValue(influence.russian);

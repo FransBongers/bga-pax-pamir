@@ -75,6 +75,7 @@ class NotificationManager {
       ['wakhanDrawCard', undefined],
       ['wakhanRadicalize', undefined],
       ['wakhanReshuffleDeck', undefined],
+      ['wakhanUpdatePragmaticLoyalty', 1],
     ];
 
     // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
@@ -734,6 +735,13 @@ class NotificationManager {
 
     // element.remove();
     await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  notif_wakhanUpdatePragmaticLoyalty({ args }: Notif<NotifWakhanUpdatePragmaticLoyalty>) {
+    const { pragmaticLoyalty } = args;
+    if (pragmaticLoyalty !== null) {
+      (this.getPlayer({ playerId: WAKHAN_PLAYER_ID }) as PPWakhanPlayer).updateLoyaltyIcon({ pragmaticLoyalty });
+    }
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

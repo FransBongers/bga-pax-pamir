@@ -52,10 +52,10 @@ trait DebugTrait
   function test()
   {
     // $this->wakhanMove();
-    $nextSpyMove = $this->wakhanGetNextSpyMove();
-    Notifications::log('nextSpyMove',$nextSpyMove);
+    // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
+    // Notifications::log('nextSpyMove',$nextSpyMove);
     // Cards::setUsed('card_81',0);
-    // Cards::move('card_31',Locations::market(1,2));
+    Cards::move('card_108',Locations::market(0,0));
     // Cards::move('card_45',DISCARD);
     // Cards::move('card_23',DISCARD);
     // Cards::move('card_25',DISCARD);
@@ -142,7 +142,7 @@ trait DebugTrait
     if ($army != null) {
       $to = $this->locations['armies'][$region];
       Tokens::move($army['id'], $this->locations['armies'][$region]);
-      $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenArmy} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
         'player' => PaxPamirPlayers::get(),
         'logTokenArmy' => Utils::logTokenArmy($coalition),
@@ -170,7 +170,7 @@ trait DebugTrait
       $region0 = explode("_", $border)[0];
       $region1 = explode("_", $border)[1];
       Tokens::move($road['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
       Notifications::moveToken($message, [
         'player' => PaxPamirPlayers::get(),
         'logTokenRoad' => Utils::logTokenRoad($coalition),
@@ -196,7 +196,7 @@ trait DebugTrait
     $to = $this->locations["tribes"][$region];
     if ($cylinder != null) {
       Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
         'player' => PaxPamirPlayers::get($playerId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
@@ -225,7 +225,7 @@ trait DebugTrait
     if ($cylinder != null) {
       $to = 'spies_' . $cardId;
       Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
       Notifications::moveToken($message, [
         'player' => PaxPamirPlayers::get($playerId),
         'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),

@@ -168,6 +168,7 @@ interface PaxPamirGamedatas extends Gamedatas {
       topCard: null | WakhanCard;
     }
   }
+  wakhanPragmaticLoyalty?: string | null;
   // rupees: Token[];
 }
 

@@ -122,7 +122,7 @@ trait ResolveEventTrait
   {
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
-    $message = clienttranslate('${player_name} removes all tribes and armies from ${logTokenRegionName}');
+    $message = clienttranslate('${tkn_playerName} removes all tribes and armies from ${logTokenRegionName}');
     Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId),], $regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult;
@@ -134,7 +134,7 @@ trait ResolveEventTrait
     $playerId = $player->getId();
     $selectedPlayerId = $selectedPlayer->getId();
 
-    $message = clienttranslate('${player_name} chooses ${player_name2}');
+    $message = clienttranslate('${tkn_playerName} chooses ${tkn_playerName_2}');
 
     $from = 'events_' . $playerId;
     $to = 'events_' . $selectedPlayerId;
@@ -147,7 +147,7 @@ trait ResolveEventTrait
     Cards::move('card_108', $to);
     Notifications::moveCard($message, [
       'player' => $player,
-      'player_name2' => $selectedPlayer->getName(),
+      'tkn_playerName_2' => $selectedPlayer->getName(),
     ], 'MOVE_EVENT', $move);
 
     $updates = [];

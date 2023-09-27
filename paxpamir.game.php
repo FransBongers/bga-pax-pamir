@@ -38,6 +38,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
@@ -289,6 +290,7 @@ class Paxpamir extends Table
                     'topCard' => $wakhanDiscardPileCount === 0 ? null : $wakhanDiscardPile[$wakhanDiscardPileCount - 1],
                 ],
             ];
+            $data['wakhanPragmaticLoyalty'] = Wakhan::getPragmaticLoyalty();
         }
 
         // Is below needed?

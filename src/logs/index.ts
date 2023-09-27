@@ -15,6 +15,18 @@ const LOG_TOKEN_REGION_NAME = 'regionName';
 const LOG_TOKEN_ROAD = 'road';
 const LOG_TOKEN_RUPEE = 'rupee';
 
+const getTokenDiv = ({key, value, game}: {key: string; value: string; game: PaxPamirGame;}) => {
+  const splitKey = key.split('_');
+  const type = splitKey[1];
+  switch (type) {
+    case LOG_TOKEN_PLAYER_NAME:
+      const player = game.playerManager.getPlayers().find((player) => player.getName() === value);
+      return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
+    default:
+      return value;
+  }
+}
+
 const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGame }) => {
   const [type, data] = logToken.split(':');
   switch (type) {

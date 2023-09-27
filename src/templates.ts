@@ -106,9 +106,9 @@ const tplPlayerBoard = ({playerId}: {playerId: number}) => {
 const tplPlayerBoardWakhan = ({playerId}: {playerId: number}) => {
   return `<div id="pp_player_board_${playerId}" class="pp_player_board">
     <div class="pp_icon_container">
-        <div id="loyalty_icon_${playerId}_afghan" class="pp_icon pp_loyalty_icon pp_afghan"><div id="influence_${playerId}_afghan" class="pp_icon_count"><span id="influence_${playerId}_afghan_counter"></span></div></div>
-        <div id="loyalty_icon_${playerId}_british" class="pp_icon pp_loyalty_icon pp_british"><div id="influence_${playerId}_british" class="pp_icon_count"><span id="influence_${playerId}_british_counter"></span></div></div>
-        <div id="loyalty_icon_${playerId}_russian" class="pp_icon pp_loyalty_icon pp_russian"><div id="influence_${playerId}_russian" class="pp_icon_count"><span id="influence_${playerId}_russian_counter"></span></div></div>
+        <div id="loyalty_icon_${playerId}_afghan" class="pp_icon pp_loyalty_icon_black pp_afghan"><div id="influence_${playerId}_afghan" class="pp_icon_count"><span id="influence_${playerId}_afghan_counter"></span></div></div>
+        <div id="loyalty_icon_${playerId}_british" class="pp_icon pp_loyalty_icon_black pp_british"><div id="influence_${playerId}_british" class="pp_icon_count"><span id="influence_${playerId}_british_counter"></span></div></div>
+        <div id="loyalty_icon_${playerId}_russian" class="pp_icon pp_loyalty_icon_black pp_russian"><div id="influence_${playerId}_russian" class="pp_icon_count"><span id="influence_${playerId}_russian_counter"></span></div></div>
         <div id="cylinders_${playerId}" class="pp_icon pp_cylinder_icon"><div id="cylinder_count_${playerId}" class="pp_icon_count"><span id="cylinder_count_${playerId}_counter"></span></div></div>        
     </div>
     <div id="suits_${playerId}" class="pp_icon_container">

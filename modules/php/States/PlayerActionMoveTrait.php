@@ -120,7 +120,7 @@ trait PlayerActionMoveTrait
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
         array_push($regionsThatNeedRulerCheck, $source, $destination);
-        $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -146,7 +146,7 @@ trait PlayerActionMoveTrait
           'from' => $from,
           'to' => $to
         ]);
-        $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -161,7 +161,7 @@ trait PlayerActionMoveTrait
       } else if (Utils::isCylinder($pieceId)) {
         $from = 'spies_' . $source;
         $to = 'spies_' . $destination;
-        $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenCardNameFrom} to ${logTokenCardNameTo}${logTokenNewLine}${logTokenLargeCardFrom}${logTokenLargeCardTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenCardNameFrom} to ${logTokenCardNameTo}${logTokenNewLine}${logTokenLargeCardFrom}${logTokenLargeCardTo}');
         $cardFrom = Cards::get($source);
         $cardTo = Cards::get($destination);
         Notifications::moveToken($message, [

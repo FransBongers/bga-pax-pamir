@@ -671,6 +671,8 @@ html {
   background-image: url(img/wakhan_cards.webp);
   box-shadow: 1px 1px 4px;
   border-radius: 10px;
+  border: 1px solid black;
+  box-sizing: border-box;
 }
 
 @for $i from 1 through 24 {

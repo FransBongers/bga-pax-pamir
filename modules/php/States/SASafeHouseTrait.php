@@ -96,7 +96,7 @@ trait SASafeHouseTrait
     if ($cardId === null) {
          $to = implode('_', ['cylinders', $playerId]);
       $state = Tokens::insertOnTop($cylinderId, $to);
-      $message = clienttranslate('${player_name} does not use Safe House');
+      $message = clienttranslate('${tkn_playerName} does not use Safe House');
       Notifications::moveToken($message, [
         'player' => PaxPamirPlayers::get($playerId),
         'move' => [
@@ -122,7 +122,7 @@ trait SASafeHouseTrait
 
     $to = Locations::spies($cardId);
     $state = Tokens::insertOnTop($cylinderId, $to);
-    $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
     Notifications::moveToken($message, [
       'player' => PaxPamirPlayers::get($playerId),
       'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),

@@ -124,7 +124,7 @@ trait WakhanTurnTrait
       $this->reshuffleWakhanDeck();
       $wakhanCards = $this->drawWakhanCard();
     }
-
+    Notifications::wakhanUpdatePragmaticLoyalty();
     array_pop($actionStack);
     ActionStack::next($actionStack);
   }

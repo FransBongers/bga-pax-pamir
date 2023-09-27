@@ -47,9 +47,9 @@ class ResolveEventRumor implements State {
   private updateInterfaceConfirmPlayer({ player }: { player: PPPlayer }) {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: 'Choose ${player_name}?',
+      text: 'Choose ${tkn_playerName}?',
       args: {
-        player_name: player.getName(),
+        tkn_playerName: player.getName(),
       },
     });
     this.game.addPrimaryActionButton({

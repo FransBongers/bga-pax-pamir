@@ -15,7 +15,7 @@ interface Log {
 }
 
 interface NotifPayBribeArgs {
-  player_name: string;
+  tkn_playerName: string;
   rulerId: number;
   briberId: number;
   rupees: number;
@@ -28,7 +28,7 @@ interface NotifChangeFavoredSuitArgs {
 }
 
 interface NotifChangeRulerArgs {
-  player_name: string;
+  tkn_playerName: string;
   oldRuler: number | null;
   newRuler: number | null;
   region: string;
@@ -36,14 +36,14 @@ interface NotifChangeRulerArgs {
 
 interface NotifChangeLoyaltyArgs {
   playerId: string;
-  // player_name: string;
+  // tkn_playerName: string;
   coalition: string;
   // coalitionName: string;
 }
 
 interface NotifDiscardArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   cardId: string;
   from: 'court' | 'hand' | string;
   to: 'discardPile' | 'tempDiscardPile';
@@ -51,7 +51,7 @@ interface NotifDiscardArgs {
 
 interface NotifReturnAllSpiesArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   cardId: string;
   spies: {
     [playerId: string]: {
@@ -63,7 +63,7 @@ interface NotifReturnAllSpiesArgs {
 
 interface NotifReturnAllToSupplyArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   regionId: string;
   armies: {
     [coalition: string]: {
@@ -81,7 +81,7 @@ interface NotifReturnAllToSupplyArgs {
 
 interface NotifReturnCoalitionBlockArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   from: string;
   blockId: string;
   weight?: number;
@@ -91,7 +91,7 @@ interface NotifReturnCoalitionBlockArgs {
 
 interface NotifReturnCylinderArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   from: string;
   cylinderId: string;
   weight?: number;
@@ -101,7 +101,7 @@ interface NotifDiscardFromCourtArgs {
   cardId: string;
   courtOwnerPlayerId: string;
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   logTokenCardName: string;
   logTokenLargeCard: string;
   moves: TokenMove[];
@@ -111,7 +111,7 @@ interface NotifDiscardFromCourtArgs {
 interface NotifDiscardFromHandArgs {
   cardId: string;
   playerId: string;
-  player_name: string;
+  tkn_playerName: string;
   logTokenCardName: string;
   logTokenLargeCard: string;
 }
@@ -119,7 +119,7 @@ interface NotifDiscardFromHandArgs {
 interface NotifDiscardFromMarketArgs {
   cardId: string;
   playerId: string;
-  player_name: string;
+  tkn_playerName: string;
   from: string;
   to: 'discardPile' | 'tempDiscardPile' | 'activeEvents';
   logTokenLargeCard: string;
@@ -128,7 +128,7 @@ interface NotifDiscardFromMarketArgs {
 interface NotifDiscardPrizesArgs {
   prizes: CourtCard[];
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
 }
 
 interface NotifDominanceCheckScoresArgs {
@@ -156,8 +156,8 @@ interface NotifDominanceCheckReturnBlocksArgs {
 }
 
 interface NotifExchangeHandArgs {
-  player_name: string;
-  player_name2: string;
+  tkn_playerName: string;
+  tkn_playerName_2: string;
   newHandCounts: {
     [playerId: number]: number;
   };
@@ -190,13 +190,13 @@ interface NotifMoveTokenArgs {
 
 interface NotifPayRupeesToMarketArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
 }
 
 interface NotifPlayCardArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   card: Token;
   cardName: string;
   courtCards: Token[];
@@ -209,7 +209,7 @@ interface NotifPublicWithdrawalArgs {
 
 interface NotifPurchaseCardArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   receivedRupees: number;
   card: Token;
   cardName: string;
@@ -220,7 +220,7 @@ interface NotifPurchaseCardArgs {
 
 interface NotifPurchaseGiftArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   value: number;
   // rupeesOnCards: { cardId: string; row: number; column: number; rupeeId: string }[];
   // rupeeChange: number;
@@ -253,7 +253,7 @@ interface NotifReplaceHandArgs {
 
 interface NotifReturnRupeesToSupplyArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   amount: number;
 }
 
@@ -262,12 +262,12 @@ type NotifDeclinePrizeArgs = NotifTakePrizeArgs;
 interface NotifTakePrizeArgs {
   cardId: string;
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
 }
 
 interface NotifTakeRupeesFromSupplyArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   amount: number;
 }
 
@@ -278,7 +278,7 @@ interface NotifSmallRefreshHandArgs {
 
 interface NotifTaxMarketArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   amount: number;
   logTokenRupee: string;
   selectedRupees: {
@@ -290,7 +290,7 @@ interface NotifTaxMarketArgs {
 
 interface NotifTaxPlayerArgs {
   playerId: number;
-  player_name: string;
+  tkn_playerName: string;
   amount: number;
   taxedPlayerId: number;
   logTokenRupee: string;
@@ -346,6 +346,10 @@ interface NotifWakhanRadicalizeArgs {
 interface NotifWakhanReshuffleDeckArgs {
   topOfDeck: string;
   topOfDiscardPile: string;
+}
+
+interface NotifWakhanUpdatePragmaticLoyalty {
+  pragmaticLoyalty: string | null;
 }
 
 type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;

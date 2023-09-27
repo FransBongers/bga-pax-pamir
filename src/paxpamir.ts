@@ -101,11 +101,11 @@ class PaxPamir implements PaxPamirGame {
     debug('gamedatas', gamedatas);
     this.setupPlayerOrder({ paxPamirPlayerOrder: gamedatas.paxPamirPlayerOrder });
     if (this.gameOptions.wakhanEnabled) {
-      dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', 0);
+      dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
     }
     // Templates from .tpl file. Todo: check if we can move to other files
     dojo.place(tplActiveEvents(), 'pp_player_tableaus');
-        
+
     this.playerOrder.forEach((playerId) => {
       const player = gamedatas.paxPamirPlayers[playerId];
       if (playerId === 1) {
@@ -498,6 +498,8 @@ class PaxPamir implements PaxPamirGame {
         Object.entries(args).forEach(([key, value]) => {
           if (key.startsWith('logToken')) {
             args[key] = getLogTokenDiv({ logToken: value as string, game: this });
+          } else if (key.startsWith('tkn_')) {
+            args[key] = getTokenDiv({ key, value: value as string, game: this });
           }
         });
 
@@ -579,18 +581,17 @@ class PaxPamir implements PaxPamirGame {
     this.cancelLogs(this.gamedatas.canceledNotifIds);
   }
 
-  
-	updatePlayerOrdering() {
-    console.log('updatePlayerOrdering',this.playerOrder);
+  updatePlayerOrdering() {
+    console.log('updatePlayerOrdering', this.playerOrder);
     // (this as any).inherited(arguments);
     this.playerOrder.forEach((playerId: number, index: number) => {
-      dojo.place("overall_player_board_" + playerId, "player_boards", index)
-    })
+      dojo.place('overall_player_board_' + playerId, 'player_boards', index);
+    });
     // if (this.gameOptions.wakhanEnabled) {
     //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
     //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
     // }
-	}
+  }
 
   // .########..#######......######..##.....##.########..######..##....##
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.

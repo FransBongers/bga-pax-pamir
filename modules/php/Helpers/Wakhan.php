@@ -174,7 +174,12 @@ class Wakhan
 
   public static function getPragmaticLoyalty()
   {
-    $pragmaticLoyalty = WakhanCards::getTopOf(DISCARD)['front']['pragmaticLoyalty'];
+    $topOfDiscard = WakhanCards::getTopOf(DISCARD);
+    if ($topOfDiscard === null) {
+      return null;
+    }
+
+    $pragmaticLoyalty = $topOfDiscard['front']['pragmaticLoyalty'];
     $otherPlayerLoyalties = Wakhan::getOtherPlayerLoyalties();
     $loyaltiesNotSharedByOtherPlayer = Utils::filter($pragmaticLoyalty, function ($coalition) use ($otherPlayerLoyalties) {
       return !in_array($coalition, $otherPlayerLoyalties);

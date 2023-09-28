@@ -100,7 +100,7 @@ class PPPlayer {
     this.setupEvents({ playerGamedatas });
 
     if (this.playerId !== WAKHAN_PLAYER_ID) {
-      this.setupHand({ hand: playerGamedatas.hand });      
+      this.setupHand({ hand: playerGamedatas.hand });
     }
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
@@ -419,7 +419,7 @@ class PPPlayer {
     if (wakhanCards.deck.topCard !== null) {
       const wakhanCardId = wakhanCards.deck.topCard.id;
       deckNode.classList.add(`pp_${wakhanCardId}_back`);
-      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId, location: 'deck' });
+      // this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId, location: 'deck' });
     } else {
       deckNode.style.opacity = '0';
     }
@@ -428,9 +428,14 @@ class PPPlayer {
     if (wakhanCards.discardPile.topCard) {
       discardNode.classList.value = '';
       discardNode.classList.add('pp_wakhan_card', `pp_${wakhanCards.discardPile.topCard.id}_front`);
-      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCards.discardPile.topCard.id, location: 'discard' });
     } else {
       discardNode.style.opacity = '0';
+    }
+    if (wakhanCards.deck.topCard && wakhanCards.discardPile.topCard) {
+      this.game.tooltipManager.addWakhanCardTooltip({
+        wakhanDeckCardId: wakhanCards.deck.topCard.id,
+        wakhanDiscardCardId: wakhanCards.discardPile.topCard.id,
+      });
     }
   }
 

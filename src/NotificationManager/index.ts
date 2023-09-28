@@ -654,11 +654,8 @@ class NotificationManager {
       discardNode.classList.replace(`pp_${discardPile.from}_front`, `pp_${discardPile.to}_front`);
       element.remove();
     }
-    if (deck.to) {
-      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: deck.to, location: 'deck' });
-    }
-    if (discardPile.to) {
-      this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: discardPile.to, location: 'discard' });
+    if (deck.to && discardPile.to) {
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanDeckCardId: deck.to, wakhanDiscardCardId: discardPile.to });
     }
   }
 

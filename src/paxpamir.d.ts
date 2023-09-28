@@ -136,6 +136,9 @@ interface PaxPamirGamedatas extends Gamedatas {
     suits: {
       [suit: string]: Suit;
     };
+    wakhanCards: {
+      [wakhanCardId: string]: WakhanCard;
+    }
   };
   map: {
     borders: Record<string, BorderGamedatas>;
@@ -232,6 +235,7 @@ interface PaxPamirGame extends Game {
   getCurrentPlayer: () => PPPlayer;
   getMinimumActionCost: (props: {action: string;}) => number | null;
   getPlayerId: () => number;
+  getWakhanCardInfo: ({wakhanCardId}: {wakhanCardId: string;}) => WakhanCard;
   getZoneForLocation: ({ location }: { location: string }) => PaxPamirZone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;

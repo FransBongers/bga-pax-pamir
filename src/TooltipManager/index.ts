@@ -32,9 +32,13 @@ class PPTooltipManager {
     }
   }
 
-  public addWakhanCardTooltip({ wakhanCardId, location }: { wakhanCardId: string; location: 'deck' | 'discard' }): void {
-    const html = tplWakhanCardTooltip({ wakhanCardId, side: location === 'deck' ? 'back' : 'front' });
-    this.game.framework().addTooltipHtml(`pp_wakhan_${location}`, html, 500);
+  public addWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }: { wakhanDeckCardId: string; wakhanDiscardCardId: string; }): void {
+    const html = tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId, game: this.game });
+    const tooltip = this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);
+    console.log('tooltips',(this.game as any).tooltips['pp_wakhan_deck']);
+    this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
+    
+    // dojo.place(tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }), 'game_play_area');
   }
 
   // Function for setup of generic tooltips as last step of setup

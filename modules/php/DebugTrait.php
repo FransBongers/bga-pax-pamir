@@ -53,9 +53,9 @@ trait DebugTrait
   {
     // $this->wakhanMove();
     // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
-    // Notifications::log('nextSpyMove',$nextSpyMove);
+    Notifications::log('getFromVersion',Globals::getFromVersion());
     // Cards::setUsed('card_81',0);
-    Cards::move('card_108',Locations::market(0,0));
+    // Cards::move('card_108',Locations::market(0,0));
     // Cards::move('card_45',DISCARD);
     // Cards::move('card_23',DISCARD);
     // Cards::move('card_25',DISCARD);

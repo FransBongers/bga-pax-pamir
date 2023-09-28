@@ -175,9 +175,66 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
   });
 };
 
-const tplWakhanCardTooltip = ({ wakhanCardId, side }: { wakhanCardId: string; side: 'front' | 'back' }) => {
+const tplWakhanCardTooltip = ({ wakhanDeckCardId, wakhanDiscardCardId, game }: { wakhanDeckCardId: string; wakhanDiscardCardId: string; game: PaxPamirGame; }) => {
+  const WAKHAN_ARROW_DESCRIPTION = {
+    [BOTTOM_RIGHT]: _('Bottom (right)'),
+    [TOP_LEFT]: _('Top (left)'),
+  };
+  const WAKHAN_ACTION_DESCRIPTION = {
+    [BATTLE]: _('Battle'),
+    [BETRAY]: _('Betray'),
+    [BUILD]: _('Build'),
+    [GIFT]: _('Gift'),
+    [MOVE]: _('Move'),
+    [TAX]: _('Tax'),
+    [RADICALIZE]: _('Radicalize'),
+    [RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY]: _('If military cards are favored, radicalize the highest ranked military card'),
+    [RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC]: _('If political cards are favored, radicalize the highest ranked economic card'),
+    [RADICALIZE_HIGHEST_RANKED_POLITICAL]: _('Radicalize the highest ranked political card'),
+    [RADICALIZE_HIGHEST_RANKED_INTELLIGENCE]: _('Radicalize the highest ranked intelligence card'),
+    [RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES]: _('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees'),
+    [RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION]: _('Radicalize a card that will gain Wakhan control of a region'),
+    [RADICALIZE_INTELLIGENCE]: _('Radicalize an intelligence card'),
+    [RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS]: _('Radicalize the card that would place most armies and/or roads'),
+    [RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS]: _('If no coalition has dominance, radicalize the card that would place the most spies and/or tribes'),
+    [RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION]: _('If Wakhan has no card with the move action, radicalize a card with the move action'),
+    [RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT]: _('If a coalition has dominance radicalize a matching patriot'),
+    [RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL]: _('If Wakhan\'s court size is at its limit, radicalize the highest ranked political card'),
+    [RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE]: _('If Wakhan has fewer spies than another player then radicalize the highest ranked intelligence card'),
+    [BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY]: _('Battle on the highest priority court card with the most spies where Wakhan also has at least one spy'),
+  };
+
+  const topOfDeck = game.getWakhanCardInfo({wakhanCardId: wakhanDeckCardId}).back;
+  const topOfDiscard = game.getWakhanCardInfo({wakhanCardId: wakhanDiscardCardId}).front;
+
   return tplCardTooltipContainer({
-    card: `<div class="pp_wakhan_card_in_tooltip pp_${wakhanCardId}_${side}"></div>`,
-    content: '',
+    card: `<div class="pp_wakhan_card_in_tooltip pp_${wakhanDiscardCardId}_front"></div>`,
+    content: `
+    <span class="pp_title">${_('AI card')}</span>
+    <span class="pp_flavor_text">${_(
+      "Each turn Wakhan draws an AI card. The face-up card and the back of the card on top of the draw deck are used to make decisions for Wakhan."
+    )}</span>
+    <span class="pp_section_title">${_('Pragmatic Loyalty')}</span>
+    <div style="display: flex; flex-direction: row;">
+      ${topOfDiscard.pragmaticLoyalty.map((coalition) => `<div class="pp_wakhan_icon pp_${coalition}"></div>`).join('')}
+    </div>
+    <span class="pp_section_title">${_('Wakhan\'s Actions')}</span>
+    ${topOfDiscard.actions.map((action) => `<span class="pp_tooltip_text pp_wakhan_action">${WAKHAN_ACTION_DESCRIPTION[action]}</span>`).join('')}
+    <span class="pp_section_title">${_('Arrows')}</span>
+    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+      <div style="display: flex; flex-direction: row; align-items: center;">
+        <span class="pp_section_title" style="margin: 0px;">${WAKHAN_ARROW_DESCRIPTION[topOfDeck.rowSide[topOfDiscard.rowSideArrow]]}</span>
+        <div class="pp_wakhan_icon pp_red_arrow" style="margin-left: -6px;"></div>
+      </div>
+      <div style="display: flex; flex-direction: row; align-items: center;">
+        <span class="pp_title" style="margin: 0px; font-size: xx-large;">${topOfDeck.columnNumbers[topOfDiscard.columnArrow]}</span>
+        <div class="pp_wakhan_icon pp_black_arrow" style="margin-left: 6px;"></div>
+      </div>
+    </div>
+    <span class="pp_section_title">${_('Region Priority')}</span>
+    <div style="display: flex; flex-direction: row;">
+      ${topOfDiscard.regionOrder.map((region) => `<div class="pp_wakhan_icon pp_region_icon pp_${region}"></div>`).join('')}
+    </div>
+    `,
   });
 };

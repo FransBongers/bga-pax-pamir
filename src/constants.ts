@@ -52,7 +52,7 @@ const COURT = 'court';
 const discardMap = {
   [DISCARD]: 'pp_pile_discarded_card',
   [TEMP_DISCARD]: 'pp_temp_discarded_card',
-}
+};
 // const PLAYER_EVENTS = 'playerEvents';
 
 // size of tokens
@@ -140,7 +140,6 @@ const IMPACT_ICON_MILITARY_SUIT = 'military';
 const IMPACT_ICON_POLITICAL_SUIT = 'political';
 const IMPACT_ICON_INTELLIGENCE_SUIT = 'intelligence';
 
-
 /**
  * Class names
  */
@@ -223,6 +222,29 @@ const SA_IRREGULARS = 'irregulars'; // card_99
  * Wakhan
  */
 const WAKHAN_PLAYER_ID = 1;
+
+const TOP_LEFT = 'topLeft';
+const BOTTOM_RIGHT = 'bottomRight';
+
+const BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY =
+  'battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy';
+const RADICALIZE = 'radicalize';
+const RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY = 'radicalizeIfMilitaryFavoredHighestRankedMilitary'; // wakhan_card_1
+const RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC = 'radicalizeIfPoliticalFavoredHighestRankedEconomic'; // wakhan_card_2
+const RADICALIZE_HIGHEST_RANKED_POLITICAL = 'radicalizeHighestRankedPolitical'; // wakhan_card_2
+const RADICALIZE_HIGHEST_RANKED_INTELLIGENCE = 'radicalizeHighestRankedIntelligence'; // wakhan_card_3
+const RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES = 'radicalizeIfFewerThan2RupeesRadicalizeMostNetRupees';
+const RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION = 'radicalizeCardThatGivesControlOfRegion';
+const RADICALIZE_INTELLIGENCE = 'radicalizeIntelligence';
+const RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS = 'radicalizeCardThatWouldPlaceMostBlocks';
+const RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS =
+  'radicalizeIfNoDominantCoalitionCardThatWouldPlaceMostCylinders';
+const RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION = 'radicalizeIfNoCardWithMoveCardWithMoveAction';
+const RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT = 'radicalizeIfDominantCoalitionMatchingPatriot';
+const RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL = 'radicalizeIfCourtSizeAtLimitHighestRankedPolitical';
+const RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE =
+  'radicalizeIfFewerSpiesThanAnotherPlayerHighestRankedIntelligence';
+
 
 /**
  * Influence types (used in frontend for notifs)

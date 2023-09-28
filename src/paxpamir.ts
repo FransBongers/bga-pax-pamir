@@ -374,6 +374,10 @@ class PaxPamir implements PaxPamirGame {
     return this.gamedatas.staticData.cards[cardId];
   }
 
+  public getWakhanCardInfo({wakhanCardId}: {wakhanCardId: string;}): WakhanCard {
+    return this.gamedatas.staticData.wakhanCards[wakhanCardId];
+  }
+
   public getPlayerId(): number {
     return Number(this.framework().player_id);
   }

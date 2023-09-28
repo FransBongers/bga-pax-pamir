@@ -190,6 +190,19 @@
       font-size: small;
     }
 
+    .pp_tooltip_text {
+      text-align: left;
+      font-size: small;
+    }
+
+    .pp_wakhan_action {
+      border-radius: 4px;
+      text-align: center;
+      border: 2px solid #E5927A;
+      margin-bottom: 8px;
+      padding: 2px;
+    }
+
     .pp_flavor_text {
       text-align: left;
       font-size: small;
@@ -237,15 +250,33 @@
   box-sizing: border-box;
 }
 
-// // Card detail
-// @keyframes ea-wiggle {
-//   0% {
-//       transform: perspective(60em) rotateY(-12deg) scale(.93);
-//       animation-timing-function: ease-in-out
-//   }
+.pp_wakhan_icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background-image: url('img/wakhan_icons.webp');
+  /* background-size: 132px 30px;  */
+  /* background-position: -250px 0px; */
+  background-size: 500% 100%;
+  background-repeat: no-repeat;
+}
 
-//   to {
-//       transform: perspective(60em) rotateY(-2deg) scale(.93);
-//       animation-timing-function: ease-in-out
-//   }
-// }
+.pp_wakhan_icon.pp_black_arrow {
+  background-position-x: 0%;
+}
+
+.pp_wakhan_icon.pp_red_arrow {
+  background-position-x: 100%;
+}
+
+.pp_wakhan_icon.pp_afghan {
+  background-position-x: 25%;
+}
+
+.pp_wakhan_icon.pp_british {
+  background-position-x: 50%;
+}
+
+.pp_wakhan_icon.pp_russian {
+  background-position-x: 75%;
+}

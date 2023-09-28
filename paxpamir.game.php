@@ -504,6 +504,9 @@ class Paxpamir extends Table
      */
     function upgradeTableDb($from_version)
     {
+        // Notifications::log('fromVersion',$from_version);
+        // Globals::setFromVersion('version');
+
         // $from_version is the current version of this game database, in numerical form.
         // For example, if the game was running with a release of your game named "140430-1345",
         // $from_version is equal to 1404301345

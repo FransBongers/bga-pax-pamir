@@ -1194,6 +1194,23 @@ var SA_INFRASTRUCTURE = 'infrastructure';
 var SA_SAVVY_OPERATOR = 'savvyOperator';
 var SA_IRREGULARS = 'irregulars';
 var WAKHAN_PLAYER_ID = 1;
+var TOP_LEFT = 'topLeft';
+var BOTTOM_RIGHT = 'bottomRight';
+var BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY = 'battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy';
+var RADICALIZE = 'radicalize';
+var RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY = 'radicalizeIfMilitaryFavoredHighestRankedMilitary';
+var RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC = 'radicalizeIfPoliticalFavoredHighestRankedEconomic';
+var RADICALIZE_HIGHEST_RANKED_POLITICAL = 'radicalizeHighestRankedPolitical';
+var RADICALIZE_HIGHEST_RANKED_INTELLIGENCE = 'radicalizeHighestRankedIntelligence';
+var RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES = 'radicalizeIfFewerThan2RupeesRadicalizeMostNetRupees';
+var RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION = 'radicalizeCardThatGivesControlOfRegion';
+var RADICALIZE_INTELLIGENCE = 'radicalizeIntelligence';
+var RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS = 'radicalizeCardThatWouldPlaceMostBlocks';
+var RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS = 'radicalizeIfNoDominantCoalitionCardThatWouldPlaceMostCylinders';
+var RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION = 'radicalizeIfNoCardWithMoveCardWithMoveAction';
+var RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT = 'radicalizeIfDominantCoalitionMatchingPatriot';
+var RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL = 'radicalizeIfCourtSizeAtLimitHighestRankedPolitical';
+var RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE = 'radicalizeIfFewerSpiesThanAnotherPlayerHighestRankedIntelligence';
 var PLAYER_INFLUENCE = 'playerInfluence';
 var WAKHAN_INFLUENCE = 'wakhanInfluence';
 var tplArmy = function (_a) {
@@ -1432,10 +1449,40 @@ var tplEventCardTooltip = function (_a) {
     });
 };
 var tplWakhanCardTooltip = function (_a) {
-    var wakhanCardId = _a.wakhanCardId, side = _a.side;
+    var _b, _c;
+    var wakhanDeckCardId = _a.wakhanDeckCardId, wakhanDiscardCardId = _a.wakhanDiscardCardId, game = _a.game;
+    var WAKHAN_ARROW_DESCRIPTION = (_b = {},
+        _b[BOTTOM_RIGHT] = _('Bottom (right)'),
+        _b[TOP_LEFT] = _('Top (left)'),
+        _b);
+    var WAKHAN_ACTION_DESCRIPTION = (_c = {},
+        _c[BATTLE] = _('Battle'),
+        _c[BETRAY] = _('Betray'),
+        _c[BUILD] = _('Build'),
+        _c[GIFT] = _('Gift'),
+        _c[MOVE] = _('Move'),
+        _c[TAX] = _('Tax'),
+        _c[RADICALIZE] = _('Radicalize'),
+        _c[RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY] = _('If military cards are favored, radicalize the highest ranked military card'),
+        _c[RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC] = _('If political cards are favored, radicalize the highest ranked economic card'),
+        _c[RADICALIZE_HIGHEST_RANKED_POLITICAL] = _('Radicalize the highest ranked political card'),
+        _c[RADICALIZE_HIGHEST_RANKED_INTELLIGENCE] = _('Radicalize the highest ranked intelligence card'),
+        _c[RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES] = _('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees'),
+        _c[RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION] = _('Radicalize a card that will gain Wakhan control of a region'),
+        _c[RADICALIZE_INTELLIGENCE] = _('Radicalize an intelligence card'),
+        _c[RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS] = _('Radicalize the card that would place most armies and/or roads'),
+        _c[RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS] = _('If no coalition has dominance, radicalize the card that would place the most spies and/or tribes'),
+        _c[RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION] = _('If Wakhan has no card with the move action, radicalize a card with the move action'),
+        _c[RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT] = _('If a coalition has dominance radicalize a matching patriot'),
+        _c[RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL] = _('If Wakhan\'s court size is at its limit, radicalize the highest ranked political card'),
+        _c[RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE] = _('If Wakhan has fewer spies than another player then radicalize the highest ranked intelligence card'),
+        _c[BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY] = _('Battle on the highest priority court card with the most spies where Wakhan also has at least one spy'),
+        _c);
+    var topOfDeck = game.getWakhanCardInfo({ wakhanCardId: wakhanDeckCardId }).back;
+    var topOfDiscard = game.getWakhanCardInfo({ wakhanCardId: wakhanDiscardCardId }).front;
     return tplCardTooltipContainer({
-        card: "<div class=\"pp_wakhan_card_in_tooltip pp_".concat(wakhanCardId, "_").concat(side, "\"></div>"),
-        content: '',
+        card: "<div class=\"pp_wakhan_card_in_tooltip pp_".concat(wakhanDiscardCardId, "_front\"></div>"),
+        content: "\n    <span class=\"pp_title\">".concat(_('AI card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each turn Wakhan draws an AI card. The face-up card and the back of the card on top of the draw deck are used to make decisions for Wakhan."), "</span>\n    <span class=\"pp_section_title\">").concat(_('Pragmatic Loyalty'), "</span>\n    <div style=\"display: flex; flex-direction: row;\">\n      ").concat(topOfDiscard.pragmaticLoyalty.map(function (coalition) { return "<div class=\"pp_wakhan_icon pp_".concat(coalition, "\"></div>"); }).join(''), "\n    </div>\n    <span class=\"pp_section_title\">").concat(_('Wakhan\'s Actions'), "</span>\n    ").concat(topOfDiscard.actions.map(function (action) { return "<span class=\"pp_tooltip_text pp_wakhan_action\">".concat(WAKHAN_ACTION_DESCRIPTION[action], "</span>"); }).join(''), "\n    <span class=\"pp_section_title\">").concat(_('Arrows'), "</span>\n    <div style=\"display: flex; flex-direction: row; justify-content: space-evenly;\">\n      <div style=\"display: flex; flex-direction: row; align-items: center;\">\n        <span class=\"pp_section_title\" style=\"margin: 0px;\">").concat(WAKHAN_ARROW_DESCRIPTION[topOfDeck.rowSide[topOfDiscard.rowSideArrow]], "</span>\n        <div class=\"pp_wakhan_icon pp_red_arrow\" style=\"margin-left: -6px;\"></div>\n      </div>\n      <div style=\"display: flex; flex-direction: row; align-items: center;\">\n        <span class=\"pp_title\" style=\"margin: 0px; font-size: xx-large;\">").concat(topOfDeck.columnNumbers[topOfDiscard.columnArrow], "</span>\n        <div class=\"pp_wakhan_icon pp_black_arrow\" style=\"margin-left: 6px;\"></div>\n      </div>\n    </div>\n    <span class=\"pp_section_title\">").concat(_('Region Priority'), "</span>\n    <div style=\"display: flex; flex-direction: row;\">\n      ").concat(topOfDiscard.regionOrder.map(function (region) { return "<div class=\"pp_wakhan_icon pp_region_icon pp_".concat(region, "\"></div>"); }).join(''), "\n    </div>\n    "),
     });
 };
 var PPTooltipManager = (function () {
@@ -1455,9 +1502,11 @@ var PPTooltipManager = (function () {
         }
     };
     PPTooltipManager.prototype.addWakhanCardTooltip = function (_a) {
-        var wakhanCardId = _a.wakhanCardId, location = _a.location;
-        var html = tplWakhanCardTooltip({ wakhanCardId: wakhanCardId, side: location === 'deck' ? 'back' : 'front' });
-        this.game.framework().addTooltipHtml("pp_wakhan_".concat(location), html, 500);
+        var wakhanDeckCardId = _a.wakhanDeckCardId, wakhanDiscardCardId = _a.wakhanDiscardCardId;
+        var html = tplWakhanCardTooltip({ wakhanDeckCardId: wakhanDeckCardId, wakhanDiscardCardId: wakhanDiscardCardId, game: this.game });
+        var tooltip = this.game.framework().addTooltipHtml("pp_wakhan_deck", html, 500);
+        console.log('tooltips', this.game.tooltips['pp_wakhan_deck']);
+        this.game.framework().addTooltipHtml("pp_wakhan_discard", html, 500);
     };
     PPTooltipManager.prototype.setupTooltips = function () {
         this.setupCardCounterTooltips();
@@ -2175,7 +2224,6 @@ var PPPlayer = (function () {
         if (wakhanCards.deck.topCard !== null) {
             var wakhanCardId = wakhanCards.deck.topCard.id;
             deckNode.classList.add("pp_".concat(wakhanCardId, "_back"));
-            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCardId, location: 'deck' });
         }
         else {
             deckNode.style.opacity = '0';
@@ -2184,10 +2232,15 @@ var PPPlayer = (function () {
         if (wakhanCards.discardPile.topCard) {
             discardNode.classList.value = '';
             discardNode.classList.add('pp_wakhan_card', "pp_".concat(wakhanCards.discardPile.topCard.id, "_front"));
-            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: wakhanCards.discardPile.topCard.id, location: 'discard' });
         }
         else {
             discardNode.style.opacity = '0';
+        }
+        if (wakhanCards.deck.topCard && wakhanCards.discardPile.topCard) {
+            this.game.tooltipManager.addWakhanCardTooltip({
+                wakhanDeckCardId: wakhanCards.deck.topCard.id,
+                wakhanDiscardCardId: wakhanCards.discardPile.topCard.id,
+            });
         }
     };
     PPPlayer.prototype.clearInterface = function () {
@@ -4917,7 +4970,7 @@ var ClientInitialBribeCheckState = (function () {
             });
         }
         var _loop_1 = function (i) {
-            if (i > maxAvailableRupees) {
+            if (i > maxAvailableRupees || bribee.isWakhan()) {
                 return "continue";
             }
             this_1.game.addPrimaryActionButton({
@@ -4946,7 +4999,7 @@ var ClientInitialBribeCheckState = (function () {
                 callback: function () { return next({ bribe: null }); },
             });
         }
-        else {
+        else if (!bribee.isWakhan()) {
             this.game.addPrimaryActionButton({
                 id: "ask_waive_btn",
                 text: _('Ask to waive'),
@@ -7109,11 +7162,8 @@ var NotificationManager = (function () {
                             discardNode.classList.replace("pp_".concat(discardPile.from, "_front"), "pp_".concat(discardPile.to, "_front"));
                             element.remove();
                         }
-                        if (deck.to) {
-                            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: deck.to, location: 'deck' });
-                        }
-                        if (discardPile.to) {
-                            this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId: discardPile.to, location: 'discard' });
+                        if (deck.to && discardPile.to) {
+                            this.game.tooltipManager.addWakhanCardTooltip({ wakhanDeckCardId: deck.to, wakhanDiscardCardId: discardPile.to });
                         }
                         return [2];
                 }
@@ -7481,6 +7531,10 @@ var PaxPamir = (function () {
     PaxPamir.prototype.getCardInfo = function (_a) {
         var cardId = _a.cardId;
         return this.gamedatas.staticData.cards[cardId];
+    };
+    PaxPamir.prototype.getWakhanCardInfo = function (_a) {
+        var wakhanCardId = _a.wakhanCardId;
+        return this.gamedatas.staticData.wakhanCards[wakhanCardId];
     };
     PaxPamir.prototype.getPlayerId = function () {
         return Number(this.framework().player_id);

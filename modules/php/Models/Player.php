@@ -28,9 +28,10 @@ class Player extends \PaxPamir\Helpers\DB_Model
     'color' => 'player_color',
     'eliminated' => 'player_eliminated',
     'score' => ['player_score', 'int'],
+    'scoreAux' => ['player_score_aux', 'int'],
     'zombie' => 'player_zombie',
-    // 'loyalty' => 'loyalty',
-    // 'rupees' => ['rupees', 'int'],
+    'loyalty' => 'loyalty',
+    'rupees' => ['rupees', 'int'],
   ];
 
   /*

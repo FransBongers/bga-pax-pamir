@@ -205,7 +205,7 @@ class Paxpamir extends Table
             $playerId = $player->getId();
             if ($playerId === WAKHAN_PLAYER_ID) {
                 continue;
-              }
+            }
             $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
                 'transition' => 'playerSetup',
                 'giveExtraTime' => true,
@@ -504,6 +504,40 @@ class Paxpamir extends Table
      */
     function upgradeTableDb($from_version)
     {
+        if ($from_version <= 2308232239) {
+            // ! important ! Use DBPREFIX_<table_name> for all tables
+
+            // $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+            $sql = ""
+                . "CREATE TABLE IF NOT EXISTS `DBPREFIX_player_extra` ("
+                . "`player_id` int(10) unsigned NOT NULL,"
+                . "`player_name` varchar(32) NOT NULL,"
+                . "`player_avatar` varchar(10) NOT NULL,"
+                . "`player_hex_color` varchar(6) NOT NULL,"
+                . "`player_color` varchar(6) NOT NULL,"
+                . "`player_no` int(10) NOT NULL,"
+                . "`player_score` int(10) NOT NULL DEFAULT '0',"
+                . "`player_score_aux` int(10) NOT NULL DEFAULT '0',"
+                . "`player_rupees` int(10) unsigned NOT NULL DEFAULT 0,"
+                . "`player_loyalty` varchar(32),"
+                . "PRIMARY KEY (`player_id`)"
+                . ") ENGINE = InnoDB DEFAULT CHARSET = utf8;";
+            self::applyDbUpgradeToAllDB($sql);
+
+            $sql = ""
+                . "CREATE TABLE IF NOT EXISTS `wakhan_cards` ("
+                . "`wakhan_card_id` varchar(32) NOT NULL,"
+                . "`wakhan_card_location` varchar(32) NOT NULL,"
+                . "`wakhan_card_state` int(10) DEFAULT 0,"
+                . "PRIMARY KEY (`wakhan_card_id`)"
+                . ") ENGINE = InnoDB DEFAULT CHARSET = utf8;";
+            self::applyDbUpgradeToAllDB($sql);
+            $players = Players::getAll();
+            foreach (Players::getAll() as $playerId => $player) {
+                PaxPamirPlayers::setupPlayer($player, $player->getScore(), $player->getScoreAux(), $player->getRupees(), $player->getLoyalty());
+            };
+        }
+
         // Notifications::log('fromVersion',$from_version);
         // Globals::setFromVersion('version');
 

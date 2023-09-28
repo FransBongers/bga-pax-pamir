@@ -53,7 +53,8 @@ trait DebugTrait
   {
     // $this->wakhanMove();
     // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
-    Notifications::log('getFromVersion',Globals::getFromVersion());
+    $players = Players::getAll();
+    Notifications::log('players',$players);
     // Cards::setUsed('card_81',0);
     // Cards::move('card_108',Locations::market(0,0));
     // Cards::move('card_45',DISCARD);

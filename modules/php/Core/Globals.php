@@ -179,7 +179,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setOpenHands(($options[\PaxPamir\OPTION_OPEN_HANDS] ?? null) == \PaxPamir\OPTION_OPEN_HANDS_ENABLED);
     $optionWakhan = $options[\PaxPamir\OPTION_WAKHAN] ?? 'null';
     self::setWakhanOption($optionWakhan);
-    self::setWakhanEnabled(in_array($optionWakhan, [\PaxPamir\OPTION_WAKHAN_BASIC, \PaxPamir\OPTION_WAKHAN_IMPROVED, \PaxPamir\OPTION_WAKHAN_CUSTOM]));
+    self::setWakhanEnabled(in_array($optionWakhan, [\PaxPamir\OPTION_WAKHAN_BASIC, \PaxPamir\OPTION_WAKHAN_IMPROVED, \PaxPamir\OPTION_WAKHAN_CUSTOM]) || count($players) === 1);
     self::setWakhanAutoResolve(($options[\PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE] ?? null) == \PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE_ENABLED);
 
     $optionImprovedWakhan = $optionWakhan == \PaxPamir\OPTION_WAKHAN_IMPROVED;

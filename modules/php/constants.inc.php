@@ -49,7 +49,21 @@ const COLOR_MAP = [
   'D7A461' => 'yellow',
   '7A6E66' => 'gray',
   '231F20' => 'black',
-  '8A70B2' => 'purple'
+  '8A70B2' => 'purple',
+  // original colors
+  '98B3C0' => 'blue',
+  'C19B9E' => 'red',
+  'DFCFB6' => 'yellow',
+  'B9B6B1' => 'gray',
+  '807F7F' => 'black',
+];
+
+const DB_UPGRADE_COLOR_MAP = [
+  '98B3C0' => '006A8F',
+  'C19B9E' => 'AB2C29',
+  'DFCFB6' => 'D7A461',
+  'B9B6B1' => '7A6E66',
+  '807F7F' => '231F20',
 ];
 
 

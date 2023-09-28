@@ -504,10 +504,10 @@ class Paxpamir extends Table
      */
     function upgradeTableDb($from_version)
     {
-        if ($from_version <= 2308232239) {
+        // if ($from_version <= 2308232239) {
             // ! important ! Use DBPREFIX_<table_name> for all tables
 
-            // $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
             $sql = ""
                 . "CREATE TABLE IF NOT EXISTS `DBPREFIX_player_extra` ("
                 . "`player_id` int(10) unsigned NOT NULL,"
@@ -532,11 +532,11 @@ class Paxpamir extends Table
                 . "PRIMARY KEY (`wakhan_card_id`)"
                 . ") ENGINE = InnoDB DEFAULT CHARSET = utf8;";
             self::applyDbUpgradeToAllDB($sql);
-            $players = Players::getAll();
+
             foreach (Players::getAll() as $playerId => $player) {
-                PaxPamirPlayers::setupPlayer($player, $player->getScore(), $player->getScoreAux(), $player->getRupees(), $player->getLoyalty());
+                PaxPamirPlayers::setupPlayer($player, $player->getScore(), $player->getScoreAux(), $player->getRupees(), $player->getLoyalty(), true);
             };
-        }
+        // }
 
         // Notifications::log('fromVersion',$from_version);
         // Globals::setFromVersion('version');

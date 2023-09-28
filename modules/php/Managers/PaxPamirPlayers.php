@@ -23,14 +23,14 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
   }
 
   // setup player. Arguments for score, score_aux, rupees, loyalty added so we can use function for db upgrade for games in progress
-  public static function setupPlayer($player, $player_score = 0, $player_score_aux = 0, $player_rupees = 4, $player_loyalty = null)
+  public static function setupPlayer($player, $player_score = 0, $player_score_aux = 0, $player_rupees = 4, $player_loyalty = null, $dbUpgrade = false)
   {
     $playerId = $player->getId();
     self::DB()->insert([
       'player_id' => $playerId,
       'player_name' => $player->getName(),
       'player_avatar' => $player->getAvatar(),
-      'player_hex_color' => $player->getColor(),
+      'player_hex_color' => !$dbUpgrade ? $player->getColor() : DB_UPGRADE_COLOR_MAP[$player->getColor()],
       'player_color' => COLOR_MAP[$player->getColor()],
       'player_no' => $player->getNo(),
       'player_score' => $player_score,
@@ -39,7 +39,9 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
       'player_loyalty' => $player_loyalty
     ]);
 
-    self::setupTokens($playerId);
+    if (!$dbUpgrade) {
+      self::setupTokens($playerId);
+    }
   }
 
   public static function setupTokens($pId)

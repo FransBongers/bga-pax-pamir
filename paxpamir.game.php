@@ -504,7 +504,7 @@ class Paxpamir extends Table
      */
     function upgradeTableDb($from_version)
     {
-        // if ($from_version <= 2308232239) {
+        if ($from_version <= 2308232239) {
             // ! important ! Use DBPREFIX_<table_name> for all tables
 
             $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
@@ -536,7 +536,7 @@ class Paxpamir extends Table
             foreach (Players::getAll() as $playerId => $player) {
                 PaxPamirPlayers::setupPlayer($player, $player->getScore(), $player->getScoreAux(), $player->getRupees(), $player->getLoyalty(), true);
             };
-        // }
+        }
 
         // Notifications::log('fromVersion',$from_version);
         // Globals::setFromVersion('version');

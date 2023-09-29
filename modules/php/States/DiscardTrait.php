@@ -9,7 +9,7 @@ use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 
 trait DiscardTrait
@@ -70,7 +70,7 @@ trait DiscardTrait
       throw new \feException("Card does not have the required loyalty");
     }
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     $explodedLocation = explode('_', $card['location']);
@@ -79,6 +79,7 @@ trait DiscardTrait
     }
 
     $this->resolveDiscardCard($card, $player, $from);
+    $this->nextState('dispatchAction');
   }
 
   // .########..####..######..########.....###....########..######..##.....##
@@ -113,7 +114,7 @@ trait DiscardTrait
     $playerId = $next['playerId'];
     $from = $next['data']['from'];
     $loyalty = isset($next['data']['loyalty']) ? $next['data']['loyalty'] : null;
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
     $data = $next['data'];
 
     // Determine if there are cards left to discard
@@ -131,13 +132,16 @@ trait DiscardTrait
     }
     // If cards available transition to discard state
     // otherwise cancel action and continue to next action
-    if ($availableCards > 0) {
+    if ($availableCards > 0 && $playerId === WAKHAN_PLAYER_ID) {
+      // TODO: add logic to discard card
+      array_pop($actionStack);
+      ActionStack::next($actionStack);
+    } else if ($availableCards > 0) {
       // ActionStack::set($actionStack);
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);
-      ActionStack::set($actionStack);
-      $this->nextState('dispatchAction');
+      ActionStack::next($actionStack);
     }
   }
 
@@ -152,7 +156,7 @@ trait DiscardTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $courtCards = $player->getCourtCards();
     // $loyalty =  $player->getLoyalty();
@@ -163,7 +167,6 @@ trait DiscardTrait
       $checkSuit = isset($data['suit']) ? $data['suit'] === $card['suit'] : true;
       $checkRegion = isset($data['region']) ? $data['region'] === $card['region'] : true;
       return $checkLoyalty && $checkSuit && $checkRegion;
-      // return $card['loyalty'] !== null && $card['loyalty'] === $loyalty;
     });
 
     // 1. Player has no cards of type, so next action can be resolved
@@ -176,14 +179,14 @@ trait DiscardTrait
     $hasCardsWithLeverage = Utils::array_some($cardsToDiscard, function ($card) {
       return in_array(LEVERAGE, $card['impactIcons']);
     });
-    // Transition to discard step where player needs to select patriots
-    if ($hasCardsWithLeverage) {
+    // Transition to discard step where player needs to select cards one by one
+    if ($hasCardsWithLeverage && !$player->isWakhan()) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, array_merge($data, ['from' => [COURT]]));
       ActionStack::set($actionStack);
       $this->nextState('dispatchAction');
       return;
     }
-    // 3. Discard all patriots
+    // 3. Discard all cards
     array_pop($actionStack);
     foreach ($cardsToDiscard as $index => $card) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $playerId, [
@@ -227,8 +230,6 @@ trait DiscardTrait
     if ($from === COURT) {
       $this->checkLeverage($card, $cardOwner);
     }
-
-    $this->nextState('dispatchAction');
   }
 
   /**
@@ -243,12 +244,12 @@ trait DiscardTrait
     $rupees = $player->getRupees();
     $amountOfRupeesToReturn = min($rupees, 2);
     if ($amountOfRupeesToReturn > 0) {
-      Players::incRupees($player->getId(), -$amountOfRupeesToReturn);
+      PaxPamirPlayers::incRupees($player->getId(), -$amountOfRupeesToReturn);
       Notifications::returnRupeesForDiscardingLeveragedCard($player, $amountOfRupeesToReturn);
     }
 
     $additionalDiscards = 2 - $amountOfRupeesToReturn;
-    if ($additionalDiscards === 0) {
+    if ($additionalDiscards === 0 || $player->isWakhan()) {
       return;
     }
     Notifications::additionalDiscardsForDiscardingLeveragedCard($player, $additionalDiscards);
@@ -294,21 +295,4 @@ trait DiscardTrait
     };
     Notifications::returnAllSpies($player,$cardId, $spies);
   }
-
-  // function reassignCourtState($playerId = null)
-  // {
-  //   $player = Players::get($playerId);
-  //   $courtCards = $player->getCourtCards();
-  //   $courtCardStates = [];
-  //   foreach ($courtCards as $index => $card) {
-  //     $cardId = $card['id'];
-  //     $state = $index + 1;
-  //     Cards::setState($cardId, $state);
-  //     $courtCardStates[] = [
-  //       'cardId' => $cardId,
-  //       'state' => $state,
-  //     ];
-  //   };
-  //   Notifications::updateCourtCardStates($courtCardStates, $player->getId());
-  // }
 }

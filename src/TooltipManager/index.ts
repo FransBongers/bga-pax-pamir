@@ -17,11 +17,11 @@
 class PPTooltipManager {
   private game: PaxPamirGame;
 
-  constructor(game) {
+  constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string; }): void {
+  public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string }): void {
     const cardInfo = this.game.getCardInfo({ cardId });
     if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({ cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
@@ -30,6 +30,15 @@ class PPTooltipManager {
       const html = tplEventCardTooltip({ cardId, cardInfo });
       this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     }
+  }
+
+  public addWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }: { wakhanDeckCardId: string; wakhanDiscardCardId: string; }): void {
+    const html = tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId, game: this.game });
+    const tooltip = this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);
+    console.log('tooltips',(this.game as any).tooltips['pp_wakhan_deck']);
+    this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
+    
+    // dojo.place(tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }), 'game_play_area');
   }
 
   // Function for setup of generic tooltips as last step of setup

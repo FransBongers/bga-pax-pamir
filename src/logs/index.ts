@@ -3,6 +3,7 @@ const LOG_TOKEN_CARD = 'card';
 const LOG_TOKEN_CARD_ICON = 'cardIcon';
 const LOG_TOKEN_CARD_NAME = 'cardName';
 const LOG_TOKEN_COALITION = 'coalition';
+const LOG_TOKEN_COALITION_BLACK = 'coalitionBlack';
 const LOG_TOKEN_COALITION_NAME = 'coalitionName';
 const LOG_TOKEN_CYLINDER = 'cylinder';
 const LOG_TOKEN_FAVORED_SUIT = 'favoredSuit';
@@ -13,6 +14,18 @@ const LOG_TOKEN_PLAYER_NAME = 'playerName';
 const LOG_TOKEN_REGION_NAME = 'regionName';
 const LOG_TOKEN_ROAD = 'road';
 const LOG_TOKEN_RUPEE = 'rupee';
+
+const getTokenDiv = ({key, value, game}: {key: string; value: string; game: PaxPamirGame;}) => {
+  const splitKey = key.split('_');
+  const type = splitKey[1];
+  switch (type) {
+    case LOG_TOKEN_PLAYER_NAME:
+      const player = game.playerManager.getPlayers().find((player) => player.getName() === value);
+      return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
+    default:
+      return value;
+  }
+}
 
 const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGame }) => {
   const [type, data] = logToken.split(':');
@@ -33,6 +46,8 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
       return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(data) }).getColor() });
     case LOG_TOKEN_COALITION:
       return tplLogTokenCoalition({ coalition: data });
+    case LOG_TOKEN_COALITION_BLACK:
+      return tplLogTokenCoalition({ coalition: data, black: true });
     case LOG_TOKEN_COALITION_NAME:
       return tlpLogTokenBoldText({ text: game.gamedatas.staticData.loyalty[data].name });
     case LOG_TOKEN_LEVERAGE:
@@ -41,7 +56,7 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
       return '<br>';
     case LOG_TOKEN_PLAYER_NAME:
       const player = game.playerManager.getPlayer({ playerId: Number(data) });
-      return tplLogTokenPlayerName({ name: player.getName(), color: player.getColor() });
+      return tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() });
     case LOG_TOKEN_REGION_NAME:
       return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[data].name, regionId: data });
     case LOG_TOKEN_ROAD:
@@ -60,7 +75,8 @@ const tlpLogTokenBoldText = ({ text }) => `<span style="font-weight: 700;">${_(t
 const tplLogTokenCard = ({ cardId, large }: { cardId: string; large?: boolean }) =>
   `<div class="pp_card pp_log_token pp_${cardId}${large ? ' pp_large' : ''}"></div>`;
 
-const tplLogTokenCoalition = ({ coalition }: { coalition: string }) => `<div class="pp_log_token pp_loyalty_icon pp_${coalition}"></div>`;
+const tplLogTokenCoalition = ({ coalition, black }: { coalition: string; black?: boolean }) =>
+  `<div class="pp_log_token pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`;
 
 const tplLogTokenCylinder = ({ color }: { color: string }) => `<div class="pp_cylinder pp_player_color_${color} pp_log_token"></div>`;
 

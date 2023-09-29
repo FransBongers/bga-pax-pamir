@@ -1,7 +1,7 @@
 interface PlayerCounts {
   cards: number;
   cylinders: number;
-  influence: number;
+  influence: PlayerInfluence | WakhanInfluence;
   rupees: number; // TODO (Frans): return as Number
   suits: {
     economic: number;
@@ -41,6 +41,21 @@ interface EventCard {
     description: string;
   };
   type: 'eventCard';
+}
+
+interface WakhanCard {
+  id: string;
+  back: {
+    columnNumbers: number[];
+    rowSide: string[];
+  },
+  front: {
+    actions: string[];
+    columnArrow: number;
+    pragmaticLoyalty: string[];
+    regionOrder: string[];
+    rowSideArrow: number;
+  }
 }
 
 // TODO(Frans): check what we need
@@ -95,6 +110,7 @@ interface PaxPamirGamedatas extends Gamedatas {
   };
   gameOptions: {
     openHands: boolean;
+    wakhanEnabled: boolean;
   };
   tempDiscardPile: Card | null;
   staticData: {
@@ -120,6 +136,9 @@ interface PaxPamirGamedatas extends Gamedatas {
     suits: {
       [suit: string]: Suit;
     };
+    wakhanCards: {
+      [wakhanCardId: string]: WakhanCard;
+    }
   };
   map: {
     borders: Record<string, BorderGamedatas>;
@@ -138,8 +157,21 @@ interface PaxPamirGamedatas extends Gamedatas {
     cards: Token[][];
     rupees: Token[];
   };
-  players: Record<number, PaxPamirPlayer>;
+  paxPamirPlayerOrder: number[];
+  paxPamirPlayers: Record<number, PaxPamirPlayer>;
+  players: Record<number, BgaPlayer>;
   localState: LocalState;
+  wakhanCards?: {
+    deck: {
+      cardCount: number;
+      topCard: null | WakhanCard;
+    },
+    discardPile: {
+      cardCount: number;
+      topCard: null | WakhanCard;
+    }
+  }
+  wakhanPragmaticLoyalty?: string | null;
   // rupees: Token[];
 }
 
@@ -182,6 +214,7 @@ interface PaxPamirGame extends Game {
   objectManager: ObjectManager;
   playerManager: PlayerManager;
   playerCounts: Record<string, number>;
+  playerOrder: number[];
   spies: {
     [cardId: string]: PaxPamirZone;
   };
@@ -202,6 +235,7 @@ interface PaxPamirGame extends Game {
   getCurrentPlayer: () => PPPlayer;
   getMinimumActionCost: (props: {action: string;}) => number | null;
   getPlayerId: () => number;
+  getWakhanCardInfo: ({wakhanCardId}: {wakhanCardId: string;}) => WakhanCard;
   getZoneForLocation: ({ location }: { location: string }) => PaxPamirZone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
@@ -230,7 +264,8 @@ interface PaxPamirPlayer extends BgaPlayer {
       [cylinderId: string]: Token;
     }
   >;
-  hand: Token[]; // Will only contain cards if player is current player (or with open hands variant?)
+  hand: Token[]; // Will only contain cards if player is current player (or with open hands variant)
+  hexColor: string;
   events: (EventCard & Token)[];
   loyalty: string;
   rupees: number;

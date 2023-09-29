@@ -10,12 +10,51 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Models\PaxPamirPlayer;
 
 trait ChangeLoyaltyTrait
 {
 
+  //  .########..##..........###....##....##.########.########.
+  //  .##.....##.##.........##.##....##..##..##.......##.....##
+  //  .##.....##.##........##...##....####...##.......##.....##
+  //  .########..##.......##.....##....##....######...########.
+  //  .##........##.......#########....##....##.......##...##..
+  //  .##........##.......##.....##....##....##.......##....##.
+  //  .##........########.##.....##....##....########.##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
+
+  /**
+   * Part of set up when players need to select loyalty.
+   */
+  function chooseLoyalty($coalition)
+  {
+    self::checkAction('chooseLoyalty');
+
+    $player = PaxPamirPlayers::get();
+    $playerId = $player->getId();
+
+    $actionStack = ActionStack::get();
+    $action = array_pop($actionStack);
+
+    if ($action['playerId'] !== $playerId) {
+      throw new \feException("Not a valid action for player");
+    }
+
+    PaxPamirPlayers::setLoyalty($playerId, $coalition);
+    Notifications::setupLoyalty($player,$coalition);
+
+    ActionStack::next($actionStack);
+  }
 
   // .########..####..######..########.....###....########..######..##.....##
   // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
@@ -42,7 +81,7 @@ trait ChangeLoyaltyTrait
     $coalition = $action['data']['coalition'];
 
     // Players::get($playerId)->setLoyalty($coalition);
-    Players::setLoyalty($playerId, $coalition);
+    PaxPamirPlayers::setLoyalty($playerId, $coalition);
 
     Notifications::changeLoyalty($coalition);
 
@@ -50,7 +89,7 @@ trait ChangeLoyaltyTrait
     foreach (Game::get()->regions as $region => $regionInfo) {
       Map::checkRulerChange($region);
     }
-    
+
 
     $this->nextState('dispatchAction');
   }
@@ -66,7 +105,7 @@ trait ChangeLoyaltyTrait
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $courtCards = $player->getCourtCards();
     $loyalty =  $player->getLoyalty();
@@ -172,7 +211,7 @@ trait ChangeLoyaltyTrait
       }
       $to = 'cylinders_' . $playerId;
       $state = Tokens::insertOnTop($tokenInLocation['id'], $to);
-      Notifications::returnCylinder(Players::get($playerId), $playerId, $location, $tokenInLocation['id'], $state, 'returnGift');
+      Notifications::returnCylinder(PaxPamirPlayers::get($playerId), $playerId, $location, $tokenInLocation['id'], $state, 'returnGift');
     };
   }
 

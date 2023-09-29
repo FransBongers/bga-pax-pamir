@@ -1,30 +1,5 @@
 {OVERALL_GAME_HEADER}
 
-<!-- 
---------
--- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- Paxpamir implementation : © Frans Bongers <fjmbongers@gmail.com>
--- 
--- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
--- See http://en.boardgamearena.com/#!doc/Studio for more information.
--------
-
-    paxpamir_paxpamir.tpl
-    
-    This is the HTML template of your game.
-    
-    Everything you are writing in this file will be displayed in the HTML page of your game user interface,
-    in the "main game zone" of the screen.
-    
-    You can use in this template:
-    _ variables, with the format {MY_VARIABLE_ELEMENT}.
-    _ HTML block, with the BEGIN/END format
-    
-    See your "view" PHP file to check how to set variables and control blocks
-    
-    Please REMOVE this comment before publishing your game on BGA
--->
-
 <div id="pp_play_area">
     <div id="pp_map">
         <!-- alternative solution with clip-path
@@ -144,83 +119,12 @@
 
 
     <div id="pp_player_tableaus">
-        <div id="pp_active_events_container">
-              <div id="pp_active_events_title" class="pp_tableau_title"><span>Active events</span></div>
-            <div id="pp_active_events" class="pp_active_events"></div>
-        </div>
-        <!-- BEGIN player_hand -->
-        <div id="pp_player_hand_{player_id}" class="pp_player_hand">
-            <div id="pp_player_hand_title" class="pp_tableau_title"><span>{player_name}'s hand</span></div>
-            <div id="pp_player_hand_cards" class="pp_player_hand_cards"></div>
-        </div>
-        <!-- END player_hand -->
-        <!-- BEGIN player_tableau -->
-        <div id="player_tableau_{player_id}" >
-            <div class="pp_player_tableau pp_player_color_{player_color}">
-                <div class="pp_tableau_left">
-                    <div id="pp_ruler_tokens_player_{player_id}" class="pp_ruler_tokens_player"></div>
-                    <div class="pp_loyalty_dial_section">
-                        <div id="pp_prizes_{player_id}" class="pp_prizes"></div>
-                        <div class="pp_loyalty_dial_container">
-                            <div id="pp_loyalty_dial_{player_id}" class="pp_loyalty_dial"></div>
-                            <div class="pp_loyalty_dial_cover pp_player_color_{player_color}"></div>
-                            <div id="pp_gift_2_{player_id}" class="pp_gift pp_gift_2">
-                                <div id="pp_gift_2_zone_{player_id}" class="pp_gift_zone"></div>
-                            </div>
-                            <div id="pp_gift_4_{player_id}" class="pp_gift pp_gift_4">
-                                <div id="pp_gift_4_zone_{player_id}" class="pp_gift_zone"></div>
-                            </div>
-                            <div id="pp_gift_6_{player_id}" class="pp_gift pp_gift_6">
-                                <div id="pp_gift_6_zone_{player_id}" class="pp_gift_zone"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pp_player_tableau_right">
-                    <div class="pp_player_tableau_title_container">
-                        <div id="pp_tableau_title_player_{player_id}" class="pp_player_tableau_title"><span>{player_name}'s court</span></div>
-                        <div id="pp_tableau_title_icons_player_{player_id}" class="pp_player_tableau_icons">
-                            <div id="rupees_tableau_{player_id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_{player_id}" class="pp_icon_count"><span id="rupee_count_tableau_{player_id}_counter"></span></div></div>
-                            <div id="cards_tableau_{player_id}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_{player_id}" class="pp_icon_count"><span id="card_count_tableau_{player_id}_counter"></span></div></div>
-                        </div>
-                    </div>
-                    <div class="pp_tableau_inner_container">
-                        <div class="pp_tableau_inner_left">
-                            <div id="pp_cylinders_player_{player_id}" class="pp_cylinders pp_cylinders_player_{player_id}"></div>
-                        </div>
-                        <div class="pp_tableau_inner_right">
-                            <div id="pp_court_player_{player_id}" class="pp_court pp_court_player_{player_id}"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="pp_player_events_container_{player_id}" class="pp_player_events_container">
-                <div id="player_tableau_events_{player_id}">
-                </div>
-            </div>
-        </div>
-    <!-- END player_tableau -->
     </div>
  </div>
 
 <script type="text/javascript">
 
 // Javascript HTML templates
-
-var jstpl_player_board = '\<div id="pp_player_board_${id}" class="pp_player_board">\
-    <div class="pp_icon_container">\
-        <div id="loyalty_icon_${id}" class="pp_icon pp_loyalty_icon"><div id="influence_${id}" class="pp_icon_count"><span id="influence_${id}_counter"></span></div></div>\
-        <div id="cylinders_${id}" class="pp_icon pp_cylinder_icon"><div id="cylinder_count_${id}" class="pp_icon_count"><span id="cylinder_count_${id}_counter"></span></div></div>\
-        <div id="rupees_${id}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${id}" class="pp_icon_count"><span id="rupee_count_${id}_counter"></span></div></div>\
-        <div id="cards_${id}" class="pp_icon pp_card_icon"><div id="card_count_${id}" class="pp_icon_count"><span id="card_count_${id}_counter"></span></div></div>\
-    </div>\
-    <div id="suits_${id}" class="pp_icon_container">\
-        <div class="pp_icon pp_suit_icon political"><div id="political_${id}" class="pp_icon_count"><span id="political_${id}_counter"></span></div></div>\
-        <div class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${id}" class="pp_icon_count"><span id="intelligence_${id}_counter"></span></div></div>\
-        <div class="pp_icon pp_suit_icon economic"><div id="economic_${id}" class="pp_icon_count"><span id="economic_${id}_counter"></span></div></div>\
-        <div class="pp_icon pp_suit_icon military"><div id="military_${id}" class="pp_icon_count"><span id="military_${id}_counter"></span></div></div>\
-    </div>\
-</div>';
 
 
 /*

@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
+use Paxpamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -38,7 +39,7 @@ trait RefillMarketTrait
    */
   function stRefillMarket()
   {
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     ActionStack::push([
       ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
@@ -109,16 +110,13 @@ trait RefillMarketTrait
 
   function dispatchRefillMarketDrawCards($actionStack)
   {
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     $cards = Cards::getOfTypeInLocation('card', 'market');
-    Notifications::log('cards', $cards);
 
     $dominanceCheckCards = Utils::filter($cards, function ($card) {
       return $this->isDominanceCheck($card);
     });
-
-    Notifications::log('$numberOfDominanceChecksInMarket', count($dominanceCheckCards));
 
     for ($column = 0; $column <= 5; $column++) {
       for ($row = 0; $row <= 1; $row++) {

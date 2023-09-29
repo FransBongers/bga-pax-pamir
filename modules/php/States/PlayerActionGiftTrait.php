@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -33,7 +34,7 @@ trait PlayerActionGiftTrait
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
-  function purchaseGift($value, $cardId,$offeredBribeAmount = null)
+  function purchaseGift($value, $cardId, $offeredBribeAmount = null)
   {
     self::checkAction('purchaseGift');
 
@@ -43,15 +44,15 @@ trait PlayerActionGiftTrait
     }
 
     $value = intval($value);
-    $player = Players::get();
-    $resolved = $this->resolveBribe($cardInfo, $player,GIFT, $offeredBribeAmount);
+    $player = PaxPamirPlayers::get();
+    $resolved = $this->resolveBribe($cardInfo, $player, GIFT, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
       return;
     }
     // Get player again, because bribe has been paid
     if ($offeredBribeAmount !== null && intval($offeredBribeAmount) > 0) {
-      $player = Players::get();
+      $player = PaxPamirPlayers::get();
     };
 
     $playerId = $player->getId();

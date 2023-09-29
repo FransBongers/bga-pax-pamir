@@ -43,6 +43,7 @@ interface Framework {
   placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;
   player_id: string;
   removeActionButtons: () => void;
+  removeTooltip: (nodeId: string) => void;
   restoreServerGameState: () => void;
   scoreCtrl: {
     [playerId: number | string]: Counter;

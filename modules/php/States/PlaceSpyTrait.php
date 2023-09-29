@@ -10,6 +10,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -101,7 +102,7 @@ trait PlaceSpyTrait
     }
 
     $specialAbility = $action['data']['specialAbility'];
-    if (!Players::get()->hasSpecialAbility($specialAbility)) {
+    if (!PaxPamirPlayers::get()->hasSpecialAbility($specialAbility)) {
       throw new \feException("Player does not have special ability");
     }
     $card = Cards::get($cardId);

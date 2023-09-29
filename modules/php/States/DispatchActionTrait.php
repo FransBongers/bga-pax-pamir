@@ -9,7 +9,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 
 trait DispatchActionTrait
@@ -38,6 +38,9 @@ trait DispatchActionTrait
 
     $next = $actionStack[count($actionStack) - 1];
     switch ($next['type']) {
+      case DISPATCH_ACCEPT_PRIZE_CHECK:
+        $this->dispatchAcceptPrizeCheck($actionStack);
+        break;
       case DISPATCH_CLEANUP_CHECK_COURT:
         $this->dispatchCleanupCheckCourt($actionStack);
         break;
@@ -89,9 +92,9 @@ trait DispatchActionTrait
       case DISPATCH_IMPACT_ICON_SPY:
         $this->dispatchResolveImpactIconSpy($actionStack);
         break;
-      // case DISPATCH_IMPACT_ICON_TRIBE:
-      //   $this->dispatchResolveImpactIconTribe($actionStack);
-      //   break;
+        // case DISPATCH_IMPACT_ICON_TRIBE:
+        //   $this->dispatchResolveImpactIconTribe($actionStack);
+        //   break;
       case DISPATCH_OVERTHROW_TRIBE:
         $this->dispatchOverthrowTribe($actionStack);
         break;
@@ -99,7 +102,7 @@ trait DispatchActionTrait
         $this->dispatchPayRupeesToMarket($actionStack);
         break;
       case DISPATCH_PLACE_ARMY:
-        $this->dispatchPlaceArmy($actionStack);      
+        $this->dispatchPlaceArmy($actionStack);
         break;
       case DISPATCH_PLACE_CYLINDER:
         $this->dispatchPlaceCylinder($actionStack);
@@ -113,14 +116,29 @@ trait DispatchActionTrait
       case DISPATCH_REFILL_MARKET_SHIFT_CARDS:
         $this->dispatchRefillMarketShiftCards($actionStack);
         break;
+      case DISPATCH_SA_SAFE_HOUSE:
+        $this->dispatchSASafeHouse($actionStack);
+        break;
       case DISPATCH_TRANSITION:
         $this->dispatchTransition($actionStack);
         break;
       case DISPATCH_UPDATE_INFLUENCE:
         $this->dispatchUpdateInfluence($actionStack);
         break;
-      case 'acceptPrizeCheck':
-        $this->dispatchAcceptPrizeCheck($actionStack);
+      case DISPATCH_WAKHAN_ACTIONS:
+        $this->dispatchWakhanActions($actionStack);
+        break;
+      case DISPATCH_WAKHAN_BONUS_ACTION:
+        $this->dispatchWakhanBonusAction($actionStack);
+        break;
+      case DISPATCH_WAKHAN_DRAW_AI_CARD:
+        $this->dispatchWakhanDrawAICard($actionStack);
+        break;
+      case DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS:
+        $this->dispatchWakhanSetupBonusActions($actionStack);
+        break;
+      case DISPATCH_WAKHAN_START_OF_TURN_ABILITIES:
+        $this->dispatchWakhanStartOfTurnAbilities($actionStack);
         break;
       case 'changeLoyalty':
         $this->dispatchChangeLoyalty($actionStack);
@@ -176,8 +194,12 @@ trait DispatchActionTrait
   function dispatchAcceptPrizeCheck($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
-    ActionStack::set($actionStack);
-    $this->nextState('acceptPrize', $next['playerId']);
+    if ($next['playerId'] === WAKHAN_PLAYER_ID) {
+      $this->wakhanAcceptPrize($actionStack);
+    } else {
+      ActionStack::set($actionStack);
+      $this->nextState('acceptPrize', $next['playerId']);
+    }
   }
 
   // TODO: replace with dispatchTransition
@@ -196,11 +218,12 @@ trait DispatchActionTrait
     $card = Cards::get($current['data']['cardId']);
     $this->resolveDiscardCard(
       $card,
-      Players::get($current['playerId']),
+      PaxPamirPlayers::get($current['playerId']),
       COURT,
       $card['prize'] !== null ? TEMP_DISCARD : DISCARD,
-      Players::get($current['data']['cardOwnerId'])
+      PaxPamirPlayers::get($current['data']['cardOwnerId'])
     );
+    $this->nextState('dispatchAction');
   }
 
   function dispatchDiscardSingleCard($actionStack)
@@ -209,12 +232,13 @@ trait DispatchActionTrait
     ActionStack::set($actionStack);
 
     $card = Cards::get($action['data']['cardId']);
-    $player = Players::get($action['playerId']);
+    $player = PaxPamirPlayers::get($action['playerId']);
     $from = $action['data']['from'];
     $to = $action['data']['to'];
-    $cardOwner = isset($action['data']['cardOwnerId']) ? Players::get($action['data']['cardOwnerId']) : null;
+    $cardOwner = isset($action['data']['cardOwnerId']) ? PaxPamirPlayers::get($action['data']['cardOwnerId']) : null;
 
     $this->resolveDiscardCard($card, $player, $from, $to, $cardOwner);
+    $this->nextState('dispatchAction');
   }
 
   // TODO: replace with dispatchTransition
@@ -233,16 +257,28 @@ trait DispatchActionTrait
     $this->changeLoyaltyReturnGiftsDiscardPrizes($action);
   }
 
+  /**
+   * Transition to next state. 
+   * Data:
+   * - pop: set to true if actions needs to be popped from stack. Will also pop if not set at all
+   * - giveExtraTime: set if player needs to receive extra time
+   */
   function dispatchTransition($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
+    $playerId = $next['playerId'];
+
     $popSet = isset($next['data']['pop']);
     if (!$popSet || ($popSet && $next['data']['pop'])) {
       array_pop($actionStack);
     }
+    $giveExtraTimeSet = isset($next['data']['giveExtraTime']);
+    if ($giveExtraTimeSet && $next['data']['giveExtraTime']) {
+      $this->giveExtraTime($playerId);
+    }
 
     ActionStack::set($actionStack);
-    $this->nextState($next['data']['transition'], $next['playerId']);
+    $this->nextState($next['data']['transition'], $playerId);
   }
 
   function dispatchUpdateInfluence($actionStack)

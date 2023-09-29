@@ -70,19 +70,19 @@
   margin-top: 5px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_afghan {
+.pp_log_token.pp_loyalty_icon.pp_afghan, .pp_log_token.pp_loyalty_icon_black.pp_afghan {
   height: 20px;
   width: 38px;
   padding-bottom: 0px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_british {
+.pp_log_token.pp_loyalty_icon.pp_british, .pp_log_token.pp_loyalty_icon_black.pp_british {
   height: 20px;
   width: 34px;
   padding-bottom: 0px;
 }
 
-.pp_log_token.pp_loyalty_icon.pp_russian {
+.pp_log_token.pp_loyalty_icon.pp_russian, .pp_log_token.pp_loyalty_icon_black.pp_russian {
   height: 20px;
   width: 35px;
   padding-bottom: 0px;
@@ -535,6 +535,11 @@
   flex-direction: row;
   align-items: flex-end;
   margin: 3px;
+  flex-wrap: wrap;
+}
+
+.pp_wakhan_avatar {
+  background-image: url("img/wakhan_avatar_32.jpeg");
 }
 
 .pp_icon {
@@ -548,20 +553,26 @@
   background-image: url("img/coalition_icons.webp");
   /* background-size: 132px 30px;  */
   /* background-position: -250px 0px; */
-  background-size: 300% 100%;
+  background-size: 600% 100%;
+  background-repeat: no-repeat;
+}
+
+.pp_loyalty_icon_black {
+  background-image: url("img/coalition_icons.webp");
+  background-size: 600% 100%;
   background-repeat: no-repeat;
 }
 
 .pp_loyalty_icon.pp_afghan {
   height: 25px;
   padding-bottom: 12px;
-  background-position-x: 0%;
+  background-position-x: 60%;
 }
 
 .pp_loyalty_icon.pp_british {
   height: 16px;
   padding-bottom: 22px;
-  background-position-x: 50%;
+  background-position-x: 80%;
 }
 
 .pp_loyalty_icon.pp_russian {
@@ -570,30 +581,52 @@
   background-position-x: 100%;
 }
 
+.pp_loyalty_icon_black.pp_afghan {
+  height: 25px;
+  padding-bottom: 12px;
+  background-position-x: 0%;
+}
+
+.pp_loyalty_icon_black.pp_british {
+  height: 16px;
+  padding-bottom: 22px;
+  background-position-x: 20%;
+}
+
+.pp_loyalty_icon_black.pp_russian {
+  height: 14px;
+  padding-bottom: 22px;
+  background-position-x: 40%;
+}
+
 .pp_cylinder_icon {
   background-image: url("img/cylinders.webp");
-  background-size: 500% 100%;
+  background-size: 600% 100%;
   height: 44px;
 }
 
-.pp_cylinder_icon.pp_player_color_98B3C0 {
-  background-position-x: 25%;
+.pp_cylinder_icon.pp_player_color_blue {
+  background-position-x: 20%;
 }
 
-.pp_cylinder_icon.pp_player_color_B9B6B1 {
-  background-position-x: 50%;
+.pp_cylinder_icon.pp_player_color_gray {
+  background-position-x: 40%;
 }
 
-.pp_cylinder_icon.pp_player_color_DFCFB6 {
-  background-position-x: 100%;
+.pp_cylinder_icon.pp_player_color_yellow {
+  background-position-x: 80%;
 }
 
-.pp_cylinder_icon.pp_player_color_C19B9E {
-  background-position-x: 75%;
+.pp_cylinder_icon.pp_player_color_red {
+  background-position-x: 60%;
 }
 
-.pp_cylinder_icon.pp_player_color_807F7F {
+.pp_cylinder_icon.pp_player_color_black {
   background-position-x: 0%;
+}
+
+.pp_cylinder_icon.pp_player_color_purple {
+  background-position-x: 100%;
 }
 
 .pp_player_board_rupee {
@@ -613,6 +646,21 @@
   background-position-y: 100%;
   margin-left: 16px;
   border-radius: 3px;
+}
+
+.pp_wakhan_deck_container {
+  display: flex;
+  padding-left: 10px;
+  z-index: 1;
+}
+
+.pp_wakhan_tableau_left {
+  display: flex;
+  flex-direction: column;
+}
+
+#pp_wakhan_deck {
+  margin-right: 10px;
 }
 
 .pp_player_hand {
@@ -670,28 +718,33 @@
 }
 
 /* Blue */
-.pp_player_tableau.pp_player_color_98B3C0 {
+.pp_player_tableau.pp_player_color_blue {
   background-color: #98B3C0;
 }
 
 /* Gray */
-.pp_player_tableau.pp_player_color_B9B6B1 {
+.pp_player_tableau.pp_player_color_gray {
   background-color: #B9B6B1;
 }
 
 /* Yellow / tan */
-.pp_player_tableau.pp_player_color_DFCFB6 {
+.pp_player_tableau.pp_player_color_yellow {
   background-color: #DFCFB6;
 }
 
 /* Red */
-.pp_player_tableau.pp_player_color_C19B9E {
+.pp_player_tableau.pp_player_color_red {
   background-color: #C19B9E;
 }
 
 /* Black */
-.pp_player_tableau.pp_player_color_807F7F {
+.pp_player_tableau.pp_player_color_black {
   background-color: #807F7F;
+}
+
+/* Black */
+.pp_player_tableau.pp_player_color_purple {
+  background-color: #C3B1D6;
 }
 
 .pp_tableau_inner_right {
@@ -749,17 +802,17 @@
 
 .pp_loyalty_dial.pp_afghan {
   transform: rotate(0deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial_cover {
@@ -778,6 +831,36 @@
   width: 40px;
   height: 40px;
   z-index: 1;
+}
+
+.pp_wakhan_gift {
+  background-image: url("img/gifts.webp");
+  border-radius: 50%;
+  background-size: 600% 100%;
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+}
+
+#pp_wakhan_gifts {
+  display: flex;
+  flex-direction: row;
+  height: 45px;
+  width: 150px;
+  margin-left: 10px;
+  justify-content: space-evenly;
+}
+
+.pp_wakhan_gift_2 {
+  background-position: 60%;
+}
+
+.pp_wakhan_gift_4 {
+  background-position: 80%;
+}
+
+.pp_wakhan_gift_6 {
+  background-position: 100%;
 }
 
 .pp_gift.pp_selectable {
@@ -810,27 +893,27 @@
 }
 
 /* Blue */
-.pp_loyalty_dial_cover.pp_player_color_98B3C0 {
+.pp_loyalty_dial_cover.pp_player_color_blue {
   background-position-x: 25%;
 }
 
 /* Gray */
-.pp_loyalty_dial_cover.pp_player_color_B9B6B1 {
+.pp_loyalty_dial_cover.pp_player_color_gray {
   background-position-x: 50%;
 }
 
 /* Yellow / tan */
-.pp_loyalty_dial_cover.pp_player_color_DFCFB6 {
+.pp_loyalty_dial_cover.pp_player_color_yellow {
   background-position-x: 100%;
 }
 
 /* Red */
-.pp_loyalty_dial_cover.pp_player_color_C19B9E {
+.pp_loyalty_dial_cover.pp_player_color_red {
   background-position-x: 75%;
 }
 
 /* Black */
-.pp_loyalty_dial_cover.pp_player_color_807F7F {
+.pp_loyalty_dial_cover.pp_player_color_black {
   background-position-x: 0%;
 }
 
@@ -1141,6 +1224,17 @@
   text-align: left;
   font-size: small;
 }
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_tooltip_text {
+  text-align: left;
+  font-size: small;
+}
+.pp_card_tooltip .pp_card_tooltip_inner_container .pp_wakhan_action {
+  border-radius: 4px;
+  text-align: center;
+  border: 2px solid #E5927A;
+  margin-bottom: 8px;
+  padding: 2px;
+}
 .pp_card_tooltip .pp_card_tooltip_inner_container .pp_flavor_text {
   text-align: left;
   font-size: small;
@@ -1157,6 +1251,52 @@
   background-size: 240px 334px;
   box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
+}
+
+.pp_wakhan_card_in_tooltip {
+  margin-right: -100px;
+  margin-left: 8px;
+  align-self: center;
+  width: 240px;
+  height: 334px;
+  background-size: 240px 334px;
+  box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  background-size: 800% 700%;
+  background-image: url(img/wakhan_cards.webp);
+  border: 1px solid black;
+  box-sizing: border-box;
+}
+
+.pp_wakhan_icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background-image: url("img/wakhan_icons.webp");
+  /* background-size: 132px 30px;  */
+  /* background-position: -250px 0px; */
+  background-size: 500% 100%;
+  background-repeat: no-repeat;
+}
+
+.pp_wakhan_icon.pp_black_arrow {
+  background-position-x: 0%;
+}
+
+.pp_wakhan_icon.pp_red_arrow {
+  background-position-x: 100%;
+}
+
+.pp_wakhan_icon.pp_afghan {
+  background-position-x: 25%;
+}
+
+.pp_wakhan_icon.pp_british {
+  background-position-x: 50%;
+}
+
+.pp_wakhan_icon.pp_russian {
+  background-position-x: 75%;
 }
 
 /**
@@ -1227,15 +1367,15 @@ html {
 }
 
 #pp_dominant_coalition_banner.pp_afghan {
-  background-color: #5fc89e;
+  background-color: #58c1a6;
 }
 
 #pp_dominant_coalition_banner.pp_british {
-  background-color: #eb97d1;
+  background-color: #e8a9cc;
 }
 
 #pp_dominant_coalition_banner.pp_russian {
-  background-color: #f3f35a;
+  background-color: #f7f079;
 }
 
 #pp_coalition_blocks_container {
@@ -1441,7 +1581,7 @@ html {
 
 .pp_cylinder {
   background-image: url("img/cylinders.webp");
-  background-size: 500% 100%;
+  background-size: 600% 100%;
   background-repeat: no-repeat;
   height: 30px;
   width: 30px;
@@ -1459,24 +1599,28 @@ html {
   cursor: pointer;
 }
 
-.pp_cylinder.pp_player_color_98B3C0 {
-  background-position-x: 25%;
+.pp_cylinder.pp_player_color_blue {
+  background-position-x: 20%;
 }
 
-.pp_cylinder.pp_player_color_B9B6B1 {
-  background-position-x: 50%;
+.pp_cylinder.pp_player_color_gray {
+  background-position-x: 40%;
 }
 
-.pp_cylinder.pp_player_color_DFCFB6 {
-  background-position-x: 100%;
+.pp_cylinder.pp_player_color_yellow {
+  background-position-x: 80%;
 }
 
-.pp_cylinder.pp_player_color_C19B9E {
-  background-position-x: 75%;
+.pp_cylinder.pp_player_color_red {
+  background-position-x: 60%;
 }
 
-.pp_cylinder.pp_player_color_807F7F {
+.pp_cylinder.pp_player_color_black {
   background-position-x: 0%;
+}
+
+.pp_cylinder.pp_player_color_purple {
+  background-position-x: 100%;
 }
 
 #pp_market_board {
@@ -1706,15 +1850,15 @@ html {
 
 /* BUTTONS */
 #afghan_button {
-  background-color: #5fc89e;
+  background-color: #58c1a6;
 }
 
 #british_button {
-  background-color: #eb97d1;
+  background-color: #e8a9cc;
 }
 
 #russian_button {
-  background-color: #f3f35a;
+  background-color: #f7f079;
 }
 
 .loyalty_button {
@@ -1722,28 +1866,33 @@ html {
 }
 
 /* Blue */
-.pp_player_button.pp_player_color_98B3C0 {
-  background-color: #98b3c0;
+.pp_player_button.pp_player_color_blue {
+  background-color: #006A8F;
 }
 
 /* Gray */
-.pp_player_button.pp_player_color_B9B6B1 {
-  background-color: #b9b6b1;
+.pp_player_button.pp_player_color_gray {
+  background-color: #7A6E66;
 }
 
 /* Yellow / tan */
-.pp_player_button.pp_player_color_DFCFB6 {
-  background-color: #dfcfb6;
+.pp_player_button.pp_player_color_yellow {
+  background-color: #D7A461;
 }
 
 /* Red */
-.pp_player_button.pp_player_color_C19B9E {
-  background-color: #c19b9e;
+.pp_player_button.pp_player_color_red {
+  background-color: #AB2C29;
 }
 
 /* Black */
-.pp_player_button.pp_player_color_807F7F {
-  background-color: #807f7f;
+.pp_player_button.pp_player_color_black {
+  background-color: #231F20;
+}
+
+/* Purple */
+.pp_player_button.pp_player_color_purple {
+  background-color: #8A70B2;
 }
 
 .pp_player_button {
@@ -1751,7 +1900,7 @@ html {
   text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
 }
 
-/* ------- CARDS START ------- */
+/* ------- CARDS ------- */
 .pp_card_1 {
   background-image: url("img/cards1.webp");
   background-size: 1000% 700%;
@@ -2571,6 +2720,578 @@ html {
   background-position-y: 100%;
 }
 
-/* ------- CARDS END ------- */
+/* ------- WAKHAN CARDS ------- */
+.pp_wakhan_card {
+  width: 150px;
+  height: 209px;
+  background-size: 800% 700%;
+  background-image: url(img/wakhan_cards.webp);
+  box-shadow: 1px 1px 4px;
+  border-radius: 10px;
+  border: 1px solid black;
+  box-sizing: border-box;
+}
+
+.pp_wakhan_card_1_front {
+  background-position-x: 0%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_1_back {
+  background-position-x: 0%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_2_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_2_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_3_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_3_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_4_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_4_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_5_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_5_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_6_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_6_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_7_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_7_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_8_front {
+  background-position-x: 100%;
+  background-position-y: 50%;
+}
+
+.pp_wakhan_card_8_back {
+  background-position-x: 100%;
+  background-position-y: 0%;
+}
+
+.pp_wakhan_card_9_front {
+  background-position-x: 0%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_9_back {
+  background-position-x: 0%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_10_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_10_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_11_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_11_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_12_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_12_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_13_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_13_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_14_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_14_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_15_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_15_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_16_front {
+  background-position-x: 100%;
+  background-position-y: 66.6666666667%;
+}
+
+.pp_wakhan_card_16_back {
+  background-position-x: 100%;
+  background-position-y: 16.6666666667%;
+}
+
+.pp_wakhan_card_17_front {
+  background-position-x: 0%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_17_back {
+  background-position-x: 0%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_18_front {
+  background-position-x: 14.2857142857%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_18_back {
+  background-position-x: 14.2857142857%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_19_front {
+  background-position-x: 28.5714285714%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_19_back {
+  background-position-x: 28.5714285714%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_20_front {
+  background-position-x: 42.8571428571%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_20_back {
+  background-position-x: 42.8571428571%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_21_front {
+  background-position-x: 57.1428571429%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_21_back {
+  background-position-x: 57.1428571429%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_22_front {
+  background-position-x: 71.4285714286%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_22_back {
+  background-position-x: 71.4285714286%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_23_front {
+  background-position-x: 85.7142857143%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_23_back {
+  background-position-x: 85.7142857143%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_wakhan_card_24_front {
+  background-position-x: 100%;
+  background-position-y: 83.3333333333%;
+}
+
+.pp_wakhan_card_24_back {
+  background-position-x: 100%;
+  background-position-y: 33.3333333333%;
+}
+
+.pp_card_71 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 0%;
+}
+
+.pp_card_72 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 0%;
+}
+
+.pp_card_73 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 0%;
+}
+
+.pp_card_74 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 0%;
+}
+
+.pp_card_75 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 0%;
+}
+
+.pp_card_76 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 0%;
+}
+
+.pp_card_77 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 0%;
+}
+
+.pp_card_78 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 0%;
+}
+
+.pp_card_79 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 0%;
+}
+
+.pp_card_80 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 0%;
+}
+
+.pp_card_81 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 25%;
+}
+
+.pp_card_82 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 25%;
+}
+
+.pp_card_83 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 25%;
+}
+
+.pp_card_84 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 25%;
+}
+
+.pp_card_85 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 25%;
+}
+
+.pp_card_86 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 25%;
+}
+
+.pp_card_87 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 25%;
+}
+
+.pp_card_88 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 25%;
+}
+
+.pp_card_89 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 25%;
+}
+
+.pp_card_90 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 25%;
+}
+
+.pp_card_91 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 50%;
+}
+
+.pp_card_92 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 50%;
+}
+
+.pp_card_93 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 50%;
+}
+
+.pp_card_94 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 50%;
+}
+
+.pp_card_95 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 50%;
+}
+
+.pp_card_96 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 50%;
+}
+
+.pp_card_97 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 50%;
+}
+
+.pp_card_98 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 50%;
+}
+
+.pp_card_99 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 50%;
+}
+
+.pp_card_100 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 50%;
+}
+
+.pp_card_101 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 75%;
+}
+
+.pp_card_102 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 75%;
+}
+
+.pp_card_103 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 75%;
+}
+
+.pp_card_104 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 75%;
+}
+
+.pp_card_105 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 75%;
+}
+
+.pp_card_106 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 75%;
+}
+
+.pp_card_107 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 66.6666666667%;
+  background-position-y: 75%;
+}
+
+.pp_card_108 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 77.7777777778%;
+  background-position-y: 75%;
+}
+
+.pp_card_109 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 88.8888888889%;
+  background-position-y: 75%;
+}
+
+.pp_card_110 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 100%;
+  background-position-y: 75%;
+}
+
+.pp_card_111 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 0%;
+  background-position-y: 100%;
+}
+
+.pp_card_112 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 11.1111111111%;
+  background-position-y: 100%;
+}
+
+.pp_card_113 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 22.2222222222%;
+  background-position-y: 100%;
+}
+
+.pp_card_114 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 33.3333333333%;
+  background-position-y: 100%;
+}
+
+.pp_card_115 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 44.4444444444%;
+  background-position-y: 100%;
+}
+
+.pp_card_116 {
+  background-image: url("img/cards2.webp");
+  background-size: 1000% 500%;
+  background-position-x: 55.5555555556%;
+  background-position-y: 100%;
+}
 
 /*# sourceMappingURL=paxpamir.css.map */

@@ -38,7 +38,7 @@ $gameinfos = array(
 
 
 // Players configuration that can be played (ex: 2 to 4 players)
-'players' => array( 2,3,4,5 ),    
+'players' => array( 1,2,3,4,5 ),    
 
 // Suggest players to play with this number of players. Must be null if there is no such advice, or if there is only one possible player configuration.
 // NB: the automatic lobby will try first the lowest number of players if this is not specified. So you _have to_ specify this parameter if the lowest player number is not compatible with the default options.
@@ -92,16 +92,17 @@ $gameinfos = array(
 'complexity' => 3,    
 
 // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
-'luck' => 3,    
+'luck' => 1,    
 
 // Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
-'strategy' => 3,    
+'strategy' => 4,    
 
 // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-'diplomacy' => 3,    
+'diplomacy' => 4,    
 
 // Colors attributed to players
-'player_colors' => array( "98B3C0", "C19B9E", "DFCFB6", "B9B6B1", "807F7F" ),
+// 'player_colors' => array( "98B3C0", "C19B9E", "DFCFB6", "B9B6B1", "807F7F" ),
+'player_colors' => array( "006A8F", "AB2C29", "D7A461", "7A6E66", "231F20" ),
 
 // Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
 // NB: this parameter is used only to flag games supporting this feature; you must use (or not use) reattributeColorsBasedOnPreferences PHP method to actually enable or disable the feature.

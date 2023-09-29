@@ -11,7 +11,7 @@ use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 
 trait PlayerActionTaxTrait
@@ -39,7 +39,7 @@ trait PlayerActionTaxTrait
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, TAX);
 
-    $activePlayer = Players::get();
+    $activePlayer = PaxPamirPlayers::get();
 
     $resolved = $this->resolveBribe($cardInfo, $activePlayer,TAX, $offeredBribeAmount);
     if (!$resolved) {
@@ -64,7 +64,7 @@ trait PlayerActionTaxTrait
       };
       $numberOfRupeesSelectedFromMarket += 1;
     }
-    // $activePlayer = Players::get();
+    // $activePlayer = PaxPamirPlayers::get();
     $activePlayerId = $activePlayer->getId();
     $rulers = Globals::getRulers();
 
@@ -78,7 +78,7 @@ trait PlayerActionTaxTrait
       $playerInput = explode('_', $selectedPlayer);
       $playerId = $playerInput[0];
       $selectedRupees = intval($playerInput[1]);
-      $player = Players::get($playerId);
+      $player = PaxPamirPlayers::get($playerId);
 
       if (!$hasClaimOfAncientLineage) {
         // Player owns card of region ruled by active player
@@ -112,7 +112,7 @@ trait PlayerActionTaxTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::tax($cardId, $activePlayer);
-    Players::incRupees($activePlayerId, $totalSelected);
+    PaxPamirPlayers::incRupees($activePlayerId, $totalSelected);
 
     $rupeesInMarket = [];
     // Check if rupee is in market
@@ -141,7 +141,7 @@ trait PlayerActionTaxTrait
       $playerId = $playerInput[0];
       $numberOfRupees = intval($playerInput[1]);
 
-      Players::incRupees($playerId, -$numberOfRupees);
+      PaxPamirPlayers::incRupees($playerId, -$numberOfRupees);
       Notifications::taxPlayer($numberOfRupees, $activePlayer, $playerId);
     };
 

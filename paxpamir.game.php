@@ -38,12 +38,15 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
 use PaxPamir\Managers\Market;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Managers\WakhanCards;
 
 // // Todo check why PPPlayer import is needed
 // require_once('modules/php/PPUtilityFunctions.php');
@@ -65,6 +68,7 @@ class Paxpamir extends Table
     use PaxPamir\States\DominanceCheckTrait;
     use PaxPamir\States\EndGameTrait;
     use PaxPamir\States\NextPlayerTrait;
+    use PaxPamir\States\PlaceArmyTrait;
     use PaxPamir\States\PlaceRoadTrait;
     use PaxPamir\States\PlaceSpyTrait;
     use PaxPamir\States\PlayCardTrait;
@@ -83,6 +87,19 @@ class Paxpamir extends Table
     use PaxPamir\States\SASafeHouseTrait;
     use PaxPamir\States\SelectPieceTrait;
     use PaxPamir\States\TurnTrait;
+    use PaxPamir\States\WakhanActionBattleTrait;
+    use PaxPamir\States\WakhanActionBetrayTrait;
+    use PaxPamir\States\WakhanActionBuildTrait;
+    use PaxPamir\States\WakhanActionGiftTrait;
+    use PaxPamir\States\WakhanActionMoveTrait;
+    use PaxPamir\States\WakhanActionTaxTrait;
+    use PaxPamir\States\WakhanActionWithInstructionsTrait;
+    use PaxPamir\States\WakhanActionTrait;
+    use PaxPamir\States\WakhanDiscardTrait;
+    use PaxPamir\States\WakhanRadicalizeTrait;
+    use PaxPamir\States\WakhanResolveImpactIconsTrait;
+    use PaxPamir\States\WakhanSpecialAbilitiesTrait;
+    use PaxPamir\States\WakhanTurnTrait;
 
     // Declare objects from material.inc.php to remove IntelliSense errors
     public $borders;
@@ -91,6 +108,8 @@ class Paxpamir extends Table
     public $regions;
     public $specialAbilities;
     public $suits;
+    public $wakhanCards;
+    public $radicalizeActions;
 
     public static $instance = null;
     function __construct()
@@ -116,12 +135,12 @@ class Paxpamir extends Table
 
     public function getGameOptionValue($optionId)
     {
-      $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
-      $val = $query
-        ->where('global_id', $optionId)
-        ->get()
-        ->first();
-      return is_null($val) ? null : $val['global_value'];
+        $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
+        $val = $query
+            ->where('global_id', $optionId)
+            ->get()
+            ->first();
+        return is_null($val) ? null : $val['global_value'];
     }
 
     /*
@@ -136,6 +155,13 @@ class Paxpamir extends Table
         Globals::setupNewGame($players, $options);
         Preferences::setupNewGame($players, $options);
         Players::setupNewGame($players, $options);
+        foreach (Players::getAll() as $playerId => $player) {
+            PaxPamirPlayers::setupPlayer($player);
+        };
+        if (Globals::getWakhanEnabled()) {
+            PaxPamirPlayers::setupWakhan();
+            WakhanCards::setupNewGame($players, $options);
+        }
         Cards::setupNewGame($players, $options);
         Tokens::setupNewGame($players, $options);
         Market::setupNewGame($players, $options);
@@ -154,7 +180,41 @@ class Paxpamir extends Table
         /************ End of the game initialization *****/
 
 
-        $this->activeNextPlayer();
+        // $this->activeNextPlayer();
+        ActionStack::set($this->createSetupActions());
+    }
+
+    public function createSetupActions()
+    {
+        $actionStack = [];
+        $players = PaxPamirPlayers::getAll()->toArray();
+        usort($players, function ($a, $b) {
+            return $b->getNo() - $a->getNo();
+        });
+        if (Globals::getWakhanEnabled()) {
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, WAKHAN_PLAYER_ID, [
+                'transition' => 'wakhanTurn'
+            ]);
+        } else {
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $players[0]->getId(), [
+                'transition' => 'prepareNextTurn',
+                'giveExtraTime' => true,
+            ]);
+        }
+        foreach ($players as $index => $player) {
+            $playerId = $player->getId();
+            if ($playerId === WAKHAN_PLAYER_ID) {
+                continue;
+            }
+            $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+                'transition' => 'playerSetup',
+                'giveExtraTime' => true,
+                'pop' => false,
+            ]);
+        }
+
+        Notifications::log('actionStack', $actionStack);
+        return $actionStack;
     }
 
     /*
@@ -168,7 +228,7 @@ class Paxpamir extends Table
     */
     public function getAllDatas($pId = null)
     {
-        $pId = $pId ?? Players::getCurrentId();
+        $pId = $pId ?? PaxPamirPlayers::getCurrentId();
 
         $deck = Cards::getInLocation(DECK)->toArray();
         $deckCount = count($deck);
@@ -179,6 +239,7 @@ class Paxpamir extends Table
             // TODO (Frans): data from material.inc.php. We might also replace this?
             'gameOptions' => [
                 'openHands' => Globals::getOpenHands(),
+                'wakhanEnabled' => Globals::getWakhanEnabled(),
             ],
             'staticData' => [
                 'borders' => $this->borders,
@@ -187,7 +248,11 @@ class Paxpamir extends Table
                 'regions' => $this->regions,
                 'specialAbilities' => $this->specialAbilities,
                 'suits' => $this->suits,
+                'wakhanCards' => $this->wakhanCards,
+                'radicalizeActions' => $this->radicalizeActions,
             ],
+            'paxPamirPlayers' => PaxPamirPlayers::getUiData($pId),
+            'paxPamirPlayerOrder' => PaxPamirPlayers::getPlayerOrder(),
             'players' => Players::getUiData($pId),
             'map' => Map::getUiData(),
             'market' => Market::getUiData(),
@@ -209,7 +274,27 @@ class Paxpamir extends Table
             ],
             'tempDiscardPile' => Cards::getTopOf(TEMP_DISCARD),
         ];
-        $activePlayerId = Players::getActiveId();
+
+        if (Globals::getWakhanEnabled()) {
+            $wakhanDeck = WakhanCards::getInLocationOrdered(DECK)->toArray();
+            $wakhanDeckCount = count($wakhanDeck);
+            $wakhanDiscardPile = WakhanCards::getInLocationOrdered(DISCARD)->toArray();
+            $wakhanDiscardPileCount = count($wakhanDiscardPile);
+            $data['wakhanCards'] = [
+                'deck' => [
+                    'cardCount' => $wakhanDeckCount,
+                    'topCard' => $wakhanDeckCount === 0 ? null : $wakhanDeck[$wakhanDeckCount - 1],
+                ],
+                'discardPile' => [
+                    'cardCount' => $wakhanDiscardPileCount,
+                    'topCard' => $wakhanDiscardPileCount === 0 ? null : $wakhanDiscardPile[$wakhanDiscardPileCount - 1],
+                ],
+            ];
+            $data['wakhanPragmaticLoyalty'] = Wakhan::getPragmaticLoyalty();
+        }
+
+        // Is below needed?
+        $activePlayerId = PaxPamirPlayers::getActiveId();
         $data['localState'] = [
             'activePlayer' => $data['players'][$activePlayerId],
             // 'favoredSuit' => $data['favoredSuit'],
@@ -243,7 +328,7 @@ class Paxpamir extends Table
          * Progression is calculated as the number of cards that has left the deck since game start
          */
 
-        $playerCount = Players::count();
+        $playerCount = PaxPamirPlayers::count();
         // -2 because 10 event / dominance check cards are added and 12 cards are dealt to the market
         $cardsInDeckStartGame = (5 + $playerCount) * 6 - 2;
         $deckCount = Cards::countInLocation(DECK);
@@ -261,6 +346,11 @@ class Paxpamir extends Table
     function getCard($card_id)
     {
         return $this->cards[$card_id];
+    }
+
+    function getWakhanCard($wakhan_card_id)
+    {
+        return $this->wakhanCards[$wakhan_card_id];
     }
 
     /**
@@ -318,7 +408,10 @@ class Paxpamir extends Table
         }
 
         $pId = is_null($pId) || is_int($pId) ? $pId : $pId->getId();
-        if (is_null($pId) || $pId == $this->getActivePlayerId()) {
+        if (!is_null($pId) && $pId !== WAKHAN_PLAYER_ID && Globals::getWakhanActive()) {
+            Globals::setWakhanActive(false);
+        }
+        if (is_null($pId) || $pId == $this->getActivePlayerId() || $pId === WAKHAN_PLAYER_ID) {
             $this->gamestate->nextState($transition);
         } else {
             if ($state['type'] == 'game') {
@@ -404,8 +497,50 @@ class Paxpamir extends Table
     
     */
 
+    /**
+     * TODO: 
+     * - Changes for PaxPamirPlayers.
+     * - Updated player colors 
+     */
     function upgradeTableDb($from_version)
     {
+        if ($from_version <= 2308232239) {
+            // ! important ! Use DBPREFIX_<table_name> for all tables
+
+            $sql = "ALTER TABLE DBPREFIX_xxxxxxx ....";
+            $sql = ""
+                . "CREATE TABLE IF NOT EXISTS `DBPREFIX_player_extra` ("
+                . "`player_id` int(10) unsigned NOT NULL,"
+                . "`player_name` varchar(32) NOT NULL,"
+                . "`player_avatar` varchar(10) NOT NULL,"
+                . "`player_hex_color` varchar(6) NOT NULL,"
+                . "`player_color` varchar(6) NOT NULL,"
+                . "`player_no` int(10) NOT NULL,"
+                . "`player_score` int(10) NOT NULL DEFAULT '0',"
+                . "`player_score_aux` int(10) NOT NULL DEFAULT '0',"
+                . "`player_rupees` int(10) unsigned NOT NULL DEFAULT 0,"
+                . "`player_loyalty` varchar(32),"
+                . "PRIMARY KEY (`player_id`)"
+                . ") ENGINE = InnoDB DEFAULT CHARSET = utf8;";
+            self::applyDbUpgradeToAllDB($sql);
+
+            $sql = ""
+                . "CREATE TABLE IF NOT EXISTS `wakhan_cards` ("
+                . "`wakhan_card_id` varchar(32) NOT NULL,"
+                . "`wakhan_card_location` varchar(32) NOT NULL,"
+                . "`wakhan_card_state` int(10) DEFAULT 0,"
+                . "PRIMARY KEY (`wakhan_card_id`)"
+                . ") ENGINE = InnoDB DEFAULT CHARSET = utf8;";
+            self::applyDbUpgradeToAllDB($sql);
+
+            foreach (Players::getAll() as $playerId => $player) {
+                PaxPamirPlayers::setupPlayer($player, $player->getScore(), $player->getScoreAux(), $player->getRupees(), $player->getLoyalty(), true);
+            };
+        }
+
+        // Notifications::log('fromVersion',$from_version);
+        // Globals::setFromVersion('version');
+
         // $from_version is the current version of this game database, in numerical form.
         // For example, if the game was running with a release of your game named "140430-1345",
         // $from_version is equal to 1404301345

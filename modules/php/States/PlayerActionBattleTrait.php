@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -45,7 +46,7 @@ trait PlayerActionBattleTrait
 
     $this->isValidCardAction($cardInfo, BATTLE);
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     $resolved = $this->resolveBribe($cardInfo, $player, BATTLE, $offeredBribeAmount);
     if (!$resolved) {
@@ -77,7 +78,8 @@ trait PlayerActionBattleTrait
 
   function resolveBattleInRegion($cardInfo, $location, $removedPieces)
   {
-    Notifications::battleRegion($location);
+    $player = PaxPamirPlayers::get();
+    Notifications::battleRegion($player, $location);
 
     // All checks have been done. Execute battle
     Cards::setUsed($cardInfo['id'], 1);
@@ -86,8 +88,6 @@ trait PlayerActionBattleTrait
       Globals::incRemainingActions(-1);
     }
 
-
-    $player = Players::get();
     $loyalty = $player->getLoyalty();
     $numberOfLoyalPieces = $this->getNumberOfLoyalArmies($player, $location);
     // Needs loyal pieces to remove enemy pieces
@@ -107,7 +107,7 @@ trait PlayerActionBattleTrait
       if ($isBlock && $splitTokenId[1] === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
-      if ($isCylinder && Players::get($splitTokenId[1])->getLoyalty() === $loyalty) {
+      if ($isCylinder && PaxPamirPlayers::get($splitTokenId[1])->getLoyalty() === $loyalty) {
         throw new \feException("Piece to remove has same loyalty as active player");
       };
       if ($location === KABUL && $isCylinder && Cards::get(SA_CITADEL_KABUL_CARD_ID)['location'] === Locations::court($splitTokenId[1])) {
@@ -160,7 +160,7 @@ trait PlayerActionBattleTrait
       if ($isCylinder) {
         Notifications::returnCylinder($player, intval($splitTokenId[1]), $location, $tokenId, $state);
       } else {
-        Notifications::returnCoalitionBlock($player,$logTokenType,$logTokenData,$from,$tokenId,$state);
+        Notifications::returnCoalitionBlock($player, $logTokenType, $logTokenData, $from, $tokenId, $state);
       }
     };
 
@@ -187,9 +187,9 @@ trait PlayerActionBattleTrait
 
   function resolveBattleOnCourtCard($cardInfo, $location, $removedPieces)
   {
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
-    if ($this->getNumberLoyalSpies($player, $location) < count($removedPieces)) {
+    if ($this->getLoyalSpyCount($player->getId(), $location) < count($removedPieces)) {
       throw new \feException("Not enough loyal pieces");
     }
 
@@ -197,7 +197,7 @@ trait PlayerActionBattleTrait
     foreach ($removedPieces as $index => $tokenId) {
       $splitTokenId = explode("_", $tokenId);
 
-      if (Players::get($splitTokenId[1])->hasSpecialAbility(SA_INDISPENSABLE_ADVISORS)) {
+      if (PaxPamirPlayers::get($splitTokenId[1])->hasSpecialAbility(SA_INDISPENSABLE_ADVISORS)) {
         throw new \feException("Player's spies can not be removed in battles with other spies");
       }
       $tokenInfo = Tokens::get($tokenId);
@@ -227,7 +227,7 @@ trait PlayerActionBattleTrait
       $from = $tokenInfo['location'];
 
       $cylinderOwnerPlayerId = intval($splitTokenId[1]);
-      $moves = [];
+      // $moves = [];
       if (in_array($cylinderOwnerPlayerId, $safeHouseOwners)) {
         $protectedBySafeHouse[$tokenId] = [
           'tokenId' => $tokenId,
@@ -237,31 +237,43 @@ trait PlayerActionBattleTrait
       } else {
         $to = implode('_', ['cylinders', $cylinderOwnerPlayerId]);
         $state = Tokens::insertOnTop($tokenId, $to);
-        $moves[] = [
-          'from' => $from,
-          'to' => $to,
-          'tokenId' => $tokenId,
-          'weight' => $state,
-        ];
+        // $moves[] = [
+        //   'from' => $from,
+        //   'to' => $to,
+        //   'tokenId' => $tokenId,
+        //   'weight' => $state,
+        // ];
         Notifications::returnCylinder($player, $cylinderOwnerPlayerId, $location, $tokenId, $state);
       };
-      
     };
 
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [
+        'transition' => 'playerActions'
+      ])
+    ];
+
     if (count($protectedBySafeHouse) > 0) {
-      ksort($protectedBySafeHouse);
-      Globals::setSpecialAbilityData([
-        'specialAbility' => SA_SAFE_HOUSE,
-        'args' => [
-          'activePlayerId' => $player->getId(),
-          'cylinders' => array_values($protectedBySafeHouse),
-        ],
-      ]);
-      $this->nextState('specialAbilitySafeHouse', array_values($protectedBySafeHouse)[0]['playerId']);
-      // Notifications::log('result', array_values($protectedBySafeHouse)[0]['playerId']);
-    } else {
-      $this->gamestate->nextState('playerActions');
+      $actionStack = array_merge($actionStack, $this->getSafeHouseActions($protectedBySafeHouse));
     }
+
+    ActionStack::next($actionStack);
+  }
+
+  function getSafeHouseActions($protectedBySafeHouse)
+  {
+    ksort($protectedBySafeHouse);
+    $extraActions = [];
+    $protectedBySafeHouse = array_values($protectedBySafeHouse);
+    foreach ($protectedBySafeHouse as $index => $protected) {
+      $split = explode('_',$protected['from']);
+      $cardId = $split[1].'_'.$split[2];
+      $extraActions[] = ActionStack::createAction(DISPATCH_SA_SAFE_HOUSE, $protected['playerId'], [
+        'cylinderId' => $protected['tokenId'],
+        'fromCardId' => $cardId,
+      ]);
+    }
+    return $extraActions;
   }
 
   function getSafeHouseOwners()
@@ -284,19 +296,18 @@ trait PlayerActionBattleTrait
     $loyalArmies = array_values(array_filter($armiesInLocation, function ($army) use ($loyalty) {
       return explode("_", $army['id'])[1] === $loyalty;
     }));
-    // $player = Players::get(); // to check: is there a reason we get $player again?
+    // $player = PaxPamirPlayers::get(); // to check: is there a reason we get $player again?
     $extraPiecesActive = 0;
-    if (Events::isNationalismActive($player)) {
-      $extraPiecesActive += count(Map::getPlayerTribesInRegion($location, $player));
+    if (Events::isNationalismActive($player->getId())) {
+      $extraPiecesActive += count(Map::getPlayerTribesInRegion($location, $player->getId()));
     }
 
     return count($loyalArmies) + $extraPiecesActive;
   }
 
-  function getNumberLoyalSpies($player, $location)
+  function getLoyalSpyCount($playerId, $cardId)
   {
-    $playerId = $player->getId();
-    $spiesOnCard = Tokens::getInLocation(['spies', $location])->toArray();
+    $spiesOnCard = Tokens::getInLocation(['spies', $cardId])->toArray();
     $loyalSpies = array_values(array_filter($spiesOnCard, function ($cylinder) use ($playerId) {
       return intval(explode("_", $cylinder['id'])[1]) === $playerId;
     }));

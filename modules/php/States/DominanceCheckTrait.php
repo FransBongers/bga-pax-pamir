@@ -10,8 +10,10 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
+use PaxPamir\Models\PaxPamirPlayer;
 
 trait DominanceCheckTrait
 {
@@ -64,7 +66,7 @@ trait DominanceCheckTrait
     $checkSuccessful = $dominantCoalition !== null;
 
     // Determine scores
-    $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition) : $this->getScoresUnsuccessFulCheck();
+    $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition, Globals::getDominanceChecksResolved()) : $this->getScoresUnsuccessFulCheck(Globals::getDominanceChecksResolved());
 
     Notifications::dominanceCheckResult($scores, $checkSuccessful, $dominantCoalition);
 
@@ -92,12 +94,12 @@ trait DominanceCheckTrait
     )));
     Notifications::dominanceCheckReturnCoalitionBlocks($blocks, $fromLocations);
     array_pop($actionStack);
-    foreach($fromLocations as $index => $location) {
-      $exploded = explode('_',$location);
+    foreach ($fromLocations as $index => $location) {
+      $exploded = explode('_', $location);
       if ($exploded[0] === 'armies') {
         Map::checkRulerChange($exploded[1]);
       }
-    } 
+    }
     ActionStack::next($actionStack);
   }
 
@@ -117,10 +119,18 @@ trait DominanceCheckTrait
     array_pop($actionStack);
     // SA_INSURRECTION
     $card = Cards::get('card_3');
-    if (Utils::startsWith($card['location'], 'court_')) {
-      $playerId = intval(explode('_', $card['location'])[1]);
-      Notifications::insurrection(Players::get($playerId));
-      for ($i = 0; $i < 2; $i++) {
+    if (!Utils::startsWith($card['location'], 'court_')) {
+      ActionStack::next($actionStack);
+      return;
+    }
+    $playerId = intval(explode('_', $card['location'])[1]);
+
+
+    Notifications::insurrection(PaxPamirPlayers::get($playerId));
+    for ($i = 0; $i < 2; $i++) {
+      if ($playerId === WAKHAN_PLAYER_ID) {
+        $this->wakhanPlaceArmy(KABUL, AFGHAN);
+      } else {
         $actionStack[] = ActionStack::createAction(
           DISPATCH_PLACE_ARMY,
           $playerId,
@@ -130,6 +140,7 @@ trait DominanceCheckTrait
         );
       }
     }
+
     ActionStack::next($actionStack);
   }
 
@@ -151,16 +162,16 @@ trait DominanceCheckTrait
       }
       $isGlobalEvent = $location === ACTIVE_EVENTS;
       $cardOwnerId = Utils::startsWith($location, 'events_') ? intval(explode('_', $location)[1]) : null;
-      $discardActions[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $isGlobalEvent ? Players::get()->getId() : $cardOwnerId, [
+      $discardActions[] = ActionStack::createAction(DISPATCH_DISCARD_SINGLE_CARD, $isGlobalEvent ? PaxPamirPlayers::get()->getId() : $cardOwnerId, [
         'cardId' => $card['id'],
         'to' => DISCARD,
         'from' => $location,
       ]);
     }
     if ($updateInfluence) {
-      $discardActions[] = ActionStack::createAction(DISPATCH_UPDATE_INFLUENCE, Players::get()->getId(), []);
+      $discardActions[] = ActionStack::createAction(DISPATCH_UPDATE_INFLUENCE, PaxPamirPlayers::get()->getId(), []);
     }
-    $actionStack = array_merge($actionStack,array_reverse($discardActions));
+    $actionStack = array_merge($actionStack, array_reverse($discardActions));
     ActionStack::next($actionStack);
   }
 
@@ -199,17 +210,17 @@ trait DominanceCheckTrait
     return null;
   }
 
-  function getScoresSuccessFulCheck($dominantCoalition)
+  function getScoresSuccessFulCheck($dominantCoalition, $numberOfChecksResolved, $updateDatabase = true)
   {
-    $players = Players::getAll();
+    $players = PaxPamirPlayers::getAll();
 
     // Create array of players loyal to dominant coalition and their total influence
     $loyalPlayers = [];
     foreach ($players as $playerId => $player) {
-      if ($player->getLoyalty() === $dominantCoalition) {
+      if ($player->getLoyalty() === $dominantCoalition || $player->isWakhan()) {
         $loyalPlayers[] = [
           'playerId' => $playerId,
-          'count' => $player->getInfluence(),
+          'count' => $player->getInfluence($dominantCoalition),
         ];
       }
     };
@@ -220,12 +231,12 @@ trait DominanceCheckTrait
     });
 
     // TODO: we could probably replace this by checking dominance checks in discard or dominance checks left in deck
-    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [10, 6, 2] : [5, 3, 1];
+    $availablePoints = $numberOfChecksResolved === 4 ? [10, 6, 2] : [5, 3, 1];
 
-    return $this->determineVictoryPoints($loyalPlayers, $availablePoints);
+    return $this->determineVictoryPoints($loyalPlayers, $availablePoints, $updateDatabase);
   }
 
-  function getScoresUnsuccessFulCheck()
+  function getScoresUnsuccessFulCheck($numberOfChecksResolved, $updateDatabase = true)
   {
     // Determine number of cylinders in play by each player
     $cylinderCounts = $this->getCylindersInPlayPerPlayer();
@@ -236,16 +247,16 @@ trait DominanceCheckTrait
     });
 
     // Determine VPs
-    $availablePoints = Globals::getDominanceChecksResolved() === 4 ? [6, 2] :  [3, 1];
-    return $this->determineVictoryPoints($cylinderCounts, $availablePoints);
+    $availablePoints = $numberOfChecksResolved === 4 ? [6, 2] :  [3, 1];
+    return $this->determineVictoryPoints($cylinderCounts, $availablePoints, $updateDatabase);
   }
 
   function getCylindersInPlayPerPlayer()
   {
     $counts = array();
-    $players = $this->loadPlayersBasicInfos();
+    $players = PaxPamirPlayers::getAll();
     $i = 0;
-    foreach ($players as $playerId => $playerInfo) {
+    foreach ($players as $playerId => $player) {
       $counts[$i] = array(
         'count' => 10 - Tokens::countInLocation(['cylinders', $playerId]),
         'playerId' => $playerId,
@@ -260,7 +271,7 @@ trait DominanceCheckTrait
    * Calculates VPs based on an array with available point [5,3,1] and 
    * a ranking of players and count with first player on position 0.
    */
-  function determineVictoryPoints($playerRanking, $availablePoints)
+  function determineVictoryPoints($playerRanking, $availablePoints, $updateDatabase = true)
   {
     $scores = [];
     while (count($availablePoints) > 0 && count($playerRanking) > 0) {
@@ -283,13 +294,19 @@ trait DominanceCheckTrait
         // Update database and add data to scores object for notifictation
         for ($i = 0; $i < $countSameScore; $i++) {
           $playerId = $playerRanking[$i]['playerId'];
-          $currentScore = Players::get($playerId)->getScore();
+          $currentScore = PaxPamirPlayers::get($playerId)->getScore();
           $scores[$playerId] = array(
             'playerId' => $playerId,
             'currentScore' => $currentScore,
             'newScore' => $currentScore + $pointsPerPlayer,
           );
-          Players::incScore($playerId, $pointsPerPlayer);
+          if ($updateDatabase) {
+            PaxPamirPlayers::incScore($playerId, $pointsPerPlayer);
+            if ($playerId !== WAKHAN_PLAYER_ID) {
+              // Also need to update in Players table since refresh of page loads data from there
+              Players::incScore($playerId, $pointsPerPlayer);
+            }
+          }
         }
       }
 
@@ -306,7 +323,7 @@ trait DominanceCheckTrait
     if (Globals::getDominanceChecksResolved() >= 4) {
       return true;
     }
-    $players = Players::getAll()->toArray();
+    $players = PaxPamirPlayers::getAll()->toArray();
     usort($players, function ($a, $b) {
       return $b->getScore() - $a->getScore();
     });

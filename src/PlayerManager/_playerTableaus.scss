@@ -1,4 +1,26 @@
+@use 'sass:math';
 @use '../base';
+
+.pp_wakhan_deck_container {
+  display: flex;
+  padding-left: 10px;
+  z-index: 1;
+}
+
+.pp_wakhan_tableau_left {
+  display: flex;
+  flex-direction: column;
+}
+
+#pp_wakhan_deck {
+  margin-right: 10px;
+}
+
+// #pp_wakhan_discard {
+//   background-position-x: 0%;
+//   background-position-y: math.div(4, 6) * 100%;
+//   // background-position-y: math.div(4,6) * 100%;
+// }
 
 .pp_player_hand {
   display: flex;
@@ -56,29 +78,35 @@
 }
 
 /* Blue */
-.pp_player_tableau.pp_player_color_98B3C0 {
-  background-color: #98B3C0;
+.pp_player_tableau.pp_player_color_blue {
+  background-color: base.$blue-player-background-color;//  #98B3C0;
 }
 
 /* Gray */
-.pp_player_tableau.pp_player_color_B9B6B1 {
-  background-color: #B9B6B1;
+.pp_player_tableau.pp_player_color_gray {
+  background-color: base.$gray-player-background-color;// #B9B6B1;
 }
 
 /* Yellow / tan */
-.pp_player_tableau.pp_player_color_DFCFB6 {
-  background-color: #DFCFB6;
+.pp_player_tableau.pp_player_color_yellow {
+  background-color: base.$yellow-player-background-color;// #DFCFB6;
 }
 
 /* Red */
-.pp_player_tableau.pp_player_color_C19B9E {
-  background-color: #C19B9E;
+.pp_player_tableau.pp_player_color_red {
+  background-color: base.$red-player-background-color;// #C19B9E;
 }
 
 /* Black */
-.pp_player_tableau.pp_player_color_807F7F {
-  background-color: #807F7F;
+.pp_player_tableau.pp_player_color_black {
+  background-color: base.$black-player-background-color;// #807F7F;
 }
+
+/* Black */
+.pp_player_tableau.pp_player_color_purple {
+  background-color: base.$purple-player-background-color;// #C3B1D6;
+}
+
 
 .pp_tableau_inner_right {
   /* display: flex;
@@ -145,17 +173,17 @@
 
 .pp_loyalty_dial.pp_afghan {
   transform: rotate(0deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_british {
   transform: rotate(120deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial.pp_russian {
   transform: rotate(240deg);
-  transition: transform 2s;
+  transition: transform 1s;
 }
 
 .pp_loyalty_dial_cover {
@@ -175,6 +203,36 @@
   width: 40px;
   height: 40px;
   z-index: 1;
+}
+
+.pp_wakhan_gift {
+  background-image: url('img/gifts.webp');
+  border-radius: 50%;
+  background-size: 600% 100%;
+  width: 40px;
+  height: 40px;
+  z-index: 1;
+}
+
+#pp_wakhan_gifts {
+  display: flex;
+  flex-direction: row;
+  height: 45px;
+  width: 150px;
+  margin-left: 10px;
+  justify-content: space-evenly;
+}
+
+.pp_wakhan_gift_2 {
+  background-position: 60%;
+}
+
+.pp_wakhan_gift_4 {
+  background-position: 80%;
+}
+
+.pp_wakhan_gift_6 {
+  background-position: 100%;
 }
 
 .pp_gift.pp_selectable {
@@ -207,27 +265,27 @@
 }
 
 /* Blue */
-.pp_loyalty_dial_cover.pp_player_color_98B3C0 {
+.pp_loyalty_dial_cover.pp_player_color_blue {
   background-position-x: 25%;
 }
 
 /* Gray */
-.pp_loyalty_dial_cover.pp_player_color_B9B6B1 {
+.pp_loyalty_dial_cover.pp_player_color_gray {
   background-position-x: 50%;
 }
 
 /* Yellow / tan */
-.pp_loyalty_dial_cover.pp_player_color_DFCFB6 {
+.pp_loyalty_dial_cover.pp_player_color_yellow {
   background-position-x: 100%;
 }
 
 /* Red */
-.pp_loyalty_dial_cover.pp_player_color_C19B9E {
+.pp_loyalty_dial_cover.pp_player_color_red {
   background-position-x: 75%;
 }
 
 /* Black */
-.pp_loyalty_dial_cover.pp_player_color_807F7F {
+.pp_loyalty_dial_cover.pp_player_color_black {
   background-position-x: 0%;
 }
 

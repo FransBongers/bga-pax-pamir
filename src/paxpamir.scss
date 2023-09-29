@@ -304,7 +304,7 @@ html {
 
 .pp_cylinder {
   background-image: url('img/cylinders.webp');
-  background-size: 500% 100%;
+  background-size: 600% 100%;
   background-repeat: no-repeat;
   height: 30px;
   width: 30px;
@@ -324,24 +324,28 @@ html {
   cursor: pointer;
 }
 
-.pp_cylinder.pp_player_color_98B3C0 {
-  background-position-x: 25%;
+.pp_cylinder.pp_player_color_blue {
+  background-position-x: 20%;
 }
 
-.pp_cylinder.pp_player_color_B9B6B1 {
-  background-position-x: 50%;
+.pp_cylinder.pp_player_color_gray {
+  background-position-x: 40%;
 }
 
-.pp_cylinder.pp_player_color_DFCFB6 {
-  background-position-x: 100%;
+.pp_cylinder.pp_player_color_yellow {
+  background-position-x: 80%;
 }
 
-.pp_cylinder.pp_player_color_C19B9E {
-  background-position-x: 75%;
+.pp_cylinder.pp_player_color_red {
+  background-position-x: 60%;
 }
 
-.pp_cylinder.pp_player_color_807F7F {
+.pp_cylinder.pp_player_color_black {
   background-position-x: 0%;
+}
+
+.pp_cylinder.pp_player_color_purple {
+  background-position-x: 100%;
 }
 
 #pp_market_board {
@@ -597,28 +601,33 @@ html {
 }
 
 /* Blue */
-.pp_player_button.pp_player_color_98B3C0 {
-  background-color: #98b3c0;
+.pp_player_button.pp_player_color_blue {
+  background-color: base.$blue-player-color; // #98b3c0;
 }
 
 /* Gray */
-.pp_player_button.pp_player_color_B9B6B1 {
-  background-color: #b9b6b1;
+.pp_player_button.pp_player_color_gray {
+  background-color: base.$gray-player-color;// #b9b6b1;
 }
 
 /* Yellow / tan */
-.pp_player_button.pp_player_color_DFCFB6 {
-  background-color: #dfcfb6;
+.pp_player_button.pp_player_color_yellow {
+  background-color: base.$yellow-player-color;// #dfcfb6;
 }
 
 /* Red */
-.pp_player_button.pp_player_color_C19B9E {
-  background-color: #c19b9e;
+.pp_player_button.pp_player_color_red {
+  background-color: base.$red-player-color;// #c19b9e;
 }
 
 /* Black */
-.pp_player_button.pp_player_color_807F7F {
-  background-color: #807f7f;
+.pp_player_button.pp_player_color_black {
+  background-color: base.$black-player-color;// #807f7f;
+}
+
+/* Purple */
+.pp_player_button.pp_player_color_purple {
+  background-color: base.$purple-player-color;// #C3B1D6;
 }
 
 .pp_player_button {
@@ -626,7 +635,7 @@ html {
   text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
 }
 
-/* ------- CARDS START ------- */
+/* ------- CARDS ------- */
 
 @for $i from 1 through 70 {
   .pp_card_#{$i} {
@@ -653,4 +662,36 @@ html {
   background-position-y: 100%;
 }
 
-/* ------- CARDS END ------- */
+/* ------- WAKHAN CARDS ------- */
+
+.pp_wakhan_card {
+  width: 150px;
+  height: 209px;
+  background-size: 800% 700%;
+  background-image: url(img/wakhan_cards.webp);
+  box-shadow: 1px 1px 4px;
+  border-radius: 10px;
+  border: 1px solid black;
+  box-sizing: border-box;
+}
+
+@for $i from 1 through 24 {
+  .pp_wakhan_card_#{$i}_front {
+    background-position-x: math.div((($i + 24 - 1) % 8 * 100%), 7);
+    background-position-y: math.div(math.floor(calc(($i + 24 - 1) / 8)) * 100%, 6);
+  }
+
+  .pp_wakhan_card_#{$i}_back {
+    background-position-x: math.div((($i - 1) % 8 * 100%), 7);
+    background-position-y: math.div(math.floor(calc(($i - 1) / 8)) * 100%, 6);
+  }
+}
+
+@for $i from 71 through 116 {
+  .pp_card_#{$i} {
+    background-image: url('img/cards2.webp');
+    background-size: 1000% 500%;
+    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
+    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
+  }
+}

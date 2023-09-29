@@ -12,8 +12,7 @@ use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
-use PaxPamir\Managers\Map;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 
 trait PlayerActionTrait
@@ -32,7 +31,7 @@ trait PlayerActionTrait
     $bribe = Globals::getNegotiatedBribe();
     return [
       // TODO: remove activePlayer here
-      'activePlayer' => Players::getActive()->jsonSerialize(null),
+      'activePlayer' => PaxPamirPlayers::getActive()->jsonSerialize(null),
       'remainingActions' => Globals::getRemainingActions(),
       'usedCards' => Cards::getUnavailableCards(),
       'bribe' => isset($bribe['action']) ? $bribe : null,
@@ -62,9 +61,9 @@ trait PlayerActionTrait
     $playerId = $action['playerId'];
     Notifications::log('dispatchPayRupeesToMarket',$action);
     $rupeesOnCards = $this->payActionCosts($cost);
-    Players::incRupees($playerId, -$cost);
+    PaxPamirPlayers::incRupees($playerId, -$cost);
 
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     Notifications::payRupeesToMarket(
       $player,
@@ -91,32 +90,6 @@ trait PlayerActionTrait
   // .##.....##..######.....##....####..#######..##....##..######.
 
   /**
-   * Part of set up when players need to select loyalty.
-   */
-  function chooseLoyalty($coalition)
-  {
-    self::checkAction('chooseLoyalty');
-
-    $playerId = Players::getActiveId();
-    $coalitionName = $this->loyalty[$coalition]['name'];
-
-    // Players::get()->setLoyalty($coalition);
-    Players::setLoyalty($playerId,$coalition);
-
-    // Notify
-    // TODO (Frans): check i18n for coalition name
-    self::notifyAllPlayers("changeLoyalty", clienttranslate('${player_name} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
-      'playerId' => $playerId,
-      'player_name' => Game::get()->getActivePlayerName(),
-      'coalition' => $coalition,
-      'coalitionName' => $coalitionName,
-      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
-    ));
-
-    $this->gamestate->nextState('next');
-  }
-
-  /**
    * Used to either:
    * 1. End player's turn
    * 2. Skip start of turn abilities
@@ -124,18 +97,10 @@ trait PlayerActionTrait
   function pass()
   {
     self::checkAction('pass');
-    $playerId = self::getActivePlayerId();
 
-    $remainingActions = Globals::getRemainingActions();
-    $state = $this->gamestate->state();
-
-    // TODO: (check if it is necessary to set remaining actions to 0 here, also done in turn trait?)
-    if (($remainingActions > 0) and ($state['name'] == 'playerActions')) {
-      Globals::setRemainingActions(0);
-    }
-    // Notify
     Notifications::pass();
 
+    // $this->stCleanup(PaxPamirPlayers::get());
     $this->gamestate->nextState('cleanup');
   }
 
@@ -159,7 +124,7 @@ trait PlayerActionTrait
     unset($datas['canceledNotifIds']);
 
     Notifications::smallRefreshInterface($datas);
-    $player = Players::getCurrent();
+    $player = PaxPamirPlayers::getCurrent();
     Notifications::smallRefreshHand($player);
 
     $this->gamestate->jumpToState(Globals::getLogState());
@@ -204,7 +169,7 @@ trait PlayerActionTrait
     if ($cardInfo['specialAbility'] === SA_SAVVY_OPERATOR || $cardInfo['specialAbility'] === SA_IRREGULARS) {
       return true;
     };
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $isNewTacticsActive = Events::isNewTacticsActive($player);
     if ($cardInfo['suit'] === MILITARY && $isNewTacticsActive) {
       return true;

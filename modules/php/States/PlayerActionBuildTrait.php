@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -51,7 +52,7 @@ trait PlayerActionBuildTrait
       $locations[] = $location['location'];
     }
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $resolved = $this->resolveBribe($cardInfo, $player, BUILD, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
@@ -59,11 +60,11 @@ trait PlayerActionBuildTrait
     }
     // Get player again, because bribe has been paid
     if ($offeredBribeAmount !== null && intval($offeredBribeAmount) > 0) {
-      $player = Players::get();
+      $player = PaxPamirPlayers::get();
     };
 
     $playerId = $player->getId();
-    $nationBuildingMultiplier = Events::isNationBuildingActive(Players::get()) ? 2 : 1;
+    $nationBuildingMultiplier = Events::isNationBuildingActive(PaxPamirPlayers::get()) ? 2 : 1;
     $numberOfTokens = count($locations);
     
     // max number to build is 3, but can be multiplied with nation building
@@ -89,7 +90,7 @@ trait PlayerActionBuildTrait
       Globals::incRemainingActions(-1);
     }
     $rupeesOnCards = $this->payActionCosts($cost);
-    Players::incRupees($playerId, -$cost);
+    PaxPamirPlayers::incRupees($playerId, -$cost);
     Notifications::build($cardId, $player, $rupeesOnCards);
 
     $actionStack = [
@@ -120,7 +121,7 @@ trait PlayerActionBuildTrait
     }
 
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     if (!$player->hasSpecialAbility(SA_INFRASTRUCTURE)) {
       throw new \feException("Player does not have Infrastructure special ability");
     }

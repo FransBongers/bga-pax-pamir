@@ -63,7 +63,7 @@ $machinestates = array(
         "type" => "manager",
         "action" => "stGameSetup",
         "transitions" => array(
-            "" => ST_PLAYER_SETUP
+            "" => ST_DISPATCH_ACTION
         )
     ),
 
@@ -76,7 +76,7 @@ $machinestates = array(
         "type" => "activeplayer",
         "possibleactions" => array("chooseLoyalty"),
         "transitions" => array(
-            "next" => ST_NEXT_PLAYER
+            "dispatchAction" => ST_DISPATCH_ACTION,
         )
     ),
 
@@ -97,7 +97,8 @@ $machinestates = array(
         "updateGameProgression" => false,
         "transitions" => array(
             "prepareNextTurn" => ST_PREPARE_TURN,
-            "setup" => ST_PLAYER_SETUP,
+            'wakhanTurn' => ST_WAKHAN_TURN,
+            // "setup" => ST_PLAYER_SETUP,
         )
     ),
 
@@ -132,10 +133,15 @@ $machinestates = array(
             "placeRoad" => ST_PLACE_ROAD,
             "placeSpy" => ST_PLACE_SPY,
             "playerActions" => ST_PLAYER_ACTIONS,
+            "playerSetup" => ST_PLAYER_SETUP,
+            "prepareNextTurn" => ST_PREPARE_TURN,
             "refillMarket" => ST_REFILL_MARKET,
             "selectPiece" => ST_SELECT_PIECE,
             "specialAbilityInfrastructure" => ST_SA_INFRASTRUCTURE,
+            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             'startOfTurnAbilities' => ST_START_OF_TURN_ABILITIES,
+            'wakhanPause' => ST_WAKHAN_PAUSE,
+            'wakhanTurn' => ST_WAKHAN_TURN,
         )
     ),
 
@@ -149,7 +155,6 @@ $machinestates = array(
         "transitions" => array(
             "playerActions" => ST_PLAYER_ACTIONS,
             "dispatchAction" => ST_DISPATCH_ACTION,
-            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
             "negotiateBribe" => ST_NEGOTIATE_BRIBE,
             "cleanup" => ST_CLEANUP,
         )
@@ -271,8 +276,7 @@ $machinestates = array(
         "args" => "argSpecialAbilitySafeHouse",
         "possibleactions" => ["specialAbilitySafeHouse"],
         "transitions" => [
-            "playerActions" => ST_PLAYER_ACTIONS,
-            "specialAbilitySafeHouse" => ST_SA_SAFE_HOUSE,
+            "dispatchAction" => ST_DISPATCH_ACTION,
         ]
     ],
 
@@ -326,6 +330,28 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you}'),
         "type" => "activeplayer",
         "possibleactions" => ["eventCardRumor"],
+        "transitions" => [
+            "dispatchAction" => ST_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_WAKHAN_TURN => [
+        'name' => 'wakhanTurn',
+        "description" => clienttranslate('Wakhan performs actions'),
+        'descriptionmyturn' => '',
+        'type' => 'game',
+        'action' => 'stWakhanTurn',
+        "transitions" => [
+            "dispatchAction" => ST_DISPATCH_ACTION,
+        ]
+    ],
+
+    ST_WAKHAN_PAUSE => [
+        "name" => "wakhanPause",
+        "description" => clienttranslate('${actplayer} must click next to let Wakhan continue'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["wakhanNext"],
         "transitions" => [
             "dispatchAction" => ST_DISPATCH_ACTION,
         ]

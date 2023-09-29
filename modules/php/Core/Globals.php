@@ -1,11 +1,14 @@
 <?php
+
 namespace PaxPamir\Core;
+
 use PaxPamir\Core\Game;
 use PaxPamir\Managers\Players;
 
 /*
  * Globals
  */
+
 class Globals extends \PaxPamir\Helpers\DB_Manager
 {
   protected static $initialized = false;
@@ -13,6 +16,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     'changeActivePlayer' => 'obj', // Used for the generic "changeActivePlayer" state
     'logState' => 'int', // Used to store state id when enabling the log
     'actionStack' => 'obj',
+    // 'activePlayerId' => 'int',
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
@@ -25,6 +29,15 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     "setup" => "int",
     "specialAbilityData" => "obj",
     "openHands" => 'bool',
+    'wakhanActionsSkipped' => 'int', // number of actions skipped because they were not valid
+    'wakhanActive' => 'bool', // Wakhan is currently active player
+    'wakhanAutoResolve' => 'bool',
+    'wakhanCurrentAction' => 'int', // index of current action on AI card
+    'wakhanEnabled' => 'bool', // Wakhan is playing in this game
+    'wakhanOption' => 'str', // Rulebook, Improved, Custom
+    'wakhanVariantSavvyPurchasing' => 'bool',
+    'wakhanVariantSpyMovement' => 'bool',
+    'wakhanVariantSteadfastPragmaticLoyalty' => 'bool',
   ];
 
   protected static $table = 'global_variables';
@@ -45,12 +58,10 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     $tmp = self::$log;
     self::$log = false;
 
-    foreach (
-      self::DB()
+    foreach (self::DB()
         ->select(['value', 'name'])
         ->get()
-      as $name => $variable
-    ) {
+      as $name => $variable) {
       if (\array_key_exists($name, self::$variables)) {
         self::$data[$name] = $variable;
       }
@@ -166,5 +177,15 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     self::setNegotiatedBribe([]);
     self::setActionStack([]);
     self::setOpenHands(($options[\PaxPamir\OPTION_OPEN_HANDS] ?? null) == \PaxPamir\OPTION_OPEN_HANDS_ENABLED);
+    $optionWakhan = $options[\PaxPamir\OPTION_WAKHAN] ?? 'null';
+    self::setWakhanOption($optionWakhan);
+    self::setWakhanEnabled(in_array($optionWakhan, [\PaxPamir\OPTION_WAKHAN_BASIC, \PaxPamir\OPTION_WAKHAN_IMPROVED, \PaxPamir\OPTION_WAKHAN_CUSTOM]) || count($players) === 1);
+    self::setWakhanAutoResolve(($options[\PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE] ?? null) == \PaxPamir\OPTION_WAKHAN_AUTO_RESOLVE_ENABLED);
+
+    $optionImprovedWakhan = $optionWakhan == \PaxPamir\OPTION_WAKHAN_IMPROVED;
+    self::setWakhanVariantSavvyPurchasing($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SAVVY_PURCHASING_ENABLED);
+    self::setWakhanVariantSpyMovement($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_SPY_MOVEMENT_ENABLED);
+    self::setWakhanVariantSteadfastPragmaticLoyalty($optionImprovedWakhan || ($options[\PaxPamir\OPTION_WAKHAN_VARIANT_STEADFAST_PRAGMATIC_LOYALTY] ?? null) == \PaxPamir\OPTION_WAKHAN_VARIANT_STEADFAST_PRAGMATIC_LOYALTY_ENABLED);
+    
   }
 }

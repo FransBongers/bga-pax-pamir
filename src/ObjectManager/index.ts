@@ -265,7 +265,7 @@ class Supply {
       const log = _('Dominant coalition: ${logTokenCoalition}');
       // const log = _('${logTokenCoalition} dominant');
       node.innerHTML = this.game.format_string_recursive(log, {
-        logTokenCoalition: `coalition:${dominantCoalition}`,
+        logTokenCoalition: `coalitionBlack:${dominantCoalition}`,
       });
       node.classList.remove(PP_AFGHAN,PP_BRITISH,PP_RUSSIAN);
       node.classList.add(`pp_${dominantCoalition}`);
@@ -316,8 +316,8 @@ class VpTrack {
     }
 
     // Add cylinders
-    for (const playerId in gamedatas.players) {
-      const player = gamedatas.players[playerId];
+    for (const playerId in gamedatas.paxPamirPlayers) {
+      const player = gamedatas.paxPamirPlayers[playerId];
       const zone = this.getZone(player.score);
       zone.placeInZone({
         id: `vp_cylinder_${playerId}`,

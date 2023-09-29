@@ -310,7 +310,7 @@ class ClientCardActionMoveState implements State {
    * @returns returns array of playerIds in player order
    */
   private getPlayerOrder = (): number[] => {
-    return this.game.gamedatas.playerorder.map((id) => Number(id));
+    return this.game.playerOrder;
   };
 
   /**

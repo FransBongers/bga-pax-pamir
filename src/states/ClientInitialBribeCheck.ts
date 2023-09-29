@@ -70,7 +70,7 @@ class ClientInitialBribeCheckState implements State {
     }
 
     for (let i = amount - 1; i >= 1; i--) {
-      if (i > maxAvailableRupees) {
+      if (i > maxAvailableRupees || bribee.isWakhan()) {
         continue;
       }
       this.game.addPrimaryActionButton({
@@ -93,7 +93,7 @@ class ClientInitialBribeCheckState implements State {
         text: _('Do not pay'),
         callback: () => next({ bribe: null }),
       });
-    } else {
+    } else if (!bribee.isWakhan()) {
       this.game.addPrimaryActionButton({
         id: `ask_waive_btn`,
         text: _('Ask to waive'),

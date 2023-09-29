@@ -91,7 +91,7 @@ class Region {
         id,
         element: tplCylinder({
           id,
-          color: this.game.gamedatas.players[id.split('_')[1]].color,
+          color: this.game.gamedatas.paxPamirPlayers[id.split('_')[1]].color,
         }),
       });
     });

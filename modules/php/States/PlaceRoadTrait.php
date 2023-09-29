@@ -9,6 +9,7 @@ use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -64,29 +65,35 @@ trait PlaceRoadTrait
       throw new \feException("Not a valid action");
     };
 
-    $actionStack[] = ActionStack::createAction(DISPATCH_PLACE_ROAD,$action['playerId'],[
+    $actionStack[] = ActionStack::createAction(DISPATCH_PLACE_ROAD, $action['playerId'], [
       'border' => $border,
     ]);
-
-    // $this->resolvePlaceRoad($border, $selectedPiece);
 
     ActionStack::next($actionStack);
   }
 
-  // .##.....##.########.####.##.......####.########.##....##
-  // .##.....##....##.....##..##........##.....##.....##..##.
-  // .##.....##....##.....##..##........##.....##......####..
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // ..#######.....##....####.########.####....##.......##...
+  // .########..####..######..########.....###....########..######..##.....##
+  // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
+  // .##.....##..##..##.......##.....##..##...##.....##....##.......##.....##
+  // .##.....##..##...######..########..##.....##....##....##.......#########
+  // .##.....##..##........##.##........#########....##....##.......##.....##
+  // .##.....##..##..##....##.##........##.....##....##....##....##.##.....##
+  // .########..####..######..##........##.....##....##.....######..##.....##
+
+  // ....###.....######..########.####..#######..##....##..######.
+  // ...##.##...##....##....##.....##..##.....##.###...##.##....##
+  // ..##...##..##..........##.....##..##.....##.####..##.##......
+  // .##.....##.##..........##.....##..##.....##.##.##.##..######.
+  // .#########.##..........##.....##..##.....##.##..####.......##
+  // .##.....##.##....##....##.....##..##.....##.##...###.##....##
+  // .##.....##..######.....##....####..#######..##....##..######.
 
   function dispatchPlaceRoad($actionStack)
   {
     $action = $actionStack[count($actionStack) - 1];
 
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
     $loyalty = $player->getLoyalty();
 
     $borderId = $action['data']['border'];
@@ -101,23 +108,34 @@ trait PlaceRoadTrait
       return;
     }
 
+    $this->resolvePlaceRoad($player, $road, $loyalty, $borderId);
+
+    array_pop($actionStack);
+    ActionStack::next($actionStack);
+  }
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function resolvePlaceRoad($player, $road, $loyalty, $borderId)
+  {
     $to = $this->locations['roads'][$borderId];
     $from = $road['location'];
     $region0 = explode("_", $borderId)[0];
     $region1 = explode("_", $borderId)[1];
     Tokens::move($road['id'], $to);
     Tokens::setUsed($road['id'], USED);
-    Notifications::placeRoad($player,  $road['id'], $loyalty, $region0,$region1, $from, $to);
+    Notifications::placeRoad($player,  $road['id'], $loyalty, $region0, $region1, $from, $to);
 
-    if ($selectedPiece !== null) {
-      $fromRegionId = explode('_', $from)[1];
-      $isArmy = Utils::startsWith($from, 'armies');
-      if ($isArmy) {
-        Map::checkRulerChange($fromRegionId);
-      }
+    $fromRegionId = explode('_', $from)[1];
+    $isArmy = Utils::startsWith($from, 'armies');
+    if ($isArmy) {
+      Map::checkRulerChange($fromRegionId);
     }
-
-    array_pop($actionStack);
-    ActionStack::next($actionStack);
   }
 }

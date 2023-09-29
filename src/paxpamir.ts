@@ -34,10 +34,11 @@ class PaxPamir implements PaxPamirGame {
   public playerManager: PlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
-  private playerEvents = {}; // events per player
+  private playerEvents = {}; // events per player => can we remove?
   public activeEvents: PaxPamirZone; // active events
   public spies: Record<string, PaxPamirZone> = {}; // spies per cards
-  public playerCounts = {}; // rename to playerTotals?
+  public playerCounts = {}; // rename to playerTotals? => can we remove?
+  public playerOrder: number[];
   public tooltipManager: PPTooltipManager;
   private _notif_uid_to_log_id = {};
   private _last_notif = null;
@@ -71,6 +72,7 @@ class PaxPamir implements PaxPamirGame {
     specialAbilityInfrastructure: ClientCardActionBuildState;
     specialAbilitySafeHouse: SASafeHouseState;
     startOfTurnAbilities: StartOfTurnAbilitiesState;
+    wakhanPause: WakhanPauseState;
   };
 
   constructor() {
@@ -97,6 +99,21 @@ class PaxPamir implements PaxPamirGame {
     this.gamedatas = gamedatas;
     this.gameOptions = gamedatas.gameOptions;
     debug('gamedatas', gamedatas);
+    this.setupPlayerOrder({ paxPamirPlayerOrder: gamedatas.paxPamirPlayerOrder });
+    if (this.gameOptions.wakhanEnabled) {
+      dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
+    }
+    // Templates from .tpl file. Todo: check if we can move to other files
+    dojo.place(tplActiveEvents(), 'pp_player_tableaus');
+
+    this.playerOrder.forEach((playerId) => {
+      const player = gamedatas.paxPamirPlayers[playerId];
+      if (playerId === 1) {
+        dojo.place(tplWakhanTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+      } else {
+        dojo.place(tplPlayerTableau({ playerId, playerName: player.name, playerColor: player.color }), 'pp_player_tableaus');
+      }
+    });
 
     this._connections = [];
     // Will store all data for active player and gets refreshed with entering player actions state
@@ -126,9 +143,10 @@ class PaxPamir implements PaxPamirGame {
       specialAbilityInfrastructure: new ClientCardActionBuildState(this, true),
       specialAbilitySafeHouse: new SASafeHouseState(this),
       startOfTurnAbilities: new StartOfTurnAbilitiesState(this),
+      wakhanPause: new WakhanPauseState(this),
     };
 
-    this.animationManager = new AnimationManager(this, {duration: 500});
+    this.animationManager = new AnimationManager(this, { duration: 500 });
     // Events
     this.activeEvents = new PaxPamirZone({
       animationManager: this.animationManager,
@@ -144,7 +162,6 @@ class PaxPamir implements PaxPamirGame {
         element: tplCard({ cardId: card.id }),
       }))
     );
-  
 
     this.tooltipManager = new PPTooltipManager(this);
     this.playerManager = new PlayerManager(this);
@@ -357,6 +374,10 @@ class PaxPamir implements PaxPamirGame {
     return this.gamedatas.staticData.cards[cardId];
   }
 
+  public getWakhanCardInfo({wakhanCardId}: {wakhanCardId: string;}): WakhanCard {
+    return this.gamedatas.staticData.wakhanCards[wakhanCardId];
+  }
+
   public getPlayerId(): number {
     return Number(this.framework().player_id);
   }
@@ -430,6 +451,19 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
+  // Sets player order with current player at index 0 if player is in the game
+  setupPlayerOrder({ paxPamirPlayerOrder }: { paxPamirPlayerOrder: number[] }) {
+    const currentPlayerId = this.getPlayerId();
+    const isInGame = paxPamirPlayerOrder.includes(currentPlayerId);
+    if (isInGame) {
+      while (paxPamirPlayerOrder[0] !== currentPlayerId) {
+        const firstItem = paxPamirPlayerOrder.shift();
+        paxPamirPlayerOrder.push(firstItem);
+      }
+    }
+    this.playerOrder = paxPamirPlayerOrder;
+  }
+
   // TODO: check if we can make below functions a single function and just update both since framework
   // will only show one?
   clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
@@ -459,7 +493,7 @@ class PaxPamir implements PaxPamirGame {
   // ..#######.....###....########.##.....##.##.....##.####.########..########..######.
 
   /* @Override */
-  format_string_recursive(log: string, args: Record<string,unknown>): string {
+  format_string_recursive(log: string, args: Record<string, unknown>): string {
     try {
       if (log && args && !args.processed) {
         args.processed = true;
@@ -468,6 +502,8 @@ class PaxPamir implements PaxPamirGame {
         Object.entries(args).forEach(([key, value]) => {
           if (key.startsWith('logToken')) {
             args[key] = getLogTokenDiv({ logToken: value as string, game: this });
+          } else if (key.startsWith('tkn_')) {
+            args[key] = getTokenDiv({ key, value: value as string, game: this });
           }
         });
 
@@ -547,6 +583,18 @@ class PaxPamir implements PaxPamirGame {
   onLoadingComplete() {
     // debug('Loading complete');
     this.cancelLogs(this.gamedatas.canceledNotifIds);
+  }
+
+  updatePlayerOrdering() {
+    console.log('updatePlayerOrdering', this.playerOrder);
+    // (this as any).inherited(arguments);
+    this.playerOrder.forEach((playerId: number, index: number) => {
+      dojo.place('overall_player_board_' + playerId, 'player_boards', index);
+    });
+    // if (this.gameOptions.wakhanEnabled) {
+    //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
+    //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
+    // }
   }
 
   // .########..#######......######..##.....##.########..######..##....##

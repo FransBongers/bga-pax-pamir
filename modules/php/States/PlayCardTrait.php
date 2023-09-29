@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -44,7 +45,7 @@ trait PlayCardTrait
   {
     self::checkAction('playCard');
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $card = Cards::get($cardId);
 
@@ -100,6 +101,20 @@ trait PlayCardTrait
     $side = $action['data']['side'];
 
     $card = Cards::get($cardId);
+    $firstCard = $this->moveCardToCourt($playerId, $cardId, $side);
+
+    Globals::incRemainingActions(-1);
+    // We need to fetch data again to get updated state
+    // can replace this with state returned by insertAtBottom / insertOnTop instead of
+    // getting and returning all card data
+    $card = Cards::get($cardId);
+    Notifications::playCard($card, $firstCard, $side, $playerId);
+
+    $this->nextState('dispatchAction');
+  }
+
+  function moveCardToCourt($playerId, $cardId, $side)
+  {
     $courtCards = Cards::getInLocation(['court', $playerId])->toArray();
     $firstCard = count($courtCards) === 0;
     if ($firstCard) {
@@ -109,13 +124,6 @@ trait PlayCardTrait
     } else {
       Cards::insertOnTop($cardId, ['court', $playerId]);
     }
-    Globals::incRemainingActions(-1);
-    // We need to fetch data again to get updated state
-    // can replace this with state returned by insertAtBottom / insertOnTop instead of
-    // getting and returning all card data
-    $card = Cards::get($cardId);
-    Notifications::playCard($card, $firstCard, $side, $playerId);
-
-    $this->nextState('dispatchAction');
+    return $firstCard;
   }
 }

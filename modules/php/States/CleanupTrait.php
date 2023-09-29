@@ -10,7 +10,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
-use PaxPamir\Managers\Players;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 
 trait CleanupTrait
@@ -48,7 +48,7 @@ trait CleanupTrait
     Cards::resetUsed();
     Tokens::resetUsed();
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
 
     $actionStack = [
@@ -85,13 +85,16 @@ trait CleanupTrait
   {
     $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $totals = $player->getSuitTotals();
 
     $playerHasToDiscard = $totals['courtCards'] - $totals['political'] - 3 > 0;
 
-    if ($playerHasToDiscard) {
+    if ($playerHasToDiscard && $playerId === WAKHAN_PLAYER_ID) {
+      $this->wakhanDiscardCourtCards($totals['courtCards'] - $totals['political'] - 3);
+      array_pop($actionStack);
+    } else if ($playerHasToDiscard) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
         'from' => [COURT]
       ]);
@@ -105,14 +108,17 @@ trait CleanupTrait
   {
     $action = $actionStack[count($actionStack) - 1];
     $playerId = $action['playerId'];
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $totals = $player->getSuitTotals();
     $handCards = $player->getHandCards();
 
     $playerHasToDiscard = count($handCards) - $totals['intelligence'] - 2 > 0;
 
-    if ($playerHasToDiscard) {
+    if ($playerHasToDiscard && $playerId === WAKHAN_PLAYER_ID) {
+      // Wakhan does not have hand cards, we can pop action and continue
+      array_pop($actionStack);
+    } else if ($playerHasToDiscard) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD, $playerId, [
         'from' => [HAND]
       ]);
@@ -130,7 +136,7 @@ trait CleanupTrait
     $location = $action['data']['location'];
     $card = Cards::get($cardId);
 
-    $player = Players::get($playerId);
+    $player = PaxPamirPlayers::get($playerId);
 
     $to = in_array($cardId, ['card_106', 'card_107']) ? ACTIVE_EVENTS : DISCARD;
 

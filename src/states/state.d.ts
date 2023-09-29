@@ -106,6 +106,7 @@ interface OnEnteringPlaceSpyArgs {
 
 interface OnEnteringPlaceSASafeHouseArgs {
   cylinderId: string;
+  fromCardId: string;
 }
 
 type OnEnteringResolveEventStateArgs = null;

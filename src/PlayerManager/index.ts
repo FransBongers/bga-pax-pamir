@@ -23,19 +23,25 @@ class PlayerManager {
     this.game = game;
     this.players = {};
 
-    for (const playerId in game.gamedatas.players) {
-      const player = game.gamedatas.players[playerId];
+    for (const playerId in game.gamedatas.paxPamirPlayers) {
+      const player = game.gamedatas.paxPamirPlayers[playerId];
+      console.log('playerId type',typeof playerId);
       // console.log("playerManager", playerId, player);
-      this.players[playerId] = new PPPlayer({ player, game: this.game });
+      if (Number(playerId) !== 1) {
+        this.players[playerId] = new PPPlayer({ player, game: this.game });
+      } else {
+        this.players[playerId] = new PPWakhanPlayer({ player, game: this.game });
+      }
+      
     }
     // console.log("players", this.players);
   }
 
-  getPlayer({ playerId }: { playerId: number }): PPPlayer {
+  getPlayer({ playerId }: { playerId: number }): PPPlayer | PPWakhanPlayer{
     return this.players[playerId];
   }
 
-  getPlayers(): PPPlayer[] {
+  getPlayers(): (PPPlayer | PPWakhanPlayer)[] {
     return Object.values(this.players);
   }
 
@@ -44,7 +50,7 @@ class PlayerManager {
   }
 
   updatePlayers({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    for (const playerId in gamedatas.players) {
+    for (const playerId in gamedatas.paxPamirPlayers) {
       this.players[playerId].updatePlayer({ gamedatas });
     }
   }

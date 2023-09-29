@@ -7,19 +7,20 @@
 //  .##........########.##.....##....##....########.##.....##
 
 class PPPlayer {
-  private court: PaxPamirZone;
+  protected court: PaxPamirZone;
   private events: PaxPamirZone;
   private cylinders: PaxPamirZone;
   private handCards: string[];
   private hand: PaxPamirZone;
-  private game: PaxPamirGame;
+  protected game: PaxPamirGame;
   private gifts: Record<string, PaxPamirZone> = {};
   private modal: Modal;
-  private playerColor: string;
-  private playerId: number;
+  protected playerColor: string;
+  private playerHexColor: string;
+  protected playerId: number;
   private playerName: string;
   private prizes: PaxPamirZone;
-  private counters: {
+  protected counters: {
     cards: Counter;
     cardsTableau: Counter;
     cylinders: Counter;
@@ -42,6 +43,7 @@ class PPPlayer {
     rupees: new ebg.counter(),
     rupeesTableau: new ebg.counter(),
   };
+
   private player: PaxPamirPlayer;
   private rulerTokens: PaxPamirZone;
   private loyalty: string;
@@ -54,8 +56,13 @@ class PPPlayer {
     this.player = player;
     this.playerName = player.name;
     this.playerColor = player.color;
-
+    this.playerHexColor = player.hexColor;
     const gamedatas = game.gamedatas;
+
+    if (this.playerId === this.game.getPlayerId()) {
+      dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
+    }
+    console.log('isWakhan', this.isWakhan(), this.playerId);
     this.setupPlayer({ gamedatas });
   }
 
@@ -68,11 +75,13 @@ class PPPlayer {
   // ..######..########....##.....#######..##.......
 
   updatePlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    const playerGamedatas = gamedatas.players[this.playerId];
+    const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
+
     this.setupPrizes({ playerGamedatas });
+
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
@@ -85,18 +94,24 @@ class PPPlayer {
 
   // Setup functions
   setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    const playerGamedatas = gamedatas.players[this.playerId];
+    const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
-    this.setupHand({ hand: playerGamedatas.hand });
     this.setupCourt({ playerGamedatas });
     this.setupEvents({ playerGamedatas });
+
+    if (this.playerId !== WAKHAN_PLAYER_ID) {
+      this.setupHand({ hand: playerGamedatas.hand });
+    }
     this.setupPrizes({ playerGamedatas });
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
     this.setupPlayerPanel({ playerGamedatas });
-    if (this.game.gameOptions.openHands) {
+    if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
       this.setupPlayerHandModal();
+    }
+    if (this.playerId === WAKHAN_PLAYER_ID && gamedatas.wakhanCards) {
+      this.setupWakhanDeck({ wakhanCards: gamedatas.wakhanCards });
     }
   }
 
@@ -117,6 +132,9 @@ class PPPlayer {
   }
 
   setupPlayerHandModal() {
+    if (this.isWakhan()) {
+      return;
+    }
     this.modal = new Modal(`player_hand_${this.playerId}`, {
       class: 'pp_player_hand_popin',
       closeIcon: 'fa-times',
@@ -169,7 +187,7 @@ class PPPlayer {
           const playerId = cylinder.id.split('_')[1];
           return {
             id: cylinder.id,
-            element: tplCylinder({ id: cylinder.id, color: this.game.gamedatas.players[playerId].color }),
+            element: tplCylinder({ id: cylinder.id, color: this.game.gamedatas.paxPamirPlayers[playerId].color }),
           };
         })
       );
@@ -286,10 +304,7 @@ class PPPlayer {
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up panels
     const player_board_div = $('player_board_' + this.playerId);
-    dojo.place(
-      (this.game as unknown as Framework).format_block('jstpl_player_board', { ...this.player, p_color: this.playerColor }),
-      player_board_div
-    );
+    dojo.place(tplPlayerBoard({ playerId: this.playerId }), player_board_div);
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
     // TODO: check how player loyalty is returned with new setup. Seems to be empty string?
@@ -319,8 +334,8 @@ class PPPlayer {
     }
 
     // Set all values in player panels
-    if (this.player.loyalty && this.player.loyalty !== 'null') {
-      this.counters.influence.setValue(playerGamedatas.counts.influence);
+    if (this.player.loyalty && this.player.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
+      this.counters.influence.setValue(playerGamedatas.counts.influence.value);
     } else {
       this.counters.influence.disable();
     }
@@ -347,9 +362,6 @@ class PPPlayer {
 
     const numberOfPrizes = playerGamedatas.prizes.length;
     this.updatePrizesStyle({ numberOfPrizes });
-    if (numberOfPrizes > 0) {
-      console.log('prizes', playerGamedatas.prizes);
-    }
     this.prizes.placeInZone(
       playerGamedatas.prizes.map((card: CourtCard & Token) => ({
         id: card.id,
@@ -363,7 +375,7 @@ class PPPlayer {
       const node = dojo.byId(`pp_prizes_${this.playerId}`);
       // dojo.style(node, 'margin-bottom', `${(CARD_HEIGHT - 15 * numberOfPrizes) * -1}px`);
       // dojo.style(node, 'margin-bottom', `${ (CARD_HEIGHT - (numberOfPrizes - 1) * 25) * -1 }px`);
-      dojo.style(node, 'margin-bottom', `-194px`);
+      dojo.style(node, 'margin-bottom', this.playerId === WAKHAN_PLAYER_ID ? '-184px' : `-194px`);
       dojo.style(node, 'height', `${CARD_HEIGHT + (numberOfPrizes - 1) * 25}px`);
     }
   }
@@ -397,6 +409,34 @@ class PPPlayer {
         cardId
       );
     });
+  }
+
+  setupWakhanDeck({ wakhanCards }: { wakhanCards: PaxPamirGamedatas['wakhanCards'] }) {
+    const deckNode = dojo.byId('pp_wakhan_deck');
+
+    deckNode.classList.value = '';
+    deckNode.classList.add('pp_wakhan_card');
+    if (wakhanCards.deck.topCard !== null) {
+      const wakhanCardId = wakhanCards.deck.topCard.id;
+      deckNode.classList.add(`pp_${wakhanCardId}_back`);
+      // this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId, location: 'deck' });
+    } else {
+      deckNode.style.opacity = '0';
+    }
+
+    const discardNode = dojo.byId('pp_wakhan_discard');
+    if (wakhanCards.discardPile.topCard) {
+      discardNode.classList.value = '';
+      discardNode.classList.add('pp_wakhan_card', `pp_${wakhanCards.discardPile.topCard.id}_front`);
+    } else {
+      discardNode.style.opacity = '0';
+    }
+    if (wakhanCards.deck.topCard && wakhanCards.discardPile.topCard) {
+      this.game.tooltipManager.addWakhanCardTooltip({
+        wakhanDeckCardId: wakhanCards.deck.topCard.id,
+        wakhanDiscardCardId: wakhanCards.discardPile.topCard.id,
+      });
+    }
   }
 
   clearInterface() {
@@ -451,6 +491,10 @@ class PPPlayer {
 
   getHandZone(): PaxPamirZone {
     return this.hand;
+  }
+
+  getHexColor(): string {
+    return this.playerHexColor;
   }
 
   getCylinderZone(): PaxPamirZone {
@@ -516,13 +560,7 @@ class PPPlayer {
       }, 0);
   }
 
-  setCounter({
-    counter,
-    value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  setCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.setValue(value);
@@ -537,13 +575,7 @@ class PPPlayer {
     }
   }
 
-  incCounter({
-    counter,
-    value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  incCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.incValue(value);
@@ -558,13 +590,7 @@ class PPPlayer {
     }
   }
 
-  toValueCounter({
-    counter,
-    value,
-  }: {
-    counter: 'cards' | 'cylinders' | 'economic' | 'influence' | 'intelligence' | 'military' | 'political' | 'rupees';
-    value: number;
-  }): void {
+  toValueCounter({ counter, value }: PlayerCounterInput): void {
     switch (counter) {
       case 'cards':
         this.counters.cards.toValue(value);
@@ -612,13 +638,6 @@ class PPPlayer {
     return this.events.getItems().includes(cardId);
   }
 
-  hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
-    return this.court
-      .getItems()
-      .map((cardId: string) => this.game.getCardInfo({ cardId }))
-      .some((card: CourtCard) => card.specialAbility === specialAbility);
-  }
-
   getCourtCardsWithSpecialAbility({ specialAbility }: { specialAbility: string }): CourtCard[] {
     return this.court
       .getItems()
@@ -626,12 +645,23 @@ class PPPlayer {
       .filter((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
-  updateHandCards({action, cardId}: {action: 'ADD' | 'REMOVE'; cardId: string;}) {
+  hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
+    return this.court
+      .getItems()
+      .map((cardId: string) => this.game.getCardInfo({ cardId }))
+      .some((card: CourtCard) => card.specialAbility === specialAbility);
+  }
+
+  public isWakhan(): boolean {
+    return this.playerId === WAKHAN_PLAYER_ID;
+  }
+
+  updateHandCards({ action, cardId }: { action: 'ADD' | 'REMOVE'; cardId: string }) {
     if (!this.game.gameOptions.openHands) {
       return;
     }
     if (action === 'ADD') {
-      this.handCards.push(cardId)
+      this.handCards.push(cardId);
     } else if (action === 'REMOVE') {
       const index = this.handCards.findIndex((item) => item === cardId);
       if (index < 0) {
@@ -716,7 +746,7 @@ class PPPlayer {
         from: `cards_${this.playerId}`,
       });
     }
-    this.updateHandCards({cardId, action: 'REMOVE'});
+    this.updateHandCards({ cardId, action: 'REMOVE' });
   }
 
   async discardPrize({ cardId }: { cardId: string }) {
@@ -765,11 +795,11 @@ class PPPlayer {
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     }
     this.incCounter({ counter: suit, value: rank });
-    if (cardInfo.loyalty) {
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.incCounter({ counter: 'influence', value: 1 });
     }
-    this.updateHandCards({cardId: card.id, action: 'REMOVE'});
+    this.updateHandCards({ cardId: card.id, action: 'REMOVE' });
   }
 
   async addCardToHand({ cardId, from }: { cardId: string; from?: PaxPamirZone }): Promise<void> {
@@ -786,7 +816,7 @@ class PPPlayer {
       await from.removeTo({ id: cardId, to: `cards_${this.playerId}` });
     }
     this.incCounter({ counter: 'cards', value: 1 });
-    this.updateHandCards({cardId, action: 'ADD'});
+    this.updateHandCards({ cardId, action: 'ADD' });
   }
 
   async addCardToEvents({ cardId, from }: { cardId: string; from: PaxPamirZone }): Promise<void> {

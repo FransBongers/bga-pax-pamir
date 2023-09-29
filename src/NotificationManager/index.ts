@@ -36,7 +36,7 @@ class NotificationManager {
     const notifs: [id: string, wait: number][] = [
       // checked
       ['log', 1],
-      ['changeLoyalty', 1],
+      ['changeLoyalty', undefined],
       ['changeFavoredSuit', undefined],
       ['changeRuler', undefined],
       ['clearTurn', 1],
@@ -72,6 +72,10 @@ class NotificationManager {
       ['taxMarket', undefined],
       ['taxPlayer', undefined],
       ['updateInfluence', 1],
+      ['wakhanDrawCard', undefined],
+      ['wakhanRadicalize', undefined],
+      ['wakhanReshuffleDeck', undefined],
+      ['wakhanUpdatePragmaticLoyalty', 1],
     ];
 
     // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
@@ -130,7 +134,7 @@ class NotificationManager {
     );
   }
 
-  notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
+  async notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {
     const { playerId: argsPlayerId, coalition } = notif.args;
     const playerId = Number(argsPlayerId);
 
@@ -141,6 +145,7 @@ class NotificationManager {
     if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
     }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   async notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
@@ -235,7 +240,8 @@ class NotificationManager {
     Object.entries(notif.args.newHandCounts).forEach(([key, value]) => {
       const playerId = Number(key);
       // Updates for current player have been sent in separate notification.
-      if (playerId === this.game.getPlayerId()) {
+      // Wakhan does not have a hand count to update and will play all card to court
+      if (playerId === this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
         return;
       }
       const player = this.getPlayer({ playerId: Number(key) });
@@ -246,7 +252,13 @@ class NotificationManager {
   async notif_dominanceCheckScores(notif: Notif<NotifDominanceCheckScoresArgs>) {
     const { scores } = notif.args;
     for (let playerId of Object.keys(scores)) {
-      this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+      if (Number(playerId) === WAKHAN_PLAYER_ID) {
+        (this.game.playerManager.getPlayer({ playerId: Number(playerId) }) as PPWakhanPlayer).wakhanScore.toValue(
+          scores[playerId].newScore
+        );
+      } else {
+        this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+      }
       await Promise.all([
         this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
         this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`).remove({ input: `vp_cylinder_${playerId}` }),
@@ -348,8 +360,21 @@ class NotificationManager {
     if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
       this.getPlayer({ playerId }).incCounter({ counter: 'cylinders', value: 1 });
     }
-    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_')) {
-      this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.getItems().includes('card_106')) {
+      if (playerId === WAKHAN_PLAYER_ID) {
+        (this.getPlayer({ playerId }) as PPWakhanPlayer).incWakhanInfluence({
+          wakhanInfluence: {
+            type: 'wakhanInfluence',
+            influence: {
+              afghan: 1,
+              british: 1,
+              russian: 1,
+            },
+          },
+        });
+      } else {
+        this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+      }
     }
   }
 
@@ -528,8 +553,8 @@ class NotificationManager {
   }
 
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
-    const {hand, playerId} = notif.args;
-    const player = this.getPlayer({playerId});
+    const { hand, playerId } = notif.args;
+    const player = this.getPlayer({ playerId });
     player.clearHand();
     player.setupHand({ hand });
   }
@@ -576,10 +601,144 @@ class NotificationManager {
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
-  notif_updateInfluence({ args }: Notif<NotifUpdateInterfaceArgs>) {
-    args.updates.forEach(({ playerId, value }) => {
-      this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
+  notif_updateInfluence({ args }: Notif<NotifUpdateInfluenceArgs>) {
+    args.updates.forEach((update) => {
+      if (update.type === 'playerInfluence') {
+        const { playerId, value } = update;
+        this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value });
+      } else if (update.type === 'wakhanInfluence') {
+        (this.getPlayer({ playerId: WAKHAN_PLAYER_ID }) as PPWakhanPlayer).toValueWakhanInfluence({ wakhanInfluence: update });
+      }
     });
+  }
+
+  async notif_wakhanDrawCard({ args }: Notif<NotifWakhanDrawCardArgs>) {
+    const { deck, discardPile } = args;
+    this.game.framework().removeTooltip('pp_wakhan_deck');
+    this.game.framework().removeTooltip('pp_wakhan_discard');
+    const deckNode = dojo.byId('pp_wakhan_deck');
+    const discardNode = dojo.byId('pp_wakhan_discard');
+
+    // Place element on discard
+
+    const element = !discardPile.from
+      ? discardNode
+      : dojo.place(`<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`, `pp_wakhan_discard`);
+    // Execute move animation from deck
+    const fromRect = $(`pp_wakhan_deck`)?.getBoundingClientRect();
+
+    deckNode.classList.remove(`pp_${deck.from}_back`);
+    if (deck.to !== null) {
+      deckNode.classList.add(`pp_${deck.to}_back`);
+    } else {
+      deckNode.style.opacity = '0';
+    }
+
+    if (!discardPile.from) {
+      discardNode.classList.add(`pp_${discardPile.to}_front`);
+      discardNode.style.opacity = '1';
+    }
+
+    await this.game.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element,
+        transitionTimingFunction: 'linear',
+        fromRect,
+      })
+    );
+
+    // discardNode.classList.add(`pp_${discardPile.to}_front`);
+    // if (discardPile.from) {
+
+    if (discardPile.from) {
+      discardNode.classList.replace(`pp_${discardPile.from}_front`, `pp_${discardPile.to}_front`);
+      element.remove();
+    }
+    if (deck.to && discardPile.to) {
+      this.game.tooltipManager.addWakhanCardTooltip({ wakhanDeckCardId: deck.to, wakhanDiscardCardId: discardPile.to });
+    }
+  }
+
+  async notif_wakhanRadicalize({ args }: Notif<NotifWakhanRadicalizeArgs>) {
+    const { marketLocation, newLocation, rupeesOnCards, receivedRupees, card } = args;
+    const playerId = WAKHAN_PLAYER_ID;
+
+    this.game.clearPossible();
+    const row = Number(marketLocation.split('_')[1]);
+    const col = Number(marketLocation.split('_')[2]);
+
+    // Place paid rupees on market cards
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
+    await Promise.all(
+      rupeesOnCards.map(({ row, column, rupeeId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` })
+      )
+    );
+
+    // Remove all rupees that were on the purchased card
+    await this.game.market.removeRupeesFromCard({ row, column: col, to: `rupees_${playerId}` });
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
+
+    // Move card from markt
+    const cardId = card.id;
+    if (newLocation.startsWith('events_')) {
+      await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      if (cardId === 'card_109') {
+        this.game.objectManager.supply.checkDominantCoalition();
+      }
+    } else if (newLocation === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.game.market.getMarketCardZone({ row, column: col }),
+      });
+    } else if (newLocation === TEMP_DISCARD) {
+      // await Promise.all([
+      //   this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+      //     elements: { id: cardId },
+      //     classesToRemove: [PP_MARKET_CARD],
+      //   }),
+      //   this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
+      // ]);
+    } else {
+      const player = this.getPlayer({ playerId });
+      if (player instanceof PPWakhanPlayer) {
+        await player.radicalizeCardWakhan({
+          card,
+          from: this.game.market.getMarketCardZone({ row, column: col }),
+        });
+      }
+    }
+  }
+
+  async notif_wakhanReshuffleDeck({ args }: Notif<NotifWakhanReshuffleDeckArgs>) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const { topOfDiscardPile, topOfDeck } = args;
+    const deckNode = dojo.byId(`pp_wakhan_deck`);
+    const discardNode = dojo.byId('pp_wakhan_discard');
+    deckNode.classList.add(`pp_${topOfDeck}_back`);
+    const fromRect = $(`pp_wakhan_discard`)?.getBoundingClientRect();
+
+    discardNode.style.opacity = '0';
+    deckNode.style.opacity = '1';
+    await this.game.animationManager.play(
+      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
+        element: deckNode,
+        transitionTimingFunction: 'linear',
+        fromRect,
+      })
+    );
+    discardNode.classList.remove(`pp_${topOfDiscardPile}_front`);
+    // const deckNode = dojo.byId('pp_wakhan_deck');
+
+    // element.remove();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  notif_wakhanUpdatePragmaticLoyalty({ args }: Notif<NotifWakhanUpdatePragmaticLoyalty>) {
+    const { pragmaticLoyalty } = args;
+    if (pragmaticLoyalty !== null) {
+      (this.getPlayer({ playerId: WAKHAN_PLAYER_ID }) as PPWakhanPlayer).updateLoyaltyIcon({ pragmaticLoyalty });
+    }
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

@@ -33,10 +33,38 @@ const ST_RESOLVE_ECE_PASHTUNWALI_VALUES = 61;
 const ST_RESOLVE_ECE_REBUKE = 62;
 const ST_RESOLVE_ECE_RUMOR = 63;
 
+const ST_WAKHAN_TURN = 90;
+const ST_WAKHAN_PAUSE = 91;
 const ST_CHANGE_ACTIVE_PLAYER = 95;
 const ST_CALCULATE_TIE_BREAKER = 98;
 const ST_END_GAME = 99;
 
+
+/**
+ * Player color map
+ */
+const COLOR_MAP = [
+  '006A8F' => 'blue',
+  'AB2C29' => 'red',
+  'D7A461' => 'yellow',
+  '7A6E66' => 'gray',
+  '231F20' => 'black',
+  '8A70B2' => 'purple',
+  // original colors
+  '98B3C0' => 'blue',
+  'C19B9E' => 'red',
+  'DFCFB6' => 'yellow',
+  'B9B6B1' => 'gray',
+  '807F7F' => 'black',
+];
+
+const DB_UPGRADE_COLOR_MAP = [
+  '98B3C0' => '006A8F',
+  'C19B9E' => 'AB2C29',
+  'DFCFB6' => 'D7A461',
+  'B9B6B1' => '7A6E66',
+  '807F7F' => '231F20',
+];
 
 
 /**
@@ -57,6 +85,12 @@ const TAX = 'tax';
  */
 const EVENT_CARD = 'eventCard';
 const COURT_CARD = 'courtCard';
+
+/**
+ * Influence types (used in frontend for notifs)
+ */
+const PLAYER_INFLUENCE = 'playerInfluence';
+const WAKHAN_INFLUENCE = 'wakhanInfluence';
 
 /**
  * Coalitions
@@ -132,6 +166,7 @@ const PUNJAB = 'punjab';
  * Special abilities
  */
 const SA_INDISPENSABLE_ADVISORS = 'indispensableAdvisors'; // card_1
+const SA_INDISPENSABLE_ADVISORS_CARD_ID = 'card_1';
 const SA_INSURRESCTION = 'insurrection'; // card_3
 const SA_CLAIM_OF_ANCIENT_LINEAGE = 'claimOfAncientLineage'; // card_5
 const SA_CLAIM_OF_ANCIENT_LINEAGE_CARD_ID = 'card_5';
@@ -221,6 +256,8 @@ const LOG_TOKEN_RUPEE = 'rupee';
 /**
  * Dispatch actions
  */
+const DISPATCH_ACCEPT_PRIZE_CHECK = 'dispAcceptPrizeCheck';
+
 const DISPATCH_CLEANUP_CHECK_COURT = 'dispCleanupCheckCourt';
 const DISPATCH_CLEANUP_CHECK_HAND = 'dispCleanupCheckHand';
 const DISPATCH_CLEANUP_DISCARD_EVENT = 'dispCleanupDiscardEvent';
@@ -261,9 +298,19 @@ const DISPATCH_PLACE_CYLINDER = 'dispPlaceCylinder';
 const DISPATCH_OVERTHROW_TRIBE = 'dispatchOverthrowTribe';
 const DISPATCH_REFILL_MARKET_DRAW_CARDS = 'dispRefillMarketDraw';
 const DISPATCH_REFILL_MARKET_SHIFT_CARDS = 'dispRefillMarketShift';
+
+const DISPATCH_SA_SAFE_HOUSE = 'dispSASafeHouse';
+
 const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
 const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';
+
+const DISPATCH_WAKHAN_ACTIONS = 'dispWakhanActions';
+const DISPATCH_WAKHAN_BONUS_ACTION = 'dispWakhanBonusAction';
+const DISPATCH_WAKHAN_DRAW_AI_CARD = 'dispWakhanDrawAICard';
+const DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS = 'dispWakhanSetupBonusActions';
+const DISPATCH_WAKHAN_START_OF_TURN_ABILITIES = 'dispWakhanStartOfTurnAbilities';
+
 
 const IMPACT_ICON_DISPATCH_MAP = [
   ARMY => DISPATCH_PLACE_ARMY,
@@ -282,3 +329,27 @@ const IMPACT_ICON_DISPATCH_MAP = [
  */
 const USED = 1;
 const NOT_USED = 0;
+
+/**
+ * Wakhan
+ */
+const WAKHAN_PLAYER_ID = 1;
+
+const TOP_LEFT = 'topLeft';
+const BOTTOM_RIGHT = 'bottomRight';
+
+const BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY = 'battleHighestPriorityCourtCardWithMostSpiesWhereWakhanHasSpy';
+const RADICALIZE = 'radicalize';
+const RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY = 'radicalizeIfMilitaryFavoredHighestRankedMilitary'; // wakhan_card_1
+const RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC = 'radicalizeIfPoliticalFavoredHighestRankedEconomic'; // wakhan_card_2
+const RADICALIZE_HIGHEST_RANKED_POLITICAL = 'radicalizeHighestRankedPolitical'; // wakhan_card_2
+const RADICALIZE_HIGHEST_RANKED_INTELLIGENCE = 'radicalizeHighestRankedIntelligence'; // wakhan_card_3
+const RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES = 'radicalizeIfFewerThan2RupeesRadicalizeMostNetRupees';
+const RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION = 'radicalizeCardThatGivesControlOfRegion';
+const RADICALIZE_INTELLIGENCE = 'radicalizeIntelligence';
+const RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS = 'radicalizeCardThatWouldPlaceMostBlocks';
+const RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS = 'radicalizeIfNoDominantCoalitionCardThatWouldPlaceMostCylinders';
+const RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION = 'radicalizeIfNoCardWithMoveCardWithMoveAction';
+const RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT = 'radicalizeIfDominantCoalitionMatchingPatriot';
+const RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL = 'radicalizeIfCourtSizeAtLimitHighestRankedPolitical';
+const RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE = 'radicalizeIfFewerSpiesThanAnotherPlayerHighestRankedIntelligence';

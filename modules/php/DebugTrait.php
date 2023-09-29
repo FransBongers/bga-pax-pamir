@@ -8,12 +8,16 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Tokens;
 use PaxPamir\Managers\Players;
+use PaxPamir\Managers\WakhanCards;
+use PaxPamir\Models\PaxPamirPlayer;
 use PaxPamir\Models\Player;
 
 trait DebugTrait
@@ -47,70 +51,86 @@ trait DebugTrait
 
   function test()
   {
-    // $openHandsGlobals = Globals::getOpenHands();
-    // Notifications::log('openHands',$openHandsGlobals);
-    // $openHands = $this->getGameOptionValue(OPTION_OPEN_HANDS);
-    // Notifications::log('option open hands', $openHands);
-    // Notifications::log('option open null', $openHands === null);
-    // $discardPile = Cards::getInLocationOrdered(DISCARD)->toArray();
-    // $discardPileCount = count($discardPile);
-
-
-    // Notifications::log('discardPile', $discardPile);
-
-    // Cards::move('card_35', 'deck');
-    // Cards::move('card_71', 'deck');
-    // Cards::move('card_6', 'deck');
-    // Cards::move('card_81', 'deck');
-    // Cards::move(ECE_CONFLICT_FATIGUE_CARD_ID, 'events_2371053');
-    Cards::move('card_101', 'market_0_0');
-    // Cards::move('card_115', 'market_0_1');
-    // Cards::move('card_116', 'market_0_2');
-    // Cards::move('card_111', 'market_0_3');
-    // Cards::move('card_19', 'prizes_2371053');
-
-
-    // Cards::move('card_107',ACTIVE_EVENTS);
-
-    // $this->dispatchRefillMarketDrawCards([]);
-
-    // Notifications::log('getInLocation',Cards::getOfTypeInLocation('card','market'));
-    // $this->debugAddCardToHand('card_1');
-    // $this->debugAddCardToHand('card_2');
-    // $this->debugAddCardToHand('card_3');
-    // $this->debugAddCardToHand('card_4');
-    // $actionStack = ActionStack::get();
-    // Notifications::log('actions', $actionStack);
-    // ActionStack::next($actionStack);
-
-    // ActionStack::set([]);
-    // $this->nextState('playerActions');
-    // $this->pushActionsToActionStack([
-    //   [
-    //     'action' => 'discard',
-    //     'data' => [
-    //       'source' => 'hand',
-    //     ],
-    //   ],
-    //   [
-    //     'action' => 'discard',
-    //     'data' => [
-    //       'source' => 'court',
-    //     ],
-    //   ],
+    
+    // Globals::setRulers([
+    //   'herat' => null,
+    //   'kabul' => null,
+    //   'kandahar' => 2371052,
+    //   'persia' => null,
+    //   'punjab' => null,
+    //   'transcaspia' => 1
     // ]);
-    // Notifications::log('actionStack', ActionStack::get());
-    // $actionStack = ActionStack::get();
-    // Notifications::log('actionStack before', $actionStack);
-    // $action = array_pop($actionStack);
-    // Notifications::log('action', $action);
-    // Notifications::log('actionStack after', $actionStack);
+    // Notifications::log('rulers',Globals::getRulers());
+    // Notifications::log('stack',ActionStack::get());
+    // $this->wakhanMove();
+    // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
+    // $players = Players::getAll();
+    // Notifications::log('stack',ActionStack::get());
+    // Cards::setUsed('card_81',0);
+    Cards::move('card_111',Locations::market(0,1));
+    // Cards::move('card_45',DISCARD);
+    // Cards::move('card_23',DISCARD);
+    // Cards::move('card_25',DISCARD);
+    // Cards::move('card_99',DISCARD);
+    // Cards::move('card_83',DISCARD);
+    // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());
+    // Notifications::log('result',$result);
+    // Cards::move('card_68', ['court', WAKHAN_PLAYER_ID],-10);
+    // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
+    // Cards::move('card_26', DISCARD);
+    // Cards::move('card_116', Locations::market(0,5));
+    // Cards::move('card_78', Locations::market(1,5));
+    // Cards::move('card_114', DISCARD);
+    // Cards::move('card_28', Locations::market(1,2));
+    // Cards::move('card_100', DISCARD);
+    // Cards::move('card_9', Locations::market(0,1));
+
+    // Globals::setFavoredSuit(MILITARY);
+    // PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
+    // PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);
+    // $this->gamestate->jumpToState(ST_CALCULATE_TIE_BREAKER);
+    // Globals::setFavoredSuit(MILITARY);
+    // $this->determineRuler(KABUL, $piecesToIgnore = [], $armiesToAdd = [], $tribesToAdd = []);
+    // $ruler = Map::determineRuler(KABUL,['block_russian_12'],[],['cylinder_1_8']);
+    // Notifications::log('ruler',$ruler);
+
+    // $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
+    // // Add start of turn abilities to action stack
+
+    // $addPause = false;
+    // Notifications::log('blachMailHerat',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT));
+    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
+    //   // $addPause = $addPause || $this->wakhanBlackmail(HERAT);
+    // }
+    // Notifications::log('blachMailKandahar',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR));
+    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
+    //   // $addPause = $addPause || $this->wakhanBlackmail(KANDAHAR);
+    // }
+    // Globals::setFavoredSuit(INTELLIGENCE);
+    // Cards::setUsed('card_45',0);
+    // $actionStack = [
+    //   ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::get()->getId(), [
+    //     'transition' => 'playerActions'
+    //   ])
+    // ];
+    // ActionStack::set($actionStack);
+    // Notifications::log('stack',ActionStack::get());
+    // Notifications::log('stack',Globals::getWakhanActive());
+    // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
+
+    // Notifications::log('adjacent',$this->wakhanGetNextMove());
+    // Notifications::log('piece',Map::determineRuler(KABUL,['cylinder_1_5','block_british_6']));
+    // Notifications::log('piece',$this->wakhanGetPieceToMove(PUNJAB));
+
+    // Globals::setRemainingActions(2);
+    // Cards::setUsed('card_69', 0);
+    // $this->dispatchWakhanSetupBonusActions();
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)
   {
     $card = Cards::get($cardId);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
     Cards::move($cardId, ['court', $playerId]);
     // $this->reassignCourtState($playerId);
   }
@@ -118,13 +138,13 @@ trait DebugTrait
   function debugAddCardToHand($cardId, $playerId = null)
   {
     $card = Cards::get($cardId);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
     Cards::move($cardId, ['hand', $playerId]);
   }
 
   function debugCreateArmy($region, $coalition = null)
   {
-    $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
+    $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->regions[$region] && $this->loyalty[$coalition])) {
       return;
     }
@@ -134,9 +154,9 @@ trait DebugTrait
     if ($army != null) {
       $to = $this->locations['armies'][$region];
       Tokens::move($army['id'], $this->locations['armies'][$region]);
-      $message = clienttranslate('${player_name} places ${logTokenArmy} in ${logTokenRegionName}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenArmy} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => PaxPamirPlayers::get(),
         'logTokenArmy' => Utils::logTokenArmy($coalition),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
         'move' => [
@@ -151,7 +171,7 @@ trait DebugTrait
 
   function debugCreateRoad($border, $coalition = null)
   {
-    $coalition = $coalition === null ? Players::get()->getLoyalty() : $coalition;
+    $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->borders[$border] && $this->loyalty[$coalition])) {
       return;
     }
@@ -162,9 +182,9 @@ trait DebugTrait
       $region0 = explode("_", $border)[0];
       $region1 = explode("_", $border)[1];
       Tokens::move($road['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
       Notifications::moveToken($message, [
-        'player' => Players::get(),
+        'player' => PaxPamirPlayers::get(),
         'logTokenRoad' => Utils::logTokenRoad($coalition),
         'logTokenRegionName0' => Utils::logTokenRegionName($region0),
         'logTokenRegionName1' => Utils::logTokenRegionName($region1),
@@ -188,9 +208,9 @@ trait DebugTrait
     $to = $this->locations["tribes"][$region];
     if ($cylinder != null) {
       Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} in ${logTokenRegionName}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} in ${logTokenRegionName}');
       Notifications::moveToken($message, [
-        'player' => Players::get($playerId),
+        'player' => PaxPamirPlayers::get($playerId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenRegionName' => Utils::logTokenRegionName($region),
         'move' => [
@@ -217,9 +237,9 @@ trait DebugTrait
     if ($cylinder != null) {
       $to = 'spies_' . $cardId;
       Tokens::move($cylinder['id'], $to);
-      $message = clienttranslate('${player_name} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
+      $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenLargeCard}');
       Notifications::moveToken($message, [
-        'player' => Players::get($playerId),
+        'player' => PaxPamirPlayers::get($playerId),
         'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
         'logTokenCylinder' => Utils::logTokenCylinder($playerId),
         'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
@@ -235,14 +255,14 @@ trait DebugTrait
   function debugIncPlayerRupees($rupees, $playerId = null)
   {
     $rupees = intval($rupees);
-    $playerId = $playerId === null ? Players::get()->getId() : intval($playerId);
-    Players::incRupees($playerId, $rupees);
+    $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
+    PaxPamirPlayers::incRupees($playerId, $rupees);
   }
 
   function debugIncScore($score, $playerId = null)
   {
     $score = intval($score);
-    $player = $playerId === null ? Players::get() : Players::get(intval($playerId));
+    $player = $playerId === null ? PaxPamirPlayers::get() : PaxPamirPlayers::get(intval($playerId));
     $player->incScore($score);
   }
 
@@ -293,6 +313,37 @@ trait DebugTrait
 
   function debugGetPlayerId($playerId = null)
   {
-    return $playerId === null ? Players::get()->getId() : intval($playerId);
+    return $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
   }
+
+
+
+  public function LoadDebug()
+	{
+		// These are the id's from the BGAtable I need to debug.
+		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
+		$ids = [
+			90748913,
+		];
+                // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
+
+		// Id of the first player in BGA Studio
+		$sid = 2371052;
+		
+		foreach ($ids as $id) {
+			// basic tables
+			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
+			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
+			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
+
+			// 'other' game specific tables. example:
+			// tables specific to your schema that use player_ids
+      // TODO: cylinders contain player id
+      // Ruler tokens
+      self::DbQuery("UPDATE player_extra SET player_id=$sid WHERE player_id = $id" );
+			// self::DbQuery("UPDATE card SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			
+			++$sid;
+		}
+	}
 }

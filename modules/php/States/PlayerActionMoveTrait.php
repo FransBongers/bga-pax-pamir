@@ -11,6 +11,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -39,7 +40,7 @@ trait PlayerActionMoveTrait
     $cardInfo = Cards::get($cardId);
     $this->isValidCardAction($cardInfo, MOVE);
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     $resolved = $this->resolveBribe($cardInfo, $player, MOVE, $offeredBribeAmount);
     if (!$resolved) {
@@ -79,6 +80,33 @@ trait PlayerActionMoveTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::move($cardId, $player);
+
+    $extraActions = $this->resolveMoves($player, $moves);
+
+    $playerId = $player->getId();
+    $actionStack = array_merge(
+      [
+        ActionStack::createAction(DISPATCH_TRANSITION, $playerId, ['transition' => 'playerActions']),
+      ],
+      $extraActions
+    );
+
+    ActionStack::next($actionStack);
+  }
+
+
+
+
+  // .##.....##.########.####.##.......####.########.##....##
+  // .##.....##....##.....##..##........##.....##.....##..##.
+  // .##.....##....##.....##..##........##.....##......####..
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // .##.....##....##.....##..##........##.....##.......##...
+  // ..#######.....##....####.########.####....##.......##...
+
+  function resolveMoves($player, $moves)
+  {
     $regionsThatNeedRulerCheck  = [];
     $regionsThatNeedOverthrowCheck = [];
     foreach ($moves as $pieceId => $pieceMoves) {
@@ -92,7 +120,7 @@ trait PlayerActionMoveTrait
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
         array_push($regionsThatNeedRulerCheck, $source, $destination);
-        $message = clienttranslate('${player_name} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -118,7 +146,7 @@ trait PlayerActionMoveTrait
           'from' => $from,
           'to' => $to
         ]);
-        $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -133,7 +161,7 @@ trait PlayerActionMoveTrait
       } else if (Utils::isCylinder($pieceId)) {
         $from = 'spies_' . $source;
         $to = 'spies_' . $destination;
-        $message = clienttranslate('${player_name} moves ${logTokenCylinder} from ${logTokenCardNameFrom} to ${logTokenCardNameTo}${logTokenNewLine}${logTokenLargeCardFrom}${logTokenLargeCardTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenCardNameFrom} to ${logTokenCardNameTo}${logTokenNewLine}${logTokenLargeCardFrom}${logTokenLargeCardTo}');
         $cardFrom = Cards::get($source);
         $cardTo = Cards::get($destination);
         Notifications::moveToken($message, [
@@ -159,31 +187,12 @@ trait PlayerActionMoveTrait
       Map::checkRulerChange($region);
     };
 
-    if (count($regionsThatNeedOverthrowCheck) === 0) {
-      $this->gamestate->nextState('playerActions');
-      return;
-    }
-    $playerId = $player->getId();
-    $actions = [
-      ActionStack::createAction(DISPATCH_TRANSITION, $playerId, ['transition' => 'playerActions']),
-    ];
+    $extraActions = [];
     foreach ($regionsThatNeedOverthrowCheck as $index => $region) {
-      $actions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, ['region' => $region]);
+      $extraActions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $player->getId(), ['region' => $region]);
     }
-    $this->pushActionsToActionStack($actions);
-    $this->nextState('dispatchAction');
+    return $extraActions;
   }
-
-
-
-
-  // .##.....##.########.####.##.......####.########.##....##
-  // .##.....##....##.....##..##........##.....##.....##..##.
-  // .##.....##....##.....##..##........##.....##......####..
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // .##.....##....##.....##..##........##.....##.......##...
-  // ..#######.....##....####.########.####....##.......##...
 
 
   function validateArmyMoves($pieceId, $moves, $player)
@@ -212,7 +221,7 @@ trait PlayerActionMoveTrait
 
   function validateTribeMoves($pieceId, $moves, $player)
   {
-    if (!Events::isNationalismActive($player)) {
+    if (!Events::isNationalismActive($player->getId())) {
       throw new \feException("Not allowed to move tribes");
     }
 
@@ -246,10 +255,10 @@ trait PlayerActionMoveTrait
     if ($playerId !== intval(explode('_', $pieceId)[1])) {
       throw new \feException("Cylinder is not owned by player");
     };
-    $player = Players::get();
-    $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
-    $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
-    $courtCards = $this->getAllCourtCardsOrdered();
+    $player = PaxPamirPlayers::get();
+    // $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
+    // $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
+    // $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
     // Each move should be valid (spy should be at specified location and cards need to be adjacent)
     foreach ($moves as $index => $move) {
       // block should be in db location for first move or in destination of previous move
@@ -257,14 +266,15 @@ trait PlayerActionMoveTrait
         throw new \feException("Spy is not in the specified location");
       };
 
-      $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
+      // $adjacentCards = $this->getAdjacentCards($move['from'], $courtCards, $hasStrangeBedfellowsAbility);
 
-      if ($hasWellConnectedAbility) {
-        $arrayCopy = $adjacentCards;
-        foreach ($arrayCopy as $index => $cardId) {
-          $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
-        }
-      };
+      // if ($hasWellConnectedAbility) {
+      //   $arrayCopy = $adjacentCards;
+      //   foreach ($arrayCopy as $index => $cardId) {
+      //     $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+      //   }
+      // };
+      $adjacentCards = $this->getAllAdjecentCardsForSpyMovement($move['from'],$player);
 
       if (!in_array($move['to'], $adjacentCards)) {
         throw new \feException("Destination is not adjacent to current location");
@@ -272,18 +282,22 @@ trait PlayerActionMoveTrait
     }
   }
 
-  function getAllCourtCardsOrdered()
+  function getAllAdjecentCardsForSpyMovement($originCardId, $player)
   {
-    $players = Players::getAll()->toArray();
-    usort($players, function ($a, $b) {
-      return $a->getNo() - $b->getNo();
-    });
-    $courtCards = [];
-    foreach ($players as $index => $player) {
-      $playerCourtCards = $player->getCourtCards();
-      array_push($courtCards, ...$playerCourtCards);
-    }
-    return $courtCards;
+    $hasStrangeBedfellowsAbility = $player->hasSpecialAbility(SA_STRANGE_BEDFELLOWS);
+    $hasWellConnectedAbility = $player->hasSpecialAbility(SA_WELL_CONNECTED);
+    $courtCards = PaxPamirPlayers::getAllCourtCardsOrdered();
+
+    $adjacentCards = $this->getAdjacentCards($originCardId, $courtCards, $hasStrangeBedfellowsAbility);
+
+    if ($hasWellConnectedAbility) {
+      $arrayCopy = $adjacentCards;
+      foreach ($arrayCopy as $index => $cardId) {
+        $adjacentCards = array_merge($adjacentCards, $this->getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility));
+      }
+    };
+
+    return $adjacentCards;
   }
 
   function getAdjacentCards($cardId, $courtCards, $hasStrangeBedfellowsAbility)

@@ -12,6 +12,7 @@ use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
+use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
 use PaxPamir\Managers\Tokens;
 
@@ -57,13 +58,13 @@ trait PlayerActionBetrayTrait
     $actionStack = ActionStack::get();
     $current = array_pop($actionStack);
 
-    if ($current['type'] !== 'acceptPrizeCheck') {
+    if ($current['type'] !== DISPATCH_ACCEPT_PRIZE_CHECK) {
       throw new \feException("Not a valid action");
     }
     $cardId = $current['data']['cardId'];
     $card = Cards::get($cardId);
     $prize = $card['prize'];
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
 
     if ($accept) {
       Notifications::acceptPrize($cardId, $player);
@@ -95,7 +96,7 @@ trait PlayerActionBetrayTrait
     $betrayedPlayerId = intval(explode('_', $betrayedCardInfo['location'])[1]);
 
 
-    $player = Players::get();
+    $player = PaxPamirPlayers::get();
     $resolved = $this->resolveBribe($cardInfo, $player, BETRAY, $offeredBribeAmount);
     if (!$resolved) {
       $this->nextState('playerActions');
@@ -103,7 +104,7 @@ trait PlayerActionBetrayTrait
     }
     // Get player again, because bribe has been paid
     if ($offeredBribeAmount !== null && intval($offeredBribeAmount) > 0) {
-      $player = Players::get();
+      $player = PaxPamirPlayers::get();
     };
 
     // Card should be in a player's court
@@ -111,7 +112,7 @@ trait PlayerActionBetrayTrait
       throw new \feException("Card is not in a players court");
     }
 
-    if (Players::get($betrayedPlayerId)->hasSpecialAbility(SA_BODYGUARDS) && $betrayedCardInfo['suit'] === POLITICAL) {
+    if (PaxPamirPlayers::get($betrayedPlayerId)->hasSpecialAbility(SA_BODYGUARDS) && $betrayedCardInfo['suit'] === POLITICAL) {
       throw new \feException("Player has Bodyguard special ability");
     }
 
@@ -139,7 +140,7 @@ trait PlayerActionBetrayTrait
       Globals::incRemainingActions(-1);
     }
     $rupeesOnCards = $this->payActionCosts(2);
-    Players::incRupees($playerId, -2);
+    PaxPamirPlayers::incRupees($playerId, -2);
     Notifications::betray($betrayedCardInfo, $player, $rupeesOnCards);
 
     $actionStack =
@@ -148,7 +149,7 @@ trait PlayerActionBetrayTrait
       ];
 
     if ($betrayedCardInfo['prize'] !== null) {
-      $actionStack[] = ActionStack::createAction('acceptPrizeCheck', $playerId, ['cardId' => $betrayedCardId,]);
+      $actionStack[] = ActionStack::createAction(DISPATCH_ACCEPT_PRIZE_CHECK, $playerId, ['cardId' => $betrayedCardId,]);
     }
 
     $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_BETRAYED_CARD, $playerId, [
@@ -178,7 +179,7 @@ trait PlayerActionBetrayTrait
     $playerId = $current['playerId'];
 
     Cards::move($cardId, Locations::prizes($playerId));
-    Notifications::takePrize($cardId, Players::Get($playerId));
+    Notifications::takePrize($cardId, PaxPamirPlayers::Get($playerId));
 
     $this->nextState('dispatchAction');
   }

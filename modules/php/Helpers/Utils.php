@@ -2,6 +2,8 @@
 
 namespace PaxPamir\Helpers;
 
+use PaxPamir\Core\Globals;
+
 abstract class Utils extends \APP_DbObject
 {
 
@@ -217,9 +219,52 @@ abstract class Utils extends \APP_DbObject
     return Utils::startsWith($pieceId, "cylinder");
   }
 
+  public static function getCardCostBase()
+  {
+    return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
+  }
+
+  public static function getCardCost($player, $card)
+  {
+    if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
+      return 0;
+    };
+    if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
+      return 0;
+    };
+    $column = intval(explode('_', $card['location'])[2]);
+    return $column * Utils::getCardCostBase();
+  }
+
+  public static function getImpactIconCount($card, $icons)
+  {
+    $total = 0;
+    $array_count_values = array_count_values($card['impactIcons']);
+    foreach ($icons as $index => $icon) {
+      $iconCount = isset($array_count_values[$icon]) ? $array_count_values[$icon] : 0;
+      $total += $iconCount;
+    }
+    return $total;
+  }
+
   public static function getPlayerIdForCylinderId($cylinderId)
   {
     return intval(explode('_', $cylinderId)[1]);
+  }
+
+  public static function getCoalitionForBlockId($blockId)
+  {
+    return explode('_', $blockId)[1];
+  }
+
+  public static function getBorderName($region1, $region2)
+  {
+    $border = [$region1, $region2];
+    sort($border);
+    return implode('_', $border);
   }
 
   // .##.....##....###....##.......####.########.....###....########.####..#######..##....##

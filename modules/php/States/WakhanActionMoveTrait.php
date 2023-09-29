@@ -302,11 +302,7 @@ trait WakhanActionMoveTrait
       }
       return false;
     });
-    usort($originCourtCards, function ($a, $b) {
-      $aCardNumber = intval(explode('_', $a['id'])[1]);
-      $bCardNumber = intval(explode('_', $b['id'])[1]);
-      return $bCardNumber - $aCardNumber;
-    });
-    return $originCourtCards;
+    
+    return array_reverse(Wakhan::orderCardsByPriority($originCourtCards));
   }
 }

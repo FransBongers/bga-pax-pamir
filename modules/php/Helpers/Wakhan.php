@@ -286,6 +286,19 @@ class Wakhan
   // .##....##.##.....##.##....##..##.....##
   // ..######..##.....##.##.....##.########.
 
+  public static function orderCardsByPriority($cards)
+  {
+    $prioritizedCards = [];
+    while(count($cards) > 0) {
+      $highestPriorityCardLeft = Wakhan::selectHighestPriorityCard($cards);
+      $prioritizedCards[] = $highestPriorityCardLeft;
+      $cards = Utils::filter($cards, function ($card) use ($highestPriorityCardLeft) {
+        return $card['id'] !== $highestPriorityCardLeft['id'];
+      });
+    }
+    return $prioritizedCards;
+  }
+
 
   /**
    * Used to select a court card in a players court

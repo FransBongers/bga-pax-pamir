@@ -211,7 +211,7 @@ trait WakhanRadicalizeTrait
   {
     for ($column = $startColumn; $column >= 0; $column--) {
       $courtCard = Cards::getInLocation(Locations::market($row, $column))->first();
-      if ($courtCard === null) {
+      if ($courtCard === null || ($courtCard['type'] === EVENT_CARD && $courtCard['discarded']['effect'] === ECE_PUBLIC_WITHDRAWAL)) {
         continue;
       }
 
@@ -288,7 +288,7 @@ trait WakhanRadicalizeTrait
   {
     $cardsThatPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($courtCardsInMarket);
 
-    if(Globals::getWakhanVariantSavvyPurchasing() && Utils::getImpactIconCount($cardsThatPlaceMostCylinders[0], [TRIBE, SPY]) === 0) {
+    if (Globals::getWakhanVariantSavvyPurchasing() && Utils::getImpactIconCount($cardsThatPlaceMostCylinders[0], [TRIBE, SPY]) === 0) {
       return $this->selectCardThatWouldNetMostRupees($courtCardsInMarket);
     }
 

@@ -187,8 +187,8 @@ const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
 }
 
 const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number; playerColor: string; playerName: string;}) => {
-  return `<div id="player_tableau_${playerId}" >
-            <div class="pp_player_tableau pp_player_color_${playerColor}">
+  return `<div id="player_tableau_${playerId}">
+            <div class="pp_player_tableau pp_player_color_${playerColor}" style="min-height: 320px;">
                 <div class="pp_wakhan_tableau_left">
                   <div style="flex-grow: 1;">
                     <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>

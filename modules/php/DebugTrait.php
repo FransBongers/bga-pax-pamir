@@ -51,12 +51,23 @@ trait DebugTrait
 
   function test()
   {
+    
+    // Globals::setRulers([
+    //   'herat' => null,
+    //   'kabul' => null,
+    //   'kandahar' => 2371052,
+    //   'persia' => null,
+    //   'punjab' => null,
+    //   'transcaspia' => 1
+    // ]);
+    // Notifications::log('rulers',Globals::getRulers());
+    // Notifications::log('stack',ActionStack::get());
     // $this->wakhanMove();
     // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
-    $players = Players::getAll();
-    Notifications::log('players',$players);
+    // $players = Players::getAll();
+    // Notifications::log('stack',ActionStack::get());
     // Cards::setUsed('card_81',0);
-    // Cards::move('card_108',Locations::market(0,0));
+    Cards::move('card_111',Locations::market(0,1));
     // Cards::move('card_45',DISCARD);
     // Cards::move('card_23',DISCARD);
     // Cards::move('card_25',DISCARD);
@@ -304,4 +315,35 @@ trait DebugTrait
   {
     return $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
   }
+
+
+
+  public function LoadDebug()
+	{
+		// These are the id's from the BGAtable I need to debug.
+		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
+		$ids = [
+			90748913,
+		];
+                // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
+
+		// Id of the first player in BGA Studio
+		$sid = 2371052;
+		
+		foreach ($ids as $id) {
+			// basic tables
+			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
+			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
+			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
+
+			// 'other' game specific tables. example:
+			// tables specific to your schema that use player_ids
+      // TODO: cylinders contain player id
+      // Ruler tokens
+      self::DbQuery("UPDATE player_extra SET player_id=$sid WHERE player_id = $id" );
+			// self::DbQuery("UPDATE card SET card_location_arg=$sid WHERE card_location_arg = $id" );
+			
+			++$sid;
+		}
+	}
 }

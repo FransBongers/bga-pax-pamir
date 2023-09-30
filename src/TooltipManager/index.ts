@@ -34,8 +34,7 @@ class PPTooltipManager {
 
   public addWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }: { wakhanDeckCardId: string; wakhanDiscardCardId: string; }): void {
     const html = tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId, game: this.game });
-    const tooltip = this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);
-    console.log('tooltips',(this.game as any).tooltips['pp_wakhan_deck']);
+    this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);  
     this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
     
     // dojo.place(tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }), 'game_play_area');
@@ -55,5 +54,11 @@ class PPTooltipManager {
     this.game
       .framework()
       .addTooltip('pp_discard_pile_counter_dominance_check_container', _('Number of Dominance Check cards in the discard pile'), '', 500);
+  }
+
+  public addSuitTooltip({suit, nodeId}: {suit: 'economic' | 'intelligence' | 'military' | 'political', nodeId: string;}) {
+    console.log('addSuitTooltip', suit, nodeId)
+    const html = tplSuitToolTip({ suit });
+    this.game.framework().addTooltipHtml(nodeId, html, 500);
   }
 }

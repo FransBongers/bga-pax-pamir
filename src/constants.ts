@@ -87,7 +87,7 @@ const MILITARY = 'military';
 const POLITICAL = 'political';
 const INTELLIGENCE = 'intelligence';
 
-const SUITS = [POLITICAL, INTELLIGENCE, ECONOMIC, MILITARY];
+const SUITS: ( 'economic' | 'intelligence' | 'military' | 'political')[] = [POLITICAL, INTELLIGENCE, ECONOMIC, MILITARY];
 
 // coalitions
 const AFGHAN = 'afghan';

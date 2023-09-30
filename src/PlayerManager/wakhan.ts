@@ -31,6 +31,10 @@ class PPWakhanPlayer extends PPPlayer {
 
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
+    SUITS.forEach((suit) => {
+      this.game.tooltipManager.addSuitTooltip({ suit, nodeId: `pp_${suit}_icon_${this.playerId}` });
+    });
+
     this.counters.cylinders.create(`cylinder_count_${this.playerId}_counter`);
     this.counters.economic.create(`economic_${this.playerId}_counter`);
     this.counters.intelligence.create(`intelligence_${this.playerId}_counter`);
@@ -38,11 +42,17 @@ class PPWakhanPlayer extends PPPlayer {
     this.counters.political.create(`political_${this.playerId}_counter`);
     this.counters.rupees.create(`rupee_count_${this.playerId}_counter`);
     this.counters.rupeesTableau.create(`rupee_count_tableau_${this.playerId}_counter`);
-    console.log('wakhanInfluence', this.wakhanInfluence);
+
     this.wakhanInfluence.afghan.create(`influence_${this.playerId}_afghan_counter`);
     this.wakhanInfluence['british'].create(`influence_${this.playerId}_british_counter`);
     this.wakhanInfluence.russian.create(`influence_${this.playerId}_russian_counter`);
     this.wakhanScore.create(`player_score_${this.playerId}`);
+
+    this.counters.courtCount.create(`pp_court_count_${this.playerId}`);
+    this.counters.courtLimit.create(`pp_court_limit_${this.playerId}`);
+    this.game.tooltipManager.addSuitTooltip({suit: 'political', nodeId: `pp_player_court_size_${this.playerId}`});
+
+
     this.updatePlayerPanel({ playerGamedatas });
   }
 
@@ -65,6 +75,9 @@ class PPWakhanPlayer extends PPPlayer {
     this.counters.military.setValue(counts.suits.military);
     this.counters.political.setValue(counts.suits.political);
     this.counters.intelligence.setValue(counts.suits.intelligence);
+
+    this.counters.courtLimit.setValue(3 + counts.suits.political);
+    this.counters.courtCount.setValue(playerGamedatas.court.cards.length);
 
     if (this.game.gamedatas.wakhanPragmaticLoyalty) {
       this.updateLoyaltyIcon({ pragmaticLoyalty: this.game.gamedatas.wakhanPragmaticLoyalty });
@@ -123,6 +136,7 @@ class PPWakhanPlayer extends PPPlayer {
     this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
 
     this.incCounter({ counter: suit, value: rank });
+    this.incCounter({ counter: 'courtCount', value: 1 });
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
@@ -145,6 +159,7 @@ class PPWakhanPlayer extends PPPlayer {
     ]);
 
     this.incCounter({ counter: suit, value: rank });
+    this.incCounter({ counter: 'courtCount', value: 1 });
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }

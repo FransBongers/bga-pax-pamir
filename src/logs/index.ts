@@ -19,11 +19,15 @@ const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: P
   const splitKey = key.split('_');
   const type = splitKey[1];
   switch (type) {
+    case LOG_TOKEN_ARMY:
+      return tplLogTokenArmy({ coalition: value.split('_')[0] });
+    case LOG_TOKEN_COALITION:
+      return tplLogTokenCoalition({ coalition: value });
     case LOG_TOKEN_PLAYER_NAME:
       const player = game.playerManager.getPlayers().find((player) => player.getName() === value);
       return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
-    case LOG_TOKEN_COALITION:
-      return tplLogTokenCoalition({ coalition: value });
+    case LOG_TOKEN_ROAD:
+        return tplLogTokenRoad({ coalition: value.split('_')[0] });
     case LOG_TOKEN_RUPEE:
       return tplLogTokenRupee();
     default:

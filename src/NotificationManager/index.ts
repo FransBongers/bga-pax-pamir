@@ -818,36 +818,4 @@ class NotificationManager {
       fromZone.remove({ input: tokenId }),
     ]);
   }
-
-  // notif_updatePlayerCounts(notif) {
-  //   console.log('notif_updatePlayerCounts', notif);
-  //   this.game.playerCounts = notif.args.counts;
-  //   const counts = notif.args.counts;
-
-  //   Object.keys(counts).forEach((playerId) => {
-  //     const player = this.getPlayer({ playerId: Number(playerId) });
-  //     player.setCounter({ counter: 'influence', value: counts[playerId].influence });
-  //     player.setCounter({ counter: 'cylinders', value: counts[playerId].cylinders });
-  //     player.setCounter({ counter: 'rupees', value: counts[playerId].rupees });
-  //     player.setCounter({ counter: 'cards', value: counts[playerId].cards });
-
-  //     player.setCounter({ counter: 'economic', value: counts[playerId].suits.economic });
-  //     player.setCounter({ counter: 'military', value: counts[playerId].suits.military });
-  //     player.setCounter({ counter: 'political', value: counts[playerId].suits.political });
-  //     player.setCounter({ counter: 'intelligence', value: counts[playerId].suits.intelligence });
-  //   });
-  // }
-
-  // notif_updateCourtCardStates(notif: Notif<NotifUpdateCourtCardStatesArgs>) {
-  // debug('notif_updateCourtCardStates', notif.args);
-  // const { playerId, cardStates } = notif.args;
-  // const player = this.getPlayer({ playerId });
-  // cardStates.forEach(({ cardId, state }, index) => {
-  //   const item = player.getCourtZone().items.find((item) => item.id === cardId);
-  //   if (item) {
-  //     item.weight = state;
-  //   }
-  // });
-  // this.getPlayer({ playerId }).getCourtZone().updateDisplay();
-  // }
 }

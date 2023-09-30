@@ -23,8 +23,12 @@ class PPPlayer {
   protected counters: {
     cards: Counter;
     cardsTableau: Counter;
+    courtCount: Counter;
+    courtLimit: Counter;
     cylinders: Counter;
     economic: Counter;
+    handCount: Counter;
+    handLimit: Counter;
     influence: Counter;
     intelligence: Counter;
     military: Counter;
@@ -34,8 +38,12 @@ class PPPlayer {
   } = {
     cards: new ebg.counter(),
     cardsTableau: new ebg.counter(),
+    courtCount: new ebg.counter(),
+    courtLimit: new ebg.counter(),
     cylinders: new ebg.counter(),
     economic: new ebg.counter(),
+    handCount: new ebg.counter(),
+    handLimit: new ebg.counter(),
     influence: new ebg.counter(),
     intelligence: new ebg.counter(),
     military: new ebg.counter(),
@@ -62,7 +70,7 @@ class PPPlayer {
     if (this.playerId === this.game.getPlayerId()) {
       dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
     }
-    console.log('isWakhan', this.isWakhan(), this.playerId);
+
     this.setupPlayer({ gamedatas });
   }
 
@@ -312,8 +320,16 @@ class PPPlayer {
       this.updatePlayerLoyalty({ coalition: this.player.loyalty });
     }
 
+    SUITS.forEach((suit) => {
+      this.game.tooltipManager.addSuitTooltip({ suit, nodeId: `pp_${suit}_icon_${this.playerId}` });
+    });
+
     this.counters.cards.create(`card_count_${this.playerId}_counter`);
     this.counters.cardsTableau.create(`card_count_tableau_${this.playerId}_counter`);
+    this.counters.courtCount.create(`pp_court_count_${this.playerId}`);
+    this.counters.courtLimit.create(`pp_court_limit_${this.playerId}`);
+    this.game.tooltipManager.addSuitTooltip({suit: 'political', nodeId: `pp_player_court_size_${this.playerId}`});
+
     this.counters.cylinders.create(`cylinder_count_${this.playerId}_counter`);
     this.counters.economic.create(`economic_${this.playerId}_counter`);
     this.counters.influence.create(`influence_${this.playerId}_counter`);
@@ -322,7 +338,11 @@ class PPPlayer {
     this.counters.political.create(`political_${this.playerId}_counter`);
     this.counters.rupees.create(`rupee_count_${this.playerId}_counter`);
     this.counters.rupeesTableau.create(`rupee_count_tableau_${this.playerId}_counter`);
-
+    if (this.playerId === this.game.getPlayerId()) {
+      this.counters.handCount.create(`pp_hand_count_${this.playerId}`);
+      this.counters.handLimit.create(`pp_hand_limit_${this.playerId}`);
+      this.game.tooltipManager.addSuitTooltip({suit: 'intelligence', nodeId: `pp_player_hand_size_${this.playerId}`});
+    }
     this.updatePlayerPanel({ playerGamedatas });
   }
 
@@ -349,6 +369,13 @@ class PPPlayer {
     this.counters.military.setValue(counts.suits.military);
     this.counters.political.setValue(counts.suits.political);
     this.counters.intelligence.setValue(counts.suits.intelligence);
+
+    this.counters.courtLimit.setValue(3 + counts.suits.political);
+    this.counters.courtCount.setValue(playerGamedatas.court.cards.length);
+    if (this.playerId === this.game.getPlayerId()) {
+      this.counters.handLimit.setValue(2 + counts.suits.intelligence);
+      this.counters.handCount.setValue(counts.cards);
+    }
   }
 
   setupPrizes({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -565,10 +592,22 @@ class PPPlayer {
       case 'cards':
         this.counters.cards.setValue(value);
         this.counters.cardsTableau.setValue(value);
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handCount.setValue(value);
+        }
+        break;
+      case 'intelligence':
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handLimit.setValue(value);
+        }
         break;
       case 'rupees':
         this.counters.rupees.setValue(value);
         this.counters.rupeesTableau.setValue(value);
+        break;
+      case 'political':
+        this.counters.political.setValue(value);
+        this.counters.courtLimit.setValue(value);
         break;
       default:
         this.counters[counter].setValue(value);
@@ -580,10 +619,22 @@ class PPPlayer {
       case 'cards':
         this.counters.cards.incValue(value);
         this.counters.cardsTableau.incValue(value);
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handCount.incValue(value);
+        }
+        break;
+      case 'intelligence':
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handLimit.incValue(value);
+        }
         break;
       case 'rupees':
         this.counters.rupees.incValue(value);
         this.counters.rupeesTableau.incValue(value);
+        break;
+      case 'political':
+        this.counters.political.incValue(value);
+        this.counters.courtLimit.incValue(value);
         break;
       default:
         this.counters[counter].incValue(value);
@@ -595,10 +646,22 @@ class PPPlayer {
       case 'cards':
         this.counters.cards.toValue(value);
         this.counters.cardsTableau.toValue(value);
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handCount.toValue(value);
+        }
+        break;
+      case 'intelligence':
+        if (this.playerId === this.game.getPlayerId()) {
+          this.counters.handLimit.toValue(value);
+        }
         break;
       case 'rupees':
         this.counters.rupees.toValue(value);
         this.counters.rupeesTableau.toValue(value);
+        break;
+      case 'political':
+        this.counters.political.toValue(value);
+        this.counters.courtLimit.toValue(value);
         break;
       default:
         this.counters[counter].toValue(value);
@@ -682,6 +745,7 @@ class PPPlayer {
   async discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+    this.incCounter({ counter: 'courtCount', value: -1 });
     if (cardInfo.loyalty) {
       this.incCounter({ counter: 'influence', value: -1 });
     }
@@ -795,6 +859,7 @@ class PPPlayer {
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     }
     this.incCounter({ counter: suit, value: rank });
+    this.incCounter({ counter: 'courtCount', value: 1 });
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.incCounter({ counter: 'influence', value: 1 });

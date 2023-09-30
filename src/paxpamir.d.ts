@@ -247,7 +247,7 @@ interface PaxPamirGame extends Game {
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
   updateLocalState: (updates: Partial<LocalState>) => void;
-  clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
+  clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, unknown> }) => void;
   clientUpdatePageTitleOtherPlayers: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
 }
 

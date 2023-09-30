@@ -5,6 +5,20 @@
   // background-color: yellow !important;
 }
 
+.pp_suit_tooltip {
+  display: flex;
+  flex-direction: row;
+  width: 300px;
+  padding: 4px;
+  padding-left: 0px;
+
+  .pp_tooltip_text {
+    text-align: left;
+    font-size: small;
+    margin-left: 2px;
+  }
+}
+
 .pp_tooltip_impact_icon_tribe {
   width: 25px;
   height: 25px;

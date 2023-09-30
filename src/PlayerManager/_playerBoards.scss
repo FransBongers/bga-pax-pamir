@@ -85,17 +85,31 @@
   background-position-x: 60%;
 }
 
+#pagemaintitletext > .pp_loyalty_icon.pp_afghan {
+  margin-bottom: -3px;
+}
+
 .pp_loyalty_icon.pp_british {
   height: 16px;
   padding-bottom: 22px;
   background-position-x: 80%;
 }
 
+#pagemaintitletext > .pp_loyalty_icon.pp_british {
+  margin-bottom: -2px;
+}
+
+
 .pp_loyalty_icon.pp_russian {
   height: 14px;
   padding-bottom: 22px;
   background-position-x: 100%;
 }
+
+#pagemaintitletext > .pp_loyalty_icon.pp_russian {
+  margin-bottom: -2px;
+}
+
 
 .pp_loyalty_icon_black.pp_afghan {
   height: 25px;

@@ -28,6 +28,7 @@
   min-height: 280px;
   margin-bottom: 15px;
   background-color: ivory;
+  padding-bottom: 4px;
 }
 
 .pp_player_hand_cards {
@@ -61,7 +62,7 @@
   display: flex;
   flex-direction: row;
   min-height: 270px;
-  padding-bottom: 16px;
+  padding-bottom: 8px;
   z-index: 1;
 }
 
@@ -126,6 +127,24 @@
   width: 210px;
   display: flex;
   flex-direction: column;
+}
+
+.pp_player_tableau_court_size, .pp_player_hand_size {
+  margin-top: auto;
+  align-self: flex-end;
+  margin-right: 8px;
+  font-weight: bold;
+  font-size: medium;
+  cursor: default;
+  // color: red;
+}
+
+.pp_card_count {
+  margin-right: 2px;
+}
+
+.pp_card_limit {
+  margin-left: 2px;
 }
 
 .pp_prizes {

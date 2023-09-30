@@ -49,13 +49,30 @@ class ClientCardActionBuildState implements State {
     this.updateActionButtons();
   }
 
+  private createTokenLog() {
+    let log = '';
+    const args = {};
+    const coalition = this.game.getCurrentPlayer().getLoyalty();
+    this.tempTokens.forEach((tempToken, index) => {
+      const key = `tkn_${tempToken.type}_${index}`;
+      args[key] = `${coalition}_${tempToken.type}`;
+      log += '${' + key + '}';
+    })
+    return {
+      log,
+      args
+    }
+  }
+
   private updateInterfaceConfirm() {
     this.game.clearPossible();
     const amount = this.isSpecialAbilityInfrastructure ? 0 : Math.ceil(this.tempTokens.length / (this.playerHasNationBuilding ? 2 : 1)) * 2;
     this.game.clientUpdatePageTitle({
-      text: _('Place x for a cost of ${amount} rupees?'),
+      text: _('Place ${tokens} for a cost of ${amount} ${tkn_rupee} ?'),
       args: {
         amount,
+        tokens: this.createTokenLog(),
+        tkn_rupee: _('rupee(s)')
       },
     });
     this.game.addPrimaryActionButton({
@@ -213,10 +230,12 @@ class ClientCardActionBuildState implements State {
       });
     } else {
       this.game.clientUpdatePageTitle({
-        text: _('${you} must select regions to place armies and/or roads (up to ${number} remaining)'),
+        text: _('${you} must select regions to place ${tkn_army} and/or ${tkn_road} (up to ${number} remaining)'),
         args: {
           you: '${you}',
           number: this.maxNumberToPlace - this.tempTokens.length,
+          tkn_army: `${this.game.getCurrentPlayer().getLoyalty()}_army`,
+          tkn_road: `${this.game.getCurrentPlayer().getLoyalty()}_road`,
         },
       });
     }

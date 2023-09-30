@@ -1,3 +1,11 @@
+// ..######...#######..##.....##.########..########.....######.....###....########..########.
+// .##....##.##.....##.##.....##.##.....##....##.......##....##...##.##...##.....##.##.....##
+// .##.......##.....##.##.....##.##.....##....##.......##........##...##..##.....##.##.....##
+// .##.......##.....##.##.....##.########.....##.......##.......##.....##.########..##.....##
+// .##.......##.....##.##.....##.##...##......##.......##.......#########.##...##...##.....##
+// .##....##.##.....##.##.....##.##....##.....##.......##....##.##.....##.##....##..##.....##
+// ..######...#######...#######..##.....##....##........######..##.....##.##.....##.########.
+
 const tplCardTooltipContainer = ({ card, content }: { card: string; content: string }): string => {
   return `<div class="pp_card_tooltip">
   <div class="pp_card_tooltip_inner_container">
@@ -143,6 +151,14 @@ const tplCourtCardTooltip = ({
   });
 };
 
+// .########.##.....##.########.##....##.########.....######.....###....########..########.
+// .##.......##.....##.##.......###...##....##.......##....##...##.##...##.....##.##.....##
+// .##.......##.....##.##.......####..##....##.......##........##...##..##.....##.##.....##
+// .######...##.....##.######...##.##.##....##.......##.......##.....##.########..##.....##
+// .##........##...##..##.......##..####....##.......##.......#########.##...##...##.....##
+// .##.........##.##...##.......##...###....##.......##....##.##.....##.##....##..##.....##
+// .########....###....########.##....##....##........######..##.....##.##.....##.########.
+
 const tplEventCardTooltipDiscarded = ({ title, description, effect }: EventCard['discarded']) => {
   if ([ECE_INTELLIGENCE_SUIT, ECE_MILITARY_SUIT, ECE_POLITICAL_SUIT].includes(effect)) {
     const eventEffectImpactIconMap = {
@@ -175,7 +191,45 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
   });
 };
 
-const tplWakhanCardTooltip = ({ wakhanDeckCardId, wakhanDiscardCardId, game }: { wakhanDeckCardId: string; wakhanDiscardCardId: string; game: PaxPamirGame; }) => {
+// ..######..##.....##.####.########..######.
+// .##....##.##.....##..##.....##....##....##
+// .##.......##.....##..##.....##....##......
+// ..######..##.....##..##.....##.....######.
+// .......##.##.....##..##.....##..........##
+// .##....##.##.....##..##.....##....##....##
+// ..######...#######..####....##.....######.
+
+const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'military' | 'political' }): string => {
+  const SUIT_DESCRIPTION = {
+    economic: _('The economic suit determines your tax shelter. Your tax shelter is equal to the number of Economic Stars in your court. Opponents may only tax rupees in excess of this.'),
+    intelligence: _('The intelligence suit determines your hand size. Your hand size is equal to 2 plus the number of Intelligence Stars in your court. During cleanup, you must discard your hand down to this.'),
+    military: _('The military suit is the final score tie-breaker. If final score is tied, the number of Military Stars in your court determines victory.'),
+    political: _('The political suit determines your court size. Your court size is equal to 3 plus the number of Political Stars in your court. During cleanup, you must discard your court down to this.'),
+  };
+
+  return `<div class="pp_suit_tooltip">
+            <div class="pp_icon pp_suit_icon ${suit}" style="min-width: 44px;"></div>
+            <span class="pp_tooltip_text">${SUIT_DESCRIPTION[suit]}</span>
+          </div>`;
+};
+
+// .##......##....###....##....##.##.....##....###....##....##
+// .##..##..##...##.##...##...##..##.....##...##.##...###...##
+// .##..##..##..##...##..##..##...##.....##..##...##..####..##
+// .##..##..##.##.....##.#####....#########.##.....##.##.##.##
+// .##..##..##.#########.##..##...##.....##.#########.##..####
+// .##..##..##.##.....##.##...##..##.....##.##.....##.##...###
+// ..###..###..##.....##.##....##.##.....##.##.....##.##....##
+
+const tplWakhanCardTooltip = ({
+  wakhanDeckCardId,
+  wakhanDiscardCardId,
+  game,
+}: {
+  wakhanDeckCardId: string;
+  wakhanDiscardCardId: string;
+  game: PaxPamirGame;
+}) => {
   const WAKHAN_ARROW_DESCRIPTION = {
     [BOTTOM_RIGHT]: _('Bottom (right)'),
     [TOP_LEFT]: _('Top (left)'),
@@ -188,38 +242,56 @@ const tplWakhanCardTooltip = ({ wakhanDeckCardId, wakhanDiscardCardId, game }: {
     [MOVE]: _('Move'),
     [TAX]: _('Tax'),
     [RADICALIZE]: _('Radicalize'),
-    [RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY]: _('If military cards are favored, radicalize the highest ranked military card'),
-    [RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC]: _('If political cards are favored, radicalize the highest ranked economic card'),
+    [RADICALIZE_IF_MILITARY_FAVORED_HIGHEST_RANKED_MILITARY]: _(
+      'If military cards are favored, radicalize the highest ranked military card'
+    ),
+    [RADICALIZE_IF_POLITICAL_FAVORED_HIGHEST_RANKED_ECONOMIC]: _(
+      'If political cards are favored, radicalize the highest ranked economic card'
+    ),
     [RADICALIZE_HIGHEST_RANKED_POLITICAL]: _('Radicalize the highest ranked political card'),
     [RADICALIZE_HIGHEST_RANKED_INTELLIGENCE]: _('Radicalize the highest ranked intelligence card'),
-    [RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES]: _('If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees'),
+    [RADICALIZE_IF_FEWER_THAN_TWO_RUPEES_RADICALIZE_MOST_NET_RUPEES]: _(
+      'If Wakhan has fewer than 2 Rupees, radicalize the card that will net the most rupees'
+    ),
     [RADICALIZE_CARD_THAT_GIVES_CONTROL_OF_REGION]: _('Radicalize a card that will gain Wakhan control of a region'),
     [RADICALIZE_INTELLIGENCE]: _('Radicalize an intelligence card'),
     [RADICALIZE_CARD_THAT_WOULD_PLACE_MOST_BLOCKS]: _('Radicalize the card that would place most armies and/or roads'),
-    [RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS]: _('If no coalition has dominance, radicalize the card that would place the most spies and/or tribes'),
-    [RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION]: _('If Wakhan has no card with the move action, radicalize a card with the move action'),
+    [RADICALIZE_IF_NO_DOMINANT_COALITION_CARD_THAT_WOULD_PLACE_MOST_CYLINDERS]: _(
+      'If no coalition has dominance, radicalize the card that would place the most spies and/or tribes'
+    ),
+    [RADICALIZE_IF_NO_CARD_WITH_MOVE_CARD_WITH_MOVE_ACTION]: _(
+      'If Wakhan has no card with the move action, radicalize a card with the move action'
+    ),
     [RADICALIZE_IF_DOMINANT_COALITION_MATCHING_PATRIOT]: _('If a coalition has dominance radicalize a matching patriot'),
-    [RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL]: _('If Wakhan\'s court size is at its limit, radicalize the highest ranked political card'),
-    [RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE]: _('If Wakhan has fewer spies than another player then radicalize the highest ranked intelligence card'),
-    [BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY]: _('Battle on the highest priority court card with the most spies where Wakhan also has at least one spy'),
+    [RADICALIZE_IF_COURT_SIZE_AT_LIMIT_HIGHEST_RANKED_POLITICAL]: _(
+      "If Wakhan's court size is at its limit, radicalize the highest ranked political card"
+    ),
+    [RADICALIZE_IF_FEWER_SPIES_THAN_ANOTHER_PLAYER_HIGHEST_RANKED_INTELLIGENCE]: _(
+      'If Wakhan has fewer spies than another player then radicalize the highest ranked intelligence card'
+    ),
+    [BATTLE_HIGHEST_PRIORITY_COURT_CARD_WITH_MOST_SPIES_WHERE_WAKHAN_HAS_SPY]: _(
+      'Battle on the highest priority court card with the most spies where Wakhan also has at least one spy'
+    ),
   };
 
-  const topOfDeck = game.getWakhanCardInfo({wakhanCardId: wakhanDeckCardId}).back;
-  const topOfDiscard = game.getWakhanCardInfo({wakhanCardId: wakhanDiscardCardId}).front;
+  const topOfDeck = game.getWakhanCardInfo({ wakhanCardId: wakhanDeckCardId }).back;
+  const topOfDiscard = game.getWakhanCardInfo({ wakhanCardId: wakhanDiscardCardId }).front;
 
   return tplCardTooltipContainer({
     card: `<div class="pp_wakhan_card_in_tooltip pp_${wakhanDiscardCardId}_front"></div>`,
     content: `
     <span class="pp_title">${_('AI card')}</span>
     <span class="pp_flavor_text">${_(
-      "Each turn Wakhan draws an AI card. The face-up card and the back of the card on top of the draw deck are used to make decisions for Wakhan."
+      'Each turn Wakhan draws an AI card. The face-up card and the back of the card on top of the draw deck are used to make decisions for Wakhan.'
     )}</span>
     <span class="pp_section_title">${_('Pragmatic Loyalty')}</span>
     <div style="display: flex; flex-direction: row;">
       ${topOfDiscard.pragmaticLoyalty.map((coalition) => `<div class="pp_wakhan_icon pp_${coalition}"></div>`).join('')}
     </div>
-    <span class="pp_section_title">${_('Wakhan\'s Actions')}</span>
-    ${topOfDiscard.actions.map((action) => `<span class="pp_tooltip_text pp_wakhan_action">${WAKHAN_ACTION_DESCRIPTION[action]}</span>`).join('')}
+    <span class="pp_section_title">${_("Wakhan's Actions")}</span>
+    ${topOfDiscard.actions
+      .map((action) => `<span class="pp_tooltip_text pp_wakhan_action">${WAKHAN_ACTION_DESCRIPTION[action]}</span>`)
+      .join('')}
     <span class="pp_section_title">${_('Arrows')}</span>
     <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
       <div style="display: flex; flex-direction: row; align-items: center;">

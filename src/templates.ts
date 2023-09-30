@@ -83,6 +83,9 @@ const tplPlayerHand = ({playerId, playerName}: {playerId: number; playerName: st
   return `<div id="pp_player_hand_${playerId}" class="pp_player_hand">
             <div id="pp_player_hand_title" class="pp_tableau_title"><span>${playerName}'s hand</span></div>
             <div id="pp_player_hand_cards" class="pp_player_hand_cards"></div>
+            <div id="pp_player_hand_size_${playerId}" class="pp_player_hand_size">
+              <span id="pp_hand_count_${playerId}" class="pp_card_count"></span><span>/</span><span id="pp_hand_limit_${playerId}" class="pp_card_limit"></span>
+            </div>
           </div>`
 }
 
@@ -95,10 +98,10 @@ const tplPlayerBoard = ({playerId}: {playerId: number}) => {
         <div id="cards_${playerId}" class="pp_icon pp_card_icon"><div id="card_count_${playerId}" class="pp_icon_count"><span id="card_count_${playerId}_counter"></span></div></div>
     </div>
     <div id="suits_${playerId}" class="pp_icon_container">
-        <div class="pp_icon pp_suit_icon political"><div id="political_${playerId}" class="pp_icon_count"><span id="political_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${playerId}" class="pp_icon_count"><span id="intelligence_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon economic"><div id="economic_${playerId}" class="pp_icon_count"><span id="economic_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon military"><div id="military_${playerId}" class="pp_icon_count"><span id="military_${playerId}_counter"></span></div></div>
+        <div id="pp_political_icon_${playerId}" class="pp_icon pp_suit_icon political"><div id="political_${playerId}" class="pp_icon_count"><span id="political_${playerId}_counter"></span></div></div>
+        <div id="pp_intelligence_icon_${playerId}" class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${playerId}" class="pp_icon_count"><span id="intelligence_${playerId}_counter"></span></div></div>
+        <div id="pp_economic_icon_${playerId}" class="pp_icon pp_suit_icon economic"><div id="economic_${playerId}" class="pp_icon_count"><span id="economic_${playerId}_counter"></span></div></div>
+        <div id="pp_military_icon_${playerId}" class="pp_icon pp_suit_icon military"><div id="military_${playerId}" class="pp_icon_count"><span id="military_${playerId}_counter"></span></div></div>
     </div>
 </div>`
 }
@@ -112,10 +115,10 @@ const tplPlayerBoardWakhan = ({playerId}: {playerId: number}) => {
         <div id="cylinders_${playerId}" class="pp_icon pp_cylinder_icon"><div id="cylinder_count_${playerId}" class="pp_icon_count"><span id="cylinder_count_${playerId}_counter"></span></div></div>        
     </div>
     <div id="suits_${playerId}" class="pp_icon_container">
-        <div class="pp_icon pp_suit_icon political"><div id="political_${playerId}" class="pp_icon_count"><span id="political_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${playerId}" class="pp_icon_count"><span id="intelligence_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon economic"><div id="economic_${playerId}" class="pp_icon_count"><span id="economic_${playerId}_counter"></span></div></div>
-        <div class="pp_icon pp_suit_icon military"><div id="military_${playerId}" class="pp_icon_count"><span id="military_${playerId}_counter"></span></div></div>
+        <div id="pp_political_icon_${playerId}" class="pp_icon pp_suit_icon political"><div id="political_${playerId}" class="pp_icon_count"><span id="political_${playerId}_counter"></span></div></div>
+        <div id="pp_intelligence_icon_${playerId}" class="pp_icon pp_suit_icon intelligence"><div id="intelligence_${playerId}" class="pp_icon_count"><span id="intelligence_${playerId}_counter"></span></div></div>
+        <div id="pp_economic_icon_${playerId}" class="pp_icon pp_suit_icon economic"><div id="economic_${playerId}" class="pp_icon_count"><span id="economic_${playerId}_counter"></span></div></div>
+        <div id="pp_military_icon_${playerId}" class="pp_icon pp_suit_icon military"><div id="military_${playerId}" class="pp_icon_count"><span id="military_${playerId}_counter"></span></div></div>
         <div id="rupees_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_${playerId}" class="pp_icon_count"><span id="rupee_count_${playerId}_counter"></span></div></div>
     </div>
 </div>`
@@ -158,6 +161,9 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
               <div class="pp_tableau_inner_right">
                   <div id="pp_court_player_${playerId}" class="pp_court pp_court_player_${playerId}"></div>
               </div>
+          </div>
+          <div id="pp_player_court_size_${playerId}" class="pp_player_tableau_court_size">
+            <span id="pp_court_count_${playerId}" class="pp_card_count"></span><span>/</span><span id="pp_court_limit_${playerId}" class="pp_card_limit"></span>
           </div>
       </div>
   </div>
@@ -218,12 +224,15 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
                         </div>
                     </div>
                     <div class="pp_tableau_inner_container">
-                        <div class="pp_tableau_inner_left">
-                            <div id="pp_cylinders_player_${playerId}" class="pp_cylinders pp_cylinders_player_${playerId}"></div>
-                        </div>
-                        <div class="pp_tableau_inner_right">
-                            <div id="pp_court_player_${playerId}" class="pp_court pp_court_player_${playerId}"></div>
-                        </div>
+                      <div class="pp_tableau_inner_left">
+                          <div id="pp_cylinders_player_${playerId}" class="pp_cylinders pp_cylinders_player_${playerId}"></div>
+                      </div>
+                      <div class="pp_tableau_inner_right">
+                        <div id="pp_court_player_${playerId}" class="pp_court pp_court_player_${playerId}"></div>
+                      </div>
+                    </div>
+                    <div id="pp_player_court_size_${playerId}" class="pp_player_tableau_court_size">
+                      <span id="pp_court_count_${playerId}" class="pp_card_count"></span><span>/</span><span id="pp_court_limit_${playerId}" class="pp_card_limit"></span>
                     </div>
                 </div>
             </div>

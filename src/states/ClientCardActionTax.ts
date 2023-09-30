@@ -267,11 +267,12 @@ class ClientCardActionTaxState implements State {
 
   private updatePageTitle() {
     this.game.clientUpdatePageTitle({
-      text: _('${you} may take ${number} rupee(s) (${remaining} remaining)'),
+      text: _('${you} may take ${number} ${tkn_rupee} (${remaining} remaining)'),
       args: {
         you: '${you}',
         number: this.maxNumberToSelect,
         remaining: this.maxNumberToSelect - this.numberSelected,
+        tkn_rupee: _('rupee(s)')
       },
     });
   }

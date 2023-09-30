@@ -47,18 +47,15 @@ class ClientInitialBribeCheckState implements State {
 
     const bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
     this.game.clientUpdatePageTitle({
-      text: substituteKeywords({
-        string: ` \${you} must pay a bribe of \${amount} rupee(s) to \${playerName} or ask to waive`,
-        args: {
-          amount,
-        },
-        playerColor: bribee.getColor(),
-      }),
+      text: '${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive',
       args: {
-        playerName: bribee.getName(),
+        amount,
+        tkn_playerName: bribee.getName(),
+        tkn_rupee: _('rupee(s)'),
         you: '${you}',
       },
     });
+
     const minActionCost = this.game.getMinimumActionCost({action: this.action}) || 0;
     const maxAvailableRupees = localState.activePlayer.rupees - minActionCost;
     if (amount <= maxAvailableRupees) {

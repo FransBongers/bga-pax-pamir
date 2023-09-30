@@ -33,10 +33,11 @@ class ClientPurchaseCardState implements State {
     const name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
     dojo.query(`.pp_${cardId}`).addClass('pp_selected');
     this.game.clientUpdatePageTitle({
-      text: _("Purchase '${name}' for ${cost} rupee(s)?"),
+      text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
       args: {
         name,
         cost,
+        tkn_rupee: _('rupee(s)')
       },
     });
     this.game.addPrimaryActionButton({

@@ -467,7 +467,8 @@ class PaxPamir implements PaxPamirGame {
   // TODO: check if we can make below functions a single function and just update both since framework
   // will only show one?
   clientUpdatePageTitle({ text, args }: { text: string; args: Record<string, string | number> }) {
-    this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+    // this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+    this.gamedatas.gamestate.descriptionmyturn = this.format_string_recursive(_(text), args);
     this.framework().updatePageTitle();
   }
 

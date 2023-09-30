@@ -932,6 +932,10 @@ var getTokenDiv = function (_a) {
         case LOG_TOKEN_PLAYER_NAME:
             var player = game.playerManager.getPlayers().find(function (player) { return player.getName() === value; });
             return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
+        case LOG_TOKEN_COALITION:
+            return tplLogTokenCoalition({ coalition: value });
+        case LOG_TOKEN_RUPEE:
+            return tplLogTokenRupee();
         default:
             return value;
     }
@@ -3617,14 +3621,13 @@ var AcceptPrizeState = (function () {
     };
     AcceptPrizeState.prototype.updatePageTitle = function () {
         var card = this.game.getCardInfo({ cardId: this.cardId });
-        console.log('card', card);
         var playerLoyalty = this.game.getCurrentPlayer().getLoyalty();
         if (card.prize !== playerLoyalty) {
             this.game.clientUpdatePageTitle({
-                text: _('Accept ${cardName} as a prize and change loyalty to ${coalitionName}?'),
+                text: _('Accept ${cardName} as a prize and change loyalty to ${tkn_coalition} ?'),
                 args: {
                     cardName: _(card.name),
-                    coalitionName: this.game.gamedatas.staticData.loyalty[card.prize].name,
+                    tkn_coalition: card.prize,
                 },
             });
         }
@@ -4898,11 +4901,12 @@ var ClientCardActionTaxState = (function () {
     };
     ClientCardActionTaxState.prototype.updatePageTitle = function () {
         this.game.clientUpdatePageTitle({
-            text: _('${you} may take ${number} rupee(s) (${remaining} remaining)'),
+            text: _('${you} may take ${number} ${tkn_rupee} (${remaining} remaining)'),
             args: {
                 you: '${you}',
                 number: this.maxNumberToSelect,
                 remaining: this.maxNumberToSelect - this.numberSelected,
+                tkn_rupee: _('rupee(s)')
             },
         });
     };
@@ -4948,15 +4952,11 @@ var ClientInitialBribeCheckState = (function () {
         var localState = this.game.localState;
         var bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
         this.game.clientUpdatePageTitle({
-            text: substituteKeywords({
-                string: " ${you} must pay a bribe of ${amount} rupee(s) to ${playerName} or ask to waive",
-                args: {
-                    amount: amount,
-                },
-                playerColor: bribee.getColor(),
-            }),
+            text: '${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive',
             args: {
-                playerName: bribee.getName(),
+                amount: amount,
+                tkn_playerName: bribee.getName(),
+                tkn_rupee: _('rupee(s)'),
                 you: '${you}',
             },
         });
@@ -5117,23 +5117,7 @@ var ClientPlayCardState = (function () {
         this.game.clearPossible();
         dojo.query("#pp_card_select_".concat(side)).addClass('pp_selected');
         dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
-        if (firstCard) {
-            this.game.clientUpdatePageTitle({
-                text: _("Play '${name}' to court?"),
-                args: {
-                    name: this.game.getCardInfo({ cardId: this.cardId }).name,
-                },
-            });
-        }
-        else {
-            this.game.clientUpdatePageTitle({
-                text: _("Play '${name}' to ${side} end of court?"),
-                args: {
-                    name: this.game.getCardInfo({ cardId: this.cardId }).name,
-                    side: side,
-                },
-            });
-        }
+        this.updatePageTitleConfirmPurchase({ side: side, firstCard: firstCard });
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
             text: _('Confirm'),
@@ -5180,7 +5164,7 @@ var ClientPlayCardState = (function () {
         this.game.clearPossible();
         dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
         this.game.clientUpdatePageTitle({
-            text: _("Select which end of court to play '${name}'"),
+            text: _("Select which end of court to play ${name}"),
             args: {
                 name: this.game.getCardInfo({ cardId: this.cardId }).name,
             },
@@ -5208,6 +5192,46 @@ var ClientPlayCardState = (function () {
                 },
             });
         }
+    };
+    ClientPlayCardState.prototype.updatePageTitleConfirmPurchase = function (_a) {
+        var side = _a.side, firstCard = _a.firstCard;
+        var playedCardLoyalty = this.game.getCardInfo({ cardId: this.cardId }).loyalty;
+        var willChangeLoyalty = playedCardLoyalty !== null && playedCardLoyalty !== this.game.getCurrentPlayer().getLoyalty();
+        debug('willChangeLoyalty', willChangeLoyalty);
+        var text;
+        var args;
+        if (firstCard && willChangeLoyalty) {
+            text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
+            args = {
+                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                tkn_coalition: playedCardLoyalty,
+            };
+        }
+        else if (firstCard) {
+            text = _("Play ${name} to court?");
+            args = {
+                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+            };
+        }
+        else if (!firstCard && willChangeLoyalty) {
+            text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
+            args = {
+                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                side: side,
+                tkn_coalition: playedCardLoyalty,
+            };
+        }
+        else {
+            text = _("Play ${name} to ${side} end of court?");
+            args = {
+                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                side: side,
+            };
+        }
+        this.game.clientUpdatePageTitle({
+            text: text,
+            args: args,
+        });
     };
     ClientPlayCardState.prototype.playCardNextStep = function () {
         var numberOfCardsInCourt = this.game.playerManager
@@ -5256,10 +5280,11 @@ var ClientPurchaseCardState = (function () {
         var name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
         dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
         this.game.clientUpdatePageTitle({
-            text: _("Purchase '${name}' for ${cost} rupee(s)?"),
+            text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
             args: {
                 name: name,
                 cost: cost,
+                tkn_rupee: _('rupee(s)')
             },
         });
         this.game.addPrimaryActionButton({
@@ -7606,7 +7631,7 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.clientUpdatePageTitle = function (_a) {
         var text = _a.text, args = _a.args;
-        this.gamedatas.gamestate.descriptionmyturn = dojo.string.substitute(_(text), args);
+        this.gamedatas.gamestate.descriptionmyturn = this.format_string_recursive(_(text), args);
         this.framework().updatePageTitle();
     };
     PaxPamir.prototype.clientUpdatePageTitleOtherPlayers = function (_a) {

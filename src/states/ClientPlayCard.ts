@@ -35,22 +35,7 @@ class ClientPlayCardState implements State {
     this.game.clearPossible();
     dojo.query(`#pp_card_select_${side}`).addClass('pp_selected');
     dojo.query(`.pp_card_in_hand.pp_${this.cardId}`).addClass('pp_selected');
-    if (firstCard) {
-      this.game.clientUpdatePageTitle({
-        text: _("Play '${name}' to court?"),
-        args: {
-          name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
-        },
-      });
-    } else {
-      this.game.clientUpdatePageTitle({
-        text: _("Play '${name}' to ${side} end of court?"),
-        args: {
-          name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
-          side,
-        },
-      });
-    }
+    this.updatePageTitleConfirmPurchase({ side, firstCard });
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
@@ -100,7 +85,7 @@ class ClientPlayCardState implements State {
     this.game.clearPossible();
     dojo.query(`.pp_card_in_hand.pp_${this.cardId}`).addClass('pp_selected');
     this.game.clientUpdatePageTitle({
-      text: _("Select which end of court to play '${name}'"),
+      text: _("Select which end of court to play ${name}"),
       args: {
         name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
       },
@@ -136,6 +121,43 @@ class ClientPlayCardState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private updatePageTitleConfirmPurchase({ side, firstCard }: { side: 'left' | 'right'; firstCard: boolean }) {
+    const playedCardLoyalty = (this.game.getCardInfo({cardId: this.cardId}) as CourtCard).loyalty;
+    const willChangeLoyalty = playedCardLoyalty !== null && playedCardLoyalty !== this.game.getCurrentPlayer().getLoyalty();
+    debug('willChangeLoyalty',willChangeLoyalty);
+    let text: string;
+    let args: Record<string, string | number>;
+    if (firstCard && willChangeLoyalty) {
+      text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
+      args = {
+        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        tkn_coalition: playedCardLoyalty,
+      };
+    } else if (firstCard) {
+      text = _("Play ${name} to court?");
+      args = {
+        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+      };
+    } else if (!firstCard && willChangeLoyalty) {
+      text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
+      args = {
+        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        side,
+        tkn_coalition: playedCardLoyalty,
+      };
+    } else {
+      text = _("Play ${name} to ${side} end of court?");
+      args = {
+        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        side,
+      };
+    }
+    this.game.clientUpdatePageTitle({
+      text,
+      args,
+    });
+  }
 
   private playCardNextStep() {
     const numberOfCardsInCourt = this.game.playerManager

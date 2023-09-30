@@ -69,14 +69,14 @@ class AcceptPrizeState implements State {
 
   private updatePageTitle() {
     const card = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
-    console.log('card',card);
+
     const playerLoyalty = this.game.getCurrentPlayer().getLoyalty();
     if (card.prize !== playerLoyalty) {
       this.game.clientUpdatePageTitle({
-        text: _('Accept ${cardName} as a prize and change loyalty to ${coalitionName}?'),
+        text: _('Accept ${cardName} as a prize and change loyalty to ${tkn_coalition} ?'),
         args: {
           cardName: _(card.name),
-          coalitionName: this.game.gamedatas.staticData.loyalty[card.prize].name,
+          tkn_coalition: card.prize,
         },
       });
     } else {

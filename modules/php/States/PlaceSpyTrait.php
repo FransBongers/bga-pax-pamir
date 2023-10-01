@@ -64,9 +64,6 @@ trait PlaceSpyTrait
     $actionStack = ActionStack::get();
     $action = array_pop($actionStack);
 
-    // TODO: check if it matches region of played card?
-    Notifications::log('action', $action);
-
     $card = Cards::get($cardId);
     if (!Utils::startsWith($card['location'], "court")) {
       throw new \feException("Selected card is not in a court");

@@ -457,6 +457,13 @@ class Paxpamir extends Table
         As a consequence, there is no current player associated to this action. In your zombieTurn function,
         you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
     */
+    function zombieSkip()
+    {
+        $actionStack = ActionStack::get();
+        array_pop($actionStack);
+        ActionStack::next($actionStack);
+    }
+
 
     function zombieTurn($state, $active_player)
     {
@@ -464,6 +471,39 @@ class Paxpamir extends Table
 
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
+                case 'playerActions':
+                    $this->pass();
+                    break;
+                case 'acceptPrize':
+                    $this->acceptPrize(false);
+                    break;
+                case 'eventCardOtherPersuasiveMethods':
+                case 'eventCardPashtunwaliValues':
+                case 'eventCardRebuke':
+                case 'eventCardRumor':
+                    $this->nextState('dispatchAction');
+                    break;
+                case 'negotiateBribe':
+                    $this->declineBribe();
+                    break;
+                case 'setup':
+                    $this->chooseLoyalty(AFGHAN);
+                    break;
+                case 'specialAbilityInfrastructure':
+                    $this->specialAbilityInfrastructure(true,null);
+                    break;
+                case 'specialAbilitySafeHouse':
+                    $this->specialAbilitySafeHouse(null);
+                    break;
+                case 'startOfTurnAbilities':
+                    $this->specialAbilityPlaceSpyStartOfTurn(true, null);
+                    break;
+                case 'discard':
+                case 'placeRoad':
+                case 'placeSpy':
+                case 'selectPiece':
+                    $this->zombieSkip();
+                    break;
                 default:
                     $this->gamestate->nextState("zombiePass");
                     break;

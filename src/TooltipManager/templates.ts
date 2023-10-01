@@ -200,6 +200,12 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
 // ..######...#######..####....##.....######.
 
 const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'military' | 'political' }): string => {
+  const SUIT_TITLE = {
+    economic: _('TAX SHELTER'),
+    intelligence: _('HAND SIZE'),
+    military: _('FINAL TIES'),
+    political: _('COURT SIZE'),
+  };
   const SUIT_DESCRIPTION = {
     economic: _('The economic suit determines your tax shelter. Your tax shelter is equal to the number of Economic Stars in your court. Opponents may only tax rupees in excess of this.'),
     intelligence: _('The intelligence suit determines your hand size. Your hand size is equal to 2 plus the number of Intelligence Stars in your court. During cleanup, you must discard your hand down to this.'),
@@ -209,7 +215,10 @@ const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'militar
 
   return `<div class="pp_suit_tooltip">
             <div class="pp_icon pp_suit_icon ${suit}" style="min-width: 44px;"></div>
-            <span class="pp_tooltip_text">${SUIT_DESCRIPTION[suit]}</span>
+            <div class="pp_suit_tooltip_content">  
+              <span class="pp_tooltip_title" >${SUIT_TITLE[suit]}</span>
+              <span class="pp_tooltip_text">${SUIT_DESCRIPTION[suit]}</span>
+            </div>
           </div>`;
 };
 

@@ -15,6 +15,8 @@ const LOG_TOKEN_REGION_NAME = 'regionName';
 const LOG_TOKEN_ROAD = 'road';
 const LOG_TOKEN_RUPEE = 'rupee';
 
+let tooltipIdCounter = 0;
+
 const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: PaxPamirGame }) => {
   const splitKey = key.split('_');
   const type = splitKey[1];
@@ -27,7 +29,7 @@ const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: P
       const player = game.playerManager.getPlayers().find((player) => player.getName() === value);
       return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
     case LOG_TOKEN_ROAD:
-        return tplLogTokenRoad({ coalition: value.split('_')[0] });
+      return tplLogTokenRoad({ coalition: value.split('_')[0] });
     case LOG_TOKEN_RUPEE:
       return tplLogTokenRupee();
     default:
@@ -37,15 +39,19 @@ const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: P
 
 const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGame }) => {
   const [type, data] = logToken.split(':');
+
   switch (type) {
     case LOG_TOKEN_ARMY:
       return tplLogTokenArmy({ coalition: data });
     case LOG_TOKEN_CARD:
-      return tplLogTokenCard({ cardId: data });
+      tooltipIdCounter++;
+      return tplLogTokenCard({ cardId: data, cardIdSuffix: tooltipIdCounter });
     case LOG_TOKEN_CARD_ICON:
-      return tplLogTokenCard({ cardId: 'card_back' });
+      tooltipIdCounter++;
+      return tplLogTokenCard({ cardId: 'card_back', cardIdSuffix: tooltipIdCounter });
     case LOG_TOKEN_LARGE_CARD:
-      return tplLogTokenCard({ cardId: data, large: true });
+      tooltipIdCounter++;
+      return tplLogTokenCard({ cardId: data, large: true, cardIdSuffix: tooltipIdCounter });
     case LOG_TOKEN_CARD_NAME:
       return tlpLogTokenBoldText({ text: data });
     case LOG_TOKEN_FAVORED_SUIT:
@@ -80,8 +86,8 @@ const tplLogTokenArmy = ({ coalition }: { coalition: string }) => `<div class="p
 
 const tlpLogTokenBoldText = ({ text }) => `<span style="font-weight: 700;">${_(text)}</span>`;
 
-const tplLogTokenCard = ({ cardId, large }: { cardId: string; large?: boolean }) =>
-  `<div class="pp_card pp_log_token pp_${cardId}${large ? ' pp_large' : ''}"></div>`;
+const tplLogTokenCard = ({ cardId, large, cardIdSuffix }: { cardId: string; large?: boolean; cardIdSuffix: number }) =>
+  `<div id="${cardId}_${cardIdSuffix}" class="pp_card pp_log_token pp_${cardId}${large ? ' pp_large' : ''}"></div>`;
 
 const tplLogTokenCoalition = ({ coalition, black }: { coalition: string; black?: boolean }) =>
   `<div class="pp_log_token pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`;

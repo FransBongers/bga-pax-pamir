@@ -163,6 +163,7 @@ class PaxPamir implements PaxPamirGame {
     dojo.connect(this.framework().notifqueue, 'addToLog', () => {
       this.checkLogCancel(this._last_notif == null ? null : this._last_notif.msg.uid);
       this.addLogClass();
+      this.tooltipManager.checkLogTooltip(this._last_notif);
     });
     // this.setupNotifications();
     this.tooltipManager.setupTooltips();
@@ -534,7 +535,6 @@ class PaxPamir implements PaxPamirGame {
   }
 
   public cancelLogs(notifIds: string[]) {
-    console.log('notifIds', notifIds);
     notifIds.forEach((uid) => {
       if (this._notif_uid_to_log_id.hasOwnProperty(uid)) {
         let logId = this._notif_uid_to_log_id[uid];
@@ -591,29 +591,6 @@ class PaxPamir implements PaxPamirGame {
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
   // ....##.....#######......######..##.....##.########..######..##....##
 
-  // public returnSpiesFromCard({ cardId }: { cardId: string }) {
-  //   if (this.spies?.[cardId]) {
-  //     // ['cylinder_2371052_3']
-  //     const items = this.spies[cardId].getAllItems();
-  //     items.forEach((cylinderId) => {
-  //       const playerId = Number(cylinderId.split('_')[1]);
-  //       this.move({
-  //         id: cylinderId,
-  //         to: this.playerManager.getPlayer({ playerId }).getCylinderZone(),
-  //         from: this.spies[cardId],
-  //       });
-  //     });
-  //   }
-  // }
-
-  // public discardCard({ id, from, order = null }: { id: string; from: Zone; order?: number }) {
-  //   // Move all spies back to cylinder pools
-  //   this.returnSpiesFromCard({ cardId: id });
-
-  //   from.removeFromZone(id, false);
-  //   attachToNewParentNoDestroy(id, 'pp_discard_pile');
-  //   this.framework().slideToObject(id, 'pp_discard_pile').play();
-  // }
 
   // returns zone object for given backend location in token database
   getZoneForLocation({ location }: { location: string }): PaxPamirZone {
@@ -696,30 +673,6 @@ class PaxPamir implements PaxPamirGame {
     this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
   }
 
-  // // Function that gets called every time a card is added to a stock component
-  // setupNewCard(cardDiv, cardId, divId) {
-  //   dojo.addClass(cardDiv, `pp_${cardId}`);
-  //   // if card is played to a court
-  //   if (divId.startsWith('pp_court_player')) {
-  //     const { actions, region } = this.gamedatas.cards[cardId] as CourtCard;
-  //     // add region class for selectable functions
-  //     // const region = this.gamedatas.cards[cardId].region;
-  //     dojo.addClass(cardDiv, `pp_card_in_court_${region}`);
-
-  //     const spyZoneId = 'spies_' + cardId;
-  //     dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, divId);
-  //     this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
-  //     // TODO (add spy zone here)
-  //     // TODO (add card actions)
-  //     Object.keys(actions).forEach((action, index) => {
-  //       const actionId = action + '_' + cardId;
-  //       dojo.place(
-  //         `<div id="${actionId}" class="pp_card_action pp_card_action_${action}" style="left: ${actions[action].left}px; top: ${actions[action].top}px"></div>`,
-  //         divId
-  //       );
-  //     });
-  //   }
-  // }
 
   // Every time a card is moved or placed in court this function will be called to set up zone.
   setupCardSpyZone({ nodeId, cardId }) {

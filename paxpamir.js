@@ -924,6 +924,7 @@ var LOG_TOKEN_PLAYER_NAME = 'playerName';
 var LOG_TOKEN_REGION_NAME = 'regionName';
 var LOG_TOKEN_ROAD = 'road';
 var LOG_TOKEN_RUPEE = 'rupee';
+var tooltipIdCounter = 0;
 var getTokenDiv = function (_a) {
     var key = _a.key, value = _a.value, game = _a.game;
     var splitKey = key.split('_');
@@ -951,11 +952,14 @@ var getLogTokenDiv = function (_a) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: data });
         case LOG_TOKEN_CARD:
-            return tplLogTokenCard({ cardId: data });
+            tooltipIdCounter++;
+            return tplLogTokenCard({ cardId: data, cardIdSuffix: tooltipIdCounter });
         case LOG_TOKEN_CARD_ICON:
-            return tplLogTokenCard({ cardId: 'card_back' });
+            tooltipIdCounter++;
+            return tplLogTokenCard({ cardId: 'card_back', cardIdSuffix: tooltipIdCounter });
         case LOG_TOKEN_LARGE_CARD:
-            return tplLogTokenCard({ cardId: data, large: true });
+            tooltipIdCounter++;
+            return tplLogTokenCard({ cardId: data, large: true, cardIdSuffix: tooltipIdCounter });
         case LOG_TOKEN_CARD_NAME:
             return tlpLogTokenBoldText({ text: data });
         case LOG_TOKEN_FAVORED_SUIT:
@@ -994,8 +998,8 @@ var tlpLogTokenBoldText = function (_a) {
     return "<span style=\"font-weight: 700;\">".concat(_(text), "</span>");
 };
 var tplLogTokenCard = function (_a) {
-    var cardId = _a.cardId, large = _a.large;
-    return "<div class=\"pp_card pp_log_token pp_".concat(cardId).concat(large ? ' pp_large' : '', "\"></div>");
+    var cardId = _a.cardId, large = _a.large, cardIdSuffix = _a.cardIdSuffix;
+    return "<div id=\"".concat(cardId, "_").concat(cardIdSuffix, "\" class=\"pp_card pp_log_token pp_").concat(cardId).concat(large ? ' pp_large' : '', "\"></div>");
 };
 var tplLogTokenCoalition = function (_a) {
     var coalition = _a.coalition, black = _a.black;
@@ -1553,13 +1557,19 @@ var tplEventCardTooltip = function (_a) {
 };
 var tplSuitToolTip = function (_a) {
     var suit = _a.suit;
+    var SUIT_TITLE = {
+        economic: _('TAX SHELTER'),
+        intelligence: _('HAND SIZE'),
+        military: _('FINAL TIES'),
+        political: _('COURT SIZE'),
+    };
     var SUIT_DESCRIPTION = {
         economic: _('The economic suit determines your tax shelter. Your tax shelter is equal to the number of Economic Stars in your court. Opponents may only tax rupees in excess of this.'),
         intelligence: _('The intelligence suit determines your hand size. Your hand size is equal to 2 plus the number of Intelligence Stars in your court. During cleanup, you must discard your hand down to this.'),
         military: _('The military suit is the final score tie-breaker. If final score is tied, the number of Military Stars in your court determines victory.'),
         political: _('The political suit determines your court size. Your court size is equal to 3 plus the number of Political Stars in your court. During cleanup, you must discard your court down to this.'),
     };
-    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px;\"></div>\n            <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n          </div>");
+    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
 };
 var tplWakhanCardTooltip = function (_a) {
     var _b, _c;
@@ -1602,8 +1612,14 @@ var tplWakhanCardTooltip = function (_a) {
 };
 var PPTooltipManager = (function () {
     function PPTooltipManager(game) {
+        this.idRegex = /(?<=id=")[a-z]*_[0-9]*_[0-9]*(?=")/;
         this.game = game;
     }
+    PPTooltipManager.prototype.addSuitTooltip = function (_a) {
+        var suit = _a.suit, nodeId = _a.nodeId;
+        var html = tplSuitToolTip({ suit: suit });
+        this.game.framework().addTooltipHtml(nodeId, html, 500);
+    };
     PPTooltipManager.prototype.addTooltipToCard = function (_a) {
         var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
@@ -1622,6 +1638,27 @@ var PPTooltipManager = (function () {
         this.game.framework().addTooltipHtml("pp_wakhan_deck", html, 500);
         this.game.framework().addTooltipHtml("pp_wakhan_discard", html, 500);
     };
+    PPTooltipManager.prototype.checkLogTooltip = function (lastNotif) {
+        var _this = this;
+        var _a;
+        if (!((_a = lastNotif === null || lastNotif === void 0 ? void 0 : lastNotif.msg) === null || _a === void 0 ? void 0 : _a.args)) {
+            return;
+        }
+        Object.keys(lastNotif.msg.args).forEach(function (key) {
+            var _a;
+            if (!key.startsWith('logTokenLargeCard')) {
+                return;
+            }
+            var id = (_a = _this.idRegex.exec(lastNotif.msg.args[key])) === null || _a === void 0 ? void 0 : _a[0];
+            if (!id || !id.startsWith('card_')) {
+                return;
+            }
+            var splitId = id.split('_');
+            var cardId = "".concat(splitId[0], "_").concat(splitId[1]);
+            var cardIdSuffix = "_".concat(Number(splitId[2]) + 1);
+            _this.addTooltipToCard({ cardId: cardId, cardIdSuffix: cardIdSuffix });
+        });
+    };
     PPTooltipManager.prototype.setupTooltips = function () {
         this.setupCardCounterTooltips();
     };
@@ -1634,12 +1671,6 @@ var PPTooltipManager = (function () {
         this.game
             .framework()
             .addTooltip('pp_discard_pile_counter_dominance_check_container', _('Number of Dominance Check cards in the discard pile'), '', 500);
-    };
-    PPTooltipManager.prototype.addSuitTooltip = function (_a) {
-        var suit = _a.suit, nodeId = _a.nodeId;
-        console.log('addSuitTooltip', suit, nodeId);
-        var html = tplSuitToolTip({ suit: suit });
-        this.game.framework().addTooltipHtml(nodeId, html, 500);
     };
     return PPTooltipManager;
 }());
@@ -7647,6 +7678,7 @@ var PaxPamir = (function () {
         dojo.connect(this.framework().notifqueue, 'addToLog', function () {
             _this.checkLogCancel(_this._last_notif == null ? null : _this._last_notif.msg.uid);
             _this.addLogClass();
+            _this.tooltipManager.checkLogTooltip(_this._last_notif);
         });
         this.tooltipManager.setupTooltips();
         debug('Ending game setup');
@@ -7869,7 +7901,6 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.cancelLogs = function (notifIds) {
         var _this = this;
-        console.log('notifIds', notifIds);
         notifIds.forEach(function (uid) {
             if (_this._notif_uid_to_log_id.hasOwnProperty(uid)) {
                 var logId = _this._notif_uid_to_log_id[uid];

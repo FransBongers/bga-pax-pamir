@@ -12,10 +12,21 @@
   padding: 4px;
   padding-left: 0px;
 
+  .pp_tooltip_title {
+    font-size: medium;
+    font-style: italic;
+  }
+
+  .pp_suit_tooltip_content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2px;
+  }
+
   .pp_tooltip_text {
     text-align: left;
     font-size: small;
-    margin-left: 2px;
+    
   }
 }
 

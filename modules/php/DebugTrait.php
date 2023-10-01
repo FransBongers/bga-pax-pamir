@@ -6,6 +6,7 @@ namespace PaxPamir;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Wakhan;
@@ -51,6 +52,8 @@ trait DebugTrait
 
   function test()
   {
+    // Stats::setupNewGame();
+    Globals::setWakhanAutoResolve(true);
     // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
     // Globals::setRulers([
     //   'herat' => null,
@@ -70,8 +73,8 @@ trait DebugTrait
     
     // Cards::move('card_106',ACTIVE_EVENTS);
     // Cards::move('card_105','events_2371052');
-    Cards::move('card_99',DISCARD);
-    Cards::move('card_111',Locations::market(1,5));
+    // Cards::move('card_99',DISCARD);
+    // Cards::move('card_111',Locations::market(1,5));
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_83',DISCARD);
     // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());

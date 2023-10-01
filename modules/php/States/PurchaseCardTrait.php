@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\ActionStack;
@@ -181,6 +182,7 @@ trait PurchaseCardTrait
     Cards::insertOnTop($cardId, $newLocation);
 
     Notifications::purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards);
+    Stats::incPurchaseCardCount($playerId,1);
     return $actionStack;
   }
 }

@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
@@ -92,6 +93,7 @@ trait PlayerActionBuildTrait
     $rupeesOnCards = $this->payActionCosts($cost);
     PaxPamirPlayers::incRupees($playerId, -$cost);
     Notifications::build($cardId, $player, $rupeesOnCards);
+    Stats::incBuildCount($playerId,1);
 
     $actionStack = [
       ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [

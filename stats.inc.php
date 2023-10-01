@@ -15,85 +15,96 @@
  *
  */
 
-/*
-    In this file, you are describing game statistics, that will be displayed at the end of the
-    game.
-    
-    !! After modifying this file, you must use "Reload  statistics configuration" in BGA Studio backoffice
-    ("Control Panel" / "Manage Game" / "Your Game")
-    
-    There are 2 types of statistics:
-    _ table statistics, that are not associated to a specific player (ie: 1 value for each game).
-    _ player statistics, that are associated to each players (ie: 1 value for each player in the game).
-
-    Statistics types can be "int" for integer, "float" for floating point values, and "bool" for boolean
-    
-    Once you defined your statistics there, you can start using "initStat", "setStat" and "incStat" method
-    in your game logic, using statistics names defined below.
-    
-    !! It is not a good idea to modify this file when a game is running !!
-
-    If your game is already public on BGA, please read the following before any change:
-    http://en.doc.boardgamearena.com/Post-release_phase#Changes_that_breaks_the_games_in_progress
-    
-    Notes:
-    * Statistic index is the reference used in setStat/incStat/initStat PHP method
-    * Statistic index must contains alphanumerical characters and no space. Example: 'turn_played'
-    * Statistics IDs must be >=10
-    * Two table statistics can't share the same ID, two player statistics can't share the same ID
-    * A table statistic can have the same ID than a player statistics
-    * Statistics ID is the reference used by BGA website. If you change the ID, you lost all historical statistic data. Do NOT re-use an ID of a deleted statistic
-    * Statistic name is the English description of the statistic as shown to players
-    
-*/
-
 require_once 'modules/php/constants.inc.php';
 
 // $stats_type = [];
 
-$stats_type = array(
+
+// const STAT_SUCCESSFUL_DOMINANCE_CHECK = 30;
+// const STAT_UNSUCCESSFUL_DOMINANCE_CHECK = 31;
+
+$stats_type = [
 
     // Statistics global to table
-    "table" => array(
+    'table' => [
+        'turnCount' => [
+            'id' => STAT_TURN_COUNT,
+            'name' => totranslate('Number of turns'),
+            'type' => 'int'
+        ],
+        'successfulDominanceChecks' => [
+            'id' => STAT_SUCCESSFUL_DOMINANCE_CHECK,
+            'name' => totranslate('Number of successful Dominance Checks'),
+            'type' => 'int'
+        ],
+        'unsuccessfulDominanceChecks' => [
+            'id' => STAT_UNSUCCESSFUL_DOMINANCE_CHECK,
+            'name' => totranslate('Number of unsuccessful Dominance Checks'),
+            'type' => 'int'
+        ]
+    ],
 
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
+    // const STAT_TURN_NUMBER = 10;
+    // const STAT_ACTION_PURCHASE_CARD = 11;
+    // const STAT_ACTION_PLAY_CARD = 12;
+    // const STAT_ACTION_BATTLE = 13;
+    // const STAT_ACTION_BETRAY = 14;
+    // const STAT_ACTION_BUILD = 15;
+    // const STAT_ACTION_GIFT = 16;
+    // const STAT_ACTION_MOVE = 17;
+    // const STAT_ACTION_TAX = 18;
 
-/*
-        Examples:
-
-
-        "table_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("table test stat 1"), 
-                                "type" => "int" ),
-                                
-        "table_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("table test stat 2"), 
-                                "type" => "float" )
-*/  
-    ),
-    
     // Statistics existing for each player
-    "player" => array(
-
-        "turns_number" => array("id"=> 10,
-                    "name" => totranslate("Number of turns"),
-                    "type" => "int" ),
-    
-/*
-        Examples:    
-        
-        
-        "player_teststat1" => array(   "id"=> 10,
-                                "name" => totranslate("player test stat 1"), 
-                                "type" => "int" ),
-                                
-        "player_teststat2" => array(   "id"=> 11,
-                                "name" => totranslate("player test stat 2"), 
-                                "type" => "float" )
-
-*/    
-    )
-
-);
+    'player' => [
+        'playerTurnCount' => [
+            'id' => STAT_PLAYER_TURN_COUNT,
+            'name' => totranslate('Number of turns'),
+            'type' => 'int'
+        ],
+        'purchaseCardCount' => [
+            'id' => STAT_ACTION_PURCHASE_CARD,
+            'name' => totranslate('Number of cards purchased'),
+            'type' => 'int'
+        ],
+        'playCardCount' => [
+            'id' => STAT_ACTION_PLAY_CARD,
+            'name' => totranslate('Number of cards played'),
+            'type' => 'int'
+        ],
+        'battleCount' => [
+            'id' => STAT_ACTION_BATTLE,
+            'name' => totranslate('Number of battle actions'),
+            'type' => 'int'
+        ],
+        'betrayCount' => [
+            'id' => STAT_ACTION_BETRAY,
+            'name' => totranslate('Number of betray actions'),
+            'type' => 'int'
+        ],
+        'buildCount' => [
+            'id' => STAT_ACTION_BUILD,
+            'name' => totranslate('Number of build actions'),
+            'type' => 'int'
+        ],
+        'giftCount' => [
+            'id' => STAT_ACTION_GIFT,
+            'name' => totranslate('Number of gift actions'),
+            'type' => 'int'
+        ],
+        'moveCount' => [
+            'id' => STAT_ACTION_MOVE,
+            'name' => totranslate('Number of move actions'),
+            'type' => 'int'
+        ],
+        'taxCount' => [
+            'id' => STAT_ACTION_TAX,
+            'name' => totranslate('Number of tax actions'),
+            'type' => 'int'
+        ],
+        'loyaltyChangeCount' => [
+            'id' => STAT_LOYALTY_CHANGE_COUNT,
+            'name' => totranslate('Number of loyalty changes'),
+            'type' => 'int'
+        ],
+    ]
+];

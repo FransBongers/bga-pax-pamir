@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
@@ -69,6 +70,11 @@ trait DominanceCheckTrait
     $scores = $checkSuccessful ? $this->getScoresSuccessFulCheck($dominantCoalition, Globals::getDominanceChecksResolved()) : $this->getScoresUnsuccessFulCheck(Globals::getDominanceChecksResolved());
 
     Notifications::dominanceCheckResult($scores, $checkSuccessful, $dominantCoalition);
+    if ($checkSuccessful) {
+      Stats::incSuccessfulDominanceChecks(1);
+    } else {
+      Stats::incUnsuccessfulDominanceChecks(1);
+    }
 
     if ($checkSuccessful) {
       $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_REMOVE_COALITION_BLOCKS, $playerId, []);

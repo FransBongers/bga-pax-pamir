@@ -36,6 +36,7 @@ require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Wakhan;
@@ -125,6 +126,7 @@ class Paxpamir extends Table
         self::initGameStateLabels(array(
             'logging' => 10,
         ));
+        Stats::checkExistence();
     }
 
     protected function getGameName()
@@ -165,6 +167,7 @@ class Paxpamir extends Table
         Cards::setupNewGame($players, $options);
         Tokens::setupNewGame($players, $options);
         Market::setupNewGame($players, $options);
+        Stats::checkExistence();
 
         $this->setGameStateInitialValue('logging', false);
 

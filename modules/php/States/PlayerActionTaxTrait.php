@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
@@ -113,6 +114,7 @@ trait PlayerActionTaxTrait
     }
     Notifications::tax($cardId, $activePlayer);
     PaxPamirPlayers::incRupees($activePlayerId, $totalSelected);
+    Stats::incTaxCount($activePlayerId,1);
 
     $rupeesInMarket = [];
     // Check if rupee is in market

@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
@@ -84,6 +85,7 @@ trait ChangeLoyaltyTrait
     PaxPamirPlayers::setLoyalty($playerId, $coalition);
 
     Notifications::changeLoyalty($coalition);
+    Stats::incLoyaltyChangeCount($playerId,1);
 
     // TODO: Only check regions where player has tribes for ruler change?
     foreach (Game::get()->regions as $region => $regionInfo) {

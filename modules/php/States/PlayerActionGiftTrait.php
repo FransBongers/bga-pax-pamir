@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
@@ -71,6 +72,7 @@ trait PlayerActionGiftTrait
       $player,
       $value,
     );
+    Stats::incGiftCount($playerId,1);
 
     Cards::setUsed($cardId, 1); // unavailable
     // if not free action reduce remaining actions.

@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
@@ -80,6 +81,7 @@ trait PlayerActionBattleTrait
   {
     $player = PaxPamirPlayers::get();
     Notifications::battleRegion($player, $location);
+    Stats::incBattleCount($player->getId(),1);
 
     // All checks have been done. Execute battle
     Cards::setUsed($cardInfo['id'], 1);
@@ -217,6 +219,7 @@ trait PlayerActionBattleTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::battleCard($location);
+    Stats::incBattleCount($player->getId(),1);
 
     $protectedBySafeHouse = [];
     $safeHouseOwners = $this->getSafeHouseOwners();

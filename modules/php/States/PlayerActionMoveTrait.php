@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\ActionStack;
@@ -80,6 +81,7 @@ trait PlayerActionMoveTrait
       Globals::incRemainingActions(-1);
     }
     Notifications::move($cardId, $player);
+    Stats::incMoveCount($player->getId(),1);
 
     $extraActions = $this->resolveMoves($player, $moves);
 
@@ -142,10 +144,6 @@ trait PlayerActionMoveTrait
           $regionsThatNeedOverthrowCheck[] = $source;
         }
 
-        Notifications::log('locations', [
-          'from' => $from,
-          'to' => $to
-        ]);
         $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
         Notifications::moveToken($message, [
           'player' => $player,

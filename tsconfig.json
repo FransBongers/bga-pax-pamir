@@ -25,6 +25,7 @@
     "src/constants.ts",
     "src/templates.ts",
     "src/utility.ts",
+    "src/ActiveEvents/index.ts",
     "src/TooltipManager/templates.ts",
     "src/TooltipManager/index.ts",
     "src/ObjectManager/index.ts",

@@ -59,7 +59,6 @@ trait PlayerActionTrait
     $action = array_pop($actionStack);
     $cost = $action['data']['cost'];
     $playerId = $action['playerId'];
-    Notifications::log('dispatchPayRupeesToMarket',$action);
     $rupeesOnCards = $this->payActionCosts($cost);
     PaxPamirPlayers::incRupees($playerId, -$cost);
 
@@ -227,7 +226,15 @@ trait PlayerActionTrait
         }
         $location = 'market_' . $row . '_' . $column;
         $marketCard = Cards::getInLocation($location)->first();
-        if ($marketCard !== NULL) {
+        if ($marketCard !== null && $marketCard['id'] === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
+          $rupeesOnCards[] = array(
+            'row' => $row,
+            'column' => $column,
+            'cardId' => $marketCard["id"],
+            'rupeeId' => 'temp_rupee_id'
+          );
+          $remainingRupees--;
+        } else if ($marketCard !== NULL) {
           $rupee = Tokens::getInLocation(RUPEE_SUPPLY)->first();
           Tokens::move($rupee['id'], [$location, 'rupees']);
           Cards::setUsed($marketCard["id"], 1); // set unavailable

@@ -119,7 +119,7 @@ class ClientInitialBribeCheckState implements State {
 
    private checkBribe({ cardId, action, next }: ClientInitialBribeCheckArgs) {
     // Check for abilities that ignore bribes
-    const disregardForCustomsActive = this.game.activeEvents.getItems().includes('card_107');
+    const disregardForCustomsActive = this.game.activeEvents.hasCard({cardId: 'card_107'});
     const charismaticCourtiersAcitve =
       action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
     // actions is either playCard or one of the card actions

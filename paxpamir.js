@@ -1174,6 +1174,7 @@ var ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
 var ECE_PASHTUNWALI_VALUES_CARD_ID = 'card_115';
 var ECE_POLITICAL_SUIT = 'politicalSuit';
 var ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
+var ECE_PUBLIC_WITHDRAWAL_CARD_ID = 'card_111';
 var ECE_REBUKE = 'rebuke';
 var ECE_RIOTS_IN_HERAT = 'riotsInHerat';
 var ECE_RIOTS_IN_KABUL = 'riotsInKabul';
@@ -1278,7 +1279,7 @@ var tplPlayerHandModal = function (_a) {
     return "<div class=\"pp_player_hand_modal_content\">\n            ".concat(createCards({ cards: cards }), "\n          </div>");
 };
 var tplActiveEvents = function () {
-    return "<div id=\"pp_active_events_container\">\n            <div id=\"pp_active_events_title\" class=\"pp_tableau_title\"><span>Active events</span></div>\n            <div id=\"pp_active_events\" class=\"pp_active_events\"></div>\n          </div>";
+    return "<div id=\"pp_active_events_container\">\n            <div id=\"pp_active_events\" class=\"pp_active_events\"></div>\n          </div>";
 };
 var tplPlayerHand = function (_a) {
     var playerId = _a.playerId, playerName = _a.playerName;
@@ -1327,6 +1328,100 @@ var substituteKeywords = function (_a) {
     console.log('color', playerColor);
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
+var PPActiveEvents = (function () {
+    function PPActiveEvents(game) {
+        this.zoneId = 'pp_active_events';
+        this.containerId = 'pp_active_events_container';
+        this.game = game;
+        dojo.place(tplActiveEvents(), 'pp_player_tableaus', 1);
+        this.setupActiveEvents({ gamedatas: game.gamedatas });
+    }
+    PPActiveEvents.prototype.setupActiveEvents = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
+        this.zone = new PaxPamirZone({
+            animationManager: this.game.animationManager,
+            containerId: this.zoneId,
+            itemHeight: CARD_HEIGHT,
+            itemWidth: CARD_WIDTH,
+            itemGap: 16,
+        });
+        var events = gamedatas.activeEvents || [];
+        this.zone.placeInZone(events.map(function (card) { return ({
+            id: card.id,
+            element: tplCard({ cardId: card.id }),
+        }); }));
+        this.updateVisiblity();
+        events.forEach(function (card) {
+            _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+        });
+    };
+    PPActiveEvents.prototype.clearInterface = function () {
+        dojo.empty(this.zone.getContainerId());
+        this.zone = undefined;
+    };
+    PPActiveEvents.prototype.makeVisible = function () {
+        var node = dojo.byId(this.containerId);
+        node.style.setProperty('margin-bottom', '-65px');
+    };
+    PPActiveEvents.prototype.hide = function () {
+        var node = dojo.byId(this.containerId);
+        node.style.setProperty('margin-bottom', '-209px');
+    };
+    PPActiveEvents.prototype.updateVisiblity = function () {
+        if (this.zone.getItemCount() > 0) {
+            this.makeVisible();
+        }
+        else {
+            this.hide();
+        }
+    };
+    PPActiveEvents.prototype.addCardFromMarket = function (_a) {
+        var cardId = _a.cardId, row = _a.row, column = _a.column;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        this.makeVisible();
+                        return [4, Promise.all([
+                                this.game.activeEvents.getZone().moveToZone({
+                                    elements: {
+                                        id: cardId,
+                                    },
+                                }),
+                                this.game.market.getMarketCardZone({ row: row, column: column }).remove({ input: cardId }),
+                            ])];
+                    case 1: return [2, _b.sent()];
+                }
+            });
+        });
+    };
+    PPActiveEvents.prototype.discardCard = function (_a) {
+        var cardId = _a.cardId;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4, this.game.objectManager.discardPile.discardCardFromZone({
+                            cardId: cardId,
+                            zone: this.game.activeEvents.getZone(),
+                        })];
+                    case 1:
+                        _b.sent();
+                        this.updateVisiblity();
+                        return [2];
+                }
+            });
+        });
+    };
+    PPActiveEvents.prototype.getZone = function () {
+        return this.zone;
+    };
+    PPActiveEvents.prototype.hasCard = function (_a) {
+        var cardId = _a.cardId;
+        return this.zone.getItems().includes(cardId);
+    };
+    return PPActiveEvents;
+}());
 var tplCardTooltipContainer = function (_a) {
     var card = _a.card, content = _a.content;
     return "<div class=\"pp_card_tooltip\">\n  <div class=\"pp_card_tooltip_inner_container\">\n    ".concat(content, "\n  </div>\n  ").concat(card, "\n</div>");
@@ -1933,7 +2028,7 @@ var PPPlayer = (function () {
         this.playerHexColor = player.hexColor;
         var gamedatas = game.gamedatas;
         if (this.playerId === this.game.getPlayerId()) {
-            dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
+            dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 1);
         }
         this.setupPlayer({ gamedatas: gamedatas });
     }
@@ -1994,7 +2089,7 @@ var PPPlayer = (function () {
             closeIcon: 'fa-times',
             openAnimation: true,
             openAnimationTarget: "cards_".concat(this.playerId),
-            titleTpl: '<h2 id="popin_${id}_title" class="${class}_title" style="background-color: #' + this.playerColor + ';">${title}</h2>',
+            titleTpl: '<h2 id="popin_${id}_title" class="${class}_title pp_player_background_color_' + this.playerColor + '">${title}</h2>',
             title: dojo.string.substitute(_("${playerName}'s hand"), {
                 playerName: this.playerName,
             }),
@@ -3584,11 +3679,18 @@ var Market = (function () {
         });
     };
     Market.prototype.placeRupeeOnCard = function (_a) {
-        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv;
+        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv, cardId = _a.cardId;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_b) {
-                this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId: rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 });
-                return [2];
+                switch (_b.label) {
+                    case 0: return [4, this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId: rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 })];
+                    case 1:
+                        _b.sent();
+                        if (cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
+                            this.marketRupees[row][column].remove({ input: rupeeId, destroy: true });
+                        }
+                        return [2];
+                }
             });
         });
     };
@@ -5127,7 +5229,7 @@ var ClientInitialBribeCheckState = (function () {
     };
     ClientInitialBribeCheckState.prototype.checkBribe = function (_a) {
         var cardId = _a.cardId, action = _a.action, next = _a.next;
-        var disregardForCustomsActive = this.game.activeEvents.getItems().includes('card_107');
+        var disregardForCustomsActive = this.game.activeEvents.hasCard({ cardId: 'card_107' });
         var charismaticCourtiersAcitve = action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
         var civilServiceReformsActive = action !== 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CIVIL_SERVICE_REFORMS });
         if (disregardForCustomsActive || charismaticCourtiersAcitve || civilServiceReformsActive) {
@@ -6465,11 +6567,11 @@ var NotificationManager = (function () {
                     case 0:
                         _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
                         return [4, Promise.all((rupeesOnCards || []).map(function (item) { return __awaiter(_this, void 0, void 0, function () {
-                                var row, column, rupeeId;
+                                var row, column, rupeeId, cardId;
                                 return __generator(this, function (_a) {
-                                    row = item.row, column = item.column, rupeeId = item.rupeeId;
+                                    row = item.row, column = item.column, rupeeId = item.rupeeId, cardId = item.cardId;
                                     this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
-                                    this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+                                    this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId });
                                     return [2];
                                 });
                             }); }))];
@@ -6580,10 +6682,7 @@ var NotificationManager = (function () {
                         return [3, 8];
                     case 4:
                         if (!(from === ACTIVE_EVENTS)) return [3, 6];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.game.activeEvents,
-                            })];
+                        return [4, this.game.activeEvents.discardCard({ cardId: cardId })];
                     case 5:
                         _b.sent();
                         return [3, 8];
@@ -6615,15 +6714,10 @@ var NotificationManager = (function () {
                     case 1: return [2, _b.sent()];
                     case 2:
                         if (!(to === ACTIVE_EVENTS)) return [3, 4];
-                        return [4, Promise.all([
-                                this.game.activeEvents.moveToZone({
-                                    elements: {
-                                        id: cardId,
-                                    },
-                                }),
-                                this.game.market.getMarketCardZone({ row: row, column: column }).remove({ input: cardId }),
-                            ])];
-                    case 3: return [2, _b.sent()];
+                        return [4, this.game.activeEvents.addCardFromMarket({ cardId: cardId, row: row, column: column })];
+                    case 3:
+                        _b.sent();
+                        _b.label = 4;
                     case 4: return [2];
                 }
             });
@@ -6874,7 +6968,7 @@ var NotificationManager = (function () {
                         if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
                             this.getPlayer({ playerId: playerId }).incCounter({ counter: 'cylinders', value: 1 });
                         }
-                        if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.getItems().includes('card_106')) {
+                        if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
                             if (playerId === WAKHAN_PLAYER_ID) {
                                 this.getPlayer({ playerId: playerId }).incWakhanInfluence({
                                     wakhanInfluence: {
@@ -6939,8 +7033,8 @@ var NotificationManager = (function () {
                         col = Number(marketLocation.split('_')[2]);
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
                         return [4, Promise.all(rupeesOnCards.map(function (_a) {
-                                var row = _a.row, column = _a.column, rupeeId = _a.rupeeId;
-                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+                                var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, cardId = _a.cardId;
+                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId });
                             }))];
                     case 1:
                         _b.sent();
@@ -7122,7 +7216,7 @@ var NotificationManager = (function () {
                         _b.sent();
                         player.incCounter({ counter: 'cylinders', value: -1 });
                         if (from.startsWith('gift_')) {
-                            value = this.game.activeEvents.getItems().includes('card_106') ? 0 : -1;
+                            value = this.game.activeEvents.hasCard({ cardId: 'card_106' }) ? 0 : -1;
                             player.incCounter({ counter: 'influence', value: value });
                         }
                         return [2];
@@ -7174,6 +7268,7 @@ var NotificationManager = (function () {
         var updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
         this.game.clearInterface();
         this.game.gamedatas = updatedGamedatas;
+        this.game.activeEvents.setupActiveEvents({ gamedatas: updatedGamedatas });
         this.game.market.setupMarket({ gamedatas: updatedGamedatas });
         this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
         this.game.map.updateMap({ gamedatas: updatedGamedatas });
@@ -7318,8 +7413,8 @@ var NotificationManager = (function () {
                         col = Number(marketLocation.split('_')[2]);
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
                         return [4, Promise.all(rupeesOnCards.map(function (_a) {
-                                var row = _a.row, column = _a.column, rupeeId = _a.rupeeId;
-                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId) });
+                                var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, cardId = _a.cardId;
+                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId });
                             }))];
                     case 1:
                         _b.sent();
@@ -7482,7 +7577,6 @@ var NotificationManager = (function () {
 var PaxPamir = (function () {
     function PaxPamir() {
         this.defaultWeightZone = 0;
-        this.playerEvents = {};
         this.spies = {};
         this.playerCounts = {};
         this._notif_uid_to_log_id = {};
@@ -7500,7 +7594,6 @@ var PaxPamir = (function () {
         if (this.gameOptions.wakhanEnabled) {
             dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
         }
-        dojo.place(tplActiveEvents(), 'pp_player_tableaus');
         this.playerOrder.forEach(function (playerId) {
             var player = gamedatas.paxPamirPlayers[playerId];
             if (playerId === 1) {
@@ -7540,18 +7633,8 @@ var PaxPamir = (function () {
             _a.wakhanPause = new WakhanPauseState(this),
             _a);
         this.animationManager = new AnimationManager(this, { duration: 500 });
-        this.activeEvents = new PaxPamirZone({
-            animationManager: this.animationManager,
-            containerId: 'pp_active_events',
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-            itemGap: 16,
-        });
-        this.activeEvents.placeInZone((gamedatas.activeEvents || []).map(function (card) { return ({
-            id: card.id,
-            element: tplCard({ cardId: card.id }),
-        }); }));
         this.tooltipManager = new PPTooltipManager(this);
+        this.activeEvents = new PPActiveEvents(this);
         this.playerManager = new PlayerManager(this);
         this.map = new PPMap(this);
         this.market = new Market(this);
@@ -7647,6 +7730,7 @@ var PaxPamir = (function () {
             }
             _this.spies[key] = undefined;
         });
+        this.activeEvents.clearInterface();
         this.market.clearInterface();
         this.playerManager.clearInterface();
         this.map.clearInterface();

@@ -103,8 +103,23 @@ class Market {
     return this.marketRupees[row][column].removeTo(rupeesToRemove.map((rupee) => ({ id: rupee, to })));
   }
 
-  async placeRupeeOnCard({ row, column, rupeeId, fromDiv }: { row: number; column: number; rupeeId: string; fromDiv: string }) {
-    this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 });
+  async placeRupeeOnCard({
+    row,
+    column,
+    rupeeId,
+    fromDiv,
+    cardId,
+  }: {
+    row: number;
+    column: number;
+    rupeeId: string;
+    fromDiv: string;
+    cardId: string;
+  }) {
+    await this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 });
+    if (cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
+      this.marketRupees[row][column].remove({ input: rupeeId, destroy: true });
+    }
   }
 
   async addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {

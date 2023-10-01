@@ -187,7 +187,7 @@ interface AddActionButtonProps extends AddButtonProps {
 }
 
 interface PaxPamirGame extends Game {
-  activeEvents: PaxPamirZone;
+  activeEvents: PPActiveEvents;
   activeStates: {
     clientCardActionBattle: ClientCardActionBattleState;
     clientCardActionBetray: ClientCardActionBetrayState;

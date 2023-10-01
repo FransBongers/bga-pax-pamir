@@ -103,7 +103,7 @@
   background-color: base.$black-player-background-color;// #807F7F;
 }
 
-/* Black */
+/* Purple */
 .pp_player_tableau.pp_player_color_purple {
   background-color: base.$purple-player-background-color;// #C3B1D6;
 }
@@ -454,6 +454,32 @@
     flex-wrap: wrap;
   }
 }
+
+/* Blue */
+.pp_player_background_color_blue {
+  background-color: base.$blue-player-background-color;//  #98B3C0;
+}
+
+/* Gray */
+.pp_player_background_color_gray {
+  background-color: base.$gray-player-background-color;// #B9B6B1;
+}
+
+/* Yellow / tan */
+.pp_player_background_color_yellow {
+  background-color: base.$yellow-player-background-color;// #DFCFB6;
+}
+
+/* Red */
+.pp_player_background_color_red {
+  background-color: base.$red-player-background-color;// #C19B9E;
+}
+
+/* Black */
+.pp_player_background_color_black {
+  background-color: base.$black-player-background-color;// #807F7F;
+}
+
 
 // .pp_player_hand_popin {
 //   background-color: #ebd5bd;

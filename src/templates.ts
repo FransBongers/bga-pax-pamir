@@ -74,7 +74,6 @@ const tplPlayerHandModal = ({ cards }: { cards: string[] }) => {
 
 const tplActiveEvents = () => {
   return `<div id="pp_active_events_container">
-            <div id="pp_active_events_title" class="pp_tableau_title"><span>Active events</span></div>
             <div id="pp_active_events" class="pp_active_events"></div>
           </div>`
 }

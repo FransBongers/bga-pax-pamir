@@ -68,7 +68,7 @@ class PPPlayer {
     const gamedatas = game.gamedatas;
 
     if (this.playerId === this.game.getPlayerId()) {
-      dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 2);
+      dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 1);
     }
 
     this.setupPlayer({ gamedatas });
@@ -148,7 +148,7 @@ class PPPlayer {
       closeIcon: 'fa-times',
       openAnimation: true,
       openAnimationTarget: `cards_${this.playerId}`,
-      titleTpl: '<h2 id="popin_${id}_title" class="${class}_title" style="background-color: #' + this.playerColor + ';">${title}</h2>',
+      titleTpl: '<h2 id="popin_${id}_title" class="${class}_title pp_player_background_color_' + this.playerColor + '">${title}</h2>',
       title: dojo.string.substitute(_("${playerName}'s hand"), {
         playerName: this.playerName,
       }),

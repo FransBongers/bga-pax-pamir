@@ -127,9 +127,9 @@ class NotificationManager {
 
     await Promise.all(
       (rupeesOnCards || []).map(async (item) => {
-        const { row, column, rupeeId } = item;
+        const { row, column, rupeeId, cardId } = item;
         this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` });
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId });
       })
     );
   }
@@ -192,10 +192,7 @@ class NotificationManager {
     } else if (from === HAND) {
       await player.discardHandCard({ cardId, to });
     } else if (from === ACTIVE_EVENTS) {
-      await this.game.objectManager.discardPile.discardCardFromZone({
-        cardId,
-        zone: this.game.activeEvents,
-      });
+      await this.game.activeEvents.discardCard({ cardId });
     } else if (from.startsWith('events_')) {
       await player.discardEventCard({ cardId });
     }
@@ -212,14 +209,7 @@ class NotificationManager {
     if (to === DISCARD || to === TEMP_DISCARD) {
       return await this.game.market.discardCard({ cardId, row, column, to });
     } else if (to === ACTIVE_EVENTS) {
-      return await Promise.all([
-        this.game.activeEvents.moveToZone({
-          elements: {
-            id: cardId,
-          },
-        }),
-        this.game.market.getMarketCardZone({ row, column }).remove({ input: cardId }),
-      ]);
+      await this.game.activeEvents.addCardFromMarket({ cardId, row, column });
     }
   }
 
@@ -360,7 +350,7 @@ class NotificationManager {
     if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
       this.getPlayer({ playerId }).incCounter({ counter: 'cylinders', value: 1 });
     }
-    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.getItems().includes('card_106')) {
+    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
       if (playerId === WAKHAN_PLAYER_ID) {
         (this.getPlayer({ playerId }) as PPWakhanPlayer).incWakhanInfluence({
           wakhanInfluence: {
@@ -401,8 +391,8 @@ class NotificationManager {
     // Place paid rupees on market cards
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
     await Promise.all(
-      rupeesOnCards.map(({ row, column, rupeeId }) =>
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` })
+      rupeesOnCards.map(({ row, column, rupeeId, cardId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId })
       )
     );
 
@@ -520,7 +510,7 @@ class NotificationManager {
 
     if (from.startsWith('gift_')) {
       // card_106 is Embarrassment of Riches so cylinder influence counts as 0 and we should not reduce
-      const value = this.game.activeEvents.getItems().includes('card_106') ? 0 : -1;
+      const value = this.game.activeEvents.hasCard({ cardId: 'card_106' }) ? 0 : -1;
       player.incCounter({ counter: 'influence', value });
     }
   }
@@ -566,6 +556,7 @@ class NotificationManager {
     };
     this.game.clearInterface();
     this.game.gamedatas = updatedGamedatas;
+    this.game.activeEvents.setupActiveEvents({gamedatas: updatedGamedatas});
     this.game.market.setupMarket({ gamedatas: updatedGamedatas });
     this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
     this.game.map.updateMap({ gamedatas: updatedGamedatas });
@@ -670,8 +661,8 @@ class NotificationManager {
     // Place paid rupees on market cards
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
     await Promise.all(
-      rupeesOnCards.map(({ row, column, rupeeId }) =>
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}` })
+      rupeesOnCards.map(({ row, column, rupeeId, cardId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId })
       )
     );
 

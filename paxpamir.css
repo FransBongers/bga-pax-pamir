@@ -755,7 +755,7 @@
   background-color: #807F7F;
 }
 
-/* Black */
+/* Purple */
 .pp_player_tableau.pp_player_color_purple {
   background-color: #C3B1D6;
 }
@@ -1075,6 +1075,31 @@
   padding: 8px;
   display: flex;
   flex-wrap: wrap;
+}
+
+/* Blue */
+.pp_player_background_color_blue {
+  background-color: #98B3C0;
+}
+
+/* Gray */
+.pp_player_background_color_gray {
+  background-color: #B9B6B1;
+}
+
+/* Yellow / tan */
+.pp_player_background_color_yellow {
+  background-color: #DFCFB6;
+}
+
+/* Red */
+.pp_player_background_color_red {
+  background-color: #C19B9E;
+}
+
+/* Black */
+.pp_player_background_color_black {
+  background-color: #807F7F;
 }
 
 .dijitTooltipContainer {
@@ -1708,15 +1733,10 @@ html {
 }
 
 #pp_active_events_container {
-  display: flex;
-  flex-direction: column;
-  min-height: 280px;
-  margin-bottom: 15px;
-  background-color: darkgray;
-}
-
-#pp_active_events_title {
-  margin-left: 220px;
+  height: 209px;
+  padding-left: 8px;
+  margin-bottom: -209px;
+  transition: margin-bottom 1s ease 0s;
 }
 
 #pp_player_hand_title {
@@ -1725,7 +1745,6 @@ html {
 
 #pp_active_events {
   flex-grow: 1;
-  margin: 10px 20px;
 }
 
 .pp_card_in_zone {

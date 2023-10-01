@@ -131,6 +131,7 @@ const ECE_PASHTUNWALI_VALUES = 'pashtunwaliValues';
 const ECE_PASHTUNWALI_VALUES_CARD_ID = 'card_115';
 const ECE_POLITICAL_SUIT = 'politicalSuit';
 const ECE_PUBLIC_WITHDRAWAL = 'publicWithdrawal';
+const ECE_PUBLIC_WITHDRAWAL_CARD_ID = 'card_111';
 const ECE_REBUKE = 'rebuke';
 const ECE_RIOTS_IN_HERAT = 'riotsInHerat';
 const ECE_RIOTS_IN_KABUL = 'riotsInKabul';

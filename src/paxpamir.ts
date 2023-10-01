@@ -34,8 +34,7 @@ class PaxPamir implements PaxPamirGame {
   public playerManager: PlayerManager;
   // global variables
   private defaultWeightZone: number = 0;
-  private playerEvents = {}; // events per player => can we remove?
-  public activeEvents: PaxPamirZone; // active events
+  public activeEvents: PPActiveEvents; // active events
   public spies: Record<string, PaxPamirZone> = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals? => can we remove?
   public playerOrder: number[];
@@ -103,8 +102,6 @@ class PaxPamir implements PaxPamirGame {
     if (this.gameOptions.wakhanEnabled) {
       dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
     }
-    // Templates from .tpl file. Todo: check if we can move to other files
-    dojo.place(tplActiveEvents(), 'pp_player_tableaus');
 
     this.playerOrder.forEach((playerId) => {
       const player = gamedatas.paxPamirPlayers[playerId];
@@ -147,23 +144,10 @@ class PaxPamir implements PaxPamirGame {
     };
 
     this.animationManager = new AnimationManager(this, { duration: 500 });
-    // Events
-    this.activeEvents = new PaxPamirZone({
-      animationManager: this.animationManager,
-      containerId: 'pp_active_events',
-      itemHeight: CARD_HEIGHT,
-      itemWidth: CARD_WIDTH,
-      itemGap: 16,
-    });
-    // Add current event cards
-    this.activeEvents.placeInZone(
-      (gamedatas.activeEvents || []).map((card) => ({
-        id: card.id,
-        element: tplCard({ cardId: card.id }),
-      }))
-    );
+
 
     this.tooltipManager = new PPTooltipManager(this);
+    this.activeEvents = new PPActiveEvents(this);
     this.playerManager = new PlayerManager(this);
     this.map = new PPMap(this);
     this.market = new Market(this);
@@ -351,6 +335,7 @@ class PaxPamir implements PaxPamirGame {
       this.spies[key] = undefined;
     });
 
+    this.activeEvents.clearInterface();
     this.market.clearInterface();
     this.playerManager.clearInterface();
     this.map.clearInterface();

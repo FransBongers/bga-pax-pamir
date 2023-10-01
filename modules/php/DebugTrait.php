@@ -51,7 +51,7 @@ trait DebugTrait
 
   function test()
   {
-    Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
+    // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
     // Globals::setRulers([
     //   'herat' => null,
     //   'kabul' => null,
@@ -67,10 +67,11 @@ trait DebugTrait
     // $players = Players::getAll();
     // Notifications::log('stack',ActionStack::get());
     // Cards::setUsed('card_81',0);
-    // Cards::move('card_111',Locations::market(0,1));
-    // Cards::move('card_45',DISCARD);
-    // Cards::move('card_23',DISCARD);
-    // Cards::move('card_25',DISCARD);
+    
+    // Cards::move('card_106',ACTIVE_EVENTS);
+    // Cards::move('card_105','events_2371052');
+    Cards::move('card_99',DISCARD);
+    Cards::move('card_111',Locations::market(1,5));
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_83',DISCARD);
     // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());

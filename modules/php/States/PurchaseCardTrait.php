@@ -70,26 +70,6 @@ trait PurchaseCardTrait
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  // function getCardCostBase()
-  // {
-  //   return Globals::getFavoredSuit() === MILITARY ? 2 : 1;
-  // }
-
-  // function getCardCost($player, $card)
-  // {
-  //   if ($card['type'] === COURT_CARD && $card['region'] === HERAT && $player->hasSpecialAbility(SA_HERAT_INFLUENCE)) {
-  //     return 0;
-  //   };
-  //   if ($card['type'] === COURT_CARD && $card['region'] === PERSIA && $player->hasSpecialAbility(SA_PERSIAN_INFLUENCE)) {
-  //     return 0;
-  //   };
-  //   if ($card['type'] === COURT_CARD && $card['loyalty'] === RUSSIAN && $player->hasSpecialAbility(SA_RUSSIAN_INFLUENCE)) {
-  //     return 0;
-  //   };
-  //   $column = intval(explode('_',$card['location'])[2]);
-  //   return $column * $this->getCardCostBase();
-  // }
-
   function isValidPurchaseCard($player, $card)
   {
     // Player should have remaining actions
@@ -141,7 +121,16 @@ trait PurchaseCardTrait
         $location[1] = $rowAlt;
         $marketCard = Cards::getInLocation($location)->first();
       }
-      if ($marketCard !== null) {
+      if ($marketCard !== null && $marketCard['id'] === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
+        for ($j = 1; $j <= $baseCost; $j++) {
+          $rupeesOnCards[] = array(
+            'row' => $location[1],
+            'column' => $i,
+            'cardId' => $marketCard["id"],
+            'rupeeId' => 'temp_rupee_'.$i.$j,
+          );
+        }
+      } else if ($marketCard !== null) {
         Cards::setUsed($marketCard["id"], 1); // set unavailable
         // Add rupees base on card cost (ie add two if favored suit is military)
         for ($j = 1; $j <= $baseCost; $j++) {

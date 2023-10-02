@@ -223,6 +223,7 @@ interface PaxPamirGame extends Game {
   localState: LocalState;
   addActionButtonClient: (props: AddActionButtonProps) => void;
   addCancelButton: () => void;
+  addUndoButton: () => void;
   addPlayerButton: (props: { callback: () => void; player: PPPlayer }) => void;
   addPrimaryActionButton: (props: AddButtonProps) => void;
   addSecondaryActionButton: (props: AddButtonProps) => void;

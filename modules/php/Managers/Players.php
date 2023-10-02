@@ -41,6 +41,7 @@ class Players extends \PaxPamir\Helpers\DB_Manager
       $color = array_shift($colors);
       $values[] = [$pId, $color, $player['player_canal'], $player['player_name'], $player['player_avatar'],0];
     }
+    // shuffle($values);
     $query->values($values);
 
     Game::get()->reattributeColorsBasedOnPreferences($players, $gameInfos['player_colors']);

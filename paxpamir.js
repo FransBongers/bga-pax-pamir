@@ -5543,7 +5543,6 @@ var DiscardState = (function () {
     }
     DiscardState.prototype.onEnteringState = function (_a) {
         var from = _a.from, loyalty = _a.loyalty, region = _a.region, suit = _a.suit;
-        console.log('from state file', from);
         this.from = from;
         this.loyalty = loyalty;
         this.region = region;
@@ -5555,6 +5554,7 @@ var DiscardState = (function () {
         var _this = this;
         this.game.clearPossible();
         this.updatePageTitle();
+        this.game.addUndoButton();
         if (this.from.includes(COURT)) {
             this.game.setCourtCardsSelectable({
                 callback: function (_a) {
@@ -5843,11 +5843,7 @@ var PlayerActionsState = (function () {
                 callback: function () { return _this.onPass(); },
             });
         }
-        this.game.addDangerActionButton({
-            id: 'undo_btn',
-            text: _('Undo'),
-            callback: function () { return _this.game.takeAction({ action: 'restart' }); },
-        });
+        this.game.addUndoButton();
     };
     PlayerActionsState.prototype.updateInterfacePass = function () {
         var _this = this;
@@ -7711,6 +7707,14 @@ var PaxPamir = (function () {
             id: 'cancel_btn',
             text: _('Cancel'),
             callback: function () { return _this.onCancel(); },
+        });
+    };
+    PaxPamir.prototype.addUndoButton = function () {
+        var _this = this;
+        this.addDangerActionButton({
+            id: 'undo_btn',
+            text: _('Undo'),
+            callback: function () { return _this.takeAction({ action: 'restart' }); },
         });
     };
     PaxPamir.prototype.addPrimaryActionButton = function (_a) {

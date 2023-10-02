@@ -74,11 +74,7 @@ class PlayerActionsState implements State {
         callback: () => this.onPass(),
       });
     }
-    this.game.addDangerActionButton({
-      id: 'undo_btn',
-      text: _('Undo'),
-      callback: () => this.game.takeAction({ action: 'restart' }),
-    });
+    this.game.addUndoButton();
     // this.addDebugButton();
   }
 

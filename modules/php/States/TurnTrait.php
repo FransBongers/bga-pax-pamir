@@ -51,7 +51,7 @@ trait TurnTrait
   {
     Globals::setRemainingActions(2);
     Log::enable();
-    // Log::checkpoint();
+    Log::checkpoint();
     Log::clearAll();
 
     $player = PaxPamirPlayers::get();

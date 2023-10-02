@@ -183,7 +183,7 @@ class Paxpamir extends Table
         /************ End of the game initialization *****/
 
 
-        // $this->activeNextPlayer();
+        $this->activeNextPlayer();
         ActionStack::set($this->createSetupActions());
     }
 
@@ -406,7 +406,6 @@ class Paxpamir extends Table
 
         if (Globals::getLogState() == -1) {
             Globals::setLogState($st);
-            // Globals::setActionCount(0);
             Log::clearAll();
         }
 

@@ -258,6 +258,15 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
+  addUndoButton() {
+    this.addDangerActionButton({
+      id: 'undo_btn',
+      text: _('Undo'),
+      callback: () => this.takeAction({ action: 'restart' }),
+    });
+  }
+
+
   addPrimaryActionButton({
     id,
     text,

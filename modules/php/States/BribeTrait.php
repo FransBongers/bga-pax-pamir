@@ -61,11 +61,6 @@ trait BribeTrait
   function startBribeNegotiation($cardId, $amount, $action)
   {
     self::checkAction('startBribeNegotiation');
-    Notifications::log('startBribeNegotiation', [
-      'cardId' => $cardId,
-      'amount' => $amount,
-      'action' => $action,
-    ]);
     $amount = intval($amount);
     $allowedActions = ['playCard', BATTLE, BETRAY, BUILD, GIFT, MOVE, TAX];
     if (!in_array($action, $allowedActions)) {
@@ -107,8 +102,6 @@ trait BribeTrait
     if ($amount > $bribe['amount']) {
       throw new \feException("Not allowed to offer more rupees than required for bribe");
     }
-    Notifications::log('bribe initiated', []);
-
 
     Globals::setNegotiatedBribe([
       'briber' => [
@@ -133,6 +126,7 @@ trait BribeTrait
     ]);
 
     Notifications::startBribeNegotiation($player, $card, $amount, $action);
+    Log::checkpoint();
     $this->nextState('negotiateBribe', $bribe['bribeeId']);
   }
 
@@ -148,8 +142,6 @@ trait BribeTrait
     self::checkAction('negotiateBribe');
     $amount = intval($amount);
     $bribeState = Globals::getNegotiatedBribe();
-    Notifications::log('amount', $amount);
-    Notifications::log('bribeState', $bribeState);
     $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
     $bribeeId = $bribeState['bribee']['playerId'];
@@ -174,20 +166,21 @@ trait BribeTrait
       
     }
 
-    Notifications::log('isBribee', $isBribee);
     // Notifications::log('currentAmount',$bribeState['bribee']['currentAmount']);
     $isBribeAccepted = $bribeeCurrentAmount === $briberCurrentAmount;
-    Notifications::log('isBribeAccepted', $isBribeAccepted);
 
     Globals::setNegotiatedBribe($bribeState);
     if ($isBribeAccepted) {
       Notifications::acceptBribe($player, $briberCurrentAmount);
+      if (PaxPamirPlayers::get()->getId() !== $briberId) {
+        Log::checkpoint();  
+      }
       $this->nextState('playerActions', $briberId);
     } else {
       Notifications::negotiateBribe($player, $amount, $isBribee);
       $nextPlayerId = $isBribee ? $briberId : $bribeeId;
       $this->giveExtraTime($nextPlayerId);
-      Log::clearAll();
+      Log::checkpoint();
       $this->nextState('negotiateBribe', $nextPlayerId);
     }
   }

@@ -31,7 +31,7 @@ class Log extends \APP_DbObject
     Game::get()->setGameStateValue('logging', 0);
   }
 
-  public function checkpoint()
+  public static function checkpoint()
   {
     Globals::setLogState(-1);
   }

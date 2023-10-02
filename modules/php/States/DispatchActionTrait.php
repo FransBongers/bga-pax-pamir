@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
@@ -164,7 +165,7 @@ trait DispatchActionTrait
       case 'playCard':
         $this->dispatchPlayCard($actionStack);
         break;
-      case 'playerActions':
+      case 'playerActions': // TODO: remove at some point
         $this->dispatchPlayerActions($actionStack);
         break;
       case 'resolveImpactIcons':
@@ -194,11 +195,15 @@ trait DispatchActionTrait
   function dispatchAcceptPrizeCheck($actionStack)
   {
     $next = $actionStack[count($actionStack) - 1];
-    if ($next['playerId'] === WAKHAN_PLAYER_ID) {
+    $playerId = $next['playerId'];
+    if ($playerId === WAKHAN_PLAYER_ID) {
       $this->wakhanAcceptPrize($actionStack);
     } else {
       ActionStack::set($actionStack);
-      $this->nextState('acceptPrize', $next['playerId']);
+      if (PaxPamirPlayers::get()->getId() !== $playerId) {
+        Log::checkpoint();
+      }
+      $this->nextState('acceptPrize', $playerId);
     }
   }
 
@@ -278,6 +283,9 @@ trait DispatchActionTrait
     }
 
     ActionStack::set($actionStack);
+    if (PaxPamirPlayers::get()->getId() !== $playerId) {
+      Log::checkpoint();
+    }
     $this->nextState($next['data']['transition'], $playerId);
   }
 

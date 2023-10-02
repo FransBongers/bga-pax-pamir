@@ -11,7 +11,6 @@ class DiscardState implements State {
   }
 
   onEnteringState({ from, loyalty, region, suit }: OnEnteringDiscardArgs) {
-    console.log('from state file', from);
     this.from = from;
     this.loyalty = loyalty;
     this.region = region;
@@ -40,7 +39,7 @@ class DiscardState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.updatePageTitle();
-
+    this.game.addUndoButton();
     if (this.from.includes(COURT)) {
       this.game.setCourtCardsSelectable({
         callback: ({ cardId }: { cardId: string }) => this.updateInterfaceConfirm({ cardId, from: 'court' }),

@@ -147,7 +147,9 @@ trait PlayerActionBetrayTrait
 
     $actionStack =
       [
-        ActionStack::createAction('playerActions', $playerId, [])
+        ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
+          'transition' => 'playerActions'
+        ])
       ];
 
     if ($betrayedCardInfo['prize'] !== null) {

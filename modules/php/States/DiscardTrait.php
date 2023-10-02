@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
@@ -138,6 +139,9 @@ trait DiscardTrait
       ActionStack::next($actionStack);
     } else if ($availableCards > 0) {
       // ActionStack::set($actionStack);
+      if ($playerId !== PaxPamirPlayers::get()->getId()) {
+        Log::checkpoint();
+      }
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);

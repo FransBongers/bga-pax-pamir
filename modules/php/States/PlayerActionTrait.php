@@ -113,7 +113,8 @@ trait PlayerActionTrait
       throw new \BgaVisibleSystemException('Nothing to undo');
     }
     Log::revertAll();
-    // TODO: check what the us of Globals::fetch is
+    // TODO: check what the us of Globals::fetch is => probably fetches all globals from db
+    // after db has been restored so they are cached
     Globals::fetch();
 
     // Refresh interface

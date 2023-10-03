@@ -4022,7 +4022,7 @@ var ClientCardActionBattleState = (function () {
         return REGIONS.filter(function (regionId) {
             var region = _this.game.map.getRegion({ region: regionId });
             var coalitionId = _this.game.getCurrentPlayer().getLoyalty();
-            var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
+            var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId }).filter(function (pieceId) { return _this.checkForCitadel({ pieceId: pieceId, region: regionId }); });
             if (enemyPieces.length === 0 || _this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }) === 0) {
                 return false;
             }
@@ -5863,7 +5863,6 @@ var PlayerActionsState = (function () {
         var _this = this;
         this.game.clearPossible();
         this.setupCardActions();
-        console.log('availableCardActions', this.availableCardActions);
         this.updateMainTitleTextActions();
         if (this.activePlayerHasActions()) {
             this.game.addSecondaryActionButton({
@@ -5949,16 +5948,17 @@ var PlayerActionsState = (function () {
         var action = _a.action, cardId = _a.cardId, rupees = _a.rupees;
         switch (action) {
             case BATTLE:
-                return this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0 || this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0;
+                return this.game.activeStates.clientCardActionBattle.getRegionBattleSites().length > 0 || this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0;
             case BETRAY:
                 return this.game.activeStates.clientCardActionBetray.getCourtCardsToBetray().length > 0;
             case BUILD:
                 return this.game.activeStates.clientCardActionBuild.getRegionsToBuild().length > 0;
             case GIFT:
                 return this.game.getCurrentPlayer().getLowestAvailableGift() > 0;
-                return true;
             case MOVE:
-                return this.game.activeStates.clientCardActionMove.getArmiesToMove().length > 0 || this.game.activeStates.clientCardActionMove.getSpiesToMove(), length > 0;
+                var hasArmiesToMove = this.game.activeStates.clientCardActionMove.getArmiesToMove().length > 0;
+                var hasSpiesToMove = this.game.activeStates.clientCardActionMove.getSpiesToMove().length > 0;
+                return hasArmiesToMove || hasSpiesToMove;
             case TAX:
                 return this.game.activeStates.clientCardActionTax.getMarketRupeesToTax().length > 0 || this.game.activeStates.clientCardActionTax.getPlayersToTax().length > 0;
         }

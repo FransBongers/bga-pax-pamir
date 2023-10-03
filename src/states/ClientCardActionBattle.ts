@@ -190,8 +190,8 @@ class ClientCardActionBattleState implements State {
     return REGIONS.filter((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
       const coalitionId = this.game.getCurrentPlayer().getLoyalty();
-      const enemyPieces = region.getEnemyPieces({ coalitionId });
-
+      const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }))
+      
       if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }) === 0) {
         return false;
       }

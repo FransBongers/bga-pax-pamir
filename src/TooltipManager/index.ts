@@ -27,6 +27,10 @@ class PPTooltipManager {
     this.game.framework().addTooltipHtml(nodeId, html, 500);
   }
 
+  public addTextToolTip({nodeId, text}: {nodeId: string; text: string;}) {
+    this.game.framework().addTooltip(nodeId, _(text), '', 500);
+  }
+
   public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string }): void {
     const cardInfo = this.game.getCardInfo({ cardId });
 
@@ -45,6 +49,10 @@ class PPTooltipManager {
     this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
 
     // dojo.place(tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }), 'game_play_area');
+  }
+
+  public removeTooltip(nodeId: string) {
+    this.game.framework().removeTooltip(nodeId);
   }
 
   public checkLogTooltip(lastNotif: { logId: number; msg: Notif<unknown> }) {

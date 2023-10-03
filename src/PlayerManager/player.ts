@@ -570,7 +570,7 @@ class PPPlayer {
     if (this.gifts['6'].getItemCount() === 0) {
       return 6;
     }
-    return null;
+    return 0;
   }
 
   getLoyalty(): string {

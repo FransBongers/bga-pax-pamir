@@ -1,5 +1,9 @@
 class PlayerActionsState implements State {
   private game: PaxPamirGame;
+  private availableCardActions: {
+    cardId: string;
+    action: string;
+  }[];
 
   constructor(game: PaxPamirGame) {
     this.game = game;
@@ -11,6 +15,7 @@ class PlayerActionsState implements State {
       this.handleNegotiatedBribe(args.bribe);
       return;
     }
+    
     this.updateInterfaceInitialStep();
   }
 
@@ -36,6 +41,8 @@ class PlayerActionsState implements State {
 
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
+    this.setupCardActions();
+    console.log('availableCardActions', this.availableCardActions);
     this.updateMainTitleTextActions();
     if (this.activePlayerHasActions()) {
       this.game.addSecondaryActionButton({
@@ -44,36 +51,15 @@ class PlayerActionsState implements State {
         callback: () => this.onPass(),
       });
       this.setMarketCardsSelectable();
-      this.game.setHandCardsSelectable({
-        callback: ({ cardId }: { cardId: string }) => {
-          debug('callback triggered', cardId);
-          this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-            args: {
-              cardId,
-              action: 'playCard',
-              next: ({
-                bribe,
-              }: {
-                bribe: {
-                  amount: number;
-                  negotiated?: boolean;
-                } | null;
-              }) => this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId, bribe } }),
-            },
-          });
-        },
-      });
-      this.setCardActionsSelectable();
+      this.setHandCardsSelectable();
     } else {
-      if (this.activePlayerHasFreeCardActions()) {
-        this.setCardActionsSelectable();
-      }
       this.game.addPrimaryActionButton({
         id: 'pass_btn',
         text: _('End Turn'),
         callback: () => this.onPass(),
       });
     }
+    this.setCardActionsSelectable();
     this.game.addUndoButton();
     // this.addDebugButton();
   }
@@ -132,9 +118,9 @@ class PlayerActionsState implements State {
    */
   private updateMainTitleTextActions() {
     const remainingActions = this.game.localState.remainingActions;
-    const hasCardActions = this.activePlayerHasCardActions();
+    const hasCardActions = this.availableCardActions.length > 0;
     const hasHandCards = this.currentPlayerHasHandCards();
-    const hasFreeCardActions = this.activePlayerHasFreeCardActions();
+
     let titleText = '';
     // cibst case = 0;
     if (remainingActions > 0 && !hasHandCards && !hasCardActions) {
@@ -145,9 +131,9 @@ class PlayerActionsState implements State {
       titleText = _('${you} may purchase a card or perform a card action');
     } else if (remainingActions > 0 && hasHandCards && hasCardActions) {
       titleText = _('${you} may purchase a card, play a card or perform a card action');
-    } else if (remainingActions === 0 && hasFreeCardActions) {
+    } else if (remainingActions === 0 && hasCardActions) {
       titleText = _('${you} may perform a bonus action');
-    } else if (remainingActions === 0 && !hasFreeCardActions) {
+    } else if (remainingActions === 0 && !hasCardActions) {
       titleText = _('${you} have no actions remaining');
     }
 
@@ -165,29 +151,74 @@ class PlayerActionsState implements State {
     return this.game.localState.remainingActions > 0 || false;
   }
 
-  // TODO: check value of purchased gifts
-  private activePlayerHasCardActions(): boolean {
-    const rupees = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getRupees();
-    return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
-      const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      const cardHasActions = Object.keys(cardInfo.actions).length > 0;
-      const hasEnoughRupees = rupees >= 2 || Object.values(cardInfo.actions).some(({ type }) => CARD_ACTIONS_WITHOUT_COST.includes(type));
-      return used === 0 && cardHasActions && hasEnoughRupees;
-    });
+  /**
+   * Player can perform action if:
+   * - Player has remaining actions or action is bonus action
+   * - Player can pay minimum action cost
+   * - Player meets other requirements
+   */
+  private playerCanPerformCardAction({ action, cardId, rupees }: { action: string; cardId: string; rupees: number }): boolean {
+    switch (action) {
+      case BATTLE:
+        // There needs to be a card or region where player can battle
+        return this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0 || this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0;
+      case BETRAY:
+        return this.game.activeStates.clientCardActionBetray.getCourtCardsToBetray().length > 0
+      case BUILD:
+        return this.game.activeStates.clientCardActionBuild.getRegionsToBuild().length > 0;
+      case GIFT:
+        return this.game.getCurrentPlayer().getLowestAvailableGift() > 0;
+        return true;
+      case MOVE:
+        return this.game.activeStates.clientCardActionMove.getArmiesToMove().length > 0 || this.game.activeStates.clientCardActionMove.getSpiesToMove(),length > 0;
+      case TAX:
+        return this.game.activeStates.clientCardActionTax.getMarketRupeesToTax().length > 0 || this.game.activeStates.clientCardActionTax.getPlayersToTax().length > 0;
+    }
+    return false;
   }
 
-  private activePlayerHasFreeCardActions(): boolean {
-    return this.game.localState.activePlayer.court.cards.some(({ id, used }) => {
-      const cardInfo = this.game.gamedatas.staticData.cards[id] as CourtCard;
-      return used === 0 && this.isCardFavoredSuit({ cardId: id });
-      // cardInfo.suit == this.game.objectManager.favoredSuit.get() &&
-      Object.keys(cardInfo.actions).length > 0;
-    });
+  private setupCardActions(): void {
+    this.availableCardActions = [];
+    const player = this.game.getCurrentPlayer();
+    const rupees = player.getRupees();
+    const courtCards = player.getCourtCards();
+    courtCards     
+      .forEach(({ actions, id }) => {
+        const cardHasBeenUsed = this.game.localState.usedCards.includes(id);
+        const noActionsLeft = this.game.localState.remainingActions === 0 && !this.isCardFavoredSuit({ cardId: id });
+        Object.keys(actions).forEach((action) => {
+          const nodeId = `${action}_${id}`
+          this.game.tooltipManager.removeTooltip(nodeId);
+          if (cardHasBeenUsed) {
+            this.game.tooltipManager.addTextToolTip({nodeId, text: _('This card has been used')});
+            return;
+          }
+          if (noActionsLeft) {
+            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not have actions left to perform this')});
+            return;
+          }
+          const minActionCost = this.game.getMinimumActionCost({ action });
+          if (rupees < minActionCost) {
+            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not have enough rupees pay for this')});
+            return;
+          }
+          const canPerformAction = this.playerCanPerformCardAction({ action, cardId: id, rupees });
+          if (!canPerformAction) {
+            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not meet the requirements to perform this action')});
+            return;
+          } else {
+            this.availableCardActions.push({
+              cardId: id,
+              action,
+            });
+          }
+        });
+      });
   }
+
 
   private currentPlayerHasHandCards(): boolean {
-    const currentPlayerId = this.game.getPlayerId();
-    return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemCount() > 0;
+    return this.game.getCurrentPlayer().getHandZone().getItemCount() > 0;
   }
 
   private handleNegotiatedBribe({ action, cardId, briber }: NegotiatedBribe): void {
@@ -208,47 +239,30 @@ class PlayerActionsState implements State {
   }
 
   private setCardActionsSelectable() {
-    const playerId = this.game.getPlayerId();
-    dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement) => {
-      const cardId = node.id;
-      const used = this.game.localState.activePlayer.court.cards?.find((card) => card.id === cardId)?.used === 1;
-      if (
-        !used &&
-        (this.game.localState.remainingActions > 0 || this.isCardFavoredSuit({ cardId }))
-        // (this.game.gamedatas.staticData.cards[cardId] as CourtCard).suit === this.game.objectManager.favoredSuit.get())
-      ) {
-        const rupees = this.game.playerManager.getPlayer({ playerId }).getRupees();
-        dojo.map(node.children, (child: HTMLElement) => {
-          if (dojo.hasClass(child, 'pp_card_action')) {
-            const cardAction = child.id.split('_')[0] as CardAction;
-
-            const minActionCost = this.game.getMinimumActionCost({ action: cardAction });
-            console.log('cardAction', cardAction, 'minActionCost', minActionCost);
-            if (minActionCost === null || rupees < minActionCost) {
-              return;
-            }
-            console.log('childId', child.id);
-            // const nextStep = `cardAction${capitalizeFirstLetter(child.id.split('_')[0])}`;
-            dojo.addClass(child, 'pp_selectable');
-            this.game._connections.push(
-              dojo.connect(child, 'onclick', this, (event: PointerEvent) => {
-                event.preventDefault();
-                event.stopPropagation();
-                this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
-                  args: {
-                    cardId,
-                    action: cardAction,
-                    next: ({ bribe }: { bribe: BribeArgs }) =>
-                      this.game
-                        .framework()
-                        .setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[cardAction], { args: { cardId, bribe } }),
-                  },
-                });
-              })
-            );
-          }
-        });
+    // const playerId = this.game.getPlayerId();
+    this.availableCardActions.forEach(({ cardId, action }) => {
+      const node = dojo.byId(`${action}_${cardId}`);
+      if (node === null) {
+        return;
       }
+      // this.game.tooltipManager.addTextToolTip({nodeId: `${action}_${cardId}`,text: _('explanation text')});
+      dojo.addClass(node, 'pp_selectable');
+      this.game._connections.push(
+        dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
+          event.preventDefault();
+          event.stopPropagation();
+          this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
+            args: {
+              cardId,
+              action: action as PlayerAction,
+              next: ({ bribe }: { bribe: BribeArgs }) =>
+                this.game
+                  .framework()
+                  .setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[action], { args: { cardId, bribe } }),
+            },
+          });
+        })
+      );
     });
   }
 
@@ -272,6 +286,28 @@ class PlayerActionsState implements State {
     return column * baseCardCost; // cost is equal to the column number
   }
 
+  private setHandCardsSelectable() {
+    this.game.setHandCardsSelectable({
+      callback: ({ cardId }: { cardId: string }) => {
+        debug('callback triggered', cardId);
+        this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
+          args: {
+            cardId,
+            action: 'playCard',
+            next: ({
+              bribe,
+            }: {
+              bribe: {
+                amount: number;
+                negotiated?: boolean;
+              } | null;
+            }) => this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId, bribe } }),
+          },
+        });
+      },
+    });
+  }
+
   setMarketCardsSelectable() {
     dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
       const cardId = node.id;
@@ -280,7 +316,7 @@ class PlayerActionsState implements State {
         return;
       }
       const cost = this.getCardCost({ cardId, column: Number(node.parentElement.id.split('_')[3]) });
-      if (cost <= this.game.localState.activePlayer.rupees && !this.game.localState.usedCards.includes(cardId)) {
+      if (cost <= this.game.getCurrentPlayer().getRupees() && !this.game.localState.usedCards.includes(cardId)) {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(
           // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
@@ -305,7 +341,6 @@ class PlayerActionsState implements State {
       text: _('Debug'),
       callback: async () => {
         const zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
-        console.log('zone', zone);
         await zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] });
       },
     });

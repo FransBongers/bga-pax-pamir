@@ -114,10 +114,10 @@ class ClientCardActionBetrayState implements State {
     });
   }
 
-  private setCourtCardsSelectable() {
+  public getCourtCardsToBetray(): CourtCard[] {
+    const courtCards = [];
     this.game.playerManager.getPlayers().forEach((player: PPPlayer) => {
       player.getCourtCards().forEach((card: CourtCard) => {
-        debug('card', card);
         const { enemy, own } = this.getSpies({ cardId: card.id });
         if (own.length === 0) {
           return;
@@ -125,14 +125,22 @@ class ClientCardActionBetrayState implements State {
         if (card.suit === POLITICAL && player.hasSpecialAbility({ specialAbility: SA_BODYGUARDS })) {
           return;
         }
-        const node = dojo.byId(card.id);
-        dojo.addClass(node, 'pp_selectable');
-        this.game._connections.push(
-          dojo.connect(node, 'onclick', this, () => {
-            this.updateInterfaceConfirm({ betrayedCardId: card.id });
-          })
-        );
+        courtCards.push(card);
       });
     });
+    return courtCards;
+  }
+
+  private setCourtCardsSelectable() {
+    const cardsToBetray = this.getCourtCardsToBetray();
+    cardsToBetray.forEach((card) => {
+      const node = dojo.byId(card.id);
+      dojo.addClass(node, 'pp_selectable');
+      this.game._connections.push(
+        dojo.connect(node, 'onclick', this, () => {
+          this.updateInterfaceConfirm({ betrayedCardId: card.id });
+        })
+      );
+    })
   }
 }

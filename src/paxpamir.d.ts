@@ -86,7 +86,6 @@ interface RegionGamedatas {
 }
 
 interface LocalState {
-  activePlayer: PaxPamirPlayer;
   remainingActions: number;
   usedCards: string[];
   bribe: NegotiatedBribe | null;

@@ -214,7 +214,7 @@ const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'militar
   };
 
   return `<div class="pp_suit_tooltip">
-            <div class="pp_icon pp_suit_icon ${suit}" style="min-width: 44px;"></div>
+            <div class="pp_icon pp_suit_icon ${suit}" style="min-width: 44px; margin-left: -2px;"></div>
             <div class="pp_suit_tooltip_content">  
               <span class="pp_tooltip_title" >${SUIT_TITLE[suit]}</span>
               <span class="pp_tooltip_text">${SUIT_DESCRIPTION[suit]}</span>

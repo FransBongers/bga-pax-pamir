@@ -30,8 +30,6 @@ trait PlayerActionTrait
   {
     $bribe = Globals::getNegotiatedBribe();
     return [
-      // TODO: remove activePlayer here
-      'activePlayer' => PaxPamirPlayers::getActive()->jsonSerialize(null),
       'remainingActions' => Globals::getRemainingActions(),
       'usedCards' => Cards::getUnavailableCards(),
       'bribe' => isset($bribe['action']) ? $bribe : null,

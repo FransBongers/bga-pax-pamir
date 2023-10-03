@@ -57,11 +57,11 @@ class ClientCardActionBuildState implements State {
       const key = `tkn_${tempToken.type}_${index}`;
       args[key] = `${coalition}_${tempToken.type}`;
       log += '${' + key + '}';
-    })
+    });
     return {
       log,
-      args
-    }
+      args,
+    };
   }
 
   private updateInterfaceConfirm() {
@@ -72,7 +72,7 @@ class ClientCardActionBuildState implements State {
       args: {
         amount,
         tokens: this.createTokenLog(),
-        tkn_rupee: _('rupee(s)')
+        tkn_rupee: _('rupee(s)'),
       },
     });
     this.game.addPrimaryActionButton({
@@ -187,24 +187,23 @@ class ClientCardActionBuildState implements State {
     this.tempTokens = [];
   }
 
+  public getRegionsToBuild(): string[] {
+    return REGIONS.filter((regionId) => {
+      const region = this.game.map.getRegion({ region: regionId });
+      const ruler = region.getRuler();
+      return ruler === this.game.getPlayerId();
+    });
+  }
+
   private setLocationsSelectable() {
     debug('setRegionsSelectable');
 
-    // Regions
-    // const container = document.getElementById(`pp_map_areas`);
-    // container.classList.add('pp_selectable');
-
-    REGIONS.forEach((regionId) => {
+    this.getRegionsToBuild().forEach((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
-      const ruler = region.getRuler();
-      // console.log('region', region, ruler);
-      if (ruler !== this.game.getPlayerId()) {
-        return;
-      }
 
       const armyLocation = `pp_${regionId}_armies`;
       const element = document.getElementById(armyLocation);
-      console.log('element', element);
+
       if (element) {
         element.classList.add('pp_selectable');
         this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ location: armyLocation })));

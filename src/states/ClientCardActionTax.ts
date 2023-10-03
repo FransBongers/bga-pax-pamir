@@ -158,26 +158,22 @@ class ClientCardActionTaxState implements State {
     node.classList.toggle('pp_selectable');
   }
 
-  private setRupeesSelectable() {
-    // Market
+  public getMarketRupeesToTax(): string[] {
+    const rupees: string[] = [];
     dojo.query('.pp_rupee').forEach((node: HTMLElement) => {
       const parentId = node.parentElement.id;
       if (parentId.startsWith('pp_market')) {
-        dojo.addClass(node, 'pp_selectable');
-        this.game._connections.push(
-          dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
-            event.stopPropagation();
-            this.handleMarketRupeeClicked({ rupeeId: node.id });
-          })
-        );
+        rupees.push(node.id);
       }
     });
+    return rupees;
+  }
 
+  public getPlayersToTax(): number[] {
     const hasClaimOfAncientLineage = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CLAIM_OF_ANCIENT_LINEAGE });
-    // Players
-    this.game.playerManager.getPlayerIds().forEach((playerId: number) => {
+    return this.game.playerManager.getPlayerIds().filter((playerId: number) => {
       if (playerId === this.game.getPlayerId()) {
-        return;
+        return false;
       }
       const player = this.game.playerManager.getPlayer({ playerId });
       if (!hasClaimOfAncientLineage) {
@@ -191,18 +187,35 @@ class ClientCardActionTaxState implements State {
             }
           });
         if (!hasCardRuledByPlayer) {
-          return;
+          return false;
         }
       } else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
-        return;
+        return false;
       }
       const taxShelter = player.getTaxShelter();
       const playerRupees = player.getRupees();
       if (playerRupees <= taxShelter) {
-        return;
+        return false;
       }
       this.maxPerPlayer[playerId] = playerRupees - taxShelter;
+      return true;
+    });
+  }
 
+  private setRupeesSelectable() {
+    // Market
+    this.getMarketRupeesToTax().forEach((rupeeId) => {
+      const node = dojo.byId(rupeeId);
+      dojo.addClass(node, 'pp_selectable');
+      this.game._connections.push(
+        dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
+          event.stopPropagation();
+          this.handleMarketRupeeClicked({ rupeeId: node.id });
+        })
+      );
+    })
+
+    this.getPlayersToTax().forEach((playerId) => {
       const node = dojo.byId(`rupees_tableau_${playerId}`);
       dojo.addClass(node, 'pp_selectable');
       this.game._connections.push(
@@ -211,16 +224,8 @@ class ClientCardActionTaxState implements State {
           this.handlePlayerRupeeClicked({ rupeeId: node.id });
         })
       );
-    });
+    })
   }
-
-  // private updateConfirmButton() {
-  //   if (this.numberSelected > 0 && this.numberSelected <= this.maxNumberToSelect) {
-  //     dojo.removeClass('confirm_btn', 'disabled');
-  //   } else {
-  //     dojo.addClass('confirm_btn', 'disabled');
-  //   }
-  // }
 
   private updateNumberSelected() {
     let numberSelected = 0;

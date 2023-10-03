@@ -57,7 +57,7 @@ class ClientInitialBribeCheckState implements State {
     });
 
     const minActionCost = this.game.getMinimumActionCost({action: this.action}) || 0;
-    const maxAvailableRupees = localState.activePlayer.rupees - minActionCost;
+    const maxAvailableRupees = this.game.getCurrentPlayer().getRupees() - minActionCost;
     if (amount <= maxAvailableRupees) {
       this.game.addPrimaryActionButton({
         id: `pay_bribe_btn`,

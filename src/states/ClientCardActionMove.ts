@@ -356,19 +356,20 @@ class ClientCardActionMoveState implements State {
     }
   }
 
-  private setArmiesSelectable() {
+  public getArmiesToMove(): { pieceId: string; regionId: string }[] {
+    const pieceIds: { pieceId: string; regionId: string }[] = [];
     /**
      * For each region
      * check if there are loyal armies and roads on borders
      *  =>
      */
+    const player = this.game.getCurrentPlayer();
+    const coalitionId = player.getLoyalty();
     REGIONS.forEach((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
-      const coalitionId = this.game.localState.activePlayer.loyalty;
-      // const enemyPieces = region.getEnemyPieces({ coalitionId });
+
       const coalitionArmies = region.getCoalitionArmies({ coalitionId });
 
-      const player = this.game.getCurrentPlayer();
       const tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
         ? region.getPlayerTribes({ playerId: player.getPlayerId() })
         : [];
@@ -387,12 +388,19 @@ class ClientCardActionMoveState implements State {
       if (!hasCoalitionRoads) {
         return;
       }
-      coalitionArmies.concat(tribesNationalism).forEach((pieceId: string) => {
-        console.log('selectable army', pieceId);
-        const element = dojo.byId(pieceId);
-        element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceArmySelected({ pieceId, regionId })));
+      const pieces = coalitionArmies.concat(tribesNationalism);
+      pieces.forEach((pieceId) => {
+        pieceIds.push({ pieceId, regionId });
       });
+    });
+    return pieceIds;
+  }
+
+  private setArmiesSelectable() {
+    this.getArmiesToMove().forEach(({ pieceId, regionId }) => {
+      const element = dojo.byId(pieceId);
+      element.classList.add('pp_selectable');
+      this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceArmySelected({ pieceId, regionId })));
     });
   }
 
@@ -453,7 +461,7 @@ class ClientCardActionMoveState implements State {
     this.game.map.setSelectable();
 
     const region = this.game.map.getRegion({ region: regionId });
-    const coalitionId = this.game.localState.activePlayer.loyalty;
+    const coalitionId = this.game.getCurrentPlayer().getLoyalty();
     const hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
 
     region.borders.forEach((borderId) => {
@@ -467,23 +475,38 @@ class ClientCardActionMoveState implements State {
     });
   }
 
-  private setSpiesSelectable() {
+  public getSpiesToMove(): { cylinderId: string; cardId: string }[] {
+    // If there is only a single card in all courts there is no destination to move to
+    if (this.game.playerManager.getPlayers().map((player) => player.getCourtCards()).flat().length <= 1) {
+      return [];
+    }
     /**
      * Check all spy zones for spies of current player
      * Set selectable
      */
+    const spies: { cylinderId: string; cardId: string }[] = [];
     Object.entries(this.game.spies).forEach(([cardId, zone]) => {
       zone.getItems().forEach((cylinderId) => {
         if (Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()) {
           return;
         }
-        const node = dojo.byId(cylinderId);
-        node.classList.add(PP_SELECTABLE);
-        this.game._connections.push(
-          dojo.connect(node, 'onclick', this, () => this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId }))
-        );
+        spies.push({
+          cylinderId,
+          cardId,
+        });
       });
     });
+    return spies;
+  }
+
+  private setSpiesSelectable() {
+    this.getSpiesToMove().forEach(({cardId, cylinderId}) => {
+      const node = dojo.byId(cylinderId);
+      node.classList.add(PP_SELECTABLE);
+      this.game._connections.push(
+        dojo.connect(node, 'onclick', this, () => this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId }))
+      );
+    })
   }
 
   private totalNumberOfMoves() {

@@ -1569,7 +1569,7 @@ var tplSuitToolTip = function (_a) {
         military: _('The military suit is the final score tie-breaker. If final score is tied, the number of Military Stars in your court determines victory.'),
         political: _('The political suit determines your court size. Your court size is equal to 3 plus the number of Political Stars in your court. During cleanup, you must discard your court down to this.'),
     };
-    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
+    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px; margin-left: -2px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
 };
 var tplWakhanCardTooltip = function (_a) {
     var _b, _c;
@@ -1620,6 +1620,10 @@ var PPTooltipManager = (function () {
         var html = tplSuitToolTip({ suit: suit });
         this.game.framework().addTooltipHtml(nodeId, html, 500);
     };
+    PPTooltipManager.prototype.addTextToolTip = function (_a) {
+        var nodeId = _a.nodeId, text = _a.text;
+        this.game.framework().addTooltip(nodeId, _(text), '', 500);
+    };
     PPTooltipManager.prototype.addTooltipToCard = function (_a) {
         var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b;
         var cardInfo = this.game.getCardInfo({ cardId: cardId });
@@ -1637,6 +1641,9 @@ var PPTooltipManager = (function () {
         var html = tplWakhanCardTooltip({ wakhanDeckCardId: wakhanDeckCardId, wakhanDiscardCardId: wakhanDiscardCardId, game: this.game });
         this.game.framework().addTooltipHtml("pp_wakhan_deck", html, 500);
         this.game.framework().addTooltipHtml("pp_wakhan_discard", html, 500);
+    };
+    PPTooltipManager.prototype.removeTooltip = function (nodeId) {
+        this.game.framework().removeTooltip(nodeId);
     };
     PPTooltipManager.prototype.checkLogTooltip = function (lastNotif) {
         var _this = this;
@@ -2490,7 +2497,7 @@ var PPPlayer = (function () {
         if (this.gifts['6'].getItemCount() === 0) {
             return 6;
         }
-        return null;
+        return 0;
     };
     PPPlayer.prototype.getLoyalty = function () {
         return this.loyalty;
@@ -3908,7 +3915,7 @@ var ClientCardActionBattleState = (function () {
         this.game.clearPossible();
         this.location = regionId;
         var region = this.game.map.getRegion({ region: regionId });
-        var coalitionId = this.game.localState.activePlayer.loyalty;
+        var coalitionId = this.game.getCurrentPlayer().getLoyalty();
         var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId }).filter(function (pieceId) { return _this.checkForCitadel({ pieceId: pieceId, region: regionId }); });
         debug('enemyPieces', enemyPieces);
         var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
@@ -4010,6 +4017,18 @@ var ClientCardActionBattleState = (function () {
         });
         return battleSites;
     };
+    ClientCardActionBattleState.prototype.getRegionBattleSites = function () {
+        var _this = this;
+        return REGIONS.filter(function (regionId) {
+            var region = _this.game.map.getRegion({ region: regionId });
+            var coalitionId = _this.game.getCurrentPlayer().getLoyalty();
+            var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
+            if (enemyPieces.length === 0 || _this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }) === 0) {
+                return false;
+            }
+            return true;
+        });
+    };
     ClientCardActionBattleState.prototype.getSpies = function (_a) {
         var _this = this;
         var cardId = _a.cardId;
@@ -4054,13 +4073,7 @@ var ClientCardActionBattleState = (function () {
         debug('setLocationsSelectable');
         var container = document.getElementById("pp_map_areas");
         container.classList.add('pp_selectable');
-        REGIONS.forEach(function (regionId) {
-            var region = _this.game.map.getRegion({ region: regionId });
-            var coalitionId = _this.game.localState.activePlayer.loyalty;
-            var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId });
-            if (enemyPieces.length === 0 || _this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }) === 0) {
-                return;
-            }
+        this.getRegionBattleSites().forEach(function (regionId) {
             var element = document.getElementById("pp_region_".concat(regionId));
             if (element) {
                 element.classList.add('pp_selectable');
@@ -4180,11 +4193,11 @@ var ClientCardActionBetrayState = (function () {
             },
         });
     };
-    ClientCardActionBetrayState.prototype.setCourtCardsSelectable = function () {
+    ClientCardActionBetrayState.prototype.getCourtCardsToBetray = function () {
         var _this = this;
+        var courtCards = [];
         this.game.playerManager.getPlayers().forEach(function (player) {
             player.getCourtCards().forEach(function (card) {
-                debug('card', card);
                 var _a = _this.getSpies({ cardId: card.id }), enemy = _a.enemy, own = _a.own;
                 if (own.length === 0) {
                     return;
@@ -4192,12 +4205,20 @@ var ClientCardActionBetrayState = (function () {
                 if (card.suit === POLITICAL && player.hasSpecialAbility({ specialAbility: SA_BODYGUARDS })) {
                     return;
                 }
-                var node = dojo.byId(card.id);
-                dojo.addClass(node, 'pp_selectable');
-                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
-                    _this.updateInterfaceConfirm({ betrayedCardId: card.id });
-                }));
+                courtCards.push(card);
             });
+        });
+        return courtCards;
+    };
+    ClientCardActionBetrayState.prototype.setCourtCardsSelectable = function () {
+        var _this = this;
+        var cardsToBetray = this.getCourtCardsToBetray();
+        cardsToBetray.forEach(function (card) {
+            var node = dojo.byId(card.id);
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
+                _this.updateInterfaceConfirm({ betrayedCardId: card.id });
+            }));
         });
     };
     return ClientCardActionBetrayState;
@@ -4233,7 +4254,7 @@ var ClientCardActionBuildState = (function () {
         });
         return {
             log: log,
-            args: args
+            args: args,
         };
     };
     ClientCardActionBuildState.prototype.updateInterfaceConfirm = function () {
@@ -4245,7 +4266,7 @@ var ClientCardActionBuildState = (function () {
             args: {
                 amount: amount,
                 tokens: this.createTokenLog(),
-                tkn_rupee: _('rupee(s)')
+                tkn_rupee: _('rupee(s)'),
             },
         });
         this.game.addPrimaryActionButton({
@@ -4334,18 +4355,21 @@ var ClientCardActionBuildState = (function () {
         });
         this.tempTokens = [];
     };
+    ClientCardActionBuildState.prototype.getRegionsToBuild = function () {
+        var _this = this;
+        return REGIONS.filter(function (regionId) {
+            var region = _this.game.map.getRegion({ region: regionId });
+            var ruler = region.getRuler();
+            return ruler === _this.game.getPlayerId();
+        });
+    };
     ClientCardActionBuildState.prototype.setLocationsSelectable = function () {
         var _this = this;
         debug('setRegionsSelectable');
-        REGIONS.forEach(function (regionId) {
+        this.getRegionsToBuild().forEach(function (regionId) {
             var region = _this.game.map.getRegion({ region: regionId });
-            var ruler = region.getRuler();
-            if (ruler !== _this.game.getPlayerId()) {
-                return;
-            }
             var armyLocation = "pp_".concat(regionId, "_armies");
             var element = document.getElementById(armyLocation);
-            console.log('element', element);
             if (element) {
                 element.classList.add('pp_selectable');
                 _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ location: armyLocation }); }));
@@ -4496,7 +4520,7 @@ var ClientCardActionGiftState = (function () {
                 value: giftValue,
             })
                 .getItems().length > 0;
-            if (!hasGift && giftValue <= _this.game.localState.activePlayer.rupees - (((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0)) {
+            if (!hasGift && giftValue <= _this.game.getCurrentPlayer().getRupees() - (((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0)) {
                 dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
                     dojo.addClass(node, 'pp_selectable');
                     _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId: cardId }); }));
@@ -4818,13 +4842,14 @@ var ClientCardActionMoveState = (function () {
             });
         });
     };
-    ClientCardActionMoveState.prototype.setArmiesSelectable = function () {
+    ClientCardActionMoveState.prototype.getArmiesToMove = function () {
         var _this = this;
+        var pieceIds = [];
+        var player = this.game.getCurrentPlayer();
+        var coalitionId = player.getLoyalty();
         REGIONS.forEach(function (regionId) {
             var region = _this.game.map.getRegion({ region: regionId });
-            var coalitionId = _this.game.localState.activePlayer.loyalty;
             var coalitionArmies = region.getCoalitionArmies({ coalitionId: coalitionId });
-            var player = _this.game.getCurrentPlayer();
             var tribesNationalism = player.ownsEventCard({ cardId: ECE_NATIONALISM_CARD_ID })
                 ? region.getPlayerTribes({ playerId: player.getPlayerId() })
                 : [];
@@ -4840,12 +4865,20 @@ var ClientCardActionMoveState = (function () {
             if (!hasCoalitionRoads) {
                 return;
             }
-            coalitionArmies.concat(tribesNationalism).forEach(function (pieceId) {
-                console.log('selectable army', pieceId);
-                var element = dojo.byId(pieceId);
-                element.classList.add('pp_selectable');
-                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceArmySelected({ pieceId: pieceId, regionId: regionId }); }));
+            var pieces = coalitionArmies.concat(tribesNationalism);
+            pieces.forEach(function (pieceId) {
+                pieceIds.push({ pieceId: pieceId, regionId: regionId });
             });
+        });
+        return pieceIds;
+    };
+    ClientCardActionMoveState.prototype.setArmiesSelectable = function () {
+        var _this = this;
+        this.getArmiesToMove().forEach(function (_a) {
+            var pieceId = _a.pieceId, regionId = _a.regionId;
+            var element = dojo.byId(pieceId);
+            element.classList.add('pp_selectable');
+            _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.updateInterfaceArmySelected({ pieceId: pieceId, regionId: regionId }); }));
         });
     };
     ClientCardActionMoveState.prototype.getSingleMoveDestinationsForSpy = function (_a) {
@@ -4899,7 +4932,7 @@ var ClientCardActionMoveState = (function () {
         debug('setDestinationRegionsSelectable', pieceId, regionId);
         this.game.map.setSelectable();
         var region = this.game.map.getRegion({ region: regionId });
-        var coalitionId = this.game.localState.activePlayer.loyalty;
+        var coalitionId = this.game.getCurrentPlayer().getLoyalty();
         var hasIndianSupplies = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_INDIAN_SUPPLIES });
         region.borders.forEach(function (borderId) {
             var border = _this.game.map.getBorder({ border: borderId });
@@ -4911,18 +4944,33 @@ var ClientCardActionMoveState = (function () {
             }
         });
     };
-    ClientCardActionMoveState.prototype.setSpiesSelectable = function () {
+    ClientCardActionMoveState.prototype.getSpiesToMove = function () {
         var _this = this;
+        if (this.game.playerManager.getPlayers().map(function (player) { return player.getCourtCards(); }).flat().length <= 1) {
+            return [];
+        }
+        var spies = [];
         Object.entries(this.game.spies).forEach(function (_a) {
             var cardId = _a[0], zone = _a[1];
             zone.getItems().forEach(function (cylinderId) {
                 if (Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId()) {
                     return;
                 }
-                var node = dojo.byId(cylinderId);
-                node.classList.add(PP_SELECTABLE);
-                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId: cardId }); }));
+                spies.push({
+                    cylinderId: cylinderId,
+                    cardId: cardId,
+                });
             });
+        });
+        return spies;
+    };
+    ClientCardActionMoveState.prototype.setSpiesSelectable = function () {
+        var _this = this;
+        this.getSpiesToMove().forEach(function (_a) {
+            var cardId = _a.cardId, cylinderId = _a.cylinderId;
+            var node = dojo.byId(cylinderId);
+            node.classList.add(PP_SELECTABLE);
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId: cardId }); }));
         });
     };
     ClientCardActionMoveState.prototype.totalNumberOfMoves = function () {
@@ -5048,22 +5096,22 @@ var ClientCardActionTaxState = (function () {
         node.classList.toggle('pp_selected');
         node.classList.toggle('pp_selectable');
     };
-    ClientCardActionTaxState.prototype.setRupeesSelectable = function () {
-        var _this = this;
+    ClientCardActionTaxState.prototype.getMarketRupeesToTax = function () {
+        var rupees = [];
         dojo.query('.pp_rupee').forEach(function (node) {
             var parentId = node.parentElement.id;
             if (parentId.startsWith('pp_market')) {
-                dojo.addClass(node, 'pp_selectable');
-                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
-                    event.stopPropagation();
-                    _this.handleMarketRupeeClicked({ rupeeId: node.id });
-                }));
+                rupees.push(node.id);
             }
         });
+        return rupees;
+    };
+    ClientCardActionTaxState.prototype.getPlayersToTax = function () {
+        var _this = this;
         var hasClaimOfAncientLineage = this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CLAIM_OF_ANCIENT_LINEAGE });
-        this.game.playerManager.getPlayerIds().forEach(function (playerId) {
+        return this.game.playerManager.getPlayerIds().filter(function (playerId) {
             if (playerId === _this.game.getPlayerId()) {
-                return;
+                return false;
             }
             var player = _this.game.playerManager.getPlayer({ playerId: playerId });
             if (!hasClaimOfAncientLineage) {
@@ -5077,18 +5125,32 @@ var ClientCardActionTaxState = (function () {
                     }
                 });
                 if (!hasCardRuledByPlayer) {
-                    return;
+                    return false;
                 }
             }
             else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
-                return;
+                return false;
             }
             var taxShelter = player.getTaxShelter();
             var playerRupees = player.getRupees();
             if (playerRupees <= taxShelter) {
-                return;
+                return false;
             }
             _this.maxPerPlayer[playerId] = playerRupees - taxShelter;
+            return true;
+        });
+    };
+    ClientCardActionTaxState.prototype.setRupeesSelectable = function () {
+        var _this = this;
+        this.getMarketRupeesToTax().forEach(function (rupeeId) {
+            var node = dojo.byId(rupeeId);
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
+                event.stopPropagation();
+                _this.handleMarketRupeeClicked({ rupeeId: node.id });
+            }));
+        });
+        this.getPlayersToTax().forEach(function (playerId) {
             var node = dojo.byId("rupees_tableau_".concat(playerId));
             dojo.addClass(node, 'pp_selectable');
             _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
@@ -5202,7 +5264,7 @@ var ClientInitialBribeCheckState = (function () {
             },
         });
         var minActionCost = this.game.getMinimumActionCost({ action: this.action }) || 0;
-        var maxAvailableRupees = localState.activePlayer.rupees - minActionCost;
+        var maxAvailableRupees = this.game.getCurrentPlayer().getRupees() - minActionCost;
         if (amount <= maxAvailableRupees) {
             this.game.addPrimaryActionButton({
                 id: "pay_bribe_btn",
@@ -5657,7 +5719,7 @@ var NegotiateBribeState = (function () {
     NegotiateBribeState.prototype.addBribeButtons = function () {
         var _this = this;
         var currentOffer = this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount;
-        if (this.isBribee || (!this.isBribee && currentOffer <= (this.game.localState.activePlayer.rupees - this.game.getMinimumActionCost({ action: this.action })))) {
+        if (this.isBribee || (!this.isBribee && currentOffer <= (this.game.getCurrentPlayer().getRupees() - this.game.getMinimumActionCost({ action: this.action })))) {
             this.game.addPrimaryActionButton({
                 id: 'accept_btn',
                 text: _('Accept'),
@@ -5666,17 +5728,11 @@ var NegotiateBribeState = (function () {
                     }, }); },
             });
         }
-        var values = Array.from({ length: this.maxAmount });
-        console.log('maxAmount', this.maxAmount);
         var _loop_2 = function (i) {
-            console.log('for loop i:', i);
             var isLowerThanOfferedByBriber = i < this_2.briber.currentAmount;
-            console.log('isLowerThanOfferedByBriber', isLowerThanOfferedByBriber);
             var isHigherThanDemandedByBribee = i > (this_2.bribee.currentAmount || this_2.maxAmount);
-            console.log('isHigherThanDemandedByBribee', isHigherThanDemandedByBribee);
             var isCurrentOffer = i === currentOffer;
-            console.log('isCurrentOffer', isCurrentOffer);
-            var briberCannotAfford = !this_2.isBribee && i > (this_2.game.localState.activePlayer.rupees - this_2.game.getMinimumActionCost({ action: this_2.action }));
+            var briberCannotAfford = !this_2.isBribee && i > (this_2.game.getCurrentPlayer().getRupees() - this_2.game.getMinimumActionCost({ action: this_2.action }));
             if (isLowerThanOfferedByBriber || isHigherThanDemandedByBribee || isCurrentOffer || briberCannotAfford) {
                 return "continue";
             }
@@ -5699,7 +5755,6 @@ var NegotiateBribeState = (function () {
         for (var i = this.maxAmount; i >= 0; i--) {
             _loop_2(i);
         }
-        console.log('values', values);
     };
     return NegotiateBribeState;
 }());
@@ -5807,6 +5862,8 @@ var PlayerActionsState = (function () {
     PlayerActionsState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clearPossible();
+        this.setupCardActions();
+        console.log('availableCardActions', this.availableCardActions);
         this.updateMainTitleTextActions();
         if (this.activePlayerHasActions()) {
             this.game.addSecondaryActionButton({
@@ -5815,34 +5872,16 @@ var PlayerActionsState = (function () {
                 callback: function () { return _this.onPass(); },
             });
             this.setMarketCardsSelectable();
-            this.game.setHandCardsSelectable({
-                callback: function (_a) {
-                    var cardId = _a.cardId;
-                    debug('callback triggered', cardId);
-                    _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
-                        args: {
-                            cardId: cardId,
-                            action: 'playCard',
-                            next: function (_a) {
-                                var bribe = _a.bribe;
-                                return _this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId, bribe: bribe } });
-                            },
-                        },
-                    });
-                },
-            });
-            this.setCardActionsSelectable();
+            this.setHandCardsSelectable();
         }
         else {
-            if (this.activePlayerHasFreeCardActions()) {
-                this.setCardActionsSelectable();
-            }
             this.game.addPrimaryActionButton({
                 id: 'pass_btn',
                 text: _('End Turn'),
                 callback: function () { return _this.onPass(); },
             });
         }
+        this.setCardActionsSelectable();
         this.game.addUndoButton();
     };
     PlayerActionsState.prototype.updateInterfacePass = function () {
@@ -5873,9 +5912,8 @@ var PlayerActionsState = (function () {
     };
     PlayerActionsState.prototype.updateMainTitleTextActions = function () {
         var remainingActions = this.game.localState.remainingActions;
-        var hasCardActions = this.activePlayerHasCardActions();
+        var hasCardActions = this.availableCardActions.length > 0;
         var hasHandCards = this.currentPlayerHasHandCards();
-        var hasFreeCardActions = this.activePlayerHasFreeCardActions();
         var titleText = '';
         if (remainingActions > 0 && !hasHandCards && !hasCardActions) {
             titleText = _('${you} may purchase a card');
@@ -5889,10 +5927,10 @@ var PlayerActionsState = (function () {
         else if (remainingActions > 0 && hasHandCards && hasCardActions) {
             titleText = _('${you} may purchase a card, play a card or perform a card action');
         }
-        else if (remainingActions === 0 && hasFreeCardActions) {
+        else if (remainingActions === 0 && hasCardActions) {
             titleText = _('${you} may perform a bonus action');
         }
-        else if (remainingActions === 0 && !hasFreeCardActions) {
+        else if (remainingActions === 0 && !hasCardActions) {
             titleText = _('${you} have no actions remaining');
         }
         if (remainingActions === 1) {
@@ -5907,32 +5945,68 @@ var PlayerActionsState = (function () {
     PlayerActionsState.prototype.activePlayerHasActions = function () {
         return this.game.localState.remainingActions > 0 || false;
     };
-    PlayerActionsState.prototype.activePlayerHasCardActions = function () {
-        var _this = this;
-        var rupees = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getRupees();
-        return this.game.localState.activePlayer.court.cards.some(function (_a) {
-            var id = _a.id, used = _a.used;
-            var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            var cardHasActions = Object.keys(cardInfo.actions).length > 0;
-            var hasEnoughRupees = rupees >= 2 || Object.values(cardInfo.actions).some(function (_a) {
-                var type = _a.type;
-                return CARD_ACTIONS_WITHOUT_COST.includes(type);
-            });
-            return used === 0 && cardHasActions && hasEnoughRupees;
-        });
+    PlayerActionsState.prototype.playerCanPerformCardAction = function (_a) {
+        var action = _a.action, cardId = _a.cardId, rupees = _a.rupees;
+        switch (action) {
+            case BATTLE:
+                return this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0 || this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0;
+            case BETRAY:
+                return this.game.activeStates.clientCardActionBetray.getCourtCardsToBetray().length > 0;
+            case BUILD:
+                return this.game.activeStates.clientCardActionBuild.getRegionsToBuild().length > 0;
+            case GIFT:
+                return this.game.getCurrentPlayer().getLowestAvailableGift() > 0;
+                return true;
+            case MOVE:
+                return this.game.activeStates.clientCardActionMove.getArmiesToMove().length > 0 || this.game.activeStates.clientCardActionMove.getSpiesToMove(), length > 0;
+            case TAX:
+                return this.game.activeStates.clientCardActionTax.getMarketRupeesToTax().length > 0 || this.game.activeStates.clientCardActionTax.getPlayersToTax().length > 0;
+        }
+        return false;
     };
-    PlayerActionsState.prototype.activePlayerHasFreeCardActions = function () {
+    PlayerActionsState.prototype.setupCardActions = function () {
         var _this = this;
-        return this.game.localState.activePlayer.court.cards.some(function (_a) {
-            var id = _a.id, used = _a.used;
-            var cardInfo = _this.game.gamedatas.staticData.cards[id];
-            return used === 0 && _this.isCardFavoredSuit({ cardId: id });
-            Object.keys(cardInfo.actions).length > 0;
+        this.availableCardActions = [];
+        var player = this.game.getCurrentPlayer();
+        var rupees = player.getRupees();
+        var courtCards = player.getCourtCards();
+        courtCards
+            .forEach(function (_a) {
+            var actions = _a.actions, id = _a.id;
+            var cardHasBeenUsed = _this.game.localState.usedCards.includes(id);
+            var noActionsLeft = _this.game.localState.remainingActions === 0 && !_this.isCardFavoredSuit({ cardId: id });
+            Object.keys(actions).forEach(function (action) {
+                var nodeId = "".concat(action, "_").concat(id);
+                _this.game.tooltipManager.removeTooltip(nodeId);
+                if (cardHasBeenUsed) {
+                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('This card has been used') });
+                    return;
+                }
+                if (noActionsLeft) {
+                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not have actions left to perform this') });
+                    return;
+                }
+                var minActionCost = _this.game.getMinimumActionCost({ action: action });
+                if (rupees < minActionCost) {
+                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not have enough rupees pay for this') });
+                    return;
+                }
+                var canPerformAction = _this.playerCanPerformCardAction({ action: action, cardId: id, rupees: rupees });
+                if (!canPerformAction) {
+                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not meet the requirements to perform this action') });
+                    return;
+                }
+                else {
+                    _this.availableCardActions.push({
+                        cardId: id,
+                        action: action,
+                    });
+                }
+            });
         });
     };
     PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
-        var currentPlayerId = this.game.getPlayerId();
-        return this.game.playerManager.getPlayer({ playerId: currentPlayerId }).getHandZone().getItemCount() > 0;
+        return this.game.getCurrentPlayer().getHandZone().getItemCount() > 0;
     };
     PlayerActionsState.prototype.handleNegotiatedBribe = function (_a) {
         var action = _a.action, cardId = _a.cardId, briber = _a.briber;
@@ -5954,43 +6028,29 @@ var PlayerActionsState = (function () {
     };
     PlayerActionsState.prototype.setCardActionsSelectable = function () {
         var _this = this;
-        var playerId = this.game.getPlayerId();
-        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node) {
-            var _a, _b;
-            var cardId = node.id;
-            var used = ((_b = (_a = _this.game.localState.activePlayer.court.cards) === null || _a === void 0 ? void 0 : _a.find(function (card) { return card.id === cardId; })) === null || _b === void 0 ? void 0 : _b.used) === 1;
-            if (!used &&
-                (_this.game.localState.remainingActions > 0 || _this.isCardFavoredSuit({ cardId: cardId }))) {
-                var rupees_1 = _this.game.playerManager.getPlayer({ playerId: playerId }).getRupees();
-                dojo.map(node.children, function (child) {
-                    if (dojo.hasClass(child, 'pp_card_action')) {
-                        var cardAction_1 = child.id.split('_')[0];
-                        var minActionCost = _this.game.getMinimumActionCost({ action: cardAction_1 });
-                        console.log('cardAction', cardAction_1, 'minActionCost', minActionCost);
-                        if (minActionCost === null || rupees_1 < minActionCost) {
-                            return;
-                        }
-                        console.log('childId', child.id);
-                        dojo.addClass(child, 'pp_selectable');
-                        _this.game._connections.push(dojo.connect(child, 'onclick', _this, function (event) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
-                                args: {
-                                    cardId: cardId,
-                                    action: cardAction_1,
-                                    next: function (_a) {
-                                        var bribe = _a.bribe;
-                                        return _this.game
-                                            .framework()
-                                            .setClientState(cardActionClientStateMap[cardAction_1], { args: { cardId: cardId, bribe: bribe } });
-                                    },
-                                },
-                            });
-                        }));
-                    }
-                });
+        this.availableCardActions.forEach(function (_a) {
+            var cardId = _a.cardId, action = _a.action;
+            var node = dojo.byId("".concat(action, "_").concat(cardId));
+            if (node === null) {
+                return;
             }
+            dojo.addClass(node, 'pp_selectable');
+            _this.game._connections.push(dojo.connect(node, 'onclick', _this, function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
+                    args: {
+                        cardId: cardId,
+                        action: action,
+                        next: function (_a) {
+                            var bribe = _a.bribe;
+                            return _this.game
+                                .framework()
+                                .setClientState(cardActionClientStateMap[action], { args: { cardId: cardId, bribe: bribe } });
+                        },
+                    },
+                });
+            }));
         });
     };
     PlayerActionsState.prototype.getCardCost = function (_a) {
@@ -6011,6 +6071,25 @@ var PlayerActionsState = (function () {
         }
         return column * baseCardCost;
     };
+    PlayerActionsState.prototype.setHandCardsSelectable = function () {
+        var _this = this;
+        this.game.setHandCardsSelectable({
+            callback: function (_a) {
+                var cardId = _a.cardId;
+                debug('callback triggered', cardId);
+                _this.game.framework().setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
+                    args: {
+                        cardId: cardId,
+                        action: 'playCard',
+                        next: function (_a) {
+                            var bribe = _a.bribe;
+                            return _this.game.framework().setClientState(CLIENT_PLAY_CARD, { args: { cardId: cardId, bribe: bribe } });
+                        },
+                    },
+                });
+            },
+        });
+    };
     PlayerActionsState.prototype.setMarketCardsSelectable = function () {
         var _this = this;
         dojo.query('.pp_market_card').forEach(function (node) {
@@ -6020,7 +6099,7 @@ var PlayerActionsState = (function () {
                 return;
             }
             var cost = _this.getCardCost({ cardId: cardId, column: Number(node.parentElement.id.split('_')[3]) });
-            if (cost <= _this.game.localState.activePlayer.rupees && !_this.game.localState.usedCards.includes(cardId)) {
+            if (cost <= _this.game.getCurrentPlayer().getRupees() && !_this.game.localState.usedCards.includes(cardId)) {
                 dojo.addClass(node, 'pp_selectable');
                 _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
                     return _this.game.framework().setClientState(CLIENT_PURCHASE_CARD, { args: { cardId: cardId, cost: cost } });
@@ -6046,7 +6125,6 @@ var PlayerActionsState = (function () {
                     switch (_a.label) {
                         case 0:
                             zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
-                            console.log('zone', zone);
                             return [4, zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] })];
                         case 1:
                             _a.sent();

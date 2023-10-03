@@ -62,7 +62,7 @@ class ClientCardActionBattleState implements State {
     this.location = regionId;
 
     const region = this.game.map.getRegion({ region: regionId });
-    const coalitionId = this.game.localState.activePlayer.loyalty;
+    const coalitionId = this.game.getCurrentPlayer().getLoyalty();
 
     const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }));
     debug('enemyPieces', enemyPieces);
@@ -186,6 +186,19 @@ class ClientCardActionBattleState implements State {
     return battleSites;
   }
 
+  getRegionBattleSites() {
+    return REGIONS.filter((regionId) => {
+      const region = this.game.map.getRegion({ region: regionId });
+      const coalitionId = this.game.getCurrentPlayer().getLoyalty();
+      const enemyPieces = region.getEnemyPieces({ coalitionId });
+
+      if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }) === 0) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   getSpies({ cardId }: { cardId: string }): { enemy: string[]; own: string[] } {
     const spyZone = this.game.spies[cardId];
     if (!spyZone) {
@@ -231,15 +244,7 @@ class ClientCardActionBattleState implements State {
     const container = document.getElementById(`pp_map_areas`);
     container.classList.add('pp_selectable');
 
-    REGIONS.forEach((regionId) => {
-      const region = this.game.map.getRegion({ region: regionId });
-      const coalitionId = this.game.localState.activePlayer.loyalty;
-      const enemyPieces = region.getEnemyPieces({ coalitionId });
-
-      if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }) === 0) {
-        return;
-      }
-
+    this.getRegionBattleSites().forEach((regionId) => {
       const element = document.getElementById(`pp_region_${regionId}`);
       if (element) {
         element.classList.add('pp_selectable');

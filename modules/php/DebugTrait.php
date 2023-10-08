@@ -52,7 +52,7 @@ trait DebugTrait
 
   function test()
   {
-
+    Notifications::log('bribe',Globals::getNegotiatedBribe());
     // Stats::setupNewGame();
     // Globals::setWakhanAutoResolve(true);
     // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
@@ -327,7 +327,10 @@ trait DebugTrait
 		// These are the id's from the BGAtable I need to debug.
 		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
 		$ids = [
-			90748913,
+			84412386, // 2371052
+      86878411, // 2371053
+      84053089, // 2371054
+      83886430, // 2371055
 		];
                 // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
 
@@ -342,11 +345,33 @@ trait DebugTrait
 
 			// 'other' game specific tables. example:
 			// tables specific to your schema that use player_ids
-      // TODO: cylinders contain player id
+
       // Ruler tokens
       self::DbQuery("UPDATE player_extra SET player_id=$sid WHERE player_id = $id" );
-			// self::DbQuery("UPDATE card SET card_location_arg=$sid WHERE card_location_arg = $id" );
-			
+
+      // Cards
+      self::DbQuery("UPDATE `cards` SET `card_location` = 'court_$sid' WHERE `cards`.`card_location` = 'court_$id';");
+      self::DbQuery("UPDATE `cards` SET `card_location` = 'events_$sid' WHERE `cards`.`card_location` = 'events_$id';");
+      self::DbQuery("UPDATE `cards` SET `card_location` = 'hand_$sid' WHERE `cards`.`card_location` = 'hand_$id';");
+
+      // Cylinders
+      for( $i=1; $i<=10; $i++ )
+      {
+        $oldCylinderId = 'cylinder_'.$id.'_'.$i;
+        $newCylinderId = 'cylinder_'.$sid.'_'.$i;
+        self::DbQuery("UPDATE `tokens` SET `token_id` = '$newCylinderId' WHERE `tokens`.`token_id` = '$oldCylinderId';");
+        self::DbQuery("UPDATE `tokens` SET `token_location` = 'cylinders_$sid' WHERE `tokens`.`token_location` = 'cylinders_$id';");
+      }
+
+      // Rulers
+      $rulers = Globals::getRulers();
+      foreach ($rulers as $region => $playerId) {
+        if ($playerId === $id) {
+          $rulers[$region] = $sid;
+        }
+      }
+			Globals::setRulers($rulers);
+
 			++$sid;
 		}
 	}

@@ -31,6 +31,14 @@ trait BribeTrait
   function argNegotiateBribe()
   {
     $bribeState = Globals::getNegotiatedBribe();
+    // Code to save games stuck after undo. Remove with next release
+    if ($bribeState === null || count($bribeState) === 0) {
+      $state = $this->gamestate->state(true, false, true);
+      $st = $state['transitions']['playerActions'];
+      Globals::setLogState($st);
+      Log::clearAll();
+      $this->nextState('playerActions');
+    };
     return $bribeState;
   }
 
@@ -200,13 +208,16 @@ trait BribeTrait
     $bribeState = Globals::getNegotiatedBribe();
     $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
+    $briberId = $bribeState['briber']['playerId'];
     $isBribee = $bribeState['bribee']['playerId'] === $playerId;
     $declinedAmount = $isBribee ? $bribeState['briber']['currentAmount'] : $bribeState['bribee']['currentAmount'];
 
     Notifications::declineBribe($declinedAmount);
     Globals::setNegotiatedBribe([]);
-    Log::clearAll();
-    $this->nextState('playerActions', $bribeState['briber']['playerId']);
+    if (PaxPamirPlayers::get()->getId() !== $briberId) {
+      Log::checkpoint();  
+    }
+    $this->nextState('playerActions', $briberId);
   }
 
   //  .##.....##.########.####.##.......####.########.##....##

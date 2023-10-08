@@ -3187,7 +3187,6 @@ var PlayerManager = (function () {
         this.players = {};
         for (var playerId in game.gamedatas.paxPamirPlayers) {
             var player = game.gamedatas.paxPamirPlayers[playerId];
-            console.log('playerId type', typeof playerId);
             if (Number(playerId) !== 1) {
                 this.players[playerId] = new PPPlayer({ player: player, game: this.game });
             }
@@ -5010,6 +5009,7 @@ var ClientCardActionMoveState = (function () {
 var ClientCardActionTaxState = (function () {
     function ClientCardActionTaxState(game) {
         this.game = game;
+        this.maxPerPlayer = {};
     }
     ClientCardActionTaxState.prototype.onEnteringState = function (args) {
         this.cardId = args.cardId;

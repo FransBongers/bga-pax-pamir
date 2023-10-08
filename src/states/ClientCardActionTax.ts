@@ -10,6 +10,9 @@ class ClientCardActionTaxState implements State {
 
   constructor(game: PaxPamirGame) {
     this.game = game;
+    // Need to set this here as well since it is used when checking
+    // possible actions.
+    this.maxPerPlayer = {};
   }
 
   /**

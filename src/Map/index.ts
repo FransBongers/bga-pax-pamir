@@ -59,9 +59,16 @@ class PPMap {
     REGIONS.forEach((region) => {
       this.regions[region].clearSelectable();
     });
+    BORDERS.forEach((border) => {
+      this.borders[border].clearSelectable();
+    });
     const mapArea = document.getElementById('pp_map_areas');
     if (mapArea) {
       mapArea.classList.remove(PP_SELECTABLE);
+    }
+    const armyRoadSelect = document.getElementById('pp_map_areas_borders_regions');
+    if (armyRoadSelect) {
+      armyRoadSelect.classList.remove(PP_SELECTABLE);
     }
   }
 }

@@ -29,17 +29,7 @@ class PlaceRoadState implements State {
 
   private updateInterfaceInitialStep({ borders }: { borders: string[] }) {
     this.game.clearPossible();
-
-    borders.forEach((border) => {
-      this.game.addPrimaryActionButton({
-        id: `${border}_btn`,
-        text: _(this.game.gamedatas.staticData.borders[border].name),
-        callback: () => {
-          this.game.clearPossible();
-          this.game.takeAction({ action: 'placeRoad', data: { border } });
-        },
-      });
-    });
+    this.setBordersSelectable({borders});
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -49,4 +39,20 @@ class PlaceRoadState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+  private setBordersSelectable({ borders }: { borders: string[] }) {
+    const container = document.getElementById(`pp_map_areas_borders_regions`);
+    container.classList.add('pp_selectable');
+
+    borders.forEach((border) => {
+      const element = document.getElementById(`pp_${border}_border_select`);
+      if (element) {
+        element.classList.add('pp_selectable');
+        this.game._connections.push(dojo.connect(element, 'onclick', this, () => {
+          this.game.clearPossible();
+          this.game.takeAction({ action: 'placeRoad', data: { border } });
+        }));
+      }
+    })
+  }
 }

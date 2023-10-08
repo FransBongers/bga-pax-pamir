@@ -265,5 +265,9 @@ class Region {
     if (element) {
       element.classList.remove(PP_SELECTABLE, PP_SELECTED);
     }
+    const armySelect = document.getElementById(`pp_${this.region}_armies_select`);
+    if (armySelect) {
+      armySelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
+    }
   }
 }

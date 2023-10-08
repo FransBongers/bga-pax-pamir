@@ -162,8 +162,8 @@ $machinestates = array(
 
     ST_PLACE_ROAD => array(
         "name" => "placeRoad",
-        "description" => clienttranslate('${actplayer} must place a road'),
-        "descriptionmyturn" => clienttranslate('${you} must place a road'),
+        "description" => clienttranslate('${actplayer} must select a border to place a road'),
+        "descriptionmyturn" => clienttranslate('${you} must select a border to place a road'),
         "type" => "activeplayer",
         "args" => "argPlaceRoad",
         "possibleactions" => array("placeRoad"),

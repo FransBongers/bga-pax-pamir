@@ -3299,6 +3299,12 @@ var Border = (function () {
     Border.prototype.getRoadZone = function () {
         return this.roadZone;
     };
+    Border.prototype.clearSelectable = function () {
+        var borderSelect = document.getElementById("pp_".concat(this.border, "_border_select"));
+        if (borderSelect) {
+            borderSelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
+        }
+    };
     Border.prototype.getCoalitionRoads = function (_a) {
         var coalitionId = _a.coalitionId;
         return this.roadZone.getItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
@@ -3564,6 +3570,10 @@ var Region = (function () {
         if (element) {
             element.classList.remove(PP_SELECTABLE, PP_SELECTED);
         }
+        var armySelect = document.getElementById("pp_".concat(this.region, "_armies_select"));
+        if (armySelect) {
+            armySelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
+        }
     };
     return Region;
 }());
@@ -3614,9 +3624,16 @@ var PPMap = (function () {
         REGIONS.forEach(function (region) {
             _this.regions[region].clearSelectable();
         });
+        BORDERS.forEach(function (border) {
+            _this.borders[border].clearSelectable();
+        });
         var mapArea = document.getElementById('pp_map_areas');
         if (mapArea) {
             mapArea.classList.remove(PP_SELECTABLE);
+        }
+        var armyRoadSelect = document.getElementById('pp_map_areas_borders_regions');
+        if (armyRoadSelect) {
+            armyRoadSelect.classList.remove(PP_SELECTABLE);
         }
     };
     return PPMap;
@@ -4281,29 +4298,26 @@ var ClientCardActionBuildState = (function () {
         });
     };
     ClientCardActionBuildState.prototype.onLocationClick = function (_a) {
-        var location = _a.location;
+        var id = _a.id, type = _a.type;
         if (this.maxNumberToPlace - this.tempTokens.length <= 0) {
             return;
         }
         debug('onLocationClick', location);
         var player = this.game.getCurrentPlayer();
         var coalition = player.getLoyalty();
-        if (location.endsWith('armies')) {
-            var regionId = location.split('_')[1];
-            var region = this.game.map.getRegion({ region: regionId });
+        if (type === 'army') {
+            var region = this.game.map.getRegion({ region: id });
             region.addTempArmy({ coalition: coalition, index: this.tempTokens.length });
             this.tempTokens.push({
-                location: regionId,
+                location: id,
                 type: 'army',
             });
         }
-        else if (location.endsWith('border')) {
-            var split = location.split('_');
-            var borderId = "".concat(split[1], "_").concat(split[2]);
-            var border = this.game.map.getBorder({ border: borderId });
+        else if (type === 'road') {
+            var border = this.game.map.getBorder({ border: id });
             border.addTempRoad({ coalition: coalition, index: this.tempTokens.length });
             this.tempTokens.push({
-                location: borderId,
+                location: id,
                 type: 'road',
             });
         }
@@ -4366,20 +4380,22 @@ var ClientCardActionBuildState = (function () {
     ClientCardActionBuildState.prototype.setLocationsSelectable = function () {
         var _this = this;
         debug('setRegionsSelectable');
+        var container = document.getElementById("pp_map_areas_borders_regions");
+        container.classList.add('pp_selectable');
         this.getRegionsToBuild().forEach(function (regionId) {
             var region = _this.game.map.getRegion({ region: regionId });
-            var armyLocation = "pp_".concat(regionId, "_armies");
+            var armyLocation = "pp_".concat(regionId, "_armies_select");
             var element = document.getElementById(armyLocation);
             if (element) {
                 element.classList.add('pp_selectable');
-                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ location: armyLocation }); }));
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ id: regionId, type: 'army' }); }));
             }
             region.borders.forEach(function (borderId) {
-                var borderLocation = "pp_".concat(borderId, "_border");
+                var borderLocation = "pp_".concat(borderId, "_border_select");
                 var element = document.getElementById(borderLocation);
                 if (element && !element.classList.contains('pp_selectable')) {
                     element.classList.add('pp_selectable');
-                    _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ location: borderLocation }); }));
+                    _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return _this.onLocationClick({ id: borderId, type: 'road' }); }));
                 }
             });
         });
@@ -5768,18 +5784,24 @@ var PlaceRoadState = (function () {
     };
     PlaceRoadState.prototype.onLeavingState = function () { };
     PlaceRoadState.prototype.updateInterfaceInitialStep = function (_a) {
-        var _this = this;
         var borders = _a.borders;
         this.game.clearPossible();
+        this.setBordersSelectable({ borders: borders });
+    };
+    PlaceRoadState.prototype.setBordersSelectable = function (_a) {
+        var _this = this;
+        var borders = _a.borders;
+        var container = document.getElementById("pp_map_areas_borders_regions");
+        container.classList.add('pp_selectable');
         borders.forEach(function (border) {
-            _this.game.addPrimaryActionButton({
-                id: "".concat(border, "_btn"),
-                text: _(_this.game.gamedatas.staticData.borders[border].name),
-                callback: function () {
+            var element = document.getElementById("pp_".concat(border, "_border_select"));
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () {
                     _this.game.clearPossible();
                     _this.game.takeAction({ action: 'placeRoad', data: { border: border } });
-                },
-            });
+                }));
+            }
         });
     };
     return PlaceRoadState;
@@ -6115,24 +6137,7 @@ var PlayerActionsState = (function () {
         }
     };
     PlayerActionsState.prototype.addDebugButton = function () {
-        var _this = this;
-        this.game.addPrimaryActionButton({
-            id: 'debug_button',
-            text: _('Debug'),
-            callback: function () { return __awaiter(_this, void 0, void 0, function () {
-                var zone;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
-                            return [4, zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] })];
-                        case 1:
-                            _a.sent();
-                            return [2];
-                    }
-                });
-            }); },
-        });
+        console.log('addDebugButton');
     };
     PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())

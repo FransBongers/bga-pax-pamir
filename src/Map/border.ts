@@ -87,6 +87,13 @@ class Border {
     return this.roadZone;
   }
 
+  public clearSelectable() {
+    const borderSelect = document.getElementById(`pp_${this.border}_border_select`);
+    if (borderSelect) {
+      borderSelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
+    }
+  }
+
   // .##.....##.########.####.##.......####.########.##....##
   // .##.....##....##.....##..##........##.....##.....##..##.
   // .##.....##....##.....##..##........##.....##......####..

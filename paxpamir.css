@@ -182,13 +182,24 @@
   z-index: 50;
 }
 
+#pp_map_areas_borders_regions {
+  position: absolute;
+  width: 819px;
+  left: 92px;
+  top: 90px;
+}
+
+#pp_map_areas_borders_regions.pp_selectable {
+  z-index: 50;
+}
+
 .pp_region {
   fill: transparent;
 }
 
 .pp_region.pp_selectable {
   fill: yellow;
-  fill-opacity: 25%;
+  fill-opacity: 15%;
   stroke: yellow;
   stroke-width: 4;
   cursor: pointer;
@@ -199,7 +210,7 @@
   fill: blue;
   fill-opacity: 25%;
   stroke: blue;
-  stroke-width: 4;
+  stroke-width: 3;
   cursor: pointer;
   z-index: 50;
 }

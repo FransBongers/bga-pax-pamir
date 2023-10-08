@@ -37,13 +37,24 @@
   z-index: 50;
 }
 
+#pp_map_areas_borders_regions {
+  position: absolute;
+  width: 819px;
+  left: 92px;
+  top: 90px;
+}
+
+#pp_map_areas_borders_regions.pp_selectable {
+  z-index: 50;
+}
+
 .pp_region {
   fill: transparent;
 }
 
 .pp_region.pp_selectable {
   fill: base.$selectable-color;
-  fill-opacity: 25%;
+  fill-opacity: 15%;
   stroke: base.$selectable-color;
   stroke-width: 4;
   cursor: pointer;
@@ -54,7 +65,7 @@
   fill: base.$selected-color;
   fill-opacity: 25%;
   stroke: base.$selected-color;
-  stroke-width: 4;
+  stroke-width: 3;
   cursor: pointer;
   z-index: 50;
 }
@@ -84,7 +95,6 @@
   background-repeat: no-repeat;
   background-image: url('img/favoured_suit_marker.svg');
 }
-
 
 #pp_favored_suit_political {
   top: 116px;
@@ -156,7 +166,7 @@
   background-image: url('img/ruler_tokens.webp');
   background-size: 600% 100%;
   background-repeat: no-repeat;
-  box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.4);
+  box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
   border-radius: 50%;
 }
 
@@ -197,14 +207,13 @@
 }
 
 .pp_location.pp_selectable:hover {
-box-shadow: 0px 0px 0px 4px base.$selected-color !important;
+  box-shadow: 0px 0px 0px 4px base.$selected-color !important;
 }
 
 .pp_location.pp_selected {
   cursor: pointer;
   box-shadow: 0px 0px 0px 4px base.$selected-color !important;
 }
-
 
 #pp_herat_armies {
   top: 380px;
@@ -247,7 +256,6 @@ box-shadow: 0px 0px 0px 4px base.$selected-color !important;
   height: 40px;
   width: 190px;
 }
-
 
 #pp_herat_tribes {
   top: 320px;

@@ -103,7 +103,7 @@ class ClientCardActionBuildState implements State {
   // .##.....##.##.....##.##...###.##.....##.##.......##.......##....##..##....##
   // .##.....##.##.....##.##....##.########..########.########.##.....##..######.
 
-  private onLocationClick({ location }: { location: string }) {
+  private onLocationClick({ id, type }: { id: string; type: 'army' | 'road' }) {
     if (this.maxNumberToPlace - this.tempTokens.length <= 0) {
       return;
     }
@@ -111,21 +111,21 @@ class ClientCardActionBuildState implements State {
     const player = this.game.getCurrentPlayer();
     const coalition = player.getLoyalty();
 
-    if (location.endsWith('armies')) {
-      const regionId = location.split('_')[1];
-      const region = this.game.map.getRegion({ region: regionId });
+    if (type === 'army') {
+      // const regionId = location.split('_')[1];
+      const region = this.game.map.getRegion({ region: id });
       region.addTempArmy({ coalition, index: this.tempTokens.length });
       this.tempTokens.push({
-        location: regionId,
+        location: id,
         type: 'army',
       });
-    } else if (location.endsWith('border')) {
-      const split = location.split('_');
-      const borderId = `${split[1]}_${split[2]}`;
-      const border = this.game.map.getBorder({ border: borderId });
+    } else if (type === 'road') {
+      // const split = location.split('_');
+      // const borderId = `${split[1]}_${split[2]}`;
+      const border = this.game.map.getBorder({ border: id });
       border.addTempRoad({ coalition, index: this.tempTokens.length });
       this.tempTokens.push({
-        location: borderId,
+        location: id,
         type: 'road',
       });
     }
@@ -197,23 +197,24 @@ class ClientCardActionBuildState implements State {
 
   private setLocationsSelectable() {
     debug('setRegionsSelectable');
-
+    const container = document.getElementById(`pp_map_areas_borders_regions`);
+    container.classList.add('pp_selectable');
     this.getRegionsToBuild().forEach((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
 
-      const armyLocation = `pp_${regionId}_armies`;
+      const armyLocation = `pp_${regionId}_armies_select`;
       const element = document.getElementById(armyLocation);
 
       if (element) {
         element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ location: armyLocation })));
+        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ id: regionId, type: 'army' })));
       }
       region.borders.forEach((borderId: string) => {
-        const borderLocation = `pp_${borderId}_border`;
+        const borderLocation = `pp_${borderId}_border_select`;
         const element = document.getElementById(borderLocation);
         if (element && !element.classList.contains('pp_selectable')) {
           element.classList.add('pp_selectable');
-          this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ location: borderLocation })));
+          this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ id: borderId, type: 'road' })));
         }
       });
     });

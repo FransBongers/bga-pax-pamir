@@ -336,14 +336,33 @@ class PlayerActionsState implements State {
   }
 
   public addDebugButton() {
-    this.game.addPrimaryActionButton({
-      id: 'debug_button',
-      text: _('Debug'),
-      callback: async () => {
-        const zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
-        await zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] });
-      },
-    });
+    console.log('addDebugButton');
+    // const container = document.getElementById(`pp_border_region_select`);
+    // container.style.zIndex = '50';
+    // REGIONS.forEach((region) => {
+    //   const element = document.getElementById(`pp_${region}_armies_select`);
+    //   if (element) {
+    //     element.classList.add('pp_selectable');
+    //     this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('region',region)));
+    //   }
+    // });
+    // BORDERS.forEach((border) => {
+    //   const element = document.getElementById(`pp_${border}_border_select`);
+    //   if (element) {
+    //     element.classList.add('pp_selectable');
+    //     this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('border',border)));
+    //   }
+    // })
+    
+
+    // this.game.addPrimaryActionButton({
+    //   id: 'debug_button',
+    //   text: _('Debug'),
+    //   callback: async () => {
+    //     const zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
+    //     await zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] });
+    //   },
+    // });
   }
 
   //  ..######..##.......####..######..##....##

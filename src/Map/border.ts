@@ -37,24 +37,13 @@ class Border {
   // TODO: implement custom pattern and update.
   createBorderZone() {
     const border = this.border;
-    const borderPattern: Record<string, PaxPamirZone['pattern']> = {
-      herat_kabul: 'custom',
-      herat_kandahar: 'custom',
-      herat_persia: 'custom',
-      herat_transcaspia: 'custom',
-      kabul_transcaspia: 'custom',
-      kabul_kandahar: 'custom',
-      kabul_punjab: 'custom',
-      kandahar_punjab: 'custom',
-      persia_transcaspia: 'custom',
-    };
 
     this.roadZone = new PaxPamirZone({
       animationManager: this.game.animationManager,
       containerId: `pp_${this.border}_border`,
       itemHeight: ROAD_HEIGHT,
       itemWidth: ROAD_WIDTH,
-      pattern: borderPattern[border],
+      pattern: 'custom',
       customPattern: this.getCustomPattern({ border }),
     });
   }

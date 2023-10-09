@@ -15,7 +15,7 @@ class PlayerActionsState implements State {
       this.handleNegotiatedBribe(args.bribe);
       return;
     }
-    
+
     this.updateInterfaceInitialStep();
   }
 
@@ -160,9 +160,12 @@ class PlayerActionsState implements State {
     switch (action) {
       case BATTLE:
         // There needs to be a card or region where player can battle
-        return this.game.activeStates.clientCardActionBattle.getRegionBattleSites().length > 0 || this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0;
+        return (
+          this.game.activeStates.clientCardActionBattle.getRegionBattleSites().length > 0 ||
+          this.game.activeStates.clientCardActionBattle.getCourtCardBattleSites().length > 0
+        );
       case BETRAY:
-        return this.game.activeStates.clientCardActionBetray.getCourtCardsToBetray().length > 0
+        return this.game.activeStates.clientCardActionBetray.getCourtCardsToBetray().length > 0;
       case BUILD:
         return this.game.activeStates.clientCardActionBuild.getRegionsToBuild().length > 0;
       case GIFT:
@@ -172,7 +175,10 @@ class PlayerActionsState implements State {
         const hasSpiesToMove = this.game.activeStates.clientCardActionMove.getSpiesToMove().length > 0;
         return hasArmiesToMove || hasSpiesToMove;
       case TAX:
-        return this.game.activeStates.clientCardActionTax.getMarketRupeesToTax().length > 0 || this.game.activeStates.clientCardActionTax.getPlayersToTax().length > 0;
+        return (
+          this.game.activeStates.clientCardActionTax.getMarketRupeesToTax().length > 0 ||
+          this.game.activeStates.clientCardActionTax.getPlayersToTax().length > 0
+        );
     }
     return false;
   }
@@ -182,40 +188,38 @@ class PlayerActionsState implements State {
     const player = this.game.getCurrentPlayer();
     const rupees = player.getRupees();
     const courtCards = player.getCourtCards();
-    courtCards     
-      .forEach(({ actions, id }) => {
-        const cardHasBeenUsed = this.game.localState.usedCards.includes(id);
-        const noActionsLeft = this.game.localState.remainingActions === 0 && !this.isCardFavoredSuit({ cardId: id });
-        Object.keys(actions).forEach((action) => {
-          const nodeId = `${action}_${id}`
-          this.game.tooltipManager.removeTooltip(nodeId);
-          if (cardHasBeenUsed) {
-            this.game.tooltipManager.addTextToolTip({nodeId, text: _('This card has been used')});
-            return;
-          }
-          if (noActionsLeft) {
-            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not have actions left to perform this')});
-            return;
-          }
-          const minActionCost = this.game.getMinimumActionCost({ action });
-          if (rupees < minActionCost) {
-            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not have enough rupees pay for this')});
-            return;
-          }
-          const canPerformAction = this.playerCanPerformCardAction({ action, cardId: id, rupees });
-          if (!canPerformAction) {
-            this.game.tooltipManager.addTextToolTip({nodeId, text: _('You do not meet the requirements to perform this action')});
-            return;
-          } else {
-            this.availableCardActions.push({
-              cardId: id,
-              action,
-            });
-          }
-        });
+    courtCards.forEach(({ actions, id }) => {
+      const cardHasBeenUsed = this.game.localState.usedCards.includes(id);
+      const noActionsLeft = this.game.localState.remainingActions === 0 && !this.isCardFavoredSuit({ cardId: id });
+      Object.keys(actions).forEach((action) => {
+        const nodeId = `${action}_${id}`;
+        this.game.tooltipManager.removeTooltip(nodeId);
+        if (cardHasBeenUsed) {
+          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('This card has been used') });
+          return;
+        }
+        if (noActionsLeft) {
+          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have actions left to perform this') });
+          return;
+        }
+        const minActionCost = this.game.getMinimumActionCost({ action });
+        if (rupees < minActionCost) {
+          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have enough rupees pay for this') });
+          return;
+        }
+        const canPerformAction = this.playerCanPerformCardAction({ action, cardId: id, rupees });
+        if (!canPerformAction) {
+          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not meet the requirements to perform this action') });
+          return;
+        } else {
+          this.availableCardActions.push({
+            cardId: id,
+            action,
+          });
+        }
       });
+    });
   }
-
 
   private currentPlayerHasHandCards(): boolean {
     return this.game.getCurrentPlayer().getHandZone().getItemCount() > 0;
@@ -337,15 +341,96 @@ class PlayerActionsState implements State {
 
   public addDebugButton() {
     console.log('addDebugButton');
+    // const region = 'kandahar'
+    // this.game.addPrimaryActionButton({
+    //   id: 'debug_button',
+    //   text: _('Place tribe'),
+    //   callback: async () => {
+    //     const cylinders = this.game.getCurrentPlayer().getCylinderZone().getItems();
+    //     if (cylinders.length === 0) {
+    //       return;
+    //     }
+    //     const from = `cylinders_${this.game.getPlayerId()}`;
+    //     const to = `tribes_${region}`;
+    //     await this.game.notificationManager.performTokenMove({
+    //       move: {
+    //         tokenId: cylinders[0],
+    //         from,
+    //         to,
+    //       },
+    //     });
+    //   },
+    // });
+
+    // this.game.addPrimaryActionButton({
+    //   id: 'debug_button2',
+    //   text: _('Place Afghan army'),
+    //   callback: async () => {
+    //     const blocks = this.game.objectManager.supply.getCoalitionBlocksZone({coalition: AFGHAN}).getItems();
+    //     if (blocks.length === 0) {
+    //       return;
+    //     }
+    //     const from = `blocks_${AFGHAN}`;
+    //     const to = `armies_${region}`;
+    //     await this.game.notificationManager.performTokenMove({
+    //       move: {
+    //         tokenId: blocks[0],
+    //         from,
+    //         to,
+    //       },
+    //     });
+    //   },
+    // });
+
+    // this.game.addPrimaryActionButton({
+    //   id: 'debug_button3',
+    //   text: _('Place British army'),
+    //   callback: async () => {
+    //     const blocks = this.game.objectManager.supply.getCoalitionBlocksZone({coalition: BRITISH}).getItems();
+    //     if (blocks.length === 0) {
+    //       return;
+    //     }
+    //     const from = `blocks_${BRITISH}`;
+    //     const to = `armies_${region}`;
+    //     await this.game.notificationManager.performTokenMove({
+    //       move: {
+    //         tokenId: blocks[0],
+    //         from,
+    //         to,
+    //       },
+    //     });
+    //   },
+    // });
+
+    // this.game.addPrimaryActionButton({
+    //   id: 'debug_button4',
+    //   text: _('Place Russian army'),
+    //   callback: async () => {
+    //     const blocks = this.game.objectManager.supply.getCoalitionBlocksZone({coalition: RUSSIAN}).getItems();
+    //     if (blocks.length === 0) {
+    //       return;
+    //     }
+    //     const from = `blocks_${RUSSIAN}`;
+    //     const to = `armies_${region}`;
+    //     await this.game.notificationManager.performTokenMove({
+    //       move: {
+    //         tokenId: blocks[0],
+    //         from,
+    //         to,
+    //       },
+    //     });
+    //   },
+    // });
+
     // const container = document.getElementById(`pp_map_areas_borders_regions`);
     // container.style.zIndex = '50';
-    // REGIONS.forEach((region) => {
-    //   const element = document.getElementById(`pp_${region}_armies_select`);
-    //   if (element) {
-    //     element.classList.add('pp_selectable');
-    //     this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('region',region)));
-    //   }
-    // });
+    // // REGIONS.forEach((region) => {
+    // //   const element = document.getElementById(`pp_${region}_armies_select`);
+    // //   if (element) {
+    // //     element.classList.add('pp_selectable');
+    // //     this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('region',region)));
+    // //   }
+    // // });
     // BORDERS.forEach((border) => {
     //   const element = document.getElementById(`pp_${border}_border_select`);
     //   if (element) {
@@ -367,16 +452,6 @@ class PlayerActionsState implements State {
     //     }));
     //   }
     // })
-    
-
-    // this.game.addPrimaryActionButton({
-    //   id: 'debug_button',
-    //   text: _('Debug'),
-    //   callback: async () => {
-    //     const zone = this.game.map.getBorder({ border: 'herat_transcaspia' }).getRoadZone();
-    //     await zone.moveToZone({ elements: { id: 'block_afghan_7' }, classesToAdd: [PP_ROAD], classesToRemove: [PP_COALITION_BLOCK] });
-    //   },
-    // });
   }
 
   //  ..######..##.......####..######..##....##

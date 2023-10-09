@@ -37,7 +37,7 @@ class PPActiveEvents {
     });
     // Add current event cards
     const events = gamedatas.activeEvents || [];
-    this.zone.placeInZone(
+    this.zone.setupItems(
       events.map((card) => ({
         id: card.id,
         element: tplCard({ cardId: card.id }),

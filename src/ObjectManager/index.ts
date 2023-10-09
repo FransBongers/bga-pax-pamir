@@ -149,7 +149,7 @@ class FavoredSuit {
     });
 
     this.favoredSuit = gamedatas.favoredSuit;
-    this.favoredSuitZones[this.favoredSuit].placeInZone({
+    this.favoredSuitZones[this.favoredSuit].setupItems({
       element: tplFavoredSuit({ id: 'favored_suit_marker' }),
       id: 'favored_suit_marker',
     });
@@ -237,7 +237,7 @@ class Supply {
   }
 
   public checkDominantCoalition() {
-    debug('checkDominantCoalition')
+    debug('checkDominantCoalition');
     const coalitions = [
       {
         coalition: AFGHAN,
@@ -267,11 +267,11 @@ class Supply {
       node.innerHTML = this.game.format_string_recursive(log, {
         logTokenCoalition: `coalitionBlack:${dominantCoalition}`,
       });
-      node.classList.remove(PP_AFGHAN,PP_BRITISH,PP_RUSSIAN);
+      node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
       node.classList.add(`pp_${dominantCoalition}`);
     } else {
       node.innerHTML = _('No dominant coalition');
-      node.classList.remove(PP_AFGHAN,PP_BRITISH,PP_RUSSIAN);
+      node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
       // Update UI no dominant coalition
     }
   }
@@ -311,7 +311,8 @@ class VpTrack {
         containerId: `pp_vp_track_${i}`,
         itemHeight: CYLINDER_HEIGHT,
         itemWidth: CYLINDER_WIDTH,
-        pattern: 'ellipticalFit',
+        pattern: 'custom',
+        customPattern: this.customPatternVpTrack,
       });
     }
 
@@ -319,7 +320,7 @@ class VpTrack {
     for (const playerId in gamedatas.paxPamirPlayers) {
       const player = gamedatas.paxPamirPlayers[playerId];
       const zone = this.getZone(player.score);
-      zone.placeInZone({
+      zone.setupItems({
         id: `vp_cylinder_${playerId}`,
         element: tplCylinder({ id: `vp_cylinder_${playerId}`, color: player.color }),
       });
@@ -328,6 +329,21 @@ class VpTrack {
 
   getZone(score: string): PaxPamirZone {
     return this.vpTrackZones[score];
+  }
+
+  private customPatternVpTrack({ index: i, itemCount: numberOfItems }: PPZoneItemToCoordsProps): OriginalZoneItemToCoordsResult {
+    switch (i) {
+      case 0:
+        return { x: 9, y: -16, w: 40, h: 27 };
+      case 1:
+        return { x: -16, y: 4, w: 40, h: 27 };
+      case 2:
+        return { x: 36, y: 0, w: 40, h: 27 };
+      case 3:
+        return { x: 0, y: 34, w: 40, h: 27 };
+      case 4:
+        return { x: 30, y: 30, w: 40, h: 27 };
+    }
   }
 }
 

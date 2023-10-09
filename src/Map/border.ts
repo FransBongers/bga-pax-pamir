@@ -22,7 +22,7 @@ class Border {
     const borderGamedatas = gamedatas.map.borders[this.border];
     this.createBorderZone();
     borderGamedatas.roads.forEach(({ id }) => {
-      this.roadZone.placeInZone({
+      this.roadZone.setupItems({
         id,
         element: tplRoad({ id, coalition: id.split('_')[1] }),
       });

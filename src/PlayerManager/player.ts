@@ -217,7 +217,7 @@ class PPPlayer {
     }
     playerGamedatas.events.forEach((card: EventCard & Token) => {
       const cardId = card.id;
-      this.events.placeInZone({
+      this.events.setupItems({
         id: cardId,
         element: tplCard({ cardId }),
       });
@@ -234,7 +234,7 @@ class PPPlayer {
       itemHeight: CYLINDER_HEIGHT,
       itemGap: 8,
     });
-    this.cylinders.placeInZone(
+    this.cylinders.setupItems(
       playerGamedatas.cylinders.map((cylinder) => ({
         id: cylinder.id,
         element: tplCylinder({ id: cylinder.id, color: playerGamedatas.color }),
@@ -263,7 +263,7 @@ class PPPlayer {
     const playerGifts = playerGamedatas.gifts;
     Object.keys(playerGifts).forEach((giftValue) => {
       Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
-        this.gifts[giftValue].placeInZone({
+        this.gifts[giftValue].setupItems({
           id: cylinderId,
           element: tplCylinder({ id: cylinderId, color: this.playerColor }),
         });
@@ -295,18 +295,17 @@ class PPPlayer {
       itemGap: 16,
     });
     // TODO: use setup items?
-    this.hand
-      .placeInZone(
-        hand.map((card) => ({
-          element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
-          id: card.id,
-        }))
-      )
-      .then(() => {
-        hand.forEach((card) => {
-          this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-        });
-      });
+    this.hand.setupItems(
+      hand.map((card) => ({
+        element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
+        id: card.id,
+      }))
+    );
+    // .then(() => {
+    hand.forEach((card) => {
+      this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+    });
+    // });
   }
 
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -328,7 +327,7 @@ class PPPlayer {
     this.counters.cardsTableau.create(`card_count_tableau_${this.playerId}_counter`);
     this.counters.courtCount.create(`pp_court_count_${this.playerId}`);
     this.counters.courtLimit.create(`pp_court_limit_${this.playerId}`);
-    this.game.tooltipManager.addSuitTooltip({suit: 'political', nodeId: `pp_player_court_size_${this.playerId}`});
+    this.game.tooltipManager.addSuitTooltip({ suit: 'political', nodeId: `pp_player_court_size_${this.playerId}` });
 
     this.counters.cylinders.create(`cylinder_count_${this.playerId}_counter`);
     this.counters.economic.create(`economic_${this.playerId}_counter`);
@@ -341,7 +340,7 @@ class PPPlayer {
     if (this.playerId === this.game.getPlayerId()) {
       this.counters.handCount.create(`pp_hand_count_${this.playerId}`);
       this.counters.handLimit.create(`pp_hand_limit_${this.playerId}`);
-      this.game.tooltipManager.addSuitTooltip({suit: 'intelligence', nodeId: `pp_player_hand_size_${this.playerId}`});
+      this.game.tooltipManager.addSuitTooltip({ suit: 'intelligence', nodeId: `pp_player_hand_size_${this.playerId}` });
     }
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -418,7 +417,7 @@ class PPPlayer {
 
     Object.keys(gamedatas.map.rulers).forEach((region: string) => {
       if (gamedatas.map.rulers[region] === Number(this.playerId)) {
-        this.rulerTokens.placeInZone({
+        this.rulerTokens.setupItems({
           id: `pp_ruler_token_${region}`,
           element: tplRulerToken({ id: `pp_ruler_token_${region}`, region }),
         });

@@ -52,7 +52,7 @@ class Region {
       itemGap: -5,
     });
     regionGamedatas.armies.forEach(({ id }) => {
-      this.armyZone.placeInZone({
+      this.armyZone.setupItems({
         id,
         element: tplArmy({
           id,
@@ -71,7 +71,7 @@ class Region {
     });
     this.ruler = gamedatas.map.rulers[this.region];
     if (this.ruler === null) {
-      this.rulerZone.placeInZone({
+      this.rulerZone.setupItems({
         id: `pp_ruler_token_${this.region}`,
         element: tplRulerToken({ id: `pp_ruler_token_${this.region}`, region: this.region }),
       });
@@ -87,7 +87,7 @@ class Region {
       itemGap: 12,
     });
     regionGamedatas.tribes.forEach(({ id }) => {
-      this.tribeZone.placeInZone({
+      this.tribeZone.setupItems({
         id,
         element: tplCylinder({
           id,

@@ -52,7 +52,10 @@ trait DebugTrait
 
   function test()
   {
-    Notifications::log('bribe',Globals::getNegotiatedBribe());
+    $players = PaxPamirPlayers::getAll();
+    foreach($players as $playerId => $player) {
+      PaxPamirPlayers::incScore($playerId,-5);
+    }
     // Stats::setupNewGame();
     // Globals::setWakhanAutoResolve(true);
     // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());

@@ -651,6 +651,10 @@ var PaxPamirZone = (function () {
                             var _b;
                             var element = _a.element, id = _a.id, from = _a.from, zIndex = _a.zIndex, duration = _a.duration;
                             var node = dojo.place(element, _this.containerId);
+                            if (_this.containerId === 'pp_punjab_armies') {
+                                console.log('element', element);
+                                console.log('node', node);
+                            }
                             node.style.position = 'absolute';
                             node.style.zIndex = "".concat(zIndex || 0);
                             _this.setItemCoords({ node: node });
@@ -1354,7 +1358,7 @@ var PPActiveEvents = (function () {
             itemGap: 16,
         });
         var events = gamedatas.activeEvents || [];
-        this.zone.placeInZone(events.map(function (card) { return ({
+        this.zone.setupItems(events.map(function (card) { return ({
             id: card.id,
             element: tplCard({ cardId: card.id }),
         }); }));
@@ -1816,7 +1820,7 @@ var FavoredSuit = (function () {
             });
         });
         this.favoredSuit = gamedatas.favoredSuit;
-        this.favoredSuitZones[this.favoredSuit].placeInZone({
+        this.favoredSuitZones[this.favoredSuit].setupItems({
             element: tplFavoredSuit({ id: 'favored_suit_marker' }),
             id: 'favored_suit_marker',
         });
@@ -1959,13 +1963,14 @@ var VpTrack = (function () {
                 containerId: "pp_vp_track_".concat(i),
                 itemHeight: CYLINDER_HEIGHT,
                 itemWidth: CYLINDER_WIDTH,
-                pattern: 'ellipticalFit',
+                pattern: 'custom',
+                customPattern: this.customPatternVpTrack,
             });
         }
         for (var playerId in gamedatas.paxPamirPlayers) {
             var player = gamedatas.paxPamirPlayers[playerId];
             var zone = this.getZone(player.score);
-            zone.placeInZone({
+            zone.setupItems({
                 id: "vp_cylinder_".concat(playerId),
                 element: tplCylinder({ id: "vp_cylinder_".concat(playerId), color: player.color }),
             });
@@ -1973,6 +1978,21 @@ var VpTrack = (function () {
     };
     VpTrack.prototype.getZone = function (score) {
         return this.vpTrackZones[score];
+    };
+    VpTrack.prototype.customPatternVpTrack = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        switch (i) {
+            case 0:
+                return { x: 9, y: -16, w: 40, h: 27 };
+            case 1:
+                return { x: -16, y: 4, w: 40, h: 27 };
+            case 2:
+                return { x: 36, y: 0, w: 40, h: 27 };
+            case 3:
+                return { x: 0, y: 34, w: 40, h: 27 };
+            case 4:
+                return { x: 30, y: 30, w: 40, h: 27 };
+        }
     };
     return VpTrack;
 }());
@@ -2203,7 +2223,7 @@ var PPPlayer = (function () {
         }
         playerGamedatas.events.forEach(function (card) {
             var cardId = card.id;
-            _this.events.placeInZone({
+            _this.events.setupItems({
                 id: cardId,
                 element: tplCard({ cardId: cardId }),
             });
@@ -2219,7 +2239,7 @@ var PPPlayer = (function () {
             itemHeight: CYLINDER_HEIGHT,
             itemGap: 8,
         });
-        this.cylinders.placeInZone(playerGamedatas.cylinders.map(function (cylinder) { return ({
+        this.cylinders.setupItems(playerGamedatas.cylinders.map(function (cylinder) { return ({
             id: cylinder.id,
             element: tplCylinder({ id: cylinder.id, color: playerGamedatas.color }),
             weight: cylinder.state,
@@ -2244,7 +2264,7 @@ var PPPlayer = (function () {
         var playerGifts = playerGamedatas.gifts;
         Object.keys(playerGifts).forEach(function (giftValue) {
             Object.keys(playerGifts[giftValue]).forEach(function (cylinderId) {
-                _this.gifts[giftValue].placeInZone({
+                _this.gifts[giftValue].setupItems({
                     id: cylinderId,
                     element: tplCylinder({ id: cylinderId, color: _this.playerColor }),
                 });
@@ -2274,15 +2294,12 @@ var PPPlayer = (function () {
             containerId: 'pp_player_hand_cards',
             itemGap: 16,
         });
-        this.hand
-            .placeInZone(hand.map(function (card) { return ({
+        this.hand.setupItems(hand.map(function (card) { return ({
             element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
             id: card.id,
-        }); }))
-            .then(function () {
-            hand.forEach(function (card) {
-                _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-            });
+        }); }));
+        hand.forEach(function (card) {
+            _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
         });
     };
     PPPlayer.prototype.setupPlayerPanel = function (_a) {
@@ -2382,7 +2399,7 @@ var PPPlayer = (function () {
         });
         Object.keys(gamedatas.map.rulers).forEach(function (region) {
             if (gamedatas.map.rulers[region] === Number(_this.playerId)) {
-                _this.rulerTokens.placeInZone({
+                _this.rulerTokens.setupItems({
                     id: "pp_ruler_token_".concat(region),
                     element: tplRulerToken({ id: "pp_ruler_token_".concat(region), region: region }),
                 });
@@ -3236,7 +3253,7 @@ var Border = (function () {
         this.createBorderZone();
         borderGamedatas.roads.forEach(function (_a) {
             var id = _a.id;
-            _this.roadZone.placeInZone({
+            _this.roadZone.setupItems({
                 id: id,
                 element: tplRoad({ id: id, coalition: id.split('_')[1] }),
             });
@@ -3802,7 +3819,7 @@ var Region = (function () {
         });
         regionGamedatas.armies.forEach(function (_a) {
             var id = _a.id;
-            _this.armyZone.placeInZone({
+            _this.armyZone.setupItems({
                 id: id,
                 element: tplArmy({
                     id: id,
@@ -3821,7 +3838,7 @@ var Region = (function () {
         });
         this.ruler = gamedatas.map.rulers[this.region];
         if (this.ruler === null) {
-            this.rulerZone.placeInZone({
+            this.rulerZone.setupItems({
                 id: "pp_ruler_token_".concat(this.region),
                 element: tplRulerToken({ id: "pp_ruler_token_".concat(this.region), region: this.region }),
             });
@@ -3839,7 +3856,7 @@ var Region = (function () {
         });
         regionGamedatas.tribes.forEach(function (_a) {
             var id = _a.id;
-            _this.tribeZone.placeInZone({
+            _this.tribeZone.setupItems({
                 id: id,
                 element: tplCylinder({
                     id: id,
@@ -4122,7 +4139,7 @@ var Market = (function () {
         var cardInMarket = gamedatas.market.cards[row][column];
         if (cardInMarket) {
             var cardId = cardInMarket.id;
-            this.marketCards[row][column].placeInZone({ id: cardId, element: tplCard({ cardId: cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
+            this.marketCards[row][column].setupItems({ id: cardId, element: tplCard({ cardId: cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
             this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
         }
     };
@@ -4137,7 +4154,7 @@ var Market = (function () {
             itemGap: -30,
         });
         var rupees = gamedatas.market.rupees.filter(function (rupee) { return rupee.location === "market_".concat(row, "_").concat(column, "_rupees"); });
-        this.marketRupees[row][column].placeInZone(rupees.map(function (rupee) { return ({ id: rupee.id, element: tplRupee({ rupeeId: rupee.id }), zIndex: 11 }); }));
+        this.marketRupees[row][column].setupItems(rupees.map(function (rupee) { return ({ id: rupee.id, element: tplRupee({ rupeeId: rupee.id }), zIndex: 11 }); }));
     };
     Market.prototype.clearInterface = function () {
         for (var row = 0; row <= 1; row++) {

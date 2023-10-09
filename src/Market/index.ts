@@ -52,7 +52,7 @@ class Market {
     const cardInMarket = gamedatas.market.cards[row][column];
     if (cardInMarket) {
       const cardId = cardInMarket.id;
-      this.marketCards[row][column].placeInZone({ id: cardId, element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
+      this.marketCards[row][column].setupItems({ id: cardId, element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
       this.game.tooltipManager.addTooltipToCard({ cardId });
     }
   }
@@ -70,7 +70,7 @@ class Market {
     });
 
     const rupees = gamedatas.market.rupees.filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`);
-    this.marketRupees[row][column].placeInZone(
+    this.marketRupees[row][column].setupItems(
       rupees.map((rupee) => ({ id: rupee.id, element: tplRupee({ rupeeId: rupee.id }), zIndex: 11 }))
     );
   }

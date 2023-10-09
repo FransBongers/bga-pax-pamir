@@ -32,13 +32,13 @@ trait BribeTrait
   {
     $bribeState = Globals::getNegotiatedBribe();
     // Code to save games stuck after undo. Remove with next release
-    if ($bribeState === null || count($bribeState) === 0) {
-      $state = $this->gamestate->state(true, false, true);
-      $st = $state['transitions']['playerActions'];
-      Globals::setLogState($st);
-      Log::clearAll();
-      $this->nextState('playerActions');
-    };
+    // if ($bribeState === null || count($bribeState) === 0) {
+    //   $state = $this->gamestate->state(true, false, true);
+    //   $st = $state['transitions']['playerActions'];
+    //   Globals::setLogState($st);
+    //   Log::clearAll();
+    //   $this->nextState('playerActions');
+    // };
     return $bribeState;
   }
 

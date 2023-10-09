@@ -337,7 +337,7 @@ class PlayerActionsState implements State {
 
   public addDebugButton() {
     console.log('addDebugButton');
-    // const container = document.getElementById(`pp_border_region_select`);
+    // const container = document.getElementById(`pp_map_areas_borders_regions`);
     // container.style.zIndex = '50';
     // REGIONS.forEach((region) => {
     //   const element = document.getElementById(`pp_${region}_armies_select`);

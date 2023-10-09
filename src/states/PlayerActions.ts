@@ -60,7 +60,7 @@ class PlayerActionsState implements State {
     }
     this.setCardActionsSelectable();
     this.game.addUndoButton();
-    this.addDebugButton();
+    // this.addDebugButton();
   }
 
   private updateInterfacePass() {
@@ -337,8 +337,8 @@ class PlayerActionsState implements State {
 
   public addDebugButton() {
     console.log('addDebugButton');
-    const container = document.getElementById(`pp_map_areas_borders_regions`);
-    container.style.zIndex = '50';
+    // const container = document.getElementById(`pp_map_areas_borders_regions`);
+    // container.style.zIndex = '50';
     // REGIONS.forEach((region) => {
     //   const element = document.getElementById(`pp_${region}_armies_select`);
     //   if (element) {
@@ -346,27 +346,27 @@ class PlayerActionsState implements State {
     //     this.game._connections.push(dojo.connect(element, 'onclick', this, () => console.log('region',region)));
     //   }
     // });
-    BORDERS.forEach((border) => {
-      const element = document.getElementById(`pp_${border}_border_select`);
-      if (element) {
-        element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, async () => {
-          const loyalty = this.game.getCurrentPlayer().getLoyalty();
-          const from = `blocks_${loyalty}`;
-          const zone = this.game.getZoneForLocation({location: from});
-          const items = zone.getItems();
-          if (items.length === 0) {
-            return;
-          }
-          const tokenId = items[items.length - 1];
-          await this.game.notificationManager.performTokenMove({move: {
-            tokenId,
-            from,
-            to: `roads_${border}`
-          }})
-        }));
-      }
-    })
+    // BORDERS.forEach((border) => {
+    //   const element = document.getElementById(`pp_${border}_border_select`);
+    //   if (element) {
+    //     element.classList.add('pp_selectable');
+    //     this.game._connections.push(dojo.connect(element, 'onclick', this, async () => {
+    //       const loyalty = this.game.getCurrentPlayer().getLoyalty();
+    //       const from = `blocks_${loyalty}`;
+    //       const zone = this.game.getZoneForLocation({location: from});
+    //       const items = zone.getItems();
+    //       if (items.length === 0) {
+    //         return;
+    //       }
+    //       const tokenId = items[items.length - 1];
+    //       await this.game.notificationManager.performTokenMove({move: {
+    //         tokenId,
+    //         from,
+    //         to: `roads_${border}`
+    //       }})
+    //     }));
+    //   }
+    // })
     
 
     // this.game.addPrimaryActionButton({

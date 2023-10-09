@@ -1612,7 +1612,7 @@ var tplWakhanCardTooltip = function (_a) {
 };
 var PPTooltipManager = (function () {
     function PPTooltipManager(game) {
-        this.idRegex = /(?<=id=")[a-z]*_[0-9]*_[0-9]*(?=")/;
+        this.idRegex = /id="[a-z]*_[0-9]*_[0-9]*"/;
         this.game = game;
     }
     PPTooltipManager.prototype.addSuitTooltip = function (_a) {
@@ -1652,11 +1652,11 @@ var PPTooltipManager = (function () {
             return;
         }
         Object.keys(lastNotif.msg.args).forEach(function (key) {
-            var _a;
+            var _a, _b;
             if (!key.startsWith('logTokenLargeCard')) {
                 return;
             }
-            var id = (_a = _this.idRegex.exec(lastNotif.msg.args[key])) === null || _a === void 0 ? void 0 : _a[0];
+            var id = (_b = (_a = _this.idRegex.exec(lastNotif.msg.args[key])) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.slice(0, -1).slice(4);
             if (!id || !id.startsWith('card_')) {
                 return;
             }

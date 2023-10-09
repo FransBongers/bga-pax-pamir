@@ -16,8 +16,9 @@
 
 class PPTooltipManager {
   private game: PaxPamirGame;
-  private idRegex = /(?<=id=")[a-z]*_[0-9]*_[0-9]*(?=")/;
-
+  // This can't be used since some versions of safari don't support it
+  // private idRegex = /(?<=id=")[a-z]*_[0-9]*_[0-9]*(?=")/;
+  private idRegex = /id="[a-z]*_[0-9]*_[0-9]*"/;
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
@@ -63,7 +64,8 @@ class PPTooltipManager {
       if (!key.startsWith('logTokenLargeCard')) {
         return;
       }
-      const id = this.idRegex.exec(lastNotif.msg.args[key])?.[0];
+      const id = this.idRegex.exec(lastNotif.msg.args[key])?.[0]?.slice(0, -1).slice(4);
+
       if (!id || !id.startsWith('card_')) {
         return;
       }

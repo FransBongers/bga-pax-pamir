@@ -273,6 +273,9 @@ class PaxPamirZone {
 
           animations.push(new BgaSlideAnimation({ element, fromRect }));
         }
+        if (this.containerId === 'pp_kabul_transcaspia_border') {
+          console.log(item.id, index, left, top, width, height);
+        }
         containerWidth = Math.max(containerWidth, left + width);
         containerHeight = Math.max(containerHeight, top + height);
       }

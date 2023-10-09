@@ -716,6 +716,9 @@ var PaxPamirZone = (function () {
                     element.style.left = "".concat(left, "px");
                     animations.push(new BgaSlideAnimation({ element: element, fromRect: fromRect }));
                 }
+                if (_this.containerId === 'pp_kabul_transcaspia_border') {
+                    console.log(item.id, index, left, top_1, width, height);
+                }
                 containerWidth = Math.max(containerWidth, left + width);
                 containerHeight = Math.max(containerHeight, top_1 + height);
             }
@@ -3246,15 +3249,15 @@ var Border = (function () {
     Border.prototype.createBorderZone = function () {
         var border = this.border;
         var borderPattern = {
-            herat_kabul: 'horizontalFit',
-            herat_kandahar: 'verticalFit',
-            herat_persia: 'verticalFit',
+            herat_kabul: 'custom',
+            herat_kandahar: 'custom',
+            herat_persia: 'custom',
             herat_transcaspia: 'custom',
-            kabul_transcaspia: 'verticalFit',
+            kabul_transcaspia: 'custom',
             kabul_kandahar: 'horizontalFit',
             kabul_punjab: 'verticalFit',
             kandahar_punjab: 'verticalFit',
-            persia_transcaspia: 'horizontalFit',
+            persia_transcaspia: 'custom',
         };
         this.roadZone = new PaxPamirZone({
             animationManager: this.game.animationManager,
@@ -3262,38 +3265,8 @@ var Border = (function () {
             itemHeight: ROAD_HEIGHT,
             itemWidth: ROAD_WIDTH,
             pattern: borderPattern[border],
-            customPattern: border === 'herat_transcaspia' ? this.customPatternHeratTranscaspia : undefined,
+            customPattern: this.getCustomPattern({ border: border }),
         });
-    };
-    Border.prototype.customPatternHeratTranscaspia = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (i % 8 == 0 && numberOfItems === 1) {
-            return { x: 50, y: 25, w: 40, h: 27 };
-        }
-        else if (i % 8 == 0) {
-            return { x: 90, y: -5, w: 40, h: 27 };
-        }
-        else if (i % 8 == 1) {
-            return { x: 85, y: 5, w: 40, h: 27 };
-        }
-        else if (i % 8 == 2) {
-            return { x: 70, y: 17, w: 40, h: 27 };
-        }
-        else if (i % 8 == 3) {
-            return { x: 55, y: 29, w: 40, h: 27 };
-        }
-        else if (i % 8 == 4) {
-            return { x: 40, y: 41, w: 40, h: 27 };
-        }
-        else if (i % 8 == 5) {
-            return { x: 35, y: 43, w: 40, h: 27 };
-        }
-        else if (i % 8 == 6) {
-            return { x: 47, y: 13, w: 40, h: 27 };
-        }
-        else if (i % 8 == 7) {
-            return { x: 10, y: 63, w: 40, h: 27 };
-        }
     };
     Border.prototype.getRoadZone = function () {
         return this.roadZone;
@@ -3302,6 +3275,25 @@ var Border = (function () {
         var borderSelect = document.getElementById("pp_".concat(this.border, "_border_select"));
         if (borderSelect) {
             borderSelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
+        }
+    };
+    Border.prototype.getCustomPattern = function (_a) {
+        var border = _a.border;
+        switch (border) {
+            case HERAT_KABUL:
+                return this.customPatternHeratKabul;
+            case HERAT_KANDAHAR:
+                return this.customPatternHeratKandahar;
+            case HERAT_PERSIA:
+                return this.customPatternHeratPersia;
+            case HERAT_TRANSCASPIA:
+                return this.customPatternHeratTranscaspia;
+            case KABUL_TRANSCASPIA:
+                return this.customPatternKabulTranscaspia;
+            case PERSIA_TRANSCASPIA:
+                return this.customPatternPersiaTranscaspia;
+            default:
+                return undefined;
         }
     };
     Border.prototype.getCoalitionRoads = function (_a) {
@@ -3323,6 +3315,242 @@ var Border = (function () {
     Border.prototype.removeTempRoad = function (_a) {
         var index = _a.index;
         this.roadZone.remove({ input: "temp_road_".concat(index), destroy: true });
+    };
+    Border.prototype.customPatternHeratKabul = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 4) {
+            switch (i) {
+                case 0:
+                    return { x: 0, y: -3, w: 40, h: 27 };
+                case 1:
+                    return { x: 29, y: 17, w: 40, h: 27 };
+                case 2:
+                    return { x: 58, y: 37, w: 40, h: 27 };
+                case 3:
+                    return { x: 82, y: 55, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 7;
+            switch (mod) {
+                case 0:
+                    return { x: 0, y: -3, w: 40, h: 27 };
+                case 1:
+                    return { x: 16, y: 6, w: 40, h: 27 };
+                case 2:
+                    return { x: 30, y: 16, w: 40, h: 27 };
+                case 3:
+                    return { x: 45, y: 25, w: 40, h: 27 };
+                case 4:
+                    return { x: 58, y: 35, w: 40, h: 27 };
+                case 5:
+                    return { x: 69, y: 43, w: 40, h: 27 };
+                case 6:
+                    return { x: 84, y: 51, w: 40, h: 27 };
+            }
+        }
+    };
+    Border.prototype.customPatternHeratKandahar = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 5) {
+            switch (i) {
+                case 0:
+                    return { x: 7, y: -7, w: 40, h: 27 };
+                case 1:
+                    return { x: 6, y: 21, w: 40, h: 27 };
+                case 2:
+                    return { x: 4, y: 51, w: 40, h: 27 };
+                case 3:
+                    return { x: 2, y: 81, w: 40, h: 27 };
+                case 4:
+                    return { x: -3, y: 112, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 12;
+            switch (mod) {
+                case 0:
+                    return { x: 7, y: -17, w: 40, h: 27 };
+                case 1:
+                    return { x: 7, y: -5, w: 40, h: 27 };
+                case 2:
+                    return { x: 8, y: 7, w: 40, h: 27 };
+                case 3:
+                    return { x: 8, y: 19, w: 40, h: 27 };
+                case 4:
+                    return { x: 8, y: 30, w: 40, h: 27 };
+                case 5:
+                    return { x: 6, y: 41, w: 40, h: 27 };
+                case 6:
+                    return { x: 5, y: 53, w: 40, h: 27 };
+                case 7:
+                    return { x: 5, y: 64, w: 40, h: 27 };
+                case 8:
+                    return { x: 3, y: 75, w: 40, h: 27 };
+                case 9:
+                    return { x: 2, y: 88, w: 40, h: 27 };
+                case 10:
+                    return { x: 0, y: 100, w: 40, h: 27 };
+                case 11:
+                    return { x: -3, y: 112, w: 40, h: 27 };
+            }
+        }
+    };
+    Border.prototype.customPatternHeratPersia = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 5) {
+            switch (i) {
+                case 0:
+                    return { x: -2, y: 0, w: 40, h: 27 };
+                case 1:
+                    return { x: -2, y: 27, w: 40, h: 27 };
+                case 2:
+                    return { x: -1, y: 57, w: 40, h: 27 };
+                case 3:
+                    return { x: 2, y: 87, w: 40, h: 27 };
+                case 4:
+                    return { x: 4, y: 117, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 11;
+            switch (mod) {
+                case 0:
+                    return { x: -2, y: -2, w: 40, h: 27 };
+                case 1:
+                    return { x: -2, y: 9, w: 40, h: 27 };
+                case 2:
+                    return { x: -2, y: 21, w: 40, h: 27 };
+                case 3:
+                    return { x: -2, y: 32, w: 40, h: 27 };
+                case 4:
+                    return { x: -1, y: 44, w: 40, h: 27 };
+                case 5:
+                    return { x: 0, y: 57, w: 40, h: 27 };
+                case 6:
+                    return { x: 1, y: 70, w: 40, h: 27 };
+                case 7:
+                    return { x: 3, y: 82, w: 40, h: 27 };
+                case 8:
+                    return { x: 4, y: 95, w: 40, h: 27 };
+                case 9:
+                    return { x: 4, y: 108, w: 40, h: 27 };
+                case 10:
+                    return { x: 4, y: 121, w: 40, h: 27 };
+            }
+        }
+    };
+    Border.prototype.customPatternHeratTranscaspia = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 4) {
+            switch (i) {
+                case 0:
+                    return { x: 85, y: 2, w: 40, h: 27 };
+                case 1:
+                    return { x: 58, y: 19, w: 40, h: 27 };
+                case 2:
+                    return { x: 32, y: 37, w: 40, h: 27 };
+                case 3:
+                    return { x: 10, y: 56, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 8;
+            switch (mod) {
+                case 0:
+                    return { x: 90, y: -5, w: 40, h: 27 };
+                case 1:
+                    return { x: 81, y: 5, w: 40, h: 27 };
+                case 2:
+                    return { x: 65, y: 15, w: 40, h: 27 };
+                case 3:
+                    return { x: 49, y: 26, w: 40, h: 27 };
+                case 4:
+                    return { x: 38, y: 36, w: 40, h: 27 };
+                case 5:
+                    return { x: 28, y: 45, w: 40, h: 27 };
+                case 6:
+                    return { x: 16, y: 57, w: 40, h: 27 };
+                case 7:
+                    return { x: 8, y: 67, w: 40, h: 27 };
+            }
+        }
+    };
+    Border.prototype.customPatternKabulTranscaspia = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 4) {
+            switch (i) {
+                case 0:
+                    return { x: 11, y: 10, w: 40, h: 27 };
+                case 1:
+                    return { x: 10, y: 40, w: 40, h: 27 };
+                case 2:
+                    return { x: 5, y: 70, w: 40, h: 27 };
+                case 3:
+                    return { x: -3, y: 100, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 9;
+            switch (mod) {
+                case 0:
+                    return { x: 12, y: -2, w: 40, h: 27 };
+                case 1:
+                    return { x: 13, y: 12, w: 40, h: 27 };
+                case 2:
+                    return { x: 12, y: 25, w: 40, h: 27 };
+                case 3:
+                    return { x: 11, y: 37, w: 40, h: 27 };
+                case 4:
+                    return { x: 10, y: 49, w: 40, h: 27 };
+                case 5:
+                    return { x: 9, y: 61, w: 40, h: 27 };
+                case 6:
+                    return { x: 6, y: 74, w: 40, h: 27 };
+                case 7:
+                    return { x: 2, y: 86, w: 40, h: 27 };
+                case 8:
+                    return { x: -3, y: 100, w: 40, h: 27 };
+            }
+        }
+    };
+    Border.prototype.customPatternPersiaTranscaspia = function (_a) {
+        var i = _a.index, numberOfItems = _a.itemCount;
+        if (numberOfItems <= 4) {
+            switch (i) {
+                case 0:
+                    return { x: -2, y: -2, w: 40, h: 27 };
+                case 1:
+                    return { x: 38, y: -2, w: 40, h: 27 };
+                case 2:
+                    return { x: 78, y: 1, w: 40, h: 27 };
+                case 3:
+                    return { x: 115, y: 9, w: 40, h: 27 };
+            }
+        }
+        else {
+            var mod = i % 9;
+            switch (mod) {
+                case 0:
+                    return { x: -8, y: -2, w: 40, h: 27 };
+                case 1:
+                    return { x: 9, y: -1, w: 40, h: 27 };
+                case 2:
+                    return { x: 26, y: 0, w: 40, h: 27 };
+                case 3:
+                    return { x: 45, y: 0, w: 40, h: 27 };
+                case 4:
+                    return { x: 67, y: 2, w: 40, h: 27 };
+                case 5:
+                    return { x: 89, y: 4, w: 40, h: 27 };
+                case 6:
+                    return { x: 109, y: 8, w: 40, h: 27 };
+                case 7:
+                    return { x: 126, y: 13, w: 40, h: 27 };
+                case 8:
+                    return { x: 141, y: 20, w: 40, h: 27 };
+            }
+        }
     };
     return Border;
 }());
@@ -5904,6 +6132,7 @@ var PlayerActionsState = (function () {
         }
         this.setCardActionsSelectable();
         this.game.addUndoButton();
+        this.addDebugButton();
     };
     PlayerActionsState.prototype.updateInterfacePass = function () {
         var _this = this;
@@ -6137,7 +6366,40 @@ var PlayerActionsState = (function () {
         }
     };
     PlayerActionsState.prototype.addDebugButton = function () {
+        var _this = this;
         console.log('addDebugButton');
+        var container = document.getElementById("pp_map_areas_borders_regions");
+        container.style.zIndex = '50';
+        BORDERS.forEach(function (border) {
+            var element = document.getElementById("pp_".concat(border, "_border_select"));
+            if (element) {
+                element.classList.add('pp_selectable');
+                _this.game._connections.push(dojo.connect(element, 'onclick', _this, function () { return __awaiter(_this, void 0, void 0, function () {
+                    var loyalty, from, zone, items, tokenId;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                loyalty = this.game.getCurrentPlayer().getLoyalty();
+                                from = "blocks_".concat(loyalty);
+                                zone = this.game.getZoneForLocation({ location: from });
+                                items = zone.getItems();
+                                if (items.length === 0) {
+                                    return [2];
+                                }
+                                tokenId = items[items.length - 1];
+                                return [4, this.game.notificationManager.performTokenMove({ move: {
+                                            tokenId: tokenId,
+                                            from: from,
+                                            to: "roads_".concat(border)
+                                        } })];
+                            case 1:
+                                _a.sent();
+                                return [2];
+                        }
+                    });
+                }); }));
+            }
+        });
     };
     PlayerActionsState.prototype.onPass = function () {
         if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive())

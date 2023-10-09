@@ -29,7 +29,7 @@ class PaxPamir implements PaxPamirGame {
   public gameOptions: PaxPamirGamedatas['gameOptions'];
   public map: PPMap;
   public market: Market;
-  private notificationManager: NotificationManager;
+  public notificationManager: NotificationManager;
   public objectManager: ObjectManager;
   public playerManager: PlayerManager;
   // global variables

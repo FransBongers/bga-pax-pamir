@@ -210,6 +210,7 @@ interface PaxPamirGame extends Game {
   gameOptions: PaxPamirGamedatas['gameOptions'];
   map: PPMap;
   market: Market;
+  notificationManager: NotificationManager;
   objectManager: ObjectManager;
   playerManager: PlayerManager;
   playerCounts: Record<string, number>;

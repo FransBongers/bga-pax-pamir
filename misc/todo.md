@@ -1,20 +1,7 @@
 # TODO
 
-## Implementation
-
-### General
-
-### Bugs
-
-### Card abilities
-
-
-### Dominance Checks
-
 ### Improvements
-- Only highlight card actions that are possible based on rupees, ruled regions etc?
 - For bribes: should ruler be able to demand higher amount than briber has available even though briber can never accept?
-- For discard: instead of moving card div change discard background to show certain card and remove the card div?
 - Reduce size of notifications as much as possible (ie remove all unnecessary data like card info)
 - Points disk not on center of pts
 
@@ -23,21 +10,16 @@
 - Check why undo after last loyalty pick during setup results in crossed log
 - Check zIndex of tokens on the board
 - purchasing cards when suit is military => first rupee appears instantly, only 2nd is animated
-- public withdrawal => rupees should be removed immediately
-
-- when events that reduce influence are already active, new influence should also be ignored 
-- Undo should not be possible when nothing to undo
-
 
 ## To check
 - Check undo functionality of Akropolis for improvements?
-
 - Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
-- Check totals in player panels. Seem to be off for cylinders
 - do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args
 - no animation when there is a bribe of 0 rupees. Change text from 0 rupee(s) to no bribe?
-- When betraying a card it's moved to discard pile first before asking for prize. Keep it in separate zone next to discard before player makes choice? (since other cards can be discarded)
 
+## Wakhan
+- influence counts don't seem to be correct after discarding?
+- When Wakhan betrays a political card the overthrow rule does not seem to be followed?
 
 ### UI
 - Matching colors for selectable / selected

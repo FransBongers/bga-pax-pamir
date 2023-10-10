@@ -20,6 +20,7 @@
 ## Wakhan
 - influence counts don't seem to be correct after discarding?
 - When Wakhan betrays a political card the overthrow rule does not seem to be followed?
+- When Wakhan resolves discard from hand cleanup and player needs to discard, the players turn is skipped?
 
 ### UI
 - Matching colors for selectable / selected

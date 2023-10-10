@@ -229,7 +229,7 @@ trait WakhanActionMoveTrait
     $spies = Tokens::getOfTypeInLocation('cylinder', 'spies');
 
     foreach ($originCards as $index => $card) {
-      $adjacentCards = $this->getAllAdjecentCardsForSpyMovement($card['id'], $wakhanPlayer);
+      $adjacentCards = array_unique($this->getAllAdjecentCardsForSpyMovement($card['id'], $wakhanPlayer));
       if (count($adjacentCards) === 0) {
         continue;
       }

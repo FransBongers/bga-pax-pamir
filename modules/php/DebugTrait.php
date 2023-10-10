@@ -52,10 +52,14 @@ trait DebugTrait
 
   function test()
   {
-    $players = PaxPamirPlayers::getAll();
-    foreach($players as $playerId => $player) {
-      PaxPamirPlayers::incScore($playerId,-5);
-    }
+    // $adjacentCards = Cards::getMany(['card_100','card_1','card_93','card_38','card_54'])->toArray();
+    // Notifications::log('adjacentCards',$adjacentCards);
+    // $move = $this->wakhanGetNextSpyMove();
+    // Notifications::log('move',$move);
+    // $players = PaxPamirPlayers::getAll();
+    // foreach($players as $playerId => $player) {
+    //   PaxPamirPlayers::incScore($playerId,-5);
+    // }
     // Stats::setupNewGame();
     // Globals::setWakhanAutoResolve(true);
     // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
@@ -330,10 +334,10 @@ trait DebugTrait
 		// These are the id's from the BGAtable I need to debug.
 		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
 		$ids = [
-			84412386, // 2371052
-      86878411, // 2371053
-      84053089, // 2371054
-      83886430, // 2371055
+			84370180, // 2371052
+      // 86878411, // 2371053
+      // 84053089, // 2371054
+      // 83886430, // 2371055
 		];
                 // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
 

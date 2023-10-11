@@ -122,8 +122,8 @@ trait ResolveEventTrait
   {
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
-    $message = clienttranslate('${tkn_playerName} removes all tribes and armies from ${logTokenRegionName}');
-    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId),], $regionId, $armies, $tribeResult['tribes']);
+    $message = clienttranslate('${tkn_playerName} removes all tribes and armies from ${tkn_regionName}');
+    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['tkn_regionName' => $regionId,], $regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult;
   }

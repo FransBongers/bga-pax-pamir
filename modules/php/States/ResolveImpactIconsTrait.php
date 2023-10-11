@@ -273,9 +273,9 @@ trait ResolveImpactIconsTrait
     }
     $customMessage = null;
     if (in_array($source, [ECE_MILITARY_SUIT, ECE_INTELLIGENCE_SUIT, ECE_POLITICAL_SUIT])) {
-      $customMessage = clienttranslate('The favored suit changes to ${logTokenFavoredSuit}');
+      $customMessage = clienttranslate('The favored suit changes to ${tkn_favoredSuit}');
     } else if ($source === ECE_PASHTUNWALI_VALUES) {
-      $customMessage = clienttranslate('${tkn_playerName} chooses ${logTokenFavoredSuit}');
+      $customMessage = clienttranslate('${tkn_playerName} chooses ${tkn_favoredSuit}');
     };
     // Update favored suit
     Globals::setFavoredSuit($newSuit);

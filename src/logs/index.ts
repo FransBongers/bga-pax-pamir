@@ -23,11 +23,33 @@ const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: P
   switch (type) {
     case LOG_TOKEN_ARMY:
       return tplLogTokenArmy({ coalition: value.split('_')[0] });
+    case LOG_TOKEN_CARD:
+      tooltipIdCounter++;
+      return tplLogTokenCard({ cardId: value, cardIdSuffix: tooltipIdCounter });
+    case LOG_TOKEN_CARD_NAME:
+      return tlpLogTokenBoldText({ text: value });
     case LOG_TOKEN_COALITION:
       return tplLogTokenCoalition({ coalition: value });
+    case LOG_TOKEN_COALITION_BLACK:
+      return tplLogTokenCoalition({ coalition: value, black: true });
+    case LOG_TOKEN_COALITION_NAME:
+      return tlpLogTokenBoldText({ text: game.gamedatas.staticData.loyalty[value].name });
+    case LOG_TOKEN_CYLINDER:
+      return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(value.split('_')[0]) }).getColor() });
+    case LOG_TOKEN_FAVORED_SUIT:
+      return tplLogTokenFavoredSuit({ suit: value });
+    case LOG_TOKEN_LARGE_CARD:
+      tooltipIdCounter++;
+      return tplLogTokenCard({ cardId: value, large: true, cardIdSuffix: tooltipIdCounter });
+    case LOG_TOKEN_LEVERAGE:
+      return tplLogTokenLeverage();
+    case LOG_TOKEN_NEW_LINE:
+      return '<br>';
     case LOG_TOKEN_PLAYER_NAME:
       const player = game.playerManager.getPlayers().find((player) => player.getName() === value);
       return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
+    case LOG_TOKEN_REGION_NAME:
+      return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[value].name, regionId: value });
     case LOG_TOKEN_ROAD:
       return tplLogTokenRoad({ coalition: value.split('_')[0] });
     case LOG_TOKEN_RUPEE:

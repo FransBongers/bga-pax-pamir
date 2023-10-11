@@ -122,7 +122,7 @@ trait PlayerActionMoveTrait
         $from = 'armies_' . $source;
         $to = 'armies_' . $destination;
         array_push($regionsThatNeedRulerCheck, $source, $destination);
-        $message = clienttranslate('${tkn_playerName} moves ${logTokenArmy} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${tkn_army} from ${tkn_regionName_from} to ${tkn_regionName_to}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -130,9 +130,9 @@ trait PlayerActionMoveTrait
             'to' => $to,
             'tokenId' => $pieceId,
           ],
-          'logTokenArmy' => Utils::logTokenArmy(explode('_', $pieceId)[1]),
-          'logTokenRegionFrom' => Utils::logTokenRegionName($source),
-          'logTokenRegionTo' => Utils::logTokenRegionName($destination),
+          'tkn_army' => explode('_', $pieceId)[1].'_army',
+          'tkn_regionName_from' => $source,
+          'tkn_regionName_to' => $destination,
         ]);
       } else if (Utils::isCylinder($pieceId) && !Utils::startsWith($pieceMoves[0]['from'], 'card')) {
 
@@ -144,7 +144,7 @@ trait PlayerActionMoveTrait
           $regionsThatNeedOverthrowCheck[] = $source;
         }
 
-        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenRegionFrom} to ${logTokenRegionTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${tkn_cylinder} from ${tkn_regionName_from} to ${tkn_regionName_to}');
         Notifications::moveToken($message, [
           'player' => $player,
           'move' => [
@@ -152,14 +152,14 @@ trait PlayerActionMoveTrait
             'to' => $to,
             'tokenId' => $pieceId,
           ],
-          'logTokenCylinder' => Utils::logTokenCylinder(explode('_', $pieceId)[1]),
-          'logTokenRegionFrom' => Utils::logTokenRegionName($source),
-          'logTokenRegionTo' => Utils::logTokenRegionName($destination),
+          'tkn_cylinder' => explode('_', $pieceId)[1].'_cylinder',
+          'tkn_regionName_from' => $source,
+          'tkn_regionName_to' => $destination,
         ]);
       } else if (Utils::isCylinder($pieceId)) {
         $from = 'spies_' . $source;
         $to = 'spies_' . $destination;
-        $message = clienttranslate('${tkn_playerName} moves ${logTokenCylinder} from ${logTokenCardNameFrom} to ${logTokenCardNameTo}${logTokenNewLine}${logTokenLargeCardFrom}${logTokenLargeCardTo}');
+        $message = clienttranslate('${tkn_playerName} moves ${tkn_cylinder} from ${tkn_cardName_from} to ${tkn_cardName_to}${tkn_newLine}${tkn_largeCard_from}${tkn_largeCard_to}');
         $cardFrom = Cards::get($source);
         $cardTo = Cards::get($destination);
         Notifications::moveToken($message, [
@@ -169,12 +169,12 @@ trait PlayerActionMoveTrait
             'to' => $to,
             'tokenId' => $pieceId,
           ],
-          'logTokenCylinder' => Utils::logTokenCylinder(explode('_', $pieceId)[1]),
-          'logTokenCardNameFrom' => Utils::logTokenCardName($cardFrom['name']),
-          'logTokenCardNameTo' => Utils::logTokenCardName($cardTo['name']),
-          'logTokenLargeCardFrom' => Utils::logTokenLargeCard($source),
-          'logTokenLargeCardTo' => Utils::logTokenLargeCard($destination),
-          'logTokenNewLine' => Utils::logTokenNewLine()
+          'tkn_cylinder' => explode('_', $pieceId)[1].'_cylinder',
+          'tkn_cardName_from' => $cardFrom['name'],
+          'tkn_cardName_to' => $cardTo['name'],
+          'tkn_largeCard_from' => $source,
+          'tkn_largeCard_to' => $destination,
+          'tkn_newLine' => '<br>',
         ]);
       };
       Tokens::move($pieceId, $to);

@@ -122,13 +122,13 @@ trait SASafeHouseTrait
 
     $to = Locations::spies($cardId);
     $state = Tokens::insertOnTop($cylinderId, $to);
-    $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_cylinder} on ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     Notifications::moveToken($message, [
       'player' => PaxPamirPlayers::get($playerId),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenCylinder' => Utils::logTokenCylinder($playerId),
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_largeCard' => $cardId,
+      'tkn_cylinder' => $playerId.'_cylinder',
+      'tkn_cardName' => $card['name'],
+      'tkn_newLine' => '<br>',
       'move' => [
         'from' => 'spies_'.$fromCardId,
         'to' => $to,

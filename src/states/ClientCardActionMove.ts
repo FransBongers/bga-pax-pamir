@@ -486,6 +486,9 @@ class ClientCardActionMoveState implements State {
      */
     const spies: { cylinderId: string; cardId: string }[] = [];
     Object.entries(this.game.spies).forEach(([cardId, zone]) => {
+      if (!zone) {
+        return;
+      }
       zone.getItems().forEach((cylinderId) => {
         if (Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()) {
           return;

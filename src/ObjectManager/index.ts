@@ -262,10 +262,9 @@ class Supply {
     if (coalitions[1].supplyCount - coalitions[0].supplyCount >= requiredDifferenceToBeDominant) {
       const dominantCoalition = coalitions[0].coalition;
       // Update UI dominant coalition
-      const log = _('Dominant coalition: ${logTokenCoalition}');
-      // const log = _('${logTokenCoalition} dominant');
+      const log = _('Dominant coalition: ${tkn_coalitionBlack}');
       node.innerHTML = this.game.format_string_recursive(log, {
-        logTokenCoalition: `coalitionBlack:${dominantCoalition}`,
+        tkn_coalitionBlack: dominantCoalition,
       });
       node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
       node.classList.add(`pp_${dominantCoalition}`);

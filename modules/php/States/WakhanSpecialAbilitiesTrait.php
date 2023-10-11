@@ -66,13 +66,13 @@ trait WakhanSpecialAbilitiesTrait
 
     $to = Locations::spies($cardId);
     $state = Tokens::insertOnTop($cylinderId, $to);
-    $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_cylinder} on ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     Notifications::moveToken($message, [
       'player' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenCylinder' => Utils::logTokenCylinder(WAKHAN_PLAYER_ID),
-      'logTokenCardName' => Utils::logTokenCardName($safeHouseCard['name']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_largeCard' => $cardId,
+      'tkn_cylinder' => WAKHAN_PLAYER_ID.'_cylinder',
+      'tkn_cardName' => $safeHouseCard['name'],
+      'tkn_newLine' => '<br>',
       'move' => [
         'from' => 'spies_'.$fromCardId,
         'to' => $to,

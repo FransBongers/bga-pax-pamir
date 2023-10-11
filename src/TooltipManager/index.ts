@@ -61,7 +61,7 @@ class PPTooltipManager {
       return;
     }
     Object.keys(lastNotif.msg.args).forEach((key) => {
-      if (!key.startsWith('logTokenLargeCard')) {
+      if (!(key.startsWith('logTokenLargeCard') || key.startsWith('tkn_largeCard'))) {
         return;
       }
       const id = this.idRegex.exec(lastNotif.msg.args[key])?.[0]?.slice(0, -1).slice(4);

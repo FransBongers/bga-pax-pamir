@@ -229,8 +229,8 @@ class Events
   {
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
-    $message = clienttranslate('All tribes and armies are removed from ${logTokenRegionName}');
-    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['logTokenRegionName' => Utils::logTokenRegionName($regionId)],$regionId, $armies, $tribeResult['tribes']);
+    $message = clienttranslate('All tribes and armies are removed from ${tkn_regionName}');
+    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['tkn_regionName' => $regionId],$regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult['actions'];
   }

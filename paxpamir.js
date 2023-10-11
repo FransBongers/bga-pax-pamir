@@ -939,11 +939,33 @@ var getTokenDiv = function (_a) {
     switch (type) {
         case LOG_TOKEN_ARMY:
             return tplLogTokenArmy({ coalition: value.split('_')[0] });
+        case LOG_TOKEN_CARD:
+            tooltipIdCounter++;
+            return tplLogTokenCard({ cardId: value, cardIdSuffix: tooltipIdCounter });
+        case LOG_TOKEN_CARD_NAME:
+            return tlpLogTokenBoldText({ text: value });
         case LOG_TOKEN_COALITION:
             return tplLogTokenCoalition({ coalition: value });
+        case LOG_TOKEN_COALITION_BLACK:
+            return tplLogTokenCoalition({ coalition: value, black: true });
+        case LOG_TOKEN_COALITION_NAME:
+            return tlpLogTokenBoldText({ text: game.gamedatas.staticData.loyalty[value].name });
+        case LOG_TOKEN_CYLINDER:
+            return tplLogTokenCylinder({ color: game.playerManager.getPlayer({ playerId: Number(value.split('_')[0]) }).getColor() });
+        case LOG_TOKEN_FAVORED_SUIT:
+            return tplLogTokenFavoredSuit({ suit: value });
+        case LOG_TOKEN_LARGE_CARD:
+            tooltipIdCounter++;
+            return tplLogTokenCard({ cardId: value, large: true, cardIdSuffix: tooltipIdCounter });
+        case LOG_TOKEN_LEVERAGE:
+            return tplLogTokenLeverage();
+        case LOG_TOKEN_NEW_LINE:
+            return '<br>';
         case LOG_TOKEN_PLAYER_NAME:
             var player = game.playerManager.getPlayers().find(function (player) { return player.getName() === value; });
             return player ? tplLogTokenPlayerName({ name: player.getName(), color: player.getHexColor() }) : value;
+        case LOG_TOKEN_REGION_NAME:
+            return tplLogTokenRegionName({ name: game.gamedatas.staticData.regions[value].name, regionId: value });
         case LOG_TOKEN_ROAD:
             return tplLogTokenRoad({ coalition: value.split('_')[0] });
         case LOG_TOKEN_RUPEE:
@@ -1660,7 +1682,7 @@ var PPTooltipManager = (function () {
         }
         Object.keys(lastNotif.msg.args).forEach(function (key) {
             var _a, _b;
-            if (!key.startsWith('logTokenLargeCard')) {
+            if (!(key.startsWith('logTokenLargeCard') || key.startsWith('tkn_largeCard'))) {
                 return;
             }
             var id = (_b = (_a = _this.idRegex.exec(lastNotif.msg.args[key])) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.slice(0, -1).slice(4);
@@ -1927,9 +1949,9 @@ var Supply = (function () {
         var node = $('pp_dominant_coalition_banner');
         if (coalitions[1].supplyCount - coalitions[0].supplyCount >= requiredDifferenceToBeDominant) {
             var dominantCoalition = coalitions[0].coalition;
-            var log = _('Dominant coalition: ${logTokenCoalition}');
+            var log = _('Dominant coalition: ${tkn_coalitionBlack}');
             node.innerHTML = this.game.format_string_recursive(log, {
-                logTokenCoalition: "coalitionBlack:".concat(dominantCoalition),
+                tkn_coalitionBlack: dominantCoalition,
             });
             node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
             node.classList.add("pp_".concat(dominantCoalition));
@@ -5833,6 +5855,9 @@ var ClientCardActionMoveState = (function () {
         var spies = [];
         Object.entries(this.game.spies).forEach(function (_a) {
             var cardId = _a[0], zone = _a[1];
+            if (!zone) {
+                return;
+            }
             zone.getItems().forEach(function (cylinderId) {
                 if (Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId()) {
                     return;

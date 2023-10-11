@@ -22,7 +22,7 @@ interface NotifPayBribeArgs {
 }
 
 interface NotifChangeFavoredSuitArgs {
-  logTokenFavoredSuit: string;
+  tkn_favoredSuit: string;
   from: string;
   to: string;
 }
@@ -97,32 +97,13 @@ interface NotifReturnCylinderArgs {
   weight?: number;
 }
 
-interface NotifDiscardFromCourtArgs {
-  cardId: string;
-  courtOwnerPlayerId: string;
-  playerId: number;
-  tkn_playerName: string;
-  logTokenCardName: string;
-  logTokenLargeCard: string;
-  moves: TokenMove[];
-  returnedSpiesLog: Log | '';
-}
-
-interface NotifDiscardFromHandArgs {
-  cardId: string;
-  playerId: string;
-  tkn_playerName: string;
-  logTokenCardName: string;
-  logTokenLargeCard: string;
-}
-
 interface NotifDiscardFromMarketArgs {
   cardId: string;
   playerId: string;
   tkn_playerName: string;
   from: string;
   to: 'discardPile' | 'tempDiscardPile' | 'activeEvents';
-  logTokenLargeCard: string;
+  tkn_largeCard: string;
 }
 
 interface NotifDiscardPrizesArgs {
@@ -280,7 +261,7 @@ interface NotifTaxMarketArgs {
   playerId: number;
   tkn_playerName: string;
   amount: number;
-  logTokenRupee: string;
+  tkn_rupee: string;
   selectedRupees: {
     rupeeId: string;
     row: number;
@@ -293,8 +274,7 @@ interface NotifTaxPlayerArgs {
   tkn_playerName: string;
   amount: number;
   taxedPlayerId: number;
-  logTokenRupee: string;
-  logTokenPlayerName: string;
+  tkn_rupee: string;
 }
 
 // interface NotifUpdateCourtCardStatesArgs {

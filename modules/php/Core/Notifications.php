@@ -6,10 +6,10 @@ use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\PaxPamirPlayers;
 use PaxPamir\Managers\Players;
-use PaxPamir\Helpers\LogTokens;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Core\Globals;
 use PaxPamir\Helpers\Wakhan;
+use PaxPamir\Models\PaxPamirPlayer;
 
 class Notifications
 {
@@ -105,46 +105,46 @@ class Notifications
 
   public static function battleCard($cardId)
   {
-    $message = clienttranslate('${tkn_playerName} battles on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} battles on ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     self::notifyAll('battle', $message, [
       'player' => PaxPamirPlayers::get(),
-      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => Cards::get($cardId)['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
     ]);
   }
 
   public static function battleRegion($player,$regionId)
   {
-    $message = clienttranslate('${tkn_playerName} battles in ${logTokenLocation}');
+    $message = clienttranslate('${tkn_playerName} battles in ${tkn_regionName}');
     self::notifyAll('battle', $message, [
       'player' => $player,
-      'logTokenLocation' => Utils::logTokenRegionName($regionId),
+      'tkn_regionName' => $regionId,
     ]);
   }
 
   public static function betray($card, $player, $rupeesOnCards)
   {
-    $message = clienttranslate('${tkn_playerName} betrays ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} betrays ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     self::notifyAll('payRupeesToMarket', $message, [
       'player' => $player,
       'rupeesOnCards' => $rupeesOnCards,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $card['name'],
+      'tkn_largeCard' => $card['id'],
+      'tkn_newLine' => '<br>',
     ]);
   }
 
   public static function build($cardId, $player, $rupeesOnCards)
   {
-    self::notifyAll("payRupeesToMarket", clienttranslate('${tkn_playerName} uses ${logTokenCardName} to build and pays ${numberOfRupees} ${logTokenRupee}${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("payRupeesToMarket", clienttranslate('${tkn_playerName} uses ${tkn_cardName} to build and pays ${numberOfRupees} ${tkn_rupee}${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
       'numberOfRupees' => count($rupeesOnCards),
       'rupeesOnCards' => $rupeesOnCards,
-      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenRupee' => Utils::logTokenRupee(),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => Cards::get($cardId)['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_rupee' => 'rupee(s)',
+      'tkn_newLine' => '<br>',
     ));
   }
 
@@ -158,11 +158,11 @@ class Notifications
 
   public static function changeFavoredSuit($previousSuit, $newSuit, $customMessage = null)
   {
-    $message = clienttranslate('${tkn_playerName} changes favored suit to ${logTokenFavoredSuit}');
+    $message = clienttranslate('${tkn_playerName} changes favored suit to ${tkn_favoredSuit}');
     $message = $customMessage ? $customMessage : $message;
     self::notifyAll('changeFavoredSuit', $message, [
       'player' => PaxPamirPlayers::get(),
-      'logTokenFavoredSuit' => Utils::logFavoredSuit($newSuit),
+      'tkn_favoredSuit' => $newSuit,
       'from' => $previousSuit,
       'to' => $newSuit,
     ]);
@@ -181,25 +181,24 @@ class Notifications
 
   public static function changeLoyaltyMessage($coalition)
   {
-    $coalition_name = Game::get()->loyalty[$coalition]['name'];
-    self::notifyAll("changeLoyaltyMessage", clienttranslate('${tkn_playerName} changes loyalty to ${coalition_name} ${logTokenCoalition}'), array(
+    self::notifyAll("changeLoyaltyMessage", clienttranslate('${tkn_playerName} changes loyalty to ${tkn_coalitionName} ${tkn_coalition}'), array(
       'player' => PaxPamirPlayers::get(),
-      'coalition_name' => $coalition_name,
-      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
+      'tkn_coalitionName' => $coalition,
+      'tkn_coalition' => $coalition,
     ));
   }
 
   public static function changeRuler($oldRuler, $newRuler, $region)
   {
-    $msg = clienttranslate('${tkn_playerName} becomes ruler of ${logTokenRegionName}');
+    $msg = clienttranslate('${tkn_playerName} becomes ruler of ${tkn_regionName}');
     if ($newRuler === null) {
-      $msg = clienttranslate('${tkn_playerName} no longer rules ${logTokenRegionName}');
+      $msg = clienttranslate('${tkn_playerName} no longer rules ${tkn_regionName}');
     }
     self::notifyAll('changeRuler', $msg, [
       'tkn_playerName' => PaxPamirPlayers::get($newRuler === null ? $oldRuler : $newRuler)->getName(),
       'oldRuler' => $oldRuler,
       'newRuler' => $newRuler,
-      'logTokenRegionName' => Utils::logTokenRegionName($region),
+      'tkn_regionName' => $region,
       'region' => $region,
     ]);
   }
@@ -207,13 +206,13 @@ class Notifications
   public static function drawMarketCard($player, $cardId, $from, $to)
   {
 
-    self::notifyAll("drawMarketCard", clienttranslate('${tkn_playerName} draws a new card for the market${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("drawMarketCard", clienttranslate('${tkn_playerName} draws a new card for the market${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
       'cardId' => $cardId,
       'from' => $from,
       'to' => $to,
-      'logTokenNewLine' => Utils::logTokenNewLine(),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
+      'tkn_newLine' => '<br>',
+      'tkn_largeCard' => $cardId,
     ));
   }
 
@@ -239,21 +238,21 @@ class Notifications
       // $playerId = explode("_", $move['tokenId'])[1];
       $logs[] = '${playerScore_' . $playerId . '}';
       $args['playerScore_' . $playerId] = [
-        'log' => clienttranslate('${tkn_playerName} scores ${points} victory point(s)${logTokenNewLine}'),
+        'log' => clienttranslate('${tkn_playerName} scores ${points} victory point(s)${tkn_newLine}'),
         'args' => [
           'tkn_playerName' => PaxPamirPlayers::get($playerId)->getName(),
-          'logTokenNewLine' => Utils::logTokenNewLine(),
+          'tkn_newLine' => '<br>',
           'points' => $playerScore['newScore'] - $playerScore['currentScore']
         ]
       ];
     }
 
-    self::notifyAll("dominanceCheckScores", clienttranslate('${resultLog}${logTokenNewLine}${logTokenNewLine}${pointsPerPlayer}'), array(
+    self::notifyAll("dominanceCheckScores", clienttranslate('${resultLog}${tkn_newLine}${tkn_newLine}${pointsPerPlayer}'), array(
       'resultLog' => $checkSuccessful ? [
-        'log' => clienttranslate('The ${logTokenCoalitionName} ${logTokenCoalition} coalition is dominant. The Dominance Check is successful.'),
+        'log' => clienttranslate('The ${tkn_coalitionName} ${tkn_coalition} coalition is dominant. The Dominance Check is successful.'),
         'args' => [
-          'logTokenCoalition' => Utils::logTokenCoalition($coalition),
-          'logTokenCoalitionName' => Utils::logTokenCoalitionName($coalition),
+          'tkn_coalition' => $coalition,
+          'tkn_coalitionName' => $coalition,
         ]
       ] : [
         'log' => clienttranslate('There is no dominant coalition. The Dominance Check is unsuccessful.'),
@@ -262,7 +261,7 @@ class Notifications
       'scores' => $scores,
       // 'successful' => $checkSuccessful,
       // 'moves' => $moves,
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_newLine' => '<br>',
       'pointsPerPlayer' => [
         'log' => implode('', $logs),
         'args' => $args
@@ -287,11 +286,11 @@ class Notifications
 
   public static function placeArmy($player, $tokenId, $coalition, $regionId, $from, $to)
   {
-    $message = clienttranslate('${tkn_playerName} places ${logTokenArmy} in ${logTokenRegionName}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_army} in ${tkn_regionName}');
     self::notifyAll('placeArmy', $message, [
       'player' => $player,
-      'logTokenArmy' => Utils::logTokenArmy($coalition),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'tkn_army' => $coalition.'_army',
+      'tkn_regionName' => $regionId,
       'move' => [
         'from' => $from,
         'to' => $to,
@@ -302,12 +301,12 @@ class Notifications
 
   public static function placeRoad($player, $tokenId, $coalition, $regionId0, $regionId1, $from, $to)
   {
-    $message = clienttranslate('${tkn_playerName} places ${logTokenRoad} on the border between ${logTokenRegionName0} and ${logTokenRegionName1}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_road} on the border between ${tkn_regionName_0} and ${tkn_regionName_1}');
     self::notifyAll('placeRoad', $message, [
       'player' => $player,
-      'logTokenRoad' => Utils::logTokenRoad($coalition),
-      'logTokenRegionName0' => Utils::logTokenRegionName($regionId0),
-      'logTokenRegionName1' => Utils::logTokenRegionName($regionId1),
+      'tkn_road' => $coalition.'_road',
+      'tkn_regionName_0' => $regionId0,
+      'tkn_regionName_1' => $regionId1,
       'move' => [
         'from' => $from,
         'to' => $to,
@@ -319,13 +318,11 @@ class Notifications
 
   public static function setupLoyalty($player, $coalition)
   {
-
-    $coalitionName = Game::Get()->loyalty[$coalition]['name'];
-    self::notifyAll("changeLoyalty", clienttranslate('${tkn_playerName} sets loyalty to ${coalitionName} ${logTokenCoalition}'), array(
+    self::notifyAll("changeLoyalty", clienttranslate('${tkn_playerName} sets loyalty to ${tkn_coalitionName} ${tkn_coalition}'), array(
       'player' => $player,
       'coalition' => $coalition,
-      'coalitionName' => $coalitionName,
-      'logTokenCoalition' => Utils::logTokenCoalition($coalition),
+      'tkn_coalitionName' => $coalition,
+      'tkn_coalition' => $coalition,
       'i18n' => ['coalitionName'],
     ));
   }
@@ -347,46 +344,12 @@ class Notifications
     self::notifyAll('moveToken', $message, $args);
   }
 
-  public static function discardFromCourt($card, $player, $moves = [], $courtOwnerPlayerId = null)
-  {
-    $messageOwnCourt =  clienttranslate('${tkn_playerName} discards ${logTokenCardName} from court ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
-    $messageOtherCourt =  clienttranslate('${tkn_playerName} discards ${logTokenCardName} from ${logTokenOtherPlayerName}\'s court ${returnedSpiesLog}${logTokenNewLine}${logTokenLargeCard}');
-    $hasSpies = count($moves) > 0;
-    $logs = [];
-    $args = [];
-    foreach ($moves as $index => $move) {
-      $playerId = explode("_", $move['tokenId'])[1];
-      $logs[] = '${logTokenCylinder' . $index . '}';
-      $args['logTokenCylinder' . $index] = Utils::logTokenCylinder($playerId);
-    }
-
-    self::notifyAll("discardFromCourt", $courtOwnerPlayerId === null ? $messageOwnCourt : $messageOtherCourt, array(
-      'player' => $player,
-      'logTokenNewLine' => Utils::logTokenNewLine(),
-      'courtOwnerPlayerId' => $courtOwnerPlayerId === null ? $player->getId() : $courtOwnerPlayerId,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenOtherPlayerName' => $courtOwnerPlayerId === null ? '' : Utils::logTokenPlayerName($courtOwnerPlayerId),
-      'cardId' => $card['id'],
-      'moves' => $moves,
-      'returnedSpiesLog' => $hasSpies ? [
-        'log' => clienttranslate('and returns ${spies}'),
-        'args' => [
-          'spies' => [
-            'log' => implode('', $logs),
-            'args' => $args
-          ]
-        ],
-      ] : '',
-    ));
-  }
-
   public static function returnCoalitionBlock($player, $type, $coalition, $from, $blockId, $weight)
   {
-    $message = clienttranslate('${tkn_playerName} removes ${logTokenRemoved}');
+    $message = $type === 'army' ? clienttranslate('${tkn_playerName} removes ${tkn_army}') : clienttranslate('${tkn_playerName} removes ${tkn_road}');
     self::notifyAll("returnCoalitionBlock", $message, [
       'player' => $player,
-      'logTokenRemoved' => implode(':', [$type, $coalition]),
+      'tkn_'.$type => $coalition.'_'.$type,
       'type' => $type,
       'coalition' => $coalition,
       'from' => $from,
@@ -398,12 +361,12 @@ class Notifications
   public static function returnCylinder($player, $cylinderOwnerId, $from, $cylinderId, $weight, $messageType = 'remove')
   {
     $message = $messageType === 'remove' ?
-      clienttranslate('${tkn_playerName} removes ${logTokenRemoved}') :
-      clienttranslate('${tkn_playerName} returns gift ${logTokenRemoved}');
+      clienttranslate('${tkn_playerName} removes ${tkn_cylinder}') :
+      clienttranslate('${tkn_playerName} returns gift ${tkn_cylinder}');
 
     self::notifyAll("returnCylinder", $message, [
       'player' => $player,
-      'logTokenRemoved' => Utils::logTokenCylinder($cylinderOwnerId),
+      'tkn_cylinder' => $cylinderOwnerId.'_cylinder',
       'from' => $from,
       'cylinderId' => $cylinderId,
       'weight' => $weight
@@ -418,8 +381,8 @@ class Notifications
     foreach ($spies as $playerId => $playerSpies) {
       // $playerId = explode("_", $move['tokenId'])[1];
       foreach ($playerSpies as $index => $spy) {
-        $logs[] = '${logTokenCylinder' . $playerId . $index . '}';
-        $args['logTokenCylinder' . $playerId . $index] = Utils::logTokenCylinder($playerId);
+        $logs[] = '${tkn_cylinder_' . $playerId . $index . '}';
+        $args['tkn_cylinder_' . $playerId . $index] = $playerId.'_cylinder';
       }
     }
 
@@ -437,12 +400,12 @@ class Notifications
   public static function declinePrize($cardId, $player)
   {
     $card = Cards::get($cardId);
-    $message =  clienttranslate('${tkn_playerName} declines ${logTokenCardName} as a prize${logTokenNewLine}${logTokenLargeCard}');
+    $message =  clienttranslate('${tkn_playerName} declines ${tkn_cardName} as a prize${tkn_newLine}${tkn_largeCard}');
     self::notifyAll("declinePrize", $message, array(
       'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $card['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
       'cardId' => $cardId,
     ));
   }
@@ -450,12 +413,12 @@ class Notifications
   public static function acceptPrize($cardId, $player)
   {
     $card = Cards::get($cardId);
-    $message =  clienttranslate('${tkn_playerName} accepts ${logTokenCardName} as a prize${logTokenNewLine}${logTokenLargeCard}');
+    $message =  clienttranslate('${tkn_playerName} accepts ${tkn_cardName} as a prize${tkn_newLine}${tkn_largeCard}');
     self::notifyAll("acceptPrize", $message, array(
       'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $card['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
     ));
   }
 
@@ -479,18 +442,18 @@ class Notifications
 
   public static function discardPrizes($prizes, $playerId)
   {
-    $message = clienttranslate('${tkn_playerName} discards ${numberOfPrizes} prize(s)${logTokenNewLine}${cardLog}');
+    $message = clienttranslate('${tkn_playerName} discards ${numberOfPrizes} prize(s)${tkn_newLine}${cardLog}');
     Notifications::log('prizes', $prizes);
     $logs = [];
     $args = [];
     foreach ($prizes as $index => $cardInfo) {
-      $logs[] = '${logTokenLargeCard' . $index . '}';
-      $args['logTokenLargeCard' . $index] = implode(':', ['largeCard', $cardInfo['id']]);
+      $logs[] = '${tkn_largeCard_' . $index . '}';
+      $args['tkn_largeCard_' . $index] = $cardInfo['id'];
     }
     self::notifyAll('discardPrizes', $message, [
       'prizes' => $prizes,
       'player' => PaxPamirPlayers::get($playerId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_newLine' => '<br>',
       'numberOfPrizes' => count($prizes),
       'cardLog' => [
         'log' => implode('', $logs),
@@ -501,25 +464,26 @@ class Notifications
 
   public static function discardMessage($card, $player, $from, $cardOwner = null)
   {
-    $message = clienttranslate('${tkn_playerName} discards ${logTokenCardName} from hand${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} discards ${tkn_cardName} from hand${tkn_newLine}${tkn_largeCard}');
     if ($card['type'] === EVENT_CARD) {
-      $message = clienttranslate('${tkn_playerName} discards event card${logTokenNewLine}${logTokenLargeCard}');
+      $message = clienttranslate('${tkn_playerName} discards event card${tkn_newLine}${tkn_largeCard}');
     }
     if ($from === COURT && $cardOwner !== null && $cardOwner->getId() !== $player->getId()) {
-      $message = clienttranslate('${tkn_playerName} discards ${logTokenCardName} from ${logTokenOtherPlayerName}\'s court${logTokenNewLine}${logTokenLargeCard}');
+      $message = clienttranslate('${tkn_playerName} discards ${tkn_cardName} from ${tkn_playerName_2}\'s court${tkn_newLine}${tkn_largeCard}');
     } else if ($from === COURT) {
-      $message = clienttranslate('${tkn_playerName} discards ${logTokenCardName} from court${logTokenNewLine}${logTokenLargeCard}');
+      $message = clienttranslate('${tkn_playerName} discards ${tkn_cardName} from court${tkn_newLine}${tkn_largeCard}');
     }
 
     self::notifyAll("discardMessage", $message, array(
       'player' => $player,
-      'logTokenCardName' => $card['type'] === EVENT_CARD ? '' : Utils::logTokenCardName($card['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenOtherPlayerName' => $cardOwner === null ? '' : Utils::logTokenPlayerName($cardOwner->getId()),
+      'tkn_cardName' => $card['type'] === EVENT_CARD ? '' : $card['name'],
+      'tkn_largeCard' => $card['id'],
+      'tkn_playerName_2' => $cardOwner === null ? '' : $cardOwner->getName(),
       'cardId' => $card['id'],
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_newLine' => '<br>',
     ));
   }
+  
 
   public static function discard($card, $player, $from, $to)
   {
@@ -544,13 +508,13 @@ class Notifications
   public static function discardEventCardFromMarket($card, $location, $to)
   {
 
-    self::notifyAll("discardFromMarket", clienttranslate('${tkn_playerName} discards event card from the market:${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("discardFromMarket", clienttranslate('${tkn_playerName} discards event card from the market:${tkn_newLine}${tkn_largeCard}'), array(
       'player' => PaxPamirPlayers::get(),
       'cardId' => $card['id'],
       'from' => $location,
       'to' => $to,
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_largeCard' => $card['id'],
+      'tkn_newLine' => '<br>',
     ));
   }
 
@@ -564,11 +528,10 @@ class Notifications
 
   public static function takeRupeesFromSupply($player, $amount)
   {
-    self::notifyAll("takeRupeesFromSupply", clienttranslate('${tkn_playerName} takes ${amount} ${logTokenRupee} from the bank'), array(
+    self::notifyAll("takeRupeesFromSupply", clienttranslate('${tkn_playerName} takes ${amount} ${tkn_rupee} from the bank'), array(
       'player' => $player,
       'amount' => $amount,
-      'logTokenRupee' => Utils::logTokenRupee(),
-      'logTokenLeverage' => Utils::logTokenLeverage(),
+      'tkn_rupee' => 'rupee(s)',
     ));
   }
 
@@ -589,65 +552,65 @@ class Notifications
 
   public static function leveragedCardPlay($player, $amount)
   {
-    self::notifyAll("takeRupeesFromSupply", clienttranslate('${tkn_playerName} gets ${amount} ${logTokenRupee} for ${logTokenLeverage}'), array(
+    self::notifyAll("takeRupeesFromSupply", clienttranslate('${tkn_playerName} gets ${amount} ${tkn_rupee} for ${tkn_leverage}'), array(
       'player' => $player,
       'amount' => $amount,
-      'logTokenRupee' => Utils::logTokenRupee(),
-      'logTokenLeverage' => Utils::logTokenLeverage(),
+      'tkn_rupee' => 'rupee(s)',
+      'tkn_leverage' => 'leverage',
     ));
   }
 
   public static function returnRupeesForDiscardingLeveragedCard($player, $amount)
   {
-    self::notifyAll("returnRupeesToSupply", clienttranslate('${tkn_playerName} returns ${amount} ${logTokenRupee} to the supply for ${logTokenLeverage}'), array(
+    self::notifyAll("returnRupeesToSupply", clienttranslate('${tkn_playerName} returns ${amount} ${tkn_rupee} to the supply for ${tkn_leverage}'), array(
       'player' => $player,
       'amount' => $amount,
-      'logTokenRupee' => Utils::logTokenRupee(),
-      'logTokenLeverage' => Utils::logTokenLeverage(),
+      'tkn_rupee' => 'rupee(s)',
+      'tkn_leverage' => 'leverage',
     ));
   }
 
   public static function additionalDiscardsForDiscardingLeveragedCard($player, $number)
   {
-    self::notifyAll("additionalDiscardsLeverage", clienttranslate('${tkn_playerName} must discard ${number} ${logTokenCardIcon} for ${logTokenLeverage}'), array(
+    self::notifyAll("additionalDiscardsLeverage", clienttranslate('${tkn_playerName} must discard ${number} ${tkn_cardIcon} for ${tkn_leverage}'), array(
       'player' => $player,
       'number' => $number,
-      'logTokenCardIcon' => Utils::logTokenCardIcon(),
-      'logTokenLeverage' => Utils::logTokenLeverage(),
+      'tkn_cardIcon' => 'card(s)',
+      'tkn_leverage' => 'leverage',
     ));
   }
 
   public static function leveragedDiscardRemaining($player)
   {
-    self::notifyAll("leveragedDiscardRemaining", clienttranslate('${tkn_playerName} discards remaining cards due to ${logTokenLeverage}'), array(
+    self::notifyAll("leveragedDiscardRemaining", clienttranslate('${tkn_playerName} discards remaining cards due to ${tkn_leverage}'), array(
       'player' => $player,
-      'logTokenLeverage' => Utils::logTokenLeverage(),
+      'tkn_leverage' => 'leverage',
     ));
   }
 
   public static function move($cardId, $player)
   {
-    self::notifyAll("move", clienttranslate('${tkn_playerName} uses ${logTokenCardName} to move${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("move", clienttranslate('${tkn_playerName} uses ${tkn_cardName} to move${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine()
+      'tkn_cardName' => Cards::get($cardId)['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
     ));
   }
 
   public static function startBribeNegotiation($player, $card,  $amount, $action)
   {
     $message =  $action === 'playCard' ?
-      clienttranslate('${tkn_playerName} wants to play ${logTokenCardName} and offers bribe of ${amount} rupee(s)${logTokenNewLine}${logTokenLargeCard}') :
-      clienttranslate('${tkn_playerName} wants to use ${logTokenCardName} to ${action} and offers bribe of ${amount} rupee(s)${logTokenNewLine}${logTokenLargeCard}');
+      clienttranslate('${tkn_playerName} wants to play ${tkn_cardName} and offers bribe of ${amount} rupee(s)${tkn_newLine}${tkn_largeCard}') :
+      clienttranslate('${tkn_playerName} wants to use ${tkn_cardName} to ${action} and offers bribe of ${amount} rupee(s)${tkn_newLine}${tkn_largeCard}');
 
     self::notifyAll("startBribeNegotiation", $message, [
       'player' => $player,
       'amount' => $amount,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'tkn_cardName' => $card['name'],
       'action' => $action,
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_largeCard' => $card['id'],
+      'tkn_newLine' => '<br>',
     ]);
   }
 
@@ -669,12 +632,13 @@ class Notifications
 
   public static function payBribe($briberId, $rulerId, $rupees)
   {
-    self::notifyAll("payBribe", clienttranslate('${tkn_playerName} pays ${rupees} rupee(s) to ${logTokenPlayerName}'), array(
+    self::notifyAll("payBribe", clienttranslate('${tkn_playerName} pays ${rupees} ${tkn_rupee} to ${tkn_playerName_2}'), array(
       'player' => PaxPamirPlayers::get($briberId),
       'rulerId' => $rulerId,
       'briberId' => $briberId,
       'rupees' => $rupees,
-      'logTokenPlayerName' => Utils::logTokenPlayerName($rulerId),
+      'tkn_playerName_2' => PaxPamirPlayers::get($rulerId)->getName(),
+      'tkn_rupee' => 'rupee(s)',
     ));
   }
 
@@ -700,13 +664,13 @@ class Notifications
 
   public static function placeSpy($cylinderId, $player, $cardId, $from, $to)
   {
-    $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} on ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_cylinder} on ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     self::notifyAll('placeCylinder', $message, [
       'player' => $player,
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenCylinder' => Utils::logTokenCylinder(PaxPamirPlayers::get()->getId()),
-      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_largeCard' => $cardId,
+      'tkn_cylinder' => PaxPamirPlayers::get()->getId().'_cylinder',
+      'tkn_cardName' => Cards::get($cardId)['name'],
+      'tkn_newLine' => '<br>',
       'move' => [
         'from' => $from,
         'to' => $to,
@@ -717,11 +681,11 @@ class Notifications
 
   public static function placeTribe($cylinderId, $player, $regionId, $from, $to)
   {
-    $message = clienttranslate('${tkn_playerName} places ${logTokenCylinder} in ${logTokenRegionName}');
+    $message = clienttranslate('${tkn_playerName} places ${tkn_cylinder} in ${tkn_regionName}');
     self::notifyAll('placeCylinder', $message, [
       'player' => $player,
-      'logTokenCylinder' => Utils::logTokenCylinder($player->getId()),
-      'logTokenRegionName' => Utils::logTokenRegionName($regionId),
+      'tkn_cylinder' => $player->getId().'_cylinder',
+      'tkn_regionName' => $regionId,
       'move' =>
       [
         'from' => $from,
@@ -736,14 +700,14 @@ class Notifications
   public static function playCard($card, $firstCard, $side, $playerId)
   {
     // Minus 1 because $courtCards includes the card currently being played
-    $message = $firstCard ? clienttranslate('${tkn_playerName} plays ${logTokenCardName} ${logTokenCard} to his court') :
-      clienttranslate('${tkn_playerName} plays ${logTokenCardName} ${logTokenCard} to the ${side} end of his court');
+    $message = $firstCard ? clienttranslate('${tkn_playerName} plays ${tkn_cardName} ${tkn_card} to his court') :
+      clienttranslate('${tkn_playerName} plays ${tkn_cardName} ${tkn_card} to the ${side} end of his court');
     self::notifyAll("playCard", $message, array(
       'player' => PaxPamirPlayers::get($playerId),
       'card' => $card,
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
+      'tkn_cardName' => $card['name'],
       'bribe' => false,
-      'logTokenCard' => Utils::logTokenCard($card['id']),
+      'tkn_card' => $card['id'],
       'side' => $side === 'left' ? clienttranslate('left') : clienttranslate('right'),
       'i18n' => ['side'],
     ));
@@ -751,23 +715,23 @@ class Notifications
 
   public static function publicWithdrawalEvent($location)
   {
-    $message = clienttranslate('All ${logTokenRupee} on it are removed from the game');
+    $message = clienttranslate('All ${tkn_rupee} on it are removed from the game');
     self::notifyAll("publicWithdrawal", $message, [
       'marketLocation' => $location,
-      'logTokenRupee' => Utils::logTokenRupee(),
+      'tkn_rupee' => 'rupee(s)',
     ]);
   }
 
   public static function purchaseCard($card, $marketLocation, $newLocation, $receivedRupees, $rupeesOnCards)
   {
     $cardName = $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'];
-    self::notifyAll("purchaseCard",  clienttranslate('${tkn_playerName} purchases ${logTokenCardName} from the market${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("purchaseCard",  clienttranslate('${tkn_playerName} purchases ${tkn_cardName} from the market${tkn_newLine}${tkn_largeCard}'), array(
       'player' => PaxPamirPlayers::get(),
       'receivedRupees' => $receivedRupees,
       'card' => $card,
-      'logTokenCardName' => Utils::logTokenCardName($cardName,),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($card['id']),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $cardName,
+      'tkn_largeCard' => $card['id'],
+      'tkn_newLine' => '<br>',
       'marketLocation' => $marketLocation,
       'newLocation' => $newLocation,
       'rupeesOnCards' => $rupeesOnCards,
@@ -776,9 +740,10 @@ class Notifications
 
   public static function purchaseGift($player, $value)
   {
-    self::notifyAll("purchaseGift", clienttranslate('${tkn_playerName} purchases a gift for ${value} rupees'), array(
+    self::notifyAll("purchaseGift", clienttranslate('${tkn_playerName} purchases a gift for ${value} ${tkn_rupee}'), array(
       'player' => $player,
       'value' => $value,
+      'tkn_rupee' => 'rupee(s)'
       // 'rupeesOnCards' => $rupeesOnCards,
       // 'rupeeChange' => -$value,
       // 'influenceChange' => Events::isKohINoorRecoveredActive($player) ? 2 : 1,
@@ -818,32 +783,32 @@ class Notifications
 
   public static function tax($cardId, $player)
   {
-    self::notifyAll("tax", clienttranslate('${tkn_playerName} taxes with ${logTokenCardName}${logTokenNewLine}${logTokenLargeCard}'), array(
+    self::notifyAll("tax", clienttranslate('${tkn_playerName} taxes with ${tkn_cardName}${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
-      'logTokenCardName' => Utils::logTokenCardName(Cards::get($cardId)['name']),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => Cards::get($cardId)['name'],
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
     ));
   }
 
   public static function taxMarket($amount, $player, $selectedRupees)
   {
-    self::notifyAll("taxMarket", clienttranslate('${tkn_playerName} takes ${amount} ${logTokenRupee} from the market'), array(
+    self::notifyAll("taxMarket", clienttranslate('${tkn_playerName} takes ${amount} ${tkn_rupee} from the market'), array(
       'player' => $player,
       'amount' => $amount,
-      'logTokenRupee' => Utils::logTokenRupee(),
+      'tkn_rupee' => 'rupee(s)',
       'selectedRupees' => $selectedRupees
     ));
   }
 
   public static function taxPlayer($amount, $player, $taxedPlayerId)
   {
-    self::notifyAll("taxPlayer", clienttranslate('${tkn_playerName} takes ${amount} ${logTokenRupee} from ${logTokenPlayerName}'), array(
+    self::notifyAll("taxPlayer", clienttranslate('${tkn_playerName} takes ${amount} ${tkn_rupee} from ${tkn_playerName_2}'), array(
       'player' => $player,
       'amount' => $amount,
       'taxedPlayerId' => $taxedPlayerId,
-      'logTokenRupee' => Utils::logTokenRupee(),
-      'logTokenPlayerName' => Utils::logTokenPlayerName($taxedPlayerId)
+      'tkn_rupee' => 'rupee(s)',
+      'tkn_playerName_2' => PaxPamirPlayers::get($taxedPlayerId)->getName(),
     ));
   }
 
@@ -856,8 +821,8 @@ class Notifications
 
   public static function wakhanDrawCard($deck, $discardPile)
   {
-    self::notifyAll("wakhanDrawCard", clienttranslate('${logTokenPlayerName} draws a new AI card'), array(
-      'logTokenPlayerName' => Utils::logTokenPlayerName(1),
+    self::notifyAll("wakhanDrawCard", clienttranslate('${tkn_playerName} draws a new AI card'), array(
+      'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
       'deck' => $deck,
       'discardPile' => $discardPile,
     ));
@@ -866,18 +831,18 @@ class Notifications
   public static function wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
   {
     $messages = [
-      'firstCourtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to her court ${logTokenNewLine}${logTokenLargeCard}'),
-      'courtCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and plays it to the ${side} end of her court ${logTokenNewLine}${logTokenLargeCard}'),
-      'eventCard' => clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} ${logTokenNewLine}${logTokenLargeCard}'),
+      'firstCourtCard' => clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} and plays it to her court ${tkn_newLine}${tkn_largeCard}'),
+      'courtCard' => clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} and plays it to the ${side} end of her court ${tkn_newLine}${tkn_largeCard}'),
+      'eventCard' => clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} ${tkn_newLine}${tkn_largeCard}'),
     ];
     $message = $messages[$type];
     $cardId = $card['id'];
 
     self::notifyAll("wakhanRadicalize", $message, array(
-      'logTokenCardName' => Utils::logTokenCardName($card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title']),
-      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $card['type'] === COURT_CARD ? $card['name'] : $card['purchased']['title'],
+      'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
       'marketLocation' => $marketLocation,
       'newLocation' => $newLocation,
       'card' => $card,
@@ -890,14 +855,14 @@ class Notifications
 
   public static function wakhanRadicalizeDiscard($card, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
   {
-    $message = clienttranslate('${logTokenPlayerName} radicalizes ${logTokenCardName} and discards it ${logTokenNewLine}${logTokenLargeCard}');
+    $message = clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} and discards it ${tkn_newLine}${tkn_largeCard}');
     $cardId = $card['id'];
 
     self::notifyAll("wakhanRadicalize", $message, array(
-      'logTokenCardName' => Utils::logTokenCardName($card['name']),
-      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
-      'logTokenLargeCard' => Utils::logTokenLargeCard($cardId),
-      'logTokenNewLine' => Utils::logTokenNewLine(),
+      'tkn_cardName' => $card['name'],
+      'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
+      'tkn_largeCard' => $cardId,
+      'tkn_newLine' => '<br>',
       'marketLocation' => $marketLocation,
       'newLocation' => $newLocation,
       'card' => $card,
@@ -908,8 +873,8 @@ class Notifications
 
   public static function wakhanReshuffleDeck($deck, $discardPile)
   {
-    self::notifyAll("wakhanReshuffleDeck", clienttranslate('${logTokenPlayerName} reshuffles the AI cards, because the draw deck is empty'), array(
-      'logTokenPlayerName' => Utils::logTokenPlayerName(1),
+    self::notifyAll("wakhanReshuffleDeck", clienttranslate('${tkn_playerName} reshuffles the AI cards, because the draw deck is empty'), array(
+      'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
       'topOfDeck' => $deck,
       'topOfDiscardPile' => $discardPile,
     ));
@@ -924,8 +889,8 @@ class Notifications
 
   public static function wakhansAmbition()
   {
-    Notifications::message(clienttranslate('${logTokenPlayerName}\'s Ambition triggers'),[
-      'logTokenPlayerName' => Utils::logTokenPlayerName(WAKHAN_PLAYER_ID),
+    Notifications::message(clienttranslate('${tkn_playerName}\'s Ambition triggers'),[
+      'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
     ]);
   }
 

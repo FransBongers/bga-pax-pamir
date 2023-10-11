@@ -387,11 +387,11 @@ trait WakhanActionBattleTrait
     $from = $block['location'];
     $coalition = explode('_', $blockId)[1];
     $to = implode('_', ['blocks', $coalition]);
-    $logTokenType = Utils::startsWith($from, "armies") ? 'army' : 'road';
-    $logTokenData = $coalition;
+    $tknType = Utils::startsWith($from, "armies") ? 'army' : 'road';
+    $tknData = $coalition;
 
     $state = Tokens::insertOnTop($blockId, $to);
-    Notifications::returnCoalitionBlock(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $logTokenType, $logTokenData, $from, $blockId, $state);
+    Notifications::returnCoalitionBlock(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $tknType, $tknData, $from, $blockId, $state);
   }
 
   function wakhanReturnCylinder($cylinder, $battleLocation)

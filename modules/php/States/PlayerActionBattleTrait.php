@@ -134,24 +134,24 @@ trait PlayerActionBattleTrait
 
       $from = $tokenInfo['location'];
       $to = '';
-      $logTokenType = '';
-      $logTokenData = '';
+      $tknType = '';
+      $tknData = '';
       if ($isBlock) {
         $to = implode('_', ['blocks', $splitTokenId[1]]);
-        $logTokenData = $splitTokenId[1];
+        $tknData = $splitTokenId[1];
         if (Utils::startsWith($from, "armies")) {
-          $logTokenType = 'army';
+          $tknType = 'army';
         }
         if (Utils::startsWith($from, "roads")) {
-          $logTokenType = 'road';
+          $tknType = 'road';
         }
       };
 
       if ($isCylinder) {
         $cylinderOwnerPlayerId = intval($splitTokenId[1]);
         $to = implode('_', ['cylinders', $cylinderOwnerPlayerId]);
-        $logTokenType = 'cylinder';
-        $logTokenData = $cylinderOwnerPlayerId;
+        $tknType = 'cylinder';
+        $tknData = $cylinderOwnerPlayerId;
 
         if (!in_array($cylinderOwnerPlayerId, $playersWithRemovedCylinders)) {
           $playersWithRemovedCylinders[] = $cylinderOwnerPlayerId;
@@ -162,7 +162,7 @@ trait PlayerActionBattleTrait
       if ($isCylinder) {
         Notifications::returnCylinder($player, intval($splitTokenId[1]), $location, $tokenId, $state);
       } else {
-        Notifications::returnCoalitionBlock($player, $logTokenType, $logTokenData, $from, $tokenId, $state);
+        Notifications::returnCoalitionBlock($player, $tknType, $tknData, $from, $tokenId, $state);
       }
     };
 

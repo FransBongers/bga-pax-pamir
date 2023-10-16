@@ -52,7 +52,7 @@ trait DebugTrait
 
   function test()
   {
-    Cards::move('card_108','events_2371052');
+    Cards::move('card_114',Locations::market(1,0));
     // Globals::setWakhanActive(true);
     // $this->wakhanBattle();
     // Globals::setWakhanActive(false);

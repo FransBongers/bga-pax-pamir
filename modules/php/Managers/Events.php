@@ -32,7 +32,6 @@ class Events
 
   public static function dispatchResolvePurchasedEffect($actionStack)
   {
-    Notifications::log('dispatchResolvePurchasedEffect',$actionStack);
     $action = array_pop($actionStack);
     $event = $action['data']['event'];
     $playerId = $action['playerId'];

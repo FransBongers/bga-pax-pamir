@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
@@ -74,7 +75,7 @@ trait ResolveEventTrait
     };
 
     $this->resolveEventCardOtherPersuasiveMethods($player, $selectedPlayer);
-
+    Log::checkpoint();
     ActionStack::next($actionStack);
   }
 

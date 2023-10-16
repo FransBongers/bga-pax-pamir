@@ -223,7 +223,10 @@ trait WakhanTurnTrait
       return null;
     }
     $cylinder = Wakhan::getCylinderToPlace();
-    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, SPY, ['cardId' => $card['id']]);
+    $extraActions = $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, SPY, ['cardId' => $card['id']]);
+    if (count($extraActions) > 0) {
+      ActionStack::push($extraActions);
+    }
     return true;
   }
 }

@@ -52,6 +52,10 @@ trait DebugTrait
 
   function test()
   {
+    Cards::move('card_108','events_2371052');
+    // Globals::setWakhanActive(true);
+    // $this->wakhanBattle();
+    // Globals::setWakhanActive(false);
     // $adjacentCards = Cards::getMany(['card_100','card_1','card_93','card_38','card_54'])->toArray();
     // Notifications::log('adjacentCards',$adjacentCards);
     // $move = $this->wakhanGetNextSpyMove();
@@ -79,7 +83,7 @@ trait DebugTrait
     // Cards::setUsed('card_81',0);
     
     // Cards::move('card_106',ACTIVE_EVENTS);
-    // Cards::move('card_105','events_2371052');
+    
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_101',Locations::market(0,0));
     // Cards::move('card_99',DISCARD);
@@ -335,7 +339,9 @@ trait DebugTrait
 		// These are the id's from the BGAtable I need to debug.
 		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
 		$ids = [
-			84370180, // 2371052
+      92332982,
+      84571542,
+			89835008, // 2371052
       // 86878411, // 2371053
       // 84053089, // 2371054
       // 83886430, // 2371055

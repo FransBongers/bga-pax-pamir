@@ -745,9 +745,10 @@ class PPPlayer {
     const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
     this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
     this.incCounter({ counter: 'courtCount', value: -1 });
-    if (cardInfo.loyalty) {
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       this.incCounter({ counter: 'influence', value: -1 });
     }
+    
     const node = dojo.byId(cardId);
     node.classList.remove('pp_card_in_court', `pp_player_${this.playerId}`);
     if (to === DISCARD) {

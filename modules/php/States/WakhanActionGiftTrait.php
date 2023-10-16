@@ -106,9 +106,12 @@ trait WakhanActionGiftTrait
   {
     $cylinder = Wakhan::getCylinderToPlace();
 
-    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, GIFT, [
+    $extraActions = $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, GIFT, [
       'value' => $value,
       'type' => GIFT,
     ]);
+    if (count($extraActions) > 0) {
+      ActionStack::push($extraActions);
+    }
   }
 }

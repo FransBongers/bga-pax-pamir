@@ -19,7 +19,7 @@
 declare const ebg;
 declare const $;
 declare const dojo: Dojo;
-declare const _;
+declare const _: (stringToTranslate: string) => string;
 declare const g_gamethemeurl;
 declare const playSound;
 

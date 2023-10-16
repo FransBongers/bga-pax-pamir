@@ -19,9 +19,8 @@
 - check tooltips when multiple cards in the same card log
 
 ## Wakhan
-- influence counts don't seem to be correct after discarding?
-- When Wakhan betrays a political card the overthrow rule does not seem to be followed?
-- When Wakhan resolves discard from hand cleanup and player needs to discard, the players turn is skipped?
+- When Wakhan betrays a political card the overthrow rule does not seem to be followed? => might be issue with selecting triobe and no overthrow
+- When Wakhan resolves discard from hand cleanup and player needs to discard, the players turn is skipped? => other persuasive methods
 - Check if there are situations where there is no spy zone for a card?
 
 ### UI

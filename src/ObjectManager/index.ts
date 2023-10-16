@@ -19,6 +19,12 @@ class DiscardPile {
   }
 
   setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+    const discardPileTitle = $('pp_discard_pile_title');
+    if (!discardPileTitle) {
+      const discardPile: HTMLElement = $('pp_discard_pile');
+      discardPile.insertAdjacentHTML('afterbegin',`<span id="pp_discard_pile_title" >${_('Discard')}</span>`)
+    }
+    
     if (gamedatas.discardPile.topCard) {
       this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
     }

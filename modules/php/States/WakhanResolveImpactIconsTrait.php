@@ -113,13 +113,19 @@ trait WakhanResolveImpactIconsTrait
 
     $cylinder = Wakhan::getCylinderToPlace();
 
-    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, SPY, ['cardId' => $cardToPlaceSpy['id']]);
+    $extraActions = $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, SPY, ['cardId' => $cardToPlaceSpy['id']]);
+    if (count($extraActions) > 0) {
+      ActionStack::push($extraActions);
+    }
   }
 
   function wakhanPlaceTribe($card)
   {
     $cylinder = Wakhan::getCylinderToPlace();
 
-    $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, TRIBE, ['region' => $card['region']]);
+    $extraActions = $this->resolvePlaceCylinder(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $cylinder, TRIBE, ['region' => $card['region']]);
+    if (count($extraActions) > 0) {
+      ActionStack::push($extraActions);
+    }
   }
 }

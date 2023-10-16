@@ -35,6 +35,10 @@ class PaxPamirZone {
       // dojo.style(this.containerId, 'position', 'relative');
       // this.containerElement.style.position = 'relative';
     }
+    // TODO: results in issue with zIndex. Check why
+    // window.addEventListener("resize", () => {
+    //   this.updateDisplay();
+    // });
   }
 
   public getContainerId(): string {
@@ -127,7 +131,7 @@ class PaxPamirZone {
         weight,
       });
     });
-    debug('items after push',this.items);
+
     this.sortItems();
 
     const animations: Promise<void>[] = [];

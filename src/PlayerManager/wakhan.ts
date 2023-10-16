@@ -108,6 +108,39 @@ class PPWakhanPlayer extends PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  async discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
+    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
+    this.incCounter({ counter: 'courtCount', value: -1 });
+    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
+      const wakhanInfluence: WakhanInfluence = {
+        type: 'wakhanInfluence',
+        influence: {
+          [AFGHAN]: 0,
+          [BRITISH]: 0,
+          [RUSSIAN]: 0,
+        },
+      };
+      wakhanInfluence.influence[cardInfo.loyalty] = -1;
+      this.incWakhanInfluence({wakhanInfluence});
+    }
+    const node = dojo.byId(cardId);
+    node.classList.remove('pp_card_in_court', `pp_player_${this.playerId}`);
+    if (to === DISCARD) {
+      await this.game.objectManager.discardPile.discardCardFromZone({
+        cardId,
+        zone: this.court,
+      });
+    } else {
+      await Promise.all([
+        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
+          elements: { id: cardId },
+        }),
+        this.court.remove({ input: cardId }),
+      ]);
+    }
+  }
+
   // Only used for OtherPersuasiveMethods event
   async discardHandCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }): Promise<void> {
     if (to === DISCARD) {

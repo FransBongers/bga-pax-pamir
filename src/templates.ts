@@ -80,7 +80,7 @@ const tplActiveEvents = () => {
 
 const tplPlayerHand = ({playerId, playerName}: {playerId: number; playerName: string;}) => {
   return `<div id="pp_player_hand_${playerId}" class="pp_player_hand">
-            <div id="pp_player_hand_title" class="pp_tableau_title"><span>${playerName}'s hand</span></div>
+            <div id="pp_player_hand_title" class="pp_tableau_title"><span>${(_("${playerName}'s hand") as string).replace('${playerName}',playerName)}</span></div>
             <div id="pp_player_hand_cards" class="pp_player_hand_cards"></div>
             <div id="pp_player_hand_size_${playerId}" class="pp_player_hand_size">
               <span id="pp_hand_count_${playerId}" class="pp_card_count"></span><span>/</span><span id="pp_hand_limit_${playerId}" class="pp_card_limit"></span>
@@ -147,7 +147,7 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
       </div>
       <div class="pp_player_tableau_right">
           <div class="pp_player_tableau_title_container">
-              <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title"><span>${playerName}'s court</span></div>
+              <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title"><span>${(_("${playerName}'s court") as string).replace('${playerName}',playerName)}</span></div>
               <div id="pp_tableau_title_icons_player_${playerId}" class="pp_player_tableau_icons">
                   <div id="rupees_tableau_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_${playerId}" class="pp_icon_count"><span id="rupee_count_tableau_${playerId}_counter"></span></div></div>
                   <div id="cards_tableau_${playerId}" class="pp_icon pp_card_icon_tableau"><div id="card_count_tableau_${playerId}" class="pp_icon_count"><span id="card_count_tableau_${playerId}_counter"></span></div></div>
@@ -217,7 +217,7 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
                 </div>
                 <div class="pp_player_tableau_right">
                     <div class="pp_player_tableau_title_container">
-                        <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title"><span>${playerName}'s court</span></div>
+                        <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title" style="margin-right: 236px;"><span>${(_("${playerName}'s court") as string).replace('${playerName}',playerName)}</span></div>
                         <div id="pp_tableau_title_icons_player_${playerId}" class="pp_player_tableau_icons">
                             <div id="rupees_tableau_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_${playerId}" class="pp_icon_count"><span id="rupee_count_tableau_${playerId}_counter"></span></div></div>
                         </div>

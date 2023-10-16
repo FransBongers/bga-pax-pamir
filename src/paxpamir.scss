@@ -247,6 +247,7 @@ html {
 
 .pp_army.pp_selectable,
 .pp_road.pp_selectable {
+  z-index: 10 !important;
   filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
     drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
 }
@@ -313,6 +314,7 @@ html {
 }
 
 .pp_cylinder.pp_selectable {
+  z-index: 10 !important;
   filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
     drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
 }

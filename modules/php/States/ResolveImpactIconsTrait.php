@@ -117,9 +117,9 @@ trait ResolveImpactIconsTrait
 
     $cylinderType = $action['data']['type'];
 
-    $this->resolvePlaceCylinder($player, $cylinder, $cylinderType, $action['data']);
-
+    $extraActions = $this->resolvePlaceCylinder($player, $cylinder, $cylinderType, $action['data']);
     array_pop($actionStack);
+    $actionStack = array_merge($actionStack,$extraActions);
     ActionStack::next($actionStack);
   }
 
@@ -315,6 +315,7 @@ trait ResolveImpactIconsTrait
     Tokens::move($cylinderId, $to);
     Tokens::setUsed($cylinderId, USED);
 
+    $extraActions = [];
     $fromRegionId = explode('_', $from)[1];
     $wasTribe = Utils::startsWith($from, 'tribes');
     // Ruler change in former region: 
@@ -322,6 +323,9 @@ trait ResolveImpactIconsTrait
     // - from region is not the same as the to region
     if ($wasTribe && $from !== $to) {
       Map::checkRulerChange($fromRegionId);
+      $extraActions[] = ActionStack::createAction(DISPATCH_OVERTHROW_TRIBE, $playerId, [
+        'region' => $fromRegionId
+      ]);
     }
     // $isTribe = Utils::startsWith($from, 'tribes');
     // if ($from !== "cylinders_" . $playerId && ($isTribe && (($cylinderType === SPY || $cylinderType === GIFT) || (isset($regionId) &&  $fromRegionId !== $regionId)))) {
@@ -332,5 +336,6 @@ trait ResolveImpactIconsTrait
       $regionId = $actionData['region'];
       Map::checkRulerChange($regionId);
     }
+    return $extraActions;
   }
 }

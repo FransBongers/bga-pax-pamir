@@ -91,7 +91,6 @@
             <div id="pp_temp_discarded_card">
             </div>
             <div id="pp_discard_pile">
-                <span>Discard</span>
                 <div id="pp_pile_discarded_card" class="pp_discarded_card"></div>
                 <div class="pp_deck_counters_container" style="position: absolute; right: -4px; bottom: -4px;">
                     <div id="pp_discard_pile_counter_container" class="pp_card_counter_container">

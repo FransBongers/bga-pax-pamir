@@ -297,9 +297,9 @@ class Paxpamir extends Table
         }
 
         // Is below needed?
-        $activePlayerId = PaxPamirPlayers::getActiveId();
+        // $activePlayerId = PaxPamirPlayers::getActiveId();
         $data['localState'] = [
-            'activePlayer' => $data['players'][$activePlayerId],
+            // 'activePlayer' => $data['players'][$activePlayerId],
             // 'favoredSuit' => $data['favoredSuit'],
             'remainingActions' => Globals::getRemainingActions(),
             'usedCards' => Cards::getUnavailableCards(),

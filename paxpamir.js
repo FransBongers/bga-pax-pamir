@@ -650,10 +650,6 @@ var PaxPamirZone = (function () {
                             var _b;
                             var element = _a.element, id = _a.id, from = _a.from, zIndex = _a.zIndex, duration = _a.duration;
                             var node = dojo.place(element, _this.containerId);
-                            if (_this.containerId === 'pp_punjab_armies') {
-                                console.log('element', element);
-                                console.log('node', node);
-                            }
                             node.style.position = 'absolute';
                             node.style.zIndex = "".concat(zIndex || 0);
                             _this.setItemCoords({ node: node });
@@ -1557,7 +1553,7 @@ var tplCourtCardTooltip = function (_a) {
     }
     return tplCardTooltipContainer({
         card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
-        content: "\n  <span class=\"pp_title\">".concat(cardInfo.name, "</span>\n  <span class=\"pp_flavor_text\">").concat(cardInfo.flavorText, "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  "),
+        content: "\n  <span class=\"pp_title\">".concat(_(cardInfo.name), "</span>\n  <span class=\"pp_flavor_text\">").concat(_(cardInfo.flavorText), "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  "),
     });
 };
 var tplEventCardTooltipDiscarded = function (_a) {
@@ -1573,14 +1569,14 @@ var tplEventCardTooltipDiscarded = function (_a) {
         return tplTooltipImpactIcon({ impactIcon: impactIcon, loyalty: null });
     }
     else {
-        return "<span class=\"pp_event_effect_text\" style=\"margin-bottom: 16px;\">".concat(description || '', "</span>");
+        return "<span class=\"pp_event_effect_text\" style=\"margin-bottom: 16px;\">".concat(_(description) || '', "</span>");
     }
 };
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
     return tplCardTooltipContainer({
         card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
-        content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(cardInfo.discarded.title || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(cardInfo.purchased.title || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(cardInfo.purchased.description || '', "</span>\n  "),
+        content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(_(cardInfo.discarded.title) || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(_(cardInfo.purchased.title) || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(_(cardInfo.purchased.description) || '', "</span>\n  "),
     });
 };
 var tplSuitToolTip = function (_a) {
@@ -6278,16 +6274,20 @@ var ClientInitialBribeCheckState = (function () {
         }
         this.game.addCancelButton();
     };
-    ClientInitialBribeCheckState.prototype.checkBribe = function (_a) {
-        var cardId = _a.cardId, action = _a.action, next = _a.next;
+    ClientInitialBribeCheckState.prototype.calulateBribe = function (_a) {
+        var cardId = _a.cardId, action = _a.action;
         var disregardForCustomsActive = this.game.activeEvents.hasCard({ cardId: 'card_107' });
         var charismaticCourtiersAcitve = action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
         var civilServiceReformsActive = action !== 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CIVIL_SERVICE_REFORMS });
         if (disregardForCustomsActive || charismaticCourtiersAcitve || civilServiceReformsActive) {
-            next({ bribe: null });
-            return;
+            return null;
         }
         var bribe = action === 'playCard' ? this.checkBribePlayCard({ cardId: cardId }) : this.checkBribeCardAction({ cardId: cardId });
+        return bribe;
+    };
+    ClientInitialBribeCheckState.prototype.checkBribe = function (_a) {
+        var cardId = _a.cardId, action = _a.action, next = _a.next;
+        var bribe = this.calulateBribe({ cardId: cardId, action: action });
         if (bribe === null) {
             next({ bribe: null });
         }
@@ -6952,8 +6952,12 @@ var PlayerActionsState = (function () {
                     return;
                 }
                 var minActionCost = _this.game.getMinimumActionCost({ action: action });
+                if (_this.game.gameOptions.wakhanEnabled) {
+                    var bribe = _this.game.activeStates.clientInitialBribeCheck.calulateBribe({ cardId: id, action: action });
+                    minActionCost = minActionCost + (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID ? bribe.amount : 0);
+                }
                 if (rupees < minActionCost) {
-                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not have enough rupees pay for this') });
+                    _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not have enough rupees to pay for this') });
                     return;
                 }
                 var canPerformAction = _this.playerCanPerformCardAction({ action: action, cardId: id, rupees: rupees });

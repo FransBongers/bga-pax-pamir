@@ -56,7 +56,7 @@ class ClientInitialBribeCheckState implements State {
       },
     });
 
-    const minActionCost = this.game.getMinimumActionCost({action: this.action}) || 0;
+    const minActionCost = this.game.getMinimumActionCost({ action: this.action }) || 0;
     const maxAvailableRupees = this.game.getCurrentPlayer().getRupees() - minActionCost;
     if (amount <= maxAvailableRupees) {
       this.game.addPrimaryActionButton({
@@ -117,9 +117,8 @@ class ClientInitialBribeCheckState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-   private checkBribe({ cardId, action, next }: ClientInitialBribeCheckArgs) {
-    // Check for abilities that ignore bribes
-    const disregardForCustomsActive = this.game.activeEvents.hasCard({cardId: 'card_107'});
+  public calulateBribe({ cardId, action }): { bribeeId: number; amount: number } | null {
+    const disregardForCustomsActive = this.game.activeEvents.hasCard({ cardId: 'card_107' });
     const charismaticCourtiersAcitve =
       action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
     // actions is either playCard or one of the card actions
@@ -127,12 +126,17 @@ class ClientInitialBribeCheckState implements State {
       action !== 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CIVIL_SERVICE_REFORMS });
 
     if (disregardForCustomsActive || charismaticCourtiersAcitve || civilServiceReformsActive) {
-      next({ bribe: null });
-      return;
+      return null;
     }
 
     const bribe: { bribeeId: number; amount: number } | null =
       action === 'playCard' ? this.checkBribePlayCard({ cardId }) : this.checkBribeCardAction({ cardId });
+
+    return bribe;
+  }
+
+  private checkBribe({ cardId, action, next }: ClientInitialBribeCheckArgs) {
+    const bribe = this.calulateBribe({ cardId, action });
 
     if (bribe === null) {
       next({ bribe: null });

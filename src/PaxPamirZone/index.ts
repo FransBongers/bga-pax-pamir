@@ -208,11 +208,6 @@ class PaxPamirZone {
     const animations: BgaAnimation<BgaAnimationSettings>[] = [];
     inputItems.forEach(({ element, id, from, zIndex, duration }) => {
       const node = dojo.place(element, this.containerId);
-      if (this.containerId === 'pp_punjab_armies') {
-        console.log('element',element);
-        console.log('node',node);
-      }
-      // const index = this.items.findIndex((item) => item.id === id) as number;
 
       // const { top, left } = this.itemToCoords({ index });
       node.style.position = 'absolute';

@@ -142,8 +142,8 @@ const tplCourtCardTooltip = ({
   return tplCardTooltipContainer({
     card: `<div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>`,
     content: `
-  <span class="pp_title">${cardInfo.name}</span>
-  <span class="pp_flavor_text">${(cardInfo as CourtCard).flavorText}</span>
+  <span class="pp_title">${_(cardInfo.name)}</span>
+  <span class="pp_flavor_text">${_((cardInfo as CourtCard).flavorText)}</span>
   ${impactIcons}
   ${cardActions}
   ${specialAbility}
@@ -169,7 +169,7 @@ const tplEventCardTooltipDiscarded = ({ title, description, effect }: EventCard[
     const impactIcon = eventEffectImpactIconMap[effect];
     return tplTooltipImpactIcon({ impactIcon, loyalty: null });
   } else {
-    return `<span class="pp_event_effect_text" style="margin-bottom: 16px;">${description || ''}</span>`;
+    return `<span class="pp_event_effect_text" style="margin-bottom: 16px;">${_(description) || ''}</span>`;
   }
 };
 
@@ -181,12 +181,12 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
     <span class="pp_flavor_text">${_(
       "Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."
     )}</span>
-    <span class="pp_section_title">${_('If discarded: ')}${cardInfo.discarded.title || ''}</span>
+    <span class="pp_section_title">${_('If discarded: ')}${_(cardInfo.discarded.title) || ''}</span>
      ${tplEventCardTooltipDiscarded(cardInfo.discarded)} 
     <span class="pp_section_title">${cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')}${
-      cardInfo.purchased.title || ''
+      _(cardInfo.purchased.title) || ''
     }</span>
-    <span class="pp_event_effect_text">${cardInfo.purchased.description || ''}</span>
+    <span class="pp_event_effect_text">${_(cardInfo.purchased.description) || ''}</span>
   `,
   });
 };

@@ -194,6 +194,7 @@ interface PaxPamirGame extends Game {
     clientCardActionGift: ClientCardActionGiftState;
     clientCardActionMove: ClientCardActionMoveState;
     clientCardActionTax: ClientCardActionTaxState;
+    clientInitialBribeCheck: ClientInitialBribeCheckState;
     clientPlayCard: ClientPlayCardState;
     clientPurchaseCard: ClientPurchaseCardState;
     negotiateBribe: NegotiateBribeState;

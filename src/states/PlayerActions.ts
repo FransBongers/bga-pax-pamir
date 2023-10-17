@@ -202,9 +202,13 @@ class PlayerActionsState implements State {
           this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have actions left to perform this') });
           return;
         }
-        const minActionCost = this.game.getMinimumActionCost({ action });
+        let minActionCost = this.game.getMinimumActionCost({ action });
+        if (this.game.gameOptions.wakhanEnabled) {
+          const bribe = this.game.activeStates.clientInitialBribeCheck.calulateBribe({ cardId: id, action });
+          minActionCost = minActionCost + (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID ? bribe.amount : 0);
+        }
         if (rupees < minActionCost) {
-          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have enough rupees pay for this') });
+          this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have enough rupees to pay for this') });
           return;
         }
         const canPerformAction = this.playerCanPerformCardAction({ action, cardId: id, rupees });

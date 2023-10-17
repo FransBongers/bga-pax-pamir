@@ -738,16 +738,15 @@ class Notifications
     ));
   }
 
-  public static function purchaseGift($player, $value)
+  public static function purchaseGift($player, $value, $card)
   {
-    self::notifyAll("purchaseGift", clienttranslate('${tkn_playerName} purchases a gift for ${value} ${tkn_rupee}'), array(
+    self::notifyAll("purchaseGift", clienttranslate('${tkn_playerName} purchases a gift for ${value} ${tkn_rupee} with ${tkn_cardName}${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
       'value' => $value,
-      'tkn_rupee' => 'rupee(s)'
-      // 'rupeesOnCards' => $rupeesOnCards,
-      // 'rupeeChange' => -$value,
-      // 'influenceChange' => Events::isKohINoorRecoveredActive($player) ? 2 : 1,
-      // 'tokenMove' => $move
+      'tkn_rupee' => 'rupee(s)',
+      'tkn_largeCard' => $card['id'],
+      'tkn_newLine' => '<br>',
+      'tkn_cardName' => $card['name'],
     ));
   }
 

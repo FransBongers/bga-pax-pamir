@@ -84,30 +84,31 @@ trait WakhanActionTrait
     $card = Cards::get($cardId);
     ActionStack::set($actionStack);
 
+    $result = false;
     foreach ($card['actions'] as $action => $actionInfo) {
       Notifications::log('action', $action);
       if (!$this->wakhanCanPayForCardAction($card, $action)) {
         continue;
       }
-      $result = false;
+      
       switch ($action) {
         case BATTLE:
-          $this->wakhanBattle($card);
+          $result = $this->wakhanBattle($card);
           break;
         case BETRAY:
-          $this->wakhanBetray($card);
+          $result = $this->wakhanBetray($card);
           break;
         case BUILD:
-          $this->wakhanBuild($card);
+          $result = $this->wakhanBuild($card);
           break;
         case GIFT:
-          $this->wakhanGift($card);
+          $result = $this->wakhanGift($card);
           break;
         case MOVE:
-          $this->wakhanMove($card);
+          $result = $this->wakhanMove($card);
           break;
         case TAX:
-          $this->wakhanTax($card);
+          $result = $this->wakhanTax($card);
           break;
       }
       if ($result) {

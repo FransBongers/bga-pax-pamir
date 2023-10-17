@@ -72,6 +72,7 @@ trait WakhanActionGiftTrait
     Notifications::purchaseGift(
       PaxPamirPlayers::get(WAKHAN_PLAYER_ID),
       $giftValue,
+      $card,
     );
 
     Cards::setUsed($card['id'], 1); // unavailable

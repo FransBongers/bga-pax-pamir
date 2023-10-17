@@ -71,6 +71,7 @@ trait PlayerActionGiftTrait
     Notifications::purchaseGift(
       $player,
       $value,
+      $cardInfo
     );
     Stats::incGiftCount($playerId,1);
 

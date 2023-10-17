@@ -52,7 +52,8 @@ trait DebugTrait
 
   function test()
   {
-    Cards::move('card_114',Locations::market(1,0));
+    Globals::setFavoredSuit(ECONOMIC);
+    // Cards::move('card_114',Locations::market(1,0));
     // Globals::setWakhanActive(true);
     // $this->wakhanBattle();
     // Globals::setWakhanActive(false);

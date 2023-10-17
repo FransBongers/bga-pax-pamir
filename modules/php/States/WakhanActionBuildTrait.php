@@ -82,7 +82,7 @@ trait WakhanActionBuildTrait
 
     $numberOfArmiesWakhanWillPlace = min($numberOfArmiesWakhanCanAfford, 3) * $nationBuildingMultiplier;
 
-    $cost = $numberOfArmiesWakhanCanAfford * 2;
+    $cost = min($numberOfArmiesWakhanCanAfford, 3) * 2;
     $rupeesOnCards = $this->payActionCosts($cost);
 
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$cost);

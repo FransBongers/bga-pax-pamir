@@ -74,7 +74,13 @@ class PPActiveEvents {
 
   public async addCardFromMarket({ cardId, row, column }: { cardId: string; row: number; column: number }) {
     this.makeVisible();
-    return await Promise.all([
+
+    const isSpectator = this.game.framework().isSpectator;
+    const playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
+    const player = this.game.playerManager.getPlayer({playerId: playerIdTopTableau});
+    const originalZIndex = player.elevateTableau();
+
+    await Promise.all([
       this.game.activeEvents.getZone().moveToZone({
         elements: {
           id: cardId,
@@ -82,13 +88,21 @@ class PPActiveEvents {
       }),
       this.game.market.getMarketCardZone({ row, column }).remove({ input: cardId }),
     ]);
+    player.removeTableauElevation(originalZIndex);
   }
 
   public async discardCard({ cardId }: { cardId: string }) {
+    const isSpectator = this.game.framework().isSpectator;
+    const playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
+    const player = this.game.playerManager.getPlayer({playerId: playerIdTopTableau});
+    const originalZIndex = player.elevateTableau();
+
     await this.game.objectManager.discardPile.discardCardFromZone({
       cardId,
       zone: this.game.activeEvents.getZone(),
     });
+    
+    player.removeTableauElevation(originalZIndex);
     this.updateVisiblity();
   }
 

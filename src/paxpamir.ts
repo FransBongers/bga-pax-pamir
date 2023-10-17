@@ -643,38 +643,38 @@ class PaxPamir implements PaxPamirGame {
     }
   }
 
-  public move({
-    id,
-    to,
-    from,
-    weight = this.defaultWeightZone,
-    addClass = [],
-    removeClass = [],
-  }: {
-    id: string;
-    to: Zone;
-    from: Zone;
-    weight?: number;
-    addClass?: string[];
-    removeClass?: string[];
-  }) {
-    addClass.forEach((newClass) => {
-      dojo.addClass(id, newClass);
-    });
+  // public move({
+  //   id,
+  //   to,
+  //   from,
+  //   weight = this.defaultWeightZone,
+  //   addClass = [],
+  //   removeClass = [],
+  // }: {
+  //   id: string;
+  //   to: Zone;
+  //   from: Zone;
+  //   weight?: number;
+  //   addClass?: string[];
+  //   removeClass?: string[];
+  // }) {
+  //   addClass.forEach((newClass) => {
+  //     dojo.addClass(id, newClass);
+  //   });
 
-    removeClass.forEach((oldClass) => {
-      dojo.removeClass(id, oldClass);
-    });
+  //   removeClass.forEach((oldClass) => {
+  //     dojo.removeClass(id, oldClass);
+  //   });
 
-    dojo.addClass(id, 'pp_moving');
-    to.placeInZone(id, weight);
-    from.removeFromZone(id, false);
+  //   dojo.addClass(id, 'pp_moving');
+  //   to.placeInZone(id, weight);
+  //   from.removeFromZone(id, false);
 
-    // TODO: check if there is a better way than using setTimeout
-    setTimeout(() => {
-      dojo.removeClass(id, 'pp_moving');
-    }, 2000);
-  }
+  //   // TODO: check if there is a better way than using setTimeout
+  //   setTimeout(() => {
+  //     dojo.removeClass(id, 'pp_moving');
+  //   }, 2000);
+  // }
 
   createSpyZone({ cardId }: { cardId: string }) {
     const spyZoneId = 'spies_' + cardId;

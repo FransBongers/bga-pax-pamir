@@ -241,7 +241,7 @@ interface PaxPamirGame extends Game {
   getZoneForLocation: ({ location }: { location: string }) => PaxPamirZone;
   createSpyZone: ({ cardId }: { cardId: string }) => void;
   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
-  move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
+  // move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   onCancel: () => void;
   // returnSpiesFromCard: (props: { cardId: string }) => void;
   setCourtCardsSelectable: (props: { callback: (props: { cardId: string }) => void; loyalty?: string; suit?: string; region?: string; }) => void;

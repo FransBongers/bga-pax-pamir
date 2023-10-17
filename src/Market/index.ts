@@ -123,12 +123,14 @@ class Market {
   }
 
   async addCardFromDeck({ cardId, to }: { cardId: string; to: MarketLocation }) {
-    await this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone({
-      element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }),
-      id: cardId,
-      from: 'pp_market_deck',
-      duration: (this.game.animationManager.getSettings().duration || 0) / 2,
-    });
+    await this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone(
+      {
+        element: tplCard({ cardId, extraClasses: PP_MARKET_CARD }),
+        id: cardId,
+        from: 'pp_market_deck',
+      },
+      (this.game.animationManager.getSettings().duration || 0) / 2
+    );
     this.game.tooltipManager.addTooltipToCard({ cardId });
   }
 

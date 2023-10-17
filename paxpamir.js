@@ -632,7 +632,8 @@ var PaxPamirZone = (function () {
         node.style.top = "".concat(top, "px");
         node.style.left = "".concat(left, "px");
     };
-    PaxPamirZone.prototype.placeInZone = function (input) {
+    PaxPamirZone.prototype.placeInZone = function (input, duration) {
+        if (duration === void 0) { duration = undefined; }
         return __awaiter(this, void 0, void 0, function () {
             var inputItems, animations;
             var _this = this;
@@ -648,7 +649,7 @@ var PaxPamirZone = (function () {
                         animations = [];
                         inputItems.forEach(function (_a) {
                             var _b;
-                            var element = _a.element, id = _a.id, from = _a.from, zIndex = _a.zIndex, duration = _a.duration;
+                            var element = _a.element, id = _a.id, from = _a.from, zIndex = _a.zIndex;
                             var node = dojo.place(element, _this.containerId);
                             node.style.position = 'absolute';
                             node.style.zIndex = "".concat(zIndex || 0);
@@ -666,7 +667,7 @@ var PaxPamirZone = (function () {
                         return [4, this.animationManager.playParallel(__spreadArray(__spreadArray([], this.getUpdateAnimations(inputItems.map(function (_a) {
                                 var id = _a.id;
                                 return id;
-                            })), true), animations, true))];
+                            }), duration), true), animations, true))];
                     case 1:
                         _a.sent();
                         return [2];
@@ -700,8 +701,9 @@ var PaxPamirZone = (function () {
             });
         });
     };
-    PaxPamirZone.prototype.getUpdateAnimations = function (skip) {
+    PaxPamirZone.prototype.getUpdateAnimations = function (skip, duration) {
         var _this = this;
+        if (duration === void 0) { duration = undefined; }
         var animations = [];
         var containerHeight = 0;
         var containerWidth = 0;
@@ -713,7 +715,7 @@ var PaxPamirZone = (function () {
                 if (!(skip || []).includes(item.id)) {
                     element.style.top = "".concat(top_1, "px");
                     element.style.left = "".concat(left, "px");
-                    animations.push(new BgaSlideAnimation({ element: element, fromRect: fromRect }));
+                    animations.push(new BgaSlideAnimation({ element: element, fromRect: fromRect, duration: duration }));
                 }
                 if (_this.containerId === 'pp_kabul_transcaspia_border') {
                     console.log(item.id, index, left, top_1, width, height);
@@ -1323,7 +1325,7 @@ var tplPlayerBoardWakhan = function (_a) {
 };
 var tplPlayerTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
-    return "<div id=\"player_tableau_".concat(playerId, "\" >\n  <div class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n      <div class=\"pp_tableau_left\">\n          <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n          <div class=\"pp_loyalty_dial_section\">\n              <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\"></div>\n              <div class=\"pp_loyalty_dial_container\">\n                  <div id=\"pp_loyalty_dial_").concat(playerId, "\" class=\"pp_loyalty_dial\"></div>\n                  <div class=\"pp_loyalty_dial_cover pp_player_color_").concat(playerColor, "\"></div>\n                  <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_gift pp_gift_2\">\n                      <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_gift pp_gift_4\">\n                      <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_gift pp_gift_6\">\n                      <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n              </div>\n          </div>\n      </div>\n      <div class=\"pp_player_tableau_right\">\n          <div class=\"pp_player_tableau_title_container\">\n              <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n              <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                  <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                  <div id=\"cards_tableau_").concat(playerId, "\" class=\"pp_icon pp_card_icon_tableau\"><div id=\"card_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"card_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n              </div>\n          </div>\n          <div class=\"pp_tableau_inner_container\">\n              <div class=\"pp_tableau_inner_left\">\n                  <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n              </div>\n              <div class=\"pp_tableau_inner_right\">\n                  <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n              </div>\n          </div>\n          <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n            <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n          </div>\n      </div>\n  </div>\n  <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n      <div id=\"player_tableau_events_").concat(playerId, "\">\n      </div>\n  </div>\n</div>");
+    return "<div id=\"player_tableau_".concat(playerId, "\" >\n  <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n      <div class=\"pp_tableau_left\">\n          <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n          <div class=\"pp_loyalty_dial_section\">\n              <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\"></div>\n              <div class=\"pp_loyalty_dial_container\">\n                  <div id=\"pp_loyalty_dial_").concat(playerId, "\" class=\"pp_loyalty_dial\"></div>\n                  <div class=\"pp_loyalty_dial_cover pp_player_color_").concat(playerColor, "\"></div>\n                  <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_gift pp_gift_2\">\n                      <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_gift pp_gift_4\">\n                      <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_gift pp_gift_6\">\n                      <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n              </div>\n          </div>\n      </div>\n      <div class=\"pp_player_tableau_right\">\n          <div class=\"pp_player_tableau_title_container\">\n              <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n              <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                  <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                  <div id=\"cards_tableau_").concat(playerId, "\" class=\"pp_icon pp_card_icon_tableau\"><div id=\"card_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"card_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n              </div>\n          </div>\n          <div class=\"pp_tableau_inner_container\">\n              <div class=\"pp_tableau_inner_left\">\n                  <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n              </div>\n              <div class=\"pp_tableau_inner_right\">\n                  <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n              </div>\n          </div>\n          <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n            <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n          </div>\n      </div>\n  </div>\n  <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n      <div id=\"player_tableau_events_").concat(playerId, "\">\n      </div>\n  </div>\n</div>");
 };
 var tplWakhanPlayerPanel = function (_a) {
     var name = _a.name;
@@ -1331,7 +1333,7 @@ var tplWakhanPlayerPanel = function (_a) {
 };
 var tplWakhanTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
-    return "<div id=\"player_tableau_".concat(playerId, "\">\n            <div class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\" style=\"min-height: 320px;\">\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div style=\"flex-grow: 1;\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div id=\"pp_wakhan_gifts\">\n                      <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                        <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\" style=\"margin-right: 236px;\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                      <div class=\"pp_tableau_inner_left\">\n                          <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                      </div>\n                      <div class=\"pp_tableau_inner_right\">\n                        <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                      </div>\n                    </div>\n                    <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n                      <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n                    </div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
+    return "<div id=\"player_tableau_".concat(playerId, "\">\n            <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\" style=\"min-height: 320px;\">\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div style=\"flex-grow: 1;\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div id=\"pp_wakhan_gifts\">\n                      <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                        <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\" style=\"margin-right: 236px;\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                      <div class=\"pp_tableau_inner_left\">\n                          <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                      </div>\n                      <div class=\"pp_tableau_inner_right\">\n                        <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                      </div>\n                    </div>\n                    <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n                      <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n                    </div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
 };
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 var debug = isDebug ? console.info.bind(window.console) : function () { };
@@ -1407,10 +1409,15 @@ var PPActiveEvents = (function () {
     PPActiveEvents.prototype.addCardFromMarket = function (_a) {
         var cardId = _a.cardId, row = _a.row, column = _a.column;
         return __awaiter(this, void 0, void 0, function () {
+            var isSpectator, playerIdTopTableau, player, originalZIndex;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         this.makeVisible();
+                        isSpectator = this.game.framework().isSpectator;
+                        playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
+                        player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
+                        originalZIndex = player.elevateTableau();
                         return [4, Promise.all([
                                 this.game.activeEvents.getZone().moveToZone({
                                     elements: {
@@ -1419,7 +1426,10 @@ var PPActiveEvents = (function () {
                                 }),
                                 this.game.market.getMarketCardZone({ row: row, column: column }).remove({ input: cardId }),
                             ])];
-                    case 1: return [2, _b.sent()];
+                    case 1:
+                        _b.sent();
+                        player.removeTableauElevation(originalZIndex);
+                        return [2];
                 }
             });
         });
@@ -1427,14 +1437,21 @@ var PPActiveEvents = (function () {
     PPActiveEvents.prototype.discardCard = function (_a) {
         var cardId = _a.cardId;
         return __awaiter(this, void 0, void 0, function () {
+            var isSpectator, playerIdTopTableau, player, originalZIndex;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                            cardId: cardId,
-                            zone: this.game.activeEvents.getZone(),
-                        })];
+                    case 0:
+                        isSpectator = this.game.framework().isSpectator;
+                        playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
+                        player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
+                        originalZIndex = player.elevateTableau();
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
+                                cardId: cardId,
+                                zone: this.game.activeEvents.getZone(),
+                            })];
                     case 1:
                         _b.sent();
+                        player.removeTableauElevation(originalZIndex);
                         this.updateVisiblity();
                         return [2];
                 }
@@ -2635,9 +2652,21 @@ var PPPlayer = (function () {
                 this.counters[counter].toValue(value);
         }
     };
+    PPPlayer.prototype.elevateTableau = function () {
+        var tableau = dojo.byId("pp_player_tableau_container_".concat(this.playerId));
+        var originalZIndex = tableau.style.zIndex;
+        tableau.style.zIndex = '11';
+        return originalZIndex;
+    };
+    PPPlayer.prototype.removeTableauElevation = function (originalZIndex) {
+        var tableau = dojo.byId("pp_player_tableau_container_".concat(this.playerId));
+        tableau.style.zIndex = originalZIndex;
+    };
     PPPlayer.prototype.addSideSelectToCourt = function () {
-        this.court.placeInZone({ element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 });
-        this.court.placeInZone({ element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 });
+        this.court.placeInZone([
+            { element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 },
+            { element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 },
+        ], 1);
     };
     PPPlayer.prototype.checkEventContainerHeight = function () {
         var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
@@ -2738,9 +2767,11 @@ var PPPlayer = (function () {
     PPPlayer.prototype.discardEventCard = function (_a) {
         var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
         return __awaiter(this, void 0, void 0, function () {
+            var originalZIndex;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
+                        originalZIndex = this.elevateTableau();
                         if (!(to === TEMP_DISCARD)) return [3, 2];
                         return [4, Promise.all([
                                 this.game.objectManager.tempDiscardPile.getZone().moveToZone({
@@ -2759,6 +2790,7 @@ var PPPlayer = (function () {
                         _c.sent();
                         _c.label = 4;
                     case 4:
+                        this.removeTableauElevation(originalZIndex);
                         this.checkEventContainerHeight();
                         return [2];
                 }
@@ -2935,10 +2967,11 @@ var PPPlayer = (function () {
     PPPlayer.prototype.addCardToEvents = function (_a) {
         var cardId = _a.cardId, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
-            var node;
+            var originalZIndex, node;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        originalZIndex = this.elevateTableau();
                         if (this.events.getItemCount() === 0) {
                             node = dojo.byId("pp_player_events_container_".concat(this.playerId));
                             node.style.marginTop = '-57px';
@@ -2952,6 +2985,7 @@ var PPPlayer = (function () {
                             ])];
                     case 1:
                         _b.sent();
+                        this.removeTableauElevation(originalZIndex);
                         return [2];
                 }
             });
@@ -4692,8 +4726,7 @@ var Market = (function () {
                             element: tplCard({ cardId: cardId, extraClasses: PP_MARKET_CARD }),
                             id: cardId,
                             from: 'pp_market_deck',
-                            duration: (this.game.animationManager.getSettings().duration || 0) / 2,
-                        })];
+                        }, (this.game.animationManager.getSettings().duration || 0) / 2)];
                     case 1:
                         _b.sent();
                         this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
@@ -8619,6 +8652,7 @@ var NotificationManager = (function () {
                                     },
                                     classesToAdd: classesToAdd,
                                     classesToRemove: classesToRemove,
+                                    zIndex: 10
                                 }),
                                 fromZone.remove({ input: tokenId }),
                             ])];
@@ -9002,21 +9036,6 @@ var PaxPamir = (function () {
                 console.log('no zone determined');
                 break;
         }
-    };
-    PaxPamir.prototype.move = function (_a) {
-        var id = _a.id, to = _a.to, from = _a.from, _b = _a.weight, weight = _b === void 0 ? this.defaultWeightZone : _b, _c = _a.addClass, addClass = _c === void 0 ? [] : _c, _d = _a.removeClass, removeClass = _d === void 0 ? [] : _d;
-        addClass.forEach(function (newClass) {
-            dojo.addClass(id, newClass);
-        });
-        removeClass.forEach(function (oldClass) {
-            dojo.removeClass(id, oldClass);
-        });
-        dojo.addClass(id, 'pp_moving');
-        to.placeInZone(id, weight);
-        from.removeFromZone(id, false);
-        setTimeout(function () {
-            dojo.removeClass(id, 'pp_moving');
-        }, 2000);
     };
     PaxPamir.prototype.createSpyZone = function (_a) {
         var cardId = _a.cardId;

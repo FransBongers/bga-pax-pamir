@@ -35,6 +35,7 @@ interface Framework {
   isCurrentPlayerActive: () => boolean;
   isLoadingComplete: boolean;
   inherited(args: any); // TODO: check what this does?
+  isSpectator: boolean;
   notifqueue: {
     next_log_id: string;
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;

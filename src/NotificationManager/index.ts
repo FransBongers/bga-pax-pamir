@@ -805,6 +805,7 @@ class NotificationManager {
         },
         classesToAdd,
         classesToRemove,
+        zIndex: 10
       }),
       fromZone.remove({ input: tokenId }),
     ]);

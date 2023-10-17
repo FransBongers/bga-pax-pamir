@@ -19,7 +19,6 @@ interface PaxPamirZonePlaceItem {
   element: string;
   from?: string;
   zIndex?: number;
-  duration?: number;
 }
 
 interface PaxPamirZoneSetupItem {

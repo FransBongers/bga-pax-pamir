@@ -196,7 +196,7 @@ class PaxPamirZone {
     node.style.left = `${left}px`;
   }
 
-  public async placeInZone(input: PaxPamirZonePlaceItem | PaxPamirZonePlaceItem[]): Promise<void> {
+  public async placeInZone(input: PaxPamirZonePlaceItem | PaxPamirZonePlaceItem[], duration: number = undefined): Promise<void> {
     const inputItems = Array.isArray(input) ? input : [input];
 
     inputItems.forEach(({ id, weight }) => {
@@ -206,7 +206,7 @@ class PaxPamirZone {
     this.sortItems();
 
     const animations: BgaAnimation<BgaAnimationSettings>[] = [];
-    inputItems.forEach(({ element, id, from, zIndex, duration }) => {
+    inputItems.forEach(({ element, id, from, zIndex }) => {
       const node = dojo.place(element, this.containerId);
 
       // const { top, left } = this.itemToCoords({ index });
@@ -227,7 +227,13 @@ class PaxPamirZone {
         );
       }
     });
-    await this.animationManager.playParallel([...this.getUpdateAnimations(inputItems.map(({ id }) => id)), ...animations]);
+    await this.animationManager.playParallel([
+      ...this.getUpdateAnimations(
+        inputItems.map(({ id }) => id),
+        duration
+      ),
+      ...animations,
+    ]);
   }
 
   /**
@@ -257,7 +263,7 @@ class PaxPamirZone {
     return await this.animationManager.playParallel(this.getUpdateAnimations());
   }
 
-  public getUpdateAnimations(skip?: string[]): BgaSlideAnimation<BgaAnimationWithOriginSettings>[] {
+  public getUpdateAnimations(skip?: string[], duration: number = undefined): BgaSlideAnimation<BgaAnimationWithOriginSettings>[] {
     const animations: BgaSlideAnimation<BgaAnimationWithOriginSettings>[] = [];
     let containerHeight = 0;
     let containerWidth = 0;
@@ -274,7 +280,7 @@ class PaxPamirZone {
           element.style.top = `${top}px`;
           element.style.left = `${left}px`;
 
-          animations.push(new BgaSlideAnimation({ element, fromRect }));
+          animations.push(new BgaSlideAnimation({ element, fromRect, duration }));
         }
         if (this.containerId === 'pp_kabul_transcaspia_border') {
           console.log(item.id, index, left, top, width, height);

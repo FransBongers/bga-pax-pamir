@@ -675,9 +675,26 @@ class PPPlayer {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
+  elevateTableau(): string {
+    const tableau = dojo.byId(`pp_player_tableau_container_${this.playerId}`);
+    const originalZIndex = tableau.style.zIndex;
+    tableau.style.zIndex = '11';
+    return originalZIndex
+  }
+
+  removeTableauElevation(originalZIndex: string) {
+    const tableau = dojo.byId(`pp_player_tableau_container_${this.playerId}`);
+    tableau.style.zIndex = originalZIndex;
+  }
+
   addSideSelectToCourt() {
-    this.court.placeInZone({ element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 });
-    this.court.placeInZone({ element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 });
+    this.court.placeInZone(
+      [
+        { element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 },
+        { element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 },
+      ],
+      1
+    );
   }
 
   checkEventContainerHeight() {
@@ -748,7 +765,7 @@ class PPPlayer {
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       this.incCounter({ counter: 'influence', value: -1 });
     }
-    
+
     const node = dojo.byId(cardId);
     node.classList.remove('pp_card_in_court', `pp_player_${this.playerId}`);
     if (to === DISCARD) {
@@ -767,6 +784,7 @@ class PPPlayer {
   }
 
   async discardEventCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
+    const originalZIndex = this.elevateTableau();
     // Move card to discard pile
     if (to === TEMP_DISCARD) {
       await Promise.all([
@@ -781,6 +799,7 @@ class PPPlayer {
         zone: this.events,
       });
     }
+    this.removeTableauElevation(originalZIndex);
     this.checkEventContainerHeight();
   }
 
@@ -885,6 +904,7 @@ class PPPlayer {
   }
 
   async addCardToEvents({ cardId, from }: { cardId: string; from: PaxPamirZone }): Promise<void> {
+    const originalZIndex = this.elevateTableau();
     if (this.events.getItemCount() === 0) {
       const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
       node.style.marginTop = '-57px';
@@ -897,6 +917,7 @@ class PPPlayer {
       }),
       from.remove({ input: cardId }),
     ]);
+    this.removeTableauElevation(originalZIndex);
   }
 
   removeTaxCounter() {

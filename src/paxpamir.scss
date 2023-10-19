@@ -261,6 +261,12 @@ html {
   cursor: pointer;
 }
 
+.pp_army.pp_selected,
+.pp_road.pp_selected {
+  z-index: 10 !important;
+}
+
+
 .pp_army.pp_afghan {
   background-position-x: 0%;
 }
@@ -324,6 +330,10 @@ html {
   filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color)
     drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
   cursor: pointer;
+}
+
+.pp_cylinder.pp_selected {
+  z-index: 10 !important;
 }
 
 .pp_cylinder.pp_player_color_blue {

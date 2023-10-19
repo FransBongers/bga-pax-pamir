@@ -113,7 +113,9 @@ class Map
       }
     };
     $playersWithHighestStrength = array_keys($rulingPieces, max($rulingPieces));
-    if (count($playersWithHighestStrength) === 1 && $tribesPerPlayer[$playersWithHighestStrength[0]]  > 0) {
+    $highestCoalitionStrength = max(array_values($armyCounts));
+
+    if (count($playersWithHighestStrength) === 1 && $tribesPerPlayer[$playersWithHighestStrength[0]]  > 0 && $rulingPieces[$playersWithHighestStrength[0]] > $highestCoalitionStrength) {
       return $playersWithHighestStrength[0];
     };
     return null;

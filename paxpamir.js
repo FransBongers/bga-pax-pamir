@@ -7594,7 +7594,7 @@ var NotificationManager = (function () {
         var _this = this;
         console.log('notifications subscriptions setup');
         var notifs = [
-            ['log', 1],
+            ['log', undefined],
             ['changeLoyalty', undefined],
             ['changeFavoredSuit', undefined],
             ['changeRuler', undefined],
@@ -7646,7 +7646,12 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_log = function (notif) {
-        debug('notif_log', notif.args);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                debug('notif_log', notif.args);
+                return [2, Promise.resolve()];
+            });
+        });
     };
     NotificationManager.prototype.notif_payRupeesToMarket = function (notif) {
         return __awaiter(this, void 0, void 0, function () {

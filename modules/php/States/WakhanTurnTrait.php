@@ -138,15 +138,11 @@ trait WakhanTurnTrait
 
     $addPause = false;
 
-    $blackMailHerat = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT);
-    Notifications::log('blackMailHerat',$blackMailHerat);
     if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
       $this->wakhanBlackmail(HERAT);
       $addPause = true;
     }
 
-    $blackMailKandahar = $wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR);
-    Notifications::log('blackMailKandahar',$blackMailKandahar);
     if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
       $this->wakhanBlackmail(KANDAHAR);
       $addPause = true;

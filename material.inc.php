@@ -2328,7 +2328,7 @@ $this->wakhanCards = [
       'columnArrow' => 4,
       'pragmaticLoyalty' => [BRITISH, AFGHAN, RUSSIAN],
       'regionOrder' => [KANDAHAR, HERAT, PERSIA, KABUL, TRANSCASPIA, PUNJAB],
-      'rowSideArrow' => 0
+      'rowSideArrow' => 1
     ]
   ],
   'wakhan_card_13' => [

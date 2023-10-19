@@ -35,7 +35,7 @@ class NotificationManager {
     console.log('notifications subscriptions setup');
     const notifs: [id: string, wait: number][] = [
       // checked
-      ['log', 1],
+      ['log', undefined],
       ['changeLoyalty', undefined],
       ['changeFavoredSuit', undefined],
       ['changeRuler', undefined],
@@ -117,9 +117,10 @@ class NotificationManager {
   // .##...###.##.....##....##.....##..##.......##....##
   // .##....##..#######.....##....####.##........######.
 
-  notif_log(notif: Notif<unknown>) {
+  async notif_log(notif: Notif<unknown>) {
     // this is for debugging php side
     debug('notif_log', notif.args);
+    return Promise.resolve();
   }
 
   async notif_payRupeesToMarket(notif: Notif<NotifPayRupeesToMarketArgs>) {

@@ -104,7 +104,7 @@ trait WakhanActionBetrayTrait
 
     $actionStack[] = ActionStack::createAction(DISPATCH_DISCARD_BETRAYED_CARD, WAKHAN_PLAYER_ID, [
       'cardId' => $cardToBetray['id'],
-      'cardOwnerId' => intval(explode('_', $cardToBetray['location'][1])),
+      'cardOwnerId' => intval(explode('_', $cardToBetray['location'])[1]),
     ]);
 
     ActionStack::push($actionStack);

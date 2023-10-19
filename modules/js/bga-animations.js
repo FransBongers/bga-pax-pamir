@@ -86,18 +86,15 @@ function slideAnimation(animationManager, animation) {
         var _f = getDeltaCoordinates(element, settings), x = _f.x, y = _f.y;
         var duration = (_a = settings.duration) !== null && _a !== void 0 ? _a : 500;
         var originalZIndex = element.style.zIndex;
-        console.log('originalZIndex',element.id,originalZIndex);
         var originalTransition = element.style.transition;
         var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
         element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
-        console.log('duringMOve',element.id,element.style.zIndex);
         element.style.transition = null;
         element.offsetHeight;
         element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg)");
         var timeoutId = null;
         var cleanOnTransitionEnd = function () {
             element.style.zIndex = originalZIndex;
-            console.log('afterMove',element.id,element.style.zIndex);
             element.style.transition = originalTransition;
             success();
             element.removeEventListener('transitioncancel', cleanOnTransitionEnd);

@@ -129,6 +129,9 @@ trait DispatchActionTrait
       case DISPATCH_WAKHAN_ACTIONS:
         $this->dispatchWakhanActions($actionStack);
         break;
+      case DISPATCH_WAKHAN_ACTIVATE:
+        $this->dispatchWakhanActivate($actionStack);
+        break;
       case DISPATCH_WAKHAN_BONUS_ACTION:
         $this->dispatchWakhanBonusAction($actionStack);
         break;

@@ -52,12 +52,13 @@ trait DebugTrait
 
   function test()
   {
+    // Notifications::log('stack',ActionStack::get());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
-    // Cards::move('card_106',Locations::market(1,0));
-    Globals::setWakhanActive(true);
-    $this->wakhanBetray();
-    Globals::setWakhanActive(false);
+    Cards::move('card_114',Locations::market(1,0));
+    // Globals::setWakhanActive(true);
+    // $this->wakhanBetray();
+    // Globals::setWakhanActive(false);
     // $adjacentCards = Cards::getMany(['card_100','card_1','card_93','card_38','card_54'])->toArray();
     // Notifications::log('adjacentCards',$adjacentCards);
     // $move = $this->wakhanGetNextSpyMove();

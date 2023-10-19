@@ -79,6 +79,7 @@ trait WakhanActionTrait
 
   function dispatchWakhanBonusAction($actionStack)
   {
+    Globals::setWakhanActive(true);
     $action = array_pop($actionStack);
     $cardId = $action['data']['cardId'];
     $card = Cards::get($cardId);

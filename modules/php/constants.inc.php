@@ -306,6 +306,7 @@ const DISPATCH_TAKE_PRIZE = 'dispTakePrize';
 const DISPATCH_TRANSITION = 'dispatchTransition';
 const DISPATCH_UPDATE_INFLUENCE = 'dispUpdateInfluence';
 
+const DISPATCH_WAKHAN_ACTIVATE = 'dispWakhanActivate';
 const DISPATCH_WAKHAN_ACTIONS = 'dispWakhanActions';
 const DISPATCH_WAKHAN_BONUS_ACTION = 'dispWakhanBonusAction';
 const DISPATCH_WAKHAN_DRAW_AI_CARD = 'dispWakhanDrawAICard';

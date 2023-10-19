@@ -85,6 +85,7 @@ trait WakhanTurnTrait
       ActionStack::createAction(DISPATCH_TRANSITION, WAKHAN_PLAYER_ID, [
         'transition' => 'cleanup',
       ]),
+      ActionStack::createAction(DISPATCH_WAKHAN_ACTIVATE, WAKHAN_PLAYER_ID, []),
       ActionStack::createAction(DISPATCH_WAKHAN_SETUP_BONUS_ACTIONS, WAKHAN_PLAYER_ID, []),
       ActionStack::createAction(DISPATCH_WAKHAN_ACTIONS, WAKHAN_PLAYER_ID, []),
       ActionStack::createAction(DISPATCH_WAKHAN_START_OF_TURN_ABILITIES, WAKHAN_PLAYER_ID, []),
@@ -115,6 +116,13 @@ trait WakhanTurnTrait
   // .#########.##..........##.....##..##.....##.##..####.......##
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
+
+  function dispatchWakhanActivate($actionStack)
+  {
+    array_pop($actionStack);
+    Globals::setWakhanActive(true);
+    ActionStack::next($actionStack);
+  }
 
   function dispatchWakhanDrawAICard($actionStack)
   {
@@ -147,7 +155,7 @@ trait WakhanTurnTrait
       $this->wakhanBlackmail(KANDAHAR);
       $addPause = true;
     }
-    
+
     if ($addPause) {
       Wakhan::addPause();
     }

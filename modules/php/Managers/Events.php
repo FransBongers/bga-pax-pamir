@@ -76,7 +76,7 @@ class Events
       default:
         break;
     }
-    Notifications::log('actionStack before next',$actionStack);
+
     ActionStack::next($actionStack);
   }
 
@@ -182,7 +182,9 @@ class Events
         'from' => [HAND]
       ]);
     }, array_reverse($playerOrder));
-
+    if ($playerId === WAKHAN_PLAYER_ID) {
+      $extraActions = array_merge([ActionStack::createAction(DISPATCH_WAKHAN_ACTIVATE, WAKHAN_PLAYER_ID, []),], $extraActions);
+    }
     return $extraActions;
   }
 
@@ -229,7 +231,7 @@ class Events
     $tribeResult = Map::removeTribesFromRegion($regionId);
     $armies = Map::removeArmiesFromRegion($regionId);
     $message = clienttranslate('All tribes and armies are removed from ${tkn_regionName}');
-    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['tkn_regionName' => $regionId],$regionId, $armies, $tribeResult['tribes']);
+    Notifications::returnAllToSupply(PaxPamirPlayers::get(), $message, ['tkn_regionName' => $regionId], $regionId, $armies, $tribeResult['tribes']);
     Map::checkRulerChange($regionId);
     return $tribeResult['actions'];
   }

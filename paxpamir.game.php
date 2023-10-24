@@ -168,7 +168,9 @@ class Paxpamir extends Table
         Tokens::setupNewGame($players, $options);
         Market::setupNewGame($players, $options);
         Stats::checkExistence();
-
+        if (Globals::getWakhanEnabled()) {
+            Stats::setWakhanEnabled(1);
+        }
         $this->setGameStateInitialValue('logging', false);
 
         // // Init game statistics

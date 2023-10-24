@@ -52,10 +52,11 @@ trait DebugTrait
 
   function test()
   {
+    Notifications::log('solo',count(Players::getAll()->toArray()) === 1);
     // Notifications::log('stack',ActionStack::get());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
-    Cards::move('card_114',Locations::market(1,0));
+    // Cards::move('card_114',Locations::market(1,0));
     // Globals::setWakhanActive(true);
     // $this->wakhanBetray();
     // Globals::setWakhanActive(false);

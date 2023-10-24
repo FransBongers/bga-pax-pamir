@@ -41,6 +41,16 @@ $stats_type = [
             'id' => STAT_UNSUCCESSFUL_DOMINANCE_CHECK,
             'name' => totranslate('Number of unsuccessful Dominance Checks'),
             'type' => 'int'
+        ],
+        'wakhanEnabled' => [
+            'id' => STAT_WAKHAN_ENABLED,
+            'name' => totranslate('Wakhan enabled'),
+            'type' => 'int'
+        ],
+        'wakhanWins' => [
+            'id' => STAT_WAKHAN_WINS,
+            'name' => totranslate('Wakhan wins'),
+            'type' => 'int'
         ]
     ],
 
@@ -106,5 +116,16 @@ $stats_type = [
             'name' => totranslate('Number of loyalty changes'),
             'type' => 'int'
         ],
+    ],
+
+    'value_labels' => [
+        STAT_WAKHAN_ENABLED => [
+            0 => totranslate("No"),
+            1 => totranslate("Yes"),
+        ],
+        STAT_WAKHAN_WINS => [
+            0 => totranslate("No"),
+            1 => totranslate("Yes"),
+        ]
     ]
 ];

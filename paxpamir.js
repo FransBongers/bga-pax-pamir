@@ -6702,6 +6702,36 @@ var DiscardState = (function () {
     };
     return DiscardState;
 }());
+var EndGameCheckState = (function () {
+    function EndGameCheckState(game) {
+        this.game = game;
+    }
+    EndGameCheckState.prototype.onEnteringState = function (args) {
+        this.updateInterfaceInitialStep();
+    };
+    EndGameCheckState.prototype.onLeavingState = function () { };
+    EndGameCheckState.prototype.updateInterfaceInitialStep = function () {
+        var _this = this;
+        this.game.clearPossible();
+        this.game.clientUpdatePageTitle({
+            text: _('${you} may end the game or undo'),
+            args: {
+                you: '${you}',
+            },
+        });
+        this.game.addPrimaryActionButton({
+            id: 'end_game_btn',
+            text: _('End game'),
+            callback: function () {
+                return _this.game.takeAction({
+                    action: 'endGame',
+                });
+            },
+        });
+        this.game.addUndoButton();
+    };
+    return EndGameCheckState;
+}());
 var NegotiateBribeState = (function () {
     function NegotiateBribeState(game) {
         this.game = game;
@@ -8756,6 +8786,7 @@ var PaxPamir = (function () {
             _a[CLIENT_PURCHASE_CARD] = new ClientPurchaseCardState(this),
             _a.acceptPrize = new AcceptPrizeState(this),
             _a.discard = new DiscardState(this),
+            _a.endGameCheck = new EndGameCheckState(this),
             _a.eventCardPashtunwaliValues = new ResolveEventPashtunwaliValuesState(this),
             _a.eventCardOtherPersuasiveMethods = new ResolveEventOtherPersuasiveMethodsState(this),
             _a.eventCardRumor = new ResolveEventRumor(this),

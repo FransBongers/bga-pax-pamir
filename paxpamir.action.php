@@ -75,6 +75,13 @@ class action_paxpamir extends APP_GameAction
         self::ajaxResponse();
     }
 
+    public function endGame()
+    {
+        self::setAjaxMode();
+        $result = $this->game->endGame();
+        self::ajaxResponse();
+    }
+
     public function negotiateBribe()
     {
         self::setAjaxMode();

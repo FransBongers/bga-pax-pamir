@@ -50,6 +50,7 @@
     "src/states/ClientPlayCard.ts",
     "src/states/ClientPurchaseCard.ts",
     "src/states/Discard.ts",
+    "src/states/EndGameCheck.ts",
     "src/states/NegotiateBribe.ts",
     "src/states/PlaceRoad.ts",
     "src/states/PlaceSpy.ts",

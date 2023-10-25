@@ -40,11 +40,14 @@ trait DominanceCheckTrait
     $action = array_pop($actionStack);
     $cards = $action['data']['cards'];
     $playerId = $action['playerId'];
+    $purchased = !isset($action['data']['purchased']) ? false : $action['data']['purchased'];
 
     $actionStack = array_merge($actionStack, [
       ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_DISCARD_EVENTS_IN_PLAY, $playerId, []),
       ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_AFTER_ABILITIES, $playerId, []),
-      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK, $playerId, []),
+      ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_END_GAME_CHECK, $playerId, [
+        'purchased' => $purchased
+      ]),
       ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_RESOLVE, $playerId, [
         'cards' => $cards,
       ]),
@@ -112,8 +115,13 @@ trait DominanceCheckTrait
 
   function dispatchDominanceCheckEndGameCheck($actionStack)
   {
+    $action = array_pop($actionStack);
     if ($this->didPlayerWin()) {
-      $this->nextState('calculateTieBreaker');
+      if ($action['data']['purchased']) {
+        $this->nextState('endGameCheck');
+      } else {
+        $this->nextState('calculateTieBreaker');
+      }
       return;
     }
     array_pop($actionStack);

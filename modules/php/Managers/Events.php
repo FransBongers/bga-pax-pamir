@@ -39,6 +39,7 @@ class Events
       case ECE_DOMINANCE_CHECK:
         $actionStack[] = ActionStack::createAction(DISPATCH_DOMINANCE_CHECK_SETUP, $playerId, [
           'cards' => [$action['data']['cardId']],
+          'purchased' => true
         ]);
         break;
       case ECE_KOH_I_NOOR_RECOVERED: // card_106

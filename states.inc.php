@@ -126,6 +126,7 @@ $machinestates = array(
             "nextTurn" => ST_NEXT_PLAYER,
             "discard" => ST_DISCARD,
             "dispatchAction" => ST_DISPATCH_ACTION,
+            "endGameCheck" => ST_END_GAME_CHECK,
             'eventCardOtherPersuasiveMethods' => ST_RESOLVE_ECE_OTHER_PERSUASIVE_METHODS,
             'eventCardPashtunwaliValues' => ST_RESOLVE_ECE_PASHTUNWALI_VALUES,
             'eventCardRebuke' => ST_RESOLVE_ECE_REBUKE,
@@ -365,6 +366,17 @@ $machinestates = array(
         'type' => 'game',
         'action' => 'stChangeActivePlayer',
     ],
+
+    ST_END_GAME_CHECK => array(
+        "name" => "endGameCheck",
+        "description" => clienttranslate('${actplayer} may end game'),
+        "descriptionmyturn" => clienttranslate('${you}'),
+        "type" => "activeplayer",
+        "possibleactions" => ["endGame","restart"],
+        "transitions" => array(
+            "calculateTieBreaker" => ST_CALCULATE_TIE_BREAKER,
+        )
+    ),
 
     ST_CALCULATE_TIE_BREAKER => array(
         "name" => "calculateTieBreaker",

@@ -61,6 +61,9 @@ interface OnEnteringDiscardArgs {
   suit?: string;
 }
 
+interface OnEnteringEndGameCheckArgs {
+}
+
 interface OnEnteringNegotiateBribeArgs {
   bribee: {
     currentAmount?: number;

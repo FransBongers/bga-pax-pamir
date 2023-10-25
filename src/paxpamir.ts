@@ -58,6 +58,7 @@ class PaxPamir implements PaxPamirGame {
     eventCardRebuke: ResolveEventRebukeState;
     acceptPrize: AcceptPrizeState;
     discard: DiscardState;
+    endGameCheck: EndGameCheckState;
     negotiateBribe: NegotiateBribeState;
     placeRoad: PlaceRoadState;
     placeSpy: PlaceSpyState;
@@ -127,6 +128,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       acceptPrize: new AcceptPrizeState(this),
       discard: new DiscardState(this),
+      endGameCheck: new EndGameCheckState(this),
       eventCardPashtunwaliValues: new ResolveEventPashtunwaliValuesState(this),
       eventCardOtherPersuasiveMethods: new ResolveEventOtherPersuasiveMethodsState(this),
       eventCardRumor: new ResolveEventRumor(this),

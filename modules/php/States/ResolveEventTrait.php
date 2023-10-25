@@ -75,7 +75,9 @@ trait ResolveEventTrait
     };
 
     $this->resolveEventCardOtherPersuasiveMethods($player, $selectedPlayer);
-    Log::checkpoint();
+    if (!Globals::getOpenHands()) {
+      Log::checkpoint();
+    }
     ActionStack::next($actionStack);
   }
 

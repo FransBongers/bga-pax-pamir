@@ -98,6 +98,12 @@ class PPPlayer {
     if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
       this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
     }
+    if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
+      this.setupHand({ hand: playerGamedatas.hand });
+      if (this.modal.isDisplayed()) {
+        this.updateModalContent();
+      }
+    }
   }
 
   // Setup functions
@@ -216,9 +222,11 @@ class PPPlayer {
       itemGap: 16,
     });
 
+    const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
     if (playerGamedatas.events.length > 0) {
-      const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
       node.style.marginTop = '-57px';
+    } else {
+      node.style.marginTop = '-209px';
     }
     playerGamedatas.events.forEach((card: EventCard & Token) => {
       const cardId = card.id;
@@ -299,18 +307,17 @@ class PPPlayer {
       containerId: 'pp_player_hand_cards',
       itemGap: 16,
     });
-    // TODO: use setup items?
+
     this.hand.setupItems(
       hand.map((card) => ({
         element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
         id: card.id,
       }))
     );
-    // .then(() => {
+
     hand.forEach((card) => {
       this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
     });
-    // });
   }
 
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
@@ -485,6 +492,10 @@ class PPPlayer {
     this.events = undefined;
     dojo.empty(this.prizes.getContainerId());
     this.prizes = undefined;
+    if (this.game.gameOptions.openHands && this.playerId === this.game.getPlayerId()) {
+      dojo.empty(this.hand.getContainerId());
+      this.hand = undefined;
+    }
   }
 
   // ..######...########.########.########.########.########...######.

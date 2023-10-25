@@ -56,7 +56,8 @@ trait DebugTrait
     // Notifications::log('stack',ActionStack::get());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
-    Cards::move('card_114',Locations::market(0,0));
+    // Cards::move('card_114',Locations::market(0,0));
+    Cards::insertAtBottom('card_101',DECK);
     // Globals::setWakhanActive(true);
     // $this->wakhanBetray();
     // Globals::setWakhanActive(false);

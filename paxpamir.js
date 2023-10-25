@@ -2145,6 +2145,12 @@ var PPPlayer = (function () {
         if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
             this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
         }
+        if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
+            this.setupHand({ hand: playerGamedatas.hand });
+            if (this.modal.isDisplayed()) {
+                this.updateModalContent();
+            }
+        }
     };
     PPPlayer.prototype.setupPlayer = function (_a) {
         var gamedatas = _a.gamedatas;
@@ -2260,9 +2266,12 @@ var PPPlayer = (function () {
             itemWidth: CARD_WIDTH,
             itemGap: 16,
         });
+        var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
         if (playerGamedatas.events.length > 0) {
-            var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
             node.style.marginTop = '-57px';
+        }
+        else {
+            node.style.marginTop = '-209px';
         }
         playerGamedatas.events.forEach(function (card) {
             var cardId = card.id;
@@ -2501,6 +2510,10 @@ var PPPlayer = (function () {
         this.events = undefined;
         dojo.empty(this.prizes.getContainerId());
         this.prizes = undefined;
+        if (this.game.gameOptions.openHands && this.playerId === this.game.getPlayerId()) {
+            dojo.empty(this.hand.getContainerId());
+            this.hand = undefined;
+        }
     };
     PPPlayer.prototype.getColor = function () {
         return this.playerColor;

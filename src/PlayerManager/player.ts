@@ -127,16 +127,21 @@ class PPPlayer {
     return this.handCards;
   }
 
-  updateModalContentAndOpen() {
+  updateModalContent() {
+    debug('update modal content');
     this.modal.updateContent(
       tplPlayerHandModal({
         cards: this.handCards,
       })
     );
-    this.modal.show();
     this.handCards.forEach((cardId) => {
       this.game.tooltipManager.addTooltipToCard({ cardId, cardIdSuffix: '_modal' });
     });
+  }
+
+  updateModalContentAndOpen() {
+    this.updateModalContent();
+    this.modal.show();
   }
 
   setupPlayerHandModal() {
@@ -735,6 +740,13 @@ class PPPlayer {
     return this.playerId === WAKHAN_PLAYER_ID;
   }
 
+  resetHandCards() {
+    if (!this.game.gameOptions.openHands) {
+      return;
+    }
+    this.handCards = [];
+  }
+
   updateHandCards({ action, cardId }: { action: 'ADD' | 'REMOVE'; cardId: string }) {
     if (!this.game.gameOptions.openHands) {
       return;
@@ -747,6 +759,9 @@ class PPPlayer {
         return;
       }
       this.handCards.splice(index, 1);
+    }
+    if (this.modal.isDisplayed()) {
+      this.updateModalContent();
     }
   }
 

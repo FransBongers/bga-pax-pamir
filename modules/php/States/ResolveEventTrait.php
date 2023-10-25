@@ -184,10 +184,19 @@ trait ResolveEventTrait
       return $card['id'];
     }, $playerHand), Locations::hand($selectedPlayerId));
 
+    $newHandCards = null;
+    if (Globals::getOpenHands()) {
+      $newHandCards = [
+        $playerId => $selectedPlayerHand,
+        $selectedPlayerId => $playerHand
+      ];
+      
+    }
+
     Notifications::exchangeHandAllPlayers($player, $selectedPlayer, [
       $player->getId() => count($selectedPlayerHand),
       $selectedPlayer->getId() => count($playerHand),
-    ]);
+    ],$newHandCards);
     if (!$player->isWakhan()) {
       Notifications::replaceHand($player, $selectedPlayerHand);
     }

@@ -228,7 +228,8 @@ class NotificationManager {
   }
 
   notif_exchangeHand(notif: Notif<NotifExchangeHandArgs>) {
-    Object.entries(notif.args.newHandCounts).forEach(([key, value]) => {
+    const { newHandCounts, newHandCards } = notif.args;
+    Object.entries(newHandCounts).forEach(([key, value]) => {
       const playerId = Number(key);
       // Updates for current player have been sent in separate notification.
       // Wakhan does not have a hand count to update and will play all card to court
@@ -237,6 +238,20 @@ class NotificationManager {
       }
       const player = this.getPlayer({ playerId: Number(key) });
       player.toValueCounter({ counter: 'cards', value });
+    });
+    if (newHandCards === null) {
+      return;
+    }
+
+    // When playing with open hands we also need to update the hand cards for the modal.
+    Object.entries(newHandCards).forEach(([key, value]) => {
+      const playerId = Number(key);
+      if (playerId === WAKHAN_PLAYER_ID) {
+        return;
+      }
+      const player = this.getPlayer({ playerId });
+      player.resetHandCards();
+      value.forEach((card) => player.updateHandCards({ cardId: card.id, action: 'ADD' }));
     });
   }
 
@@ -557,7 +572,7 @@ class NotificationManager {
     };
     this.game.clearInterface();
     this.game.gamedatas = updatedGamedatas;
-    this.game.activeEvents.setupActiveEvents({gamedatas: updatedGamedatas});
+    this.game.activeEvents.setupActiveEvents({ gamedatas: updatedGamedatas });
     this.game.market.setupMarket({ gamedatas: updatedGamedatas });
     this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
     this.game.map.updateMap({ gamedatas: updatedGamedatas });
@@ -806,7 +821,7 @@ class NotificationManager {
         },
         classesToAdd,
         classesToRemove,
-        zIndex: 10
+        zIndex: 10,
       }),
       fromZone.remove({ input: tokenId }),
     ]);

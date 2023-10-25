@@ -2169,15 +2169,19 @@ var PPPlayer = (function () {
     PPPlayer.prototype.getHandCards = function () {
         return this.handCards;
     };
-    PPPlayer.prototype.updateModalContentAndOpen = function () {
+    PPPlayer.prototype.updateModalContent = function () {
         var _this = this;
+        debug('update modal content');
         this.modal.updateContent(tplPlayerHandModal({
             cards: this.handCards,
         }));
-        this.modal.show();
         this.handCards.forEach(function (cardId) {
             _this.game.tooltipManager.addTooltipToCard({ cardId: cardId, cardIdSuffix: '_modal' });
         });
+    };
+    PPPlayer.prototype.updateModalContentAndOpen = function () {
+        this.updateModalContent();
+        this.modal.show();
     };
     PPPlayer.prototype.setupPlayerHandModal = function () {
         var _this = this;
@@ -2711,6 +2715,12 @@ var PPPlayer = (function () {
     PPPlayer.prototype.isWakhan = function () {
         return this.playerId === WAKHAN_PLAYER_ID;
     };
+    PPPlayer.prototype.resetHandCards = function () {
+        if (!this.game.gameOptions.openHands) {
+            return;
+        }
+        this.handCards = [];
+    };
     PPPlayer.prototype.updateHandCards = function (_a) {
         var action = _a.action, cardId = _a.cardId;
         if (!this.game.gameOptions.openHands) {
@@ -2725,6 +2735,9 @@ var PPPlayer = (function () {
                 return;
             }
             this.handCards.splice(index, 1);
+        }
+        if (this.modal.isDisplayed()) {
+            this.updateModalContent();
         }
     };
     PPPlayer.prototype.discardCourtCard = function (_a) {
@@ -7847,7 +7860,8 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_exchangeHand = function (notif) {
         var _this = this;
-        Object.entries(notif.args.newHandCounts).forEach(function (_a) {
+        var _a = notif.args, newHandCounts = _a.newHandCounts, newHandCards = _a.newHandCards;
+        Object.entries(newHandCounts).forEach(function (_a) {
             var key = _a[0], value = _a[1];
             var playerId = Number(key);
             if (playerId === _this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
@@ -7855,6 +7869,19 @@ var NotificationManager = (function () {
             }
             var player = _this.getPlayer({ playerId: Number(key) });
             player.toValueCounter({ counter: 'cards', value: value });
+        });
+        if (newHandCards === null) {
+            return;
+        }
+        Object.entries(newHandCards).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
+            var playerId = Number(key);
+            if (playerId === WAKHAN_PLAYER_ID) {
+                return;
+            }
+            var player = _this.getPlayer({ playerId: playerId });
+            player.resetHandCards();
+            value.forEach(function (card) { return player.updateHandCards({ cardId: card.id, action: 'ADD' }); });
         });
     };
     NotificationManager.prototype.notif_dominanceCheckScores = function (notif) {
@@ -8657,7 +8684,7 @@ var NotificationManager = (function () {
                                     },
                                     classesToAdd: classesToAdd,
                                     classesToRemove: classesToRemove,
-                                    zIndex: 10
+                                    zIndex: 10,
                                 }),
                                 fromZone.remove({ input: tokenId }),
                             ])];

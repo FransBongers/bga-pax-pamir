@@ -142,6 +142,9 @@ interface NotifExchangeHandArgs {
   newHandCounts: {
     [playerId: number]: number;
   };
+  newHandCards: {
+    [playerId: number]: CourtCard[];
+  } | null;
 }
 
 interface NotifPlaceArmyArgs {

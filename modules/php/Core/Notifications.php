@@ -750,12 +750,13 @@ class Notifications
     ));
   }
 
-  public static function exchangeHandAllPlayers($player, $selectedPlayer, $newHandCounts)
+  public static function exchangeHandAllPlayers($player, $selectedPlayer, $newHandCounts, $newHandCards = null)
   {
     self::notifyAll("exchangeHand", clienttranslate('${tkn_playerName} exchanges hand with ${tkn_playerName_2}'), [
       'tkn_playerName' => $player->getName(),
       'tkn_playerName_2' => $selectedPlayer->getName(),
-      'newHandCounts' => $newHandCounts
+      'newHandCounts' => $newHandCounts,
+      'newHandCards' => $newHandCards
     ]);
   }
 

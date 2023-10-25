@@ -57,14 +57,14 @@ trait PlayerActionTrait
     $action = array_pop($actionStack);
     $cost = $action['data']['cost'];
     $playerId = $action['playerId'];
-    $rupeesOnCards = $this->payActionCosts($cost);
+    $actionCost = $this->payActionCosts($cost);
     PaxPamirPlayers::incRupees($playerId, -$cost);
 
     $player = PaxPamirPlayers::get($playerId);
 
     Notifications::payRupeesToMarket(
       $player,
-      $rupeesOnCards
+      $actionCost
     );
 
     ActionStack::next($actionStack);
@@ -217,6 +217,7 @@ trait PlayerActionTrait
     // Cost is always an even amount so we can divide by 2.
     $numberOfRupeesPerRow = $cost / 2;
     $rupeesOnCards = [];
+    $removedRupees = 0;
     for ($row = 0; $row <= 1; $row++) {
       $remainingRupees = $numberOfRupeesPerRow;
       for ($column = 5; $column >= 0; $column--) {
@@ -246,7 +247,11 @@ trait PlayerActionTrait
           $remainingRupees--;
         }
       }
+      $removedRupees += $remainingRupees;
     }
-    return $rupeesOnCards;
+    return [
+      'rupeesOnCards' => $rupeesOnCards,
+      'removedRupees' => $removedRupees,
+    ];
   }
 }

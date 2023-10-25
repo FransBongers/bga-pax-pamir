@@ -81,14 +81,14 @@ trait WakhanActionGiftTrait
       Globals::incRemainingActions(-1);
     }
 
-    $rupeesOnCards = $this->payActionCosts($giftValue);
+    $actionCost = $this->payActionCosts($giftValue);
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$giftValue);
 
     $player = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
 
     Notifications::payRupeesToMarket(
       $player,
-      $rupeesOnCards
+      $actionCost
     );
 
     $this->wakhanPlaceGift($giftValue);

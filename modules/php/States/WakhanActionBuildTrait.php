@@ -83,11 +83,11 @@ trait WakhanActionBuildTrait
     $numberOfArmiesWakhanWillPlace = min($numberOfArmiesWakhanCanAfford, 3) * $nationBuildingMultiplier;
 
     $cost = min($numberOfArmiesWakhanCanAfford, 3) * 2;
-    $rupeesOnCards = $this->payActionCosts($cost);
+    $actionCost = $this->payActionCosts($cost);
 
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -$cost);
 
-    Notifications::build($card['id'], $wakhanPlayer, $rupeesOnCards);
+    Notifications::build($card['id'], $wakhanPlayer, $actionCost);
 
     $pragmaticLoyalty = Wakhan::getPragmaticLoyalty();
     for ($i = 0; $i < $numberOfArmiesWakhanWillPlace; $i++) {

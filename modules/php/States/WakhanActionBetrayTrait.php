@@ -93,8 +93,8 @@ trait WakhanActionBetrayTrait
 
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     $this->wakhanPayHostageBribeIfNeeded($card, BETRAY);
-    $rupeesOnCards = $this->payActionCosts(2);
-    Notifications::betray($cardToBetray, $wakhanPlayer, $rupeesOnCards);
+    $actionCost = $this->payActionCosts(2);
+    Notifications::betray($cardToBetray, $wakhanPlayer, $actionCost);
 
     PaxPamirPlayers::incRupees(WAKHAN_PLAYER_ID, -2);
 

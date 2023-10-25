@@ -90,9 +90,9 @@ trait PlayerActionBuildTrait
     if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
-    $rupeesOnCards = $this->payActionCosts($cost);
+    $actionCost = $this->payActionCosts($cost);
     PaxPamirPlayers::incRupees($playerId, -$cost);
-    Notifications::build($cardId, $player, $rupeesOnCards);
+    Notifications::build($cardId, $player, $actionCost);
     Stats::incBuildCount($playerId,1);
 
     $actionStack = [

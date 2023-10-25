@@ -123,24 +123,30 @@ class Notifications
     ]);
   }
 
-  public static function betray($card, $player, $rupeesOnCards)
+  public static function betray($card, $player, $actionCost)
   {
+    $rupeesOnCards = $actionCost['rupeesOnCards'];
+    $removedRupees = $actionCost['removedRupees'];
     $message = clienttranslate('${tkn_playerName} betrays ${tkn_cardName}${tkn_newLine}${tkn_largeCard}');
     self::notifyAll('payRupeesToMarket', $message, [
       'player' => $player,
       'rupeesOnCards' => $rupeesOnCards,
+      'removedRupees' => $removedRupees,
       'tkn_cardName' => $card['name'],
       'tkn_largeCard' => $card['id'],
       'tkn_newLine' => '<br>',
     ]);
   }
 
-  public static function build($cardId, $player, $rupeesOnCards)
+  public static function build($cardId, $player, $actionCost)
   {
+    $rupeesOnCards = $actionCost['rupeesOnCards'];
+    $removedRupees = $actionCost['removedRupees'];
     self::notifyAll("payRupeesToMarket", clienttranslate('${tkn_playerName} uses ${tkn_cardName} to build and pays ${numberOfRupees} ${tkn_rupee}${tkn_newLine}${tkn_largeCard}'), array(
       'player' => $player,
-      'numberOfRupees' => count($rupeesOnCards),
+      'numberOfRupees' => count($rupeesOnCards) + $removedRupees,
       'rupeesOnCards' => $rupeesOnCards,
+      'removedRupees' => $removedRupees,
       'tkn_cardName' => Cards::get($cardId)['name'],
       'tkn_largeCard' => $cardId,
       'tkn_rupee' => 'rupee(s)',
@@ -642,11 +648,14 @@ class Notifications
     ));
   }
 
-  public static function payRupeesToMarket($player, $rupeesOnCards)
+  public static function payRupeesToMarket($player, $actionCost)
   {
+    $rupeesOnCards = $actionCost['rupeesOnCards'];
+    $removedRupees = $actionCost['removedRupees'];
     self::notifyAll("payRupeesToMarket", '', [
       'player' => $player,
       'rupeesOnCards' => $rupeesOnCards,
+      'removedRupees' => $removedRupees,
     ]);
   }
 

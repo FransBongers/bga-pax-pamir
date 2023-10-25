@@ -7681,12 +7681,12 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_payRupeesToMarket = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, playerId, rupeesOnCards;
+            var _a, playerId, rupeesOnCards, removedRupees;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards;
+                        _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards, removedRupees = _a.removedRupees;
                         return [4, Promise.all((rupeesOnCards || []).map(function (item) { return __awaiter(_this, void 0, void 0, function () {
                                 var row, column, rupeeId, cardId;
                                 return __generator(this, function (_a) {
@@ -7698,6 +7698,9 @@ var NotificationManager = (function () {
                             }); }))];
                     case 1:
                         _b.sent();
+                        if (removedRupees > 0) {
+                            this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -removedRupees });
+                        }
                         return [2];
                 }
             });

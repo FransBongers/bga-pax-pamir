@@ -124,7 +124,7 @@ class NotificationManager {
   }
 
   async notif_payRupeesToMarket(notif: Notif<NotifPayRupeesToMarketArgs>) {
-    const { playerId, rupeesOnCards } = notif.args;
+    const { playerId, rupeesOnCards, removedRupees } = notif.args;
 
     await Promise.all(
       (rupeesOnCards || []).map(async (item) => {
@@ -133,6 +133,9 @@ class NotificationManager {
         this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId });
       })
     );
+    if (removedRupees > 0) {
+      this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -removedRupees });
+    }
   }
 
   async notif_changeLoyalty(notif: Notif<NotifChangeLoyaltyArgs>) {

@@ -176,6 +176,7 @@ interface NotifPayRupeesToMarketArgs {
   playerId: number;
   tkn_playerName: string;
   rupeesOnCards?: { cardId: string; row: number; column: number; rupeeId: string }[];
+  removedRupees: number;
 }
 
 interface NotifPlayCardArgs {

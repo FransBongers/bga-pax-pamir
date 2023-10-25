@@ -140,9 +140,10 @@ trait PlayerActionBetrayTrait
     if (!$this->isCardFavoredSuit($cardInfo)) {
       Globals::incRemainingActions(-1);
     }
-    $rupeesOnCards = $this->payActionCosts(2);
+    $actionCost = $this->payActionCosts(2);
+    
     PaxPamirPlayers::incRupees($playerId, -2);
-    Notifications::betray($betrayedCardInfo, $player, $rupeesOnCards);
+    Notifications::betray($betrayedCardInfo, $player, $actionCost);
     Stats::incBetrayCount($playerId,1);
 
     $actionStack =

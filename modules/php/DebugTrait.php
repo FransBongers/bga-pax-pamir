@@ -53,39 +53,11 @@ trait DebugTrait
   function test()
   {
     // Notifications::log('solo',count(Players::getAll()->toArray()) === 1);
-    // Notifications::log('stack',ActionStack::get());
+    Notifications::log('stack',ActionStack::get());
+    Notifications::log('active',PaxPamirPlayers::getActiveId());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
-    // Cards::move('card_114',Locations::market(0,0));
-    Cards::insertAtBottom('card_101',DECK);
-    // Globals::setWakhanActive(true);
-    // $this->wakhanBetray();
-    // Globals::setWakhanActive(false);
-    // $adjacentCards = Cards::getMany(['card_100','card_1','card_93','card_38','card_54'])->toArray();
-    // Notifications::log('adjacentCards',$adjacentCards);
-    // $move = $this->wakhanGetNextSpyMove();
-    // Notifications::log('move',$move);
-    // $players = PaxPamirPlayers::getAll();
-    // foreach($players as $playerId => $player) {
-    //   PaxPamirPlayers::incScore($playerId,-5);
-    // }
-    // Stats::setupNewGame();
-    // Globals::setWakhanAutoResolve(true);
-    // Notifications::log('cards',$this->wakhanGetCardsSpyCanMoveFrom());
-    // Globals::setRulers([
-    //   'herat' => null,
-    //   'kabul' => null,
-    //   'kandahar' => 2371052,
-    //   'persia' => null,
-    //   'punjab' => null,
-    //   'transcaspia' => 1
-    // ]);
-    // Notifications::log('players',Globals::getPlayers());
-    // $this->wakhanMove();
-    // $this->wakhanIfFewerThan2RupeesRadicalizeMostNetRupees();
-    // $players = Players::getAll();
-    // Notifications::log('stack',ActionStack::get());
-    // Cards::setUsed('card_81',0);
+
     
     // Cards::move('card_106',ACTIVE_EVENTS);
     
@@ -99,52 +71,7 @@ trait DebugTrait
     // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
     // Cards::move('card_26', DISCARD);
     // Cards::move('card_116', Locations::market(0,5));
-    // Cards::move('card_78', Locations::market(1,5));
-    // Cards::move('card_114', DISCARD);
-    // Cards::move('card_28', Locations::market(1,2));
-    // Cards::move('card_100', DISCARD);
-    // Cards::move('card_9', Locations::market(0,1));
-
-    // Globals::setFavoredSuit(MILITARY);
-    // PaxPamirPlayers::incScore(PaxPamirPlayers::get()->getId(), 6);
-    // PaxPamirPlayers::incScore(WAKHAN_PLAYER_ID, 5);
-    // $this->gamestate->jumpToState(ST_CALCULATE_TIE_BREAKER);
-    // Globals::setFavoredSuit(MILITARY);
-    // $this->determineRuler(KABUL, $piecesToIgnore = [], $armiesToAdd = [], $tribesToAdd = []);
-    // $ruler = Map::determineRuler(KABUL,['block_russian_12'],[],['cylinder_1_8']);
-    // Notifications::log('ruler',$ruler);
-
-    // $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
-    // // Add start of turn abilities to action stack
-
-    // $addPause = false;
-    // Notifications::log('blachMailHerat',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT));
-    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
-    //   // $addPause = $addPause || $this->wakhanBlackmail(HERAT);
-    // }
-    // Notifications::log('blachMailKandahar',$wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR));
-    // if ($wakhanPlayer->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
-    //   // $addPause = $addPause || $this->wakhanBlackmail(KANDAHAR);
-    // }
-    // Globals::setFavoredSuit(INTELLIGENCE);
-    // Cards::setUsed('card_45',0);
-    // $actionStack = [
-    //   ActionStack::createAction(DISPATCH_TRANSITION, PaxPamirPlayers::get()->getId(), [
-    //     'transition' => 'playerActions'
-    //   ])
-    // ];
-    // ActionStack::set($actionStack);
-    // Notifications::log('stack',ActionStack::get());
-    // Notifications::log('stack',Globals::getWakhanActive());
-    // Cards::move('card_110', 'events_'.WAKHAN_PLAYER_ID);
-
-    // Notifications::log('adjacent',$this->wakhanGetNextMove());
-    // Notifications::log('piece',Map::determineRuler(KABUL,['cylinder_1_5','block_british_6']));
-    // Notifications::log('piece',$this->wakhanGetPieceToMove(PUNJAB));
-
-    // Globals::setRemainingActions(2);
-    // Cards::setUsed('card_69', 0);
-    // $this->dispatchWakhanSetupBonusActions();
+   
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)
@@ -344,12 +271,7 @@ trait DebugTrait
 		// These are the id's from the BGAtable I need to debug.
 		// you can get them by running this query : SELECT JSON_ARRAYAGG(`player_id`) FROM `player`
 		$ids = [
-      88504426,
-      90501196,
-			94382584, // 2371052
-      9072145, // 2371053
-      // 84053089, // 2371054
-      // 83886430, // 2371055
+      94652353,
 		];
                 // You can also get the ids automatically with $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
 

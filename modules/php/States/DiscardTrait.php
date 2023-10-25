@@ -142,6 +142,9 @@ trait DiscardTrait
       if ($playerId !== PaxPamirPlayers::get()->getId()) {
         Log::checkpoint();
       }
+      if (Globals::getWakhanEnabled()) {
+        Globals::setWakhanActive(false);
+      }
       $this->nextState('discard', $playerId);
     } else {
       array_pop($actionStack);

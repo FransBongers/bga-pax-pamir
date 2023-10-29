@@ -53,8 +53,12 @@ trait DebugTrait
   function test()
   {
     // Notifications::log('solo',count(Players::getAll()->toArray()) === 1);
-    Notifications::log('stack',ActionStack::get());
-    Notifications::log('active',PaxPamirPlayers::getActiveId());
+    // Notifications::log('stack',ActionStack::get());
+    Cards::insertOnTop('card_101',DECK);
+    // Cards::insertOnTop('card_102',DECK);
+    // Cards::insertOnTop('card_103',DECK);
+    // Cards::insertOnTop('card_104',DECK);
+    // Notifications::log('active',PaxPamirPlayers::getActiveId());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
 

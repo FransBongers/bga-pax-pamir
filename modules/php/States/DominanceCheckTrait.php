@@ -117,14 +117,13 @@ trait DominanceCheckTrait
   {
     $action = array_pop($actionStack);
     if ($this->didPlayerWin()) {
-      if ($action['data']['purchased']) {
+      if ($action['data']['purchased'] && $action['playerId'] !== WAKHAN_PLAYER_ID) {
         $this->nextState('endGameCheck');
       } else {
         $this->nextState('calculateTieBreaker');
       }
       return;
     }
-    array_pop($actionStack);
     ActionStack::next($actionStack);
   }
 

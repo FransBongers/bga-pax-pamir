@@ -52,7 +52,7 @@ class PPPlayer {
     rupeesTableau: new ebg.counter(),
   };
 
-  private player: PaxPamirPlayer;
+  // private player: PaxPamirPlayer;
   private rulerTokens: PaxPamirZone;
   private loyalty: string;
 
@@ -61,7 +61,7 @@ class PPPlayer {
     this.game = game;
     const playerId = player.id;
     this.playerId = Number(playerId);
-    this.player = player;
+    // this.player = player;
     this.playerName = player.name;
     this.playerColor = player.color;
     this.playerHexColor = player.hexColor;
@@ -326,9 +326,8 @@ class PPPlayer {
     dojo.place(tplPlayerBoard({ playerId: this.playerId }), player_board_div);
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
-    // TODO: check how player loyalty is returned with new setup. Seems to be empty string?
-    if (this.player.loyalty && this.player.loyalty !== 'null') {
-      this.updatePlayerLoyalty({ coalition: this.player.loyalty });
+    if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
+      this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
     }
 
     SUITS.forEach((suit) => {
@@ -365,7 +364,7 @@ class PPPlayer {
     }
 
     // Set all values in player panels
-    if (this.player.loyalty && this.player.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
+    if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
       this.counters.influence.setValue(playerGamedatas.counts.influence.value);
     } else {
       this.counters.influence.disable();
@@ -695,7 +694,7 @@ class PPPlayer {
     const tableau = dojo.byId(`pp_player_tableau_container_${this.playerId}`);
     const originalZIndex = tableau.style.zIndex;
     tableau.style.zIndex = '11';
-    return originalZIndex
+    return originalZIndex;
   }
 
   removeTableauElevation(originalZIndex: string) {

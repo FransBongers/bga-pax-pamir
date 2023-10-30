@@ -174,6 +174,7 @@ const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
 const ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
 const ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
 const ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+const ECE_KOH_I_NOOR_RECOVERED_CARD_ID = 'card_106';
 const ECE_MILITARY_SUIT = 'militarySuit';
 const ECE_NATION_BUILDING = 'nationBuilding';
 const ECE_NATION_BUILDING_CARD_ID = 'card_112';

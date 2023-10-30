@@ -30,7 +30,7 @@ class ResolveEventOtherPersuasiveMethodsState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a player to exchange your hand with',
+      text: _('${you} must select a player to exchange your hand with'),
       args: {
         you: '${you}',
       },
@@ -49,7 +49,7 @@ class ResolveEventOtherPersuasiveMethodsState implements State {
   private updateInterfaceConfirmPlayer({ player }: { player: PPPlayer }) {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: 'Choose ${tkn_playerName}?',
+      text: _('Choose ${tkn_playerName}?'),
       args: {
         tkn_playerName: player.getName(),
       },

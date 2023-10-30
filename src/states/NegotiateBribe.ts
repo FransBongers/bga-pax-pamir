@@ -41,7 +41,7 @@ class NegotiateBribeState implements State {
     this.game.clearPossible();
 
     this.game.clientUpdatePageTitle({
-      text: '${you} must accept or decline bribe of ${amount} rupee(s)',
+      text: _('${you} must accept or decline bribe of ${amount} rupee(s)'),
       args: {
         amount: this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount,
         you: '${you}',

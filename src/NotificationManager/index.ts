@@ -365,24 +365,31 @@ class NotificationManager {
     const move = notif.args.move;
     await this.performTokenMove({ move });
     const playerId = Number(move.tokenId.split('_')[1]);
+    const player = this.getPlayer({ playerId });
     // cylinders is placed from supply somewhere else, increase count
     if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
-      this.getPlayer({ playerId }).incCounter({ counter: 'cylinders', value: 1 });
+      player.incCounter({ counter: 'cylinders', value: 1 });
     }
-    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
+    if (move.to.startsWith('gift_') && !move.from.startsWith('gift_')) {
+      let value = 1;
+      if (this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
+        value = 0;
+      } else if (player.ownsEventCard({cardId: ECE_KOH_I_NOOR_RECOVERED_CARD_ID})) {
+        value = 2;
+      }
       if (playerId === WAKHAN_PLAYER_ID) {
-        (this.getPlayer({ playerId }) as PPWakhanPlayer).incWakhanInfluence({
+        (player as PPWakhanPlayer).incWakhanInfluence({
           wakhanInfluence: {
             type: 'wakhanInfluence',
             influence: {
-              afghan: 1,
-              british: 1,
-              russian: 1,
+              afghan: value,
+              british: value,
+              russian: value,
             },
           },
         });
       } else {
-        this.getPlayer({ playerId }).incCounter({ counter: 'influence', value: 1 });
+        player.incCounter({ counter: 'influence', value });
       }
     }
   }

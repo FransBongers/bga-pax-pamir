@@ -30,7 +30,7 @@ class ResolveEventPashtunwaliValuesState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a suit to favor',
+      text: _('${you} must select a suit to favor'),
       args: {
         you: '${you}',
       },
@@ -48,7 +48,7 @@ class ResolveEventPashtunwaliValuesState implements State {
   private updateInterfaceConfirmSuit({ suit, name }: { suit: string; name: string }) {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: 'Choose ${suitName}?',
+      text: _('Choose ${suitName}?'),
       args: {
         suitName: name,
       },

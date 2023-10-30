@@ -47,7 +47,7 @@ class ClientInitialBribeCheckState implements State {
 
     const bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
     this.game.clientUpdatePageTitle({
-      text: '${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive',
+      text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive'),
       args: {
         amount,
         tkn_playerName: bribee.getName(),

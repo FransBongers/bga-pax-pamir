@@ -1192,6 +1192,7 @@ var ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
 var ECE_FAILURE_TO_IMPRESS = 'failureToImpress';
 var ECE_INTELLIGENCE_SUIT = 'intelligenceSuit';
 var ECE_KOH_I_NOOR_RECOVERED = 'kohINoorRecovered';
+var ECE_KOH_I_NOOR_RECOVERED_CARD_ID = 'card_106';
 var ECE_MILITARY_SUIT = 'militarySuit';
 var ECE_NATION_BUILDING = 'nationBuilding';
 var ECE_NATION_BUILDING_CARD_ID = 'card_112';
@@ -2122,7 +2123,6 @@ var PPPlayer = (function () {
         this.game = game;
         var playerId = player.id;
         this.playerId = Number(playerId);
-        this.player = player;
         this.playerName = player.name;
         this.playerColor = player.color;
         this.playerHexColor = player.hexColor;
@@ -2360,8 +2360,8 @@ var PPPlayer = (function () {
         var player_board_div = $('player_board_' + this.playerId);
         dojo.place(tplPlayerBoard({ playerId: this.playerId }), player_board_div);
         $("cylinders_".concat(this.playerId)).classList.add("pp_player_color_".concat(this.playerColor));
-        if (this.player.loyalty && this.player.loyalty !== 'null') {
-            this.updatePlayerLoyalty({ coalition: this.player.loyalty });
+        if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
+            this.updatePlayerLoyalty({ coalition: playerGamedatas.loyalty });
         }
         SUITS.forEach(function (suit) {
             _this.game.tooltipManager.addSuitTooltip({ suit: suit, nodeId: "pp_".concat(suit, "_icon_").concat(_this.playerId) });
@@ -2393,7 +2393,7 @@ var PPPlayer = (function () {
         if ((_b = this.game.framework().scoreCtrl) === null || _b === void 0 ? void 0 : _b[this.playerId]) {
             this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score));
         }
-        if (this.player.loyalty && this.player.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
+        if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null' && playerGamedatas.counts.influence.type === PLAYER_INFLUENCE) {
             this.counters.influence.setValue(playerGamedatas.counts.influence.value);
         }
         else {
@@ -6268,7 +6268,7 @@ var ClientInitialBribeCheckState = (function () {
         var localState = this.game.localState;
         var bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
         this.game.clientUpdatePageTitle({
-            text: '${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive',
+            text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive'),
             args: {
                 amount: amount,
                 tkn_playerName: bribee.getName(),
@@ -6750,7 +6750,7 @@ var NegotiateBribeState = (function () {
         var _this = this;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: '${you} must accept or decline bribe of ${amount} rupee(s)',
+            text: _('${you} must accept or decline bribe of ${amount} rupee(s)'),
             args: {
                 amount: this.isBribee ? this.briber.currentAmount : this.bribee.currentAmount || this.maxAmount,
                 you: '${you}',
@@ -7198,7 +7198,7 @@ var ResolveEventOtherPersuasiveMethodsState = (function () {
         var _this = this;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: '${you} must select a player to exchange your hand with',
+            text: _('${you} must select a player to exchange your hand with'),
             args: {
                 you: '${you}',
             },
@@ -7218,7 +7218,7 @@ var ResolveEventOtherPersuasiveMethodsState = (function () {
         var player = _a.player;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: 'Choose ${tkn_playerName}?',
+            text: _('Choose ${tkn_playerName}?'),
             args: {
                 tkn_playerName: player.getName(),
             },
@@ -7251,7 +7251,7 @@ var ResolveEventPashtunwaliValuesState = (function () {
         var _this = this;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: '${you} must select a suit to favor',
+            text: _('${you} must select a suit to favor'),
             args: {
                 you: '${you}',
             },
@@ -7270,7 +7270,7 @@ var ResolveEventPashtunwaliValuesState = (function () {
         var suit = _a.suit, name = _a.name;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: 'Choose ${suitName}?',
+            text: _('Choose ${suitName}?'),
             args: {
                 suitName: name,
             },
@@ -7302,7 +7302,7 @@ var ResolveEventRebukeState = (function () {
     ResolveEventRebukeState.prototype.updateInterfaceInitialStep = function () {
         var _this = this;
         this.game.clientUpdatePageTitle({
-            text: '${you} must select a region',
+            text: _('${you} must select a region'),
             args: {
                 you: '${you}',
             },
@@ -7326,7 +7326,7 @@ var ResolveEventRebukeState = (function () {
             element.classList.add(PP_SELECTED);
         }
         this.game.clientUpdatePageTitle({
-            text: 'Remove all tribes and armies from ${regionName}?',
+            text: _('Remove all tribes and armies from ${regionName}?'),
             args: {
                 regionName: this.game.gamedatas.staticData.regions[regionId].name,
             },
@@ -7359,7 +7359,7 @@ var ResolveEventRumor = (function () {
         var _this = this;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: '${you} must select a player',
+            text: _('${you} must select a player'),
             args: {
                 you: '${you}',
             },
@@ -7377,7 +7377,7 @@ var ResolveEventRumor = (function () {
         var player = _a.player;
         this.game.clearPossible();
         this.game.clientUpdatePageTitle({
-            text: 'Choose ${tkn_playerName}?',
+            text: _('Choose ${tkn_playerName}?'),
             args: {
                 tkn_playerName: player.getName(),
             },
@@ -8124,7 +8124,7 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_placeCylinder = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var move, playerId;
+            var move, playerId, player, value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -8133,24 +8133,32 @@ var NotificationManager = (function () {
                     case 1:
                         _a.sent();
                         playerId = Number(move.tokenId.split('_')[1]);
+                        player = this.getPlayer({ playerId: playerId });
                         if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
-                            this.getPlayer({ playerId: playerId }).incCounter({ counter: 'cylinders', value: 1 });
+                            player.incCounter({ counter: 'cylinders', value: 1 });
                         }
-                        if (move.to.startsWith('gift_') && !move.from.startsWith('gift_') && !this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
+                        if (move.to.startsWith('gift_') && !move.from.startsWith('gift_')) {
+                            value = 1;
+                            if (this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
+                                value = 0;
+                            }
+                            else if (player.ownsEventCard({ cardId: ECE_KOH_I_NOOR_RECOVERED_CARD_ID })) {
+                                value = 2;
+                            }
                             if (playerId === WAKHAN_PLAYER_ID) {
-                                this.getPlayer({ playerId: playerId }).incWakhanInfluence({
+                                player.incWakhanInfluence({
                                     wakhanInfluence: {
                                         type: 'wakhanInfluence',
                                         influence: {
-                                            afghan: 1,
-                                            british: 1,
-                                            russian: 1,
+                                            afghan: value,
+                                            british: value,
+                                            russian: value,
                                         },
                                     },
                                 });
                             }
                             else {
-                                this.getPlayer({ playerId: playerId }).incCounter({ counter: 'influence', value: 1 });
+                                player.incCounter({ counter: 'influence', value: value });
                             }
                         }
                         return [2];

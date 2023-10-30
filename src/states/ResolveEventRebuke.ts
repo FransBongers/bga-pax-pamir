@@ -30,7 +30,7 @@ class ResolveEventRebukeState implements State {
   private updateInterfaceInitialStep() {
     // this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a region',
+      text: _('${you} must select a region'),
       args: {
         you: '${you}',
       },
@@ -57,7 +57,7 @@ class ResolveEventRebukeState implements State {
       element.classList.add(PP_SELECTED);
     }
     this.game.clientUpdatePageTitle({
-      text: 'Remove all tribes and armies from ${regionName}?',
+      text: _('Remove all tribes and armies from ${regionName}?'),
       args: {
         regionName: this.game.gamedatas.staticData.regions[regionId].name,
       },

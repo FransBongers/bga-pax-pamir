@@ -30,7 +30,7 @@ class ResolveEventRumor implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: '${you} must select a player',
+      text: _('${you} must select a player'),
       args: {
         you: '${you}',
       },
@@ -47,7 +47,7 @@ class ResolveEventRumor implements State {
   private updateInterfaceConfirmPlayer({ player }: { player: PPPlayer }) {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: 'Choose ${tkn_playerName}?',
+      text: _('Choose ${tkn_playerName}?'),
       args: {
         tkn_playerName: player.getName(),
       },

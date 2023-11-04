@@ -211,7 +211,7 @@ trait WakhanRadicalizeTrait
   {
     for ($column = $startColumn; $column >= 0; $column--) {
       $courtCard = Cards::getInLocation(Locations::market($row, $column))->first();
-      if ($courtCard === null || ($courtCard['type'] === EVENT_CARD && $courtCard['discarded']['effect'] === ECE_PUBLIC_WITHDRAWAL)) {
+      if ($courtCard === null || ($courtCard['type'] === EVENT_CARD && $courtCard['purchased']['effect'] === ECE_PUBLIC_WITHDRAWAL)) {
         continue;
       }
 

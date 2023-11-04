@@ -66,7 +66,7 @@ class SASafeHouseState implements State {
     this.game.clientUpdatePageTitle({
       text: _('Place spy on ${cardName}?'),
       args: {
-        cardName: card.name,
+        cardName: _(card.name),
       },
     });
     this.game.addPrimaryActionButton({

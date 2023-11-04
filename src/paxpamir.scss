@@ -595,6 +595,38 @@ html {
 
 /* BUTTONS */
 
+.pp_info_icon {
+  background-color: white;
+  box-sizing: border-box;
+  // background-color: #a47a77;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 467px;
+  top: 5px;
+  // top: -18px;
+  // right: -18px;
+  font-size: 90%;
+  color: #231F20 !important;
+  border: 3px solid #231F20;
+
+  &:hover {
+    text-decoration: none;
+    color: #231F20 !important;
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+
+  i {
+    font-size: 1.5em;
+    // margin-top: -2px;
+  }
+}
+
 #afghan_button {
   background-color: base.$afghan-color;
 }

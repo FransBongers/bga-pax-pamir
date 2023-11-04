@@ -59,7 +59,7 @@ class ResolveEventRebukeState implements State {
     this.game.clientUpdatePageTitle({
       text: _('Remove all tribes and armies from ${regionName}?'),
       args: {
-        regionName: this.game.gamedatas.staticData.regions[regionId].name,
+        regionName: _(this.game.gamedatas.staticData.regions[regionId].name),
       },
     });
     this.game.addPrimaryActionButton({

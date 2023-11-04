@@ -52,12 +52,17 @@ trait DebugTrait
 
   function test()
   {
-    // Notifications::log('solo',count(Players::getAll()->toArray()) === 1);
-    // Notifications::log('stack',ActionStack::get());
+    $this->wakhanCheckAmbition();
+
     // Cards::insertOnTop('card_101',DECK);
-    // Cards::insertOnTop('card_102',DECK);
-    // Cards::insertOnTop('card_103',DECK);
-    // Cards::insertOnTop('card_104',DECK);
+    // Cards::insertOnTop('card_102',DISCARD);
+    // Cards::insertOnTop('card_103',DISCARD);
+    // Cards::insertOnTop('card_104',DISCARD);
+    // Globals::setDominanceChecksResolved(3);
+    // PaxPamirPlayers::incScore(2371052,3);
+    // Players::incScore(2371052,3);
+    // $this->debugIncPlayerRupees(10,WAKHAN_PLAYER_ID);
+
     // Notifications::log('active',PaxPamirPlayers::getActiveId());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(ECONOMIC);
@@ -66,7 +71,7 @@ trait DebugTrait
     // Cards::move('card_106',ACTIVE_EVENTS);
     
     // Cards::move('card_99',DISCARD);
-    Cards::move('card_106',Locations::market(1,0));
+    // Cards::move('card_106',Locations::market(1,0));
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_83',DISCARD);
     // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());

@@ -56,7 +56,7 @@ class StartOfTurnAbilitiesState implements State {
     this.game.clientUpdatePageTitle({
       text: _('Place a spy on ${cardName}?'),
       args: {
-        cardName: (this.game.getCardInfo({ cardId }) as CourtCard).name,
+        cardName: _((this.game.getCardInfo({ cardId }) as CourtCard).name),
       },
     });
     this.game.addPrimaryActionButton({

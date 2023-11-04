@@ -226,8 +226,8 @@ trait WakhanActionTrait
       ];
     }, $playerIds);
     usort($totalScores, function ($a, $b) {
-      $scoreDifference = $b['score'] - $a['score'];
-      if ($scoreDifference === 0) {
+      $scoreDifference = intval($b['score'] - $a['score']);
+      if ($scoreDifference === intval(0)) {
         return $b['tieBreaker'] - $a['tieBreaker'];
       } else {
         return $scoreDifference;

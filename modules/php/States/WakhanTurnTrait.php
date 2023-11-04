@@ -77,7 +77,7 @@ trait WakhanTurnTrait
     // Used to determine if there are no valid actions left
     Globals::setWakhanActionsSkipped(0);
     Globals::setRemainingActions(2);
-    Notifications::message('${tkn_playerName} starts her turn', [
+    Notifications::message(clienttranslate('${tkn_playerName} starts her turn'), [
       'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
     ]);
 

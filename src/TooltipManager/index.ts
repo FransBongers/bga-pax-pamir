@@ -28,7 +28,7 @@ class PPTooltipManager {
     this.game.framework().addTooltipHtml(nodeId, html, 500);
   }
 
-  public addTextToolTip({nodeId, text}: {nodeId: string; text: string;}) {
+  public addTextToolTip({ nodeId, text }: { nodeId: string; text: string }) {
     this.game.framework().addTooltip(nodeId, _(text), '', 500);
   }
 
@@ -72,7 +72,7 @@ class PPTooltipManager {
       const splitId = id.split('_');
       const cardId = `${splitId[0]}_${splitId[1]}`;
       // No idea why we need to do + 1 here. Looks like the notif that puts a msg in the log
-      // is not the same that gets handles to addToLog (/ or the format_string_recursize gets triggered twice)? 
+      // is not the same that gets handles to addToLog (/ or the format_string_recursize gets triggered twice)?
       const cardIdSuffix = `_${Number(splitId[2]) + 1}`;
       this.addTooltipToCard({ cardId, cardIdSuffix });
     });
@@ -81,6 +81,7 @@ class PPTooltipManager {
   // Function for setup of generic tooltips as last step of setup
   public setupTooltips() {
     this.setupCardCounterTooltips();
+    // this.setupDominanceCheckScoresTooltip();
   }
 
   private setupCardCounterTooltips() {
@@ -93,4 +94,14 @@ class PPTooltipManager {
       .framework()
       .addTooltip('pp_discard_pile_counter_dominance_check_container', _('Number of Dominance Check cards in the discard pile'), '', 500);
   }
+
+  // private setupDominanceCheckScoresTooltip() {
+  //   // @ts-ignore
+  //   new dijit.Tooltip({
+  //     connectId: ['pp_dominance_check_info'],
+  //     getContent: function (matchedNode) {
+  //       return tplVirtualScoresTooltip();
+  //     },
+  //   });
+  // }
 }

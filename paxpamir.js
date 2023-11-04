@@ -1613,6 +1613,9 @@ var tplSuitToolTip = function (_a) {
     };
     return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px; margin-left: -2px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
 };
+var tplVirtualScoresTooltip = function () {
+    return "\n    <div class=\"pp_virtual_score_tooltip\">\n      <span class=\"pp_tooltip_title\" >".concat(_('Victory'), "</span>\n      <span class=\"pp_tooltip_text\">").concat(_('description'), "</span>\n    </div>\n  ");
+};
 var tplWakhanCardTooltip = function (_a) {
     var _b, _c;
     var wakhanDeckCardId = _a.wakhanDeckCardId, wakhanDiscardCardId = _a.wakhanDiscardCardId, game = _a.game;
@@ -6291,7 +6294,7 @@ var ClientInitialBribeCheckState = (function () {
             }
             this_1.game.addPrimaryActionButton({
                 id: "ask_partial_waive_".concat(i, "_btn"),
-                text: dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
+                text: dojo.string.substitute(_('Offer ${i} rupee(s)'), { i: i }),
                 callback: function () {
                     return _this.game.takeAction({
                         action: 'startBribeNegotiation',
@@ -6486,7 +6489,7 @@ var ClientPlayCardState = (function () {
         this.game.clientUpdatePageTitle({
             text: _("Select which end of court to play ${name}"),
             args: {
-                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
             },
         });
         this.setSideSelectable();
@@ -6523,29 +6526,29 @@ var ClientPlayCardState = (function () {
         if (firstCard && willChangeLoyalty) {
             text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
             args = {
-                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
                 tkn_coalition: playedCardLoyalty,
             };
         }
         else if (firstCard) {
             text = _("Play ${name} to court?");
             args = {
-                name: this.game.getCardInfo({ cardId: this.cardId }).name,
+                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
             };
         }
         else if (!firstCard && willChangeLoyalty) {
             text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
             args = {
-                name: this.game.getCardInfo({ cardId: this.cardId }).name,
-                side: side,
+                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                side: _(side),
                 tkn_coalition: playedCardLoyalty,
             };
         }
         else {
             text = _("Play ${name} to ${side} end of court?");
             args = {
-                name: this.game.getCardInfo({ cardId: this.cardId }).name,
-                side: side,
+                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                side: _(side),
             };
         }
         this.game.clientUpdatePageTitle({
@@ -6602,7 +6605,7 @@ var ClientPurchaseCardState = (function () {
         this.game.clientUpdatePageTitle({
             text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
             args: {
-                name: name,
+                name: _(name),
                 cost: cost,
                 tkn_rupee: _('rupee(s)')
             },
@@ -6662,7 +6665,7 @@ var DiscardState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Discard ${name}?'),
             args: {
-                name: this.game.getCardInfo({ cardId: cardId }).name,
+                name: _(this.game.getCardInfo({ cardId: cardId }).name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -6786,8 +6789,8 @@ var NegotiateBribeState = (function () {
             this_2.game.addPrimaryActionButton({
                 id: "ask_partial_waive_".concat(i, "_btn"),
                 text: this_2.isBribee
-                    ? dojo.string.substitute(_("Demand ".concat(i, " rupee(s)")), { i: i })
-                    : dojo.string.substitute(_("Offer ".concat(i, " rupee(s)")), { i: i }),
+                    ? dojo.string.substitute(_('Demand ${i} rupee(s)'), { i: i })
+                    : dojo.string.substitute(_('Offer ${i} rupee(s)'), { i: i }),
                 callback: function () {
                     return _this.game.takeAction({
                         action: 'negotiateBribe',
@@ -6866,7 +6869,7 @@ var PlaceSpyState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}'),
             args: {
-                cardName: this.game.getCardInfo({ cardId: cardId }).name,
+                cardName: _(this.game.getCardInfo({ cardId: cardId }).name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7328,7 +7331,7 @@ var ResolveEventRebukeState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Remove all tribes and armies from ${regionName}?'),
             args: {
-                regionName: this.game.gamedatas.staticData.regions[regionId].name,
+                regionName: _(this.game.gamedatas.staticData.regions[regionId].name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7443,7 +7446,7 @@ var SASafeHouseState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Place spy on ${cardName}?'),
             args: {
-                cardName: card.name,
+                cardName: _(card.name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7577,7 +7580,7 @@ var StartOfTurnAbilitiesState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}?'),
             args: {
-                cardName: this.game.getCardInfo({ cardId: cardId }).name,
+                cardName: _(this.game.getCardInfo({ cardId: cardId }).name),
             },
         });
         this.game.addPrimaryActionButton({

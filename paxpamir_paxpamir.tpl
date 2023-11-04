@@ -79,6 +79,7 @@
     
     <div id="pp_supply">
         <div id="pp_coalition_blocks_container">
+            <!--<a id="pp_dominance_check_info" class="pp_info_icon"><i class="fa fa-info" aria-hidden="true"></i></a>-->
             <div id="pp_dominant_coalition_banner"></div>
             <div id="pp_afghan_coalition_blocks" class="pp_coalition_blocks">
             </div>

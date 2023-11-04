@@ -35,7 +35,7 @@ class ClientPurchaseCardState implements State {
     this.game.clientUpdatePageTitle({
       text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
       args: {
-        name,
+        name: _(name),
         cost,
         tkn_rupee: _('rupee(s)')
       },

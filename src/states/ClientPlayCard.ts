@@ -87,7 +87,7 @@ class ClientPlayCardState implements State {
     this.game.clientUpdatePageTitle({
       text: _("Select which end of court to play ${name}"),
       args: {
-        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        name: _((this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name),
       },
     });
     this.setSideSelectable();
@@ -131,26 +131,26 @@ class ClientPlayCardState implements State {
     if (firstCard && willChangeLoyalty) {
       text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
       args = {
-        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        name: _((this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name),
         tkn_coalition: playedCardLoyalty,
       };
     } else if (firstCard) {
       text = _("Play ${name} to court?");
       args = {
-        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
+        name: _((this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name),
       };
     } else if (!firstCard && willChangeLoyalty) {
       text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
       args = {
-        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
-        side,
+        name: _((this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name),
+        side: _(side),
         tkn_coalition: playedCardLoyalty,
       };
     } else {
       text = _("Play ${name} to ${side} end of court?");
       args = {
-        name: (this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name,
-        side,
+        name: _((this.game.getCardInfo({ cardId: this.cardId }) as CourtCard).name),
+        side: _(side),
       };
     }
     this.game.clientUpdatePageTitle({

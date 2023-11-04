@@ -88,8 +88,8 @@ class NegotiateBribeState implements State {
       this.game.addPrimaryActionButton({
         id: `ask_partial_waive_${i}_btn`,
         text: this.isBribee
-          ? dojo.string.substitute(_(`Demand ${i} rupee(s)`), { i })
-          : dojo.string.substitute(_(`Offer ${i} rupee(s)`), { i }),
+          ? dojo.string.substitute(_('Demand ${i} rupee(s)'), { i })
+          : dojo.string.substitute(_('Offer ${i} rupee(s)'), { i }),
         callback: () =>
           this.game.takeAction({
             action: 'negotiateBribe',

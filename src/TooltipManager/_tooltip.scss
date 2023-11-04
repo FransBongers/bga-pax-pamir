@@ -5,6 +5,12 @@
   // background-color: yellow !important;
 }
 
+.pp_virtual_score_tooltip {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+
 .pp_suit_tooltip {
   display: flex;
   flex-direction: row;

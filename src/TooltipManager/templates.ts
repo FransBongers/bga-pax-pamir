@@ -230,8 +230,8 @@ const tplHandCountCountToolTip = () => tplIconToolTip({
   iconWidth: 32,
 });
 
-const tplInfluenceCountToolTip = ({coalition}: {coalition: string;}) => tplIconToolTip({
-  iconHtml: `<div class="pp_icon pp_loyalty_icon pp_${coalition}"></div>`,
+const tplInfluenceCountToolTip = ({coalition, black = false}: {coalition: string; black?: boolean}) => tplIconToolTip({
+  iconHtml: `<div class="pp_icon pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`,
   title: _('LOYALTY AND INFLUENCE'),
   text: _('When a Dominance Check is successful, players loyal to the Dominant Coalition will score points based on their influence points if they are loyal. Each loyal player has one influence plus the sum of their gifts, prizes, and the number of patriots in their court.'),
 });

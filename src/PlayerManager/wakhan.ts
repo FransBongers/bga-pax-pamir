@@ -52,6 +52,7 @@ class PPWakhanPlayer extends PPPlayer {
     this.counters.courtLimit.create(`pp_court_limit_${this.playerId}`);
     this.game.tooltipManager.addSuitTooltip({suit: 'political', nodeId: `pp_player_court_size_${this.playerId}`});
 
+    this.game.tooltipManager.addPlayerIconToolTips({playerId: this.playerId, playerColor: this.playerColor});
 
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -98,6 +99,8 @@ class PPWakhanPlayer extends PPPlayer {
         node.classList.add('pp_loyalty_icon_black');
       }
     });
+    this.game.tooltipManager.removeWakhanInfluenceCountTooltips();
+    this.game.tooltipManager.addWakhanInfluenceCountTooltips({pragmaticLoyalty});
   }
 
   // ....###.....######..########.####..#######..##....##..######.

@@ -27,7 +27,9 @@ class PPTooltipManager {
   public addPlayerIconToolTips({ playerColor, playerId }: { playerColor: string; playerId: number }) {
     this.game.framework().addTooltipHtml(`cylinders_${playerId}`, tplCylinderCountToolTip({ playerColor }), 500);
     this.game.framework().addTooltipHtml(`rupees_${playerId}`, tplRupeeCountToolTip(), 500);
-    this.game.framework().addTooltipHtml(`cards_${playerId}`, tplHandCountCountToolTip(), 500);
+    if (playerId !== WAKHAN_PLAYER_ID) {
+      this.game.framework().addTooltipHtml(`cards_${playerId}`, tplHandCountCountToolTip(), 500);
+    }
   }
 
   public addSuitTooltip({ suit, nodeId }: { suit: 'economic' | 'intelligence' | 'military' | 'political'; nodeId: string }) {
@@ -41,6 +43,18 @@ class PPTooltipManager {
 
   public removeInfluenceCountTooltip({playerId}: {playerId: number}) {
     this.removeTooltip(`loyalty_icon_${playerId}`)
+  }
+
+  public addWakhanInfluenceCountTooltips({pragmaticLoyalty}: {pragmaticLoyalty: string;}) {
+    COALITIONS.forEach((coalition) => {
+      this.game.framework().addTooltipHtml(`loyalty_icon_1_${coalition}`, tplInfluenceCountToolTip({ coalition, black: coalition !== pragmaticLoyalty }), 500);
+    })
+  }
+
+  public removeWakhanInfluenceCountTooltips() {
+    COALITIONS.forEach((coalition) => {
+      this.removeTooltip(`loyalty_icon_1_${coalition}`);
+    })
   }
   
   // Generic text

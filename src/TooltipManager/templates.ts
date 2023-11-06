@@ -190,6 +190,51 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
   `,
   });
 };
+// .####..######...#######..##....##
+// ..##..##....##.##.....##.###...##
+// ..##..##.......##.....##.####..##
+// ..##..##.......##.....##.##.##.##
+// ..##..##.......##.....##.##..####
+// ..##..##....##.##.....##.##...###
+// .####..######...#######..##....##
+
+const tplIconToolTip = ({ title, text, iconHtml, iconWidth }: { title?: string; text: string; iconHtml: string, iconWidth?: number }): string => {
+  return `<div class="pp_icon_tooltip">
+            <div class="pp_icon_tooltip_icon"${iconWidth ? `style="min-width: ${iconWidth}px;"` : ''}>
+              ${iconHtml}
+            </div>
+            <div class="pp_icon_tooltip_content">
+              ${title ? `<span class="pp_tooltip_title" >${title}</span>` : ''}
+              <span class="pp_tooltip_text">${text}</span>
+            </div>
+          </div>`;
+};
+
+const tplCylinderCountToolTip = ({ playerColor }: { playerColor: string; }) =>
+  tplIconToolTip({
+    iconHtml: `<div class="pp_icon pp_cylinder_icon pp_player_color_${playerColor}"></div>`,
+    title: _('CYLINDERS IN PLAY'),
+    text: _('When a Dominance Check is unsuccessful, players will score points based on the number of cylinders they have in play (even zero).'),
+  });
+
+const tplRupeeCountToolTip = () =>   tplIconToolTip({
+  iconHtml: `<div class="pp_icon pp_player_board_rupee"></div>`,
+  title: _('RUPEES'),
+  text: _('The number of rupees owned by this player.'),
+});
+
+const tplHandCountCountToolTip = () => tplIconToolTip({
+  iconHtml: `<div class="pp_icon pp_card_icon"></div>`,
+  title: _('CARDS IN HAND'),
+  text: _('The number of cards this player has in hand.'),
+  iconWidth: 32,
+});
+
+const tplInfluenceCountToolTip = ({coalition}: {coalition: string;}) => tplIconToolTip({
+  iconHtml: `<div class="pp_icon pp_loyalty_icon pp_${coalition}"></div>`,
+  title: _('LOYALTY AND INFLUENCE'),
+  text: _('When a Dominance Check is successful, players loyal to the Dominant Coalition will score points based on their influence points if they are loyal. Each loyal player has one influence plus the sum of their gifts, prizes, and the number of patriots in their court.'),
+});
 
 // ..######..##.....##.####.########..######.
 // .##....##.##.....##..##.....##....##....##
@@ -207,10 +252,18 @@ const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'militar
     political: _('COURT SIZE'),
   };
   const SUIT_DESCRIPTION = {
-    economic: _('The economic suit determines your tax shelter. Your tax shelter is equal to the number of Economic Stars in your court. Opponents may only tax rupees in excess of this.'),
-    intelligence: _('The intelligence suit determines your hand size. Your hand size is equal to 2 plus the number of Intelligence Stars in your court. During cleanup, you must discard your hand down to this.'),
-    military: _('The military suit is the final score tie-breaker. If final score is tied, the number of Military Stars in your court determines victory.'),
-    political: _('The political suit determines your court size. Your court size is equal to 3 plus the number of Political Stars in your court. During cleanup, you must discard your court down to this.'),
+    economic: _(
+      'The economic suit determines your tax shelter. Your tax shelter is equal to the number of Economic Stars in your court. Opponents may only tax rupees in excess of this.'
+    ),
+    intelligence: _(
+      'The intelligence suit determines your hand size. Your hand size is equal to 2 plus the number of Intelligence Stars in your court. During cleanup, you must discard your hand down to this.'
+    ),
+    military: _(
+      'The military suit is the final score tie-breaker. If final score is tied, the number of Military Stars in your court determines victory.'
+    ),
+    political: _(
+      'The political suit determines your court size. Your court size is equal to 3 plus the number of Political Stars in your court. During cleanup, you must discard your court down to this.'
+    ),
   };
 
   return `<div class="pp_suit_tooltip">
@@ -236,8 +289,8 @@ const tplVirtualScoresTooltip = () => {
       <span class="pp_tooltip_title" >${_('Victory')}</span>
       <span class="pp_tooltip_text">${_('description')}</span>
     </div>
-  `
-}
+  `;
+};
 
 // .##......##....###....##....##.##.....##....###....##....##
 // .##..##..##...##.##...##...##..##.....##...##.##...###...##

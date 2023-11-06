@@ -23,11 +23,27 @@ class PPTooltipManager {
     this.game = game;
   }
 
+  // Player panels
+  public addPlayerIconToolTips({ playerColor, playerId }: { playerColor: string; playerId: number }) {
+    this.game.framework().addTooltipHtml(`cylinders_${playerId}`, tplCylinderCountToolTip({ playerColor }), 500);
+    this.game.framework().addTooltipHtml(`rupees_${playerId}`, tplRupeeCountToolTip(), 500);
+    this.game.framework().addTooltipHtml(`cards_${playerId}`, tplHandCountCountToolTip(), 500);
+  }
+
   public addSuitTooltip({ suit, nodeId }: { suit: 'economic' | 'intelligence' | 'military' | 'political'; nodeId: string }) {
     const html = tplSuitToolTip({ suit });
     this.game.framework().addTooltipHtml(nodeId, html, 500);
   }
 
+  public addInfluenceCountTooltip({playerId, coalition}: {playerId: number; coalition: string;}) {
+    this.game.framework().addTooltipHtml(`loyalty_icon_${playerId}`, tplInfluenceCountToolTip({ coalition }), 500);
+  }
+
+  public removeInfluenceCountTooltip({playerId}: {playerId: number}) {
+    this.removeTooltip(`loyalty_icon_${playerId}`)
+  }
+  
+  // Generic text
   public addTextToolTip({ nodeId, text }: { nodeId: string; text: string }) {
     this.game.framework().addTooltip(nodeId, _(text), '', 500);
   }

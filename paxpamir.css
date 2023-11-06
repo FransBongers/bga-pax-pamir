@@ -687,6 +687,11 @@
   margin-right: 10px;
 }
 
+.pp_player_to_left, .pp_player_to_right {
+  background-color: yellow;
+  width: 12px;
+}
+
 .pp_player_hand {
   display: flex;
   flex-direction: column;
@@ -726,7 +731,6 @@
   display: flex;
   flex-direction: row;
   min-height: 288px;
-  padding-bottom: 8px;
   z-index: 1;
 }
 

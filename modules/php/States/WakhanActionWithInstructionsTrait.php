@@ -44,7 +44,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanIfMilitaryFavoredRadicalizeHighestRankedMilitary()
   {
-    if (!Globals::getFavoredSuit() === MILITARY) {
+    if (Globals::getFavoredSuit() !== MILITARY) {
       Wakhan::actionNotValid();
       return;
     }
@@ -66,7 +66,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanIfPoliticalFavoredRadicalizeHighestRankedEconomic()
   {
-    if (!Globals::getFavoredSuit() === POLITICAL) {
+    if (Globals::getFavoredSuit() !== POLITICAL) {
       Wakhan::actionNotValid();
       return;
     }

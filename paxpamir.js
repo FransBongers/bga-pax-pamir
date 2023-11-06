@@ -1597,6 +1597,37 @@ var tplEventCardTooltip = function (_a) {
         content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(_(cardInfo.discarded.title) || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(_(cardInfo.purchased.title) || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(_(cardInfo.purchased.description) || '', "</span>\n  "),
     });
 };
+var tplIconToolTip = function (_a) {
+    var title = _a.title, text = _a.text, iconHtml = _a.iconHtml, iconWidth = _a.iconWidth;
+    return "<div class=\"pp_icon_tooltip\">\n            <div class=\"pp_icon_tooltip_icon\"".concat(iconWidth ? "style=\"min-width: ".concat(iconWidth, "px;\"") : '', ">\n              ").concat(iconHtml, "\n            </div>\n            <div class=\"pp_icon_tooltip_content\">\n              ").concat(title ? "<span class=\"pp_tooltip_title\" >".concat(title, "</span>") : '', "\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
+};
+var tplCylinderCountToolTip = function (_a) {
+    var playerColor = _a.playerColor;
+    return tplIconToolTip({
+        iconHtml: "<div class=\"pp_icon pp_cylinder_icon pp_player_color_".concat(playerColor, "\"></div>"),
+        title: _('CYLINDERS IN PLAY'),
+        text: _('When a Dominance Check is unsuccessful, players will score points based on the number of cylinders they have in play (even zero).'),
+    });
+};
+var tplRupeeCountToolTip = function () { return tplIconToolTip({
+    iconHtml: "<div class=\"pp_icon pp_player_board_rupee\"></div>",
+    title: _('RUPEES'),
+    text: _('The number of rupees owned by this player.'),
+}); };
+var tplHandCountCountToolTip = function () { return tplIconToolTip({
+    iconHtml: "<div class=\"pp_icon pp_card_icon\"></div>",
+    title: _('CARDS IN HAND'),
+    text: _('The number of cards this player has in hand.'),
+    iconWidth: 32,
+}); };
+var tplInfluenceCountToolTip = function (_a) {
+    var coalition = _a.coalition, _b = _a.black, black = _b === void 0 ? false : _b;
+    return tplIconToolTip({
+        iconHtml: "<div class=\"pp_icon pp_loyalty_icon".concat(black ? '_black' : '', " pp_").concat(coalition, "\"></div>"),
+        title: _('LOYALTY AND INFLUENCE'),
+        text: _('When a Dominance Check is successful, players loyal to the Dominant Coalition will score points based on their influence points if they are loyal. Each loyal player has one influence plus the sum of their gifts, prizes, and the number of patriots in their court.'),
+    });
+};
 var tplSuitToolTip = function (_a) {
     var suit = _a.suit;
     var SUIT_TITLE = {
@@ -1660,10 +1691,39 @@ var PPTooltipManager = (function () {
         this.idRegex = /id="[a-z]*_[0-9]*_[0-9]*"/;
         this.game = game;
     }
+    PPTooltipManager.prototype.addPlayerIconToolTips = function (_a) {
+        var playerColor = _a.playerColor, playerId = _a.playerId;
+        this.game.framework().addTooltipHtml("cylinders_".concat(playerId), tplCylinderCountToolTip({ playerColor: playerColor }), 500);
+        this.game.framework().addTooltipHtml("rupees_".concat(playerId), tplRupeeCountToolTip(), 500);
+        if (playerId !== WAKHAN_PLAYER_ID) {
+            this.game.framework().addTooltipHtml("cards_".concat(playerId), tplHandCountCountToolTip(), 500);
+        }
+    };
     PPTooltipManager.prototype.addSuitTooltip = function (_a) {
         var suit = _a.suit, nodeId = _a.nodeId;
         var html = tplSuitToolTip({ suit: suit });
         this.game.framework().addTooltipHtml(nodeId, html, 500);
+    };
+    PPTooltipManager.prototype.addInfluenceCountTooltip = function (_a) {
+        var playerId = _a.playerId, coalition = _a.coalition;
+        this.game.framework().addTooltipHtml("loyalty_icon_".concat(playerId), tplInfluenceCountToolTip({ coalition: coalition }), 500);
+    };
+    PPTooltipManager.prototype.removeInfluenceCountTooltip = function (_a) {
+        var playerId = _a.playerId;
+        this.removeTooltip("loyalty_icon_".concat(playerId));
+    };
+    PPTooltipManager.prototype.addWakhanInfluenceCountTooltips = function (_a) {
+        var _this = this;
+        var pragmaticLoyalty = _a.pragmaticLoyalty;
+        COALITIONS.forEach(function (coalition) {
+            _this.game.framework().addTooltipHtml("loyalty_icon_1_".concat(coalition), tplInfluenceCountToolTip({ coalition: coalition, black: coalition !== pragmaticLoyalty }), 500);
+        });
+    };
+    PPTooltipManager.prototype.removeWakhanInfluenceCountTooltips = function () {
+        var _this = this;
+        COALITIONS.forEach(function (coalition) {
+            _this.removeTooltip("loyalty_icon_1_".concat(coalition));
+        });
     };
     PPTooltipManager.prototype.addTextToolTip = function (_a) {
         var nodeId = _a.nodeId, text = _a.text;
@@ -2387,6 +2447,7 @@ var PPPlayer = (function () {
             this.counters.handLimit.create("pp_hand_limit_".concat(this.playerId));
             this.game.tooltipManager.addSuitTooltip({ suit: 'intelligence', nodeId: "pp_player_hand_size_".concat(this.playerId) });
         }
+        this.game.tooltipManager.addPlayerIconToolTips({ playerId: this.playerId, playerColor: this.playerColor });
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
     PPPlayer.prototype.updatePlayerPanel = function (_a) {
@@ -3067,6 +3128,8 @@ var PPPlayer = (function () {
             .removeClass('pp_british')
             .removeClass('pp_russian')
             .addClass("pp_".concat(coalition));
+        this.game.tooltipManager.removeInfluenceCountTooltip({ playerId: this.playerId });
+        this.game.tooltipManager.addInfluenceCountTooltip({ playerId: this.playerId, coalition: coalition });
     };
     return PPPlayer;
 }());
@@ -3120,6 +3183,7 @@ var PPWakhanPlayer = (function (_super) {
         this.counters.courtCount.create("pp_court_count_".concat(this.playerId));
         this.counters.courtLimit.create("pp_court_limit_".concat(this.playerId));
         this.game.tooltipManager.addSuitTooltip({ suit: 'political', nodeId: "pp_player_court_size_".concat(this.playerId) });
+        this.game.tooltipManager.addPlayerIconToolTips({ playerId: this.playerId, playerColor: this.playerColor });
         this.updatePlayerPanel({ playerGamedatas: playerGamedatas });
     };
     PPWakhanPlayer.prototype.updatePlayerPanel = function (_a) {
@@ -3160,6 +3224,8 @@ var PPWakhanPlayer = (function (_super) {
                 node.classList.add('pp_loyalty_icon_black');
             }
         });
+        this.game.tooltipManager.removeWakhanInfluenceCountTooltips();
+        this.game.tooltipManager.addWakhanInfluenceCountTooltips({ pragmaticLoyalty: pragmaticLoyalty });
     };
     PPWakhanPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;

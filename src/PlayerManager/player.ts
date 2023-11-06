@@ -353,6 +353,7 @@ class PPPlayer {
       this.counters.handLimit.create(`pp_hand_limit_${this.playerId}`);
       this.game.tooltipManager.addSuitTooltip({ suit: 'intelligence', nodeId: `pp_player_hand_size_${this.playerId}` });
     }
+    this.game.tooltipManager.addPlayerIconToolTips({ playerId: this.playerId, playerColor: this.playerColor });
     this.updatePlayerPanel({ playerGamedatas });
   }
 
@@ -983,5 +984,8 @@ class PPPlayer {
       .removeClass('pp_british')
       .removeClass('pp_russian')
       .addClass(`pp_${coalition}`);
+
+    this.game.tooltipManager.removeInfluenceCountTooltip({ playerId: this.playerId });
+    this.game.tooltipManager.addInfluenceCountTooltip({ playerId: this.playerId, coalition });
   }
 }

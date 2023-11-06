@@ -52,7 +52,8 @@ trait DebugTrait
 
   function test()
   {
-    $this->wakhanCheckAmbition();
+    // WakhanCards::insertOnTop('wakhan_card_5',DECK);
+    // WakhanCards::insertOnTop('wakhan_card_1',DISCARD);
 
     // Cards::insertOnTop('card_101',DECK);
     // Cards::insertOnTop('card_102',DISCARD);
@@ -65,7 +66,7 @@ trait DebugTrait
 
     // Notifications::log('active',PaxPamirPlayers::getActiveId());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
-    // Globals::setFavoredSuit(ECONOMIC);
+    Globals::setFavoredSuit(MILITARY);
 
     
     // Cards::move('card_106',ACTIVE_EVENTS);

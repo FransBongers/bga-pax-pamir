@@ -1128,6 +1128,32 @@
   width: 300px;
 }
 
+.pp_icon_tooltip {
+  display: flex;
+  flex-direction: row;
+  width: 300px;
+}
+.pp_icon_tooltip .pp_icon {
+  margin: 0px;
+}
+.pp_icon_tooltip .pp_tooltip_title {
+  font-size: medium;
+  font-style: italic;
+}
+.pp_icon_tooltip .pp_icon_tooltip_icon {
+  padding-top: 4px;
+  min-width: 44px;
+}
+.pp_icon_tooltip .pp_icon_tooltip_content {
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
+}
+.pp_icon_tooltip .pp_tooltip_text {
+  text-align: left;
+  font-size: small;
+}
+
 .pp_suit_tooltip {
   display: flex;
   flex-direction: row;

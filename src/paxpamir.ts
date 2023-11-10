@@ -151,6 +151,9 @@ class PaxPamir implements PaxPamirGame {
     this.tooltipManager = new PPTooltipManager(this);
     this.activeEvents = new PPActiveEvents(this);
     this.playerManager = new PlayerManager(this);
+
+    this.playerManager.setupAdjacentPlayerColors();
+
     this.map = new PPMap(this);
     this.market = new Market(this);
     this.objectManager = new ObjectManager(this);

@@ -30,12 +30,12 @@ class PlayerManager {
       } else {
         this.players[playerId] = new PPWakhanPlayer({ player, game: this.game });
       }
-      
     }
+
     // console.log("players", this.players);
   }
 
-  getPlayer({ playerId }: { playerId: number }): PPPlayer | PPWakhanPlayer{
+  getPlayer({ playerId }: { playerId: number }): PPPlayer | PPWakhanPlayer {
     return this.players[playerId];
   }
 
@@ -51,6 +51,59 @@ class PlayerManager {
     for (const playerId in gamedatas.paxPamirPlayers) {
       this.players[playerId].updatePlayer({ gamedatas });
     }
+  }
+
+  setupAdjacentPlayerColors() {
+    Object.values(this.players).forEach((player) => {
+      player.setupAdjacentPlayerColors();
+    })
+  }
+
+  /**
+   * @returns returns array of playerIds in player order
+   */
+  private getPlayerOrder = (): number[] => {
+    return this.game.playerOrder;
+  };
+
+  /**
+   * @returns next player for the player with given playerId
+   */
+  getNextPlayerId({ playerId }: { playerId: number }): number {
+    const playerOrder = this.getPlayerOrder();
+    const playerIndex = playerOrder.indexOf(playerId);
+
+    if (playerIndex === playerOrder.length - 1) {
+      // Last element so return player on index 0
+      return playerOrder[0];
+    } else {
+      // Return next item in array
+      return playerOrder[playerIndex + 1];
+    }
+  }
+
+  /**
+   * @returns previous player for the player with given playerId
+   */
+  getPreviousPlayerId({ playerId }: { playerId: number }): number {
+    const playerOrder = this.getPlayerOrder();
+    const playerIndex = playerOrder.indexOf(playerId);
+
+    if (playerIndex === 0) {
+      // First element so return player on last index
+      return playerOrder[playerOrder.length - 1];
+    } else {
+      // Return previous item in array
+      return playerOrder[playerIndex - 1];
+    }
+  }
+
+  getNextPlayer({ playerId }: { playerId: number }): PPPlayer {
+    return this.players[this.getNextPlayerId({ playerId })];
+  }
+
+  getPreviousPlayer({ playerId }: { playerId: number }): PPPlayer {
+    return this.players[this.getPreviousPlayerId({ playerId })];
   }
 
   clearInterface() {

@@ -277,6 +277,7 @@ class ClientCardActionMoveState implements State {
   /**
    * @returns next player for the player with given playerId
    */
+  // TODO: use playerManager
   private getNextPlayer({ playerId }: { playerId: number }) {
     const playerOrder = this.getPlayerOrder();
     const playerIndex = playerOrder.indexOf(playerId);
@@ -293,6 +294,7 @@ class ClientCardActionMoveState implements State {
   /**
    * @returns previous player for the player with given playerId
    */
+  // TODO: use playerManager
   private getPreviousPlayer({ playerId }: { playerId: number }) {
     const playerOrder = this.getPlayerOrder();
     const playerIndex = playerOrder.indexOf(playerId);
@@ -309,6 +311,7 @@ class ClientCardActionMoveState implements State {
   /**
    * @returns returns array of playerIds in player order
    */
+  // TODO: use playerManager
   private getPlayerOrder = (): number[] => {
     return this.game.playerOrder;
   };

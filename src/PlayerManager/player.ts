@@ -93,6 +93,7 @@ class PPPlayer {
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
+
     this.updatePlayerPanel({ playerGamedatas });
 
     if (playerGamedatas.loyalty && playerGamedatas.loyalty !== 'null') {
@@ -120,12 +121,27 @@ class PPPlayer {
     this.setupCylinders({ playerGamedatas });
     this.setupGifts({ playerGamedatas });
     this.setupRulerTokens({ gamedatas });
+
     this.setupPlayerPanel({ playerGamedatas });
     if (this.game.gameOptions.openHands && this.playerId !== WAKHAN_PLAYER_ID) {
       this.setupPlayerHandModal();
     }
     if (this.playerId === WAKHAN_PLAYER_ID && gamedatas.wakhanCards) {
       this.setupWakhanDeck({ wakhanCards: gamedatas.wakhanCards });
+    }
+  }
+
+  setupAdjacentPlayerColors() {
+    const previousPlayerColor = this.game.playerManager.getPreviousPlayer({ playerId: this.playerId })?.getColor();
+    const nodePrevious: HTMLElement = $(`pp_player_to_left_of_${this.playerId}`);
+    if (nodePrevious && previousPlayerColor) {
+      nodePrevious.classList.add(`pp_player_color_${previousPlayerColor}`)
+    }
+
+    const nextPlayerColor = this.game.playerManager.getNextPlayer({ playerId: this.playerId })?.getColor();
+    const nodeNext: HTMLElement = $(`pp_player_to_right_of_${this.playerId}`);
+    if (nodeNext && nextPlayerColor) {
+      nodeNext.classList.add(`pp_player_color_${nextPlayerColor}`)
     }
   }
 

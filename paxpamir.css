@@ -681,6 +681,7 @@
 .pp_wakhan_tableau_left {
   display: flex;
   flex-direction: column;
+  margin-bottom: 8px;
 }
 
 #pp_wakhan_deck {
@@ -688,8 +689,16 @@
 }
 
 .pp_player_to_left, .pp_player_to_right {
-  background-color: yellow;
+  box-sizing: border-box;
   width: 12px;
+}
+
+.pp_player_to_left {
+  border-right: 1px solid black;
+}
+
+.pp_player_to_right {
+  border-left: 1px solid black;
 }
 
 .pp_player_hand {
@@ -739,6 +748,7 @@
   flex-direction: column;
   flex-grow: 1;
   /* background-color: blue; */
+  margin-bottom: 8px;
 }
 
 .pp_tableau_inner_container {
@@ -747,32 +757,32 @@
 }
 
 /* Blue */
-.pp_player_tableau.pp_player_color_blue {
+.pp_player_tableau.pp_player_color_blue, .pp_player_to_left.pp_player_color_blue, .pp_player_to_right.pp_player_color_blue {
   background-color: #98B3C0;
 }
 
 /* Gray */
-.pp_player_tableau.pp_player_color_gray {
+.pp_player_tableau.pp_player_color_gray, .pp_player_to_left.pp_player_color_gray, .pp_player_to_right.pp_player_color_gray {
   background-color: #B9B6B1;
 }
 
 /* Yellow / tan */
-.pp_player_tableau.pp_player_color_yellow {
+.pp_player_tableau.pp_player_color_yellow, .pp_player_to_left.pp_player_color_yellow, .pp_player_to_right.pp_player_color_yellow {
   background-color: #DFCFB6;
 }
 
 /* Red */
-.pp_player_tableau.pp_player_color_red {
+.pp_player_tableau.pp_player_color_red, .pp_player_to_left.pp_player_color_red, .pp_player_to_right.pp_player_color_red {
   background-color: #C19B9E;
 }
 
 /* Black */
-.pp_player_tableau.pp_player_color_black {
+.pp_player_tableau.pp_player_color_black, .pp_player_to_left.pp_player_color_black, .pp_player_to_right.pp_player_color_black {
   background-color: #807F7F;
 }
 
 /* Purple */
-.pp_player_tableau.pp_player_color_purple {
+.pp_player_tableau.pp_player_color_purple, .pp_player_to_left.pp_player_color_purple, .pp_player_to_right.pp_player_color_purple {
   background-color: #C3B1D6;
 }
 
@@ -794,6 +804,7 @@
   width: 210px;
   display: flex;
   flex-direction: column;
+  margin-bottom: 8px;
 }
 
 .pp_player_tableau_court_size, .pp_player_hand_size {

@@ -34,7 +34,7 @@ trait DebugTrait
   function debugSetupTokens()
   {
     // $this->debugCreateArmy(KABUL);
-
+    
     // $this->debugCreateRoad('kabul_punjab');
     // $this->debugCreateSpy('card_32');
     // $this->debugCreateSpy('card_27');
@@ -52,8 +52,9 @@ trait DebugTrait
 
   function test()
   {
-    // WakhanCards::insertOnTop('wakhan_card_5',DECK);
-    // WakhanCards::insertOnTop('wakhan_card_1',DISCARD);
+    // Tokens::move('block_russian_8',Locations::pool(RUSSIAN));
+    WakhanCards::insertOnTop('wakhan_card_12',DECK);
+    WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
 
     // Cards::insertOnTop('card_101',DECK);
     // Cards::insertOnTop('card_102',DISCARD);
@@ -66,13 +67,13 @@ trait DebugTrait
 
     // Notifications::log('active',PaxPamirPlayers::getActiveId());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
-    Globals::setFavoredSuit(MILITARY);
+    // Globals::setFavoredSuit(MILITARY);
 
     
     // Cards::move('card_106',ACTIVE_EVENTS);
     
     // Cards::move('card_99',DISCARD);
-    // Cards::move('card_106',Locations::market(1,0));
+    // Cards::move('card_112',DECK);
     // Cards::move('card_99',DISCARD);
     // Cards::move('card_83',DISCARD);
     // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCourtCardsWakhanCanPurchase());

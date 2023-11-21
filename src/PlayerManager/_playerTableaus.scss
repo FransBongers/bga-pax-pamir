@@ -25,14 +25,41 @@
 .pp_player_to_left, .pp_player_to_right {
   box-sizing: border-box;
   width: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .pp_player_to_left {
-  border-right: 1px solid black;
+  justify-content: center;
 }
 
 .pp_player_to_right {
-  border-left: 1px solid black;
+  justify-content: space-between;
+}
+
+.pp_player_color_block {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pp_player_to_right > .pp_player_color_block {
+  height: 25%;
+  border-left: 1px solid;
+}
+
+.pp_player_to_right > .pp_player_color_block:nth-child(1) {
+  border-bottom: 1px solid;
+}
+
+.pp_player_to_right > .pp_player_color_block:nth-child(2) {
+  border-top: 1px solid;
+}
+
+.pp_player_to_left > .pp_player_color_block {
+  height: 50%;
+  border-right: 1px solid;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 
 .pp_player_hand {
@@ -93,32 +120,32 @@
 }
 
 /* Blue */
-.pp_player_tableau.pp_player_color_blue, .pp_player_to_left.pp_player_color_blue, .pp_player_to_right.pp_player_color_blue {
+.pp_player_tableau.pp_player_color_blue, .pp_player_color_block[data-color=blue] {
   background-color: base.$blue-player-background-color;//  #98B3C0;
 }
 
 /* Gray */
-.pp_player_tableau.pp_player_color_gray, .pp_player_to_left.pp_player_color_gray, .pp_player_to_right.pp_player_color_gray {
+.pp_player_tableau.pp_player_color_gray, .pp_player_color_block[data-color=gray] {
   background-color: base.$gray-player-background-color;// #B9B6B1;
 }
 
 /* Yellow / tan */
-.pp_player_tableau.pp_player_color_yellow, .pp_player_to_left.pp_player_color_yellow, .pp_player_to_right.pp_player_color_yellow {
+.pp_player_tableau.pp_player_color_yellow, .pp_player_color_block[data-color=yellow] {
   background-color: base.$yellow-player-background-color;// #DFCFB6;
 }
 
 /* Red */
-.pp_player_tableau.pp_player_color_red, .pp_player_to_left.pp_player_color_red, .pp_player_to_right.pp_player_color_red {
+.pp_player_tableau.pp_player_color_red, .pp_player_color_block[data-color=red] {
   background-color: base.$red-player-background-color;// #C19B9E;
 }
 
 /* Black */
-.pp_player_tableau.pp_player_color_black, .pp_player_to_left.pp_player_color_black, .pp_player_to_right.pp_player_color_black {
+.pp_player_tableau.pp_player_color_black, .pp_player_color_block[data-color=black] {
   background-color: base.$black-player-background-color;// #807F7F;
 }
 
 /* Purple */
-.pp_player_tableau.pp_player_color_purple, .pp_player_to_left.pp_player_color_purple, .pp_player_to_right.pp_player_color_purple {
+.pp_player_tableau.pp_player_color_purple, .pp_player_color_block[data-color=purple] {
   background-color: base.$purple-player-background-color;// #C3B1D6;
 }
 

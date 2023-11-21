@@ -135,13 +135,21 @@ class PPPlayer {
     const previousPlayerColor = this.game.playerManager.getPreviousPlayer({ playerId: this.playerId })?.getColor();
     const nodePrevious: HTMLElement = $(`pp_player_to_left_of_${this.playerId}`);
     if (nodePrevious && previousPlayerColor) {
-      nodePrevious.classList.add(`pp_player_color_${previousPlayerColor}`)
+      nodePrevious.childNodes.forEach((element) => {
+        if (element instanceof HTMLElement) {
+          element.dataset.color = previousPlayerColor;
+        }
+      });
     }
 
     const nextPlayerColor = this.game.playerManager.getNextPlayer({ playerId: this.playerId })?.getColor();
     const nodeNext: HTMLElement = $(`pp_player_to_right_of_${this.playerId}`);
     if (nodeNext && nextPlayerColor) {
-      nodeNext.classList.add(`pp_player_color_${nextPlayerColor}`)
+      nodeNext.childNodes.forEach((element) => {
+        if (element instanceof HTMLElement) {
+          element.dataset.color = nextPlayerColor;
+        }
+      });
     }
   }
 

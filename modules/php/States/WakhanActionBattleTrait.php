@@ -61,7 +61,6 @@ trait WakhanActionBattleTrait
       $card = $this->wakhanGetCourtCardToPerformAction(BATTLE);
     }
     
-    Notifications::log('card', $card);
     if ($card === null) {
       Wakhan::actionNotValid();
       return false;
@@ -108,7 +107,7 @@ trait WakhanActionBattleTrait
     }
     Notifications::battleCard($cardToBattleOn['id']);
 
-    $wakhanSpyCount = $this->getLoyalSpyCount(WAKHAN_PLAYER_ID, $card['id']);
+    $wakhanSpyCount = $this->getLoyalSpyCount(WAKHAN_PLAYER_ID, $cardToBattleOn['id']);
     $enemySpies = $this->getEnemySpiesOnCard(WAKHAN_PLAYER_ID, $cardToBattleOn['id']);
 
     $side = $this->wakhanGetRedArrowValue();

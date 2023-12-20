@@ -59,6 +59,11 @@ class Log extends \APP_DbObject
       ->get();
   }
 
+  public static function undoPossible()
+  {
+    return !self::getAll()->empty();
+  }
+
   /**
    * Clear the log table
    */

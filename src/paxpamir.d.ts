@@ -86,7 +86,9 @@ interface RegionGamedatas {
 }
 
 interface LocalState {
+  bribeLimitReached: boolean;
   remainingActions: number;
+  undoPossible: boolean;
   usedCards: string[];
   bribe: NegotiatedBribe | null;
 }
@@ -224,7 +226,7 @@ interface PaxPamirGame extends Game {
   localState: LocalState;
   addActionButtonClient: (props: AddActionButtonProps) => void;
   addCancelButton: () => void;
-  addUndoButton: () => void;
+  addUndoButton: ({undoPossible}: {undoPossible: boolean}) => void;
   addPlayerButton: (props: { callback: () => void; player: PPPlayer }) => void;
   addPrimaryActionButton: (props: AddButtonProps) => void;
   addSecondaryActionButton: (props: AddButtonProps) => void;

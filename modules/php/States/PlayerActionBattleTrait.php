@@ -258,8 +258,10 @@ trait PlayerActionBattleTrait
 
     if (count($protectedBySafeHouse) > 0) {
       $actionStack = array_merge($actionStack, $this->getSafeHouseActions($protectedBySafeHouse));
+      $actionStack[] = ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [
+        'transition' => 'confirmPartialTurn'
+      ]);
     }
-
     ActionStack::next($actionStack);
   }
 

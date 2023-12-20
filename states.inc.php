@@ -122,6 +122,7 @@ $machinestates = array(
         "transitions" => array(
             "acceptPrize" => ST_ACCEPT_PRIZE,
             "calculateTieBreaker" => ST_CALCULATE_TIE_BREAKER,
+            "confirmPartialTurn" => ST_CONFIRM_PARTIAL_TURN,
             "cleanup" => ST_CLEANUP,
             "nextTurn" => ST_NEXT_PLAYER,
             "discard" => ST_DISCARD,
@@ -131,6 +132,7 @@ $machinestates = array(
             'eventCardPashtunwaliValues' => ST_RESOLVE_ECE_PASHTUNWALI_VALUES,
             'eventCardRebuke' => ST_RESOLVE_ECE_REBUKE,
             'eventCardRumor' => ST_RESOLVE_ECE_RUMOR,
+            "negotiateBribe" => ST_NEGOTIATE_BRIBE,
             "placeRoad" => ST_PLACE_ROAD,
             "placeSpy" => ST_PLACE_SPY,
             "playerActions" => ST_PLAYER_ACTIONS,
@@ -217,7 +219,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must discard '),
         "type" => "activeplayer",
         "args" => "argDiscard",
-        "possibleactions" => array("discard","restart"),
+        "possibleactions" => array("discard", "restart"),
         "transitions" => array(
             "dispatchAction" => ST_DISPATCH_ACTION,
             "playerActions" => ST_PLAYER_ACTIONS,
@@ -358,6 +360,18 @@ $machinestates = array(
         ]
     ],
 
+    ST_CONFIRM_PARTIAL_TURN => [
+        'name' => 'confirmPartialTurn',
+        'description' => clienttranslate('${actplayer} must confirm the switch of active player'),
+        'descriptionmyturn' => clienttranslate('${you} must confirm the switch of active player. You will not be able to restart your turn'),
+        'type' => 'activeplayer',
+        "args" => "argConfirmPartialTurn",
+        'possibleactions' => ['actConfirmPartialTurn', "restart"],
+        "transitions" => [
+            "dispatchAction" => ST_DISPATCH_ACTION,
+        ]
+    ],
+
     // Generic state to change player
     ST_CHANGE_ACTIVE_PLAYER => [
         'name' => 'changeActivePlayer',
@@ -372,7 +386,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} may end game'),
         "descriptionmyturn" => clienttranslate('${you}'),
         "type" => "activeplayer",
-        "possibleactions" => ["endGame","restart"],
+        "args" => "argsEndGame",
+        "possibleactions" => ["endGame", "restart"],
         "transitions" => array(
             "calculateTieBreaker" => ST_CALCULATE_TIE_BREAKER,
         )

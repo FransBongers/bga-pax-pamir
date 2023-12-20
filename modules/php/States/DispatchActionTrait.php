@@ -270,6 +270,7 @@ trait DispatchActionTrait
    * Data:
    * - pop: set to true if actions needs to be popped from stack. Will also pop if not set at all
    * - giveExtraTime: set if player needs to receive extra time
+   * - checkpoint: set to true to force checkPoint
    */
   function dispatchTransition($actionStack)
   {
@@ -286,7 +287,7 @@ trait DispatchActionTrait
     }
 
     ActionStack::set($actionStack);
-    if (PaxPamirPlayers::get()->getId() !== $playerId) {
+    if ((PaxPamirPlayers::get()->getId() !== $playerId) || (isset($next['data']['checkpoint']) && $next['data']['checkpoint'])) {
       Log::checkpoint();
     }
     $this->nextState($next['data']['transition'], $playerId);

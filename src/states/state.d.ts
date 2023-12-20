@@ -36,6 +36,7 @@ interface ClientInitialBribeCheckArgs {
   }) => void;
   action: PlayerAction;
   cardId: string;
+  bribeLimitReached: boolean;
 }
 
 interface EnteringDiscardCourtArgs {
@@ -54,14 +55,20 @@ interface OnEnteringAcceptPrizeArgs {
   cardId: string;
 }
 
+interface OnEnteringConfirmPartialTurnArgs {
+  undoPossible: boolean;
+}
+
 interface OnEnteringDiscardArgs {
   from: ('hand' | 'court')[];
   loyalty?: string;
   region?: string;
   suit?: string;
+  undoPossible: boolean;
 }
 
 interface OnEnteringEndGameCheckArgs {
+  undoPossible: boolean;
 }
 
 interface OnEnteringNegotiateBribeArgs {

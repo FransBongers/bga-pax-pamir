@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Log;
+use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
 use PaxPamir\Managers\Map;
@@ -74,6 +75,10 @@ trait BribeTrait
     if (!in_array($action, $allowedActions)) {
       throw new \feException("Not a valid action to start bribe negotiation");
     }
+
+    if (Globals::getDeclinedBribes() >= DECLINED_BRIBES_LIMIT) {
+      throw new \feException("Bribe limit reached/ Not allowed to start a new bribe negotiation");
+    }
     /**
      * Checks:
      * player has card
@@ -134,8 +139,21 @@ trait BribeTrait
     ]);
 
     Notifications::startBribeNegotiation($player, $card, $amount, $action);
-    Log::checkpoint();
-    $this->nextState('negotiateBribe', $bribe['bribeeId']);
+    // Log::checkpoint();
+
+    $actionStack = [
+      ActionStack::createAction(DISPATCH_TRANSITION, $bribe['bribeeId'], [
+        'transition' => 'negotiateBribe',
+        'checkpoint' => true,
+      ]),
+      ActionStack::createAction(DISPATCH_TRANSITION, $player->getId(), [
+        'transition' => 'confirmPartialTurn'
+      ]),
+    ];
+
+    ActionStack::next($actionStack);
+
+    // $this->nextState('negotiateBribe', $bribe['bribeeId']);
   }
 
   function negotiateBribe($amount)
@@ -213,6 +231,7 @@ trait BribeTrait
     $declinedAmount = $isBribee ? $bribeState['briber']['currentAmount'] : $bribeState['bribee']['currentAmount'];
 
     Notifications::declineBribe($declinedAmount);
+    Globals::incDeclinedBribes(1);
     Globals::setNegotiatedBribe([]);
     if (PaxPamirPlayers::get()->getId() !== $briberId) {
       Log::checkpoint();  

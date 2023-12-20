@@ -17,6 +17,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
     'logState' => 'int', // Used to store state id when enabling the log
     'actionStack' => 'obj',
     // 'activePlayerId' => 'int',
+    "declinedBribes" => "int",
     "dominanceChecksResolved" => "int",
     "favoredSuit" => "str",
     "remainingActions" => "int",
@@ -172,6 +173,7 @@ class Globals extends \PaxPamir\Helpers\DB_Manager
       TRANSCASPIA => null,
     ));
     self::setRemainingActions(2);
+    self::setDeclinedBribes(0);
     self::setSetup(1);
     self::setBribeClearLogs(true);
     self::setNegotiatedBribe([]);

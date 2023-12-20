@@ -4,17 +4,18 @@ class DiscardState implements State {
   private loyalty: OnEnteringDiscardArgs['loyalty'];
   private region: OnEnteringDiscardArgs['region'];
   private suit: OnEnteringDiscardArgs['suit'];
-  
+  private undoPossible: boolean;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState({ from, loyalty, region, suit }: OnEnteringDiscardArgs) {
+  onEnteringState({ from, loyalty, region, suit, undoPossible }: OnEnteringDiscardArgs) {
     this.from = from;
     this.loyalty = loyalty;
     this.region = region;
     this.suit = suit;
+    this.undoPossible = undoPossible;
     this.updateInterfaceInitialStep();
   }
 
@@ -39,7 +40,7 @@ class DiscardState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.updatePageTitle();
-    this.game.addUndoButton();
+    this.game.addUndoButton({ undoPossible: this.undoPossible });
     if (this.from.includes(COURT)) {
       this.game.setCourtCardsSelectable({
         callback: ({ cardId }: { cardId: string }) => this.updateInterfaceConfirm({ cardId, from: 'court' }),

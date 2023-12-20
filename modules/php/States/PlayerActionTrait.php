@@ -31,8 +31,10 @@ trait PlayerActionTrait
     $bribe = Globals::getNegotiatedBribe();
     return [
       'remainingActions' => Globals::getRemainingActions(),
+      'undoPossible' => Log::undoPossible(),
       'usedCards' => Cards::getUnavailableCards(),
       'bribe' => isset($bribe['action']) ? $bribe : null,
+      'bribeLimitReached' => Globals::getDeclinedBribes() >= DECLINED_BRIBES_LIMIT,
     ];
   }
 

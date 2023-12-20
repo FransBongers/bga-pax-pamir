@@ -59,7 +59,7 @@ class PlayerActionsState implements State {
       });
     }
     this.setCardActionsSelectable();
-    this.game.addUndoButton();
+    this.game.addUndoButton({undoPossible: this.game.localState.undoPossible});
     // this.addDebugButton();
   }
 
@@ -261,6 +261,7 @@ class PlayerActionsState implements State {
           event.stopPropagation();
           this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
             args: {
+              bribeLimitReached: this.game.localState.bribeLimitReached,
               cardId,
               action: action as PlayerAction,
               next: ({ bribe }: { bribe: BribeArgs }) =>
@@ -300,6 +301,7 @@ class PlayerActionsState implements State {
         debug('callback triggered', cardId);
         this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
           args: {
+            bribeLimitReached: this.game.localState.bribeLimitReached,
             cardId,
             action: 'playCard',
             next: ({

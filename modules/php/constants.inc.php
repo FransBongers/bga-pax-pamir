@@ -35,6 +35,7 @@ const ST_RESOLVE_ECE_RUMOR = 63;
 
 const ST_WAKHAN_TURN = 90;
 const ST_WAKHAN_PAUSE = 91;
+const ST_CONFIRM_PARTIAL_TURN = 94;
 const ST_CHANGE_ACTIVE_PLAYER = 95;
 const ST_END_GAME_CHECK = 97;
 const ST_CALCULATE_TIE_BREAKER = 98;
@@ -67,6 +68,11 @@ const DB_UPGRADE_COLOR_MAP = [
   '807F7F' => '231F20',
 ];
 
+
+/**
+ * Decclined Bribe limit
+ */
+const DECLINED_BRIBES_LIMIT = 3;
 
 /**
  * Actions 

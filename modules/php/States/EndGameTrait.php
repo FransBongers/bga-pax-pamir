@@ -7,6 +7,7 @@ use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Utils;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
 use PaxPamir\Managers\Events;
@@ -17,6 +18,21 @@ use PaxPamir\Managers\Tokens;
 
 trait EndGameTrait
 {
+
+  // ....###....########...######....######.
+  // ...##.##...##.....##.##....##..##....##
+  // ..##...##..##.....##.##........##......
+  // .##.....##.########..##...####..######.
+  // .#########.##...##...##....##........##
+  // .##.....##.##....##..##....##..##....##
+  // .##.....##.##.....##..######....######.
+
+  function argsEndGame()
+  {
+    return [
+      'undoPossible' => Log::undoPossible(),
+    ];
+  }
 
   //  .########..##..........###....##....##.########.########.
   //  .##.....##.##.........##.##....##..##..##.......##.....##

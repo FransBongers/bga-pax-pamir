@@ -32,10 +32,12 @@ class ClientInitialBribeCheckState implements State {
   // ..######.....##....########.##.........######.
 
   private updateInterfaceInitialStep({
+    bribeLimitReached,
     bribeeId,
     amount,
     next,
   }: {
+    bribeLimitReached: boolean;
     bribeeId: number;
     amount: number;
     next: ClientInitialBribeCheckArgs['next'];
@@ -43,18 +45,30 @@ class ClientInitialBribeCheckState implements State {
     this.game.clearPossible();
     this.game.activeStates.playerActions.setCardActionSelected({ cardId: this.cardId, action: this.action });
     // Todo check if we can remove localState and just use current UI data
-    const localState = this.game.localState;
+    // const localState = this.game.localState;
 
     const bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
-    this.game.clientUpdatePageTitle({
-      text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive'),
-      args: {
-        amount,
-        tkn_playerName: bribee.getName(),
-        tkn_rupee: _('rupee(s)'),
-        you: '${you}',
-      },
-    });
+    if (bribeLimitReached) {
+      this.game.clientUpdatePageTitle({
+        text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName}. ${you} have reached your limit of declined bribes and cannot start a new bribe negotiation this turn'),
+        args: {
+          amount,
+          tkn_playerName: bribee.getName(),
+          tkn_rupee: _('rupee(s)'),
+          you: '${you}',
+        },
+      });
+    } else {
+      this.game.clientUpdatePageTitle({
+        text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName} or ask to waive'),
+        args: {
+          amount,
+          tkn_playerName: bribee.getName(),
+          tkn_rupee: _('rupee(s)'),
+          you: '${you}',
+        },
+      });
+    }
 
     const minActionCost = this.game.getMinimumActionCost({ action: this.action }) || 0;
     const maxAvailableRupees = this.game.getCurrentPlayer().getRupees() - minActionCost;
@@ -67,7 +81,7 @@ class ClientInitialBribeCheckState implements State {
     }
 
     for (let i = amount - 1; i >= 1; i--) {
-      if (i > maxAvailableRupees || bribee.isWakhan()) {
+      if (i > maxAvailableRupees || bribee.isWakhan() || bribeLimitReached) {
         continue;
       }
       this.game.addPrimaryActionButton({
@@ -90,7 +104,7 @@ class ClientInitialBribeCheckState implements State {
         text: _('Do not pay'),
         callback: () => next({ bribe: null }),
       });
-    } else if (!bribee.isWakhan()) {
+    } else if (!bribee.isWakhan() && !bribeLimitReached) {
       this.game.addPrimaryActionButton({
         id: `ask_waive_btn`,
         text: _('Ask to waive'),
@@ -135,13 +149,13 @@ class ClientInitialBribeCheckState implements State {
     return bribe;
   }
 
-  private checkBribe({ cardId, action, next }: ClientInitialBribeCheckArgs) {
+  private checkBribe({ cardId, action, next, bribeLimitReached }: ClientInitialBribeCheckArgs) {
     const bribe = this.calulateBribe({ cardId, action });
 
     if (bribe === null) {
       next({ bribe: null });
     } else {
-      this.updateInterfaceInitialStep({ ...bribe, next });
+      this.updateInterfaceInitialStep({ ...bribe, next, bribeLimitReached });
     }
   }
 

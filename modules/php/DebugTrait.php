@@ -8,6 +8,7 @@ use PaxPamir\Core\Notifications;
 use PaxPamir\Core\Preferences;
 use PaxPamir\Core\Stats;
 use PaxPamir\Helpers\Locations;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
@@ -53,8 +54,8 @@ trait DebugTrait
   function test()
   {
     // Tokens::move('block_russian_8',Locations::pool(RUSSIAN));
-    WakhanCards::insertOnTop('wakhan_card_12',DECK);
-    WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
+    // WakhanCards::insertOnTop('wakhan_card_12',DECK);
+    // WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
 
     // Cards::insertOnTop('card_101',DECK);
     // Cards::insertOnTop('card_102',DISCARD);
@@ -64,8 +65,8 @@ trait DebugTrait
     // PaxPamirPlayers::incScore(2371052,3);
     // Players::incScore(2371052,3);
     // $this->debugIncPlayerRupees(10,WAKHAN_PLAYER_ID);
-
-    // Notifications::log('active',PaxPamirPlayers::getActiveId());
+    Notifications::log('log',Log::getAll());
+    Notifications::log('canUndo',!Log::getAll()->empty());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(MILITARY);
 
@@ -83,6 +84,11 @@ trait DebugTrait
     // Cards::move('card_26', DISCARD);
     // Cards::move('card_116', Locations::market(0,5));
    
+  }
+
+  function debugStack()
+  {
+    Notifications::log('stack',ActionStack::get());
   }
 
   function debugAddCardToCourt($cardId, $playerId = null)

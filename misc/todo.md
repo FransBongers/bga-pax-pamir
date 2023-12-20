@@ -12,11 +12,10 @@
 - purchasing cards when suit is military => first rupee appears instantly, only 2nd is animated
 
 ## To check
-- Check undo functionality of Akropolis for improvements?
-- Check maximum number of rupees: 5 player start + all leveraged cards + any events / abilities?
 - do not use getCurrentPlayerId (/ active player?) in args functions https://en.doc.boardgamearena.com/Your_game_state_machine:_states.inc.php#args
 - no animation when there is a bribe of 0 rupees. Change text from 0 rupee(s) to no bribe?
 - check tooltips when multiple cards in the same card log
+- check influence after loyalty change when player has gifts
 
 ## Wakhan
 - When Wakhan betrays a political card the overthrow rule does not seem to be followed? => might be issue with selecting triobe and no overthrow

@@ -64,6 +64,7 @@ class Paxpamir extends Table
     use PaxPamir\States\BribeTrait;
     use PaxPamir\States\ChangeLoyaltyTrait;
     use PaxPamir\States\CleanupTrait;
+    use PaxPamir\States\ConfirmPartialTurnTrait;
     use PaxPamir\States\DiscardTrait;
     use PaxPamir\States\DispatchActionTrait;
     use PaxPamir\States\DominanceCheckTrait;

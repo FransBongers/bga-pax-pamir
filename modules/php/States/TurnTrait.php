@@ -50,20 +50,27 @@ trait TurnTrait
   function stPrepareTurn()
   {
     Globals::setRemainingActions(2);
+    Globals::setDeclinedBribes(0);
+
     Log::enable();
     Log::checkpoint();
     Log::clearAll();
 
     $player = PaxPamirPlayers::get();
     $playerId = $player->getId();
+
+    $playerCanUseBlackmailKandahar = $player->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR);
+    $playerCanUseBlackmailHerat = $player->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT);
+
     $actionStack = [
       ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
-        'transition' => 'playerActions'
+        'transition' => 'playerActions',
+        'checkpoint' => $playerCanUseBlackmailKandahar || $playerCanUseBlackmailHerat ? false : true,
       ])
     ];
 
     // Add start of turn abilities to action stack
-    if ($player->hasSpecialAbility(SA_BLACKMAIL_KANDAHAR) && $this->existsCourtCardWithoutSpy(KANDAHAR)) {
+    if ($playerCanUseBlackmailKandahar) {
       $actionStack[] =    ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
         'transition' => 'startOfTurnAbilities',
         'pop' => false,
@@ -71,7 +78,7 @@ trait TurnTrait
       ]);
     }
 
-    if ($player->hasSpecialAbility(SA_BLACKMAIL_HERAT) && $this->existsCourtCardWithoutSpy(HERAT)) {
+    if ($playerCanUseBlackmailHerat) {
       $actionStack[] =    ActionStack::createAction(DISPATCH_TRANSITION, $playerId, [
         'transition' => 'startOfTurnAbilities',
         'pop' => false,

@@ -55,6 +55,7 @@ class PaxPamir implements PaxPamirGame {
     [CLIENT_PLAY_CARD]: ClientPlayCardState;
     [CLIENT_PURCHASE_CARD]: ClientPurchaseCardState;
     // [CLIENT_RESOLVE_EVENT_CONFIDENCE_FAILURE]: ResolveEventConfidenceFailureState;
+    confirmPartialTurn: ConfirmPartialTurnState;
     eventCardRebuke: ResolveEventRebukeState;
     acceptPrize: AcceptPrizeState;
     discard: DiscardState;
@@ -127,6 +128,7 @@ class PaxPamir implements PaxPamirGame {
       [CLIENT_PLAY_CARD]: new ClientPlayCardState(this),
       [CLIENT_PURCHASE_CARD]: new ClientPurchaseCardState(this),
       acceptPrize: new AcceptPrizeState(this),
+      confirmPartialTurn: new ConfirmPartialTurnState(this),
       discard: new DiscardState(this),
       endGameCheck: new EndGameCheckState(this),
       eventCardPashtunwaliValues: new ResolveEventPashtunwaliValuesState(this),
@@ -263,12 +265,14 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
-  addUndoButton() {
-    this.addDangerActionButton({
-      id: 'undo_btn',
-      text: _('Undo'),
-      callback: () => this.takeAction({ action: 'restart' }),
-    });
+  addUndoButton({undoPossible}: {undoPossible: boolean}) {
+    if (undoPossible) {
+      this.addDangerActionButton({
+        id: 'undo_btn',
+        text: _('Undo'),
+        callback: () => this.takeAction({ action: 'restart' }),
+      });
+    }
   }
 
 

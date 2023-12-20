@@ -1,12 +1,12 @@
-class EndGameCheckState implements State {
+class ConfirmPartialTurnState implements State {
   private game: PaxPamirGame;
-  private args: OnEnteringEndGameCheckArgs;
+  private args: OnEnteringConfirmPartialTurnArgs;
 
   constructor(game: PaxPamirGame) {
     this.game = game;
   }
 
-  onEnteringState(args: OnEnteringEndGameCheckArgs) {
+  onEnteringState(args: OnEnteringConfirmPartialTurnArgs) {
     this.args = args;
     this.updateInterfaceInitialStep();
   }
@@ -32,20 +32,20 @@ class EndGameCheckState implements State {
   private updateInterfaceInitialStep() {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
-      text: _('${you} may end the game or undo'),
+      text: _('${you} must confirm the switch of active player. You will not be able to restart your turn'),
       args: {
         you: '${you}',
-      },
-    });
+      }
+    })
     this.game.addPrimaryActionButton({
-      id: 'end_game_btn',
-      text: _('End game'),
+      id: 'confirm_btn',
+      text: _('Confirm'),
       callback: () =>
-        this.game.takeAction({
-          action: 'endGame',
-        }),
+      this.game.takeAction({
+        action: 'actConfirmPartialTurn',
+      }),
     });
-    this.game.addUndoButton({ undoPossible: this.args.undoPossible });
+    this.game.addUndoButton({undoPossible: this.args.undoPossible});
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -55,4 +55,6 @@ class EndGameCheckState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
+
+
 }

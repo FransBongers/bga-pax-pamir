@@ -30,7 +30,10 @@ trait DiscardTrait
 
     $next = $actionStack[count($actionStack) - 1];
 
-    return $next['data'];
+    $data = $next['data'];
+    $data['undoPossible'] = Log::undoPossible();
+
+    return $data;
   }
 
   //  .########..##..........###....##....##.########.########.

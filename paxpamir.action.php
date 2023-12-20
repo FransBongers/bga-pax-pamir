@@ -41,6 +41,15 @@ class action_paxpamir extends APP_GameAction
 
     // TODO: defines your action entry points there
 
+    
+    public function actConfirmPartialTurn()
+    {
+        self::setAjaxMode();
+
+        $result = $this->game->actConfirmPartialTurn();
+        self::ajaxResponse();
+    }
+
     public function acceptPrize()
     {
         self::setAjaxMode();

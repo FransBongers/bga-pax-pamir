@@ -198,7 +198,17 @@ const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: E
 // ..##..##....##.##.....##.##...###
 // .####..######...#######..##....##
 
-const tplIconToolTip = ({ title, text, iconHtml, iconWidth }: { title?: string; text: string; iconHtml: string, iconWidth?: number }): string => {
+const tplIconToolTip = ({
+  title,
+  text,
+  iconHtml,
+  iconWidth,
+}: {
+  title?: string;
+  text: string;
+  iconHtml: string;
+  iconWidth?: number;
+}): string => {
   return `<div class="pp_icon_tooltip">
             <div class="pp_icon_tooltip_icon"${iconWidth ? `style="min-width: ${iconWidth}px;"` : ''}>
               ${iconHtml}
@@ -210,31 +220,38 @@ const tplIconToolTip = ({ title, text, iconHtml, iconWidth }: { title?: string; 
           </div>`;
 };
 
-const tplCylinderCountToolTip = ({ playerColor }: { playerColor: string; }) =>
+const tplCylinderCountToolTip = ({ playerColor }: { playerColor: string }) =>
   tplIconToolTip({
     iconHtml: `<div class="pp_icon pp_cylinder_icon pp_player_color_${playerColor}"></div>`,
     title: _('CYLINDERS IN PLAY'),
-    text: _('When a Dominance Check is unsuccessful, players will score points based on the number of cylinders they have in play (even zero).'),
+    text: _(
+      'When a Dominance Check is unsuccessful, players will score points based on the number of cylinders they have in play (even zero).'
+    ),
   });
 
-const tplRupeeCountToolTip = () =>   tplIconToolTip({
-  iconHtml: `<div class="pp_icon pp_player_board_rupee"></div>`,
-  title: _('RUPEES'),
-  text: _('The number of rupees owned by this player.'),
-});
+const tplRupeeCountToolTip = () =>
+  tplIconToolTip({
+    iconHtml: `<div class="pp_icon pp_player_board_rupee"></div>`,
+    title: _('RUPEES'),
+    text: _('The number of rupees owned by this player.'),
+  });
 
-const tplHandCountCountToolTip = () => tplIconToolTip({
-  iconHtml: `<div class="pp_icon pp_card_icon"></div>`,
-  title: _('CARDS IN HAND'),
-  text: _('The number of cards this player has in hand.'),
-  iconWidth: 32,
-});
+const tplHandCountCountToolTip = () =>
+  tplIconToolTip({
+    iconHtml: `<div class="pp_icon pp_card_icon"></div>`,
+    title: _('CARDS IN HAND'),
+    text: _('The number of cards this player has in hand.'),
+    iconWidth: 32,
+  });
 
-const tplInfluenceCountToolTip = ({coalition, black = false}: {coalition: string; black?: boolean}) => tplIconToolTip({
-  iconHtml: `<div class="pp_icon pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`,
-  title: _('LOYALTY AND INFLUENCE'),
-  text: _('When a Dominance Check is successful, players loyal to the Dominant Coalition will score points based on their influence points. Each loyal player has one influence point plus the sum of their gifts, prizes, and the number of patriots in their court.'),
-});
+const tplInfluenceCountToolTip = ({ coalition, black = false }: { coalition: string; black?: boolean }) =>
+  tplIconToolTip({
+    iconHtml: `<div class="pp_icon pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`,
+    title: _('LOYALTY AND INFLUENCE'),
+    text: _(
+      'When a Dominance Check is successful, players loyal to the Dominant Coalition will score points based on their influence points. Each loyal player has one influence point plus the sum of their gifts, prizes, and the number of patriots in their court.'
+    ),
+  });
 
 // ..######..##.....##.####.########..######.
 // .##....##.##.....##..##.....##....##....##
@@ -276,13 +293,28 @@ const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'militar
 };
 
 const tplFavoredSuitMarkerToolTip = (): string => {
-  const title = _('Favored Suit Marker');
-  const text = _('This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.')
+  const title = _('FAVORED SUIT MARKER');
+  const text = _(
+    'This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.'
+  );
 
   return `<div class="pp_suit_tooltip">
             <div class="pp_favored_suit_marker" style="min-width: 30px; background-position: center; margin-left: -4px;"></div>
             <div class="pp_suit_tooltip_content">  
               <span class="pp_tooltip_title" >${title}</span>
+              <span class="pp_tooltip_text">${text}</span>
+            </div>
+          </div>`;
+};
+
+const tplMarketMilitaryCostToolTip = (): string => {
+  const title = _('CARD COST DOUBLED');
+  const text = _('Because military cards are favored the cost to purchase cards is currently doubled. Two rupees are placed on each card instead of one.');
+
+  return `<div class="pp_suit_tooltip">
+            <div class="pp_military_cost_icon" style="min-width: 53px; margin-right: 4px;"></div>
+            <div class="pp_suit_tooltip_content">  
+            <span class="pp_tooltip_title" >${title}</span>
               <span class="pp_tooltip_text">${text}</span>
             </div>
           </div>`;

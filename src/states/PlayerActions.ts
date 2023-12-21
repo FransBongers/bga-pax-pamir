@@ -59,7 +59,7 @@ class PlayerActionsState implements State {
       });
     }
     this.setCardActionsSelectable();
-    this.game.addUndoButton({undoPossible: this.game.localState.undoPossible});
+    this.game.addUndoButton({ undoPossible: this.game.localState.undoPossible });
     // this.addDebugButton();
   }
 
@@ -205,7 +205,11 @@ class PlayerActionsState implements State {
         let minActionCost = this.game.getMinimumActionCost({ action });
         if (this.game.gameOptions.wakhanEnabled) {
           const bribe = this.game.activeStates.clientInitialBribeCheck.calulateBribe({ cardId: id, action });
-          minActionCost = minActionCost + (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID ? bribe.amount : 0);
+          minActionCost =
+            minActionCost +
+            (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID && !player.ownsEventCard({ cardId: ECE_COURTLY_MANNERS_CARD_ID })
+              ? bribe.amount
+              : 0);
         }
         if (rupees < minActionCost) {
           this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have enough rupees to pay for this') });

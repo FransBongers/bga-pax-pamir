@@ -120,6 +120,7 @@
     </div>
 
     <div id="pp_market_board">
+        <div id="pp_market_board_military_suit_icon" class="pp_military_cost_icon" style="opacity: 0;"></div>
         <!-- BEGIN market -->
         <div id="pp_market_{ROW}_{COLUMN}" class="pp_market" style="left: {LEFT}px; top: {TOP}px;">
         </div>

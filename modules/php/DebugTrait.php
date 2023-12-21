@@ -58,8 +58,9 @@ trait DebugTrait
     // WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
 
     // Cards::insertOnTop('card_101',DECK);
-    Cards::insertOnTop('card_31',DISCARD);
-    Cards::insertOnTop('card_110',Locations::market(1,2));
+    // Cards::insertOnTop('card_31',DISCARD);
+    Cards::insertOnTop('card_64',Locations::market(0,1));
+    // Cards::insertOnTop('card_107',DISCARD);
     // Cards::insertOnTop('card_104',DISCARD);
     // Globals::setDominanceChecksResolved(3);
     // PaxPamirPlayers::incScore(2371052,3);

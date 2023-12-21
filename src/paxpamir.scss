@@ -266,7 +266,6 @@ html {
   z-index: 10 !important;
 }
 
-
 .pp_army.pp_afghan {
   background-position-x: 0%;
 }
@@ -371,6 +370,23 @@ html {
   box-shadow: 1px 1px 5px #000;
   height: 492px;
   position: relative;
+}
+
+#pp_market_board_military_suit_icon {
+  position: absolute;
+  top: 10px;
+  left: 18px;
+}
+
+.pp_military_cost_icon {
+  background-image: url('img/military_suit_reminder.webp');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 53px;
+  height: 35px;
+  filter: drop-shadow(1px 0px 0px white) drop-shadow(-1px 0px 0px white) drop-shadow(0px 1px 0px white) drop-shadow(0px -1px 0px white);
+  // filter: drop-shadow(2px 2px);
+  /* text-shadow: 2px 0 2px hsla(0,0%,100%,.6), 0 -2px 2px hsla(0,0%,100%,.6), 0 2px 2px hsla(0,0%,100%,.6), -2px 0 2px hsla(0,0%,100%,*/
 }
 
 .pp_market {
@@ -611,12 +627,12 @@ html {
   // top: -18px;
   // right: -18px;
   font-size: 90%;
-  color: #231F20 !important;
-  border: 3px solid #231F20;
+  color: #231f20 !important;
+  border: 3px solid #231f20;
 
   &:hover {
     text-decoration: none;
-    color: #231F20 !important;
+    color: #231f20 !important;
     transform: scale(1.1);
     cursor: pointer;
   }
@@ -650,27 +666,27 @@ html {
 
 /* Gray */
 .pp_player_button.pp_player_color_gray {
-  background-color: base.$gray-player-color;// #b9b6b1;
+  background-color: base.$gray-player-color; // #b9b6b1;
 }
 
 /* Yellow / tan */
 .pp_player_button.pp_player_color_yellow {
-  background-color: base.$yellow-player-color;// #dfcfb6;
+  background-color: base.$yellow-player-color; // #dfcfb6;
 }
 
 /* Red */
 .pp_player_button.pp_player_color_red {
-  background-color: base.$red-player-color;// #c19b9e;
+  background-color: base.$red-player-color; // #c19b9e;
 }
 
 /* Black */
 .pp_player_button.pp_player_color_black {
-  background-color: base.$black-player-color;// #807f7f;
+  background-color: base.$black-player-color; // #807f7f;
 }
 
 /* Purple */
 .pp_player_button.pp_player_color_purple {
-  background-color: base.$purple-player-color;// #C3B1D6;
+  background-color: base.$purple-player-color; // #C3B1D6;
 }
 
 .pp_player_button {

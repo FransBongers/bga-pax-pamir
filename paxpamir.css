@@ -1805,6 +1805,22 @@ html {
   position: relative;
 }
 
+#pp_market_board_military_suit_icon {
+  position: absolute;
+  top: 10px;
+  left: 18px;
+}
+
+.pp_military_cost_icon {
+  background-image: url("img/military_suit_reminder.webp");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width: 53px;
+  height: 35px;
+  filter: drop-shadow(1px 0px 0px white) drop-shadow(-1px 0px 0px white) drop-shadow(0px 1px 0px white) drop-shadow(0px -1px 0px white);
+  /* text-shadow: 2px 0 2px hsla(0,0%,100%,.6), 0 -2px 2px hsla(0,0%,100%,.6), 0 2px 2px hsla(0,0%,100%,.6), -2px 0 2px hsla(0,0%,100%,*/
+}
+
 .pp_market {
   width: 150px;
   height: 209px;
@@ -2026,12 +2042,12 @@ html {
   left: 467px;
   top: 5px;
   font-size: 90%;
-  color: #231F20 !important;
-  border: 3px solid #231F20;
+  color: #231f20 !important;
+  border: 3px solid #231f20;
 }
 .pp_info_icon:hover {
   text-decoration: none;
-  color: #231F20 !important;
+  color: #231f20 !important;
   transform: scale(1.1);
   cursor: pointer;
 }

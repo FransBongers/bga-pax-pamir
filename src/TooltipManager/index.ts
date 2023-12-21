@@ -51,6 +51,17 @@ class PPTooltipManager {
     this.removeTooltip(`loyalty_icon_${playerId}`)
   }
 
+  public addMiltiarySuitIndicatorMarketTooltip() {
+    const html = tplMarketMilitaryCostToolTip();
+    this.game.framework().addTooltipHtml('pp_market_board_military_suit_icon', html, 500);
+    
+    // this.addTextToolTip({nodeId: 'pp_market_board_military_suit_icon', text: _('The cost to purchase cards is doubled. Two rupees are placed on each card instead of one.')})
+  }
+
+  public removeMiltiarySuitIndicatorMarketTooltip() {
+    this.removeTooltip('pp_market_board_military_suit_icon');
+  }
+
   public addWakhanInfluenceCountTooltips({pragmaticLoyalty}: {pragmaticLoyalty: string;}) {
     COALITIONS.forEach((coalition) => {
       this.game.framework().addTooltipHtml(`loyalty_icon_1_${coalition}`, tplInfluenceCountToolTip({ coalition, black: coalition !== pragmaticLoyalty }), 500);

@@ -1186,6 +1186,7 @@ var ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
 var ECE_CONFLICT_FATIGUE = 'conflictFatigue';
 var ECE_CONFLICT_FATIGUE_CARD_ID = 'card_109';
 var ECE_COURTLY_MANNERS = 'courtlyManners';
+var ECE_COURTLY_MANNERS_CARD_ID = 'card_107';
 var ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
 var ECE_DOMINANCE_CHECK = 'dominanceCheck';
 var ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';
@@ -1609,17 +1610,21 @@ var tplCylinderCountToolTip = function (_a) {
         text: _('When a Dominance Check is unsuccessful, players will score points based on the number of cylinders they have in play (even zero).'),
     });
 };
-var tplRupeeCountToolTip = function () { return tplIconToolTip({
-    iconHtml: "<div class=\"pp_icon pp_player_board_rupee\"></div>",
-    title: _('RUPEES'),
-    text: _('The number of rupees owned by this player.'),
-}); };
-var tplHandCountCountToolTip = function () { return tplIconToolTip({
-    iconHtml: "<div class=\"pp_icon pp_card_icon\"></div>",
-    title: _('CARDS IN HAND'),
-    text: _('The number of cards this player has in hand.'),
-    iconWidth: 32,
-}); };
+var tplRupeeCountToolTip = function () {
+    return tplIconToolTip({
+        iconHtml: "<div class=\"pp_icon pp_player_board_rupee\"></div>",
+        title: _('RUPEES'),
+        text: _('The number of rupees owned by this player.'),
+    });
+};
+var tplHandCountCountToolTip = function () {
+    return tplIconToolTip({
+        iconHtml: "<div class=\"pp_icon pp_card_icon\"></div>",
+        title: _('CARDS IN HAND'),
+        text: _('The number of cards this player has in hand.'),
+        iconWidth: 32,
+    });
+};
 var tplInfluenceCountToolTip = function (_a) {
     var coalition = _a.coalition, _b = _a.black, black = _b === void 0 ? false : _b;
     return tplIconToolTip({
@@ -1645,9 +1650,14 @@ var tplSuitToolTip = function (_a) {
     return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px; margin-left: -2px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
 };
 var tplFavoredSuitMarkerToolTip = function () {
-    var title = _('Favored Suit Marker');
+    var title = _('FAVORED SUIT MARKER');
     var text = _('This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.');
     return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_favored_suit_marker\" style=\"min-width: 30px; background-position: center; margin-left: -4px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >".concat(title, "</span>\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
+};
+var tplMarketMilitaryCostToolTip = function () {
+    var title = _('CARD COST DOUBLED');
+    var text = _('Because military cards are favored the cost to purchase cards is currently doubled. Two rupees are placed on each card instead of one.');
+    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_military_cost_icon\" style=\"min-width: 53px; margin-right: 4px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n            <span class=\"pp_tooltip_title\" >".concat(title, "</span>\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
 };
 var tplVirtualScoresTooltip = function () {
     return "\n    <div class=\"pp_virtual_score_tooltip\">\n      <span class=\"pp_tooltip_title\" >".concat(_('Victory'), "</span>\n      <span class=\"pp_tooltip_text\">").concat(_('description'), "</span>\n    </div>\n  ");
@@ -1720,6 +1730,13 @@ var PPTooltipManager = (function () {
     PPTooltipManager.prototype.removeInfluenceCountTooltip = function (_a) {
         var playerId = _a.playerId;
         this.removeTooltip("loyalty_icon_".concat(playerId));
+    };
+    PPTooltipManager.prototype.addMiltiarySuitIndicatorMarketTooltip = function () {
+        var html = tplMarketMilitaryCostToolTip();
+        this.game.framework().addTooltipHtml('pp_market_board_military_suit_icon', html, 500);
+    };
+    PPTooltipManager.prototype.removeMiltiarySuitIndicatorMarketTooltip = function () {
+        this.removeTooltip('pp_market_board_military_suit_icon');
     };
     PPTooltipManager.prototype.addWakhanInfluenceCountTooltips = function (_a) {
         var _this = this;
@@ -1937,6 +1954,7 @@ var FavoredSuit = (function () {
             element: tplFavoredSuit({ id: 'favored_suit_marker' }),
             id: 'favored_suit_marker',
         });
+        this.game.market.setMilitarySuitIndicatorVisible({ visible: this.favoredSuit === MILITARY });
     };
     FavoredSuit.prototype.clearInterface = function () {
         var _this = this;
@@ -1961,6 +1979,11 @@ var FavoredSuit = (function () {
                     case 0:
                         currentSuit = this.favoredSuit;
                         this.favoredSuit = suit;
+                        console.log('currentSuit', currentSuit);
+                        console.log('favoredSuit', this.favoredSuit);
+                        if (currentSuit === MILITARY) {
+                            this.game.market.setMilitarySuitIndicatorVisible({ visible: false });
+                        }
                         return [4, Promise.all([
                                 this.favoredSuitZones[suit].moveToZone({
                                     elements: {
@@ -1971,6 +1994,9 @@ var FavoredSuit = (function () {
                             ])];
                     case 1:
                         _b.sent();
+                        if (this.favoredSuit === MILITARY) {
+                            this.game.market.setMilitarySuitIndicatorVisible({ visible: true });
+                        }
                         return [2];
                 }
             });
@@ -4843,6 +4869,21 @@ var Market = (function () {
         var row = _a.row, column = _a.column;
         return this.marketRupees[row][column];
     };
+    Market.prototype.setMilitarySuitIndicatorVisible = function (_a) {
+        var visible = _a.visible;
+        var node = document.getElementById('pp_market_board_military_suit_icon');
+        if (!node) {
+            return;
+        }
+        if (visible) {
+            node.style.opacity = '1';
+            this.game.tooltipManager.addMiltiarySuitIndicatorMarketTooltip();
+        }
+        else {
+            node.style.opacity = '0';
+            this.game.tooltipManager.removeMiltiarySuitIndicatorMarketTooltip();
+        }
+    };
     Market.prototype.removeSingleRupeeFromCard = function (_a) {
         var row = _a.row, column = _a.column, to = _a.to, rupeeId = _a.rupeeId;
         return __awaiter(this, void 0, void 0, function () {
@@ -7227,7 +7268,11 @@ var PlayerActionsState = (function () {
                 var minActionCost = _this.game.getMinimumActionCost({ action: action });
                 if (_this.game.gameOptions.wakhanEnabled) {
                     var bribe = _this.game.activeStates.clientInitialBribeCheck.calulateBribe({ cardId: id, action: action });
-                    minActionCost = minActionCost + (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID ? bribe.amount : 0);
+                    minActionCost =
+                        minActionCost +
+                            (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID && !player.ownsEventCard({ cardId: ECE_COURTLY_MANNERS_CARD_ID })
+                                ? bribe.amount
+                                : 0);
                 }
                 if (rupees < minActionCost) {
                     _this.game.tooltipManager.addTextToolTip({ nodeId: nodeId, text: _('You do not have enough rupees to pay for this') });

@@ -168,6 +168,7 @@ const ECE_CONFIDENCE_FAILURE = 'confidenceFailure';
 const ECE_CONFLICT_FATIGUE = 'conflictFatigue';
 const ECE_CONFLICT_FATIGUE_CARD_ID = 'card_109';
 const ECE_COURTLY_MANNERS = 'courtlyManners';
+const ECE_COURTLY_MANNERS_CARD_ID = 'card_107';
 const ECE_DISREGARD_FOR_CUSTOMS = 'disregardForCustoms';
 const ECE_DOMINANCE_CHECK = 'dominanceCheck';
 const ECE_EMBARRASSEMENT_OF_RICHES = 'embarrassementOfRiches';

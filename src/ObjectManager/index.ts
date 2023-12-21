@@ -22,9 +22,9 @@ class DiscardPile {
     const discardPileTitle = $('pp_discard_pile_title');
     if (!discardPileTitle) {
       const discardPile: HTMLElement = $('pp_discard_pile');
-      discardPile.insertAdjacentHTML('afterbegin',`<span id="pp_discard_pile_title" >${_('Discard')}</span>`)
+      discardPile.insertAdjacentHTML('afterbegin', `<span id="pp_discard_pile_title" >${_('Discard')}</span>`);
     }
-    
+
     if (gamedatas.discardPile.topCard) {
       this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
     }
@@ -159,6 +159,8 @@ class FavoredSuit {
       element: tplFavoredSuit({ id: 'favored_suit_marker' }),
       id: 'favored_suit_marker',
     });
+
+    this.game.market.setMilitarySuitIndicatorVisible({ visible: this.favoredSuit === MILITARY });
   }
 
   clearInterface() {
@@ -179,6 +181,11 @@ class FavoredSuit {
   async changeTo({ suit }: { suit: string }): Promise<void> {
     const currentSuit = this.favoredSuit;
     this.favoredSuit = suit;
+    console.log('currentSuit', currentSuit);
+    console.log('favoredSuit', this.favoredSuit);
+    if (currentSuit === MILITARY) {
+      this.game.market.setMilitarySuitIndicatorVisible({visible: false});
+    }
     await Promise.all([
       this.favoredSuitZones[suit].moveToZone({
         elements: {
@@ -187,6 +194,9 @@ class FavoredSuit {
       }),
       this.favoredSuitZones[currentSuit].remove({ input: 'favored_suit_marker' }),
     ]);
+    if (this.favoredSuit === MILITARY) {
+      this.game.market.setMilitarySuitIndicatorVisible({visible: true});
+    }
   }
 }
 

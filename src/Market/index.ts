@@ -94,6 +94,20 @@ class Market {
     return this.marketRupees[row][column];
   }
 
+  setMilitarySuitIndicatorVisible({visible}: {visible: boolean}) {
+    const node = document.getElementById('pp_market_board_military_suit_icon');
+    if (!node) {
+      return;
+    }
+    if (visible) {
+      node.style.opacity = '1';
+      this.game.tooltipManager.addMiltiarySuitIndicatorMarketTooltip();
+    } else {
+      node.style.opacity = '0';
+      this.game.tooltipManager.removeMiltiarySuitIndicatorMarketTooltip();
+    }
+  }
+
   async removeSingleRupeeFromCard({ row, column, to, rupeeId }: { row: number; column: number; to: string; rupeeId: string }) {
     await this.marketRupees[row][column].removeTo({ id: rupeeId, to });
   }

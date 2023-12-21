@@ -6,6 +6,7 @@ use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
 use PaxPamir\Helpers\Locations;
+use PaxPamir\Helpers\Log;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
@@ -80,6 +81,7 @@ trait WakhanSpecialAbilitiesTrait
         'weight' => $state,
       ]
     ]);
+    Log::checkpoint();
     ActionStack::next($actionStack);
   }
 

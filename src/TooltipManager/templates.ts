@@ -275,6 +275,19 @@ const tplSuitToolTip = ({ suit }: { suit: 'economic' | 'intelligence' | 'militar
           </div>`;
 };
 
+const tplFavoredSuitMarkerToolTip = (): string => {
+  const title = _('Favored Suit Marker');
+  const text = _('This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.')
+
+  return `<div class="pp_suit_tooltip">
+            <div class="pp_favored_suit_marker" style="min-width: 30px; background-position: center; margin-left: -4px;"></div>
+            <div class="pp_suit_tooltip_content">  
+              <span class="pp_tooltip_title" >${title}</span>
+              <span class="pp_tooltip_text">${text}</span>
+            </div>
+          </div>`;
+};
+
 // ..######...######...#######..########..########..######.
 // .##....##.##....##.##.....##.##.....##.##.......##....##
 // .##.......##.......##.....##.##.....##.##.......##......

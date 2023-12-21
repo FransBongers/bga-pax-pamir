@@ -58,15 +58,15 @@ trait DebugTrait
     // WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
 
     // Cards::insertOnTop('card_101',DECK);
-    // Cards::insertOnTop('card_102',DISCARD);
-    // Cards::insertOnTop('card_103',DISCARD);
+    Cards::insertOnTop('card_31',DISCARD);
+    Cards::insertOnTop('card_110',Locations::market(1,2));
     // Cards::insertOnTop('card_104',DISCARD);
     // Globals::setDominanceChecksResolved(3);
     // PaxPamirPlayers::incScore(2371052,3);
     // Players::incScore(2371052,3);
     // $this->debugIncPlayerRupees(10,WAKHAN_PLAYER_ID);
-    Notifications::log('log',Log::getAll());
-    Notifications::log('canUndo',!Log::getAll()->empty());
+    // Notifications::log('log',Log::getAll());
+    // Notifications::log('canUndo',!Log::getAll()->empty());
     // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
     // Globals::setFavoredSuit(MILITARY);
 

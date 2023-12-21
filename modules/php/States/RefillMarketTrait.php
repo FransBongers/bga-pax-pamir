@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Managers\ActionStack;
 use PaxPamir\Managers\Cards;
@@ -84,6 +85,11 @@ trait RefillMarketTrait
           if (count($emptySpaces[$row]) > 0) {
             $toLocaction = 'market_' . $row . '_' . array_shift($emptySpaces[$row]);
             Cards::move($card['id'], $toLocaction);
+            if (explode('_',$toLocaction)[2] === '0' && $card['type'] === EVENT_CARD && $card['purchased']['effect'] === ECE_PUBLIC_WITHDRAWAL) {
+              $rupeesInLocation = Tokens::getInLocation([$toLocaction, 'rupees']);
+              Notifications::log('public withdrawal shifted into first position. Check if there are rupees there',$rupeesInLocation);
+              Tokens::moveAllInLocation([$toLocaction, 'rupees'], RUPEE_SUPPLY);
+            }
             Tokens::moveAllInLocation([$fromLocation, 'rupees'], [$toLocaction, 'rupees']);
             $cardMoves[] = array(
               'cardId' => $card['id'],

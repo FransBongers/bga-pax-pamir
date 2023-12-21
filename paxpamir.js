@@ -1644,6 +1644,11 @@ var tplSuitToolTip = function (_a) {
     };
     return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_icon pp_suit_icon ".concat(suit, "\" style=\"min-width: 44px; margin-left: -2px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >").concat(SUIT_TITLE[suit], "</span>\n              <span class=\"pp_tooltip_text\">").concat(SUIT_DESCRIPTION[suit], "</span>\n            </div>\n          </div>");
 };
+var tplFavoredSuitMarkerToolTip = function () {
+    var title = _('Favored Suit Marker');
+    var text = _('This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.');
+    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_favored_suit_marker\" style=\"min-width: 30px; background-position: center; margin-left: -4px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >".concat(title, "</span>\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
+};
 var tplVirtualScoresTooltip = function () {
     return "\n    <div class=\"pp_virtual_score_tooltip\">\n      <span class=\"pp_tooltip_title\" >".concat(_('Victory'), "</span>\n      <span class=\"pp_tooltip_text\">").concat(_('description'), "</span>\n    </div>\n  ");
 };
@@ -1698,6 +1703,10 @@ var PPTooltipManager = (function () {
         if (playerId !== WAKHAN_PLAYER_ID) {
             this.game.framework().addTooltipHtml("cards_".concat(playerId), tplHandCountCountToolTip(), 500);
         }
+    };
+    PPTooltipManager.prototype.setupFavoredSuitMarkerTooltip = function () {
+        var html = tplFavoredSuitMarkerToolTip();
+        this.game.framework().addTooltipHtml('favored_suit_marker', html, 500);
     };
     PPTooltipManager.prototype.addSuitTooltip = function (_a) {
         var suit = _a.suit, nodeId = _a.nodeId;
@@ -1773,6 +1782,7 @@ var PPTooltipManager = (function () {
     };
     PPTooltipManager.prototype.setupTooltips = function () {
         this.setupCardCounterTooltips();
+        this.setupFavoredSuitMarkerTooltip();
     };
     PPTooltipManager.prototype.setupCardCounterTooltips = function () {
         this.game.framework().addTooltip('pp_deck_counter_container', _('Total number of cards in the deck'), '', 500);
@@ -8605,7 +8615,12 @@ var NotificationManager = (function () {
                             })];
                     case 1:
                         _a.sent();
-                        return [2];
+                        if (!(move.cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID && toCol === 0)) return [3, 3];
+                        return [4, this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }).removeAll({ destroy: true })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [2];
                 }
             });
         });

@@ -374,7 +374,7 @@ class NotificationManager {
       let value = 1;
       if (this.game.activeEvents.hasCard({ cardId: 'card_106' })) {
         value = 0;
-      } else if (player.ownsEventCard({cardId: ECE_KOH_I_NOOR_RECOVERED_CARD_ID})) {
+      } else if (player.ownsEventCard({ cardId: ECE_KOH_I_NOOR_RECOVERED_CARD_ID })) {
         value = 2;
       }
       if (playerId === WAKHAN_PLAYER_ID) {
@@ -566,6 +566,10 @@ class NotificationManager {
         column: toCol,
       },
     });
+
+    if (move.cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID && toCol === 0) {
+      await this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }).removeAll({ destroy: true });
+    }
   }
 
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {

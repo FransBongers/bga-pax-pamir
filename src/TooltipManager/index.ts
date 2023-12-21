@@ -32,6 +32,12 @@ class PPTooltipManager {
     }
   }
 
+
+  public setupFavoredSuitMarkerTooltip() {
+    const html = tplFavoredSuitMarkerToolTip();
+    this.game.framework().addTooltipHtml('favored_suit_marker', html, 500);
+  }
+
   public addSuitTooltip({ suit, nodeId }: { suit: 'economic' | 'intelligence' | 'military' | 'political'; nodeId: string }) {
     const html = tplSuitToolTip({ suit });
     this.game.framework().addTooltipHtml(nodeId, html, 500);
@@ -112,6 +118,7 @@ class PPTooltipManager {
   public setupTooltips() {
     this.setupCardCounterTooltips();
     // this.setupDominanceCheckScoresTooltip();
+    this.setupFavoredSuitMarkerTooltip();
   }
 
   private setupCardCounterTooltips() {

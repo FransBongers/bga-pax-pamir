@@ -155,7 +155,8 @@ abstract class Utils extends \APP_DbObject
   public static function getImpactIconCount($card, $icons)
   {
     $total = 0;
-    $array_count_values = array_count_values($card['impactIcons']);
+
+    $array_count_values = !isset($card['impactIcons']) || $card['impactIcons'] === null ? [] : array_count_values($card['impactIcons']);
     foreach ($icons as $index => $icon) {
       $iconCount = isset($array_count_values[$icon]) ? $array_count_values[$icon] : 0;
       $total += $iconCount;

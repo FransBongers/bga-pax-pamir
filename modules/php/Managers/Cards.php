@@ -72,7 +72,7 @@ class Cards extends \PaxPamir\Helpers\Pieces
     self::createDeck(count($players) + $wakhan);
   }
 
-  private function createDeck($player_count)
+  private static function createDeck($player_count)
   {
     $cards = [];
     array_push($cards, [

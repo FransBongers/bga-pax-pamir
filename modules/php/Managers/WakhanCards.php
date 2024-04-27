@@ -66,7 +66,7 @@ class WakhanCards extends \PaxPamir\Helpers\Pieces
     
   }
 
-  private function createWakhanDeck()
+  private static function createWakhanDeck()
   {
     $cards = [];
     array_push($cards, [

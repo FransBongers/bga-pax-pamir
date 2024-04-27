@@ -281,6 +281,8 @@ abstract class Table extends APP_GameClass {
     
     function notifyPlayer($player_id, $notification_type, $notification_log, $notification_args) {
     }
+
+    function sendNotifications() {}
     
     function getStatTypes() {
         return array ();

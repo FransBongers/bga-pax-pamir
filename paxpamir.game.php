@@ -433,15 +433,15 @@ class Paxpamir extends Table
     /////////////////////////////////////////////////////////////
 
     // Exposing protected method getCurrentPlayerId
-    public static function getCurrentPId()
+    public function getCurrentPId()
     {
-        return self::getCurrentPlayerId();
+        return $this->getCurrentPlayerId();
     }
 
     // Exposing protected method translation
-    public static function translate($text)
+    public function translate($text)
     {
-        return self::_($text);
+        return $this->_($text);
     }
 
     // public functuio

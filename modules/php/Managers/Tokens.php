@@ -82,7 +82,7 @@ class Tokens extends \PaxPamir\Helpers\Pieces
     self::createTokens();
   }
 
-  private function createTokens()
+  private static function createTokens()
   {
     $tokens = [];
     array_push($tokens, [

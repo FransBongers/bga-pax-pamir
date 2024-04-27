@@ -427,6 +427,10 @@ trait WakhanActionWithInstructionsTrait
 
   function selectCardThatWouldNetMostRupees($availableCards)
   {
+    if (count($availableCards) === 0) {
+      return null;
+    }
+
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
 
     $cardsWithNetRupees = array_map(function ($card) use ($wakhanPlayer) {

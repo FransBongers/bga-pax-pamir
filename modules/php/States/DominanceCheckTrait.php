@@ -63,7 +63,7 @@ trait DominanceCheckTrait
     $playerId = $action['playerId'];
 
     Globals::incDominanceChecksResolved(count($cards));
-    Notifications::message('A Dominance Check is resolved');
+    Notifications::message(clienttranslate('A Dominance Check is resolved'));
 
     // Determine if there is a dominant coalition
     $dominantCoalition = $this->getDominantCoalition();

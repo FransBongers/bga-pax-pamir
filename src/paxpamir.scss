@@ -35,6 +35,11 @@ html {
   background-color: antiquewhite;
 }
 
+/* Hide player is now online, player is now offline messages */
+.notif_playerstatus {
+  display: none !important;
+}
+
 #pp_play_area {
   grid-gap: 16px;
   display: grid;

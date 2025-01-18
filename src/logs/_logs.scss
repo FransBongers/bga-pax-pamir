@@ -19,22 +19,92 @@
 
 /* ------- LOG TOKENS ------- */
 
+
+
 .pp_log_token {
   display: inline-block;
   margin-left: 2px;
   margin-right: 2px;
+  position: relative;
+  vertical-align: middle;
 }
 
-.pp_log_token.pp_log_token_rupee {
-  background-size: 1100% 100%;
-  background-position-x: 100%;
-  background-image: url('img/actions.webp');
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  margin-bottom: -5px;
-  background-repeat: no-repeat;
+.pp_region_icon {
+  height: calc(var(--tokenScale) * 25px);
+  width: calc(var(--tokenScale) * 25px);
 }
+
+// .pp_log_token.pp_log_token_rupee {
+//   background-size: 1100% 100%;
+//   background-position-x: 100%;
+//   background-image: url('img/actions.webp');
+//   width: 25px;
+//   height: 25px;
+//   border-radius: 50%;
+//   background-repeat: no-repeat;
+// }
+
+.log > .roundedbox,
+.log > .roundedboxinner {
+  .pp_log_token {
+    top: -2px;
+    margin-top: 2px;
+  }
+
+  .pp_coalition_block_side[data-type="army"] {
+    --tokenScale: 0.75;
+    top: -4px;
+    margin-top: 4px;
+  }
+
+  .pp_coalition_block_side[data-type='road'] {
+    --tokenScale: 1;
+  }
+
+  .pp_card_side {
+    --cardScale: var(--logCardScale);
+    margin-top: calc(var(--logCardScale) * 6px);
+  }
+
+  .pp_card_side.pp_small {
+    --cardScale: 0.15;
+  }
+ 
+  .pp_region_icon {
+    --tokenScale: 1;
+  }
+
+  .pp_cylinder_side {
+    --tokenScale: 1;
+  }
+
+  .pp_rupee_side {
+    --tokenScale: 0.5;
+    top: -2px;
+    margin-top: 2px;
+  }
+}
+
+#pagemaintitletext,
+#gameaction_status {
+  .pp_log_token {
+    top: -3px;
+    margin-top: 3px;
+  }
+
+  .pp_rupee_side {
+    --tokenScale: 0.5;
+  }
+
+  .pp_coalition_block_side {
+    --tokenScale: 0.75;
+  }
+
+  .pp_coalition_block_side[data-type='road'] {
+    --tokenScale: 1;
+  }
+}
+
 
 .pp_log_token.pp_leverage {
   background-image: url('img/impact_icons.webp');
@@ -43,16 +113,6 @@
   height: 25px;
   background-position-x: math.div(4, 14) * 100%;
   background-repeat: no-repeat;
-  margin-bottom: -5px;
-}
-
-.pp_log_token.pp_region_icon {
-  width: 25px;
-  height: 25px;
-  // background-size: 15px 15px;
-  background-repeat: no-repeat;
-  margin-bottom: -5px;
-  margin-top: 5px;
 }
 
 .pp_log_token.pp_loyalty_icon.pp_afghan, .pp_log_token.pp_loyalty_icon_black.pp_afghan {
@@ -73,43 +133,19 @@
   padding-bottom: 0px;
 }
 
-.pp_log_token.pp_card {
-  height: 30px;
-  width: 21px;
-  // background-size: 22px 30px;
-  border-radius: 2px !important;
-  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.4) !important;
-  margin-bottom: -5px;
-}
 
-.pp_log_token.pp_card.pp_large {
-  display: inline-block;
-  width: 74px;
-  height: 104px;
-  // background-size: 75px 104px;
-  border-radius: 5px !important;
-  box-shadow: 2.5px 2.5px 2.5px 0px rgba(0, 0, 0, 0.4) !important;
-  margin-top: 2px;
-  margin-bottom: 0px;
-}
 
-.pp_log_token.pp_army {
-  // background-size: contain;
-  background-size: 400% 100%;
-  background-repeat: no-repeat;
-  height: 30px;
-  width: 19px;
-  z-index: 1;
-  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5));
-  margin-bottom: -5px;
-}
+
 
 .pp_log_token.pp_road {
   margin-bottom: -5px;
 }
 
 .pp_log_token.pp_cylinder {
-  margin-bottom: -5px;
+  --tokenScale: 1;
+  top: -2px;
+  margin-top: 2px;
+  // margin-bottom: -5px;
 }
 
 .pp_log_token.pp_impact_icon_suit {
@@ -117,7 +153,6 @@
   height: 30px;
   background-size: contain;
   background-repeat: no-repeat;
-  margin-bottom: -7px;
 }
 
 .pp_impact_icon_suit.economic {
@@ -142,4 +177,9 @@
   background-image: url('img/impact_icons.webp');
   background-size: 1500% 100%;
   background-position-x: math.div(11, 14) * 100%;
+}
+
+#pagemaintitletext,
+#gameaction_status {
+
 }

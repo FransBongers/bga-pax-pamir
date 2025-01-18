@@ -1,0 +1,50 @@
+.pp_ruler_token {
+  height: calc(var(--tokenScale) * 50px);
+  width: calc(var(--tokenScale) * 50px);
+}
+
+.pp_ruler_token[data-region='herat'] {
+  .pp_ruler_token_side {
+    background-position-x: 0%;
+  }
+}
+
+.pp_ruler_token[data-region='kabul'] {
+  .pp_ruler_token_side {
+    background-position-x: 20%;
+  }
+}
+
+.pp_ruler_token[data-region='kandahar'] {
+  .pp_ruler_token_side {
+    background-position-x: 40%;
+  }
+}
+
+.pp_ruler_token[data-region='persia'] {
+  .pp_ruler_token_side {
+    background-position-x: 60%;
+  }
+}
+
+.pp_ruler_token[data-region='punjab'] {
+  .pp_ruler_token_side {
+    background-position-x: 80%;
+  }
+}
+
+.pp_ruler_token[data-region='transcaspia'] {
+  .pp_ruler_token_side {
+    background-position-x: 100%;
+  }
+}
+
+.pp_ruler_token_side {
+  height: calc(var(--tokenScale) * 50px);
+  width: calc(var(--tokenScale) * 50px);
+  background-image: url('img/ruler_tokens.webp');
+  background-size: 600% 100%;
+  background-repeat: no-repeat;
+  box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 50%;
+}

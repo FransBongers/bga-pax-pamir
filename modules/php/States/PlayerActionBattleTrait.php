@@ -93,7 +93,6 @@ trait PlayerActionBattleTrait
     $loyalty = $player->getLoyalty();
     $numberOfLoyalPieces = $this->getNumberOfLoyalArmies($player, $location);
     // Needs loyal pieces to remove enemy pieces
-    // Notifications::log('battle debug', [$loyalPieces,$removedPieces]);
     if ($numberOfLoyalPieces < count($removedPieces)) {
       throw new \feException("Not enough loyal pieces");
     }

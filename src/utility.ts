@@ -28,6 +28,31 @@ const substituteKeywords = ({
   args?: Record<string, string | number>;
   playerColor?: string;
 }) => {
-  console.log('color', playerColor);
   return dojo.string.substitute(_(string), { ...getKeywords({ playerColor }), ...(args || {}) });
 };
+
+const extractId = (input: { id: string }): string => {
+  return input.id;
+};
+
+const getArmy = (token: Token): CoalitionBlock => ({
+  ...token,
+  coalition: token.id.split('_')[1] as Coalition,
+  type: 'army',
+});
+
+const getRoad = (token: Token): CoalitionBlock => ({
+  ...token,
+  coalition: token.id.split('_')[1] as Coalition,
+  type: 'road',
+});
+
+const pxNumber = (px?: string): number => {
+  if ((px || '').endsWith('px')) {
+    return Number(px.slice(0, -2));
+  } else {
+    return 0;
+  }
+}
+
+const getCoalitionForBlock = (coalitionBlockId: string): Coalition => coalitionBlockId.split('_')[1] as Coalition;

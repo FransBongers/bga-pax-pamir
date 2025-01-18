@@ -40,14 +40,14 @@ class PlaceSpyState implements State {
 
   private updateInterfaceConfirmPlaceSpy({ cardId }: { cardId: string }) {
     this.game.clearPossible();
-    dojo.query(`.pp_card_in_court.pp_${cardId}`).addClass('pp_selected');
+    document.getElementById(cardId).classList.add('pp_selected');
     if (this.selectedPiece) {
       this.setPieceSelected();
     }
     this.game.clientUpdatePageTitle({
       text: _('Place a spy on ${cardName}'),
       args: {
-        cardName: _((this.game.getCardInfo({ cardId }) as CourtCard).name),
+        cardName: _((this.game.getCardInfo(cardId) as CourtCard).name),
       },
     });
     this.game.addPrimaryActionButton({
@@ -78,7 +78,7 @@ class PlaceSpyState implements State {
   }
 
   setPlaceSpyCardsSelectable({ regionId }: { regionId: string }) {
-    dojo.query(`.pp_card_in_court.pp_${regionId}`).forEach((node: HTMLElement, index: number) => {
+    dojo.query(`.pp_court .pp_card.pp_${regionId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
       dojo.addClass(node, 'pp_selectable');
       this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));

@@ -61,6 +61,7 @@ interface Framework {
     delay?: number
   ) => Animation;
   updatePageTitle: () => void;
+  wait: (ms: number) => Promise<void>;
 }
 
 interface Notif<T> {

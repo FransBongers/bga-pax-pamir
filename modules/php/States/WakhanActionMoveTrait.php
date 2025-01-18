@@ -64,7 +64,7 @@ trait WakhanActionMoveTrait
       Wakhan::actionNotValid();
       return false;
     }
-    Notifications::log('card', $card);
+
     if ($this->wakhanGetNextMove() === null) {
       Wakhan::actionNotValid();
       return false;
@@ -219,7 +219,7 @@ trait WakhanActionMoveTrait
   function wakhanGetNextSpyMove()
   {
     $originCards = $this->wakhanGetCardsSpyCanMoveFrom();
-    Notifications::log('originCards', $originCards);
+
     if (count($originCards) === 0) {
       return null;
     }

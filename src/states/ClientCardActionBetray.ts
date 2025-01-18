@@ -61,7 +61,7 @@ class ClientCardActionBetrayState implements State {
 
   private updateInterfaceConfirm({ betrayedCardId }: { betrayedCardId: string; }) {
     this.game.clearPossible();
-    const card = this.game.getCardInfo({ cardId: betrayedCardId }) as CourtCard;
+    const card = this.game.getCardInfo(betrayedCardId) as CourtCard;
     const node = dojo.byId(betrayedCardId);
     dojo.addClass(node, 'pp_selected');
     this.game.clientUpdatePageTitle({
@@ -95,7 +95,7 @@ class ClientCardActionBetrayState implements State {
         own: [],
       };
     }
-    const cylinderIds = spyZone.getItems();
+    const cylinderIds = spyZone.getCards().map(extractId);
     return {
       enemy: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()),
       own: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) === this.game.getPlayerId()),

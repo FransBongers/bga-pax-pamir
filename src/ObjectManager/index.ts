@@ -10,6 +10,7 @@ class DiscardPile {
   private game: PaxPamirGame;
   private visibleCardId?: string = undefined;
   private containterId: string;
+  private stock: VoidStock<Card>;
 
   constructor({ game, containerId }: { game: PaxPamirGame; containerId: string }) {
     this.game = game;
@@ -22,8 +23,10 @@ class DiscardPile {
     const discardPileTitle = $('pp_discard_pile_title');
     if (!discardPileTitle) {
       const discardPile: HTMLElement = $('pp_discard_pile');
-      discardPile.insertAdjacentHTML('afterbegin', `<span id="pp_discard_pile_title" >${_('Discard')}</span>`);
+      discardPile.insertAdjacentHTML('afterbegin', `<span id="pp_discard_pile_title">${_('Discard')}</span>`);
     }
+
+    this.stock = new VoidStock<Card>(this.game.cardManager, document.getElementById(this.containterId));
 
     if (gamedatas.discardPile.topCard) {
       this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
@@ -51,35 +54,28 @@ class DiscardPile {
   }
 
   public async discardCardFromLocation({ cardId, from }: { cardId: string; from: string }) {
-    const fromRect = $(from)?.getBoundingClientRect();
-    const element = dojo.place(tplCard({ cardId }), 'pp_pile_discarded_card');
-    await this.game.animationManager.play(
-      new BgaSlideAnimation<BgaAnimationWithOriginSettings>({
-        element,
-        transitionTimingFunction: 'linear',
-        fromRect,
-      })
+    await this.stock.addCard(
+      {
+        id: cardId,
+      } as Card,
+      { fromElement: document.getElementById(from) }
     );
     this.setVisibleCard({ cardId });
-    $(cardId).remove();
     this.game.objectManager.incCardCounter({ cardId, location: 'discardPile' });
   }
 
-  public async discardCardFromZone({ cardId, zone }: { cardId: string; zone: PaxPamirZone }) {
-    await zone.removeTo({
+  public async discardCardFromZone(cardId: string) {
+    await this.stock.addCard({
       id: cardId,
-      to: this.containterId,
-      destroy: false,
-    });
+    } as Card);
     this.setVisibleCard({ cardId });
-    $(cardId).remove();
     this.game.objectManager.incCardCounter({ cardId, location: 'discardPile' });
   }
 }
 
 class TempDiscardPile {
   private game: PaxPamirGame;
-  private zone: PaxPamirZone;
+  private zone: LineStock<Card>;
 
   constructor({ game }: { game: PaxPamirGame }) {
     this.game = game;
@@ -88,27 +84,21 @@ class TempDiscardPile {
   }
 
   setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    this.zone = new PaxPamirZone({
-      animationManager: this.game.animationManager,
-      containerId: 'pp_temp_discarded_card',
-      itemHeight: CARD_HEIGHT,
-      itemWidth: CARD_WIDTH,
-    });
+    this.zone = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_temp_discarded_card'), { center: false });
     if (gamedatas.tempDiscardPile) {
-      const cardId = gamedatas.tempDiscardPile.id;
-      this.zone.setupItems({
-        id: cardId,
-        element: tplCard({ cardId }),
+      this.zone.addCard({
+        ...gamedatas.tempDiscardPile,
+        ...this.game.getCardInfo(gamedatas.tempDiscardPile.id),
       });
     }
   }
 
   clearInterface() {
-    dojo.empty(this.zone.getContainerId());
+    this.zone.removeAll();
     this.zone = undefined;
   }
 
-  getZone(): PaxPamirZone {
+  getZone(): LineStock<Card> {
     return this.zone;
   }
 }
@@ -131,11 +121,10 @@ class TempDiscardPile {
 
 class FavoredSuit {
   private game: PaxPamirGame;
-  private favoredSuitZones: Record<string, PaxPamirZone>;
+  private favoredSuitZones: Record<string, LineStock<Token>>;
   private favoredSuit: string;
 
   constructor({ game }: { game: PaxPamirGame }) {
-    console.log('Constructor Favored Suit');
     this.game = game;
 
     this.setup({ gamedatas: game.gamedatas });
@@ -146,26 +135,25 @@ class FavoredSuit {
 
     // Setup zones for favored suit marker
     Object.keys(this.game.gamedatas.staticData.suits).forEach((suit) => {
-      this.favoredSuitZones[suit] = new PaxPamirZone({
-        animationManager: this.game.animationManager,
-        containerId: `pp_favored_suit_${suit}`,
-        itemHeight: FAVORED_SUIT_MARKER_HEIGHT,
-        itemWidth: FAVORED_SUIT_MARKER_WIDTH,
-      });
+      this.favoredSuitZones[suit] = new LineStock<Token>(
+        this.game.favoredSuitMarkerManager,
+        document.getElementById(`pp_favored_suit_${suit}`)
+      );
     });
 
     this.favoredSuit = gamedatas.favoredSuit;
-    this.favoredSuitZones[this.favoredSuit].setupItems({
-      element: tplFavoredSuit({ id: 'favored_suit_marker' }),
+    this.favoredSuitZones[this.favoredSuit].addCard({
       id: 'favored_suit_marker',
+      location: '',
+      state: 0,
+      used: 0,
     });
-
     this.game.market.setMilitarySuitIndicatorVisible({ visible: this.favoredSuit === MILITARY });
   }
 
   clearInterface() {
     Object.keys(this.favoredSuitZones).forEach((key) => {
-      dojo.empty(this.favoredSuitZones[key].getContainerId());
+      this.favoredSuitZones[key].removeAll();
       this.favoredSuitZones[key] = undefined;
     });
   }
@@ -181,21 +169,17 @@ class FavoredSuit {
   async changeTo({ suit }: { suit: string }): Promise<void> {
     const currentSuit = this.favoredSuit;
     this.favoredSuit = suit;
-    console.log('currentSuit', currentSuit);
-    console.log('favoredSuit', this.favoredSuit);
     if (currentSuit === MILITARY) {
-      this.game.market.setMilitarySuitIndicatorVisible({visible: false});
+      this.game.market.setMilitarySuitIndicatorVisible({ visible: false });
     }
-    await Promise.all([
-      this.favoredSuitZones[suit].moveToZone({
-        elements: {
-          id: 'favored_suit_marker',
-        },
-      }),
-      this.favoredSuitZones[currentSuit].remove({ input: 'favored_suit_marker' }),
-    ]);
+    await this.favoredSuitZones[suit].addCard({
+      id: 'favored_suit_marker',
+      location: '',
+      state: 0,
+      used: 0,
+    });
     if (this.favoredSuit === MILITARY) {
-      this.game.market.setMilitarySuitIndicatorVisible({visible: true});
+      this.game.market.setMilitarySuitIndicatorVisible({ visible: true });
     }
   }
 }
@@ -210,10 +194,9 @@ class FavoredSuit {
 
 class Supply {
   private game: PaxPamirGame;
-  private coalitionBlocks: Record<string, PaxPamirZone>;
+  private coalitionBlocks: Record<string, LineStock<CoalitionBlock>>;
 
   constructor({ game }: { game: PaxPamirGame }) {
-    console.log('Constructor Supply');
     this.game = game;
 
     this.setup({ gamedatas: game.gamedatas });
@@ -222,19 +205,17 @@ class Supply {
   setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
     this.coalitionBlocks = {};
     COALITIONS.forEach((coalition) => {
-      this.coalitionBlocks[coalition] = new PaxPamirZone({
-        animationManager: this.game.animationManager,
-        containerId: `pp_${coalition}_coalition_blocks`,
-        itemHeight: COALITION_BLOCK_HEIGHT,
-        itemWidth: COALITION_BLOCK_WIDTH,
-        itemGap: 15,
-      });
+      this.coalitionBlocks[coalition] = new LineStock<CoalitionBlock>(
+        this.game.coalitionBlockManager,
+        document.getElementById(`pp_${coalition}_coalition_blocks`),
+        { center: false }
+      );
 
-      this.coalitionBlocks[coalition].setupItems(
-        gamedatas.coalitionBlocks[coalition].map((block) => ({
-          id: block.id,
-          element: tplCoalitionBlock({ id: block.id, coalition }),
-          weight: block.state,
+      this.coalitionBlocks[coalition].addCards(
+        gamedatas.coalitionBlocks[coalition].map((token) => ({
+          ...token,
+          type: 'supply',
+          coalition,
         }))
       );
     });
@@ -243,12 +224,12 @@ class Supply {
 
   clearInterface() {
     Object.keys(this.coalitionBlocks).forEach((key) => {
-      dojo.empty(this.coalitionBlocks[key].getContainerId());
+      this.coalitionBlocks[key].removeAll();
       this.coalitionBlocks[key] = undefined;
     });
   }
 
-  getCoalitionBlocksZone({ coalition }: { coalition: string }): PaxPamirZone {
+  getCoalitionBlocksZone({ coalition }: { coalition: string }): LineStock<CoalitionBlock> {
     return this.coalitionBlocks[coalition];
   }
 
@@ -257,15 +238,15 @@ class Supply {
     const coalitions = [
       {
         coalition: AFGHAN,
-        supplyCount: this.coalitionBlocks[AFGHAN].getItemCount(),
+        supplyCount: this.coalitionBlocks[AFGHAN].getCards().length,
       },
       {
         coalition: BRITISH,
-        supplyCount: this.coalitionBlocks[BRITISH].getItemCount(),
+        supplyCount: this.coalitionBlocks[BRITISH].getCards().length,
       },
       {
         coalition: RUSSIAN,
-        supplyCount: this.coalitionBlocks[RUSSIAN].getItemCount(),
+        supplyCount: this.coalitionBlocks[RUSSIAN].getCards().length,
       },
     ];
     const isConflictFatigueActive = this.game.playerManager
@@ -302,17 +283,16 @@ class Supply {
 
 class VpTrack {
   private game: PaxPamirGame;
-  private vpTrackZones: Record<string, PaxPamirZone>;
+  private vpTrackZones: Record<string, TokenManualPositionStock<Cylinder>>;
 
   constructor({ game }: { game: PaxPamirGame }) {
-    console.log('VpTrack');
     this.game = game;
     this.setupVpTrack({ gamedatas: game.gamedatas });
   }
 
   clearInterface() {
     for (let i = 0; i <= 23; i++) {
-      dojo.empty(this.vpTrackZones[i].getContainerId());
+      this.vpTrackZones[i].removeAll();
       this.vpTrackZones[i] = undefined;
     }
   }
@@ -321,32 +301,34 @@ class VpTrack {
     this.vpTrackZones = {};
     // Create VP track
     for (let i = 0; i <= 23; i++) {
-      this.vpTrackZones[i] = new PaxPamirZone({
-        animationManager: this.game.animationManager,
-        containerId: `pp_vp_track_${i}`,
-        itemHeight: CYLINDER_HEIGHT,
-        itemWidth: CYLINDER_WIDTH,
-        pattern: 'custom',
-        customPattern: this.customPatternVpTrack,
-      });
+      this.vpTrackZones[i] = new TokenManualPositionStock(
+        this.game.cylinderManager,
+        document.getElementById(`pp_vp_track_${i}`),
+        {},
+        (element: HTMLElement, cards: Cylinder[], lastCard: Cylinder, stock: TokenManualPositionStock<Cylinder>) =>
+          updateZoneDislay(this.customPatternVpTrack, element, cards, lastCard, stock)
+      );
     }
 
     // Add cylinders
     for (const playerId in gamedatas.paxPamirPlayers) {
       const player = gamedatas.paxPamirPlayers[playerId];
       const zone = this.getZone(player.score);
-      zone.setupItems({
+      zone.addCard({
         id: `vp_cylinder_${playerId}`,
-        element: tplCylinder({ id: `vp_cylinder_${playerId}`, color: player.color }),
+        color: player.color,
+        state: 0,
+        used: 0,
+        location: `vp_track_${player.score}`,
       });
     }
   }
 
-  getZone(score: string): PaxPamirZone {
+  getZone(score: string): TokenManualPositionStock<Cylinder> {
     return this.vpTrackZones[score];
   }
 
-  private customPatternVpTrack({ index: i, itemCount: numberOfItems }: PPZoneItemToCoordsProps): OriginalZoneItemToCoordsResult {
+  private customPatternVpTrack({ index: i, itemCount: numberOfItems }: ZonePatternInput): ZonePatternOutput {
     switch (i) {
       case 0:
         return { x: 9, y: -16, w: 40, h: 27 };
@@ -407,7 +389,6 @@ class ObjectManager {
   };
 
   constructor(game: PaxPamirGame) {
-    console.log('ObjectManager');
     this.game = game;
 
     this.discardPile = new DiscardPile({ game, containerId: 'pp_pile_discarded_card' });
@@ -451,7 +432,7 @@ class ObjectManager {
   }
 
   incCardCounter({ cardId, location }: { cardId: string; location: 'deck' | 'discardPile' }) {
-    const cardInfo = this.game.getCardInfo({ cardId });
+    const cardInfo = this.game.getCardInfo(cardId);
     const isDominanceCheck = cardInfo.type === EVENT_CARD && cardInfo.discarded.effect === ECE_DOMINANCE_CHECK;
     const increase = location === 'deck' ? -1 : 1;
     this.game.objectManager.counters[location].cards.incValue(increase);

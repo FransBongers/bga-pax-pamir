@@ -180,7 +180,6 @@ trait PlayerActionMoveTrait
       Tokens::move($pieceId, $to);
     }
     $regionsThatNeedRulerCheck = array_values(array_unique($regionsThatNeedRulerCheck));
-    Notifications::log('regionsThatNeedRulerCheck', $regionsThatNeedRulerCheck);
     foreach ($regionsThatNeedRulerCheck as $index => $region) {
       Map::checkRulerChange($region);
     };

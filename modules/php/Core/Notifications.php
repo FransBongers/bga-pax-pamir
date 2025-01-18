@@ -449,7 +449,7 @@ class Notifications
   public static function discardPrizes($prizes, $playerId)
   {
     $message = clienttranslate('${tkn_playerName} discards ${numberOfPrizes} prize(s)${tkn_newLine}${cardLog}');
-    Notifications::log('prizes', $prizes);
+
     $logs = [];
     $args = [];
     foreach ($prizes as $index => $cardInfo) {

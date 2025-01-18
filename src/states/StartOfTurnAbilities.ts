@@ -56,7 +56,7 @@ class StartOfTurnAbilitiesState implements State {
     this.game.clientUpdatePageTitle({
       text: _('Place a spy on ${cardName}?'),
       args: {
-        cardName: _((this.game.getCardInfo({ cardId }) as CourtCard).name),
+        cardName: _((this.game.getCardInfo(cardId) as CourtCard).name),
       },
     });
     this.game.addPrimaryActionButton({
@@ -91,12 +91,10 @@ class StartOfTurnAbilitiesState implements State {
 
   setCourtCardsSelectable() {
     const region = this.specialAbility === SA_BLACKMAIL_HERAT ? HERAT : KANDAHAR;
-    dojo.query(`.pp_card_in_court`).forEach((node: HTMLElement, index: number) => {
-      const cardId = node.id;
-      const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
-      if (cardInfo.region === region && (this.game.spies[cardId]?.getItems() || []).length === 0) {
-        dojo.addClass(node, 'pp_selectable');
-        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
+    this.game.playerManager.getAllCourtCards().forEach(({ id: cardId, region: cardRegion }: CourtCard) => {
+      if (cardRegion === region && (this.game.spies[cardId]?.getCards() || []).length === 0) {
+        dojo.addClass($(cardId), 'pp_selectable');
+        this.game._connections.push(dojo.connect($(cardId), 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
       }
     });
   }

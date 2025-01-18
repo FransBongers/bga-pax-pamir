@@ -80,7 +80,7 @@ class PPTooltipManager {
   }
 
   public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string }): void {
-    const cardInfo = this.game.getCardInfo({ cardId });
+    const cardInfo = this.game.getCardInfo(cardId);
 
     if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({ cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
@@ -95,8 +95,6 @@ class PPTooltipManager {
     const html = tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId, game: this.game });
     this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);
     this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
-
-    // dojo.place(tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }), 'game_play_area');
   }
 
   public removeTooltip(nodeId: string) {

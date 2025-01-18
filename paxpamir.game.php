@@ -219,7 +219,6 @@ class Paxpamir extends Table
             ]);
         }
 
-        Notifications::log('actionStack', $actionStack);
         return $actionStack;
     }
 

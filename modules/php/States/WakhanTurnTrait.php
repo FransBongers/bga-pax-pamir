@@ -47,7 +47,6 @@ trait WakhanTurnTrait
     // $actionStack = ActionStack::get();
 
     // array_pop($actionStack);
-    // Notifications::log('actionStack',$actionStack);
     // ActionStack::next($actionStack);
     Globals::setWakhanActive(true);
     $this->nextState('dispatchAction');

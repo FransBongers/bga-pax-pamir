@@ -165,7 +165,7 @@ class ClientInitialBribeCheckState implements State {
     if (!spyZone) {
       return null;
     }
-    const cylinderIds = spyZone.getItems();
+    const cylinderIds = spyZone.getCards().map(extractId);
     const totals: {
       [playerId: string]: number;
     } = {};
@@ -187,7 +187,6 @@ class ClientInitialBribeCheckState implements State {
         numberOfSpies: value,
       }))
       .sort((a, b) => b.numberOfSpies - a.numberOfSpies);
-    console.log('sortedTotals', sortedTotals);
 
     const currentPlayerId = this.game.getPlayerId();
     const numberOfPlayersWithSpies = sortedTotals.length;
@@ -216,7 +215,7 @@ class ClientInitialBribeCheckState implements State {
 
   private checkBribePlayCard({ cardId }: { cardId: string }): { bribeeId: number; amount: number } | null {
     // Check if other player rules the region
-    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     const { region } = cardInfo;
     const rulerId = this.game.map.getRegion({ region }).getRuler();
     const playerId = this.game.getPlayerId();

@@ -1,0 +1,76 @@
+@use 'sass:math';
+@use '../base';
+
+.card-sides {
+  position: relative !important;
+}
+
+.pp_card {
+  position: relative;
+  background-repeat: no-repeat;
+  // border: calc(var(--cardScale) * 1px) black solid;
+  width: calc(var(--cardScale) * 150px);
+  height: calc(var(--cardScale) * 209px);
+  box-sizing: border-box;
+  // box-shadow: calc(var(--cardScale) * 2px) calc(var(--cardScale) * 2px) calc(var(--cardScale) * 5px) calc(var(--cardScale) * -1px) #000;
+  border-radius: 3%;
+}
+
+.pp_card_side {
+  border: calc(var(--cardScale) * 1px) black solid;
+  width: calc(var(--cardScale) * 150px);
+  height: calc(var(--cardScale) * 209px);
+  box-sizing: border-box;
+  box-shadow: calc(var(--cardScale) * 2px) calc(var(--cardScale) * 2px) calc(var(--cardScale) * 5px) calc(var(--cardScale) * -1px) #000;
+  border-radius: 3%;
+}
+
+.pp_card.pp_selectable {
+  cursor: pointer;
+
+  .pp_card_side {
+    box-shadow: 0px 0px 0px calc(var(--cardScale) * 4px) base.$selectable-color !important;
+  }
+}
+
+.pp_card.pp_selectable:hover {
+  cursor: pointer;
+  .pp_card_side {
+    box-shadow: 0px 0px 0px calc(var(--cardScale) * 4px) base.$selected-color !important;
+  }
+}
+
+.pp_card.pp_selected {
+  cursor: pointer;
+
+  .pp_card_side {
+      box-shadow: 0px 0px 0px calc(var(--cardScale) * 4px) base.$selected-color !important;
+  }
+}
+
+/* ------- CARDS ------- */
+
+@for $i from 1 through 70 {
+  .pp_card_#{$i} {
+    background-image: url('img/cards1.webp');
+    background-size: 1000% 700%;
+    background-position-x: math.div((($i - 1) % 10 * 100%), 9);
+    background-position-y: math.div(math.floor(calc(($i - 1) / 10)) * 100%, 6);
+  }
+}
+
+@for $i from 71 through 116 {
+  .pp_card_#{$i} {
+    background-image: url('img/cards2.webp');
+    background-size: 1000% 500%;
+    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
+    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
+  }
+}
+
+.pp_card_back {
+  background-size: 1000% 500%;
+  background-image: url('img/cards2.webp');
+  background-position-x: calc(2 / 3) * 100%;
+  background-position-y: 100%;
+}

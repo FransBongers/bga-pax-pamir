@@ -82,7 +82,6 @@ trait SASafeHouseTrait
 
     $actionStack = ActionStack::get();
     // $action = $actionStack[count($actionStack) - 1];
-    // Notifications::log('action', $action);
     $action = array_pop($actionStack);
     $data = $action['data'];
     // Get data

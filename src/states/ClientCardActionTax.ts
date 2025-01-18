@@ -25,7 +25,7 @@ class ClientCardActionTaxState implements State {
   onEnteringState(args: ClientCardActionStateArgs) {
     this.cardId = args.cardId;
     this.bribe = args.bribe;
-    const cardInfo = this.game.getCardInfo(args) as CourtCard;
+    const cardInfo = this.game.getCardInfo(args.cardId) as CourtCard;
     this.maxNumberToSelect = cardInfo.rank;
     this.numberSelected = 0;
     this.maxPerPlayer = {};
@@ -182,9 +182,9 @@ class ClientCardActionTaxState implements State {
       if (!hasClaimOfAncientLineage) {
         const hasCardRuledByPlayer = player
           .getCourtZone()
-          .getItems()
-          .some((cardId: string) => {
-            const cardRegion = (this.game.getCardInfo({ cardId }) as CourtCard).region;
+          .getCards()
+          .some(({region: cardRegion}: CourtCard) => {
+            // const cardRegion = (this.game.getCardInfo(cardId) as CourtCard).region;
             if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {
               return true;
             }
@@ -192,7 +192,7 @@ class ClientCardActionTaxState implements State {
         if (!hasCardRuledByPlayer) {
           return false;
         }
-      } else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
+      } else if (hasClaimOfAncientLineage && player.getCourtZone().getCards().length === 0) {
         return false;
       }
       const taxShelter = player.getTaxShelter();

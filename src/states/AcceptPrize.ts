@@ -68,7 +68,7 @@ class AcceptPrizeState implements State {
   //  ..#######.....##....####.########.####....##.......##...
 
   private updatePageTitle() {
-    const card = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
+    const card = this.game.getCardInfo(this.cardId) as CourtCard;
 
     const playerLoyalty = this.game.getCurrentPlayer().getLoyalty();
     if (card.prize !== playerLoyalty) {

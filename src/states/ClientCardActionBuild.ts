@@ -17,7 +17,6 @@ class ClientCardActionBuildState implements State {
     this.bribe = props?.bribe;
     this.tempTokens = [];
     this.setMaxNumberToPlace();
-    console.log('maxNumberToPlace', this.maxNumberToPlace);
     this.updateInterfaceInitialStep();
   }
 
@@ -129,7 +128,7 @@ class ClientCardActionBuildState implements State {
         type: 'road',
       });
     }
-    console.log('tempTokens', this.tempTokens);
+
     this.updatePageTitle();
     this.updateActionButtons();
   }
@@ -168,7 +167,7 @@ class ClientCardActionBuildState implements State {
     const playerRupees = player.getRupees();
     this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
     const multiplier = this.playerHasNationBuilding ? 2 : 1;
-    console.log('multiplier', multiplier);
+
     const bribe = this.bribe?.amount || 0;
     const maxAffordable = Math.floor((playerRupees - bribe) / 2);
     this.maxNumberToPlace = Math.min(maxAffordable, 3) * multiplier;

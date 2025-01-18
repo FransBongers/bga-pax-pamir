@@ -15,13 +15,14 @@
  *
  */
 
-// declare const define; // TODO: check if we comment here or in bga-animations module?
+declare const define; // TODO: check if we comment here or in bga-animations module?
 declare const ebg;
 declare const $;
 declare const dojo: Dojo;
 declare const _: (stringToTranslate: string) => string;
 declare const g_gamethemeurl;
 declare const playSound;
+declare var noUiSlider;
 
 class PaxPamir implements PaxPamirGame {
   public gamedatas: PaxPamirGamedatas;
@@ -32,10 +33,18 @@ class PaxPamir implements PaxPamirGame {
   public notificationManager: NotificationManager;
   public objectManager: ObjectManager;
   public playerManager: PlayerManager;
+  public infoPanel: InfoPanel;
+  public settings: Settings;
+  public cardManager: PPCardManager;
+  public coalitionBlockManager: CoalitionBlockManager;
+  public cylinderManager: CylinderManager;
+  public favoredSuitMarkerManager: FavoredSuitMarkerManager;
+  public rulerTokenManager: RulerTokenManager;
+  public rupeeManager: RupeeManager;
   // global variables
   private defaultWeightZone: number = 0;
   public activeEvents: PPActiveEvents; // active events
-  public spies: Record<string, PaxPamirZone> = {}; // spies per cards
+  public spies: Record<string, LineStock<Cylinder>> = {}; // spies per cards
   public playerCounts = {}; // rename to playerTotals? => can we remove?
   public playerOrder: number[];
   public tooltipManager: PPTooltipManager;
@@ -43,6 +52,8 @@ class PaxPamir implements PaxPamirGame {
   private _last_notif = null;
   public _connections: unknown[];
   public localState: LocalState;
+  private alwaysFixTopActions: boolean;
+  private alwaysFixTopActionsMaximum: number;
 
   public activeStates: {
     [CLIENT_CARD_ACTION_BATTLE]: ClientCardActionBattleState;
@@ -95,6 +106,7 @@ class PaxPamir implements PaxPamirGame {
   public setup(gamedatas: PaxPamirGamedatas) {
     // Create a new div for buttons to avoid BGA auto clearing it
     dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
+    this.setAlwaysFixTopActions();
     // const playAreaWidth = document.getElementById('pp_play_area').offsetWidth;
     // console.log('playAreaWidth',playAreaWidth);
     this.gamedatas = gamedatas;
@@ -104,6 +116,9 @@ class PaxPamir implements PaxPamirGame {
     if (this.gameOptions.wakhanEnabled) {
       dojo.place(tplWakhanPlayerPanel({ name: _('Wakhan') }), 'player_boards', 0);
     }
+
+    // dojo.style("pagemaintitle_wrap", "display", "block");
+    // dojo.style("gameaction_status_wrap", "display", "block");
 
     this.playerOrder.forEach((playerId) => {
       const player = gamedatas.paxPamirPlayers[playerId];
@@ -147,10 +162,24 @@ class PaxPamir implements PaxPamirGame {
       wakhanPause: new WakhanPauseState(this),
     };
 
-    this.animationManager = new AnimationManager(this, { duration: 500 });
-
+    this.infoPanel = new InfoPanel(this);
+    this.settings = new Settings(this);
+    // this.animationManager = new AnimationManager(this, { duration: 500 });
+    this.animationManager = new AnimationManager(this, {
+      duration:
+        this.settings.get({ id: PREF_SHOW_ANIMATIONS }) === PREF_DISABLED
+          ? 0
+          : 2100 - (this.settings.get({ id: PREF_ANIMATION_SPEED }) as number),
+    });
 
     this.tooltipManager = new PPTooltipManager(this);
+    this.cylinderManager = new CylinderManager(this);
+    this.favoredSuitMarkerManager = new FavoredSuitMarkerManager(this);
+    this.cardManager = new PPCardManager(this);
+    this.coalitionBlockManager = new CoalitionBlockManager(this);
+    this.rulerTokenManager = new RulerTokenManager(this);
+    this.rupeeManager = new RupeeManager(this);
+
     this.activeEvents = new PPActiveEvents(this);
     this.playerManager = new PlayerManager(this);
 
@@ -265,7 +294,7 @@ class PaxPamir implements PaxPamirGame {
     });
   }
 
-  addUndoButton({undoPossible}: {undoPossible: boolean}) {
+  addUndoButton({ undoPossible }: { undoPossible: boolean }) {
     if (undoPossible) {
       this.addDangerActionButton({
         id: 'undo_btn',
@@ -274,7 +303,6 @@ class PaxPamir implements PaxPamirGame {
       });
     }
   }
-
 
   addPrimaryActionButton({
     id,
@@ -346,10 +374,9 @@ class PaxPamir implements PaxPamirGame {
   }
 
   public clearInterface() {
-    console.log('clear interface');
     Object.keys(this.spies).forEach((key) => {
-      if (this.spies[key]?.getContainerId() && $(this.spies[key].getContainerId())) {
-        dojo.empty(this.spies[key].getContainerId());
+      if (this.spies[key]) {
+        this.spies[key].removeAll();
       }
       this.spies[key] = undefined;
     });
@@ -374,11 +401,25 @@ class PaxPamir implements PaxPamirGame {
     this.map.clearSelectable();
   }
 
-  public getCardInfo({ cardId }: { cardId: string }): Card {
+  public getCard(token: Token): Card {
+    return {
+      ...token,
+      ...this.getCardInfo(token.id),
+    };
+  }
+
+  public getCylinder(token: Token): Cylinder {
+    return {
+      ...token,
+      color: this.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color,
+    };
+  }
+
+  public getCardInfo(cardId: string): CardStaticData {
     return this.gamedatas.staticData.cards[cardId];
   }
 
-  public getWakhanCardInfo({wakhanCardId}: {wakhanCardId: string;}): WakhanCard {
+  public getWakhanCardInfo({ wakhanCardId }: { wakhanCardId: string }): WakhanCard {
     return this.gamedatas.staticData.wakhanCards[wakhanCardId];
   }
 
@@ -430,9 +471,9 @@ class PaxPamir implements PaxPamirGame {
   }) {
     debug('setCourtCardsSelectable', loyalty, region, suit);
     const playerId = this.getPlayerId();
-    dojo.query(`.pp_card_in_court.pp_player_${playerId}`).forEach((node: HTMLElement, index: number) => {
+    dojo.query(`.pp_court.pp_court_player_${playerId} .pp_card`).forEach((node: HTMLElement, index: number) => {
       const cardId = 'card_' + node.id.split('_')[1];
-      const card = this.getCardInfo({ cardId }) as CourtCard;
+      const card = this.getCardInfo(cardId) as CourtCard;
 
       const loyaltyFilter = !loyalty || card.loyalty === loyalty;
       const regionFilter = !region || card.region === region;
@@ -447,7 +488,7 @@ class PaxPamir implements PaxPamirGame {
 
   setHandCardsSelectable({ callback }: { callback: (props: { cardId: string }) => void }) {
     debug('setHandCardsSelectable');
-    dojo.query('.pp_card_in_hand').forEach((node: HTMLElement, index: number) => {
+    document.querySelectorAll('.pp_player_hand_cards .pp_card').forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
       debug('cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
@@ -479,6 +520,42 @@ class PaxPamir implements PaxPamirGame {
   clientUpdatePageTitleOtherPlayers({ text, args }: { text: string; args: Record<string, string | number> }) {
     this.gamedatas.gamestate.description = dojo.string.substitute(_(text), args);
     this.framework().updatePageTitle();
+  }
+
+  public updateLayout() {
+    if (!this.settings) {
+      return;
+    }
+
+    $('play_area_container').setAttribute('data-two-columns', this.settings.get({ id: 'twoColumnsLayout' }));
+
+    const ROOT = document.documentElement;
+    let WIDTH = $('play_area_container').getBoundingClientRect()['width'] - 8; // minus padding
+    const LEFT_COLUMN = 1000;
+    const RIGHT_COLUMN = 1000;
+
+    if (this.settings.get({ id: 'twoColumnsLayout' }) === PREF_ENABLED) {
+      WIDTH = WIDTH - 8; // minus grid gap
+      const size = Number(this.settings.get({ id: 'columnSizes' }));
+      const proportions = [size, 100 - size];
+      const LEFT_SIZE = (proportions[0] * WIDTH) / 100;
+      const leftColumnScale = LEFT_SIZE / LEFT_COLUMN;
+      ROOT.style.setProperty('--leftColumnScale', `${leftColumnScale}`);
+      ROOT.style.setProperty('--mapSizeMultiplier', '1');
+      const RIGHT_SIZE = (proportions[1] * WIDTH) / 100;
+      const rightColumnScale = RIGHT_SIZE / RIGHT_COLUMN;
+      ROOT.style.setProperty('--rightColumnScale', `${rightColumnScale}`);
+
+      $('play_area_container').style.gridTemplateColumns = `${LEFT_SIZE}px ${RIGHT_SIZE}px`;
+    } else {
+      const LEFT_SIZE = WIDTH;
+      const leftColumnScale = LEFT_SIZE / LEFT_COLUMN;
+      ROOT.style.setProperty('--leftColumnScale', `${leftColumnScale}`);
+      ROOT.style.setProperty('--mapSizeMultiplier', `${Number(this.settings.get({ id: PREF_SINGLE_COLUMN_MAP_SIZE })) / 100}`);
+      const RIGHT_SIZE = WIDTH;
+      const rightColumnScale = RIGHT_SIZE / RIGHT_COLUMN;
+      ROOT.style.setProperty('--rightColumnScale', `${rightColumnScale}`);
+    }
   }
 
   // .########.########.....###....##.....##.########.##......##..#######..########..##....##
@@ -552,6 +629,13 @@ class PaxPamir implements PaxPamirGame {
     }
   }
 
+  /*
+   * Remove non standard zoom property
+   */
+  onScreenWidthChange() {
+    this.updateLayout();
+  }
+
   public cancelLogs(notifIds: string[]) {
     notifIds.forEach((uid) => {
       if (this._notif_uid_to_log_id.hasOwnProperty(uid)) {
@@ -590,15 +674,55 @@ class PaxPamir implements PaxPamirGame {
   }
 
   updatePlayerOrdering() {
-    console.log('updatePlayerOrdering', this.playerOrder);
     // (this as any).inherited(arguments);
     this.playerOrder.forEach((playerId: number, index: number) => {
       dojo.place('overall_player_board_' + playerId, 'player_boards', index);
     });
+    const container = document.getElementById('player_boards');
+    const infoPanel = document.getElementById('info_panel');
+    if (!container) {
+      return;
+    }
+    container.insertAdjacentElement('afterbegin', infoPanel);
     // if (this.gameOptions.wakhanEnabled) {
     //   const wakhanPosition = this.playerOrder.findIndex((id) => id === 1) + 2;
     //   dojo.place(tplWakhanPlayerPanel({name: _('Wakhan')}), 'player_boards', wakhanPosition);
     // }
+  }
+
+  setAlwaysFixTopActions(alwaysFixed = true, maximum = 30) {
+    this.alwaysFixTopActions = alwaysFixed;
+    this.alwaysFixTopActionsMaximum = maximum;
+    this.adaptStatusBar();
+  }
+
+  adaptStatusBar() {
+    (this as any).inherited(arguments);
+
+    if (this.alwaysFixTopActions) {
+      const afterTitleElem = document.getElementById('after-page-title');
+      const titleElem = document.getElementById('page-title');
+      let zoom = (getComputedStyle(titleElem) as any).zoom;
+      if (!zoom) {
+        zoom = 1;
+      }
+
+      const titleRect = afterTitleElem.getBoundingClientRect();
+      if (
+        titleRect.top < 0 &&
+        titleElem.offsetHeight <
+          (window.innerHeight * this.alwaysFixTopActionsMaximum) / 100
+      ) {
+        const afterTitleRect = afterTitleElem.getBoundingClientRect();
+        titleElem.classList.add('fixed-page-title');
+        titleElem.style.width = (afterTitleRect.width - 10) / zoom + 'px';
+        afterTitleElem.style.height = titleRect.height + 'px';
+      } else {
+        titleElem.classList.remove('fixed-page-title');
+        titleElem.style.width = 'auto';
+        afterTitleElem.style.height = '0px';
+      }
+    }
   }
 
   // .########..#######......######..##.....##.########..######..##....##
@@ -609,9 +733,8 @@ class PaxPamir implements PaxPamirGame {
   // ....##....##.....##....##....##.##.....##.##.......##....##.##...##.
   // ....##.....#######......######..##.....##.########..######..##....##
 
-
   // returns zone object for given backend location in token database
-  getZoneForLocation({ location }: { location: string }): PaxPamirZone {
+  getZoneForLocation({ location }: { location: string }): CardStock<any> {
     const splitLocation = location.split('_');
     switch (splitLocation[0]) {
       case 'armies':
@@ -647,7 +770,7 @@ class PaxPamir implements PaxPamirGame {
         // tribes_kabul
         return this.map.getRegion({ region: splitLocation[1] }).getTribeZone();
       default:
-        console.log('no zone determined');
+        debug('no zone determined');
         break;
     }
   }
@@ -685,27 +808,6 @@ class PaxPamir implements PaxPamirGame {
   //   }, 2000);
   // }
 
-  createSpyZone({ cardId }: { cardId: string }) {
-    const spyZoneId = 'spies_' + cardId;
-    dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, cardId);
-    this.setupCardSpyZone({ nodeId: spyZoneId, cardId });
-  }
-
-
-  // Every time a card is moved or placed in court this function will be called to set up zone.
-  setupCardSpyZone({ nodeId, cardId }) {
-    if (!this.spies[cardId]) {
-      // ** setup for zone
-      this.spies[cardId] = new PaxPamirZone({
-        animationManager: this.animationManager,
-        containerId: nodeId,
-        itemHeight: CYLINDER_HEIGHT,
-        itemWidth: CYLINDER_WIDTH,
-        itemGap: 4,
-      });
-    }
-  }
-
   // Updates weight of item in the stock component for ordering purposes
   updateCard({ location, id, order }) {
     location.changeItemsWeight({ [id]: order });
@@ -729,7 +831,6 @@ class PaxPamir implements PaxPamirGame {
    * Make an AJAX call with automatic lock
    */
   takeAction({ action, data = {} }: { action: string; data?: Record<string, unknown> }) {
-    console.log(`takeAction ${action}`, data);
     if (!this.framework().checkAction(action)) {
       this.actionError(action);
       return;

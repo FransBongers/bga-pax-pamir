@@ -91,7 +91,7 @@ class ClientCardActionGiftState implements State {
           .getGiftZone({
             value: giftValue,
           })
-          .getItems().length > 0;
+          .getCards().length > 0;
       if (!hasGift && giftValue <= this.game.getCurrentPlayer().getRupees() - (this.bribe?.amount || 0)) {
         dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
           dojo.addClass(node, 'pp_selectable');

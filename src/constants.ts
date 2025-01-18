@@ -1,3 +1,5 @@
+const ANIMATION_WAIT_MS = 100;
+
 // Client states
 const CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
 const CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
@@ -13,6 +15,26 @@ const CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS = 'clientResolveEventOtherPe
 const CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 const CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 const CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
+
+
+/**
+ * Setting ids
+ */
+// const CARD_INFO_IN_TOOLTIP = 'cardInfoInTooltip';
+const PREF_SINGLE_COLUMN_MAP_SIZE = 'singleColumnMapSize';
+const PREF_TWO_COLUMNS_LAYOUT = 'twoColumnsLayout';
+const PREF_CONFIRM_END_OF_TURN_AND_PLAYER_SWITCH_ONLY =
+  'confirmEndOfTurnPlayerSwitchOnly';
+const PREF_SHOW_ANIMATIONS = 'showAnimations';
+const PREF_ANIMATION_SPEED = 'animationSpeed';
+const PREF_CARD_INFO_IN_TOOLTIP = 'cardInfoInTooltip';
+const PREF_CARD_SIZE_IN_LOG = 'cardSizeInLog';
+const PREF_CARD_SIZE_IN_COURT = 'cardSizeInCourt';
+const PREF_DISABLED = 'disabled';
+const PREF_ENABLED = 'enabled';
+// const PREF_SELECTABLE_COLOR = 'selectableColor';
+// const PREF_SELECTED_COLOR = 'selectedColor';
+
 
 /**
  * Action
@@ -94,7 +116,7 @@ const AFGHAN = 'afghan';
 const BRITISH = 'british';
 const RUSSIAN = 'russian';
 
-const COALITIONS = [AFGHAN, BRITISH, RUSSIAN];
+const COALITIONS: Array<'afghan' | 'british' | 'russian'> = [AFGHAN, BRITISH, RUSSIAN];
 
 // regions
 const HERAT = 'herat';

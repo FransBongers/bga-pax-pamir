@@ -127,10 +127,10 @@ class NotificationManager {
     const { playerId, rupeesOnCards, removedRupees } = notif.args;
 
     await Promise.all(
-      (rupeesOnCards || []).map(async (item) => {
+      (rupeesOnCards || []).map(async (item, index) => {
         const { row, column, rupeeId, cardId } = item;
         this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId });
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId, index });
       })
     );
     if (removedRupees > 0) {
@@ -144,7 +144,7 @@ class NotificationManager {
 
     const player = this.getPlayer({ playerId });
     player.updatePlayerLoyalty({ coalition });
-    console.log('playerInfluence', player.getInfluence());
+
     // Influence value will be 0 when player chooses loyalty for the first time
     if (player.getInfluence() === 0) {
       player.setCounter({ counter: 'influence', value: 1 });
@@ -154,24 +154,23 @@ class NotificationManager {
 
   async notif_changeFavoredSuit(notif: Notif<NotifChangeFavoredSuitArgs>) {
     const { to } = notif.args;
-    this.game.objectManager.favoredSuit.changeTo({ suit: to });
+    await this.game.objectManager.favoredSuit.changeTo({ suit: to });
   }
 
   async notif_changeRuler(notif: Notif<NotifChangeRulerArgs>) {
-    const { oldRuler, newRuler, region } = notif.args;
-    const from =
-      oldRuler === null
-        ? this.game.map.getRegion({ region }).getRulerZone()
-        : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
+    const { newRuler, region } = notif.args;
     const to =
       newRuler === null
         ? this.game.map.getRegion({ region }).getRulerZone()
         : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
     this.game.map.getRegion({ region }).setRuler({ playerId: newRuler });
-    await Promise.all([
-      to.moveToZone({ elements: { id: `pp_ruler_token_${region}` } }),
-      from.remove({ input: `pp_ruler_token_${region}` }),
-    ]);
+    await to.addCard({
+      id: `pp_ruler_token_${region}`,
+      state: 0,
+      used: 0,
+      location: newRuler ? `rulerTokens_${newRuler}` : `rulerTokens_${region}`,
+      region,
+    });
   }
 
   notif_clearTurn(notif) {
@@ -183,7 +182,7 @@ class NotificationManager {
   async notif_declinePrize(notif: Notif<NotifDeclinePrizeArgs>) {
     this.game.clearPossible();
     const { cardId } = notif.args;
-    await this.game.objectManager.discardPile.discardCardFromZone({ cardId, zone: this.game.objectManager.tempDiscardPile.getZone() });
+    await this.game.objectManager.discardPile.discardCardFromZone(cardId);
   }
 
   async notif_discard(notif: Notif<NotifDiscardArgs>): Promise<void> {
@@ -213,7 +212,7 @@ class NotificationManager {
     if (to === DISCARD || to === TEMP_DISCARD) {
       return await this.game.market.discardCard({ cardId, row, column, to });
     } else if (to === ACTIVE_EVENTS) {
-      await this.game.activeEvents.addCardFromMarket({ cardId, row, column });
+      return await this.game.activeEvents.addCardFromMarket({ cardId, row, column });
     }
   }
 
@@ -268,22 +267,29 @@ class NotificationManager {
       } else {
         this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
       }
-      await Promise.all([
-        this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
-        this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`).remove({ input: `vp_cylinder_${playerId}` }),
-      ]);
+      await this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).addCard({
+        id: `vp_cylinder_${playerId}`,
+        color: this.game.gamedatas.paxPamirPlayers[playerId].color,
+        state: 0,
+        used: 0,
+        location: `vp_track_${scores[playerId].newScore}`,
+      });
+      // await Promise.all([
+      //   this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).moveToZone({ elements: { id: `vp_cylinder_${playerId}` } }),
+      //   this.game.objectManager.vpTrack.getZone(`${scores[playerId].currentScore}`).remove({ input: `vp_cylinder_${playerId}` }),
+      // ]);
     }
   }
 
   async notif_dominanceCheckReturnCoalitionBlocks(notif: Notif<NotifDominanceCheckReturnBlocksArgs>) {
     const { blocks, fromLocations } = notif.args;
-    await Promise.all(
-      COALITIONS.map((coalition: string) =>
-        this.game.objectManager.supply
-          .getCoalitionBlocksZone({ coalition })
-          .moveToZone({ elements: blocks[coalition], classesToAdd: [PP_COALITION_BLOCK], classesToRemove: [PP_ARMY, PP_ROAD] })
-      )
-    );
+    // await Promise.all(
+    // COALITIONS.map((coalition: string) =>
+    //   this.game.objectManager.supply
+    //     .getCoalitionBlocksZone({ coalition })
+    //     .moveToZone({ elements: blocks[coalition], classesToAdd: [PP_COALITION_BLOCK], classesToRemove: [PP_ARMY, PP_ROAD] })
+    // )
+    // );
     await Promise.all(
       fromLocations.map(async (location: string) => {
         const splitLocation = location.split('_');
@@ -311,7 +317,7 @@ class NotificationManager {
         row,
         column,
       },
-      cardId,
+      card: this.game.getCardInfo(cardId),
     });
   }
 
@@ -326,7 +332,7 @@ class NotificationManager {
     switch (action) {
       case 'MOVE_EVENT':
         await Promise.all([
-          this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addCardToEvents({ cardId, from: fromZone }),
+          this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addCardToEvents({ cardId }),
           this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight(),
         ]);
         break;
@@ -337,7 +343,7 @@ class NotificationManager {
 
   async notif_moveToken(notif: Notif<NotifMoveTokenArgs>) {
     const { move } = notif.args;
-    return await this.performTokenMove({ move });
+    await this.performTokenMove({ move });
   }
 
   async notif_payBribe(notif: Notif<NotifPayBribeArgs>) {
@@ -350,20 +356,64 @@ class NotificationManager {
 
     const { playerId, card } = notif.args;
     const player = this.getPlayer({ playerId });
-    return await player.playCard({
-      card,
-    });
+    await player.playCard(card);
   }
 
   async notif_placeArmy(notif: Notif<NotifPlaceArmyArgs>) {
-    // TODO: check moving multipe armies at the same time if necessary
-    await this.performTokenMove({ move: notif.args.move });
+    const { tokenId, to, weight } = notif.args.move;
+    const region = to.split('_')[1];
+    const coalition = getCoalitionForBlock(tokenId);
+
+    await this.game.map
+      .getRegion({ region })
+      .getArmyZone()
+      .addCard({
+        id: tokenId,
+        state: weight,
+        used: 0,
+        coalition,
+        type: 'army',
+        location: `armies_${region}`,
+      });
     this.game.objectManager.supply.checkDominantCoalition();
+  }
+
+  getCylinderZone(location: string): CardStock<Cylinder> {
+    const splitLocation = location.split('_');
+    switch (splitLocation[0]) {
+      case 'cylinders':
+        // cylinders_playerId
+        return this.game.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
+      case 'gift':
+        // gift_2_playerId
+        return this.game.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
+      case 'spies':
+        // spies_card_38
+        const cardId = `${splitLocation[1]}_${splitLocation[2]}`;
+        return this.game.spies[cardId];
+      case 'tribes':
+        // tribes_kabul
+        return this.game.map.getRegion({ region: splitLocation[1] }).getTribeZone();
+      default:
+        debug('cannot find zone for cylinder');
+        break;
+    }
   }
 
   async notif_placeCylinder(notif: Notif<NotifPlaceCylinderArgs>) {
     const move = notif.args.move;
-    await this.performTokenMove({ move });
+    const { to, from, tokenId, weight } = move;
+    const toZone = this.getCylinderZone(to);
+    if (from !== to) {
+      await toZone.addCard(
+        this.game.getCylinder({
+          id: tokenId,
+          state: weight,
+          used: 0,
+          location: to,
+        })
+      );
+    }
     const playerId = Number(move.tokenId.split('_')[1]);
     const player = this.getPlayer({ playerId });
     // cylinders is placed from supply somewhere else, increase count
@@ -395,8 +445,24 @@ class NotificationManager {
   }
 
   async notif_placeRoad(notif: Notif<NotifPlaceRoadArgs>) {
-    // TODO: check moving multipe armies at the same time if necessary
-    await this.performTokenMove({ move: notif.args.move });
+    const { from, to, tokenId, weight } = notif.args.move;
+    const [type, region1, region2] = notif.args.move.to.split('_');
+    const border = `${region1}_${region2}`;
+
+    if (from !== to) {
+      await this.game.map
+        .getBorder({ border })
+        .getRoadZone()
+        .addCard({
+          id: tokenId,
+          state: weight,
+          used: 0,
+          location: to,
+          type: 'road',
+          coalition: getCoalitionForBlock(tokenId),
+        });
+    }
+
     this.game.objectManager.supply.checkDominantCoalition();
   }
 
@@ -404,7 +470,7 @@ class NotificationManager {
     const { marketLocation } = notif.args;
     const row = Number(marketLocation.split('_')[1]);
     const column = Number(marketLocation.split('_')[2]);
-    await this.game.market.getMarketRupeesZone({ row, column }).removeAll({ destroy: true });
+    this.game.market.getMarketRupeesZone({ row, column }).removeAll({ destroy: true });
   }
 
   async notif_purchaseCard(notif: Notif<NotifPurchaseCardArgs>): Promise<void> {
@@ -417,9 +483,11 @@ class NotificationManager {
     // Place paid rupees on market cards
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
     await Promise.all(
-      rupeesOnCards.map(({ row, column, rupeeId, cardId }) =>
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId })
-      )
+      rupeesOnCards
+        .reverse()
+        .map(({ row, column, rupeeId, cardId }, index) =>
+          this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId, index })
+        )
     );
 
     // Remove all rupees that were on the purchased card
@@ -429,25 +497,16 @@ class NotificationManager {
     // Move card from markt
     const cardId = notif.args.card.id;
     if (newLocation.startsWith('events_')) {
-      await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      await this.getPlayer({ playerId }).addCardToEvents({ cardId });
       if (cardId === 'card_109') {
         this.game.objectManager.supply.checkDominantCoalition();
       }
     } else if (newLocation === DISCARD) {
-      await this.game.objectManager.discardPile.discardCardFromZone({
-        cardId,
-        zone: this.game.market.getMarketCardZone({ row, column: col }),
-      });
+      await this.game.objectManager.discardPile.discardCardFromZone(cardId);
     } else if (newLocation === TEMP_DISCARD) {
-      await Promise.all([
-        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-          elements: { id: cardId },
-          classesToRemove: [PP_MARKET_CARD],
-        }),
-        this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
-      ]);
+      await this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(notif.args.card));
     } else {
-      await this.getPlayer({ playerId }).addCardToHand({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      await this.getPlayer({ playerId }).addCardToHand(notif.args.card);
     }
   }
 
@@ -466,12 +525,20 @@ class NotificationManager {
     await Promise.all([
       ...Object.entries(spies).map(async ([key, value]) => {
         const player = this.getPlayer({ playerId: Number(key) });
-        await player.getCylinderZone().moveToZone({
-          elements: value.map(({ tokenId, weight }) => ({ id: tokenId, weight })),
-        });
+        await player.getCylinderZone().addCards(
+          value.map(({ tokenId, weight }) =>
+            this.game.getCylinder({
+              id: tokenId,
+              state: weight,
+              used: 0,
+              location: `cylinders_${player.getPlayerId()}`,
+            })
+          )
+        );
+
         player.incCounter({ counter: 'cylinders', value: -value.length });
       }),
-      this.game.spies?.[cardId].removeAll(),
+      // this.game.spies?.[cardId].removeAll(),
     ]);
   }
 
@@ -486,52 +553,35 @@ class NotificationManager {
 
   async notif_returnCoalitionBlock(notif: Notif<NotifReturnCoalitionBlockArgs>): Promise<void> {
     this.game.clearPossible();
-    const { from, blockId, weight, coalition, type } = notif.args;
+    const { blockId, weight, coalition } = notif.args;
     const toZone = this.game.objectManager.supply.getCoalitionBlocksZone({ coalition });
-    const splitFrom = from.split('_');
-    const fromZone = from.startsWith('roads_')
-      ? this.game.map.getBorder({ border: `${splitFrom[1]}_${splitFrom[2]}` }).getRoadZone()
-      : this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone();
-    await Promise.all([
-      toZone.moveToZone({
-        elements: {
-          id: blockId,
-          weight,
-        },
-        classesToRemove: [PP_ARMY, PP_ROAD],
-        classesToAdd: [PP_COALITION_BLOCK],
-      }),
-      fromZone.remove({ input: blockId }),
-    ]);
+
+    await toZone.addCard({
+      id: blockId,
+      state: weight,
+      used: 0,
+      location: `blocks_${coalition}`,
+      type: 'supply',
+      coalition: coalition as Coalition,
+    });
+
     this.game.objectManager.supply.checkDominantCoalition();
   }
 
   async notif_returnCylinder(notif: Notif<NotifReturnCylinderArgs>): Promise<void> {
-    const getCylinderFromZone = (from: string): PaxPamirZone => {
-      if (from.startsWith('card_')) {
-        return this.game.spies[from];
-      } else if (from.startsWith('gift_')) {
-        const splitFrom = from.split('_');
-        return this.getPlayer({ playerId: Number(splitFrom[2]) }).getGiftZone({ value: Number(splitFrom[1]) });
-      } else {
-        return this.game.map.getRegion({ region: from }).getTribeZone();
-      }
-    };
-
     this.game.clearPossible();
     const { from, cylinderId, weight } = notif.args;
     const playerId = Number(cylinderId.split('_')[1]);
     const player = this.getPlayer({ playerId });
-    const fromZone = getCylinderFromZone(from);
-    await Promise.all([
-      player.getCylinderZone().moveToZone({
-        elements: {
-          id: cylinderId,
-          weight,
-        },
-      }),
-      fromZone.remove({ input: cylinderId }),
-    ]);
+
+    await player.getCylinderZone().addCard(
+      this.game.getCylinder({
+        id: cylinderId,
+        state: weight,
+        used: 0,
+        location: `cylinders_${player.getPlayerId()}`,
+      })
+    );
     player.incCounter({ counter: 'cylinders', value: -1 });
 
     if (from.startsWith('gift_')) {
@@ -549,14 +599,17 @@ class NotificationManager {
   async notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>): Promise<void> {
     this.game.clearPossible();
     const { move } = notif.args;
+    const animationDurationBefore = this.game.animationManager.getSettings().duration;
 
     const fromRow = Number(move.from.split('_')[1]);
     const fromCol = Number(move.from.split('_')[2]);
     const toRow = Number(move.to.split('_')[1]);
     const toCol = Number(move.to.split('_')[2]);
 
+    this.game.animationManager.getSettings().duration = animationDurationBefore / 2;
+
     await this.game.market.moveCard({
-      cardId: move.cardId,
+      card: this.game.getCardInfo(move.cardId),
       from: {
         row: fromRow,
         column: fromCol,
@@ -570,6 +623,8 @@ class NotificationManager {
     if (move.cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID && toCol === 0) {
       await this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }).removeAll({ destroy: true });
     }
+
+    this.game.animationManager.getSettings().duration = animationDurationBefore;
   }
 
   notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
@@ -596,7 +651,16 @@ class NotificationManager {
   async notif_takePrize(notif: Notif<NotifTakePrizeArgs>) {
     this.game.clearPossible();
     const { cardId, playerId } = notif.args;
-    return await this.game.playerManager.getPlayer({ playerId }).takePrize({ cardId });
+
+    const loyaltyDial = document.getElementById(`pp_loyalty_dial_container_${playerId}`);
+    const zIndexBefore = loyaltyDial?.style.zIndex || null;
+    if (loyaltyDial) {
+      loyaltyDial.style.zIndex = `${11}`;
+    }
+    await this.game.playerManager.getPlayer({ playerId }).takePrize({ cardId });
+    if (loyaltyDial) {
+      loyaltyDial.style.zIndex = zIndexBefore;
+    }
   }
 
   notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
@@ -614,9 +678,9 @@ class NotificationManager {
   async notif_taxMarket(notif: Notif<NotifTaxMarketArgs>): Promise<void> {
     const { selectedRupees, playerId, amount } = notif.args;
     await Promise.all(
-      selectedRupees.map(async (rupee) => {
+      selectedRupees.map(async (rupee, index) => {
         const { row, column, rupeeId } = rupee;
-        await this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}` });
+        await this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}`, index });
       })
     );
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
@@ -703,23 +767,14 @@ class NotificationManager {
     // Move card from markt
     const cardId = card.id;
     if (newLocation.startsWith('events_')) {
-      await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      // await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
       if (cardId === 'card_109') {
         this.game.objectManager.supply.checkDominantCoalition();
       }
     } else if (newLocation === DISCARD) {
-      await this.game.objectManager.discardPile.discardCardFromZone({
-        cardId,
-        zone: this.game.market.getMarketCardZone({ row, column: col }),
-      });
+      await this.game.objectManager.discardPile.discardCardFromZone(cardId);
     } else if (newLocation === TEMP_DISCARD) {
-      // await Promise.all([
-      //   this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-      //     elements: { id: cardId },
-      //     classesToRemove: [PP_MARKET_CARD],
-      //   }),
-      //   this.game.market.getMarketCardZone({ row, column: col }).remove({ input: cardId }),
-      // ]);
+      await this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(card));
     } else {
       const player = this.getPlayer({ playerId });
       if (player instanceof PPWakhanPlayer) {
@@ -780,27 +835,6 @@ class NotificationManager {
     return this.game.playerManager.getPlayer({ playerId });
   }
 
-  getClassChanges({ from, to }: { from: string; to: string }): { classesToAdd: string[]; classesToRemove: string[] } {
-    // TODO: perhaps create separate function for this
-    const classesToAdd = [];
-    const classesToRemove = [];
-    if (to.startsWith('armies')) {
-      classesToAdd.push(PP_ARMY);
-    } else if (to.startsWith('roads')) {
-      classesToAdd.push(PP_ROAD);
-    } else if (to.startsWith('blocks')) {
-      classesToAdd.push(PP_COALITION_BLOCK);
-    }
-    if (from.startsWith('blocks')) {
-      classesToRemove.push(PP_COALITION_BLOCK);
-    } else if (from.startsWith('armies') && !to.startsWith('armies')) {
-      classesToRemove.push(PP_ARMY);
-    } else if (from.startsWith('roads')) {
-      classesToRemove.push(PP_ROAD);
-    }
-    return { classesToAdd, classesToRemove };
-  }
-
   async performTokenMove({ move }: { move: TokenMove }): Promise<void> {
     const { tokenId, from, to, weight } = move;
     // Can be the case when a player needs to select a piece
@@ -809,8 +843,6 @@ class NotificationManager {
       return;
     }
 
-    // TODO: replace getZoneForLocation
-    const fromZone = this.game.getZoneForLocation({ location: from });
     const toZone = this.game.getZoneForLocation({ location: to });
 
     // Player is active player and moves have already been executed in client state.
@@ -818,26 +850,40 @@ class NotificationManager {
     // check if to already has the token
     if (
       this.game.framework().isCurrentPlayerActive() &&
-      toZone.getItems().includes(tokenId) // Perhaps we just make this a generic check?
+      toZone.getCards().some((item) => item.id === tokenId) // Perhaps we just make this a generic check?
     ) {
       debug('no need to execute move');
       return;
     }
 
-    // This could also be part of the input?
-    const { classesToRemove, classesToAdd } = this.getClassChanges({ from, to });
+    let token: Token | Cylinder | CoalitionBlock = {
+      id: tokenId,
+      state: weight,
+      used: 0,
+      location: to,
+    };
+    const [zoneType] = to.split('_');
 
-    await Promise.all([
-      toZone.moveToZone({
-        elements: {
-          id: tokenId,
-          weight,
-        },
-        classesToAdd,
-        classesToRemove,
-        zIndex: 10,
-      }),
-      fromZone.remove({ input: tokenId }),
-    ]);
+    switch (zoneType) {
+      case 'armies':
+        token['type'] = 'army';
+        token['coalition'] = getCoalitionForBlock(tokenId);
+        break;
+      case 'roads':
+        token['type'] = 'road';
+        token['coalition'] = getCoalitionForBlock(tokenId);
+        break;
+      case 'blocks':
+        token['type'] = 'supply';
+        token['coalition'] = getCoalitionForBlock(tokenId);
+        break;
+      case 'gift':
+      case 'tribes':
+      case 'spies':
+        token = this.game.getCylinder(token);
+        break;
+    }
+
+    await toZone.addCard(token);
   }
 }

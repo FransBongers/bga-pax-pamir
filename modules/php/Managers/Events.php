@@ -92,7 +92,7 @@ class Events
   public static function resolveDiscardEffect($actionStack, $card, $location, $playerId)
   {
     $event = $card['discarded']['effect'];
-    Notifications::log('event', $event);
+
     switch ($event) {
         // cards 101-104
       case ECE_DOMINANCE_CHECK:

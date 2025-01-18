@@ -16,11 +16,21 @@
 @use 'sass:math';
 @use 'base';
 @use 'animation/animation';
+@use 'card-managers/cards';
 @use 'logs/logs';
 @use 'Map/map';
 @use 'PlayerManager/playerBoards';
 @use 'PlayerManager/playerTableaus';
 @use 'TooltipManager/tooltip';
+@use 'info-panel/infoPanel';
+@use 'settings/settingsModal';
+@use 'token-managers/coalition-blocks';
+@use 'token-managers/cylinders';
+@use 'token-managers/favored-suit-marker';
+@use 'token-managers/ruler-tokens';
+@use 'token-managers/rupees';
+@use 'nouislider';
+@import '../node_modules/bga-cards/bga-cards';
 
 html {
   background: url('') rgb(192, 192, 192);
@@ -35,34 +45,55 @@ html {
   background-color: antiquewhite;
 }
 
+/* Hide the "You may note something for next time..." popup that would appear. */
+#turnBasedNotesIncent {
+  display: none;
+}
+
+#pagemaintitle_wrap {
+  flex-grow: 1;
+}
+
 /* Hide player is now online, player is now offline messages */
 .notif_playerstatus {
   display: none !important;
 }
 
-#pp_play_area {
-  grid-gap: 16px;
+#play_area_container {
+  padding: 4px;
+  grid-gap: 8px;
   display: grid;
-  grid-auto-flow: dense;
-  @media (max-width: 2080px) {
-    grid-template-columns: repeat(auto-fill, 1000px);
-  }
-  @media (min-width: 2080px) {
-    grid-template-columns: repeat(auto-fill, 1000px minmax(840px, 1fr));
-  }
-  grid-template-rows: repeat(auto-fill, 581px 241px 492px);
-  justify-content: center;
-  position: relative;
-  text-align: center;
-  top: 5px;
+  grid-template-columns: auto auto;
+}
+
+#play_area_container[data-two-columns='disabled'] {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+#left_column {
+  width: calc(var(--leftColumnScale) * 1000px);
+  display: flex;
+  flex-direction: column;
+  // flex-wrap: wrap;
+  // padding: 4px;
+  gap: 8px;
+  align-items: center;
+  --cardScale: var(--leftColumnScale) * var(--mapSizeMultiplier);
+  --tokenScale: var(--leftColumnScale) * var(--mapSizeMultiplier);
+  --mapScale: var(--leftColumnScale) * var(--mapSizeMultiplier);
+  --adjustedLeftColumnScale: calc(var(--leftColumnScale) * var(--mapSizeMultiplier));
 }
 
 /* ------- SUPPLY ------- */
 
 #pp_supply {
-  grid-column: 1 / span 1;
-  grid-row: span 1;
-  height: 241px;
+  // grid-column: 1 / span 1;
+  // grid-row: span 1;
+  height: calc(var(--adjustedLeftColumnScale) * 241px);
+  width: calc(var(--adjustedLeftColumnScale) * 1000px);
+  // height: 241px;
   background-color: ivory;
   position: relative;
   /* width: 1000px; */
@@ -70,16 +101,17 @@ html {
   // box-shadow: rgb(0 0 0) 2px 2px 8px;
   /* padding: 10px; */
   display: flex;
-  padding: 16px;
+  padding: calc(var(--adjustedLeftColumnScale) * 16px);
   box-sizing: border-box;
 }
 
 #pp_dominant_coalition_banner {
-  height: 40px;
+  // height: 40px;
+  height: calc(var(--adjustedLeftColumnScale) * 40px);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: large;
+  font-size: calc(var(--adjustedLeftColumnScale) * 18px);
   font-weight: bold;
 }
 
@@ -101,7 +133,8 @@ html {
   flex-direction: column;
   justify-content: space-between;
   margin-right: auto;
-  width: 470px;
+  // width: 470px;
+  width: calc(var(--adjustedLeftColumnScale) * 470px);
 }
 
 #pp_market_deck_container {
@@ -110,35 +143,69 @@ html {
 
 #pp_temp_discarded_card {
   position: relative;
-  margin-right: 10px;
-  width: 150px;
-  height: 209px;
+  // margin-right: 10px;
+  margin-right: calc(var(--adjustedLeftColumnScale) * 10px);
+  // width: 150px;
+  // height: 209px;
+  width: calc(var(--adjustedLeftColumnScale) * 150px);
+  height: calc(var(--adjustedLeftColumnScale) * 209px);
 }
 
 #pp_pile_discarded_card {
-  top: -4px;
-  left: -5px;
+  // top: -4px;
+  top: 0px;
+  // left: -5px;
+  left: 0px;
   position: absolute;
+
+  .pp_card {
+    position: relative;
+  }
 }
 
 #pp_discard_pile {
-  width: 149px;
-  height: 209px;
-  border-radius: 10px;
-  border: 4px dashed black;
+  // width: 149px;
+  // height: 209px;
+  width: calc(var(--adjustedLeftColumnScale) * 149px);
+  height: calc(var(--adjustedLeftColumnScale) * 209px);
   box-sizing: border-box;
-  margin-right: 10px;
+  margin-right: calc(var(--adjustedLeftColumnScale) * 10px); //10px;
   position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  #pp_discard_pile_title {
+    align-self: center;
+    font-size: calc(var(--adjustedLeftColumnScale) * 18px);
+    margin-top: 2px;
+  }
+
+
+  .pp_discard_pile_border {
+    position: absolute;
+    box-sizing: border-box;
+    top: 0px;
+    left: 0px;
+    width: calc(var(--adjustedLeftColumnScale) * 149px);
+    height: calc(var(--adjustedLeftColumnScale) * 209px);
+    border-radius: calc(var(--adjustedLeftColumnScale) * 10px); //10px;
+    border: calc(var(--adjustedLeftColumnScale) * 4px) dashed black;
+  }
 }
 
 .pp_discarded_card {
-  width: 150px;
-  height: 209px;
+  // width: 150px;
+  // height: 209px;
+  width: calc(var(--adjustedLeftColumnScale) * 150px);
+  height: calc(var(--adjustedLeftColumnScale) * 209px);
   box-sizing: border-box;
-  box-shadow: rgb(0, 0, 0) 2px 2px 5px -1px;
-  border-radius: 10px;
+  box-shadow: rgb(0, 0, 0) calc(var(--adjustedLeftColumnScale) * 2px) calc(var(--adjustedLeftColumnScale) * 2px) calc(var(--adjustedLeftColumnScale) * 5px)
+    calc(var(--adjustedLeftColumnScale) * -1px);
+  border-radius: calc(var(--adjustedLeftColumnScale) * 10px); //10px;
   background-repeat: no-repeat;
-  border: 1px black solid;
+  border: calc(var(--adjustedLeftColumnScale) * 1px) black solid;
   opacity: 0;
 }
 
@@ -149,44 +216,57 @@ html {
 // }
 
 #pp_market_deck {
-  width: 150px;
-  height: 209px;
+  // width: 150px;
+  // height: 209px;
+  width: calc(var(--adjustedLeftColumnScale) * 150px);
+  height: calc(var(--adjustedLeftColumnScale) * 209px);
   background-size: 1000% 500%;
   background-image: url('img/cards2.webp');
   background-position-x: calc(2 / 3) * 100%;
   background-position-y: 100%;
-  box-shadow: 1px 1px 4px;
-  border-radius: 10px;
+  box-shadow: calc(var(--adjustedLeftColumnScale) * 1px) calc(var(--adjustedLeftColumnScale) * 1px) calc(var(--adjustedLeftColumnScale) * 4px);
+  border-radius: calc(var(--adjustedLeftColumnScale) * 10px);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
+#pp_market_deck_stock {
+  position: absolute;
+}
+
 .pp_deck_counters_container {
-  height: 24px;
-  width: 90px;
+  --deckCounterScale: max(0.6, var(--adjustedLeftColumnScale));
+  // height: 24px;
+  // width: 90px;
+  width: calc(var(--deckCounterScale) * 90px);
+  height: calc(var(--deckCounterScale) * 24px);
   background-color: white;
-  border-radius: 8px;
-  border: 1px solid rgb(0, 0, 0);
+  border-radius: calc(var(--deckCounterScale) * 8px);
+  border: calc(var(--deckCounterScale) * 1px) solid rgb(0, 0, 0);
   justify-self: flex-end;
   margin-top: auto;
   // margin-bottom: -8px;
   display: flex;
   flex-direction: row;
+  font-size: calc(var(--deckCounterScale) * 16px);
   font-weight: bold;
   justify-content: space-evenly;
   align-items: center;
+  z-index: 1;
 }
 
 .pp_card_counter_container {
   display: flex;
   flex-direction: row;
   align-items: center;
+
+  .pp_card_counter {
+    margin-left: calc(var(--deckCounterScale) * 2px);
+  }
 }
 
-.pp_card_counter {
-  margin-left: 2px;
-}
+
 
 .pp_court_card_icon {
   background-position-x: calc(2 / 3) * 100%;
@@ -194,11 +274,13 @@ html {
 }
 
 .pp_deck_counter_icon {
-  height: 20px;
-  width: 14px;
+  // height: 20px;
+  // width: 14px;
+  width: calc(var(--adjustedLeftColumnScale) * 14px);
+  height: calc(var(--adjustedLeftColumnScale) * 20px);
   background-image: url('img/cards2.webp');
   background-size: 1000% 500%;
-  border-radius: 2px;
+  border-radius: calc(var(--adjustedLeftColumnScale) * 2px);
 }
 
 .pp_dominance_check_icon {
@@ -208,215 +290,98 @@ html {
 
 .pp_coalition_blocks {
   box-sizing: border-box;
-  height: 40px;
-  width: 650px;
+  // height: 40px;
+  // width: 650px;
+  width: calc(var(--tokenScale) * 650px);
+  height: calc(var(--tokenScale) * 40px);
   /* border: 2px solid blue; */
-}
-
-.pp_coalition_block {
-  background-image: url('img/blocks.webp');
-  background-size: 300% 100%;
-  // background-size: contain;
-  background-repeat: no-repeat;
-  height: 40px;
-  width: 25px;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
-}
-
-.pp_coalition_block.pp_afghan {
-  background-position-x: 0%;
-}
-
-.pp_coalition_block.pp_british {
-  background-position-x: 50%;
-}
-
-.pp_coalition_block.pp_russian {
-  background-position-x: 100%;
-}
-
-.pp_army {
-  background-image: url('img/armies.webp');
-  background-size: 400% 100%;
-  background-repeat: no-repeat;
-  height: 40px;
-  width: 25px;
-  z-index: 1;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
-}
-
-.pp_army.pp_temporary,
-.pp_road.pp_temporary {
-  opacity: 0.5;
-}
-
-.pp_army.pp_selectable,
-.pp_road.pp_selectable {
-  z-index: 10 !important;
-  filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
-    drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
-}
-
-.pp_army.pp_selectable:hover,
-.pp_army.pp_selected,
-.pp_road.pp_selectable:hover,
-.pp_road.pp_selected {
-  filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color)
-    drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
-  cursor: pointer;
-}
-
-.pp_army.pp_selected,
-.pp_road.pp_selected {
-  z-index: 10 !important;
-}
-
-.pp_army.pp_afghan {
-  background-position-x: 0%;
-}
-
-.pp_army.pp_british {
-  background-position-x: 33.33333%;
-}
-
-.pp_army.pp_russian {
-  background-position-x: 100%;
-}
-
-.pp_army.pp_neutral {
-  background-position-x: 66.66667%;
-}
-
-.pp_road {
-  background-image: url('img/roads.webp');
-  background-size: 400% 100%;
-  background-repeat: no-repeat;
-  height: 27px;
-  width: 40px;
-  z-index: 1;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
-}
-
-.pp_road.pp_afghan {
-  background-position-x: 0%;
-}
-
-.pp_road.pp_british {
-  background-position-x: 33.33333%;
-}
-
-.pp_road.pp_russian {
-  background-position-x: 100%;
-}
-
-.pp_road.pp_neutral {
-  background-position-x: 66.66667%;
-}
-
-.pp_cylinder {
-  background-image: url('img/cylinders.webp');
-  background-size: 600% 100%;
-  background-repeat: no-repeat;
-  height: 30px;
-  width: 30px;
-  z-index: 1;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
-}
-
-.pp_cylinder.pp_selectable {
-  z-index: 10 !important;
-  filter: drop-shadow(2px 0px 0px base.$selectable-color) drop-shadow(-2px 0px 0px base.$selectable-color)
-    drop-shadow(0px 2px 0px base.$selectable-color) drop-shadow(0px -2px 0px base.$selectable-color);
-}
-
-.pp_cylinder.pp_selectable:hover,
-.pp_cylinder.pp_selected {
-  filter: drop-shadow(2px 0px 0px base.$selected-color) drop-shadow(-2px 0px 0px base.$selected-color)
-    drop-shadow(0px 2px 0px base.$selected-color) drop-shadow(0px -2px 0px base.$selected-color);
-  cursor: pointer;
-}
-
-.pp_cylinder.pp_selected {
-  z-index: 10 !important;
-}
-
-.pp_cylinder.pp_player_color_blue {
-  background-position-x: 20%;
-}
-
-.pp_cylinder.pp_player_color_gray {
-  background-position-x: 40%;
-}
-
-.pp_cylinder.pp_player_color_yellow {
-  background-position-x: 80%;
-}
-
-.pp_cylinder.pp_player_color_red {
-  background-position-x: 60%;
-}
-
-.pp_cylinder.pp_player_color_black {
-  background-position-x: 0%;
-}
-
-.pp_cylinder.pp_player_color_purple {
-  background-position-x: 100%;
+  position: relative;
+  gap: calc(var(--adjustedLeftColumnScale) * 8px) !important;
 }
 
 #pp_market_board {
+  --tokenScale: var(--adjustedLeftColumnScale);
   background-image: url('img/paxpamir_market.jpg');
-  background-size: 1000px 492px;
+  background-size: 100% 100%;
   background-repeat: no-repeat;
-  grid-column: 1 / span 1;
-  grid-row: span 1;
-  width: 1000px;
+  // grid-column: 1 / span 1;
+  // grid-row: span 1;
+  height: calc(var(--adjustedLeftColumnScale) * 492px);
+  width: calc(var(--adjustedLeftColumnScale) * 1000px);
+  // width: 1000px;
   // box-shadow: rgb(0 0 0) 2px 2px 8px;
   box-shadow: 1px 1px 5px #000;
-  height: 492px;
+  // height: 492px;
   position: relative;
 }
 
 #pp_market_board_military_suit_icon {
   position: absolute;
-  top: 10px;
-  left: 18px;
+  // top: 10px;
+  // left: 18px;
+  top: calc(var(--adjustedLeftColumnScale) * 10px);
+  left: calc(var(--adjustedLeftColumnScale) * 18px);
 }
 
 .pp_military_cost_icon {
   background-image: url('img/military_suit_reminder.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  width: 53px;
-  height: 35px;
+  // width: 53px;
+  // height: 35px;
+  width: calc(var(--adjustedLeftColumnScale) * 53px);
+  height: calc(var(--adjustedLeftColumnScale) * 35px);
   filter: drop-shadow(1px 0px 0px white) drop-shadow(-1px 0px 0px white) drop-shadow(0px 1px 0px white) drop-shadow(0px -1px 0px white);
   // filter: drop-shadow(2px 2px);
   /* text-shadow: 2px 0 2px hsla(0,0%,100%,.6), 0 -2px 2px hsla(0,0%,100%,.6), 0 2px 2px hsla(0,0%,100%,.6), -2px 0 2px hsla(0,0%,100%,*/
 }
 
 .pp_market {
-  width: 150px;
-  height: 209px;
+  // width: 150px;
+  // height: 209px;
+  height: calc(var(--cardScale) * 209px);
+  width: calc(var(--cardScale) * 150px);
   /* background-color: red; */
   position: absolute;
   /* border: 1px blue solid; */
 }
 
 .pp_market_rupees {
-  width: 120px;
-  height: 50px;
-  left: 8px;
-  top: 52px;
+  // width: 120px;
+  // height: 50px;
+  // left: 8px;
+  // top: 52px;
+  height: calc(var(--cardScale) * 50px);
+  width: calc(var(--cardScale) * 120px);
+  left: calc(var(--cardScale) * 8px);
+  top: calc(var(--cardScale) * 52px);
   position: absolute;
   /* border: 2px black solid; */
   /* z-index: 1; */
+  // z-index: 11;
+
+  .pp_rupee {
+    z-index: 1;
+  }
+
+  .bga-animations_animated.pp_rupee {
+    z-index: 11 !important;
+  }
+
+  .pp_rupee:nth-child(n + 2) {
+    margin-left: calc(var(--tokenScale) * -30px);
+  }
 }
 
 .pp_spy_zone {
-  width: 140px;
-  height: 30px;
-  left: 8px;
-  top: 78px;
+  // width: 140px;
+  // height: 30px;
+  height: calc(var(--cardScale) * 30px);
+  width: calc(var(--cardScale) * 140px);
+  // left: 8px;
+  // top: 78px;
+  left: calc(var(--cardScale) * 8px);
+  top: calc(var(--cardScale) * 78px);
   position: absolute;
   /* background-color: purple; */
   /* border: 2px black solid; */
@@ -424,10 +389,12 @@ html {
 }
 
 #pp_active_events_container {
-  height: 209px;
+  // height: 209px;
+  height: calc(var(--cardScale) * 209px);
   padding-left: 8px;
-  margin-bottom: -209px;
-  transition: margin-bottom 1s ease 0s;
+  // margin-bottom: -209px;
+  margin-bottom: calc(var(--cardScale) * -209px);
+  // transition: margin-bottom 1s ease 0s;
   // display: flex;
   // flex-direction: column;
   // min-height: 280px;
@@ -436,7 +403,8 @@ html {
 }
 
 #pp_player_hand_title {
-  margin-left: 220px;
+  // margin-left: 220px;
+  margin-left: calc(var(--rightColumnScale) * 220px);
 }
 
 #pp_active_events {
@@ -445,66 +413,54 @@ html {
 
 // TODO: we can just put this in pp_card?
 .pp_card_in_zone {
-  width: 150px;
-  height: 209px;
-  box-sizing: border-box;
-  box-shadow: 2px 2px 5px -1px #000;
-  border-radius: 10px;
+  // width: 150px;
+  // height: 209px;
+
+  // width: calc(var(--cardScale) * 150px);
+  // height: calc(var(--cardScale) * 209px);
+  // box-sizing: border-box;
+  // box-shadow: calc(var(--cardScale) * 2px) calc(var(--cardScale) * 2px) calc(var(--cardScale) * 5px) calc(var(--cardScale) * -1px) #000;
+  // border-radius: 3%;
 }
 
 .pp_card_select_side {
-  width: 150px;
-  height: 209px;
-  border-radius: 10px;
-  border: 4px dashed base.$selectable-color;
+  // width: 150px;
+  // height: 209px;
+  height: calc(var(--cardScale) * 209px);
+  width: calc(var(--cardScale) * 150px);
+  border-radius: calc(var(--cardScale) * 10px);
+  border: calc(var(--cardScale) * 4px) dashed base.$selectable-color;
   box-sizing: border-box;
+  box-shadow: none !important;
 }
 
-.pp_card_select_side:hover,
-.pp_card_select_side.pp_selected {
-  border-color: base.$selected-color !important;
-  cursor: pointer;
-}
-
-.pp_card {
-  background-repeat: no-repeat;
-  border: 1px black solid;
+.pp_card_select:hover,
+.pp_card_select.pp_selected {
+  .pp_card_select_side {
+    border-color: base.$selected-color !important;
+    cursor: pointer;
+  }
 }
 
 .pp_card_action {
   /* box-shadow: 0px 0px 0px 2px blue !important; */
-  border-radius: 4px;
+  border-radius: calc(var(--cardScale) * 4px);
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: calc(var(--cardScale) * 32px);
+  height: calc(var(--cardScale) * 32px);
 }
 
 .pp_card_action.pp_selectable {
-  box-shadow: 0px 0px 0px 2px base.$selectable-color !important;
+  box-shadow: 0px 0px 0px calc(var(--cardScale) * 2px) base.$selectable-color !important;
   cursor: pointer !important;
 }
 
 .pp_card_action.pp_selected {
-  box-shadow: 0px 0px 0px 2px base.$selected-color !important;
+  box-shadow: 0px 0px 0px calc(var(--cardScale) * 2px) base.$selected-color !important;
 }
 
 .pp_card_action.pp_selectable:hover {
-  box-shadow: 0px 0px 0px 2px base.$selected-color !important;
-}
-
-.pp_card.pp_selectable {
-  /* border: 2px blue solid; */
-  cursor: pointer !important;
-  box-shadow: 0px 0px 0px 4px base.$selectable-color !important;
-}
-
-.pp_card.pp_selectable:hover {
-  box-shadow: 0px 0px 0px 4px base.$selected-color !important;
-}
-
-.pp_card.pp_selected {
-  cursor: pointer;
-  box-shadow: 0px 0px 0px 4px base.$selected-color !important;
+  box-shadow: 0px 0px 0px calc(var(--cardScale) * 2px) base.$selected-color !important;
 }
 
 /* .pp_selected {
@@ -515,7 +471,7 @@ html {
 .pp_discard {
   /* opacity: 0.5; */
   cursor: pointer !important;
-  margin-top: -16px;
+  margin-top: calc(var(--cardScale) * -16px);
 }
 
 .pp_card_in_court:hover,
@@ -534,37 +490,6 @@ html {
     1px -1px 0px rgba(255, 255, 255, 1);
   // text-shadow: -2px -2px 0px base.$selected-color, 2px 2px 0px base.$selected-color, -2px 2px 0px base.$selected-color, 2px -2px 0px base.$selected-color;
   // text-shadow: -2px -2px 2px base.$selected-color, 2px 2px 2px base.$selected-color, -2px 2px 2px base.$selected-color, 2px -2px 2px base.$selected-color;
-}
-
-.pp_rupee {
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
-  // box-shadow: 1px 1px 4px;
-  z-index: 1;
-  filter: drop-shadow(rgba(0, 0, 0, 0.5) 2px 2px 2px);
-}
-
-.pp_rupee.pp_selectable,
-.pp_player_board_rupee.pp_selectable {
-  cursor: pointer !important;
-  box-shadow: 0px 0px 0px 3px base.$selectable-color !important;
-}
-
-.pp_rupee.pp_selectable:hover,
-.pp_player_board_rupee.pp_selectable:hover,
-.pp_rupee.pp_selected,
-.pp_player_board_rupee.pp_selected {
-  cursor: pointer !important;
-  box-shadow: 0px 0px 0px 3px base.$selected-color !important;
-}
-
-.pp_rupee_inner {
-  background-size: 1100% 100%;
-  background-position-x: 100%;
-  background-image: url('img/actions.webp');
-  width: 100%;
-  height: 100%;
 }
 
 .pp_keyword_token {
@@ -699,43 +624,18 @@ html {
   text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
 }
 
-/* ------- CARDS ------- */
-
-@for $i from 1 through 70 {
-  .pp_card_#{$i} {
-    background-image: url('img/cards1.webp');
-    background-size: 1000% 700%;
-    background-position-x: math.div((($i - 1) % 10 * 100%), 9);
-    background-position-y: math.div(math.floor(calc(($i - 1) / 10)) * 100%, 6);
-  }
-}
-
-@for $i from 71 through 116 {
-  .pp_card_#{$i} {
-    background-image: url('img/cards2.webp');
-    background-size: 1000% 500%;
-    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
-    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
-  }
-}
-
-.pp_card_back {
-  background-size: 1000% 500%;
-  background-image: url('img/cards2.webp');
-  background-position-x: calc(2 / 3) * 100%;
-  background-position-y: 100%;
-}
-
 /* ------- WAKHAN CARDS ------- */
 
 .pp_wakhan_card {
-  width: 150px;
-  height: 209px;
+  // width: 150px;
+  // height: 209px;
+  height: calc(var(--cardScale) * 209px);
+  width: calc(var(--cardScale) * 150px);
   background-size: 800% 700%;
   background-image: url(img/wakhan_cards.webp);
-  box-shadow: 1px 1px 4px;
-  border-radius: 10px;
-  border: 1px solid black;
+  box-shadow: calc(var(--cardScale) * 1px) calc(var(--cardScale) * 1px) calc(var(--cardScale) * 4px);
+  border-radius: calc(var(--cardScale) * 10px);
+  border: calc(var(--cardScale) * 1px) solid black;
   box-sizing: border-box;
 }
 
@@ -751,11 +651,11 @@ html {
   }
 }
 
-@for $i from 71 through 116 {
-  .pp_card_#{$i} {
-    background-image: url('img/cards2.webp');
-    background-size: 1000% 500%;
-    background-position-x: math.div(($i - 71) % 10 * 100%, 9);
-    background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
-  }
-}
+// @for $i from 71 through 116 {
+//   .pp_card_#{$i} {
+//     background-image: url('img/cards2.webp');
+//     background-size: 1000% 500%;
+//     background-position-x: math.div(($i - 71) % 10 * 100%, 9);
+//     background-position-y: math.div(math.floor(calc(($i - 71) / 10)) * 100%, 4);
+//   }
+// }

@@ -19,7 +19,7 @@ class ClientCardActionMoveState implements State {
     this.game.clearPossible();
     this.cardId = cardId;
     this.bribe = bribe;
-    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     this.maxNumberOfMoves = cardInfo.rank;
     this.moves = {};
     this.updateInterfaceInitialStep();
@@ -133,10 +133,14 @@ class ClientCardActionMoveState implements State {
     this.game.clearPossible();
 
     this.addMove({ from: fromCardId, to: toCardId, pieceId });
-    await Promise.all([
-      this.game.spies[toCardId].moveToZone({ elements: { id: pieceId }, classesToRemove: [PP_SELECTABLE] }),
-      this.game.spies[fromCardId].remove({ input: pieceId }),
-    ]);
+    await this.game.spies[toCardId].addCard(
+      this.game.getCylinder({
+        id: pieceId,
+        location: `spies_${toCardId}`,
+        state: 0,
+        used: 0,
+      })
+    );
     this.nextStepAfterMove();
   }
 
@@ -161,12 +165,25 @@ class ClientCardActionMoveState implements State {
     const isPieceArmy = pieceId.startsWith('block');
 
     this.addMove({ from: fromRegionId, to: toRegionId, pieceId });
-    const fromZone = isPieceArmy ? fromRegion.getArmyZone() : fromRegion.getTribeZone();
-    const toZone = isPieceArmy ? toRegion.getArmyZone() : toRegion.getTribeZone();
-    await Promise.all([
-      toZone.moveToZone({ elements: { id: pieceId }, classesToRemove: [PP_SELECTED] }),
-      fromZone.remove({ input: pieceId }),
-    ]);
+    if (isPieceArmy) {
+      toRegion.getArmyZone().addCard(
+        getArmy({
+          id: pieceId,
+          location: `armies_${toRegionId}`,
+          state: 0,
+          used: 0,
+        })
+      );
+    } else {
+      toRegion.getTribeZone().addCard(
+        this.game.getCylinder({
+          id: pieceId,
+          location: `tribes_${toRegionId}`,
+          state: 0,
+          used: 0,
+        })
+      );
+    }
 
     this.nextStepAfterMove();
   }
@@ -221,7 +238,11 @@ class ClientCardActionMoveState implements State {
   private getNextCardId({ cardId }: { cardId: string }) {
     const node = dojo.byId(cardId);
     const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
-    const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getItems();
+    const cardIds = this.game.playerManager
+      .getPlayer({ playerId })
+      .getCourtZone()
+      .getCards()
+      .map((card) => card.id);
 
     // Assumption to check: cardIds are returned in court order (based on weight)
     const index = cardIds.indexOf(cardId);
@@ -235,7 +256,11 @@ class ClientCardActionMoveState implements State {
     let currentPlayerId = playerId;
     while (true) {
       const nextPlayerId = this.getNextPlayer({ playerId: currentPlayerId });
-      const nextPlayerCardsIds = this.game.playerManager.getPlayer({ playerId: nextPlayerId }).getCourtZone().getItems();
+      const nextPlayerCardsIds = this.game.playerManager
+        .getPlayer({ playerId: nextPlayerId })
+        .getCourtZone()
+        .getCards()
+        .map((card) => card.id);
       if (nextPlayerCardsIds.length > 0) {
         return nextPlayerCardsIds[0];
       } else {
@@ -251,7 +276,11 @@ class ClientCardActionMoveState implements State {
   private getPreviousCardId({ cardId }: { cardId: string }) {
     const node = dojo.byId(cardId);
     const playerId = Number(node.closest('.pp_court')?.id.split('_')[3]);
-    const cardIds = this.game.playerManager.getPlayer({ playerId }).getCourtZone().getItems();
+    const cardIds = this.game.playerManager
+      .getPlayer({ playerId })
+      .getCourtZone()
+      .getCards()
+      .map((card) => card.id);
 
     // Assumption to check: cardIds are returned in court order (based on weight)
     const index = cardIds.indexOf(cardId);
@@ -265,7 +294,11 @@ class ClientCardActionMoveState implements State {
     let currentPlayerId = playerId;
     while (true) {
       const previousPlayerId = this.getPreviousPlayer({ playerId: currentPlayerId });
-      const previousPlayerCardIds = this.game.playerManager.getPlayer({ playerId: previousPlayerId }).getCourtZone().getItems();
+      const previousPlayerCardIds = this.game.playerManager
+        .getPlayer({ playerId: previousPlayerId })
+        .getCourtZone()
+        .getCards()
+        .map((card) => card.id);
       if (previousPlayerCardIds.length > 0) {
         return previousPlayerCardIds[previousPlayerCardIds.length - 1];
       } else {
@@ -337,24 +370,32 @@ class ClientCardActionMoveState implements State {
         return;
       }
       if (key.includes('block')) {
-        await Promise.all([
-          this.game.map
-            .getRegion({ region: to })
-            .getArmyZone()
-            .moveToZone({ elements: { id: key } }),
-          this.game.map.getRegion({ region: from }).getArmyZone().remove({ input: key }),
-        ]);
+        await this.game.map
+          .getRegion({ region: to })
+          .getArmyZone()
+          .addCard(
+            getArmy({
+              id: key,
+              location: `armies_${to}`,
+              state: 0,
+              used: 0,
+            })
+          );
       } else if (key.includes('cylinder') && !from.startsWith('card')) {
         // Moved cylinders with nationalism
-        await Promise.all([
-          this.game.map
-            .getRegion({ region: to })
-            .getTribeZone()
-            .moveToZone({ elements: { id: key } }),
-          this.game.map.getRegion({ region: from }).getTribeZone().remove({ input: key }),
-        ]);
+        this.game.map
+          .getRegion({ region: to })
+          .getTribeZone()
+          .addCard(this.game.getCylinder({ id: key, location: `tribes_${to}`, state: 0, used: 0 }));
       } else if (key.includes('cylinder')) {
-        await Promise.all([this.game.spies[to].moveToZone({ elements: { id: key } }), this.game.spies[from].remove({ input: key })]);
+        await this.game.spies[to].addCard(
+          this.game.getCylinder({
+            id: key,
+            location: `spies_${to}`,
+            state: 0,
+            used: 0,
+          })
+        );
       }
     }
   }
@@ -408,7 +449,7 @@ class ClientCardActionMoveState implements State {
   }
 
   private getSingleMoveDestinationsForSpy({ cardId }: { cardId: string }): string[] {
-    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     const destinationCards: string[] = [];
     destinationCards.push(this.getNextCardId({ cardId }));
     const previousCardId = this.getPreviousCardId({ cardId });
@@ -480,7 +521,12 @@ class ClientCardActionMoveState implements State {
 
   public getSpiesToMove(): { cylinderId: string; cardId: string }[] {
     // If there is only a single card in all courts there is no destination to move to
-    if (this.game.playerManager.getPlayers().map((player) => player.getCourtCards()).flat().length <= 1) {
+    if (
+      this.game.playerManager
+        .getPlayers()
+        .map((player) => player.getCourtCards())
+        .flat().length <= 1
+    ) {
       return [];
     }
     /**
@@ -492,7 +538,7 @@ class ClientCardActionMoveState implements State {
       if (!zone) {
         return;
       }
-      zone.getItems().forEach((cylinderId) => {
+      zone.getCards().forEach(({ id: cylinderId }) => {
         if (Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()) {
           return;
         }
@@ -506,13 +552,13 @@ class ClientCardActionMoveState implements State {
   }
 
   private setSpiesSelectable() {
-    this.getSpiesToMove().forEach(({cardId, cylinderId}) => {
+    this.getSpiesToMove().forEach(({ cardId, cylinderId }) => {
       const node = dojo.byId(cylinderId);
       node.classList.add(PP_SELECTABLE);
       this.game._connections.push(
         dojo.connect(node, 'onclick', this, () => this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId }))
       );
-    })
+    });
   }
 
   private totalNumberOfMoves() {

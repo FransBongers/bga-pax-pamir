@@ -16,7 +16,13 @@ class PlayerActionsState implements State {
       return;
     }
 
-    this.updateInterfaceInitialStep();
+    // TODO: find another solution for this?
+    // Right now it's needed because initial setup is not yet done due to some async function
+    // and availability of actions is determined based on incorrect data
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {
@@ -84,7 +90,7 @@ class PlayerActionsState implements State {
 
   private isCardFavoredSuit({ cardId }: { cardId: string }): boolean {
     // debug('isCardFavoredSuit', cardId);
-    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     if (cardInfo.suit === this.game.objectManager.favoredSuit.get()) {
       return true;
     }
@@ -94,7 +100,13 @@ class PlayerActionsState implements State {
 
     const player = this.game.getCurrentPlayer();
     // card 105 - New Tactics
-    if (cardInfo.suit === MILITARY && player.getEventsZone().getItems().includes('card_105')) {
+    if (
+      cardInfo.suit === MILITARY &&
+      player
+        .getEventsZone()
+        .getCards()
+        .some((card) => card.id === 'card_105')
+    ) {
       return true;
     }
     return false;
@@ -230,7 +242,7 @@ class PlayerActionsState implements State {
   }
 
   private currentPlayerHasHandCards(): boolean {
-    return this.game.getCurrentPlayer().getHandZone().getItemCount() > 0;
+    return this.game.getCurrentPlayer().getHandZone().getCards().length > 0;
   }
 
   private handleNegotiatedBribe({ action, cardId, briber }: NegotiatedBribe): void {
@@ -282,7 +294,7 @@ class PlayerActionsState implements State {
   getCardCost({ cardId, column }: { cardId: string; column: number }): number {
     const baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
     const player = this.game.getCurrentPlayer();
-    const cardInfo = this.game.getCardInfo({ cardId });
+    const cardInfo = this.game.getCardInfo(cardId);
     if (cardInfo.type === 'courtCard' && cardInfo.region === HERAT && player.hasSpecialAbility({ specialAbility: SA_HERAT_INFLUENCE })) {
       return 0;
     }
@@ -323,9 +335,9 @@ class PlayerActionsState implements State {
   }
 
   setMarketCardsSelectable() {
-    dojo.query('.pp_market_card').forEach((node: HTMLElement) => {
+    dojo.query('.pp_market .pp_card').forEach((node: HTMLElement) => {
       const cardId = node.id;
-      const cardInfo = this.game.getCardInfo({ cardId });
+      const cardInfo = this.game.getCardInfo(cardId);
       if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
         return;
       }

@@ -17,12 +17,8 @@
   margin-right: 10px;
 }
 
-// #pp_wakhan_discard {
-//   background-position-x: 0%;
-//   background-position-y: math.div(4, 6) * 100%;
-//   // background-position-y: math.div(4,6) * 100%;
-// }
-.pp_player_to_left, .pp_player_to_right {
+.pp_player_to_left,
+.pp_player_to_right {
   box-sizing: border-box;
   width: 12px;
   display: flex;
@@ -65,8 +61,6 @@
 .pp_player_hand {
   display: flex;
   flex-direction: column;
-  min-height: 293px;
-  margin-bottom: 15px;
   background-color: ivory;
   padding-bottom: 4px;
 }
@@ -74,35 +68,33 @@
 .pp_player_hand_cards {
   flex-grow: 1;
   margin: 10px 20px;
+  min-height: calc(var(--cardScale) * 209px);
 }
 
 .pp_player_events_container {
-  height: 209px;
+  height: calc(var(--cardScale) * 209px);
   padding-left: 8px;
-  // background-color: white;
-  margin-bottom: 16px;
-  margin-top: -209px;
+  margin-bottom: 8px;
+  margin-top: calc(var(--cardScale) * -209px);
   z-index: 0;
-  transition: margin-top 1s;
 }
 
 #pp_player_tableaus {
-  grid-column: span 1;
-  grid-row: span 4;
+  --cardInCourtScale: 1;
+  --tokenScale: min(1, var(--rightColumnScale));
+  --cardScale: var(--rightColumnScale) * var(--cardInCourtScale);
   min-height: 300px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .pp_player_tableau {
   position: relative;
-  /* box-shadow: rgb(0 0 0) 2px 2px 8px; */
   box-shadow: 1px 1px 5px #000;
-  /* position: relative; */
   display: flex;
   flex-direction: row;
-  min-height: 288px;
-  // padding-bottom: 8px;
   z-index: 1;
 }
 
@@ -110,75 +102,77 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  /* background-color: blue; */
-  margin-bottom: 8px;
+  padding-bottom: 8px;
 }
 
 .pp_tableau_inner_container {
+  flex-grow: 1;
   display: flex;
   flex-direction: row;
 }
 
 /* Blue */
-.pp_player_tableau.pp_player_color_blue, .pp_player_color_block[data-color=blue] {
-  background-color: base.$blue-player-background-color;//  #98B3C0;
+.pp_player_tableau.pp_player_color_blue,
+.pp_player_color_block[data-color='blue'] {
+  background-color: base.$blue-player-background-color; //  #98B3C0;
 }
 
 /* Gray */
-.pp_player_tableau.pp_player_color_gray, .pp_player_color_block[data-color=gray] {
-  background-color: base.$gray-player-background-color;// #B9B6B1;
+.pp_player_tableau.pp_player_color_gray,
+.pp_player_color_block[data-color='gray'] {
+  background-color: base.$gray-player-background-color; // #B9B6B1;
 }
 
 /* Yellow / tan */
-.pp_player_tableau.pp_player_color_yellow, .pp_player_color_block[data-color=yellow] {
-  background-color: base.$yellow-player-background-color;// #DFCFB6;
+.pp_player_tableau.pp_player_color_yellow,
+.pp_player_color_block[data-color='yellow'] {
+  background-color: base.$yellow-player-background-color; // #DFCFB6;
 }
 
 /* Red */
-.pp_player_tableau.pp_player_color_red, .pp_player_color_block[data-color=red] {
-  background-color: base.$red-player-background-color;// #C19B9E;
+.pp_player_tableau.pp_player_color_red,
+.pp_player_color_block[data-color='red'] {
+  background-color: base.$red-player-background-color; // #C19B9E;
 }
 
 /* Black */
-.pp_player_tableau.pp_player_color_black, .pp_player_color_block[data-color=black] {
-  background-color: base.$black-player-background-color;// #807F7F;
+.pp_player_tableau.pp_player_color_black,
+.pp_player_color_block[data-color='black'] {
+  background-color: base.$black-player-background-color; // #807F7F;
 }
 
 /* Purple */
-.pp_player_tableau.pp_player_color_purple, .pp_player_color_block[data-color=purple] {
-  background-color: base.$purple-player-background-color;// #C3B1D6;
+.pp_player_tableau.pp_player_color_purple,
+.pp_player_color_block[data-color='purple'] {
+  background-color: base.$purple-player-background-color; // #C3B1D6;
 }
 
-
 .pp_tableau_inner_right {
-  /* display: flex;
-  flex-direction: column; */
   flex-grow: 1;
 }
 
 .pp_tableau_inner_left {
-  /* background-color: purple; */
-  width: 77px;
-  margin-right: 7px;
-  margin-left: 16px;
+  min-width: calc(var(--tokenScale) * 77px);
+  width: calc(var(--tokenScale) * 77px);
+  margin-right: calc(var(--tokenScale) * 7px);
+  margin-left: calc(var(--tokenScale) * 16px);
 }
 
 .pp_tableau_left {
-  /* background-color: purple; */
-  width: 210px;
+  width: calc(var(--tokenScale) * 210px);
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  padding-bottom: 8px;
 }
 
-.pp_player_tableau_court_size, .pp_player_hand_size {
+.pp_player_tableau_court_size,
+.pp_player_hand_size {
   margin-top: auto;
   align-self: flex-end;
-  margin-right: 8px;
+  margin-right: calc(var(--rightColumnScale) * 8px);
   font-weight: bold;
   font-size: medium;
   cursor: default;
-  // color: red;
 }
 
 .pp_card_count {
@@ -191,45 +185,44 @@
 
 .pp_prizes {
   position: relative;
-  left: 30px;
-  width: 150px;
-  height: 209px;
-  // background-color: yellow;
-  margin-bottom: -209px;
+  left: calc(var(--cardScale) * 30px);
+  width: calc(var(--cardScale) * 150px);
+  height: calc(var(--cardScale) * 209px);
   transition: height 2s margin-bottom 2s;
+
+  .pp_card {
+    transform: rotate(180deg);
+    .card-side {
+      box-shadow: rgba(0, 0, 0, 0.1) calc(var(--cardScale) * -5px) calc(var(--cardScale) * -5px) calc(var(--cardScale) * 5px) 0px !important;
+    }
+  }
+
+  .pp_card:nth-child(n + 2) {
+    margin-top: calc(var(--cardScale) * -199px);
+  }
 }
 
-.pp_card.pp_prize {
-  // transition: transform 2s;
-  transform: rotate(180deg);
-  box-shadow: rgba(0, 0, 0, 0.1) -5px -5px 5px 0px;
-  
+.pp_loyalty_dial_section {
+  min-height: calc(var(--tokenScale) * 204px);
 }
 
 .pp_loyalty_dial_container {
   position: relative;
-  width: 204px;
-  height: 204px;
-  // background-color: white;
+  width: calc(var(--tokenScale) * 204px);
+  height: calc(var(--tokenScale) * 204px);
   border-radius: 50%;
-  margin: 5px;
-  // box-shadow: rgb(0 0 0 / 40%) 5px 5px 5px 0px;
+  margin: calc(var(--tokenScale) * 5px);
   box-shadow: 2px 2px 5px -1px #000;
-  border: 1px solid black;
+  border: calc(var(--tokenScale) * 1px) solid black;
 }
 
 .pp_loyalty_dial {
   background-image: url('img/loyalty_dial.png');
-  // background-color: white;
   border-radius: 50%;
-  // width: 200px;
-  // height: 200px;
-  width: 204px;
-  height: 203px;
+  width: calc(var(--tokenScale) * 204px);
+  height: calc(var(--tokenScale) * 203px);
   position: absolute;
-  background-size: 204px 204px;
-  // left: 2px;
-  // top: 2px;
+  background-size: 100% 100%;
 }
 
 .pp_loyalty_dial.pp_afghan {
@@ -250,19 +243,18 @@
 .pp_loyalty_dial_cover {
   background-image: url('img/loyalty_dials.png');
   background-size: 500% 100%;
-  // background-size: 204px;
-  width: 204px;
-  height: 160px;
+  width: calc(var(--tokenScale) * 204px);
+  height: calc(var(--tokenScale) * 160px);
   position: absolute;
   background-repeat: no-repeat;
-  margin-top: 44px;
+  margin-top: calc(var(--tokenScale) * 44px);
 }
 
 .pp_gift {
   border-radius: 50%;
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: calc(var(--tokenScale) * 40px);
+  height: calc(var(--tokenScale) * 40px);
   z-index: 1;
 }
 
@@ -272,14 +264,16 @@
   background-size: 600% 100%;
   width: 40px;
   height: 40px;
+  width: calc(var(--tokenScale) * 40px);
+  height: calc(var(--tokenScale) * 40px);
   z-index: 1;
 }
 
 #pp_wakhan_gifts {
   display: flex;
   flex-direction: row;
-  height: 45px;
-  width: 150px;
+  width: calc(var(--tokenScale) * 150px);
+  height: calc(var(--tokenScale) * 45px);
   margin-left: 10px;
   justify-content: space-evenly;
 }
@@ -301,28 +295,30 @@
   cursor: pointer !important;
 }
 
-.pp_gift.pp_selected, .pp_gift.pp_selectable:hover {
+.pp_gift.pp_selected,
+.pp_gift.pp_selectable:hover {
   box-shadow: 0px 0px 0px 3px base.$selected-color !important;
 }
 
 .pp_gift_zone {
-  width: 40px;
-  height: 40px;
+  width: calc(var(--tokenScale) * 40px);
+  height: calc(var(--tokenScale) * 40px);
+  margin-top: calc(var(--tokenScale) * 4px);
 }
 
 .pp_gift_2 {
-  left: 17px;
-  top: 78px;
+  left: calc(var(--tokenScale) * 17px);
+  top: calc(var(--tokenScale) * 78px);
 }
 
 .pp_gift_4 {
-  left: 29px;
-  top: 119px;
+  left: calc(var(--tokenScale) * 29px);
+  top: calc(var(--tokenScale) * 119px);
 }
 
 .pp_gift_6 {
-  left: 64px;
-  top: 144px;
+  left: calc(var(--tokenScale) * 64px);
+  top: calc(var(--tokenScale) * 144px);
 }
 
 /* Blue */
@@ -353,12 +349,12 @@
 .pp_court {
   /* margin: 10px 20px; */
   flex-grow: 1;
-  /* border: solid 2px white; */
+  min-height: calc(var(--cardScale) * 209px);
+  justify-content: flex-start !important;
 }
 
 .pp_cylinders {
-  /* width: 400px; */
-  /* margin: 0px 20px 15px 20px; */
+  gap: calc(var(--rightColumnScale) * 4px) !important;
 }
 
 .pp_bottom_court {
@@ -374,19 +370,19 @@
 
 .pp_tableau_title {
   font-weight: bold;
-  font-size: large;
   word-wrap: break-word;
-  margin: 10px;
-  margin-right: 220px;
+  margin: calc(var(--tokenScale) * 10px);
+  margin-right: calc(var(--tokenScale) * 126px + 94px);
+  text-align: center;
 }
 
 .pp_player_tableau_title {
   font-weight: bold;
-  font-size: large;
   word-wrap: break-word;
-  margin: 10px;
-  margin-right: 126px;
+  margin: calc(var(--tokenScale) * 10px);
+  margin-right: calc(var(--tokenScale) * 126px);
   flex-grow: 1;
+  text-align: center;
 }
 
 .pp_player_tableau_title_container {
@@ -396,35 +392,26 @@
 }
 
 .pp_player_tableau_icons {
-  width: 94px;
-  // background-color: purple;
+  --tokenScale: 1;
+  --rightColumnScale: 1;
+  width: calc(var(--rightColumnScale) * 94px);
   display: flex;
   flex-direction: row;
 }
 
 .pp_card_icon_tableau {
-  height: 44px;
-  width: 32px;
+  height: calc(var(--tokenScale) * 44px);
+  width: calc(var(--tokenScale) * 32px);
   background-size: 1000% 500%;
   background-image: url('img/cards2.webp');
-  background-position-x: (calc(2/3)) * 100%;
+  background-position-x: (calc(2 / 3)) * 100%;
   background-position-y: 100%;
-  /* margin-left: 16px; */
   border-radius: 3px;
 }
 
-/* .pp_player_board {
-  width: 600px;
-  height: 137px;
-  background-image: url('img/temp/player_board.png');
-  background-size: 600px 685px;
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  box-shadow: 1px 1px 4px;
-  border-radius: 10px;
+.pp_player_board {
+  --tokenScale: 1;
 }
-*/
 
 .pp_player_hand_modal_content {
   min-height: 241px;
@@ -436,18 +423,14 @@
   grid-auto-flow: dense;
   grid-template-columns: 150px 150px 150px 150px 150px;
   grid-template-rows: 209px;
-  // justify-content: center;
-  // position: relative;
-  // text-align: center;
-  // top: 5px;
+  .pp_card_side {
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .pp_player_hand_popin {
-  // background-color: #ebd5bd;
   background-color: white;
-  // border-radius: 8px;
   box-shadow: rgb(0, 0, 0) 1px 1px 5px;
-  // position: relative;
   position: fixed;
   top: 10vh;
   min-width: 500px;
@@ -479,13 +462,10 @@
   }
 
   h2 {
-    // font-family: "Oranienbaum";
     text-align: center;
     font-size: large;
     font-weight: bold;
     margin: 0px;
-    // background: #b79570;
-    // border-radius: 8px 8px 0px 0px;
     padding: 7px 0px;
     border-bottom: 1px solid black;
   }
@@ -499,77 +479,25 @@
 
 /* Blue */
 .pp_player_background_color_blue {
-  background-color: base.$blue-player-background-color;//  #98B3C0;
+  background-color: base.$blue-player-background-color; //  #98B3C0;
 }
 
 /* Gray */
 .pp_player_background_color_gray {
-  background-color: base.$gray-player-background-color;// #B9B6B1;
+  background-color: base.$gray-player-background-color; // #B9B6B1;
 }
 
 /* Yellow / tan */
 .pp_player_background_color_yellow {
-  background-color: base.$yellow-player-background-color;// #DFCFB6;
+  background-color: base.$yellow-player-background-color; // #DFCFB6;
 }
 
 /* Red */
 .pp_player_background_color_red {
-  background-color: base.$red-player-background-color;// #C19B9E;
+  background-color: base.$red-player-background-color; // #C19B9E;
 }
 
 /* Black */
 .pp_player_background_color_black {
-  background-color: base.$black-player-background-color;// #807F7F;
+  background-color: base.$black-player-background-color; // #807F7F;
 }
-
-
-// .pp_player_hand_popin {
-//   background-color: #ebd5bd;
-//   border-radius: 8px;
-//   box-shadow: 0 3px 8px black;
-//   position: relative;
-//   min-width: 500px;
-
-//   .pp_player_hand_popin_closeicon {
-//     background-color: #a47a77;
-//     border-radius: 50%;
-//     width: 40px;
-//     height: 40px;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     position: absolute;
-//     top: -18px;
-//     right: -18px;
-//     font-size: 90%;
-//     color: white !important;
-//     border: 1px solid #dfbda8;
-
-//     &:hover {
-//       text-decoration: none;
-//       color: #ccc !important;
-//       transform: scale(1.1);
-//     }
-
-//     i {
-//       margin-top: -2px;
-//     }
-//   }
-
-//   h2 {
-//     font-family: "Oranienbaum";
-//     text-align: center;
-//     font-size: 23px;
-//     margin: 0px;
-//     background: #b79570;
-//     border-radius: 8px 8px 0px 0px;
-//     padding: 7px 0px;
-//     border-bottom: 1px solid #734f2a;
-//   }
-
-//   .reserve {
-//     padding: 8px;
-//     display: flex;
-//     flex-wrap: wrap;
-//   }
-// }

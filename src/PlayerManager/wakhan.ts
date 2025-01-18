@@ -50,9 +50,9 @@ class PPWakhanPlayer extends PPPlayer {
 
     this.counters.courtCount.create(`pp_court_count_${this.playerId}`);
     this.counters.courtLimit.create(`pp_court_limit_${this.playerId}`);
-    this.game.tooltipManager.addSuitTooltip({suit: 'political', nodeId: `pp_player_court_size_${this.playerId}`});
+    this.game.tooltipManager.addSuitTooltip({ suit: 'political', nodeId: `pp_player_court_size_${this.playerId}` });
 
-    this.game.tooltipManager.addPlayerIconToolTips({playerId: this.playerId, playerColor: this.playerColor});
+    this.game.tooltipManager.addPlayerIconToolTips({ playerId: this.playerId, playerColor: this.playerColor });
 
     this.updatePlayerPanel({ playerGamedatas });
   }
@@ -100,7 +100,7 @@ class PPWakhanPlayer extends PPPlayer {
       }
     });
     this.game.tooltipManager.removeWakhanInfluenceCountTooltips();
-    this.game.tooltipManager.addWakhanInfluenceCountTooltips({pragmaticLoyalty});
+    this.game.tooltipManager.addWakhanInfluenceCountTooltips({ pragmaticLoyalty });
   }
 
   // ....###.....######..########.####..#######..##....##..######.
@@ -112,7 +112,7 @@ class PPWakhanPlayer extends PPPlayer {
   // .##.....##..######.....##....####..#######..##....##..######.
 
   async discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
-    const cardInfo = this.game.getCardInfo({ cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
     this.incCounter({ counter: 'courtCount', value: -1 });
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
@@ -125,22 +125,21 @@ class PPWakhanPlayer extends PPPlayer {
         },
       };
       wakhanInfluence.influence[cardInfo.loyalty] = -1;
-      this.incWakhanInfluence({wakhanInfluence});
+      this.incWakhanInfluence({ wakhanInfluence });
     }
     const node = dojo.byId(cardId);
     node.classList.remove('pp_card_in_court', `pp_player_${this.playerId}`);
     if (to === DISCARD) {
-      await this.game.objectManager.discardPile.discardCardFromZone({
-        cardId,
-        zone: this.court,
-      });
+      await this.game.objectManager.discardPile.discardCardFromZone(cardId);
     } else {
-      await Promise.all([
-        this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-          elements: { id: cardId },
-        }),
-        this.court.remove({ input: cardId }),
-      ]);
+      await this.game.objectManager.tempDiscardPile.getZone().addCard(
+        this.game.getCard({
+          id: cardId,
+          state: 0,
+          used: 0,
+          location: to,
+        })
+      );
     }
   }
 
@@ -149,50 +148,43 @@ class PPWakhanPlayer extends PPPlayer {
     if (to === DISCARD) {
       await this.game.objectManager.discardPile.discardCardFromLocation({ cardId, from: `cylinders_${this.playerId}` });
     } else if (to === TEMP_DISCARD) {
-      await this.game.objectManager.tempDiscardPile.getZone().placeInZone({
-        id: cardId,
-        element: tplCard({ cardId }),
-        from: `cylinders_${this.playerId}`,
-      });
+      await this.game.objectManager.tempDiscardPile.getZone().addCard(
+        this.game.getCard({
+          id: cardId,
+          state: 0,
+          used: 0,
+          location: `cylinders_${this.playerId}`,
+        })
+      );
     }
   }
 
   // Only used for OtherPersuasiveMethods event
-  async playCard({ card }: { card: Token }): Promise<void> {
-    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
-    const { region, suit, rank } = cardInfo;
+  async playCard(card: Token): Promise<void> {
+    const cardInfo = this.game.getCardInfo(card.id) as CourtCard;
+    const { suit, rank } = cardInfo;
 
-    await this.court.placeInZone({
-      id: card.id,
-      element: tplCard({ cardId: card.id, extraClasses: `pp_card_in_court pp_player_${this.playerId} pp_${region}` }),
-      weight: card.state,
-      from: `cylinders_${this.playerId}`, // Wakhan has no hand cards icon
+    this.court.addCard({
+      ...card,
+      ...cardInfo,
     });
-    this.setupCourtCard({ cardId: card.id });
-    this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
 
     this.incCounter({ counter: suit, value: rank });
     this.incCounter({ counter: 'courtCount', value: 1 });
-    if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
+    if (cardInfo.type === 'courtCard' && cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
       this.wakhanInfluence[cardInfo.loyalty].incValue(1);
     }
   }
 
-  async radicalizeCardWakhan({ card, from }: { card: Token; from: PaxPamirZone }): Promise<void> {
-    const cardInfo = this.game.getCardInfo({ cardId: card.id }) as CourtCard;
-    const { region, suit, rank } = cardInfo;
+  async radicalizeCardWakhan({ card, from }: { card: Token; from: LineStock<Card> }): Promise<void> {
+    const cardInfo = this.game.getCardInfo(card.id) as CourtCard;
+    const { suit, rank } = cardInfo;
 
-    this.setupCourtCard({ cardId: card.id });
-    await Promise.all([
-      this.court.moveToZone({
-        elements: { id: card.id, weight: card.state },
-        classesToAdd: ['pp_card_in_court', `pp_player_${this.playerId}`, `pp_${region}`],
-        classesToRemove: ['pp_market_card'],
-        elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
-      }),
-      from.remove({ input: card.id }),
-    ]);
+    await this.court.addCard({
+      ...card,
+      ...cardInfo,
+    });
 
     this.incCounter({ counter: suit, value: rank });
     this.incCounter({ counter: 'courtCount', value: 1 });
@@ -246,7 +238,6 @@ class PPWakhanPlayer extends PPPlayer {
   }
 
   toValueWakhanInfluence({ wakhanInfluence }: { wakhanInfluence: WakhanInfluence }): void {
-    console.log('toValueWakhanInfluence');
     const { influence } = wakhanInfluence;
     this.wakhanInfluence.afghan.setValue(influence.afghan);
     this.wakhanInfluence.british.setValue(influence.british);

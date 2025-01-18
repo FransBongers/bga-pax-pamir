@@ -104,17 +104,17 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
   }
 };
 
-const tplLogTokenArmy = ({ coalition }: { coalition: string }) => `<div class="pp_${coalition} pp_army pp_log_token"></div>`;
+const tplLogTokenArmy = ({ coalition }: { coalition: string }) => `<div class="pp_coalition_block_side pp_log_token" data-type="army" data-coalition="${coalition}"></div>`;
 
 const tlpLogTokenBoldText = ({ text }) => `<span style="font-weight: 700;">${_(text)}</span>`;
 
 const tplLogTokenCard = ({ cardId, large, cardIdSuffix }: { cardId: string; large?: boolean; cardIdSuffix: number }) =>
-  `<div id="${cardId}_${cardIdSuffix}" class="pp_card pp_log_token pp_${cardId}${large ? ' pp_large' : ''}"></div>`;
+  `<div id="${cardId}_${cardIdSuffix}" class="pp_card_side pp_log_token pp_${cardId}${!large ? ' pp_small' : ''}"></div>`;
 
 const tplLogTokenCoalition = ({ coalition, black }: { coalition: string; black?: boolean }) =>
   `<div class="pp_log_token pp_loyalty_icon${black ? '_black' : ''} pp_${coalition}"></div>`;
 
-const tplLogTokenCylinder = ({ color }: { color: string }) => `<div class="pp_cylinder pp_player_color_${color} pp_log_token"></div>`;
+const tplLogTokenCylinder = ({ color }: { color: string }) => `<div class="pp_cylinder_side pp_log_token" data-color="${color}"></div>`;
 
 const tplLogTokenFavoredSuit = ({ suit }: { suit: string }) => `<div class="pp_log_token pp_impact_icon_suit ${suit}"></div>`;
 
@@ -136,6 +136,6 @@ const tplLogTokenRegionName = ({ name, regionId }: { name: string; regionId: str
     name
   )}</span><div class="pp_log_token pp_${regionId} pp_region_icon"></div></div>`;
 
-const tplLogTokenRoad = ({ coalition }: { coalition: string }) => `<div class="pp_${coalition} pp_road pp_log_token"></div>`;
+const tplLogTokenRoad = ({ coalition }: { coalition: string }) => `<div class="pp_coalition_block_side pp_log_token" data-type="road" data-coalition="${coalition}"></div>`;
 
-const tplLogTokenRupee = () => `<div class="pp_log_token_rupee pp_log_token"></div>`;
+const tplLogTokenRupee = () => `<div class="pp_rupee_side pp_log_token"></div>`;

@@ -108,7 +108,7 @@ trait WakhanActionWithInstructionsTrait
   {
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     $rupees = $wakhanPlayer->getRupees();
-    Notifications::log('rupees',$rupees);
+
     if ($rupees >= 2) {
       Wakhan::actionNotValid();
       return;

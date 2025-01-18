@@ -31,7 +31,6 @@ const isFastMode = () => {
 }
 
 const slide = ({game, mobileElt, targetElt, options = {}}: {game: PaxPamirGame; mobileElt: string, targetElt: string, options?: SlideConfig}) => {
-  console.log('using slide');
   let config: SlideConfig = {
     duration: 800,
     delay: 0,

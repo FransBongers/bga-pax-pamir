@@ -58,7 +58,6 @@ class SelectPieceState implements State {
 
   private setPiecesSelectable() {
     this.availablePieces.forEach((pieceId) => {
-      console.log('pieceId', pieceId);
       const node = dojo.byId(pieceId);
       if (node) {
         dojo.addClass(node, PP_SELECTABLE);

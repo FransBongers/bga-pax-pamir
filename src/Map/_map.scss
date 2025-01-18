@@ -3,35 +3,26 @@
 /* ------- MAP AND REGIONS ------- */
 
 #pp_map {
+  --mapScale: var(--adjustedLeftColumnScale);
+  --tokenScale: var(--adjustedLeftColumnScale);
   background-image: url('img/paxpamir_board.jpg');
-  background-size: 1000px 581px;
+  height: calc(var(--mapScale) * 581px);
+  width: calc(var(--mapScale) * 1000px);
+  background-size: 100% 100%;
   background-repeat: no-repeat;
-  grid-column: 1 / span 1;
-  grid-row: span 1;
-  height: 581px;
   position: relative;
-  width: 1000px;
-  // box-shadow: rgb(0 0 0) 2px 2px 8px;
   box-shadow: 1px 1px 5px #000;
 }
 
 #pp_map_areas {
   position: absolute;
-  left: 91px;
-  top: 89px;
-  width: 819px;
-  height: 402px;
+  left: calc(var(--mapScale) * 91px);
+  top: calc(var(--mapScale) * 89px);
+  height: calc(var(--mapScale) * 402px);
+  width: calc(var(--mapScale) * 819px);
   /* background-color: blue; */
 }
 
-// #pp_region_herat {
-//   background-color: purple;
-//   // width: 457px;
-//   // height: 400px;
-//   width: 100%;
-//   height: 100%;
-//   clip-path: path("M 438,400 c 10,-30 12,-50 14,-70 c 0,-20 2,-40 4,-60 c 3,-24 0,-50 -30, -62 c -20,-10 -20,-11 -40,-25 c -60,-50 -72,-40 -97,-20 c -14,14 -32,22 -43,30 c -30,24 -50,47 -46,70 c 0,40, -1,60 3,80 C 210,380 209,390 209,400 Z");
-// }
 
 #pp_map_areas.pp_selectable {
   z-index: 50;
@@ -39,10 +30,10 @@
 
 #pp_map_areas_borders_regions {
   position: absolute;
-  width: 819px;
-  height: 400px;
-  left: 92px;
-  top: 90px;
+  width: calc(var(--mapScale) * 819px);
+  height: calc(var(--mapScale) * 400px);
+  left: calc(var(--mapScale) * 92px);
+  top: calc(var(--mapScale) * 90px);
 }
 
 #pp_map_areas_borders_regions.pp_selectable {
@@ -51,6 +42,7 @@
 
 .pp_region {
   fill: transparent;
+  transform: scale(var(--mapScale));
 }
 
 .pp_region.pp_selectable {
@@ -77,132 +69,79 @@
 }
 
 .pp_location {
-  position: absolute;
-  /* border: 2px solid blue; */
+  position: absolute !important;
 }
 
 .pp_favored_suit {
-  height: 54px;
-  width: 26px;
+  height: calc(var(--mapScale) * 54px);
+  width: calc(var(--mapScale) * 26px);
   position: absolute;
-  /* border: 2px solid blue; */
   box-sizing: border-box;
 }
 
-.pp_favored_suit_marker {
-  height: 50px;
-  width: 22px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-image: url('img/favoured_suit_marker.svg');
-}
-
 #pp_favored_suit_political {
-  top: 116px;
-  left: 42px;
+  top: calc(var(--mapScale) * 116px);
+  left: calc(var(--mapScale) * 40px);
 }
 
 #pp_favored_suit_intelligence {
-  top: 197px;
-  left: 42px;
+  top: calc(var(--mapScale) * 197px);
+  left: calc(var(--mapScale) * 40px);
 }
 
 #pp_favored_suit_economic {
-  top: 278px;
-  left: 42px;
+  top: calc(var(--mapScale) * 278px);
+  left: calc(var(--mapScale) * 40px);
 }
 
 #pp_favored_suit_military {
-  top: 361px;
-  left: 42px;
+  top: calc(var(--mapScale) * 361px);
+  left: calc(var(--mapScale) * 40px);
 }
 
 .pp_vp_track {
-  height: 50px;
-  width: 50px;
-  position: absolute;
-  /* box-shadow: 0px 0px 0px 4px blue !important; */
+  width: calc(var(--mapScale) * 50px);
+  height: calc(var(--mapScale) * 50px);
+  position: absolute !important;
 }
 
 .pp_position_ruler_token {
-  height: 54px;
-  width: 50px;
+  width: calc(var(--mapScale) * 50px);
+  height: calc(var(--mapScale) * 54px);
   position: absolute;
-  /* box-shadow: 0px 0px 0px 4px blue !important; */
 }
 
 #pp_position_ruler_token_herat {
-  top: 323px;
-  left: 394px;
+  top: calc(var(--mapScale) * 323px);
+  left: calc(var(--mapScale) * 394px);
 }
 
 #pp_position_ruler_token_kabul {
-  top: 120px;
-  left: 594px;
+  top: calc(var(--mapScale) * 120px);
+  left: calc(var(--mapScale) * 594px);
 }
 
 #pp_position_ruler_token_kandahar {
-  top: 373px;
-  left: 648px;
+  top: calc(var(--mapScale) * 373px);
+  left: calc(var(--mapScale) * 648px);
 }
 
 #pp_position_ruler_token_persia {
-  top: 363px;
-  left: 163px;
+  top: calc(var(--mapScale) * 363px);
+  left: calc(var(--mapScale) * 163px);
 }
 
 #pp_position_ruler_token_punjab {
-  top: 252px;
-  left: 831px;
+  top: calc(var(--mapScale) * 252px);
+  left: calc(var(--mapScale) * 831px);
 }
 
 #pp_position_ruler_token_transcaspia {
-  top: 110px;
-  left: 207px;
-}
-
-.pp_ruler_token {
-  height: 50px;
-  width: 50px;
-  background-image: url('img/ruler_tokens.webp');
-  background-size: 600% 100%;
-  background-repeat: no-repeat;
-  box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.4);
-  border-radius: 50%;
-}
-
-.pp_ruler_token.pp_herat {
-  // background-image: url('img/ruler_token_herat.svg');
-  background-position-x: 0%;
-}
-
-.pp_ruler_token.pp_kabul {
-  // background-image: url('img/ruler_token_kabul.svg');
-  background-position-x: 20%;
-}
-
-.pp_ruler_token.pp_kandahar {
-  // background-image: url('img/ruler_token_kandahar.svg');
-  background-position-x: 40%;
-}
-
-.pp_ruler_token.pp_persia {
-  // background-image: url('img/ruler_token_persia.svg');
-  background-position-x: 60%;
-}
-
-.pp_ruler_token.pp_punjab {
-  // background-image: url('img/ruler_token_punjab.svg');
-  background-position-x: 80%;
-}
-
-.pp_ruler_token.pp_transcaspia {
-  // background-image: url('img/ruler_token_transcaspia.svg');
-  background-position-x: 100%;
+  top: calc(var(--mapScale) * 110px);
+  left: calc(var(--mapScale) * 207px);
 }
 
 .pp_location.pp_selectable {
-  /* border: 2px blue solid; */
   cursor: pointer !important;
   box-shadow: 0px 0px 0px 4px base.$selectable-color !important;
 }
@@ -217,149 +156,149 @@
 }
 
 #pp_herat_armies {
-  top: 380px;
-  left: 320px;
-  height: 80px;
-  width: 190px;
+  top: calc(var(--mapScale) * 380px);
+  left: calc(var(--mapScale) * 320px);
+  height: calc(var(--mapScale) * 80px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 #pp_kabul_armies {
-  top: 180px;
-  left: 520px;
-  height: 40px;
-  width: 190px;
+  top: calc(var(--mapScale) * 180px);
+  left: calc(var(--mapScale) * 520px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 #pp_kandahar_armies {
-  top: 420px;
-  left: 580px;
-  height: 40px;
-  width: 160px;
+  top: calc(var(--mapScale) * 420px);
+  left: calc(var(--mapScale) * 580px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 160px);
 }
 
 #pp_persia_armies {
-  top: 420px;
-  left: 100px;
-  height: 60px;
-  width: 160px;
+  top: calc(var(--mapScale) * 420px);
+  left: calc(var(--mapScale) * 100px);
+  height: calc(var(--mapScale) * 60px);
+  width: calc(var(--mapScale) * 160px);
 }
 
 #pp_punjab_armies {
-  top: 300px;
-  left: 800px;
-  height: 160px;
-  width: 100px;
+  top: calc(var(--mapScale) * 300px);
+  left: calc(var(--mapScale) * 800px);
+  height: calc(var(--mapScale) * 160px);
+  width: calc(var(--mapScale) * 100px);
 }
 
 #pp_transcaspia_armies {
-  top: 220px;
-  left: 100px;
-  height: 40px;
-  width: 190px;
+  top: calc(var(--mapScale) * 220px);
+  left: calc(var(--mapScale) * 100px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 #pp_herat_tribes {
-  top: 320px;
-  left: 320px;
-  height: 40px;
-  width: 190px;
+  top: calc(var(--mapScale) * 320px);
+  left: calc(var(--mapScale) * 320px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 #pp_kabul_tribes {
-  top: 100px;
-  left: 520px;
-  height: 40px;
-  width: 190px;
+  top: calc(var(--mapScale) * 100px);
+  left: calc(var(--mapScale) * 520px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 #pp_kandahar_tribes {
-  top: 360px;
-  left: 580px;
-  height: 40px;
-  width: 160px;
+  top: calc(var(--mapScale) * 360px);
+  left: calc(var(--mapScale) * 580px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 160px);
 }
 
 #pp_persia_tribes {
-  top: 360px;
-  left: 100px;
-  height: 40px;
-  width: 160px;
+  top: calc(var(--mapScale) * 360px);
+  left: calc(var(--mapScale) * 100px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 160px);
 }
 
 #pp_punjab_tribes {
-  top: 240px;
-  left: 800px;
-  height: 40px;
-  width: 100px;
+  top: calc(var(--mapScale) * 240px);
+  left: calc(var(--mapScale) * 800px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 100px);
 }
 
 #pp_transcaspia_tribes {
-  top: 120px;
-  left: 100px;
-  height: 40px;
-  width: 190px;
+  top: calc(var(--mapScale) * 120px);
+  left: calc(var(--mapScale) * 100px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 190px);
 }
 
 /* Borders */
 #pp_herat_kabul_border {
-  top: 230px;
-  left: 420px;
-  height: 80px;
-  width: 110px;
+  top: calc(var(--mapScale) * 230px);
+  left: calc(var(--mapScale) * 420px);
+  height: calc(var(--mapScale) * 80px);
+  width: calc(var(--mapScale) * 110px);
 }
 
 #pp_herat_kandahar_border {
-  top: 340px;
-  left: 525px;
-  height: 140px;
-  width: 40px;
+  top: calc(var(--mapScale) * 340px);
+  left: calc(var(--mapScale) * 525px);
+  height: calc(var(--mapScale) * 140px);
+  width: calc(var(--mapScale) * 40px);
 }
 
 #pp_herat_transcaspia_border {
-  top: 230px;
-  left: 280px;
-  height: 100px;
-  width: 130px;
+  top: calc(var(--mapScale) * 230px);
+  left: calc(var(--mapScale) * 280px);
+  height: calc(var(--mapScale) * 100px);
+  width: calc(var(--mapScale) * 130px);
 }
 
 #pp_herat_persia_border {
-  top: 340px;
-  left: 270px;
-  height: 140px;
-  width: 40px;
+  top: calc(var(--mapScale) * 340px);
+  left: calc(var(--mapScale) * 270px);
+  height: calc(var(--mapScale) * 140px);
+  width: calc(var(--mapScale) * 40px);
 }
 
 #pp_kabul_kandahar_border {
-  top: 290px;
-  left: 560px;
-  height: 40px;
-  width: 160px;
+  top: calc(var(--mapScale) * 290px);
+  left: calc(var(--mapScale) * 560px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 160px);
 }
 
 #pp_kabul_punjab_border {
-  top: 100px;
-  left: 770px;
-  height: 110px;
-  width: 100px;
+  top: calc(var(--mapScale) * 100px);
+  left: calc(var(--mapScale) * 770px);
+  height: calc(var(--mapScale) * 110px);
+  width: calc(var(--mapScale) * 100px);
 }
 
 #pp_kabul_transcaspia_border {
-  top: 89px;
-  left: 410px;
-  height: 134px;
-  width: 40px;
+  top: calc(var(--mapScale) * 89px);
+  left: calc(var(--mapScale) * 410px);
+  height: calc(var(--mapScale) * 134px);
+  width: calc(var(--mapScale) * 40px);
 }
 
 #pp_kandahar_punjab_border {
-  top: 360px;
-  left: 750px;
-  height: 120px;
-  width: 40px;
+  top: calc(var(--mapScale) * 360px);
+  left: calc(var(--mapScale) * 750px);
+  height: calc(var(--mapScale) * 120px);
+  width: calc(var(--mapScale) * 40px);
 }
 
 #pp_persia_transcaspia_border {
-  top: 290px;
-  left: 100px;
-  height: 40px;
-  width: 150px;
+  top: calc(var(--mapScale) * 290px);
+  left: calc(var(--mapScale) * 100px);
+  height: calc(var(--mapScale) * 40px);
+  width: calc(var(--mapScale) * 150px);
 }

@@ -63,7 +63,7 @@ class DiscardState implements State {
     this.game.clientUpdatePageTitle({
       text: _('Discard ${name}?'),
       args: {
-        name: _((this.game.getCardInfo({ cardId }) as CourtCard).name),
+        name: _((this.game.getCardInfo(cardId) as CourtCard).name),
       },
     });
 

@@ -113,7 +113,7 @@ const tplCourtCardTooltip = ({
   specialAbilities,
 }: {
   cardId: string;
-  cardInfo: CourtCard;
+  cardInfo: CourtCardStaticData;
   specialAbilities: Record<string, { title: string; description: string }>;
 }): string => {
   let impactIcons = '';
@@ -140,7 +140,7 @@ const tplCourtCardTooltip = ({
   }
 
   return tplCardTooltipContainer({
-    card: `<div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>`,
+    card: `<div class="pp_card_side pp_card_in_tooltip pp_${cardId}"></div>`,
     content: `
   <span class="pp_title">${_(cardInfo.name)}</span>
   <span class="pp_flavor_text">${_((cardInfo as CourtCard).flavorText)}</span>
@@ -173,9 +173,9 @@ const tplEventCardTooltipDiscarded = ({ title, description, effect }: EventCard[
   }
 };
 
-const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: EventCard }): string => {
+const tplEventCardTooltip = ({ cardId, cardInfo }: { cardId: string; cardInfo: EventCardStaticData }): string => {
   return tplCardTooltipContainer({
-    card: `<div class="pp_card pp_card_in_tooltip pp_${cardId}"></div>`,
+    card: `<div class="pp_card_side pp_card_in_tooltip pp_${cardId}"></div>`,
     content: `
     <span class="pp_title">${_('Event card')}</span>
     <span class="pp_flavor_text">${_(

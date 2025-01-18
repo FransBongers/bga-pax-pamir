@@ -66,7 +66,7 @@ class ClientCardActionBattleState implements State {
 
     const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }));
     debug('enemyPieces', enemyPieces);
-    const cardInfo = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(this.cardId) as CourtCard;
     const cardRank = cardInfo.rank;
 
     this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }));
@@ -86,7 +86,7 @@ class ClientCardActionBattleState implements State {
   private updateInterfaceSelectPiecesOnCard({ cardId }: { cardId: string }) {
     this.game.clearPossible();
     this.location = cardId;
-    const cardInfo = this.game.getCardInfo({ cardId: this.cardId }) as CourtCard;
+    const cardInfo = this.game.getCardInfo(this.cardId) as CourtCard;
     const cardRank = cardInfo.rank;
     const { enemy, own } = this.getSpies({ cardId });
     this.maxNumberToSelect = Math.min(cardRank, own.length);
@@ -207,7 +207,7 @@ class ClientCardActionBattleState implements State {
         own: [],
       };
     }
-    const cylinderIds = spyZone.getItems();
+    const cylinderIds = spyZone.getCards().map(extractId);
     return {
       enemy: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) !== this.game.getPlayerId()),
       own: cylinderIds.filter((cylinderId: string) => Number(cylinderId.split('_')[1]) === this.game.getPlayerId()),
@@ -229,8 +229,6 @@ class ClientCardActionBattleState implements State {
   setPiecesSelectable({ pieces }: { pieces: string[] }) {
     pieces.forEach((pieceId: string) => {
       dojo.query(`#${pieceId}`).forEach((node: HTMLElement, index: number) => {
-        // const cardId = 'card_' + node.id.split('_')[1];
-        // console.log('cardId in courtcardselect', cardId);
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.handlePieceClicked({ pieceId })));
       });
@@ -259,7 +257,6 @@ class ClientCardActionBattleState implements State {
         dojo.addClass(node, 'pp_selectable');
         this.game._connections.push(
           dojo.connect(node, 'onclick', this, () => {
-            console.log('select court card click');
             this.updateInterfaceSelectPiecesOnCard({ cardId });
           })
         );

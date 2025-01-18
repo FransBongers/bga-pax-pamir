@@ -14,7 +14,8 @@
   "author": "Frans Bongers",
   "license": "MIT",
   "dependencies": {
-    "bga-animations": "thoun/bga-animations#1.1.0"
+    "bga-animations": "thoun/bga-animations#1.1.2",
+    "bga-cards": "thoun/bga-cards#3.1.1"
   },
   "devDependencies": {
     "sass": "^1.58.3",

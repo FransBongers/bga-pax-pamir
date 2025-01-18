@@ -19,7 +19,6 @@ class PlayerManager {
   private players: Record<number, PPPlayer>;
 
   constructor(game: PaxPamirGame) {
-    console.log('Constructor PlayerManager');
     this.game = game;
     this.players = {};
 
@@ -31,8 +30,14 @@ class PlayerManager {
         this.players[playerId] = new PPWakhanPlayer({ player, game: this.game });
       }
     }
+  }
 
-    // console.log("players", this.players);
+  getAllCourtCards(): CourtCard[] {
+    let cards = [];
+    Object.values(this.players).forEach((player) => {
+      cards = cards.concat(player.getCourtZone().getCards());
+    });
+    return cards;
   }
 
   getPlayer({ playerId }: { playerId: number }): PPPlayer | PPWakhanPlayer {
@@ -56,7 +61,7 @@ class PlayerManager {
   setupAdjacentPlayerColors() {
     Object.values(this.players).forEach((player) => {
       player.setupAdjacentPlayerColors();
-    })
+    });
   }
 
   /**

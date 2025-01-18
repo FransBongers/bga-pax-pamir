@@ -11,9 +11,20 @@ interface PlayerCounts {
   };
 }
 
-type Card = CourtCard | EventCard;
+type Card = CourtCard | EventCard | SelectCard;
 
-interface CourtCard {
+type CardStaticData = CourtCardStaticData | EventCardStaticData;
+
+interface SelectCard {
+  id: string;
+  type: 'select';
+  state: number;
+}
+
+type CourtCard = CourtCardStaticData & Token;
+type EventCard = EventCardStaticData & Token;
+
+interface CourtCardStaticData {
   actions: Record<string, { type: string; left: number; top: number }>;
   flavorText: string;
   id: string;
@@ -28,7 +39,7 @@ interface CourtCard {
   type: 'courtCard';
 }
 
-interface EventCard {
+interface EventCardStaticData {
   discarded: {
     effect: string;
     title?: string;
@@ -74,6 +85,21 @@ interface Token {
   used: number; // TODO: cast to number in php
 }
 
+type Coalition = 'afghan' | 'british' | 'russian';
+
+type CoalitionBlock = Token & {
+  type: 'army' | 'road' | 'supply';
+  coalition: Coalition;
+}
+
+type Cylinder = Token & {
+  color: string;
+}
+
+type RulerToken = Token & {
+  region: string;
+}
+
 interface BorderGamedatas {
   roads: Token[];
 }
@@ -113,7 +139,7 @@ interface PaxPamirGamedatas extends Gamedatas {
     openHands: boolean;
     wakhanEnabled: boolean;
   };
-  tempDiscardPile: Card | null;
+  tempDiscardPile: Token | null;
   staticData: {
     borders: {
       [border: string]: {
@@ -122,7 +148,7 @@ interface PaxPamirGamedatas extends Gamedatas {
       };
     };
     cards: {
-      [cardId: string]: Card;
+      [cardId: string]: CardStaticData;
     };
     loyalty: Record<
       string,
@@ -155,7 +181,7 @@ interface PaxPamirGamedatas extends Gamedatas {
   // current_player_id: string;
   favoredSuit: string;
   market: {
-    cards: Token[][];
+    cards: Card[][];
     rupees: Token[];
   };
   paxPamirPlayerOrder: number[];
@@ -209,6 +235,7 @@ interface PaxPamirGame extends Game {
     startOfTurnAbilities: StartOfTurnAbilitiesState;
   };
   animationManager: AnimationManager;
+  cardManager: PPCardManager
   gamedatas: PaxPamirGamedatas;
   gameOptions: PaxPamirGamedatas['gameOptions'];
   map: PPMap;
@@ -219,8 +246,13 @@ interface PaxPamirGame extends Game {
   playerCounts: Record<string, number>;
   playerOrder: number[];
   spies: {
-    [cardId: string]: PaxPamirZone;
+    [cardId: string]: LineStock<Cylinder>;
   };
+  coalitionBlockManager: CoalitionBlockManager;
+  cylinderManager: CylinderManager;
+  favoredSuitMarkerManager: FavoredSuitMarkerManager;
+  rulerTokenManager: RulerTokenManager;
+  rupeeManager: RupeeManager;
   tooltipManager: PPTooltipManager;
   _connections: unknown[];
   localState: LocalState;
@@ -235,13 +267,14 @@ interface PaxPamirGame extends Game {
   clearInterface: () => void;
   clearPossible: () => void;
   format_string_recursive: (log: string, args: Record<string,unknown>) => string;
-  getCardInfo: ({ cardId }: { cardId: string }) => Card;
+  getCard: (token: Token) => Card;
+  getCardInfo: (cardId: string) => CardStaticData;
+  getCylinder(token: Token): Cylinder
   getCurrentPlayer: () => PPPlayer;
   getMinimumActionCost: (props: {action: string;}) => number | null;
   getPlayerId: () => number;
   getWakhanCardInfo: ({wakhanCardId}: {wakhanCardId: string;}) => WakhanCard;
-  getZoneForLocation: ({ location }: { location: string }) => PaxPamirZone;
-  createSpyZone: ({ cardId }: { cardId: string }) => void;
+  getZoneForLocation: ({ location }: { location: string }) => CardStock<any>;
   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
   // move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
   onCancel: () => void;
@@ -250,6 +283,7 @@ interface PaxPamirGame extends Game {
   setHandCardsSelectable: (props: { callback: (props: { cardId: string }) => void }) => void;
   // AJAX calls
   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
+  updateLayout: () => void;
   updateLocalState: (updates: Partial<LocalState>) => void;
   clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, unknown> }) => void;
   clientUpdatePageTitleOtherPlayers: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
@@ -273,5 +307,5 @@ interface PaxPamirPlayer extends BgaPlayer {
   events: (EventCard & Token)[];
   loyalty: string;
   rupees: number;
-  prizes: CourtCard[];
+  prizes: Token[]; // TODO: check
 }

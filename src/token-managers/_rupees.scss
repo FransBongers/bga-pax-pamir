@@ -1,0 +1,41 @@
+@use '../base';
+
+.pp_rupee {
+  width: calc(var(--tokenScale) * 50px);
+  height: calc(var(--tokenScale) * 50px);
+
+  .card-side {
+    box-shadow: none !important;
+  }
+}
+
+.pp_rupee_side {
+  background-size: 1100% 100%;
+  background-position-x: 100%;
+  background-image: url('img/actions.webp');
+  width: 100%;
+  height: 100%;
+  width: calc(var(--tokenScale) * 50px);
+  height: calc(var(--tokenScale) * 50px);
+  border-radius: calc(var(--tokenScale) * 25px);
+  z-index: 1;
+  filter: drop-shadow(rgba(0, 0, 0, 0.5) calc(var(--tokenScale) * 2px) calc(var(--tokenScale) * 2px) calc(var(--tokenScale) * 2px));
+}
+
+.pp_rupee.pp_selectable,
+.pp_player_board_rupee.pp_selectable {
+  .pp_rupee_side {
+    cursor: pointer !important;
+    box-shadow: 0px 0px 0px calc(var(--tokenScale) * 3px) base.$selectable-color !important;
+  }
+}
+
+.pp_rupee.pp_selectable:hover,
+.pp_player_board_rupee.pp_selectable:hover,
+.pp_rupee.pp_selected,
+.pp_player_board_rupee.pp_selected {
+  .pp_rupee_side {
+    cursor: pointer !important;
+    box-shadow: 0px 0px 0px calc(var(--tokenScale) * 3px) base.$selected-color !important;
+  }
+}

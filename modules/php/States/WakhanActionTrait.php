@@ -87,7 +87,7 @@ trait WakhanActionTrait
 
     $result = false;
     foreach ($card['actions'] as $action => $actionInfo) {
-      Notifications::log('action', $action);
+
       if (!$this->wakhanCanPayForCardAction($card, $action)) {
         continue;
       }
@@ -130,7 +130,6 @@ trait WakhanActionTrait
     $availableForBonusActions = Utils::filter($courtCards, function ($card) {
       return $card['used'] === 0 && $this->isCardFavoredSuit($card);
     });
-    Notifications::log('available', $availableForBonusActions);
 
     foreach (array_reverse($availableForBonusActions) as $index => $card) {
       $actionStack[] = ActionStack::createAction(DISPATCH_WAKHAN_BONUS_ACTION, WAKHAN_PLAYER_ID, [

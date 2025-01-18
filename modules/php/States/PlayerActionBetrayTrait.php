@@ -121,7 +121,6 @@ trait PlayerActionBetrayTrait
     //   throw new \feException("Card does not have a prize");
     // }
     $spiesOnCard = Tokens::getInLocation(['spies', $betrayedCardId])->toArray();
-    // Notifications::log('spies',[$spiesOnCard[0]]);
 
     $playerId = $player->getId();
     // Card should have spy of active player

@@ -1,0 +1,16 @@
+.pp_favored_suit_marker {
+  width: calc(var(--tokenScale) * 22px);
+  height: calc(var(--tokenScale) * 50px);
+
+  .card-side {
+    box-shadow: none !important;
+  }
+}
+
+.pp_favored_suit_marker_side {
+  width: calc(var(--tokenScale) * 22px);
+  height: calc(var(--tokenScale) * 50px);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-image: url('img/favoured_suit_marker.svg');
+}

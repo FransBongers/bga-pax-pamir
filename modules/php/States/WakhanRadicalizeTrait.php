@@ -346,7 +346,7 @@ trait WakhanRadicalizeTrait
   {
     $regionId = WakhanCards::getTopOf(DISCARD)['front']['regionOrder'][0];
     $tribeResult = $this->resolveEventCardRebuke($regionId);
-    Notifications::log('tribeResult', $tribeResult);
+
     if (count($tribeResult['actions']) > 0) {
       ActionStack::push($tribeResult['actions']);
     }

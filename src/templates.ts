@@ -13,7 +13,7 @@ const tplCard = ({
   extraClasses?: string;
   style?: string;
 }): string => {
-  return `<div id="${cardId}${cardIdSuffix}" class="pp_card pp_card_in_zone pp_${cardId}${
+  return `<div id="${cardId}${cardIdSuffix}" class="pp_card_side pp_${cardId}${
     extraClasses ? ' ' + extraClasses : ''
   }"${style ? ` style="${style}"` : ''}></div>`;
 };
@@ -39,8 +39,7 @@ const tplRoad = ({ coalition, id, classesToAdd }: { id: string; coalition: strin
 };
 
 const tplRupee = ({ rupeeId }: { rupeeId: string }) => {
-  return `<div class="pp_rupee" id="${rupeeId}">
-            <div class="pp_rupee_inner"></div>
+  return `<div class="pp_rupee_side" id="${rupeeId}">
           </div>`;
 };
 
@@ -130,23 +129,23 @@ const tplPlayerTableau = ({playerId, playerColor, playerName}: {playerId: number
       <div class="pp_player_color_block"></div>
     </div>
       <div class="pp_tableau_left">
-          <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>
-          <div class="pp_loyalty_dial_section">
-              <div id="pp_prizes_${playerId}" class="pp_prizes"></div>
-              <div class="pp_loyalty_dial_container">
-                  <div id="pp_loyalty_dial_${playerId}" class="pp_loyalty_dial"></div>
-                  <div class="pp_loyalty_dial_cover pp_player_color_${playerColor}"></div>
-                  <div id="pp_gift_2_${playerId}" class="pp_gift pp_gift_2">
-                      <div id="pp_gift_2_zone_${playerId}" class="pp_gift_zone"></div>
-                  </div>
-                  <div id="pp_gift_4_${playerId}" class="pp_gift pp_gift_4">
-                      <div id="pp_gift_4_zone_${playerId}" class="pp_gift_zone"></div>
-                  </div>
-                  <div id="pp_gift_6_${playerId}" class="pp_gift pp_gift_6">
-                      <div id="pp_gift_6_zone_${playerId}" class="pp_gift_zone"></div>
-                  </div>
-              </div>
+        <div id="pp_ruler_tokens_player_${playerId}" class="pp_ruler_tokens_player"></div>
+        <div class="pp_loyalty_dial_section">
+          <div id="pp_prizes_${playerId}" class="pp_prizes"></div>
+            <div id="pp_loyalty_dial_container_${playerId}" class="pp_loyalty_dial_container">
+               <div id="pp_loyalty_dial_${playerId}" class="pp_loyalty_dial"></div>
+            <div class="pp_loyalty_dial_cover pp_player_color_${playerColor}"></div>
+            <div id="pp_gift_2_${playerId}" class="pp_gift pp_gift_2">
+                <div id="pp_gift_2_zone_${playerId}" class="pp_gift_zone"></div>
+            </div>
+            <div id="pp_gift_4_${playerId}" class="pp_gift pp_gift_4">
+                <div id="pp_gift_4_zone_${playerId}" class="pp_gift_zone"></div>
+            </div>
+            <div id="pp_gift_6_${playerId}" class="pp_gift pp_gift_6">
+                <div id="pp_gift_6_zone_${playerId}" class="pp_gift_zone"></div>
+            </div>
           </div>
+        </div>
       </div>
       <div class="pp_player_tableau_right">
           <div class="pp_player_tableau_title_container">
@@ -200,7 +199,7 @@ const tplWakhanPlayerPanel = ({name}: {name: string;}) => {
 
 const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number; playerColor: string; playerName: string;}) => {
   return `<div id="player_tableau_${playerId}">
-            <div id="pp_player_tableau_container_${playerId}" class="pp_player_tableau pp_player_color_${playerColor}" style="min-height: 320px;">
+            <div id="pp_player_tableau_container_${playerId}" class="pp_player_tableau pp_player_color_${playerColor}">
               <div id="pp_player_to_left_of_${playerId}" class="pp_player_to_left">
                 <div class="pp_player_color_block"></div>
               </div>
@@ -227,7 +226,7 @@ const tplWakhanTableau = ({playerId, playerColor, playerName}: {playerId: number
                 </div>
                 <div class="pp_player_tableau_right">
                     <div class="pp_player_tableau_title_container">
-                        <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title" style="margin-right: 236px;"><span>${(_("${playerName}'s court") as string).replace('${playerName}',playerName)}</span></div>
+                        <div id="pp_tableau_title_player_${playerId}" class="pp_player_tableau_title" style="margin-right: calc(var(--rightColumnScale)* 236px);"><span>${(_("${playerName}'s court") as string).replace('${playerName}',playerName)}</span></div>
                         <div id="pp_tableau_title_icons_player_${playerId}" class="pp_player_tableau_icons">
                             <div id="rupees_tableau_${playerId}" class="pp_icon pp_player_board_rupee"><div id="rupee_count_tableau_${playerId}" class="pp_icon_count"><span id="rupee_count_tableau_${playerId}_counter"></span></div></div>
                         </div>

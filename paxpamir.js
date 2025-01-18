@@ -290,6 +290,273 @@ var Modal = (function () {
     };
     return Modal;
 }());
+var BgaAnimation = (function () {
+    function BgaAnimation(animationFunction, settings) {
+        this.animationFunction = animationFunction;
+        this.settings = settings;
+        this.played = null;
+        this.result = null;
+        this.playWhenNoAnimation = false;
+    }
+    return BgaAnimation;
+}());
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+function attachWithAnimation(animationManager, animation) {
+    var _a;
+    var settings = animation.settings;
+    var element = settings.animation.settings.element;
+    var fromRect = element.getBoundingClientRect();
+    settings.animation.settings.fromRect = fromRect;
+    settings.attachElement.appendChild(element);
+    (_a = settings.afterAttach) === null || _a === void 0 ? void 0 : _a.call(settings, element, settings.attachElement);
+    return animationManager.play(settings.animation);
+}
+var BgaAttachWithAnimation = (function (_super) {
+    __extends(BgaAttachWithAnimation, _super);
+    function BgaAttachWithAnimation(settings) {
+        var _this = _super.call(this, attachWithAnimation, settings) || this;
+        _this.playWhenNoAnimation = true;
+        return _this;
+    }
+    return BgaAttachWithAnimation;
+}(BgaAnimation));
+function cumulatedAnimations(animationManager, animation) {
+    return animationManager.playSequence(animation.settings.animations);
+}
+var BgaCumulatedAnimation = (function (_super) {
+    __extends(BgaCumulatedAnimation, _super);
+    function BgaCumulatedAnimation(settings) {
+        var _this = _super.call(this, cumulatedAnimations, settings) || this;
+        _this.playWhenNoAnimation = true;
+        return _this;
+    }
+    return BgaCumulatedAnimation;
+}(BgaAnimation));
+function showScreenCenterAnimation(animationManager, animation) {
+    var promise = new Promise(function (success) {
+        var _a, _b, _c, _d;
+        var settings = animation.settings;
+        var element = settings.element;
+        var elementBR = element.getBoundingClientRect();
+        var xCenter = (elementBR.left + elementBR.right) / 2;
+        var yCenter = (elementBR.top + elementBR.bottom) / 2;
+        var x = xCenter - (window.innerWidth / 2);
+        var y = yCenter - (window.innerHeight / 2);
+        var duration = (_a = settings === null || settings === void 0 ? void 0 : settings.duration) !== null && _a !== void 0 ? _a : 500;
+        var originalZIndex = element.style.zIndex;
+        var originalTransition = element.style.transition;
+        var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
+        element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
+        var timeoutId = null;
+        var cleanOnTransitionEnd = function () {
+            element.style.zIndex = originalZIndex;
+            element.style.transition = originalTransition;
+            success();
+            element.removeEventListener('transitioncancel', cleanOnTransitionEnd);
+            element.removeEventListener('transitionend', cleanOnTransitionEnd);
+            document.removeEventListener('visibilitychange', cleanOnTransitionEnd);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+        var cleanOnTransitionCancel = function () {
+            var _a;
+            element.style.transition = "";
+            element.offsetHeight;
+            element.style.transform = (_a = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _a !== void 0 ? _a : null;
+            element.offsetHeight;
+            cleanOnTransitionEnd();
+        };
+        element.addEventListener('transitioncancel', cleanOnTransitionEnd);
+        element.addEventListener('transitionend', cleanOnTransitionEnd);
+        document.addEventListener('visibilitychange', cleanOnTransitionCancel);
+        element.offsetHeight;
+        element.style.transition = "transform ".concat(duration, "ms ").concat(transitionTimingFunction);
+        element.offsetHeight;
+        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg)");
+        timeoutId = setTimeout(cleanOnTransitionEnd, duration + 100);
+    });
+    return promise;
+}
+var BgaShowScreenCenterAnimation = (function (_super) {
+    __extends(BgaShowScreenCenterAnimation, _super);
+    function BgaShowScreenCenterAnimation(settings) {
+        return _super.call(this, showScreenCenterAnimation, settings) || this;
+    }
+    return BgaShowScreenCenterAnimation;
+}(BgaAnimation));
+function slideToAnimation(animationManager, animation) {
+    var promise = new Promise(function (success) {
+        var _a, _b, _c, _d, _e;
+        var settings = animation.settings;
+        var element = settings.element;
+        var _f = getDeltaCoordinates(element, settings), x = _f.x, y = _f.y;
+        var duration = (_a = settings === null || settings === void 0 ? void 0 : settings.duration) !== null && _a !== void 0 ? _a : 500;
+        var originalZIndex = element.style.zIndex;
+        var originalTransition = element.style.transition;
+        var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
+        element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
+        var timeoutId = null;
+        var cleanOnTransitionEnd = function () {
+            element.style.zIndex = originalZIndex;
+            element.style.transition = originalTransition;
+            success();
+            element.removeEventListener('transitioncancel', cleanOnTransitionEnd);
+            element.removeEventListener('transitionend', cleanOnTransitionEnd);
+            document.removeEventListener('visibilitychange', cleanOnTransitionEnd);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+        var cleanOnTransitionCancel = function () {
+            var _a;
+            element.style.transition = "";
+            element.offsetHeight;
+            element.style.transform = (_a = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _a !== void 0 ? _a : null;
+            element.offsetHeight;
+            cleanOnTransitionEnd();
+        };
+        element.addEventListener('transitioncancel', cleanOnTransitionEnd);
+        element.addEventListener('transitionend', cleanOnTransitionEnd);
+        document.addEventListener('visibilitychange', cleanOnTransitionCancel);
+        element.offsetHeight;
+        element.style.transition = "transform ".concat(duration, "ms ").concat(transitionTimingFunction);
+        element.offsetHeight;
+        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg) scale(").concat((_e = settings.scale) !== null && _e !== void 0 ? _e : 1, ")");
+        timeoutId = setTimeout(cleanOnTransitionEnd, duration + 100);
+    });
+    return promise;
+}
+var BgaSlideToAnimation = (function (_super) {
+    __extends(BgaSlideToAnimation, _super);
+    function BgaSlideToAnimation(settings) {
+        return _super.call(this, slideToAnimation, settings) || this;
+    }
+    return BgaSlideToAnimation;
+}(BgaAnimation));
+function slideAnimation(animationManager, animation) {
+    var promise = new Promise(function (success) {
+        var _a, _b, _c, _d, _e;
+        var settings = animation.settings;
+        var element = settings.element;
+        var _f = getDeltaCoordinates(element, settings), x = _f.x, y = _f.y;
+        var duration = (_a = settings.duration) !== null && _a !== void 0 ? _a : 500;
+        var originalZIndex = element.style.zIndex;
+        var originalTransition = element.style.transition;
+        var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
+        element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
+        element.style.transition = null;
+        element.offsetHeight;
+        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg)");
+        var timeoutId = null;
+        var cleanOnTransitionEnd = function () {
+            element.style.zIndex = originalZIndex;
+            element.style.transition = originalTransition;
+            success();
+            element.removeEventListener('transitioncancel', cleanOnTransitionEnd);
+            element.removeEventListener('transitionend', cleanOnTransitionEnd);
+            document.removeEventListener('visibilitychange', cleanOnTransitionEnd);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        };
+        var cleanOnTransitionCancel = function () {
+            var _a;
+            element.style.transition = "";
+            element.offsetHeight;
+            element.style.transform = (_a = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _a !== void 0 ? _a : null;
+            element.offsetHeight;
+            cleanOnTransitionEnd();
+        };
+        element.addEventListener('transitioncancel', cleanOnTransitionCancel);
+        element.addEventListener('transitionend', cleanOnTransitionEnd);
+        document.addEventListener('visibilitychange', cleanOnTransitionCancel);
+        element.offsetHeight;
+        element.style.transition = "transform ".concat(duration, "ms ").concat(transitionTimingFunction);
+        element.offsetHeight;
+        element.style.transform = (_e = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _e !== void 0 ? _e : null;
+        timeoutId = setTimeout(cleanOnTransitionEnd, duration + 100);
+    });
+    return promise;
+}
+var BgaSlideAnimation = (function (_super) {
+    __extends(BgaSlideAnimation, _super);
+    function BgaSlideAnimation(settings) {
+        return _super.call(this, slideAnimation, settings) || this;
+    }
+    return BgaSlideAnimation;
+}(BgaAnimation));
+function pauseAnimation(animationManager, animation) {
+    var promise = new Promise(function (success) {
+        var _a;
+        var settings = animation.settings;
+        var duration = (_a = settings === null || settings === void 0 ? void 0 : settings.duration) !== null && _a !== void 0 ? _a : 500;
+        setTimeout(function () { return success(); }, duration);
+    });
+    return promise;
+}
+var BgaPauseAnimation = (function (_super) {
+    __extends(BgaPauseAnimation, _super);
+    function BgaPauseAnimation(settings) {
+        return _super.call(this, pauseAnimation, settings) || this;
+    }
+    return BgaPauseAnimation;
+}(BgaAnimation));
+function shouldAnimate(settings) {
+    var _a;
+    return document.visibilityState !== 'hidden' && !((_a = settings === null || settings === void 0 ? void 0 : settings.game) === null || _a === void 0 ? void 0 : _a.instantaneousMode);
+}
+function getDeltaCoordinates(element, settings) {
+    var _a;
+    if (!settings.fromDelta && !settings.fromRect && !settings.fromElement) {
+        throw new Error("[bga-animation] fromDelta, fromRect or fromElement need to be set");
+    }
+    var x = 0;
+    var y = 0;
+    if (settings.fromDelta) {
+        x = settings.fromDelta.x;
+        y = settings.fromDelta.y;
+    }
+    else {
+        var originBR = (_a = settings.fromRect) !== null && _a !== void 0 ? _a : settings.fromElement.getBoundingClientRect();
+        var originalTransform = element.style.transform;
+        element.style.transform = '';
+        var destinationBR = element.getBoundingClientRect();
+        element.style.transform = originalTransform;
+        x = (destinationBR.left + destinationBR.right) / 2 - (originBR.left + originBR.right) / 2;
+        y = (destinationBR.top + destinationBR.bottom) / 2 - (originBR.top + originBR.bottom) / 2;
+    }
+    if (settings.scale) {
+        x /= settings.scale;
+        y /= settings.scale;
+    }
+    return { x: x, y: y };
+}
+function logAnimation(animationManager, animation) {
+    var settings = animation.settings;
+    var element = settings.element;
+    if (element) {
+        console.log(animation, settings, element, element.getBoundingClientRect(), element.style.transform);
+    }
+    else {
+        console.log(animation, settings);
+    }
+    return Promise.resolve(false);
+}
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -300,6 +567,1087 @@ var __assign = (this && this.__assign) || function () {
         return t;
     };
     return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var AnimationManager = (function () {
+    function AnimationManager(game, settings) {
+        this.game = game;
+        this.settings = settings;
+        this.zoomManager = settings === null || settings === void 0 ? void 0 : settings.zoomManager;
+        if (!game) {
+            throw new Error('You must set your game as the first parameter of AnimationManager');
+        }
+    }
+    AnimationManager.prototype.getZoomManager = function () {
+        return this.zoomManager;
+    };
+    AnimationManager.prototype.setZoomManager = function (zoomManager) {
+        this.zoomManager = zoomManager;
+    };
+    AnimationManager.prototype.getSettings = function () {
+        return this.settings;
+    };
+    AnimationManager.prototype.animationsActive = function () {
+        return document.visibilityState !== 'hidden' && !this.game.instantaneousMode;
+    };
+    AnimationManager.prototype.play = function (animation) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+        return __awaiter(this, void 0, void 0, function () {
+            var settings, _r;
+            return __generator(this, function (_s) {
+                switch (_s.label) {
+                    case 0:
+                        animation.played = animation.playWhenNoAnimation || this.animationsActive();
+                        if (!animation.played) return [3, 2];
+                        settings = animation.settings;
+                        (_a = settings.animationStart) === null || _a === void 0 ? void 0 : _a.call(settings, animation);
+                        (_b = settings.element) === null || _b === void 0 ? void 0 : _b.classList.add((_c = settings.animationClass) !== null && _c !== void 0 ? _c : 'bga-animations_animated');
+                        animation.settings = __assign(__assign({}, animation.settings), { duration: (_g = (_e = (_d = animation.settings) === null || _d === void 0 ? void 0 : _d.duration) !== null && _e !== void 0 ? _e : (_f = this.settings) === null || _f === void 0 ? void 0 : _f.duration) !== null && _g !== void 0 ? _g : 500, scale: (_l = (_j = (_h = animation.settings) === null || _h === void 0 ? void 0 : _h.scale) !== null && _j !== void 0 ? _j : (_k = this.zoomManager) === null || _k === void 0 ? void 0 : _k.zoom) !== null && _l !== void 0 ? _l : undefined });
+                        _r = animation;
+                        return [4, animation.animationFunction(this, animation)];
+                    case 1:
+                        _r.result = _s.sent();
+                        (_o = (_m = animation.settings).animationEnd) === null || _o === void 0 ? void 0 : _o.call(_m, animation);
+                        (_p = settings.element) === null || _p === void 0 ? void 0 : _p.classList.remove((_q = settings.animationClass) !== null && _q !== void 0 ? _q : 'bga-animations_animated');
+                        return [3, 3];
+                    case 2: return [2, Promise.resolve(animation)];
+                    case 3: return [2];
+                }
+            });
+        });
+    };
+    AnimationManager.prototype.playParallel = function (animations) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2, Promise.all(animations.map(function (animation) { return _this.play(animation); }))];
+            });
+        });
+    };
+    AnimationManager.prototype.playSequence = function (animations) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result, others;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!animations.length) return [3, 3];
+                        return [4, this.play(animations[0])];
+                    case 1:
+                        result = _a.sent();
+                        return [4, this.playSequence(animations.slice(1))];
+                    case 2:
+                        others = _a.sent();
+                        return [2, __spreadArray([result], others, true)];
+                    case 3: return [2, Promise.resolve([])];
+                }
+            });
+        });
+    };
+    AnimationManager.prototype.playWithDelay = function (animations, delay) {
+        return __awaiter(this, void 0, void 0, function () {
+            var promise;
+            var _this = this;
+            return __generator(this, function (_a) {
+                promise = new Promise(function (success) {
+                    var promises = [];
+                    var _loop_1 = function (i) {
+                        setTimeout(function () {
+                            promises.push(_this.play(animations[i]));
+                            if (i == animations.length - 1) {
+                                Promise.all(promises).then(function (result) {
+                                    success(result);
+                                });
+                            }
+                        }, i * delay);
+                    };
+                    for (var i = 0; i < animations.length; i++) {
+                        _loop_1(i);
+                    }
+                });
+                return [2, promise];
+            });
+        });
+    };
+    AnimationManager.prototype.attachWithAnimation = function (animation, attachElement) {
+        var attachWithAnimation = new BgaAttachWithAnimation({
+            animation: animation,
+            attachElement: attachElement
+        });
+        return this.play(attachWithAnimation);
+    };
+    return AnimationManager;
+}());
+var CardStock = (function () {
+    function CardStock(manager, element, settings) {
+        this.manager = manager;
+        this.element = element;
+        this.settings = settings;
+        this.cards = [];
+        this.selectedCards = [];
+        this.selectionMode = 'none';
+        manager.addStock(this);
+        element === null || element === void 0 ? void 0 : element.classList.add('card-stock');
+        this.bindClick();
+        this.sort = settings === null || settings === void 0 ? void 0 : settings.sort;
+    }
+    CardStock.prototype.remove = function () {
+        var _a;
+        this.manager.removeStock(this);
+        (_a = this.element) === null || _a === void 0 ? void 0 : _a.remove();
+    };
+    CardStock.prototype.getCards = function () {
+        return this.cards.slice();
+    };
+    CardStock.prototype.isEmpty = function () {
+        return !this.cards.length;
+    };
+    CardStock.prototype.getSelection = function () {
+        return this.selectedCards.slice();
+    };
+    CardStock.prototype.isSelected = function (card) {
+        var _this = this;
+        return this.selectedCards.some(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); });
+    };
+    CardStock.prototype.contains = function (card) {
+        var _this = this;
+        return this.cards.some(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); });
+    };
+    CardStock.prototype.getCardElement = function (card) {
+        return this.manager.getCardElement(card);
+    };
+    CardStock.prototype.canAddCard = function (card, settings) {
+        return !this.contains(card);
+    };
+    CardStock.prototype.addCard = function (card, animation, settings) {
+        var _this = this;
+        var _a, _b, _c, _d;
+        if (!this.canAddCard(card, settings)) {
+            return Promise.resolve(false);
+        }
+        var promise;
+        var originStock = this.manager.getCardStock(card);
+        var index = this.getNewCardIndex(card);
+        var settingsWithIndex = __assign({ index: index }, (settings !== null && settings !== void 0 ? settings : {}));
+        var updateInformations = (_a = settingsWithIndex.updateInformations) !== null && _a !== void 0 ? _a : true;
+        var needsCreation = true;
+        if (originStock === null || originStock === void 0 ? void 0 : originStock.contains(card)) {
+            var element = this.getCardElement(card);
+            if (element) {
+                promise = this.moveFromOtherStock(card, element, __assign(__assign({}, animation), { fromStock: originStock }), settingsWithIndex);
+                needsCreation = false;
+                if (!updateInformations) {
+                    element.dataset.side = ((_b = settingsWithIndex === null || settingsWithIndex === void 0 ? void 0 : settingsWithIndex.visible) !== null && _b !== void 0 ? _b : this.manager.isCardVisible(card)) ? 'front' : 'back';
+                }
+            }
+        }
+        else if ((_c = animation === null || animation === void 0 ? void 0 : animation.fromStock) === null || _c === void 0 ? void 0 : _c.contains(card)) {
+            var element = this.getCardElement(card);
+            if (element) {
+                promise = this.moveFromOtherStock(card, element, animation, settingsWithIndex);
+                needsCreation = false;
+            }
+        }
+        if (needsCreation) {
+            var element = this.manager.createCardElement(card, ((_d = settingsWithIndex === null || settingsWithIndex === void 0 ? void 0 : settingsWithIndex.visible) !== null && _d !== void 0 ? _d : this.manager.isCardVisible(card)));
+            promise = this.moveFromElement(card, element, animation, settingsWithIndex);
+        }
+        if (settingsWithIndex.index !== null && settingsWithIndex.index !== undefined) {
+            this.cards.splice(index, 0, card);
+        }
+        else {
+            this.cards.push(card);
+        }
+        if (updateInformations) {
+            this.manager.updateCardInformations(card);
+        }
+        if (!promise) {
+            console.warn("CardStock.addCard didn't return a Promise");
+            promise = Promise.resolve(false);
+        }
+        if (this.selectionMode !== 'none') {
+            promise.then(function () { var _a; return _this.setSelectableCard(card, (_a = settingsWithIndex.selectable) !== null && _a !== void 0 ? _a : true); });
+        }
+        return promise;
+    };
+    CardStock.prototype.getNewCardIndex = function (card) {
+        if (this.sort) {
+            var otherCards = this.getCards();
+            for (var i = 0; i < otherCards.length; i++) {
+                var otherCard = otherCards[i];
+                if (this.sort(card, otherCard) < 0) {
+                    return i;
+                }
+            }
+            return otherCards.length;
+        }
+        else {
+            return undefined;
+        }
+    };
+    CardStock.prototype.addCardElementToParent = function (cardElement, settings) {
+        var _a;
+        var parent = (_a = settings === null || settings === void 0 ? void 0 : settings.forceToElement) !== null && _a !== void 0 ? _a : this.element;
+        if ((settings === null || settings === void 0 ? void 0 : settings.index) === null || (settings === null || settings === void 0 ? void 0 : settings.index) === undefined || !parent.children.length || (settings === null || settings === void 0 ? void 0 : settings.index) >= parent.children.length) {
+            parent.appendChild(cardElement);
+        }
+        else {
+            parent.insertBefore(cardElement, parent.children[settings.index]);
+        }
+    };
+    CardStock.prototype.moveFromOtherStock = function (card, cardElement, animation, settings) {
+        var promise;
+        var element = animation.fromStock.contains(card) ? this.manager.getCardElement(card) : animation.fromStock.element;
+        var fromRect = element === null || element === void 0 ? void 0 : element.getBoundingClientRect();
+        this.addCardElementToParent(cardElement, settings);
+        this.removeSelectionClassesFromElement(cardElement);
+        promise = fromRect ? this.animationFromElement(cardElement, fromRect, {
+            originalSide: animation.originalSide,
+            rotationDelta: animation.rotationDelta,
+            animation: animation.animation,
+        }) : Promise.resolve(false);
+        if (animation.fromStock && animation.fromStock != this) {
+            animation.fromStock.removeCard(card);
+        }
+        if (!promise) {
+            console.warn("CardStock.moveFromOtherStock didn't return a Promise");
+            promise = Promise.resolve(false);
+        }
+        return promise;
+    };
+    CardStock.prototype.moveFromElement = function (card, cardElement, animation, settings) {
+        var promise;
+        this.addCardElementToParent(cardElement, settings);
+        if (animation) {
+            if (animation.fromStock) {
+                promise = this.animationFromElement(cardElement, animation.fromStock.element.getBoundingClientRect(), {
+                    originalSide: animation.originalSide,
+                    rotationDelta: animation.rotationDelta,
+                    animation: animation.animation,
+                });
+                animation.fromStock.removeCard(card);
+            }
+            else if (animation.fromElement) {
+                promise = this.animationFromElement(cardElement, animation.fromElement.getBoundingClientRect(), {
+                    originalSide: animation.originalSide,
+                    rotationDelta: animation.rotationDelta,
+                    animation: animation.animation,
+                });
+            }
+        }
+        else {
+            promise = Promise.resolve(false);
+        }
+        if (!promise) {
+            console.warn("CardStock.moveFromElement didn't return a Promise");
+            promise = Promise.resolve(false);
+        }
+        return promise;
+    };
+    CardStock.prototype.addCards = function (cards, animation, settings, shift) {
+        if (shift === void 0) { shift = false; }
+        return __awaiter(this, void 0, void 0, function () {
+            var promises, result, others, _loop_2, i, results;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.manager.animationsActive()) {
+                            shift = false;
+                        }
+                        promises = [];
+                        if (!(shift === true)) return [3, 4];
+                        if (!cards.length) return [3, 3];
+                        return [4, this.addCard(cards[0], animation, settings)];
+                    case 1:
+                        result = _a.sent();
+                        return [4, this.addCards(cards.slice(1), animation, settings, shift)];
+                    case 2:
+                        others = _a.sent();
+                        return [2, result || others];
+                    case 3: return [3, 5];
+                    case 4:
+                        if (typeof shift === 'number') {
+                            _loop_2 = function (i) {
+                                setTimeout(function () { return promises.push(_this.addCard(cards[i], animation, settings)); }, i * shift);
+                            };
+                            for (i = 0; i < cards.length; i++) {
+                                _loop_2(i);
+                            }
+                        }
+                        else {
+                            promises = cards.map(function (card) { return _this.addCard(card, animation, settings); });
+                        }
+                        _a.label = 5;
+                    case 5: return [4, Promise.all(promises)];
+                    case 6:
+                        results = _a.sent();
+                        return [2, results.some(function (result) { return result; })];
+                }
+            });
+        });
+    };
+    CardStock.prototype.removeCard = function (card, settings) {
+        var promise;
+        if (this.contains(card) && this.element.contains(this.getCardElement(card))) {
+            promise = this.manager.removeCard(card, settings);
+        }
+        else {
+            promise = Promise.resolve(false);
+        }
+        this.cardRemoved(card, settings);
+        return promise;
+    };
+    CardStock.prototype.cardRemoved = function (card, settings) {
+        var _this = this;
+        var index = this.cards.findIndex(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); });
+        if (index !== -1) {
+            this.cards.splice(index, 1);
+        }
+        if (this.selectedCards.find(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); })) {
+            this.unselectCard(card);
+        }
+    };
+    CardStock.prototype.removeCards = function (cards, settings) {
+        return __awaiter(this, void 0, void 0, function () {
+            var promises, results;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        promises = cards.map(function (card) { return _this.removeCard(card, settings); });
+                        return [4, Promise.all(promises)];
+                    case 1:
+                        results = _a.sent();
+                        return [2, results.some(function (result) { return result; })];
+                }
+            });
+        });
+    };
+    CardStock.prototype.removeAll = function (settings) {
+        var _this = this;
+        var cards = this.getCards();
+        cards.forEach(function (card) { return _this.removeCard(card, settings); });
+    };
+    CardStock.prototype.setSelectionMode = function (selectionMode, selectableCards) {
+        var _this = this;
+        if (selectionMode !== this.selectionMode) {
+            this.unselectAll(true);
+        }
+        this.cards.forEach(function (card) { return _this.setSelectableCard(card, selectionMode != 'none'); });
+        this.element.classList.toggle('bga-cards_selectable-stock', selectionMode != 'none');
+        this.selectionMode = selectionMode;
+        if (selectionMode === 'none') {
+            this.getCards().forEach(function (card) { return _this.removeSelectionClasses(card); });
+        }
+        else {
+            this.setSelectableCards(selectableCards !== null && selectableCards !== void 0 ? selectableCards : this.getCards());
+        }
+    };
+    CardStock.prototype.setSelectableCard = function (card, selectable) {
+        if (this.selectionMode === 'none') {
+            return;
+        }
+        var element = this.getCardElement(card);
+        var selectableCardsClass = this.getSelectableCardClass();
+        var unselectableCardsClass = this.getUnselectableCardClass();
+        if (selectableCardsClass) {
+            element === null || element === void 0 ? void 0 : element.classList.toggle(selectableCardsClass, selectable);
+        }
+        if (unselectableCardsClass) {
+            element === null || element === void 0 ? void 0 : element.classList.toggle(unselectableCardsClass, !selectable);
+        }
+        if (!selectable && this.isSelected(card)) {
+            this.unselectCard(card, true);
+        }
+    };
+    CardStock.prototype.setSelectableCards = function (selectableCards) {
+        var _this = this;
+        if (this.selectionMode === 'none') {
+            return;
+        }
+        var selectableCardsIds = (selectableCards !== null && selectableCards !== void 0 ? selectableCards : this.getCards()).map(function (card) { return _this.manager.getId(card); });
+        this.cards.forEach(function (card) {
+            return _this.setSelectableCard(card, selectableCardsIds.includes(_this.manager.getId(card)));
+        });
+    };
+    CardStock.prototype.selectCard = function (card, silent) {
+        var _this = this;
+        var _a;
+        if (silent === void 0) { silent = false; }
+        if (this.selectionMode == 'none') {
+            return;
+        }
+        var element = this.getCardElement(card);
+        var selectableCardsClass = this.getSelectableCardClass();
+        if (!element || !element.classList.contains(selectableCardsClass)) {
+            return;
+        }
+        if (this.selectionMode === 'single') {
+            this.cards.filter(function (c) { return _this.manager.getId(c) != _this.manager.getId(card); }).forEach(function (c) { return _this.unselectCard(c, true); });
+        }
+        var selectedCardsClass = this.getSelectedCardClass();
+        element.classList.add(selectedCardsClass);
+        this.selectedCards.push(card);
+        if (!silent) {
+            (_a = this.onSelectionChange) === null || _a === void 0 ? void 0 : _a.call(this, this.selectedCards.slice(), card);
+        }
+    };
+    CardStock.prototype.unselectCard = function (card, silent) {
+        var _this = this;
+        var _a;
+        if (silent === void 0) { silent = false; }
+        var element = this.getCardElement(card);
+        var selectedCardsClass = this.getSelectedCardClass();
+        element === null || element === void 0 ? void 0 : element.classList.remove(selectedCardsClass);
+        var index = this.selectedCards.findIndex(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); });
+        if (index !== -1) {
+            this.selectedCards.splice(index, 1);
+        }
+        if (!silent) {
+            (_a = this.onSelectionChange) === null || _a === void 0 ? void 0 : _a.call(this, this.selectedCards.slice(), card);
+        }
+    };
+    CardStock.prototype.selectAll = function (silent) {
+        var _this = this;
+        var _a;
+        if (silent === void 0) { silent = false; }
+        if (this.selectionMode == 'none') {
+            return;
+        }
+        this.cards.forEach(function (c) { return _this.selectCard(c, true); });
+        if (!silent) {
+            (_a = this.onSelectionChange) === null || _a === void 0 ? void 0 : _a.call(this, this.selectedCards.slice(), null);
+        }
+    };
+    CardStock.prototype.unselectAll = function (silent) {
+        var _this = this;
+        var _a;
+        if (silent === void 0) { silent = false; }
+        var cards = this.getCards();
+        cards.forEach(function (c) { return _this.unselectCard(c, true); });
+        if (!silent) {
+            (_a = this.onSelectionChange) === null || _a === void 0 ? void 0 : _a.call(this, this.selectedCards.slice(), null);
+        }
+    };
+    CardStock.prototype.bindClick = function () {
+        var _this = this;
+        var _a;
+        (_a = this.element) === null || _a === void 0 ? void 0 : _a.addEventListener('click', function (event) {
+            var cardDiv = event.target.closest('.card');
+            if (!cardDiv) {
+                return;
+            }
+            var card = _this.cards.find(function (c) { return _this.manager.getId(c) == cardDiv.id; });
+            if (!card) {
+                return;
+            }
+            _this.cardClick(card);
+        });
+    };
+    CardStock.prototype.cardClick = function (card) {
+        var _this = this;
+        var _a;
+        if (this.selectionMode != 'none') {
+            var alreadySelected = this.selectedCards.some(function (c) { return _this.manager.getId(c) == _this.manager.getId(card); });
+            if (alreadySelected) {
+                this.unselectCard(card);
+            }
+            else {
+                this.selectCard(card);
+            }
+        }
+        (_a = this.onCardClick) === null || _a === void 0 ? void 0 : _a.call(this, card);
+    };
+    CardStock.prototype.animationFromElement = function (element, fromRect, settings) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var side, cardSides_1, animation, result;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        side = element.dataset.side;
+                        if (settings.originalSide && settings.originalSide != side) {
+                            cardSides_1 = element.getElementsByClassName('card-sides')[0];
+                            cardSides_1.style.transition = 'none';
+                            element.dataset.side = settings.originalSide;
+                            setTimeout(function () {
+                                cardSides_1.style.transition = null;
+                                element.dataset.side = side;
+                            });
+                        }
+                        animation = settings.animation;
+                        if (animation) {
+                            animation.settings.element = element;
+                            animation.settings.fromRect = fromRect;
+                        }
+                        else {
+                            animation = new BgaSlideAnimation({ element: element, fromRect: fromRect });
+                        }
+                        return [4, this.manager.animationManager.play(animation)];
+                    case 1:
+                        result = _b.sent();
+                        return [2, (_a = result === null || result === void 0 ? void 0 : result.played) !== null && _a !== void 0 ? _a : false];
+                }
+            });
+        });
+    };
+    CardStock.prototype.setCardVisible = function (card, visible, settings) {
+        this.manager.setCardVisible(card, visible, settings);
+    };
+    CardStock.prototype.flipCard = function (card, settings) {
+        this.manager.flipCard(card, settings);
+    };
+    CardStock.prototype.getSelectableCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.selectableCardClass) === undefined ? this.manager.getSelectableCardClass() : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.selectableCardClass;
+    };
+    CardStock.prototype.getUnselectableCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.unselectableCardClass) === undefined ? this.manager.getUnselectableCardClass() : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.unselectableCardClass;
+    };
+    CardStock.prototype.getSelectedCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.selectedCardClass) === undefined ? this.manager.getSelectedCardClass() : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.selectedCardClass;
+    };
+    CardStock.prototype.removeSelectionClasses = function (card) {
+        this.removeSelectionClassesFromElement(this.getCardElement(card));
+    };
+    CardStock.prototype.removeSelectionClassesFromElement = function (cardElement) {
+        var selectableCardsClass = this.getSelectableCardClass();
+        var unselectableCardsClass = this.getUnselectableCardClass();
+        var selectedCardsClass = this.getSelectedCardClass();
+        cardElement === null || cardElement === void 0 ? void 0 : cardElement.classList.remove(selectableCardsClass, unselectableCardsClass, selectedCardsClass);
+    };
+    return CardStock;
+}());
+var SlideAndBackAnimation = (function (_super) {
+    __extends(SlideAndBackAnimation, _super);
+    function SlideAndBackAnimation(manager, element, tempElement) {
+        var distance = (manager.getCardWidth() + manager.getCardHeight()) / 2;
+        var angle = Math.random() * Math.PI * 2;
+        var fromDelta = {
+            x: distance * Math.cos(angle),
+            y: distance * Math.sin(angle),
+        };
+        return _super.call(this, {
+            animations: [
+                new BgaSlideToAnimation({ element: element, fromDelta: fromDelta, duration: 250 }),
+                new BgaSlideAnimation({ element: element, fromDelta: fromDelta, duration: 250, animationEnd: tempElement ? (function () { return element.remove(); }) : undefined }),
+            ]
+        }) || this;
+    }
+    return SlideAndBackAnimation;
+}(BgaCumulatedAnimation));
+var Deck = (function (_super) {
+    __extends(Deck, _super);
+    function Deck(manager, element, settings) {
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        _this = _super.call(this, manager, element) || this;
+        _this.manager = manager;
+        _this.element = element;
+        element.classList.add('deck');
+        var cardWidth = _this.manager.getCardWidth();
+        var cardHeight = _this.manager.getCardHeight();
+        if (cardWidth && cardHeight) {
+            _this.element.style.setProperty('--width', "".concat(cardWidth, "px"));
+            _this.element.style.setProperty('--height', "".concat(cardHeight, "px"));
+        }
+        else {
+            throw new Error("You need to set cardWidth and cardHeight in the card manager to use Deck.");
+        }
+        _this.fakeCardGenerator = (_a = settings === null || settings === void 0 ? void 0 : settings.fakeCardGenerator) !== null && _a !== void 0 ? _a : manager.getFakeCardGenerator();
+        _this.thicknesses = (_b = settings.thicknesses) !== null && _b !== void 0 ? _b : [0, 2, 5, 10, 20, 30];
+        _this.setCardNumber((_c = settings.cardNumber) !== null && _c !== void 0 ? _c : 0);
+        _this.autoUpdateCardNumber = (_d = settings.autoUpdateCardNumber) !== null && _d !== void 0 ? _d : true;
+        _this.autoRemovePreviousCards = (_e = settings.autoRemovePreviousCards) !== null && _e !== void 0 ? _e : true;
+        var shadowDirection = (_f = settings.shadowDirection) !== null && _f !== void 0 ? _f : 'bottom-right';
+        var shadowDirectionSplit = shadowDirection.split('-');
+        var xShadowShift = shadowDirectionSplit.includes('right') ? 1 : (shadowDirectionSplit.includes('left') ? -1 : 0);
+        var yShadowShift = shadowDirectionSplit.includes('bottom') ? 1 : (shadowDirectionSplit.includes('top') ? -1 : 0);
+        _this.element.style.setProperty('--xShadowShift', '' + xShadowShift);
+        _this.element.style.setProperty('--yShadowShift', '' + yShadowShift);
+        if (settings.topCard) {
+            _this.addCard(settings.topCard);
+        }
+        else if (settings.cardNumber > 0) {
+            _this.addCard(_this.getFakeCard());
+        }
+        if (settings.counter && ((_g = settings.counter.show) !== null && _g !== void 0 ? _g : true)) {
+            if (settings.cardNumber === null || settings.cardNumber === undefined) {
+                console.warn("Deck card counter created without a cardNumber");
+            }
+            _this.createCounter((_h = settings.counter.position) !== null && _h !== void 0 ? _h : 'bottom', (_j = settings.counter.extraClasses) !== null && _j !== void 0 ? _j : 'round', settings.counter.counterId);
+            if ((_k = settings.counter) === null || _k === void 0 ? void 0 : _k.hideWhenEmpty) {
+                _this.element.querySelector('.bga-cards_deck-counter').classList.add('hide-when-empty');
+            }
+        }
+        _this.setCardNumber((_l = settings.cardNumber) !== null && _l !== void 0 ? _l : 0);
+        return _this;
+    }
+    Deck.prototype.createCounter = function (counterPosition, extraClasses, counterId) {
+        var left = counterPosition.includes('right') ? 100 : (counterPosition.includes('left') ? 0 : 50);
+        var top = counterPosition.includes('bottom') ? 100 : (counterPosition.includes('top') ? 0 : 50);
+        this.element.style.setProperty('--bga-cards-deck-left', "".concat(left, "%"));
+        this.element.style.setProperty('--bga-cards-deck-top', "".concat(top, "%"));
+        this.element.insertAdjacentHTML('beforeend', "\n            <div ".concat(counterId ? "id=\"".concat(counterId, "\"") : '', " class=\"bga-cards_deck-counter ").concat(extraClasses, "\"></div>\n        "));
+    };
+    Deck.prototype.getCardNumber = function () {
+        return this.cardNumber;
+    };
+    Deck.prototype.setCardNumber = function (cardNumber, topCard) {
+        var _this = this;
+        if (topCard === void 0) { topCard = undefined; }
+        var promise = topCard === null || cardNumber == 0 ?
+            Promise.resolve(false) :
+            _super.prototype.addCard.call(this, topCard || this.getFakeCard(), undefined, { autoUpdateCardNumber: false });
+        this.cardNumber = cardNumber;
+        this.element.dataset.empty = (this.cardNumber == 0).toString();
+        var thickness = 0;
+        this.thicknesses.forEach(function (threshold, index) {
+            if (_this.cardNumber >= threshold) {
+                thickness = index;
+            }
+        });
+        this.element.style.setProperty('--thickness', "".concat(thickness, "px"));
+        var counterDiv = this.element.querySelector('.bga-cards_deck-counter');
+        if (counterDiv) {
+            counterDiv.innerHTML = "".concat(cardNumber);
+        }
+        return promise;
+    };
+    Deck.prototype.addCard = function (card, animation, settings) {
+        var _this = this;
+        var _a, _b;
+        if ((_a = settings === null || settings === void 0 ? void 0 : settings.autoUpdateCardNumber) !== null && _a !== void 0 ? _a : this.autoUpdateCardNumber) {
+            this.setCardNumber(this.cardNumber + 1, null);
+        }
+        var promise = _super.prototype.addCard.call(this, card, animation, settings);
+        if ((_b = settings === null || settings === void 0 ? void 0 : settings.autoRemovePreviousCards) !== null && _b !== void 0 ? _b : this.autoRemovePreviousCards) {
+            promise.then(function () {
+                var previousCards = _this.getCards().slice(0, -1);
+                _this.removeCards(previousCards, { autoUpdateCardNumber: false });
+            });
+        }
+        return promise;
+    };
+    Deck.prototype.cardRemoved = function (card, settings) {
+        var _a;
+        if ((_a = settings === null || settings === void 0 ? void 0 : settings.autoUpdateCardNumber) !== null && _a !== void 0 ? _a : this.autoUpdateCardNumber) {
+            this.setCardNumber(this.cardNumber - 1);
+        }
+        _super.prototype.cardRemoved.call(this, card, settings);
+    };
+    Deck.prototype.getTopCard = function () {
+        var cards = this.getCards();
+        return cards.length ? cards[cards.length - 1] : null;
+    };
+    Deck.prototype.shuffle = function (settings) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function () {
+            var animatedCardsMax, animatedCards, elements, getFakeCard, uid, i, newCard, newElement, pauseDelayAfterAnimation;
+            var _this = this;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        animatedCardsMax = (_a = settings === null || settings === void 0 ? void 0 : settings.animatedCardsMax) !== null && _a !== void 0 ? _a : 10;
+                        this.addCard((_b = settings === null || settings === void 0 ? void 0 : settings.newTopCard) !== null && _b !== void 0 ? _b : this.getFakeCard(), undefined, { autoUpdateCardNumber: false });
+                        if (!this.manager.animationsActive()) {
+                            return [2, Promise.resolve(false)];
+                        }
+                        animatedCards = Math.min(10, animatedCardsMax, this.getCardNumber());
+                        if (!(animatedCards > 1)) return [3, 4];
+                        elements = [this.getCardElement(this.getTopCard())];
+                        getFakeCard = function (uid) {
+                            var newCard;
+                            if (settings === null || settings === void 0 ? void 0 : settings.fakeCardSetter) {
+                                newCard = {};
+                                settings === null || settings === void 0 ? void 0 : settings.fakeCardSetter(newCard, uid);
+                            }
+                            else {
+                                newCard = _this.fakeCardGenerator("".concat(_this.element.id, "-shuffle-").concat(uid));
+                            }
+                            return newCard;
+                        };
+                        uid = 0;
+                        for (i = elements.length; i <= animatedCards; i++) {
+                            newCard = void 0;
+                            do {
+                                newCard = getFakeCard(uid++);
+                            } while (this.manager.getCardElement(newCard));
+                            newElement = this.manager.createCardElement(newCard, false);
+                            newElement.dataset.tempCardForShuffleAnimation = 'true';
+                            this.element.prepend(newElement);
+                            elements.push(newElement);
+                        }
+                        return [4, this.manager.animationManager.playWithDelay(elements.map(function (element) { return new SlideAndBackAnimation(_this.manager, element, element.dataset.tempCardForShuffleAnimation == 'true'); }), 50)];
+                    case 1:
+                        _d.sent();
+                        pauseDelayAfterAnimation = (_c = settings === null || settings === void 0 ? void 0 : settings.pauseDelayAfterAnimation) !== null && _c !== void 0 ? _c : 500;
+                        if (!(pauseDelayAfterAnimation > 0)) return [3, 3];
+                        return [4, this.manager.animationManager.play(new BgaPauseAnimation({ duration: pauseDelayAfterAnimation }))];
+                    case 2:
+                        _d.sent();
+                        _d.label = 3;
+                    case 3: return [2, true];
+                    case 4: return [2, Promise.resolve(false)];
+                }
+            });
+        });
+    };
+    Deck.prototype.getFakeCard = function () {
+        return this.fakeCardGenerator(this.element.id);
+    };
+    return Deck;
+}(CardStock));
+var LineStock = (function (_super) {
+    __extends(LineStock, _super);
+    function LineStock(manager, element, settings) {
+        var _this = this;
+        var _a, _b, _c, _d;
+        _this = _super.call(this, manager, element, settings) || this;
+        _this.manager = manager;
+        _this.element = element;
+        element.classList.add('line-stock');
+        element.dataset.center = ((_a = settings === null || settings === void 0 ? void 0 : settings.center) !== null && _a !== void 0 ? _a : true).toString();
+        element.style.setProperty('--wrap', (_b = settings === null || settings === void 0 ? void 0 : settings.wrap) !== null && _b !== void 0 ? _b : 'wrap');
+        element.style.setProperty('--direction', (_c = settings === null || settings === void 0 ? void 0 : settings.direction) !== null && _c !== void 0 ? _c : 'row');
+        element.style.setProperty('--gap', (_d = settings === null || settings === void 0 ? void 0 : settings.gap) !== null && _d !== void 0 ? _d : '8px');
+        return _this;
+    }
+    return LineStock;
+}(CardStock));
+var ManualPositionStock = (function (_super) {
+    __extends(ManualPositionStock, _super);
+    function ManualPositionStock(manager, element, settings, updateDisplay) {
+        var _this = _super.call(this, manager, element, settings) || this;
+        _this.manager = manager;
+        _this.element = element;
+        _this.updateDisplay = updateDisplay;
+        element.classList.add('manual-position-stock');
+        return _this;
+    }
+    ManualPositionStock.prototype.addCard = function (card, animation, settings) {
+        var promise = _super.prototype.addCard.call(this, card, animation, settings);
+        this.updateDisplay(this.element, this.getCards(), card, this);
+        return promise;
+    };
+    ManualPositionStock.prototype.cardRemoved = function (card, settings) {
+        _super.prototype.cardRemoved.call(this, card, settings);
+        this.updateDisplay(this.element, this.getCards(), card, this);
+    };
+    return ManualPositionStock;
+}(CardStock));
+var VoidStock = (function (_super) {
+    __extends(VoidStock, _super);
+    function VoidStock(manager, element) {
+        var _this = _super.call(this, manager, element) || this;
+        _this.manager = manager;
+        _this.element = element;
+        element.classList.add('void-stock');
+        return _this;
+    }
+    VoidStock.prototype.addCard = function (card, animation, settings) {
+        var _this = this;
+        var _a;
+        var promise = _super.prototype.addCard.call(this, card, animation, settings);
+        var cardElement = this.getCardElement(card);
+        var originalLeft = cardElement.style.left;
+        var originalTop = cardElement.style.top;
+        cardElement.style.left = "".concat((this.element.clientWidth - cardElement.clientWidth) / 2, "px");
+        cardElement.style.top = "".concat((this.element.clientHeight - cardElement.clientHeight) / 2, "px");
+        if (!promise) {
+            console.warn("VoidStock.addCard didn't return a Promise");
+            promise = Promise.resolve(false);
+        }
+        if ((_a = settings === null || settings === void 0 ? void 0 : settings.remove) !== null && _a !== void 0 ? _a : true) {
+            return promise.then(function () {
+                return _this.removeCard(card);
+            });
+        }
+        else {
+            cardElement.style.left = originalLeft;
+            cardElement.style.top = originalTop;
+            return promise;
+        }
+    };
+    return VoidStock;
+}(CardStock));
+function sortFunction() {
+    var sortedFields = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        sortedFields[_i] = arguments[_i];
+    }
+    return function (a, b) {
+        for (var i = 0; i < sortedFields.length; i++) {
+            var direction = 1;
+            var field = sortedFields[i];
+            if (field[0] == '-') {
+                direction = -1;
+                field = field.substring(1);
+            }
+            else if (field[0] == '+') {
+                field = field.substring(1);
+            }
+            var type = typeof a[field];
+            if (type === 'string') {
+                var compare = a[field].localeCompare(b[field]);
+                if (compare !== 0) {
+                    return compare;
+                }
+            }
+            else if (type === 'number') {
+                var compare = (a[field] - b[field]) * direction;
+                if (compare !== 0) {
+                    return compare * direction;
+                }
+            }
+        }
+        return 0;
+    };
+}
+var CardManager = (function () {
+    function CardManager(game, settings) {
+        var _a;
+        this.game = game;
+        this.settings = settings;
+        this.stocks = [];
+        this.updateMainTimeoutId = [];
+        this.updateFrontTimeoutId = [];
+        this.updateBackTimeoutId = [];
+        this.animationManager = (_a = settings.animationManager) !== null && _a !== void 0 ? _a : new AnimationManager(game);
+    }
+    CardManager.prototype.animationsActive = function () {
+        return this.animationManager.animationsActive();
+    };
+    CardManager.prototype.addStock = function (stock) {
+        this.stocks.push(stock);
+    };
+    CardManager.prototype.removeStock = function (stock) {
+        var index = this.stocks.indexOf(stock);
+        if (index !== -1) {
+            this.stocks.splice(index, 1);
+        }
+    };
+    CardManager.prototype.getId = function (card) {
+        var _a, _b, _c;
+        return (_c = (_b = (_a = this.settings).getId) === null || _b === void 0 ? void 0 : _b.call(_a, card)) !== null && _c !== void 0 ? _c : "card-".concat(card.id);
+    };
+    CardManager.prototype.createCardElement = function (card, visible) {
+        var _a, _b, _c, _d, _e, _f;
+        if (visible === void 0) { visible = true; }
+        var id = this.getId(card);
+        var side = visible ? 'front' : 'back';
+        if (this.getCardElement(card)) {
+            throw new Error('This card already exists ' + JSON.stringify(card));
+        }
+        var element = document.createElement("div");
+        element.id = id;
+        element.dataset.side = '' + side;
+        element.innerHTML = "\n            <div class=\"card-sides\">\n                <div id=\"".concat(id, "-front\" class=\"card-side front\">\n                </div>\n                <div id=\"").concat(id, "-back\" class=\"card-side back\">\n                </div>\n            </div>\n        ");
+        element.classList.add('card');
+        document.body.appendChild(element);
+        (_b = (_a = this.settings).setupDiv) === null || _b === void 0 ? void 0 : _b.call(_a, card, element);
+        (_d = (_c = this.settings).setupFrontDiv) === null || _d === void 0 ? void 0 : _d.call(_c, card, element.getElementsByClassName('front')[0]);
+        (_f = (_e = this.settings).setupBackDiv) === null || _f === void 0 ? void 0 : _f.call(_e, card, element.getElementsByClassName('back')[0]);
+        document.body.removeChild(element);
+        return element;
+    };
+    CardManager.prototype.getCardElement = function (card) {
+        return document.getElementById(this.getId(card));
+    };
+    CardManager.prototype.removeCard = function (card, settings) {
+        var _a;
+        var id = this.getId(card);
+        var div = document.getElementById(id);
+        if (!div) {
+            return Promise.resolve(false);
+        }
+        div.id = "deleted".concat(id);
+        div.remove();
+        (_a = this.getCardStock(card)) === null || _a === void 0 ? void 0 : _a.cardRemoved(card, settings);
+        return Promise.resolve(true);
+    };
+    CardManager.prototype.getCardStock = function (card) {
+        return this.stocks.find(function (stock) { return stock.contains(card); });
+    };
+    CardManager.prototype.isCardVisible = function (card) {
+        var _a, _b, _c, _d;
+        return (_c = (_b = (_a = this.settings).isCardVisible) === null || _b === void 0 ? void 0 : _b.call(_a, card)) !== null && _c !== void 0 ? _c : ((_d = card.type) !== null && _d !== void 0 ? _d : false);
+    };
+    CardManager.prototype.setCardVisible = function (card, visible, settings) {
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var element = this.getCardElement(card);
+        if (!element) {
+            return;
+        }
+        var isVisible = visible !== null && visible !== void 0 ? visible : this.isCardVisible(card);
+        element.dataset.side = isVisible ? 'front' : 'back';
+        var stringId = JSON.stringify(this.getId(card));
+        if ((_a = settings === null || settings === void 0 ? void 0 : settings.updateMain) !== null && _a !== void 0 ? _a : false) {
+            if (this.updateMainTimeoutId[stringId]) {
+                clearTimeout(this.updateMainTimeoutId[stringId]);
+                delete this.updateMainTimeoutId[stringId];
+            }
+            var updateMainDelay = (_b = settings === null || settings === void 0 ? void 0 : settings.updateMainDelay) !== null && _b !== void 0 ? _b : 0;
+            if (isVisible && updateMainDelay > 0 && this.animationsActive()) {
+                this.updateMainTimeoutId[stringId] = setTimeout(function () { var _a, _b; return (_b = (_a = _this.settings).setupDiv) === null || _b === void 0 ? void 0 : _b.call(_a, card, element); }, updateMainDelay);
+            }
+            else {
+                (_d = (_c = this.settings).setupDiv) === null || _d === void 0 ? void 0 : _d.call(_c, card, element);
+            }
+        }
+        if ((_e = settings === null || settings === void 0 ? void 0 : settings.updateFront) !== null && _e !== void 0 ? _e : true) {
+            if (this.updateFrontTimeoutId[stringId]) {
+                clearTimeout(this.updateFrontTimeoutId[stringId]);
+                delete this.updateFrontTimeoutId[stringId];
+            }
+            var updateFrontDelay = (_f = settings === null || settings === void 0 ? void 0 : settings.updateFrontDelay) !== null && _f !== void 0 ? _f : 500;
+            if (!isVisible && updateFrontDelay > 0 && this.animationsActive()) {
+                this.updateFrontTimeoutId[stringId] = setTimeout(function () { var _a, _b; return (_b = (_a = _this.settings).setupFrontDiv) === null || _b === void 0 ? void 0 : _b.call(_a, card, element.getElementsByClassName('front')[0]); }, updateFrontDelay);
+            }
+            else {
+                (_h = (_g = this.settings).setupFrontDiv) === null || _h === void 0 ? void 0 : _h.call(_g, card, element.getElementsByClassName('front')[0]);
+            }
+        }
+        if ((_j = settings === null || settings === void 0 ? void 0 : settings.updateBack) !== null && _j !== void 0 ? _j : false) {
+            if (this.updateBackTimeoutId[stringId]) {
+                clearTimeout(this.updateBackTimeoutId[stringId]);
+                delete this.updateBackTimeoutId[stringId];
+            }
+            var updateBackDelay = (_k = settings === null || settings === void 0 ? void 0 : settings.updateBackDelay) !== null && _k !== void 0 ? _k : 0;
+            if (isVisible && updateBackDelay > 0 && this.animationsActive()) {
+                this.updateBackTimeoutId[stringId] = setTimeout(function () { var _a, _b; return (_b = (_a = _this.settings).setupBackDiv) === null || _b === void 0 ? void 0 : _b.call(_a, card, element.getElementsByClassName('back')[0]); }, updateBackDelay);
+            }
+            else {
+                (_m = (_l = this.settings).setupBackDiv) === null || _m === void 0 ? void 0 : _m.call(_l, card, element.getElementsByClassName('back')[0]);
+            }
+        }
+        if ((_o = settings === null || settings === void 0 ? void 0 : settings.updateData) !== null && _o !== void 0 ? _o : true) {
+            var stock = this.getCardStock(card);
+            var cards = stock.getCards();
+            var cardIndex = cards.findIndex(function (c) { return _this.getId(c) === _this.getId(card); });
+            if (cardIndex !== -1) {
+                stock.cards.splice(cardIndex, 1, card);
+            }
+        }
+    };
+    CardManager.prototype.flipCard = function (card, settings) {
+        var element = this.getCardElement(card);
+        var currentlyVisible = element.dataset.side === 'front';
+        this.setCardVisible(card, !currentlyVisible, settings);
+    };
+    CardManager.prototype.updateCardInformations = function (card, settings) {
+        var newSettings = __assign(__assign({}, (settings !== null && settings !== void 0 ? settings : {})), { updateData: true });
+        this.setCardVisible(card, undefined, newSettings);
+    };
+    CardManager.prototype.getCardWidth = function () {
+        var _a;
+        return (_a = this.settings) === null || _a === void 0 ? void 0 : _a.cardWidth;
+    };
+    CardManager.prototype.getCardHeight = function () {
+        var _a;
+        return (_a = this.settings) === null || _a === void 0 ? void 0 : _a.cardHeight;
+    };
+    CardManager.prototype.getSelectableCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.selectableCardClass) === undefined ? 'bga-cards_selectable-card' : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.selectableCardClass;
+    };
+    CardManager.prototype.getUnselectableCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.unselectableCardClass) === undefined ? 'bga-cards_disabled-card' : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.unselectableCardClass;
+    };
+    CardManager.prototype.getSelectedCardClass = function () {
+        var _a, _b;
+        return ((_a = this.settings) === null || _a === void 0 ? void 0 : _a.selectedCardClass) === undefined ? 'bga-cards_selected-card' : (_b = this.settings) === null || _b === void 0 ? void 0 : _b.selectedCardClass;
+    };
+    CardManager.prototype.getFakeCardGenerator = function () {
+        var _this = this;
+        var _a, _b;
+        return (_b = (_a = this.settings) === null || _a === void 0 ? void 0 : _a.fakeCardGenerator) !== null && _b !== void 0 ? _b : (function (deckId) { return ({ id: _this.getId({ id: "".concat(deckId, "-fake-top-card") }) }); });
+    };
+    return CardManager;
+}());
+var _this = this;
+var moveToAnimation = function (_a) {
+    var game = _a.game, element = _a.element, toId = _a.toId, _b = _a.remove, remove = _b === void 0 ? false : _b;
+    return __awaiter(_this, void 0, void 0, function () {
+        var toElement, fromRect, toRect, top, left, originalPositionStyle;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    console.log('move to animation');
+                    toElement = document.getElementById(toId);
+                    fromRect = element.getBoundingClientRect();
+                    toRect = toElement.getBoundingClientRect();
+                    top = toRect.top - fromRect.top;
+                    left = toRect.left - fromRect.left;
+                    originalPositionStyle = element.style.position;
+                    element.style.top = "".concat(pxNumber(element.style.top) + top, "px");
+                    element.style.left = "".concat(pxNumber(element.style.left) + left, "px");
+                    element.style.position = 'relative';
+                    return [4, game.animationManager.play(new BgaSlideAnimation({
+                            element: element,
+                            transitionTimingFunction: 'ease-in-out',
+                            fromRect: fromRect,
+                        }))];
+                case 1:
+                    _c.sent();
+                    if (remove) {
+                        element.remove();
+                    }
+                    else {
+                        element.style.position = originalPositionStyle;
+                    }
+                    return [2];
+            }
+        });
+    });
 };
 var attachToNewParentNoDestroy = function (mobileEltId, newParentId, pos, placePosition) {
     var mobile = $(mobileEltId);
@@ -327,7 +1675,6 @@ var isFastMode = function () {
 };
 var slide = function (_a) {
     var game = _a.game, mobileElt = _a.mobileElt, targetElt = _a.targetElt, _b = _a.options, options = _b === void 0 ? {} : _b;
-    console.log('using slide');
     var config = __assign({ duration: 800, delay: 0, destroy: false, attach: true, changeParent: true, pos: null, className: 'moving', from: null, clearPos: true, beforeBrother: null, to: null, phantom: true, zIndex: null }, options);
     config.phantomStart = config.phantomStart || config.phantom;
     config.phantomEnd = config.phantomEnd || config.phantom;
@@ -436,482 +1783,265 @@ var positionObjectDirectly = function (mobileObj, x, y) {
     });
     dojo.style(mobileObj, 'left');
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+var PPCardManager = (function (_super) {
+    __extends(PPCardManager, _super);
+    function PPCardManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return card.id; },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
     }
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-var PaxPamirZone = (function () {
-    function PaxPamirZone(config) {
-        var _this = this;
-        this.animateMoveToZone = function (_a) {
-            var fromRect = _a.fromRect, element = _a.element, classesToAdd = _a.classesToAdd, classesToRemove = _a.classesToRemove, zIndex = _a.zIndex, duration = _a.duration;
-            return __awaiter(_this, void 0, void 0, function () {
-                var _b, _c;
-                return __generator(this, function (_d) {
-                    switch (_d.label) {
-                        case 0:
-                            (_b = element.classList).remove.apply(_b, (classesToRemove || []));
-                            (_c = element.classList).add.apply(_c, (classesToAdd || []));
-                            this.setItemCoords({ node: element });
-                            return [4, this.animationManager.play(new BgaSlideAnimation({
-                                    element: element,
-                                    transitionTimingFunction: 'linear',
-                                    fromRect: fromRect,
-                                    zIndex: zIndex,
-                                    duration: duration,
-                                }))];
-                        case 1:
-                            _d.sent();
-                            return [2];
-                    }
+    PPCardManager.prototype.clearInterface = function () { };
+    PPCardManager.prototype.setupDiv = function (card, div) {
+        if (card.type === 'courtCard') {
+            var actions_1 = card.actions, region = card.region, id_1 = card.id;
+            div.classList.add("pp_".concat(region));
+            Object.keys(actions_1).forEach(function (action, index) {
+                var actionId = action + '_' + id_1;
+                dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action\" style=\"left: calc(var(--cardScale) * ").concat(actions_1[action].left, "px); top: calc(var(--cardScale) * ").concat(actions_1[action].top, "px);\"></div>"), id_1);
+            });
+            var spyZoneId = 'spies_' + card.id;
+            dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), card.id);
+            if (!this.game.spies[card.id]) {
+                this.game.spies[card.id] = new LineStock(this.game.cylinderManager, document.getElementById(spyZoneId), {
+                    center: false,
+                    gap: '0px',
                 });
-            });
-        };
-        var animationManager = config.animationManager, itemGap = config.itemGap, itemHeight = config.itemHeight, itemWidth = config.itemWidth, containerId = config.containerId;
-        this.animationManager = animationManager;
-        this.itemGap = itemGap || 0;
-        this.itemHeight = itemHeight;
-        this.itemWidth = itemWidth;
-        this.containerId = containerId;
-        this.containerElement = document.getElementById(containerId);
-        this.items = [];
-        this.setPattern(config.pattern || 'grid');
-        this.autoWidth = false;
-        this.autoHeight = true;
-        this.customPattern = config.customPattern;
-        if (!this.containerElement) {
-            console.error('containerElement null');
-            return;
-        }
-        if (getComputedStyle(this.containerElement).position !== 'absolute') {
-            this.containerElement.style.position = 'relative';
-        }
-    }
-    PaxPamirZone.prototype.getContainerId = function () {
-        return this.containerId;
-    };
-    PaxPamirZone.prototype.remove = function (_a) {
-        var input = _a.input, _b = _a.destroy, destroy = _b === void 0 ? false : _b;
-        return __awaiter(this, void 0, void 0, function () {
-            var itemsToRemove;
-            var _this = this;
-            return __generator(this, function (_c) {
-                itemsToRemove = Array.isArray(input) ? input : [input];
-                itemsToRemove.forEach(function (id) {
-                    var index = _this.items.findIndex(function (item) { return item.id === id; });
-                    if (index < 0) {
-                        return;
-                    }
-                    _this.items.splice(index, 1);
-                    if (destroy) {
-                        var element = $(id);
-                        element && element.remove();
-                    }
-                });
-                return [2, this.updateDisplay()];
-            });
-        });
-    };
-    PaxPamirZone.prototype.removeAll = function (_a) {
-        var _b = _a === void 0 ? { destroy: false } : _a, destroy = _b.destroy;
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_c) {
-                if (destroy) {
-                    this.items.forEach(function (item) {
-                        var id = item.id;
-                        var node = $(id);
-                        node.remove();
-                    });
-                }
-                this.items = [];
-                return [2, this.updateDisplay()];
-            });
-        });
-    };
-    PaxPamirZone.prototype.moveToZone = function (_a) {
-        var elements = _a.elements, classesToAdd = _a.classesToAdd, classesToRemove = _a.classesToRemove, _b = _a.duration, duration = _b === void 0 ? 500 : _b, zIndex = _a.zIndex, elementsToRemove = _a.elementsToRemove;
-        return __awaiter(this, void 0, void 0, function () {
-            var items, itemsToRemove, animations;
-            var _this = this;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        items = Array.isArray(elements) ? elements : [elements];
-                        if (elementsToRemove) {
-                            itemsToRemove = Array.isArray(elementsToRemove.elements) ? elementsToRemove.elements : [elementsToRemove.elements];
-                            itemsToRemove.forEach(function (id) {
-                                var index = _this.items.findIndex(function (item) { return item.id === id; });
-                                if (index < 0) {
-                                    return;
-                                }
-                                _this.items.splice(index, 1);
-                                if (elementsToRemove.destroy) {
-                                    var element = $(id);
-                                    element && element.remove();
-                                }
-                            });
-                        }
-                        items.forEach(function (_a) {
-                            var id = _a.id, weight = _a.weight;
-                            _this.items.push({
-                                id: id,
-                                weight: weight,
-                            });
-                        });
-                        this.sortItems();
-                        animations = [];
-                        items.forEach(function (item) {
-                            var element = document.getElementById(item.id);
-                            if (!element) {
-                                console.error('newElement null');
-                                return;
-                            }
-                            var fromRect = element.getBoundingClientRect();
-                            var attachTo = document.getElementById(_this.containerId);
-                            attachTo.appendChild(element);
-                            animations.push(_this.animateMoveToZone({ element: element, classesToAdd: classesToAdd, classesToRemove: classesToRemove, zIndex: zIndex, duration: duration, fromRect: fromRect }));
-                        });
-                        return [4, Promise.all(__spreadArray(__spreadArray([], this.getUpdateAnimations(items.map(function (_a) {
-                                var id = _a.id;
-                                return id;
-                            })).map(function (anim) { return _this.animationManager.play(anim); }), true), animations, true))];
-                    case 1:
-                        _c.sent();
-                        return [2];
-                }
-            });
-        });
-    };
-    PaxPamirZone.prototype.setItemCoords = function (_a) {
-        var node = _a.node;
-        var index = this.items.findIndex(function (item) { return item.id === node.id; });
-        var coords = this.itemToCoords({ index: index });
-        var top = coords.y, left = coords.x;
-        node.style.position = 'absolute';
-        node.style.top = "".concat(top, "px");
-        node.style.left = "".concat(left, "px");
-    };
-    PaxPamirZone.prototype.placeInZone = function (input, duration) {
-        if (duration === void 0) { duration = undefined; }
-        return __awaiter(this, void 0, void 0, function () {
-            var inputItems, animations;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        inputItems = Array.isArray(input) ? input : [input];
-                        inputItems.forEach(function (_a) {
-                            var id = _a.id, weight = _a.weight;
-                            _this.items.push({ id: id, weight: weight });
-                        });
-                        this.sortItems();
-                        animations = [];
-                        inputItems.forEach(function (_a) {
-                            var _b;
-                            var element = _a.element, id = _a.id, from = _a.from, zIndex = _a.zIndex;
-                            var node = dojo.place(element, _this.containerId);
-                            node.style.position = 'absolute';
-                            node.style.zIndex = "".concat(zIndex || 0);
-                            _this.setItemCoords({ node: node });
-                            if (from) {
-                                var fromRect = (_b = $(from)) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
-                                animations.push(new BgaSlideAnimation({
-                                    element: node,
-                                    transitionTimingFunction: 'linear',
-                                    fromRect: fromRect,
-                                    duration: duration,
-                                }));
-                            }
-                        });
-                        return [4, this.animationManager.playParallel(__spreadArray(__spreadArray([], this.getUpdateAnimations(inputItems.map(function (_a) {
-                                var id = _a.id;
-                                return id;
-                            }), duration), true), animations, true))];
-                    case 1:
-                        _a.sent();
-                        return [2];
-                }
-            });
-        });
-    };
-    PaxPamirZone.prototype.setupItems = function (input) {
-        var _this = this;
-        var inputItems = Array.isArray(input) ? input : [input];
-        inputItems.forEach(function (_a) {
-            var id = _a.id, weight = _a.weight;
-            _this.items.push({ id: id, weight: weight });
-        });
-        this.sortItems();
-        inputItems.forEach(function (_a) {
-            var element = _a.element, zIndex = _a.zIndex;
-            var node = dojo.place(element, _this.containerId);
-            node.style.position = 'absolute';
-            node.style.zIndex = "".concat(zIndex || 0);
-        });
-        this.getUpdateAnimations();
-    };
-    PaxPamirZone.prototype.updateDisplay = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.animationManager.playParallel(this.getUpdateAnimations())];
-                    case 1: return [2, _a.sent()];
-                }
-            });
-        });
-    };
-    PaxPamirZone.prototype.getUpdateAnimations = function (skip, duration) {
-        var _this = this;
-        if (duration === void 0) { duration = undefined; }
-        var animations = [];
-        var containerHeight = 0;
-        var containerWidth = 0;
-        this.items.forEach(function (item, index) {
-            var element = $(item.id);
-            var fromRect = element.getBoundingClientRect();
-            if (element) {
-                var _a = _this.itemToCoords({ index: index }), left = _a.x, top_1 = _a.y, width = _a.w, height = _a.h;
-                if (!(skip || []).includes(item.id)) {
-                    element.style.top = "".concat(top_1, "px");
-                    element.style.left = "".concat(left, "px");
-                    animations.push(new BgaSlideAnimation({ element: element, fromRect: fromRect, duration: duration }));
-                }
-                if (_this.containerId === 'pp_kabul_transcaspia_border') {
-                    console.log(item.id, index, left, top_1, width, height);
-                }
-                containerWidth = Math.max(containerWidth, left + width);
-                containerHeight = Math.max(containerHeight, top_1 + height);
             }
-        });
-        if (this.autoHeight) {
-            this.containerElement.style.height = "".concat(containerHeight, "px");
         }
-        if (this.autoWidth) {
-            this.containerElement.style.width = "".concat(containerWidth, "px");
-        }
-        return animations;
-    };
-    PaxPamirZone.prototype.itemToCoords = function (_a) {
-        var index = _a.index;
-        var boundingClientRect = this.containerElement.getBoundingClientRect();
-        var containerWidth = boundingClientRect.width;
-        var containerHeight = boundingClientRect.height;
-        var itemCount = this.getItemCount();
-        var props = {
-            index: index,
-            containerHeight: containerHeight,
-            containerWidth: containerWidth,
-            itemCount: itemCount,
-        };
-        switch (this.pattern) {
-            case 'grid':
-                return this.itemToCoordsGrid(props);
-            case 'ellipticalFit':
-                return this.itemToCoordsEllipticalFit(props);
-            case 'verticalFit':
-                return this.itemToCoordsVerticalFit(props);
-            case 'horizontalFit':
-                return this.itemToCoordsHorizontalFit(props);
-            case 'custom':
-                var custom = this.customPattern ? this.customPattern(props) : { x: 0, y: 0, w: 0, h: 0 };
-                return custom;
+        div.classList.add('pp_card');
+        if (card.id.includes('select')) {
+            div.classList.add('pp_card_select');
         }
     };
-    PaxPamirZone.prototype.itemToCoordsGrid = function (_a) {
-        var e = _a.index, t = _a.containerWidth;
-        var i = Math.max(1, Math.floor(t / (this.itemWidth + this.itemGap))), n = Math.floor(e / i), o = {};
-        o['y'] = n * (this.itemHeight + this.itemGap);
-        o['x'] = (e - n * i) * (this.itemWidth + this.itemGap);
-        o['w'] = this.itemWidth;
-        o['h'] = this.itemHeight;
-        return o;
-    };
-    PaxPamirZone.prototype.itemToCoordsEllipticalFit = function (_a) {
-        var e = _a.index, t = _a.containerWidth, i = _a.containerHeight, n = _a.itemCount;
-        var o = t / 2, a = i / 2, s = 3.1415927, r = {
-            w: this.itemWidth,
-            h: this.itemHeight,
-        };
-        r['w'] = this.itemWidth;
-        r['h'] = this.itemHeight;
-        var l = n - (e + 1);
-        if (l <= 4) {
-            var c = r.w, d = (r.h * a) / o, h = s + l * ((2 * s) / 5);
-            r['x'] = o + c * Math.cos(h) - r.w / 2;
-            r['y'] = a + d * Math.sin(h) - r.h / 2;
-        }
-        else if (l > 4) {
-            (c = 2 * r.w), (d = (2 * r.h * a) / o), (h = s - s / 2 + (l - 4) * ((2 * s) / Math.max(10, n - 5)));
-            r['x'] = o + c * Math.cos(h) - r.w / 2;
-            r['y'] = a + d * Math.sin(h) - r.h / 2;
-        }
-        return r;
-    };
-    PaxPamirZone.prototype.itemToCoordsHorizontalFit = function (_a) {
-        var e = _a.index, t = _a.containerWidth, i = _a.containerHeight, n = _a.itemCount;
-        var o = {};
-        o['w'] = this.itemWidth;
-        o['h'] = this.itemHeight;
-        var a = n * this.itemWidth;
-        if (a <= t)
-            var s = this.itemWidth, r = (t - a) / 2;
-        else
-            (s = (t - this.itemWidth) / (n - 1)), (r = 0);
-        o['x'] = Math.round(e * s + r);
-        o['y'] = 0;
-        return o;
-    };
-    PaxPamirZone.prototype.itemToCoordsVerticalFit = function (_a) {
-        var e = _a.index, i = _a.containerHeight, n = _a.itemCount;
-        var o = {};
-        o['w'] = this.itemWidth;
-        o['h'] = this.itemHeight;
-        var a = n * this.itemHeight;
-        if (a <= i)
-            var s = this.itemHeight, r = (i - a) / 2;
-        else
-            (s = (i - this.itemHeight) / (n - 1)), (r = 0);
-        o['y'] = Math.round(e * s + r);
-        o['x'] = 0;
-        return o;
-    };
-    PaxPamirZone.prototype.setPattern = function (pattern) {
-        switch (pattern) {
-            case 'grid':
-                this.autoHeight = true;
-                this.pattern = pattern;
-                break;
-            case 'verticalFit':
-            case 'horizontalFit':
-            case 'ellipticalFit':
-                this.autoHeight = false;
-                this.pattern = pattern;
-                break;
-            case 'custom':
-                this.pattern = pattern;
-                break;
-            default:
-                console.error('zone::setPattern: unknow pattern: ' + pattern);
-        }
-    };
-    PaxPamirZone.prototype.sortItems = function () {
-        return this.items.sort(function (a, b) {
-            var aWeight = a.weight || 0;
-            var bWeight = b.weight || 0;
-            return aWeight > bWeight ? 1 : aWeight < bWeight ? -1 : 0;
-        });
-    };
-    PaxPamirZone.prototype.removeTo = function (input) {
-        return __awaiter(this, void 0, void 0, function () {
-            var inputItems, animations;
-            var _this = this;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        inputItems = Array.isArray(input) ? input : [input];
-                        animations = [];
-                        inputItems.forEach(function (_a) {
-                            var id = _a.id, _b = _a.destroy, destroy = _b === void 0 ? true : _b, to = _a.to;
-                            var index = _this.items.findIndex(function (item) { return item.id === id; });
-                            if (index < 0) {
-                                return;
-                            }
-                            _this.items.splice(index, 1);
-                            var element = $(id);
-                            var toElement = $(to);
-                            var fromRect = element.getBoundingClientRect();
-                            var toRect = toElement.getBoundingClientRect();
-                            var top = toRect.top - fromRect.top;
-                            var left = toRect.left - fromRect.left;
-                            element.style.top = "".concat(_this.pxNumber(element.style.top) + top, "px");
-                            element.style.left = "".concat(_this.pxNumber(element.style.left) + left, "px");
-                            animations.push(_this.animateRemoveTo({ element: element, fromRect: fromRect, destroy: destroy }));
-                        });
-                        this.sortItems();
-                        return [4, Promise.all(__spreadArray(__spreadArray([], this.getUpdateAnimations().map(function (anim) { return _this.animationManager.play(anim); }), true), animations, true))];
-                    case 1:
-                        _a.sent();
-                        return [2];
-                }
-            });
-        });
-    };
-    PaxPamirZone.prototype.animateRemoveTo = function (_a) {
-        var element = _a.element, fromRect = _a.fromRect, destroy = _a.destroy;
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4, this.animationManager.play(new BgaSlideAnimation({
-                            element: element,
-                            fromRect: fromRect,
-                        }))];
-                    case 1:
-                        _b.sent();
-                        if (destroy) {
-                            element.remove();
-                        }
-                        return [2];
-                }
-            });
-        });
-    };
-    PaxPamirZone.prototype.getItems = function () {
-        return this.items.map(function (item) { return item.id; });
-    };
-    PaxPamirZone.prototype.getItemCount = function () {
-        return this.items.length;
-    };
-    PaxPamirZone.prototype.pxNumber = function (px) {
-        if ((px || '').endsWith('px')) {
-            return Number(px.slice(0, -2));
+    PPCardManager.prototype.setupFrontDiv = function (card, div) {
+        div.classList.add("pp_".concat(card.id));
+        if (!card.id.includes('select')) {
+            this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
+            div.classList.add('pp_card_side');
         }
         else {
-            return 0;
+            div.classList.add('pp_card_select_side');
         }
     };
-    return PaxPamirZone;
-}());
+    PPCardManager.prototype.setupBackDiv = function (card, div) {
+        div.classList.add('pp_card_side');
+        div.classList.add('pp_card_back');
+    };
+    PPCardManager.prototype.isCardVisible = function (card) {
+        return (card.type === 'eventCard' || card.type === 'courtCard') && card.location === 'deck' ? false : true;
+    };
+    return PPCardManager;
+}(CardManager));
+var CoalitionBlockManager = (function (_super) {
+    __extends(CoalitionBlockManager, _super);
+    function CoalitionBlockManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return "".concat(card.id); },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
+    }
+    CoalitionBlockManager.prototype.clearInterface = function () { };
+    CoalitionBlockManager.prototype.setupDiv = function (block, div) {
+        div.classList.add('pp_coalition_block');
+        if (block.id.startsWith('temp')) {
+            div.classList.add(PP_TEMPORARY);
+        }
+    };
+    CoalitionBlockManager.prototype.setupFrontDiv = function (block, div) {
+        div.classList.add('pp_coalition_block_side');
+        div.setAttribute('data-coalition', block.coalition);
+    };
+    CoalitionBlockManager.prototype.setupBackDiv = function (block, div) {
+    };
+    CoalitionBlockManager.prototype.isCardVisible = function (block) {
+        return true;
+    };
+    return CoalitionBlockManager;
+}(CardManager));
+var CylinderManager = (function (_super) {
+    __extends(CylinderManager, _super);
+    function CylinderManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return "".concat(card.id); },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
+    }
+    CylinderManager.prototype.clearInterface = function () { };
+    CylinderManager.prototype.setupDiv = function (cylinder, div) {
+        div.classList.add('pp_cylinder');
+        div.setAttribute('data-color', cylinder.color);
+    };
+    CylinderManager.prototype.setupFrontDiv = function (cylinder, div) {
+        div.classList.add('pp_cylinder_side');
+    };
+    CylinderManager.prototype.setupBackDiv = function (cylinder, div) {
+    };
+    CylinderManager.prototype.isCardVisible = function (cylinder) {
+        return true;
+    };
+    return CylinderManager;
+}(CardManager));
+var FavoredSuitMarkerManager = (function (_super) {
+    __extends(FavoredSuitMarkerManager, _super);
+    function FavoredSuitMarkerManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return "".concat(card.id); },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
+    }
+    FavoredSuitMarkerManager.prototype.clearInterface = function () { };
+    FavoredSuitMarkerManager.prototype.setupDiv = function (token, div) {
+        div.classList.add('pp_favored_suit_marker');
+    };
+    FavoredSuitMarkerManager.prototype.setupFrontDiv = function (token, div) {
+        div.classList.add('pp_favored_suit_marker_side');
+    };
+    FavoredSuitMarkerManager.prototype.setupBackDiv = function (token, div) {
+    };
+    FavoredSuitMarkerManager.prototype.isCardVisible = function (token) {
+        return true;
+    };
+    return FavoredSuitMarkerManager;
+}(CardManager));
+var RulerTokenManager = (function (_super) {
+    __extends(RulerTokenManager, _super);
+    function RulerTokenManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return "".concat(card.id); },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
+    }
+    RulerTokenManager.prototype.clearInterface = function () { };
+    RulerTokenManager.prototype.setupDiv = function (token, div) {
+        div.classList.add('pp_ruler_token');
+        div.setAttribute('data-region', token.region);
+    };
+    RulerTokenManager.prototype.setupFrontDiv = function (token, div) {
+        div.classList.add('pp_ruler_token_side');
+    };
+    RulerTokenManager.prototype.setupBackDiv = function (token, div) {
+    };
+    RulerTokenManager.prototype.isCardVisible = function (token) {
+        return true;
+    };
+    return RulerTokenManager;
+}(CardManager));
+var RupeeManager = (function (_super) {
+    __extends(RupeeManager, _super);
+    function RupeeManager(game) {
+        var _this = _super.call(this, game, {
+            getId: function (card) { return "".concat(card.id); },
+            setupDiv: function (card, div) { return _this.setupDiv(card, div); },
+            setupFrontDiv: function (card, div) { return _this.setupFrontDiv(card, div); },
+            setupBackDiv: function (card, div) { return _this.setupBackDiv(card, div); },
+            isCardVisible: function (card) { return _this.isCardVisible(card); },
+            animationManager: game.animationManager,
+        }) || this;
+        _this.game = game;
+        return _this;
+    }
+    RupeeManager.prototype.clearInterface = function () { };
+    RupeeManager.prototype.setupDiv = function (cylinder, div) {
+        div.classList.add('pp_rupee');
+        div.setAttribute('data-color', cylinder.color);
+    };
+    RupeeManager.prototype.setupFrontDiv = function (cylinder, div) {
+        div.classList.add('pp_rupee_side');
+    };
+    RupeeManager.prototype.setupBackDiv = function (cylinder, div) {
+    };
+    RupeeManager.prototype.isCardVisible = function (cylinder) {
+        return true;
+    };
+    return RupeeManager;
+}(CardManager));
+var TokenManualPositionStock = (function (_super) {
+    __extends(TokenManualPositionStock, _super);
+    function TokenManualPositionStock(manager, element, settings, updateDisplay) {
+        var _this = _super.call(this, manager, element, settings) || this;
+        _this.manager = manager;
+        _this.element = element;
+        _this.updateDisplay = updateDisplay;
+        element.classList.add('manual-position-stock');
+        return _this;
+    }
+    TokenManualPositionStock.prototype.moveFromOtherStock = function (card, cardElement, animation, settings) {
+        var promise;
+        var element = animation.fromStock.contains(card)
+            ? this.manager.getCardElement(card)
+            :
+                animation.fromStock.element;
+        var fromRect = element === null || element === void 0 ? void 0 : element.getBoundingClientRect();
+        this.updateDisplay(this.element, __spreadArray(__spreadArray([], this.getCards(), true), [card], false), card, this);
+        this.addCardElementToParent(cardElement, settings);
+        this.removeSelectionClassesFromElement(cardElement);
+        promise = fromRect
+            ? this.animationFromElement(cardElement, fromRect, {
+                originalSide: animation.originalSide,
+                rotationDelta: animation.rotationDelta,
+                animation: animation.animation,
+            })
+            : Promise.resolve(false);
+        if (animation.fromStock && animation.fromStock != this) {
+            animation.fromStock.removeCard(card);
+        }
+        if (!promise) {
+            console.warn("CardStock.moveFromOtherStock didn't return a Promise");
+            promise = Promise.resolve(false);
+        }
+        return promise;
+    };
+    TokenManualPositionStock.prototype.addCard = function (card, animation, settings) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, _super.prototype.addCard.call(this, card, animation, settings)];
+                    case 1:
+                        result = _a.sent();
+                        this.updateDisplay(this.element, this.getCards(), card, this);
+                        return [2, result];
+                }
+            });
+        });
+    };
+    TokenManualPositionStock.prototype.cardRemoved = function (card, settings) {
+        _super.prototype.cardRemoved.call(this, card, settings);
+        this.updateDisplay(this.element, this.getCards(), card, this);
+    };
+    return TokenManualPositionStock;
+}(CardStock));
 var LOG_TOKEN_ARMY = 'army';
 var LOG_TOKEN_CARD = 'card';
 var LOG_TOKEN_CARD_ICON = 'cardIcon';
@@ -1017,7 +2147,7 @@ var getLogTokenDiv = function (_a) {
 };
 var tplLogTokenArmy = function (_a) {
     var coalition = _a.coalition;
-    return "<div class=\"pp_".concat(coalition, " pp_army pp_log_token\"></div>");
+    return "<div class=\"pp_coalition_block_side pp_log_token\" data-type=\"army\" data-coalition=\"".concat(coalition, "\"></div>");
 };
 var tlpLogTokenBoldText = function (_a) {
     var text = _a.text;
@@ -1025,7 +2155,7 @@ var tlpLogTokenBoldText = function (_a) {
 };
 var tplLogTokenCard = function (_a) {
     var cardId = _a.cardId, large = _a.large, cardIdSuffix = _a.cardIdSuffix;
-    return "<div id=\"".concat(cardId, "_").concat(cardIdSuffix, "\" class=\"pp_card pp_log_token pp_").concat(cardId).concat(large ? ' pp_large' : '', "\"></div>");
+    return "<div id=\"".concat(cardId, "_").concat(cardIdSuffix, "\" class=\"pp_card_side pp_log_token pp_").concat(cardId).concat(!large ? ' pp_small' : '', "\"></div>");
 };
 var tplLogTokenCoalition = function (_a) {
     var coalition = _a.coalition, black = _a.black;
@@ -1033,7 +2163,7 @@ var tplLogTokenCoalition = function (_a) {
 };
 var tplLogTokenCylinder = function (_a) {
     var color = _a.color;
-    return "<div class=\"pp_cylinder pp_player_color_".concat(color, " pp_log_token\"></div>");
+    return "<div class=\"pp_cylinder_side pp_log_token\" data-color=\"".concat(color, "\"></div>");
 };
 var tplLogTokenFavoredSuit = function (_a) {
     var suit = _a.suit;
@@ -1058,10 +2188,11 @@ var tplLogTokenRegionName = function (_a) {
 };
 var tplLogTokenRoad = function (_a) {
     var coalition = _a.coalition;
-    return "<div class=\"pp_".concat(coalition, " pp_road pp_log_token\"></div>");
+    return "<div class=\"pp_coalition_block_side pp_log_token\" data-type=\"road\" data-coalition=\"".concat(coalition, "\"></div>");
 };
-var tplLogTokenRupee = function () { return "<div class=\"pp_log_token_rupee pp_log_token\"></div>"; };
+var tplLogTokenRupee = function () { return "<div class=\"pp_rupee_side pp_log_token\"></div>"; };
 var _a, _b;
+var ANIMATION_WAIT_MS = 100;
 var CLIENT_CARD_ACTION_BATTLE = 'clientCardActionBattle';
 var CLIENT_CARD_ACTION_BETRAY = 'clientCardActionBetray';
 var CLIENT_CARD_ACTION_BUILD = 'clientCardActionBuild';
@@ -1076,6 +2207,16 @@ var CLIENT_RESOLVE_EVENT_OTHER_PERSUASIVE_METHODS = 'clientResolveEventOtherPers
 var CLIENT_RESOLVE_EVENT_PASHTUNWALI_VALUES = 'clientResolveEventPashtunwaliValues';
 var CLIENT_RESOLVE_EVENT_REBUKE = 'clientResolveEventRebuke';
 var CLIENT_RESOLVE_EVENT_RUMOR = 'clientResolveEventRumor';
+var PREF_SINGLE_COLUMN_MAP_SIZE = 'singleColumnMapSize';
+var PREF_TWO_COLUMNS_LAYOUT = 'twoColumnsLayout';
+var PREF_CONFIRM_END_OF_TURN_AND_PLAYER_SWITCH_ONLY = 'confirmEndOfTurnPlayerSwitchOnly';
+var PREF_SHOW_ANIMATIONS = 'showAnimations';
+var PREF_ANIMATION_SPEED = 'animationSpeed';
+var PREF_CARD_INFO_IN_TOOLTIP = 'cardInfoInTooltip';
+var PREF_CARD_SIZE_IN_LOG = 'cardSizeInLog';
+var PREF_CARD_SIZE_IN_COURT = 'cardSizeInCourt';
+var PREF_DISABLED = 'disabled';
+var PREF_ENABLED = 'enabled';
 var PLAY_CARD = 'playCard';
 var PURCHASE_CARD = 'purchaseCard';
 var BATTLE = 'battle';
@@ -1260,7 +2401,7 @@ var tplArmy = function (_a) {
 };
 var tplCard = function (_a) {
     var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b, extraClasses = _a.extraClasses, style = _a.style;
-    return "<div id=\"".concat(cardId).concat(cardIdSuffix, "\" class=\"pp_card pp_card_in_zone pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"").concat(style ? " style=\"".concat(style, "\"") : '', "></div>");
+    return "<div id=\"".concat(cardId).concat(cardIdSuffix, "\" class=\"pp_card_side pp_").concat(cardId).concat(extraClasses ? ' ' + extraClasses : '', "\"").concat(style ? " style=\"".concat(style, "\"") : '', "></div>");
 };
 var tplCardSelect = function (_a) {
     var side = _a.side;
@@ -1284,7 +2425,7 @@ var tplRoad = function (_a) {
 };
 var tplRupee = function (_a) {
     var rupeeId = _a.rupeeId;
-    return "<div class=\"pp_rupee\" id=\"".concat(rupeeId, "\">\n            <div class=\"pp_rupee_inner\"></div>\n          </div>");
+    return "<div class=\"pp_rupee_side\" id=\"".concat(rupeeId, "\">\n          </div>");
 };
 var tplRulerToken = function (_a) {
     var id = _a.id, region = _a.region;
@@ -1327,7 +2468,7 @@ var tplPlayerBoardWakhan = function (_a) {
 };
 var tplPlayerTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
-    return "<div id=\"player_tableau_".concat(playerId, "\" >\n  <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n    <div id=\"pp_player_to_left_of_").concat(playerId, "\" class=\"pp_player_to_left\">\n      <div class=\"pp_player_color_block\"></div>\n    </div>\n      <div class=\"pp_tableau_left\">\n          <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n          <div class=\"pp_loyalty_dial_section\">\n              <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\"></div>\n              <div class=\"pp_loyalty_dial_container\">\n                  <div id=\"pp_loyalty_dial_").concat(playerId, "\" class=\"pp_loyalty_dial\"></div>\n                  <div class=\"pp_loyalty_dial_cover pp_player_color_").concat(playerColor, "\"></div>\n                  <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_gift pp_gift_2\">\n                      <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_gift pp_gift_4\">\n                      <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n                  <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_gift pp_gift_6\">\n                      <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                  </div>\n              </div>\n          </div>\n      </div>\n      <div class=\"pp_player_tableau_right\">\n          <div class=\"pp_player_tableau_title_container\">\n              <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n              <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                  <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                  <div id=\"cards_tableau_").concat(playerId, "\" class=\"pp_icon pp_card_icon_tableau\"><div id=\"card_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"card_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n              </div>\n          </div>\n          <div class=\"pp_tableau_inner_container\">\n              <div class=\"pp_tableau_inner_left\">\n                  <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n              </div>\n              <div class=\"pp_tableau_inner_right\">\n                  <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n              </div>\n          </div>\n          <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n            <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n          </div>\n      </div>\n      <div id=\"pp_player_to_right_of_").concat(playerId, "\" class=\"pp_player_to_right\">\n        <div class=\"pp_player_color_block\"></div>\n        <div class=\"pp_player_color_block\"></div>\n      </div>\n  </div>\n  <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n      <div id=\"player_tableau_events_").concat(playerId, "\">\n      </div>\n  </div>\n</div>");
+    return "<div id=\"player_tableau_".concat(playerId, "\" >\n  <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n    <div id=\"pp_player_to_left_of_").concat(playerId, "\" class=\"pp_player_to_left\">\n      <div class=\"pp_player_color_block\"></div>\n    </div>\n      <div class=\"pp_tableau_left\">\n        <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n        <div class=\"pp_loyalty_dial_section\">\n          <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\"></div>\n            <div id=\"pp_loyalty_dial_container_").concat(playerId, "\" class=\"pp_loyalty_dial_container\">\n               <div id=\"pp_loyalty_dial_").concat(playerId, "\" class=\"pp_loyalty_dial\"></div>\n            <div class=\"pp_loyalty_dial_cover pp_player_color_").concat(playerColor, "\"></div>\n            <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_gift pp_gift_2\">\n                <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n            </div>\n            <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_gift pp_gift_4\">\n                <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n            </div>\n            <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_gift pp_gift_6\">\n                <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class=\"pp_player_tableau_right\">\n          <div class=\"pp_player_tableau_title_container\">\n              <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n              <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                  <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                  <div id=\"cards_tableau_").concat(playerId, "\" class=\"pp_icon pp_card_icon_tableau\"><div id=\"card_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"card_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n              </div>\n          </div>\n          <div class=\"pp_tableau_inner_container\">\n              <div class=\"pp_tableau_inner_left\">\n                  <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n              </div>\n              <div class=\"pp_tableau_inner_right\">\n                  <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n              </div>\n          </div>\n          <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n            <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n          </div>\n      </div>\n      <div id=\"pp_player_to_right_of_").concat(playerId, "\" class=\"pp_player_to_right\">\n        <div class=\"pp_player_color_block\"></div>\n        <div class=\"pp_player_color_block\"></div>\n      </div>\n  </div>\n  <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n      <div id=\"player_tableau_events_").concat(playerId, "\">\n      </div>\n  </div>\n</div>");
 };
 var tplWakhanPlayerPanel = function (_a) {
     var name = _a.name;
@@ -1335,7 +2476,7 @@ var tplWakhanPlayerPanel = function (_a) {
 };
 var tplWakhanTableau = function (_a) {
     var playerId = _a.playerId, playerColor = _a.playerColor, playerName = _a.playerName;
-    return "<div id=\"player_tableau_".concat(playerId, "\">\n            <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\" style=\"min-height: 320px;\">\n              <div id=\"pp_player_to_left_of_").concat(playerId, "\" class=\"pp_player_to_left\">\n                <div class=\"pp_player_color_block\"></div>\n              </div>\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div style=\"flex-grow: 1;\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div id=\"pp_wakhan_gifts\">\n                      <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                        <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\" style=\"margin-right: 236px;\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                      <div class=\"pp_tableau_inner_left\">\n                          <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                      </div>\n                      <div class=\"pp_tableau_inner_right\">\n                        <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                      </div>\n                    </div>\n                    <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n                      <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n                    </div>\n                </div>\n                <div id=\"pp_player_to_right_of_").concat(playerId, "\" class=\"pp_player_to_right\">\n                  <div class=\"pp_player_color_block\"></div>\n                  <div class=\"pp_player_color_block\"></div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
+    return "<div id=\"player_tableau_".concat(playerId, "\">\n            <div id=\"pp_player_tableau_container_").concat(playerId, "\" class=\"pp_player_tableau pp_player_color_").concat(playerColor, "\">\n              <div id=\"pp_player_to_left_of_").concat(playerId, "\" class=\"pp_player_to_left\">\n                <div class=\"pp_player_color_block\"></div>\n              </div>\n                <div class=\"pp_wakhan_tableau_left\">\n                  <div style=\"flex-grow: 1;\">\n                    <div id=\"pp_ruler_tokens_player_").concat(playerId, "\" class=\"pp_ruler_tokens_player\"></div>\n                    <div id=\"pp_wakhan_gifts\">\n                      <div id=\"pp_gift_2_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_2\">\n                        <div id=\"pp_gift_2_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_4_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_4\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_4_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                      <div id=\"pp_gift_6_").concat(playerId, "\" class=\"pp_wakhan_gift pp_wakhan_gift_6\" style=\"margin-left: 10px;\">\n                        <div id=\"pp_gift_6_zone_").concat(playerId, "\" class=\"pp_gift_zone\"></div>\n                      </div>\n                    </div>\n                  </div>\n                  <div id=\"pp_prizes_").concat(playerId, "\" class=\"pp_prizes\" style=\"left: 10px;\"></div>\n                  <div class=\"pp_wakhan_deck_container\">\n                    <div id=\"pp_wakhan_deck\" class=\"pp_wakhan_card\"></div>\n                    <div id=\"pp_wakhan_discard\" class=\"pp_wakhan_card\"></div>\n                  </div>\n                </div>\n                <div class=\"pp_player_tableau_right\">\n                    <div class=\"pp_player_tableau_title_container\">\n                        <div id=\"pp_tableau_title_player_").concat(playerId, "\" class=\"pp_player_tableau_title\" style=\"margin-right: calc(var(--rightColumnScale)* 236px);\"><span>").concat(_("${playerName}'s court").replace('${playerName}', playerName), "</span></div>\n                        <div id=\"pp_tableau_title_icons_player_").concat(playerId, "\" class=\"pp_player_tableau_icons\">\n                            <div id=\"rupees_tableau_").concat(playerId, "\" class=\"pp_icon pp_player_board_rupee\"><div id=\"rupee_count_tableau_").concat(playerId, "\" class=\"pp_icon_count\"><span id=\"rupee_count_tableau_").concat(playerId, "_counter\"></span></div></div>\n                        </div>\n                    </div>\n                    <div class=\"pp_tableau_inner_container\">\n                      <div class=\"pp_tableau_inner_left\">\n                          <div id=\"pp_cylinders_player_").concat(playerId, "\" class=\"pp_cylinders pp_cylinders_player_").concat(playerId, "\"></div>\n                      </div>\n                      <div class=\"pp_tableau_inner_right\">\n                        <div id=\"pp_court_player_").concat(playerId, "\" class=\"pp_court pp_court_player_").concat(playerId, "\"></div>\n                      </div>\n                    </div>\n                    <div id=\"pp_player_court_size_").concat(playerId, "\" class=\"pp_player_tableau_court_size\">\n                      <span id=\"pp_court_count_").concat(playerId, "\" class=\"pp_card_count\"></span><span>/</span><span id=\"pp_court_limit_").concat(playerId, "\" class=\"pp_card_limit\"></span>\n                    </div>\n                </div>\n                <div id=\"pp_player_to_right_of_").concat(playerId, "\" class=\"pp_player_to_right\">\n                  <div class=\"pp_player_color_block\"></div>\n                  <div class=\"pp_player_color_block\"></div>\n                </div>\n            </div>\n            <div id=\"pp_player_events_container_").concat(playerId, "\" class=\"pp_player_events_container\">\n                <div id=\"player_tableau_events_").concat(playerId, "\">\n                </div>\n            </div>\n          </div>");
 };
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
 var debug = isDebug ? console.info.bind(window.console) : function () { };
@@ -1357,9 +2498,43 @@ var getKeywords = function (_a) {
 };
 var substituteKeywords = function (_a) {
     var string = _a.string, args = _a.args, playerColor = _a.playerColor;
-    console.log('color', playerColor);
     return dojo.string.substitute(_(string), __assign(__assign({}, getKeywords({ playerColor: playerColor })), (args || {})));
 };
+var extractId = function (input) {
+    return input.id;
+};
+var getArmy = function (token) { return (__assign(__assign({}, token), { coalition: token.id.split('_')[1], type: 'army' })); };
+var getRoad = function (token) { return (__assign(__assign({}, token), { coalition: token.id.split('_')[1], type: 'road' })); };
+var pxNumber = function (px) {
+    if ((px || '').endsWith('px')) {
+        return Number(px.slice(0, -2));
+    }
+    else {
+        return 0;
+    }
+};
+var getCoalitionForBlock = function (coalitionBlockId) { return coalitionBlockId.split('_')[1]; };
+var InfoPanel = (function () {
+    function InfoPanel(game) {
+        this.game = game;
+        var gamedatas = game.gamedatas;
+        this.setup({ gamedatas: gamedatas });
+    }
+    InfoPanel.prototype.clearInterface = function () { };
+    InfoPanel.prototype.updateInterface = function (_a) {
+        var gamedatas = _a.gamedatas;
+    };
+    InfoPanel.prototype.setup = function (_a) {
+        var gamedatas = _a.gamedatas;
+        var node = document.getElementById("player_boards");
+        if (!node) {
+            return;
+        }
+        node.insertAdjacentHTML("afterbegin", tplInfoPanel());
+    };
+    return InfoPanel;
+}());
+var tplInfoPanel = function () { return "\n<div class='player-board' id=\"info_panel\">\n  <div id=\"info_panel_buttons\">\n\n  </div>\n</div>"; };
 var PPActiveEvents = (function () {
     function PPActiveEvents(game) {
         this.zoneId = 'pp_active_events';
@@ -1371,37 +2546,30 @@ var PPActiveEvents = (function () {
     PPActiveEvents.prototype.setupActiveEvents = function (_a) {
         var _this = this;
         var gamedatas = _a.gamedatas;
-        this.zone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: this.zoneId,
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-            itemGap: 16,
+        this.zone = new LineStock(this.game.cardManager, document.getElementById(this.zoneId), {
+            center: false,
         });
         var events = gamedatas.activeEvents || [];
-        this.zone.setupItems(events.map(function (card) { return ({
-            id: card.id,
-            element: tplCard({ cardId: card.id }),
-        }); }));
+        this.zone.addCards(events.map(function (token) { return _this.game.getCard(token); }));
         this.updateVisiblity();
         events.forEach(function (card) {
             _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
         });
     };
     PPActiveEvents.prototype.clearInterface = function () {
-        dojo.empty(this.zone.getContainerId());
+        this.zone.removeAll();
         this.zone = undefined;
     };
     PPActiveEvents.prototype.makeVisible = function () {
         var node = dojo.byId(this.containerId);
-        node.style.setProperty('margin-bottom', '-65px');
+        node.style.setProperty('margin-bottom', 'calc(var(--cardScale) * -75px)');
     };
     PPActiveEvents.prototype.hide = function () {
         var node = dojo.byId(this.containerId);
-        node.style.setProperty('margin-bottom', '-209px');
+        node.style.setProperty('margin-bottom', 'calc(var(--cardScale) * -209px)');
     };
     PPActiveEvents.prototype.updateVisiblity = function () {
-        if (this.zone.getItemCount() > 0) {
+        if (this.zone.getCards().length > 0) {
             this.makeVisible();
         }
         else {
@@ -1421,12 +2589,12 @@ var PPActiveEvents = (function () {
                         player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
                         originalZIndex = player.elevateTableau();
                         return [4, Promise.all([
-                                this.game.activeEvents.getZone().moveToZone({
-                                    elements: {
-                                        id: cardId,
-                                    },
-                                }),
-                                this.game.market.getMarketCardZone({ row: row, column: column }).remove({ input: cardId }),
+                                this.getZone().addCard(this.game.getCard({
+                                    id: cardId,
+                                    state: 0,
+                                    used: 0,
+                                    location: 'activeEvents',
+                                })),
                             ])];
                     case 1:
                         _b.sent();
@@ -1447,10 +2615,7 @@ var PPActiveEvents = (function () {
                         playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
                         player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
                         originalZIndex = player.elevateTableau();
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.game.activeEvents.getZone(),
-                            })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1:
                         _b.sent();
                         player.removeTableauElevation(originalZIndex);
@@ -1465,7 +2630,7 @@ var PPActiveEvents = (function () {
     };
     PPActiveEvents.prototype.hasCard = function (_a) {
         var cardId = _a.cardId;
-        return this.zone.getItems().includes(cardId);
+        return this.zone.getCards().some(function (card) { return card.id === cardId; });
     };
     return PPActiveEvents;
 }());
@@ -1571,7 +2736,7 @@ var tplCourtCardTooltip = function (_a) {
         specialAbility = "<span class=\"pp_section_title\">".concat(_(specialAbilities[cardInfo.specialAbility].title), "</span>\n    <span class=\"pp_special_ability_text\">").concat(_(specialAbilities[cardInfo.specialAbility].description), "</span>\n    ");
     }
     return tplCardTooltipContainer({
-        card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
+        card: "<div class=\"pp_card_side pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
         content: "\n  <span class=\"pp_title\">".concat(_(cardInfo.name), "</span>\n  <span class=\"pp_flavor_text\">").concat(_(cardInfo.flavorText), "</span>\n  ").concat(impactIcons, "\n  ").concat(cardActions, "\n  ").concat(specialAbility, "\n  "),
     });
 };
@@ -1594,7 +2759,7 @@ var tplEventCardTooltipDiscarded = function (_a) {
 var tplEventCardTooltip = function (_a) {
     var cardId = _a.cardId, cardInfo = _a.cardInfo;
     return tplCardTooltipContainer({
-        card: "<div class=\"pp_card pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
+        card: "<div class=\"pp_card_side pp_card_in_tooltip pp_".concat(cardId, "\"></div>"),
         content: "\n    <span class=\"pp_title\">".concat(_('Event card'), "</span>\n    <span class=\"pp_flavor_text\">").concat(_("Each event card has two effects. The bottom effect is triggered if it is purchased by a player. The top effect is triggered if the card is automatically discarded during the cleanup phase at the end of a player's turn."), "</span>\n    <span class=\"pp_section_title\">").concat(_('If discarded: ')).concat(_(cardInfo.discarded.title) || '', "</span>\n     ").concat(tplEventCardTooltipDiscarded(cardInfo.discarded), " \n    <span class=\"pp_section_title\">").concat(cardId !== 'card_111' ? _('If purchased: ') : _('Until discarded: ')).concat(_(cardInfo.purchased.title) || '', "</span>\n    <span class=\"pp_event_effect_text\">").concat(_(cardInfo.purchased.description) || '', "</span>\n  "),
     });
 };
@@ -1757,7 +2922,7 @@ var PPTooltipManager = (function () {
     };
     PPTooltipManager.prototype.addTooltipToCard = function (_a) {
         var cardId = _a.cardId, _b = _a.cardIdSuffix, cardIdSuffix = _b === void 0 ? '' : _b;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         if (cardInfo.type === COURT_CARD) {
             var html = tplCourtCardTooltip({ cardId: cardId, cardInfo: cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
             this.game.framework().addTooltipHtml("".concat(cardId).concat(cardIdSuffix), html, 500);
@@ -1826,8 +2991,9 @@ var DiscardPile = (function () {
         var discardPileTitle = $('pp_discard_pile_title');
         if (!discardPileTitle) {
             var discardPile = $('pp_discard_pile');
-            discardPile.insertAdjacentHTML('afterbegin', "<span id=\"pp_discard_pile_title\" >".concat(_('Discard'), "</span>"));
+            discardPile.insertAdjacentHTML('afterbegin', "<span id=\"pp_discard_pile_title\">".concat(_('Discard'), "</span>"));
         }
+        this.stock = new VoidStock(this.game.cardManager, document.getElementById(this.containterId));
         if (gamedatas.discardPile.topCard) {
             this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
         }
@@ -1853,44 +3019,32 @@ var DiscardPile = (function () {
         this.visibleCardId = cardId;
     };
     DiscardPile.prototype.discardCardFromLocation = function (_a) {
-        var _b;
         var cardId = _a.cardId, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
-            var fromRect, element;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        fromRect = (_b = $(from)) === null || _b === void 0 ? void 0 : _b.getBoundingClientRect();
-                        element = dojo.place(tplCard({ cardId: cardId }), 'pp_pile_discarded_card');
-                        return [4, this.game.animationManager.play(new BgaSlideAnimation({
-                                element: element,
-                                transitionTimingFunction: 'linear',
-                                fromRect: fromRect,
-                            }))];
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4, this.stock.addCard({
+                            id: cardId,
+                        }, { fromElement: document.getElementById(from) })];
                     case 1:
-                        _c.sent();
+                        _b.sent();
                         this.setVisibleCard({ cardId: cardId });
-                        $(cardId).remove();
                         this.game.objectManager.incCardCounter({ cardId: cardId, location: 'discardPile' });
                         return [2];
                 }
             });
         });
     };
-    DiscardPile.prototype.discardCardFromZone = function (_a) {
-        var cardId = _a.cardId, zone = _a.zone;
+    DiscardPile.prototype.discardCardFromZone = function (cardId) {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4, zone.removeTo({
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.stock.addCard({
                             id: cardId,
-                            to: this.containterId,
-                            destroy: false,
                         })];
                     case 1:
-                        _b.sent();
+                        _a.sent();
                         this.setVisibleCard({ cardId: cardId });
-                        $(cardId).remove();
                         this.game.objectManager.incCardCounter({ cardId: cardId, location: 'discardPile' });
                         return [2];
                 }
@@ -1907,22 +3061,13 @@ var TempDiscardPile = (function () {
     }
     TempDiscardPile.prototype.setup = function (_a) {
         var gamedatas = _a.gamedatas;
-        this.zone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: 'pp_temp_discarded_card',
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-        });
+        this.zone = new LineStock(this.game.cardManager, document.getElementById('pp_temp_discarded_card'), { center: false });
         if (gamedatas.tempDiscardPile) {
-            var cardId = gamedatas.tempDiscardPile.id;
-            this.zone.setupItems({
-                id: cardId,
-                element: tplCard({ cardId: cardId }),
-            });
+            this.zone.addCard(__assign(__assign({}, gamedatas.tempDiscardPile), this.game.getCardInfo(gamedatas.tempDiscardPile.id)));
         }
     };
     TempDiscardPile.prototype.clearInterface = function () {
-        dojo.empty(this.zone.getContainerId());
+        this.zone.removeAll();
         this.zone = undefined;
     };
     TempDiscardPile.prototype.getZone = function () {
@@ -1933,7 +3078,6 @@ var TempDiscardPile = (function () {
 var FavoredSuit = (function () {
     function FavoredSuit(_a) {
         var game = _a.game;
-        console.log('Constructor Favored Suit');
         this.game = game;
         this.setup({ gamedatas: game.gamedatas });
     }
@@ -1942,24 +3086,21 @@ var FavoredSuit = (function () {
         var gamedatas = _a.gamedatas;
         this.favoredSuitZones = {};
         Object.keys(this.game.gamedatas.staticData.suits).forEach(function (suit) {
-            _this.favoredSuitZones[suit] = new PaxPamirZone({
-                animationManager: _this.game.animationManager,
-                containerId: "pp_favored_suit_".concat(suit),
-                itemHeight: FAVORED_SUIT_MARKER_HEIGHT,
-                itemWidth: FAVORED_SUIT_MARKER_WIDTH,
-            });
+            _this.favoredSuitZones[suit] = new LineStock(_this.game.favoredSuitMarkerManager, document.getElementById("pp_favored_suit_".concat(suit)));
         });
         this.favoredSuit = gamedatas.favoredSuit;
-        this.favoredSuitZones[this.favoredSuit].setupItems({
-            element: tplFavoredSuit({ id: 'favored_suit_marker' }),
+        this.favoredSuitZones[this.favoredSuit].addCard({
             id: 'favored_suit_marker',
+            location: '',
+            state: 0,
+            used: 0,
         });
         this.game.market.setMilitarySuitIndicatorVisible({ visible: this.favoredSuit === MILITARY });
     };
     FavoredSuit.prototype.clearInterface = function () {
         var _this = this;
         Object.keys(this.favoredSuitZones).forEach(function (key) {
-            dojo.empty(_this.favoredSuitZones[key].getContainerId());
+            _this.favoredSuitZones[key].removeAll();
             _this.favoredSuitZones[key] = undefined;
         });
     };
@@ -1979,19 +3120,15 @@ var FavoredSuit = (function () {
                     case 0:
                         currentSuit = this.favoredSuit;
                         this.favoredSuit = suit;
-                        console.log('currentSuit', currentSuit);
-                        console.log('favoredSuit', this.favoredSuit);
                         if (currentSuit === MILITARY) {
                             this.game.market.setMilitarySuitIndicatorVisible({ visible: false });
                         }
-                        return [4, Promise.all([
-                                this.favoredSuitZones[suit].moveToZone({
-                                    elements: {
-                                        id: 'favored_suit_marker',
-                                    },
-                                }),
-                                this.favoredSuitZones[currentSuit].remove({ input: 'favored_suit_marker' }),
-                            ])];
+                        return [4, this.favoredSuitZones[suit].addCard({
+                                id: 'favored_suit_marker',
+                                location: '',
+                                state: 0,
+                                used: 0,
+                            })];
                     case 1:
                         _b.sent();
                         if (this.favoredSuit === MILITARY) {
@@ -2007,7 +3144,6 @@ var FavoredSuit = (function () {
 var Supply = (function () {
     function Supply(_a) {
         var game = _a.game;
-        console.log('Constructor Supply');
         this.game = game;
         this.setup({ gamedatas: game.gamedatas });
     }
@@ -2016,25 +3152,15 @@ var Supply = (function () {
         var gamedatas = _a.gamedatas;
         this.coalitionBlocks = {};
         COALITIONS.forEach(function (coalition) {
-            _this.coalitionBlocks[coalition] = new PaxPamirZone({
-                animationManager: _this.game.animationManager,
-                containerId: "pp_".concat(coalition, "_coalition_blocks"),
-                itemHeight: COALITION_BLOCK_HEIGHT,
-                itemWidth: COALITION_BLOCK_WIDTH,
-                itemGap: 15,
-            });
-            _this.coalitionBlocks[coalition].setupItems(gamedatas.coalitionBlocks[coalition].map(function (block) { return ({
-                id: block.id,
-                element: tplCoalitionBlock({ id: block.id, coalition: coalition }),
-                weight: block.state,
-            }); }));
+            _this.coalitionBlocks[coalition] = new LineStock(_this.game.coalitionBlockManager, document.getElementById("pp_".concat(coalition, "_coalition_blocks")), { center: false });
+            _this.coalitionBlocks[coalition].addCards(gamedatas.coalitionBlocks[coalition].map(function (token) { return (__assign(__assign({}, token), { type: 'supply', coalition: coalition })); }));
         });
         this.checkDominantCoalition();
     };
     Supply.prototype.clearInterface = function () {
         var _this = this;
         Object.keys(this.coalitionBlocks).forEach(function (key) {
-            dojo.empty(_this.coalitionBlocks[key].getContainerId());
+            _this.coalitionBlocks[key].removeAll();
             _this.coalitionBlocks[key] = undefined;
         });
     };
@@ -2047,15 +3173,15 @@ var Supply = (function () {
         var coalitions = [
             {
                 coalition: AFGHAN,
-                supplyCount: this.coalitionBlocks[AFGHAN].getItemCount(),
+                supplyCount: this.coalitionBlocks[AFGHAN].getCards().length,
             },
             {
                 coalition: BRITISH,
-                supplyCount: this.coalitionBlocks[BRITISH].getItemCount(),
+                supplyCount: this.coalitionBlocks[BRITISH].getCards().length,
             },
             {
                 coalition: RUSSIAN,
-                supplyCount: this.coalitionBlocks[RUSSIAN].getItemCount(),
+                supplyCount: this.coalitionBlocks[RUSSIAN].getCards().length,
             },
         ];
         var isConflictFatigueActive = this.game.playerManager
@@ -2083,35 +3209,33 @@ var Supply = (function () {
 var VpTrack = (function () {
     function VpTrack(_a) {
         var game = _a.game;
-        console.log('VpTrack');
         this.game = game;
         this.setupVpTrack({ gamedatas: game.gamedatas });
     }
     VpTrack.prototype.clearInterface = function () {
         for (var i = 0; i <= 23; i++) {
-            dojo.empty(this.vpTrackZones[i].getContainerId());
+            this.vpTrackZones[i].removeAll();
             this.vpTrackZones[i] = undefined;
         }
     };
     VpTrack.prototype.setupVpTrack = function (_a) {
+        var _this = this;
         var gamedatas = _a.gamedatas;
         this.vpTrackZones = {};
         for (var i = 0; i <= 23; i++) {
-            this.vpTrackZones[i] = new PaxPamirZone({
-                animationManager: this.game.animationManager,
-                containerId: "pp_vp_track_".concat(i),
-                itemHeight: CYLINDER_HEIGHT,
-                itemWidth: CYLINDER_WIDTH,
-                pattern: 'custom',
-                customPattern: this.customPatternVpTrack,
+            this.vpTrackZones[i] = new TokenManualPositionStock(this.game.cylinderManager, document.getElementById("pp_vp_track_".concat(i)), {}, function (element, cards, lastCard, stock) {
+                return updateZoneDislay(_this.customPatternVpTrack, element, cards, lastCard, stock);
             });
         }
         for (var playerId in gamedatas.paxPamirPlayers) {
             var player = gamedatas.paxPamirPlayers[playerId];
             var zone = this.getZone(player.score);
-            zone.setupItems({
+            zone.addCard({
                 id: "vp_cylinder_".concat(playerId),
-                element: tplCylinder({ id: "vp_cylinder_".concat(playerId), color: player.color }),
+                color: player.color,
+                state: 0,
+                used: 0,
+                location: "vp_track_".concat(player.score),
             });
         }
     };
@@ -2147,7 +3271,6 @@ var ObjectManager = (function () {
                 dominanceCheckCards: new ebg.counter(),
             },
         };
-        console.log('ObjectManager');
         this.game = game;
         this.discardPile = new DiscardPile({ game: game, containerId: 'pp_pile_discarded_card' });
         this.tempDiscardPile = new TempDiscardPile({ game: game });
@@ -2189,7 +3312,7 @@ var ObjectManager = (function () {
     };
     ObjectManager.prototype.incCardCounter = function (_a) {
         var cardId = _a.cardId, location = _a.location;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         var isDominanceCheck = cardInfo.type === EVENT_CARD && cardInfo.discarded.effect === ECE_DOMINANCE_CHECK;
         var increase = location === 'deck' ? -1 : 1;
         this.game.objectManager.counters[location].cards.incValue(increase);
@@ -2338,115 +3461,76 @@ var PPPlayer = (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_b) {
-                this.court = new PaxPamirZone({
-                    animationManager: this.game.animationManager,
-                    containerId: "pp_court_player_".concat(this.playerId),
-                    itemHeight: CARD_HEIGHT,
-                    itemWidth: CARD_WIDTH,
-                    itemGap: 16,
-                });
-                this.court.setupItems(playerGamedatas.court.cards.map(function (card) {
-                    var cardId = card.id;
-                    var region = _this.game.gamedatas.staticData.cards[cardId].region;
-                    return {
-                        id: card.id,
-                        weight: card.state,
-                        element: tplCard({ cardId: cardId, extraClasses: "pp_card_in_court pp_player_".concat(_this.playerId, " pp_").concat(region) }),
-                        zIndex: 1,
-                    };
-                }));
-                playerGamedatas.court.cards.map(function (card) { return __awaiter(_this, void 0, void 0, function () {
-                    var cardId;
-                    var _this = this;
-                    return __generator(this, function (_a) {
-                        cardId = card.id;
-                        this.setupCourtCard({ cardId: cardId });
-                        this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-                        this.game.spies[cardId].setupItems((playerGamedatas.court.spies[cardId] || []).map(function (cylinder) {
-                            var playerId = cylinder.id.split('_')[1];
-                            return {
-                                id: cylinder.id,
-                                element: tplCylinder({ id: cylinder.id, color: _this.game.gamedatas.paxPamirPlayers[playerId].color }),
-                            };
-                        }));
+                switch (_b.label) {
+                    case 0:
+                        this.court = new LineStock(this.game.cardManager, document.getElementById("pp_court_player_".concat(this.playerId)), {
+                            gap: '8px',
+                            sort: sortFunction('state'),
+                        });
+                        return [4, this.court.addCards(playerGamedatas.court.cards.map(function (data) { return (__assign(__assign({}, data), _this.game.getCardInfo(data.id))); }))];
+                    case 1:
+                        _b.sent();
+                        playerGamedatas.court.cards.map(function (card) { return __awaiter(_this, void 0, void 0, function () {
+                            var cardId;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                cardId = card.id;
+                                this.game.spies[cardId].addCards((playerGamedatas.court.spies[cardId] || []).map(function (token) { return (__assign(__assign({}, token), { color: _this.game.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color })); }));
+                                return [2];
+                            });
+                        }); });
                         return [2];
-                    });
-                }); });
-                return [2];
+                }
             });
         });
     };
     PPPlayer.prototype.setupEvents = function (_a) {
         var _this = this;
         var playerGamedatas = _a.playerGamedatas;
-        this.events = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "player_tableau_events_".concat(this.playerId),
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-            itemGap: 16,
+        this.events = new LineStock(this.game.cardManager, document.getElementById("player_tableau_events_".concat(this.playerId)), {
+            center: false,
+            gap: '8px',
         });
         var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
         if (playerGamedatas.events.length > 0) {
-            node.style.marginTop = '-57px';
+            node.style.marginTop = 'calc(var(--cardScale) * -57px)';
         }
         else {
-            node.style.marginTop = '-209px';
+            node.style.marginTop = 'calc(var(--cardScale) * -209px)';
         }
-        playerGamedatas.events.forEach(function (card) {
-            var cardId = card.id;
-            _this.events.setupItems({
-                id: cardId,
-                element: tplCard({ cardId: cardId }),
-            });
-            _this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
-        });
+        this.events.addCards(playerGamedatas.events.map(function (token) { return (__assign(__assign({}, token), _this.game.getCardInfo(token.id))); }));
     };
     PPPlayer.prototype.setupCylinders = function (_a) {
         var playerGamedatas = _a.playerGamedatas;
-        this.cylinders = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_cylinders_player_".concat(this.playerId),
-            itemWidth: CYLINDER_WIDTH,
-            itemHeight: CYLINDER_HEIGHT,
-            itemGap: 8,
+        this.cylinders = new LineStock(this.game.cylinderManager, document.getElementById("pp_cylinders_player_".concat(this.playerId)), {
+            center: false,
+            gap: '0px',
+            sort: sortFunction('state'),
         });
-        this.cylinders.setupItems(playerGamedatas.cylinders.map(function (cylinder) { return ({
-            id: cylinder.id,
-            element: tplCylinder({ id: cylinder.id, color: playerGamedatas.color }),
-            weight: cylinder.state,
-        }); }));
+        this.cylinders.addCards(playerGamedatas.cylinders.map(function (cylinder) { return (__assign(__assign({}, cylinder), { color: playerGamedatas.color })); }));
     };
     PPPlayer.prototype.setupGifts = function (_a) {
         var _this = this;
         var playerGamedatas = _a.playerGamedatas;
         ['2', '4', '6'].forEach(function (value) {
-            var customPattern = function () {
-                return { x: 5, y: 5, w: 30, h: 30 };
-            };
-            _this.gifts[value] = new PaxPamirZone({
-                animationManager: _this.game.animationManager,
-                containerId: "pp_gift_".concat(value, "_zone_").concat(_this.playerId),
-                itemHeight: 40,
-                itemWidth: 40,
-                customPattern: customPattern,
-                pattern: 'custom',
-            });
+            _this.gifts[value] = new LineStock(_this.game.cylinderManager, document.getElementById("pp_gift_".concat(value, "_zone_").concat(_this.playerId)));
         });
         var playerGifts = playerGamedatas.gifts;
         Object.keys(playerGifts).forEach(function (giftValue) {
             Object.keys(playerGifts[giftValue]).forEach(function (cylinderId) {
-                _this.gifts[giftValue].setupItems({
+                _this.gifts[giftValue].addCard(_this.game.getCylinder({
                     id: cylinderId,
-                    element: tplCylinder({ id: cylinderId, color: _this.playerColor }),
-                });
+                    state: 0,
+                    used: 0,
+                    location: "gifts_".concat(_this.playerId),
+                }));
             });
         });
     };
     PPPlayer.prototype.clearHand = function () {
         this.handCards = [];
         if (this.playerId === this.game.getPlayerId()) {
-            dojo.empty(this.hand.getContainerId());
+            this.hand.removeAll();
             this.hand = undefined;
         }
     };
@@ -2459,20 +3543,10 @@ var PPPlayer = (function () {
         if (!(this.playerId === this.game.getPlayerId())) {
             return;
         }
-        this.hand = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-            containerId: 'pp_player_hand_cards',
-            itemGap: 16,
+        this.hand = new LineStock(this.game.cardManager, document.getElementById('pp_player_hand_cards'), {
+            center: false,
         });
-        this.hand.setupItems(hand.map(function (card) { return ({
-            element: tplCard({ cardId: card.id, extraClasses: 'pp_card_in_hand' }),
-            id: card.id,
-        }); }));
-        hand.forEach(function (card) {
-            _this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-        });
+        this.hand.addCards(hand.map(function (token) { return (__assign(__assign({}, token), _this.game.getCardInfo(token.id))); }));
     };
     PPPlayer.prototype.setupPlayerPanel = function (_a) {
         var _this = this;
@@ -2537,55 +3611,45 @@ var PPPlayer = (function () {
         }
     };
     PPPlayer.prototype.setupPrizes = function (_a) {
+        var _this = this;
         var playerGamedatas = _a.playerGamedatas;
-        this.prizes = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_prizes_".concat(this.playerId),
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-            pattern: 'verticalFit',
+        this.prizes = new LineStock(this.game.cardManager, document.getElementById("pp_prizes_".concat(this.playerId)), {
+            direction: 'column',
+            center: false,
+            wrap: 'nowrap'
         });
         var numberOfPrizes = playerGamedatas.prizes.length;
         this.updatePrizesStyle({ numberOfPrizes: numberOfPrizes });
-        this.prizes.placeInZone(playerGamedatas.prizes.map(function (card) { return ({
-            id: card.id,
-            element: tplCard({ cardId: card.id, extraClasses: "pp_prize" }),
-        }); }));
+        this.prizes.addCards(playerGamedatas.prizes.map(function (token) { return (__assign(__assign({}, token), _this.game.getCardInfo(token.id))); }));
     };
     PPPlayer.prototype.updatePrizesStyle = function (_a) {
         var numberOfPrizes = _a.numberOfPrizes;
+        var node = document.getElementById("pp_prizes_".concat(this.playerId));
+        var height = 0;
+        var marginBottom = 0;
         if (numberOfPrizes > 0) {
-            var node = dojo.byId("pp_prizes_".concat(this.playerId));
-            dojo.style(node, 'margin-bottom', this.playerId === WAKHAN_PLAYER_ID ? '-184px' : "-194px");
-            dojo.style(node, 'height', "".concat(CARD_HEIGHT + (numberOfPrizes - 1) * 25, "px"));
+            marginBottom = this.playerId === WAKHAN_PLAYER_ID ? -184 : -194;
+            height = CARD_HEIGHT + (numberOfPrizes - 1) * 25;
         }
+        node.style.marginBottom = "calc(var(--cardScale)* ".concat(marginBottom, "px)");
+        node.style.height = "calc(var(--cardScale) * ".concat(height, "px)");
     };
     PPPlayer.prototype.setupRulerTokens = function (_a) {
         var _this = this;
         var gamedatas = _a.gamedatas;
-        this.rulerTokens = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_ruler_tokens_player_".concat(this.playerId),
-            itemHeight: RULER_TOKEN_HEIGHT,
-            itemWidth: RULER_TOKEN_WIDTH,
-            itemGap: 10,
+        this.rulerTokens = new LineStock(this.game.rulerTokenManager, document.getElementById("pp_ruler_tokens_player_".concat(this.playerId)), {
+            center: false,
         });
         Object.keys(gamedatas.map.rulers).forEach(function (region) {
             if (gamedatas.map.rulers[region] === Number(_this.playerId)) {
-                _this.rulerTokens.setupItems({
+                _this.rulerTokens.addCard({
                     id: "pp_ruler_token_".concat(region),
-                    element: tplRulerToken({ id: "pp_ruler_token_".concat(region), region: region }),
+                    region: region,
+                    state: 0,
+                    used: 0,
+                    location: "rulerTokens_".concat(_this.playerId),
                 });
             }
-        });
-    };
-    PPPlayer.prototype.setupCourtCard = function (_a) {
-        var cardId = _a.cardId;
-        var _b = this.game.gamedatas.staticData.cards[cardId], actions = _b.actions, region = _b.region;
-        this.game.createSpyZone({ cardId: cardId });
-        Object.keys(actions).forEach(function (action, index) {
-            var actionId = action + '_' + cardId;
-            dojo.place("<div id=\"".concat(actionId, "\" class=\"pp_card_action\" style=\"left: ").concat(actions[action].left, "px; top: ").concat(actions[action].top, "px\"></div>"), cardId);
         });
     };
     PPPlayer.prototype.setupWakhanDeck = function (_a) {
@@ -2617,22 +3681,22 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.clearInterface = function () {
         var _this = this;
-        dojo.empty(this.court.getContainerId());
+        this.court.removeAll();
         this.court = undefined;
-        dojo.empty(this.cylinders.getContainerId());
+        this.cylinders.removeAll();
         this.cylinders = undefined;
-        dojo.empty(this.rulerTokens.getContainerId());
+        this.rulerTokens.removeAll();
         this.rulerTokens = undefined;
         ['2', '4', '6'].forEach(function (value) {
-            dojo.empty(_this.gifts[value].getContainerId());
+            _this.gifts[value].removeAll();
             _this.gifts[value] = undefined;
         });
-        dojo.empty(this.events.getContainerId());
+        this.events.removeAll();
         this.events = undefined;
-        dojo.empty(this.prizes.getContainerId());
+        this.prizes.removeAll();
         this.prizes = undefined;
         if (this.game.gameOptions.openHands && this.playerId === this.game.getPlayerId()) {
-            dojo.empty(this.hand.getContainerId());
+            this.hand.removeAll();
             this.hand = undefined;
         }
     };
@@ -2641,8 +3705,11 @@ var PPPlayer = (function () {
     };
     PPPlayer.prototype.getCourtCards = function () {
         var _this = this;
-        var cardsInZone = this.court.getItems();
-        return cardsInZone.map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); });
+        var cardsInZone = this.court.getCards();
+        return cardsInZone.map(function (_a) {
+            var id = _a.id;
+            return _this.game.getCardInfo(id);
+        });
     };
     PPPlayer.prototype.getCourtZone = function () {
         return this.court;
@@ -2685,13 +3752,13 @@ var PPPlayer = (function () {
         return this.playerColor;
     };
     PPPlayer.prototype.getLowestAvailableGift = function () {
-        if (this.gifts['2'].getItemCount() === 0) {
+        if (this.gifts['2'].getCards().length === 0) {
             return 2;
         }
-        if (this.gifts['4'].getItemCount() === 0) {
+        if (this.gifts['4'].getCards().length === 0) {
             return 4;
         }
-        if (this.gifts['6'].getItemCount() === 0) {
+        if (this.gifts['6'].getCards().length === 0) {
             return 6;
         }
         return 0;
@@ -2702,8 +3769,11 @@ var PPPlayer = (function () {
     PPPlayer.prototype.getTaxShelter = function () {
         var _this = this;
         return this.court
-            .getItems()
-            .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
+            .getCards()
+            .map(function (_a) {
+            var id = _a.id;
+            return _this.game.getCardInfo(id);
+        })
             .filter(function (card) { return card.suit === ECONOMIC; })
             .reduce(function (total, current) {
             return total + current.rank;
@@ -2800,51 +3870,50 @@ var PPPlayer = (function () {
         var tableau = dojo.byId("pp_player_tableau_container_".concat(this.playerId));
         tableau.style.zIndex = originalZIndex;
     };
+    PPPlayer.prototype.createSelect = function (side) {
+        return {
+            id: "pp_card_select_".concat(side),
+            state: side === 'left' ? -1000 : 1000,
+            type: 'select',
+        };
+    };
     PPPlayer.prototype.addSideSelectToCourt = function () {
-        this.court.placeInZone([
-            { element: tplCardSelect({ side: 'left' }), id: 'pp_card_select_left', weight: -1000 },
-            { element: tplCardSelect({ side: 'right' }), id: 'pp_card_select_right', weight: 1000 },
-        ], 1);
+        this.court.addCards([this.createSelect('left'), this.createSelect('right')]);
     };
     PPPlayer.prototype.checkEventContainerHeight = function () {
         var node = dojo.byId("pp_player_events_container_".concat(this.playerId));
-        if (this.events.getItemCount() === 0) {
-            node.style.marginTop = '-209px';
+        if (this.events.getCards().length === 0) {
+            node.style.marginTop = 'calc(var(--cardScale) * -209px)';
         }
         else {
-            node.style.marginTop = '-57px';
+            node.style.marginTop = 'calc(var(--cardScale) * -57px)';
         }
     };
     PPPlayer.prototype.removeSideSelectFromCourt = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                Promise.all([
-                    this.court.remove({ input: 'pp_card_select_left', destroy: true }),
-                    this.court.remove({ input: 'pp_card_select_right', destroy: true }),
-                ]);
-                return [2];
+                switch (_a.label) {
+                    case 0: return [4, Promise.all([this.court.removeCard(this.createSelect('left')), this.court.removeCard(this.createSelect('right'))])];
+                    case 1:
+                        _a.sent();
+                        return [2, true];
+                }
             });
         });
     };
     PPPlayer.prototype.ownsEventCard = function (_a) {
         var cardId = _a.cardId;
-        return this.events.getItems().includes(cardId);
+        return this.events.getCards().some(function (card) { return card.id === cardId; });
     };
     PPPlayer.prototype.getCourtCardsWithSpecialAbility = function (_a) {
-        var _this = this;
         var specialAbility = _a.specialAbility;
         return this.court
-            .getItems()
-            .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
-            .filter(function (card) { return card.specialAbility === specialAbility; });
+            .getCards()
+            .filter(function (card) { return card.type === 'courtCard' && card.specialAbility === specialAbility; });
     };
     PPPlayer.prototype.hasSpecialAbility = function (_a) {
-        var _this = this;
         var specialAbility = _a.specialAbility;
-        return this.court
-            .getItems()
-            .map(function (cardId) { return _this.game.getCardInfo({ cardId: cardId }); })
-            .some(function (card) { return card.specialAbility === specialAbility; });
+        return this.court.getCards().some(function (card) { return card.specialAbility === specialAbility; });
     };
     PPPlayer.prototype.isWakhan = function () {
         return this.playerId === WAKHAN_PLAYER_ID;
@@ -2877,32 +3946,24 @@ var PPPlayer = (function () {
     PPPlayer.prototype.discardCourtCard = function (_a) {
         var cardId = _a.cardId, _b = _a.to, to = _b === void 0 ? DISCARD : _b;
         return __awaiter(this, void 0, void 0, function () {
-            var cardInfo, node;
+            var cardInfo;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        cardInfo = this.game.getCardInfo({ cardId: cardId });
+                        cardInfo = this.game.getCardInfo(cardId);
                         this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
                         this.incCounter({ counter: 'courtCount', value: -1 });
                         if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
                             this.incCounter({ counter: 'influence', value: -1 });
                         }
-                        node = dojo.byId(cardId);
-                        node.classList.remove('pp_card_in_court', "pp_player_".concat(this.playerId));
                         if (!(to === DISCARD)) return [3, 2];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.court,
-                            })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1:
                         _c.sent();
                         return [3, 4];
-                    case 2: return [4, Promise.all([
-                            this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                                elements: { id: cardId },
-                            }),
-                            this.court.remove({ input: cardId }),
-                        ])];
+                    case 2: return [4, this.game.objectManager.tempDiscardPile
+                            .getZone()
+                            .addCard(this.game.getCard({ id: cardId, state: 0, used: 0, location: 'tempDiscardPile' }))];
                     case 3:
                         _c.sent();
                         _c.label = 4;
@@ -2920,19 +3981,13 @@ var PPPlayer = (function () {
                     case 0:
                         originalZIndex = this.elevateTableau();
                         if (!(to === TEMP_DISCARD)) return [3, 2];
-                        return [4, Promise.all([
-                                this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                                    elements: { id: cardId },
-                                }),
-                                this.events.remove({ input: cardId }),
-                            ])];
+                        return [4, this.game.objectManager.tempDiscardPile
+                                .getZone()
+                                .addCard(this.game.getCard({ id: cardId, state: 0, used: 0, location: 'tempDiscardPile' }))];
                     case 1:
                         _c.sent();
                         return [3, 4];
-                    case 2: return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                            cardId: cardId,
-                            zone: this.events,
-                        })];
+                    case 2: return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 3:
                         _c.sent();
                         _c.label = 4;
@@ -2951,45 +4006,28 @@ var PPPlayer = (function () {
                 switch (_c.label) {
                     case 0:
                         this.incCounter({ counter: 'cards', value: -1 });
-                        console.log('discardHand', to, discardMap[to]);
                         if (!(this.playerId === this.game.getPlayerId() && to === DISCARD)) return [3, 2];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.hand,
-                            })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1:
                         _c.sent();
-                        return [3, 8];
+                        return [3, 7];
                     case 2:
-                        if (!(this.playerId === this.game.getPlayerId() && to === TEMP_DISCARD)) return [3, 4];
-                        return [4, Promise.all([
-                                this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                                    elements: {
-                                        id: cardId,
-                                    },
-                                    classesToRemove: [PP_CARD_IN_HAND],
-                                }),
-                            ])];
+                        if (!(this.playerId === this.game.getPlayerId() && to === TEMP_DISCARD)) return [3, 3];
+                        this.game.objectManager.tempDiscardPile.getZone().addCard(__assign(__assign({}, this.game.getCardInfo(cardId)), { state: 0, used: 0, location: 'temp_discard' }));
+                        return [3, 7];
                     case 3:
-                        _c.sent();
-                        return [3, 8];
-                    case 4:
-                        if (!(to === DISCARD)) return [3, 6];
+                        if (!(to === DISCARD)) return [3, 5];
                         return [4, this.game.objectManager.discardPile.discardCardFromLocation({ cardId: cardId, from: "cards_".concat(this.playerId) })];
+                    case 4:
+                        _c.sent();
+                        return [3, 7];
                     case 5:
-                        _c.sent();
-                        return [3, 8];
+                        if (!(to === TEMP_DISCARD)) return [3, 7];
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(__assign(__assign({}, this.game.getCardInfo(cardId)), { state: 0, used: 0, location: 'temp_discard' }))];
                     case 6:
-                        if (!(to === TEMP_DISCARD)) return [3, 8];
-                        return [4, this.game.objectManager.tempDiscardPile.getZone().placeInZone({
-                                id: cardId,
-                                element: tplCard({ cardId: cardId }),
-                                from: "cards_".concat(this.playerId),
-                            })];
-                    case 7:
                         _c.sent();
-                        _c.label = 8;
-                    case 8:
+                        _c.label = 7;
+                    case 7:
                         this.updateHandCards({ cardId: cardId, action: 'REMOVE' });
                         return [2];
                 }
@@ -3001,7 +4039,7 @@ var PPPlayer = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.game.objectManager.discardPile.discardCardFromZone({ cardId: cardId, zone: this.prizes })];
+                    case 0: return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1: return [2, _b.sent()];
                 }
             });
@@ -3032,42 +4070,28 @@ var PPPlayer = (function () {
             });
         });
     };
-    PPPlayer.prototype.playCard = function (_a) {
-        var card = _a.card;
+    PPPlayer.prototype.playCard = function (card) {
         return __awaiter(this, void 0, void 0, function () {
-            var cardInfo, region, suit, rank;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var cardInfo, suit, rank;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        cardInfo = this.game.getCardInfo({ cardId: card.id });
-                        region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
+                        cardInfo = this.game.getCard(card);
+                        suit = cardInfo.suit, rank = cardInfo.rank;
                         this.incCounter({ counter: 'cards', value: -1 });
-                        if (!(this.playerId === this.game.getPlayerId())) return [3, 2];
-                        this.setupCourtCard({ cardId: card.id });
-                        return [4, Promise.all([
-                                this.court.moveToZone({
-                                    elements: { id: card.id, weight: card.state },
-                                    classesToAdd: ['pp_card_in_court', "pp_player_".concat(this.playerId), "pp_".concat(region)],
-                                    classesToRemove: ['pp_card_in_hand'],
-                                    elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
-                                }),
-                                this.hand.remove({ input: card.id }),
-                            ])];
+                        if (!(this.playerId === this.game.getPlayerId())) return [3, 3];
+                        return [4, this.removeSideSelectFromCourt()];
                     case 1:
-                        _b.sent();
-                        return [3, 4];
-                    case 2: return [4, this.court.placeInZone({
-                            id: card.id,
-                            element: tplCard({ cardId: card.id, extraClasses: "pp_card_in_court pp_player_".concat(this.playerId, " pp_").concat(region) }),
-                            weight: card.state,
-                            from: "cards_".concat(this.playerId),
-                        })];
-                    case 3:
-                        _b.sent();
-                        this.setupCourtCard({ cardId: card.id });
-                        this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-                        _b.label = 4;
+                        _a.sent();
+                        return [4, this.court.addCard(cardInfo)];
+                    case 2:
+                        _a.sent();
+                        return [3, 5];
+                    case 3: return [4, this.court.addCard(cardInfo, { fromElement: document.getElementById("cards_".concat(this.playerId)) })];
                     case 4:
+                        _a.sent();
+                        _a.label = 5;
+                    case 5:
                         this.incCounter({ counter: suit, value: rank });
                         this.incCounter({ counter: 'courtCount', value: 1 });
                         if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
@@ -3079,57 +4103,51 @@ var PPPlayer = (function () {
             });
         });
     };
-    PPPlayer.prototype.addCardToHand = function (_a) {
-        var cardId = _a.cardId, from = _a.from;
+    PPPlayer.prototype.addCardToHand = function (cardToken) {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var card, element;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        if (!(this.playerId === this.game.getPlayerId() && from)) return [3, 2];
-                        return [4, Promise.all([
-                                this.hand.moveToZone({ elements: { id: cardId }, classesToAdd: ['pp_card_in_hand'], classesToRemove: [PP_MARKET_CARD] }),
-                                from.remove({ input: cardId }),
-                            ])];
+                        card = this.game.getCard(cardToken);
+                        if (!(this.playerId === this.game.getPlayerId())) return [3, 2];
+                        return [4, this.hand.addCard(card)];
                     case 1:
-                        _b.sent();
-                        return [3, 6];
+                        _a.sent();
+                        return [3, 4];
                     case 2:
-                        if (!(this.playerId === this.game.getPlayerId())) return [3, 4];
-                        return [4, this.hand.placeInZone({ id: cardId, element: tplCard({ cardId: cardId, extraClasses: 'pp_card_in_hand' }) })];
+                        element = this.game.cardManager.getCardElement(card);
+                        return [4, moveToAnimation({
+                                game: this.game,
+                                element: element,
+                                toId: "cards_".concat(this.playerId),
+                                remove: true,
+                            })];
                     case 3:
-                        _b.sent();
-                        return [3, 6];
-                    case 4: return [4, from.removeTo({ id: cardId, to: "cards_".concat(this.playerId) })];
-                    case 5:
-                        _b.sent();
-                        _b.label = 6;
-                    case 6:
+                        _a.sent();
+                        this.game.cardManager.removeCard(card);
+                        _a.label = 4;
+                    case 4:
                         this.incCounter({ counter: 'cards', value: 1 });
-                        this.updateHandCards({ cardId: cardId, action: 'ADD' });
+                        this.updateHandCards({ cardId: card.id, action: 'ADD' });
                         return [2];
                 }
             });
         });
     };
     PPPlayer.prototype.addCardToEvents = function (_a) {
-        var cardId = _a.cardId, from = _a.from;
+        var cardId = _a.cardId;
         return __awaiter(this, void 0, void 0, function () {
             var originalZIndex, node;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         originalZIndex = this.elevateTableau();
-                        if (this.events.getItemCount() === 0) {
+                        if (this.events.getCards().length === 0) {
                             node = dojo.byId("pp_player_events_container_".concat(this.playerId));
-                            node.style.marginTop = '-57px';
+                            node.style.marginTop = 'calc(var(--cardScale) * -57px)';
                         }
-                        return [4, Promise.all([
-                                this.events.moveToZone({
-                                    elements: { id: cardId },
-                                    classesToRemove: [PP_MARKET_CARD],
-                                }),
-                                from.remove({ input: cardId }),
-                            ])];
+                        return [4, this.events.addCard(__assign(__assign({}, this.game.getCardInfo(cardId)), { state: 0, used: 0, location: "events_".concat(this.playerId) }))];
                     case 1:
                         _b.sent();
                         this.removeTableauElevation(originalZIndex);
@@ -3151,17 +4169,15 @@ var PPPlayer = (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        this.updatePrizesStyle({ numberOfPrizes: this.prizes.getItemCount() + 1 });
+                        this.updatePrizesStyle({ numberOfPrizes: this.prizes.getCards().length + 1 });
                         node = $(cardId);
                         node.style.zIndex = 0;
-                        return [4, Promise.all([
-                                this.prizes.moveToZone({
-                                    elements: { id: cardId },
-                                    classesToAdd: [PP_PRIZE],
-                                    zIndex: 0,
-                                }),
-                                this.game.objectManager.tempDiscardPile.getZone().remove({ input: cardId }),
-                            ])];
+                        return [4, this.prizes.addCard(this.game.getCard({
+                                id: cardId,
+                                state: 0,
+                                used: 0,
+                                location: "prizes_".concat(this.playerId),
+                            }))];
                     case 1:
                         _b.sent();
                         this.incCounter({ counter: 'influence', value: 1 });
@@ -3190,21 +4206,6 @@ var PPPlayer = (function () {
     };
     return PPPlayer;
 }());
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var PPWakhanPlayer = (function (_super) {
     __extends(PPWakhanPlayer, _super);
     function PPWakhanPlayer(_a) {
@@ -3292,7 +4293,7 @@ var PPWakhanPlayer = (function (_super) {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        cardInfo = this.game.getCardInfo({ cardId: cardId });
+                        cardInfo = this.game.getCardInfo(cardId);
                         this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
                         this.incCounter({ counter: 'courtCount', value: -1 });
                         if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
@@ -3310,19 +4311,16 @@ var PPWakhanPlayer = (function (_super) {
                         node = dojo.byId(cardId);
                         node.classList.remove('pp_card_in_court', "pp_player_".concat(this.playerId));
                         if (!(to === DISCARD)) return [3, 2];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.court,
-                            })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1:
                         _d.sent();
                         return [3, 4];
-                    case 2: return [4, Promise.all([
-                            this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                                elements: { id: cardId },
-                            }),
-                            this.court.remove({ input: cardId }),
-                        ])];
+                    case 2: return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard({
+                            id: cardId,
+                            state: 0,
+                            used: 0,
+                            location: to,
+                        }))];
                     case 3:
                         _d.sent();
                         _d.label = 4;
@@ -3344,11 +4342,12 @@ var PPWakhanPlayer = (function (_super) {
                         return [3, 4];
                     case 2:
                         if (!(to === TEMP_DISCARD)) return [3, 4];
-                        return [4, this.game.objectManager.tempDiscardPile.getZone().placeInZone({
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard({
                                 id: cardId,
-                                element: tplCard({ cardId: cardId }),
-                                from: "cylinders_".concat(this.playerId),
-                            })];
+                                state: 0,
+                                used: 0,
+                                location: "cylinders_".concat(this.playerId),
+                            }))];
                     case 3:
                         _c.sent();
                         _c.label = 4;
@@ -3357,54 +4356,32 @@ var PPWakhanPlayer = (function (_super) {
             });
         });
     };
-    PPWakhanPlayer.prototype.playCard = function (_a) {
-        var card = _a.card;
+    PPWakhanPlayer.prototype.playCard = function (card) {
         return __awaiter(this, void 0, void 0, function () {
-            var cardInfo, region, suit, rank;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        cardInfo = this.game.getCardInfo({ cardId: card.id });
-                        region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
-                        return [4, this.court.placeInZone({
-                                id: card.id,
-                                element: tplCard({ cardId: card.id, extraClasses: "pp_card_in_court pp_player_".concat(this.playerId, " pp_").concat(region) }),
-                                weight: card.state,
-                                from: "cylinders_".concat(this.playerId),
-                            })];
-                    case 1:
-                        _b.sent();
-                        this.setupCourtCard({ cardId: card.id });
-                        this.game.tooltipManager.addTooltipToCard({ cardId: card.id });
-                        this.incCounter({ counter: suit, value: rank });
-                        this.incCounter({ counter: 'courtCount', value: 1 });
-                        if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
-                            this.wakhanInfluence[cardInfo.loyalty].incValue(1);
-                        }
-                        return [2];
+            var cardInfo, suit, rank;
+            return __generator(this, function (_a) {
+                cardInfo = this.game.getCardInfo(card.id);
+                suit = cardInfo.suit, rank = cardInfo.rank;
+                this.court.addCard(__assign(__assign({}, card), cardInfo));
+                this.incCounter({ counter: suit, value: rank });
+                this.incCounter({ counter: 'courtCount', value: 1 });
+                if (cardInfo.type === 'courtCard' && cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
+                    this.wakhanInfluence[cardInfo.loyalty].incValue(1);
                 }
+                return [2];
             });
         });
     };
     PPWakhanPlayer.prototype.radicalizeCardWakhan = function (_a) {
         var card = _a.card, from = _a.from;
         return __awaiter(this, void 0, void 0, function () {
-            var cardInfo, region, suit, rank;
+            var cardInfo, suit, rank;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        cardInfo = this.game.getCardInfo({ cardId: card.id });
-                        region = cardInfo.region, suit = cardInfo.suit, rank = cardInfo.rank;
-                        this.setupCourtCard({ cardId: card.id });
-                        return [4, Promise.all([
-                                this.court.moveToZone({
-                                    elements: { id: card.id, weight: card.state },
-                                    classesToAdd: ['pp_card_in_court', "pp_player_".concat(this.playerId), "pp_".concat(region)],
-                                    classesToRemove: ['pp_market_card'],
-                                    elementsToRemove: { elements: ['pp_card_select_left', 'pp_card_select_right'], destroy: true },
-                                }),
-                                from.remove({ input: card.id }),
-                            ])];
+                        cardInfo = this.game.getCardInfo(card.id);
+                        suit = cardInfo.suit, rank = cardInfo.rank;
+                        return [4, this.court.addCard(__assign(__assign({}, card), cardInfo))];
                     case 1:
                         _b.sent();
                         this.incCounter({ counter: suit, value: rank });
@@ -3447,7 +4424,6 @@ var PPWakhanPlayer = (function (_super) {
     };
     PPWakhanPlayer.prototype.toValueWakhanInfluence = function (_a) {
         var wakhanInfluence = _a.wakhanInfluence;
-        console.log('toValueWakhanInfluence');
         var influence = wakhanInfluence.influence;
         this.wakhanInfluence.afghan.setValue(influence.afghan);
         this.wakhanInfluence.british.setValue(influence.british);
@@ -3461,7 +4437,6 @@ var PlayerManager = (function () {
         this.getPlayerOrder = function () {
             return _this.game.playerOrder;
         };
-        console.log('Constructor PlayerManager');
         this.game = game;
         this.players = {};
         for (var playerId in game.gamedatas.paxPamirPlayers) {
@@ -3474,6 +4449,13 @@ var PlayerManager = (function () {
             }
         }
     }
+    PlayerManager.prototype.getAllCourtCards = function () {
+        var cards = [];
+        Object.values(this.players).forEach(function (player) {
+            cards = cards.concat(player.getCourtZone().getCards());
+        });
+        return cards;
+    };
     PlayerManager.prototype.getPlayer = function (_a) {
         var playerId = _a.playerId;
         return this.players[playerId];
@@ -3541,31 +4523,20 @@ var Border = (function () {
         this.setupBorder({ gamedatas: game.gamedatas });
     }
     Border.prototype.setupBorder = function (_a) {
-        var _this = this;
         var gamedatas = _a.gamedatas;
         var borderGamedatas = gamedatas.map.borders[this.border];
         this.createBorderZone();
-        borderGamedatas.roads.forEach(function (_a) {
-            var id = _a.id;
-            _this.roadZone.setupItems({
-                id: id,
-                element: tplRoad({ id: id, coalition: id.split('_')[1] }),
-            });
-        });
+        this.roadZone.addCards(borderGamedatas.roads.map(function (token) { return (__assign(__assign({}, token), { coalition: token.id.split('_')[1], type: 'road' })); }));
     };
     Border.prototype.clearInterface = function () {
-        dojo.empty(this.roadZone.getContainerId());
+        this.roadZone.removeAll();
         this.roadZone = undefined;
     };
     Border.prototype.createBorderZone = function () {
+        var _this = this;
         var border = this.border;
-        this.roadZone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_".concat(this.border, "_border"),
-            itemHeight: ROAD_HEIGHT,
-            itemWidth: ROAD_WIDTH,
-            pattern: 'custom',
-            customPattern: this.getCustomPattern({ border: border }),
+        this.roadZone = new TokenManualPositionStock(this.game.coalitionBlockManager, document.getElementById("pp_".concat(this.border, "_border")), {}, function (element, cards, lastCard, stock) {
+            return _this.updateDislay(element, cards, lastCard, stock);
         });
     };
     Border.prototype.getRoadZone = function () {
@@ -3581,499 +4552,907 @@ var Border = (function () {
         var border = _a.border;
         switch (border) {
             case HERAT_KABUL:
-                return this.customPatternHeratKabul;
+                return customPatternHeratKabul;
             case HERAT_KANDAHAR:
-                return this.customPatternHeratKandahar;
+                return customPatternHeratKandahar;
             case HERAT_PERSIA:
-                return this.customPatternHeratPersia;
+                return customPatternHeratPersia;
             case HERAT_TRANSCASPIA:
-                return this.customPatternHeratTranscaspia;
+                return customPatternHeratTranscaspia;
             case KABUL_KANDAHAR:
-                return this.customPatternKabulKandahar;
+                return customPatternKabulKandahar;
             case KABUL_PUNJAB:
-                return this.customPatternKabulPunjab;
+                return customPatternKabulPunjab;
             case KABUL_TRANSCASPIA:
-                return this.customPatternKabulTranscaspia;
+                return customPatternKabulTranscaspia;
             case KANDAHAR_PUNJAB:
-                return this.customPatternKandaharPunjab;
+                return customPatternKandaharPunjab;
             case PERSIA_TRANSCASPIA:
-                return this.customPatternPersiaTranscaspia;
+                return customPatternPersiaTranscaspia;
             default:
                 return undefined;
         }
     };
     Border.prototype.getCoalitionRoads = function (_a) {
         var coalitionId = _a.coalitionId;
-        return this.roadZone.getItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
+        return this.roadZone
+            .getCards()
+            .filter(function (_a) {
+            var id = _a.id;
+            return id.split('_')[1] === coalitionId;
+        })
+            .map(function (block) { return block.id; });
     };
     Border.prototype.getEnemyRoads = function (_a) {
         var coalitionId = _a.coalitionId;
-        return this.roadZone.getItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
+        return this.roadZone
+            .getCards()
+            .filter(function (_a) {
+            var id = _a.id;
+            return id.split('_')[1] !== coalitionId;
+        })
+            .map(function (block) { return block.id; });
+    };
+    Border.prototype.createTempRoad = function (coalition, index) {
+        var id = "temp_road_".concat(index);
+        return {
+            id: id,
+            state: 0,
+            coalition: coalition,
+            location: this.border,
+            used: 0,
+            type: 'road',
+        };
     };
     Border.prototype.addTempRoad = function (_a) {
         var coalition = _a.coalition, index = _a.index;
-        var id = "temp_road_".concat(index);
-        this.roadZone.placeInZone({
-            id: id,
-            element: tplRoad({ id: id, coalition: coalition, classesToAdd: [PP_TEMPORARY] }),
-        });
+        this.roadZone.addCard(this.createTempRoad(coalition, index));
     };
     Border.prototype.removeTempRoad = function (_a) {
         var index = _a.index;
-        this.roadZone.remove({ input: "temp_road_".concat(index), destroy: true });
+        this.roadZone.removeCard(this.createTempRoad('afghan', index));
     };
-    Border.prototype.customPatternHeratKabul = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 2) {
-            switch (i) {
-                case 0:
-                    return { x: 24, y: 13, w: 40, h: 27 };
-                case 1:
-                    return { x: 62, y: 40, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 4) {
-            switch (i) {
-                case 0:
-                    return { x: 0, y: -3, w: 40, h: 27 };
-                case 1:
-                    return { x: 29, y: 17, w: 40, h: 27 };
-                case 2:
-                    return { x: 58, y: 37, w: 40, h: 27 };
-                case 3:
-                    return { x: 82, y: 55, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 7;
-            switch (mod) {
-                case 0:
-                    return { x: 0, y: -3, w: 40, h: 27 };
-                case 1:
-                    return { x: 16, y: 6, w: 40, h: 27 };
-                case 2:
-                    return { x: 30, y: 16, w: 40, h: 27 };
-                case 3:
-                    return { x: 45, y: 25, w: 40, h: 27 };
-                case 4:
-                    return { x: 58, y: 35, w: 40, h: 27 };
-                case 5:
-                    return { x: 69, y: 43, w: 40, h: 27 };
-                case 6:
-                    return { x: 84, y: 51, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternHeratKandahar = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 3) {
-            switch (i) {
-                case 0:
-                    return { x: 7, y: 27, w: 40, h: 27 };
-                case 1:
-                    return { x: 5, y: 54, w: 40, h: 27 };
-                case 2:
-                    return { x: 2, y: 81, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 5) {
-            switch (i) {
-                case 0:
-                    return { x: 7, y: -7, w: 40, h: 27 };
-                case 1:
-                    return { x: 6, y: 21, w: 40, h: 27 };
-                case 2:
-                    return { x: 4, y: 51, w: 40, h: 27 };
-                case 3:
-                    return { x: 2, y: 81, w: 40, h: 27 };
-                case 4:
-                    return { x: -3, y: 112, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 12;
-            switch (mod) {
-                case 0:
-                    return { x: 7, y: -17, w: 40, h: 27 };
-                case 1:
-                    return { x: 7, y: -5, w: 40, h: 27 };
-                case 2:
-                    return { x: 8, y: 7, w: 40, h: 27 };
-                case 3:
-                    return { x: 8, y: 19, w: 40, h: 27 };
-                case 4:
-                    return { x: 8, y: 30, w: 40, h: 27 };
-                case 5:
-                    return { x: 6, y: 41, w: 40, h: 27 };
-                case 6:
-                    return { x: 5, y: 53, w: 40, h: 27 };
-                case 7:
-                    return { x: 5, y: 64, w: 40, h: 27 };
-                case 8:
-                    return { x: 3, y: 75, w: 40, h: 27 };
-                case 9:
-                    return { x: 2, y: 88, w: 40, h: 27 };
-                case 10:
-                    return { x: 0, y: 100, w: 40, h: 27 };
-                case 11:
-                    return { x: -3, y: 112, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternHeratPersia = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 3) {
-            switch (i) {
-                case 0:
-                    return { x: -2, y: 32, w: 40, h: 27 };
-                case 1:
-                    return { x: -1, y: 60, w: 40, h: 27 };
-                case 2:
-                    return { x: 3, y: 87, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 5) {
-            switch (i) {
-                case 0:
-                    return { x: -2, y: 0, w: 40, h: 27 };
-                case 1:
-                    return { x: -2, y: 27, w: 40, h: 27 };
-                case 2:
-                    return { x: -1, y: 57, w: 40, h: 27 };
-                case 3:
-                    return { x: 2, y: 87, w: 40, h: 27 };
-                case 4:
-                    return { x: 4, y: 117, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 11;
-            switch (mod) {
-                case 0:
-                    return { x: -2, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: -2, y: 9, w: 40, h: 27 };
-                case 2:
-                    return { x: -2, y: 21, w: 40, h: 27 };
-                case 3:
-                    return { x: -2, y: 32, w: 40, h: 27 };
-                case 4:
-                    return { x: -1, y: 44, w: 40, h: 27 };
-                case 5:
-                    return { x: 0, y: 57, w: 40, h: 27 };
-                case 6:
-                    return { x: 1, y: 70, w: 40, h: 27 };
-                case 7:
-                    return { x: 3, y: 82, w: 40, h: 27 };
-                case 8:
-                    return { x: 4, y: 95, w: 40, h: 27 };
-                case 9:
-                    return { x: 4, y: 108, w: 40, h: 27 };
-                case 10:
-                    return { x: 4, y: 121, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternHeratTranscaspia = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 2) {
-            switch (i) {
-                case 0:
-                    return { x: 65, y: 12, w: 40, h: 27 };
-                case 1:
-                    return { x: 27, y: 39, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 4) {
-            switch (i) {
-                case 0:
-                    return { x: 85, y: 2, w: 40, h: 27 };
-                case 1:
-                    return { x: 58, y: 19, w: 40, h: 27 };
-                case 2:
-                    return { x: 32, y: 37, w: 40, h: 27 };
-                case 3:
-                    return { x: 10, y: 56, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 8;
-            switch (mod) {
-                case 0:
-                    return { x: 90, y: -5, w: 40, h: 27 };
-                case 1:
-                    return { x: 81, y: 5, w: 40, h: 27 };
-                case 2:
-                    return { x: 65, y: 15, w: 40, h: 27 };
-                case 3:
-                    return { x: 49, y: 26, w: 40, h: 27 };
-                case 4:
-                    return { x: 38, y: 36, w: 40, h: 27 };
-                case 5:
-                    return { x: 28, y: 45, w: 40, h: 27 };
-                case 6:
-                    return { x: 16, y: 57, w: 40, h: 27 };
-                case 7:
-                    return { x: 8, y: 67, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternKabulKandahar = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 2) {
-            switch (i) {
-                case 0:
-                    return { x: 40, y: 10, w: 40, h: 27 };
-                case 1:
-                    return { x: 86, y: 19, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 4) {
-            switch (i) {
-                case 0:
-                    return { x: -4, y: 0, w: 40, h: 27 };
-                case 1:
-                    return { x: 36, y: 8, w: 40, h: 27 };
-                case 2:
-                    return { x: 77, y: 15, w: 40, h: 27 };
-                case 3:
-                    return { x: 120, y: 11, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 8;
-            switch (mod) {
-                case 0:
-                    return { x: -8, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: 12, y: 4, w: 40, h: 27 };
-                case 2:
-                    return { x: 32, y: 9, w: 40, h: 27 };
-                case 3:
-                    return { x: 48, y: 14, w: 40, h: 27 };
-                case 4:
-                    return { x: 69, y: 17, w: 40, h: 27 };
-                case 5:
-                    return { x: 84, y: 19, w: 40, h: 27 };
-                case 6:
-                    return { x: 104, y: 17, w: 40, h: 27 };
-                case 7:
-                    return { x: 124, y: 13, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternKabulTranscaspia = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 2) {
-            switch (i) {
-                case 0:
-                    return { x: 11, y: 32, w: 40, h: 27 };
-                case 1:
-                    return { x: 6, y: 64, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 4) {
-            switch (i) {
-                case 0:
-                    return { x: 11, y: 10, w: 40, h: 27 };
-                case 1:
-                    return { x: 10, y: 40, w: 40, h: 27 };
-                case 2:
-                    return { x: 5, y: 70, w: 40, h: 27 };
-                case 3:
-                    return { x: -3, y: 100, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 9;
-            switch (mod) {
-                case 0:
-                    return { x: 12, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: 13, y: 12, w: 40, h: 27 };
-                case 2:
-                    return { x: 12, y: 25, w: 40, h: 27 };
-                case 3:
-                    return { x: 11, y: 37, w: 40, h: 27 };
-                case 4:
-                    return { x: 10, y: 49, w: 40, h: 27 };
-                case 5:
-                    return { x: 9, y: 61, w: 40, h: 27 };
-                case 6:
-                    return { x: 6, y: 74, w: 40, h: 27 };
-                case 7:
-                    return { x: 2, y: 86, w: 40, h: 27 };
-                case 8:
-                    return { x: -3, y: 100, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternKabulPunjab = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 3) {
-            switch (i) {
-                case 0:
-                    return { x: 23, y: 61, w: 40, h: 27 };
-                case 1:
-                    return { x: 7, y: 93, w: 40, h: 27 };
-                case 2:
-                    return { x: -4, y: 123, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 7) {
-            switch (i) {
-                case 0:
-                    return { x: 56, y: 0, w: 40, h: 27 };
-                case 1:
-                    return { x: 43, y: 33, w: 40, h: 27 };
-                case 2:
-                    return { x: 22, y: 63, w: 40, h: 27 };
-                case 3:
-                    return { x: 7, y: 90, w: 40, h: 27 };
-                case 4:
-                    return { x: -2, y: 116, w: 40, h: 27 };
-                case 5:
-                    return { x: -13, y: 145, w: 40, h: 27 };
-                case 6:
-                    return { x: -32, y: 175, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 12;
-            switch (mod) {
-                case 0:
-                    return { x: 59, y: -7, w: 40, h: 27 };
-                case 1:
-                    return { x: 54, y: 8, w: 40, h: 27 };
-                case 2:
-                    return { x: 48, y: 23, w: 40, h: 27 };
-                case 3:
-                    return { x: 38, y: 39, w: 40, h: 27 };
-                case 4:
-                    return { x: 28, y: 55, w: 40, h: 27 };
-                case 5:
-                    return { x: 17, y: 72, w: 40, h: 27 };
-                case 6:
-                    return { x: 10, y: 90, w: 40, h: 27 };
-                case 7:
-                    return { x: 2, y: 108, w: 40, h: 27 };
-                case 8:
-                    return { x: -4, y: 125, w: 40, h: 27 };
-                case 9:
-                    return { x: -12, y: 141, w: 40, h: 27 };
-                case 10:
-                    return { x: -22, y: 163, w: 40, h: 27 };
-                case 11:
-                    return { x: -35, y: 178, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternKandaharPunjab = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 3) {
-            switch (i) {
-                case 0:
-                    return { x: -2, y: 16, w: 40, h: 27 };
-                case 1:
-                    return { x: 8, y: 45, w: 40, h: 27 };
-                case 2:
-                    return { x: 17, y: 75, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 6) {
-            switch (i) {
-                case 0:
-                    return { x: -26, y: -36, w: 40, h: 27 };
-                case 1:
-                    return { x: -12, y: -9, w: 40, h: 27 };
-                case 2:
-                    return { x: -3, y: 15, w: 40, h: 27 };
-                case 3:
-                    return { x: 5, y: 40, w: 40, h: 27 };
-                case 4:
-                    return { x: 15, y: 70, w: 40, h: 27 };
-                case 5:
-                    return { x: 22, y: 97, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 12;
-            switch (mod) {
-                case 0:
-                    return { x: -25, y: -40, w: 40, h: 27 };
-                case 1:
-                    return { x: -20, y: -29, w: 40, h: 27 };
-                case 2:
-                    return { x: -14, y: -17, w: 40, h: 27 };
-                case 3:
-                    return { x: -8, y: -5, w: 40, h: 27 };
-                case 4:
-                    return { x: -4, y: 6, w: 40, h: 27 };
-                case 5:
-                    return { x: 0, y: 19, w: 40, h: 27 };
-                case 6:
-                    return { x: 2, y: 30, w: 40, h: 27 };
-                case 7:
-                    return { x: 10, y: 42, w: 40, h: 27 };
-                case 8:
-                    return { x: 12, y: 55, w: 40, h: 27 };
-                case 9:
-                    return { x: 16, y: 70, w: 40, h: 27 };
-                case 10:
-                    return { x: 21, y: 85, w: 40, h: 27 };
-                case 11:
-                    return { x: 24, y: 100, w: 40, h: 27 };
-            }
-        }
-    };
-    Border.prototype.customPatternPersiaTranscaspia = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 2) {
-            switch (i) {
-                case 0:
-                    return { x: 41, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: 88, y: 5, w: 40, h: 27 };
-            }
-        }
-        else if (numberOfItems <= 4) {
-            switch (i) {
-                case 0:
-                    return { x: -2, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: 38, y: -2, w: 40, h: 27 };
-                case 2:
-                    return { x: 78, y: 1, w: 40, h: 27 };
-                case 3:
-                    return { x: 115, y: 9, w: 40, h: 27 };
-            }
-        }
-        else {
-            var mod = i % 9;
-            switch (mod) {
-                case 0:
-                    return { x: -8, y: -2, w: 40, h: 27 };
-                case 1:
-                    return { x: 9, y: -1, w: 40, h: 27 };
-                case 2:
-                    return { x: 26, y: 0, w: 40, h: 27 };
-                case 3:
-                    return { x: 45, y: 0, w: 40, h: 27 };
-                case 4:
-                    return { x: 67, y: 2, w: 40, h: 27 };
-                case 5:
-                    return { x: 89, y: 4, w: 40, h: 27 };
-                case 6:
-                    return { x: 109, y: 8, w: 40, h: 27 };
-                case 7:
-                    return { x: 126, y: 13, w: 40, h: 27 };
-                case 8:
-                    return { x: 141, y: 20, w: 40, h: 27 };
-            }
-        }
+    Border.prototype.updateDislay = function (element, blocks, lastCard, stock) {
+        var pattern = this.getCustomPattern({ border: this.border });
+        var itemCount = blocks.length;
+        blocks.forEach(function (block, index) {
+            var _a = pattern({ index: index, itemCount: itemCount }), left = _a.x, top = _a.y;
+            var div = stock.getCardElement(block);
+            div.style.top = "calc(var(--tokenScale) * ".concat(top, "px)");
+            div.style.left = "calc(var(--tokenScale) * ".concat(left, "px)");
+        });
     };
     return Border;
 }());
+var updateZoneDislay = function (pattern, element, blocks, lastCard, stock) {
+    var itemCount = blocks.length;
+    blocks.forEach(function (block, index) {
+        var _a = pattern({ index: index, itemCount: itemCount }), left = _a.x, top = _a.y;
+        var div = stock.getCardElement(block);
+        div.style.top = "calc(var(--tokenScale) * ".concat(top, "px)");
+        div.style.left = "calc(var(--tokenScale) * ".concat(left, "px)");
+    });
+};
+var defaultPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 5);
+    var mod = i % 5;
+    return { x: mod * 22, y: multiplier * 15, w: 40, h: 27 };
+};
+var armiesHeratPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 11) {
+        switch (i) {
+            case 0:
+                return { x: 1, y: -43, w: 25, h: 40 };
+            case 1:
+                return { x: 22, y: -5, w: 25, h: 40 };
+            case 2:
+                return { x: 6, y: 46, w: 25, h: 40 };
+            case 3:
+                return { x: 40, y: 48, w: 25, h: 40 };
+            case 4:
+                return { x: 68, y: 56, w: 25, h: 40 };
+            case 5:
+                return { x: 163, y: -47, w: 25, h: 40 };
+            case 6:
+                return { x: 98, y: 46, w: 25, h: 40 };
+            case 7:
+                return { x: 151, y: 5, w: 25, h: 40 };
+            case 8:
+                return { x: 177, y: 14, w: 25, h: 40 };
+            case 9:
+                return { x: 125, y: 46, w: 25, h: 40 };
+            case 10:
+                return { x: 152, y: 55, w: 25, h: 40 };
+        }
+    }
+    else if (i <= 7) {
+        switch (i) {
+            case 0:
+                return { x: 0, y: -20, w: 25, h: 40 };
+            case 1:
+                return { x: 22, y: -20, w: 25, h: 40 };
+            case 2:
+                return { x: 1, y: 5, w: 25, h: 40 };
+            case 3:
+                return { x: 23, y: 5, w: 25, h: 40 };
+            case 4:
+                return { x: 151, y: -16, w: 25, h: 40 };
+            case 5:
+                return { x: 173, y: -16, w: 25, h: 40 };
+            case 6:
+                return { x: 151, y: 6, w: 25, h: 40 };
+            case 7:
+                return { x: 173, y: 6, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor((i - 8) / 8);
+        var mod = (i - 8) % 8;
+        return { x: 3 + mod * 22, y: 46 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var armiesKabulPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (i <= 23) {
+        switch (i) {
+            case 0:
+                return { x: 1, y: -43, w: 25, h: 40 };
+            case 1:
+                return { x: 22, y: -5, w: 25, h: 40 };
+            case 2:
+                return { x: 6, y: 46, w: 25, h: 40 };
+            case 3:
+                return { x: 40, y: 48, w: 25, h: 40 };
+            case 4:
+                return { x: 68, y: 56, w: 25, h: 40 };
+            case 5:
+                return { x: 163, y: -47, w: 25, h: 40 };
+            case 6:
+                return { x: 98, y: 46, w: 25, h: 40 };
+            case 7:
+                return { x: 151, y: 5, w: 25, h: 40 };
+            case 8:
+                return { x: 177, y: 14, w: 25, h: 40 };
+            case 9:
+                return { x: 125, y: 46, w: 25, h: 40 };
+            case 10:
+                return { x: 152, y: 55, w: 25, h: 40 };
+            case 11:
+                return { x: 12, y: -89, w: 25, h: 40 };
+            case 12:
+                return { x: -22, y: -74, w: 25, h: 40 };
+            case 13:
+                return { x: -50, y: -79, w: 25, h: 40 };
+            case 14:
+                return { x: -47, y: -35, w: 25, h: 40 };
+            case 15:
+                return { x: -12, y: 2, w: 25, h: 40 };
+            case 16:
+                return { x: -42, y: 11, w: 25, h: 40 };
+            case 17:
+                return { x: 178, y: -89, w: 25, h: 40 };
+            case 18:
+                return { x: 207, y: -84, w: 25, h: 40 };
+            case 19:
+                return { x: 194, y: -35, w: 25, h: 40 };
+            case 20:
+                return { x: 226, y: -43, w: 25, h: 40 };
+            case 21:
+                return { x: 242, y: -86, w: 25, h: 40 };
+            case 22:
+                return { x: 207, y: 10, w: 25, h: 40 };
+            case 23:
+                return { x: 184, y: 56, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor((i - 24) / 8);
+        var mod = (i - 24) % 8;
+        return { x: 3 + mod * 22, y: 46 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var armiesKandaharPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 6) {
+        switch (i) {
+            case 0:
+                return { x: 1, y: -43, w: 25, h: 40 };
+            case 1:
+                return { x: 22, y: -5, w: 25, h: 40 };
+            case 2:
+                return { x: -8, y: 5, w: 25, h: 40 };
+            case 3:
+                return { x: 144, y: -7, w: 25, h: 40 };
+            case 4:
+                return { x: 160, y: 29, w: 25, h: 40 };
+            case 5:
+                return { x: 12, y: -86, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor(i / 8);
+        var mod = i % 8;
+        return { x: -11 + mod * 22, y: 26 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var armiesPersiaPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 8) {
+        switch (i) {
+            case 0:
+                return { x: 1, y: -43, w: 25, h: 40 };
+            case 1:
+                return { x: 24, y: -19, w: 25, h: 40 };
+            case 2:
+                return { x: -8, y: 5, w: 25, h: 40 };
+            case 3:
+                return { x: 139, y: -12, w: 25, h: 40 };
+            case 4:
+                return { x: 125, y: 29, w: 25, h: 40 };
+            case 5:
+                return { x: 12, y: -86, w: 25, h: 40 };
+            case 6:
+                return { x: 147, y: 29, w: 25, h: 40 };
+            case 7:
+                return { x: 13, y: 31, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor(i / 8);
+        var mod = i % 8;
+        return { x: -9 + mod * 22, y: 18 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var armiesPunjabPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (i <= 15) {
+        switch (i) {
+            case 0:
+                return { x: 30, y: -122, w: 25, h: 40 };
+            case 1:
+                return { x: 57, y: -122, w: 25, h: 40 };
+            case 2:
+                return { x: -22, y: 2, w: 25, h: 40 };
+            case 3:
+                return { x: 1, y: 53, w: 25, h: 40 };
+            case 4:
+                return { x: 65, y: -164, w: 25, h: 40 };
+            case 5:
+                return { x: 75, y: -208, w: 25, h: 40 };
+            case 6:
+                return { x: 85, y: -117, w: 25, h: 40 };
+            case 7:
+                return { x: 28, y: 54, w: 25, h: 40 };
+            case 8:
+                return { x: 55, y: 56, w: 25, h: 40 };
+            case 9:
+                return { x: 85, y: 52, w: 25, h: 40 };
+            case 10:
+                return { x: 13, y: 97, w: 25, h: 40 };
+            case 11:
+                return { x: 41, y: 99, w: 25, h: 40 };
+            case 12:
+                return { x: 70, y: 96, w: 25, h: 40 };
+            case 13:
+                return { x: 25, y: 141, w: 25, h: 40 };
+            case 14:
+                return { x: 53, y: 142, w: 25, h: 40 };
+            case 15:
+                return { x: 81, y: 140, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor((i - 16) / 5);
+        var mod = (i - 16) % 5;
+        return { x: -9 + mod * 22, y: 18 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var armiesTranscaspiaPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (i <= 13) {
+        switch (i) {
+            case 0:
+                return { x: -3, y: -126, w: 25, h: 40 };
+            case 1:
+                return { x: 25, y: -122, w: 25, h: 40 };
+            case 2:
+                return { x: -6, y: -76, w: 25, h: 40 };
+            case 3:
+                return { x: 22, y: -75, w: 25, h: 40 };
+            case 4:
+                return { x: 199, y: -127, w: 25, h: 40 };
+            case 5:
+                return { x: 229, y: -126, w: 25, h: 40 };
+            case 6:
+                return { x: 260, y: -128, w: 25, h: 40 };
+            case 7:
+                return { x: 198, y: -81, w: 25, h: 40 };
+            case 8:
+                return { x: 226, y: -81, w: 25, h: 40 };
+            case 9:
+                return { x: 252, y: -79, w: 25, h: 40 };
+            case 10:
+                return { x: -5, y: -33, w: 25, h: 40 };
+            case 11:
+                return { x: 23, y: -32, w: 25, h: 40 };
+            case 12:
+                return { x: 209, y: -36, w: 25, h: 40 };
+            case 13:
+                return { x: 237, y: -36, w: 25, h: 40 };
+        }
+    }
+    else {
+        var multiplier = Math.floor((i - 14) / 9);
+        var mod = (i - 14) % 9;
+        return { x: -5 + mod * 22, y: 13 + multiplier * 16, w: 25, h: 40 };
+    }
+};
+var customPatternHeratKabul = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 2) {
+        switch (i) {
+            case 0:
+                return { x: 24, y: 13, w: 40, h: 27 };
+            case 1:
+                return { x: 62, y: 40, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 4) {
+        switch (i) {
+            case 0:
+                return { x: 0, y: -3, w: 40, h: 27 };
+            case 1:
+                return { x: 29, y: 17, w: 40, h: 27 };
+            case 2:
+                return { x: 58, y: 37, w: 40, h: 27 };
+            case 3:
+                return { x: 82, y: 55, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 7;
+        switch (mod) {
+            case 0:
+                return { x: 0, y: -3, w: 40, h: 27 };
+            case 1:
+                return { x: 16, y: 6, w: 40, h: 27 };
+            case 2:
+                return { x: 30, y: 16, w: 40, h: 27 };
+            case 3:
+                return { x: 45, y: 25, w: 40, h: 27 };
+            case 4:
+                return { x: 58, y: 35, w: 40, h: 27 };
+            case 5:
+                return { x: 69, y: 43, w: 40, h: 27 };
+            case 6:
+                return { x: 84, y: 51, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternHeratKandahar = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 3) {
+        switch (i) {
+            case 0:
+                return { x: 7, y: 27, w: 40, h: 27 };
+            case 1:
+                return { x: 5, y: 54, w: 40, h: 27 };
+            case 2:
+                return { x: 2, y: 81, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 5) {
+        switch (i) {
+            case 0:
+                return { x: 7, y: -7, w: 40, h: 27 };
+            case 1:
+                return { x: 6, y: 21, w: 40, h: 27 };
+            case 2:
+                return { x: 4, y: 51, w: 40, h: 27 };
+            case 3:
+                return { x: 2, y: 81, w: 40, h: 27 };
+            case 4:
+                return { x: -3, y: 112, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 12;
+        switch (mod) {
+            case 0:
+                return { x: 7, y: -17, w: 40, h: 27 };
+            case 1:
+                return { x: 7, y: -5, w: 40, h: 27 };
+            case 2:
+                return { x: 8, y: 7, w: 40, h: 27 };
+            case 3:
+                return { x: 8, y: 19, w: 40, h: 27 };
+            case 4:
+                return { x: 8, y: 30, w: 40, h: 27 };
+            case 5:
+                return { x: 6, y: 41, w: 40, h: 27 };
+            case 6:
+                return { x: 5, y: 53, w: 40, h: 27 };
+            case 7:
+                return { x: 5, y: 64, w: 40, h: 27 };
+            case 8:
+                return { x: 3, y: 75, w: 40, h: 27 };
+            case 9:
+                return { x: 2, y: 88, w: 40, h: 27 };
+            case 10:
+                return { x: 0, y: 100, w: 40, h: 27 };
+            case 11:
+                return { x: -3, y: 112, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternHeratPersia = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 3) {
+        switch (i) {
+            case 0:
+                return { x: -2, y: 32, w: 40, h: 27 };
+            case 1:
+                return { x: -1, y: 60, w: 40, h: 27 };
+            case 2:
+                return { x: 3, y: 87, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 5) {
+        switch (i) {
+            case 0:
+                return { x: -2, y: 0, w: 40, h: 27 };
+            case 1:
+                return { x: -2, y: 27, w: 40, h: 27 };
+            case 2:
+                return { x: -1, y: 57, w: 40, h: 27 };
+            case 3:
+                return { x: 2, y: 87, w: 40, h: 27 };
+            case 4:
+                return { x: 4, y: 117, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 11;
+        switch (mod) {
+            case 0:
+                return { x: -2, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: -2, y: 9, w: 40, h: 27 };
+            case 2:
+                return { x: -2, y: 21, w: 40, h: 27 };
+            case 3:
+                return { x: -2, y: 32, w: 40, h: 27 };
+            case 4:
+                return { x: -1, y: 44, w: 40, h: 27 };
+            case 5:
+                return { x: 0, y: 57, w: 40, h: 27 };
+            case 6:
+                return { x: 1, y: 70, w: 40, h: 27 };
+            case 7:
+                return { x: 3, y: 82, w: 40, h: 27 };
+            case 8:
+                return { x: 4, y: 95, w: 40, h: 27 };
+            case 9:
+                return { x: 4, y: 108, w: 40, h: 27 };
+            case 10:
+                return { x: 4, y: 121, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternHeratTranscaspia = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 2) {
+        switch (i) {
+            case 0:
+                return { x: 65, y: 12, w: 40, h: 27 };
+            case 1:
+                return { x: 27, y: 39, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 4) {
+        switch (i) {
+            case 0:
+                return { x: 85, y: 2, w: 40, h: 27 };
+            case 1:
+                return { x: 58, y: 19, w: 40, h: 27 };
+            case 2:
+                return { x: 32, y: 37, w: 40, h: 27 };
+            case 3:
+                return { x: 10, y: 56, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 8;
+        switch (mod) {
+            case 0:
+                return { x: 90, y: -5, w: 40, h: 27 };
+            case 1:
+                return { x: 81, y: 5, w: 40, h: 27 };
+            case 2:
+                return { x: 65, y: 15, w: 40, h: 27 };
+            case 3:
+                return { x: 49, y: 26, w: 40, h: 27 };
+            case 4:
+                return { x: 38, y: 36, w: 40, h: 27 };
+            case 5:
+                return { x: 28, y: 45, w: 40, h: 27 };
+            case 6:
+                return { x: 16, y: 57, w: 40, h: 27 };
+            case 7:
+                return { x: 8, y: 67, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternKabulKandahar = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 2) {
+        switch (i) {
+            case 0:
+                return { x: 40, y: 10, w: 40, h: 27 };
+            case 1:
+                return { x: 86, y: 19, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 4) {
+        switch (i) {
+            case 0:
+                return { x: -4, y: 0, w: 40, h: 27 };
+            case 1:
+                return { x: 36, y: 8, w: 40, h: 27 };
+            case 2:
+                return { x: 77, y: 15, w: 40, h: 27 };
+            case 3:
+                return { x: 120, y: 11, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 8;
+        switch (mod) {
+            case 0:
+                return { x: -8, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: 12, y: 4, w: 40, h: 27 };
+            case 2:
+                return { x: 32, y: 9, w: 40, h: 27 };
+            case 3:
+                return { x: 48, y: 14, w: 40, h: 27 };
+            case 4:
+                return { x: 69, y: 17, w: 40, h: 27 };
+            case 5:
+                return { x: 84, y: 19, w: 40, h: 27 };
+            case 6:
+                return { x: 104, y: 17, w: 40, h: 27 };
+            case 7:
+                return { x: 124, y: 13, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternKabulTranscaspia = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 2) {
+        switch (i) {
+            case 0:
+                return { x: 11, y: 32, w: 40, h: 27 };
+            case 1:
+                return { x: 6, y: 64, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 4) {
+        switch (i) {
+            case 0:
+                return { x: 11, y: 10, w: 40, h: 27 };
+            case 1:
+                return { x: 10, y: 40, w: 40, h: 27 };
+            case 2:
+                return { x: 5, y: 70, w: 40, h: 27 };
+            case 3:
+                return { x: -3, y: 100, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 9;
+        switch (mod) {
+            case 0:
+                return { x: 12, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: 13, y: 12, w: 40, h: 27 };
+            case 2:
+                return { x: 12, y: 25, w: 40, h: 27 };
+            case 3:
+                return { x: 11, y: 37, w: 40, h: 27 };
+            case 4:
+                return { x: 10, y: 49, w: 40, h: 27 };
+            case 5:
+                return { x: 9, y: 61, w: 40, h: 27 };
+            case 6:
+                return { x: 6, y: 74, w: 40, h: 27 };
+            case 7:
+                return { x: 2, y: 86, w: 40, h: 27 };
+            case 8:
+                return { x: -3, y: 100, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternKabulPunjab = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 3) {
+        switch (i) {
+            case 0:
+                return { x: 23, y: 61, w: 40, h: 27 };
+            case 1:
+                return { x: 7, y: 93, w: 40, h: 27 };
+            case 2:
+                return { x: -4, y: 123, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 7) {
+        switch (i) {
+            case 0:
+                return { x: 56, y: 0, w: 40, h: 27 };
+            case 1:
+                return { x: 43, y: 33, w: 40, h: 27 };
+            case 2:
+                return { x: 22, y: 63, w: 40, h: 27 };
+            case 3:
+                return { x: 7, y: 90, w: 40, h: 27 };
+            case 4:
+                return { x: -2, y: 116, w: 40, h: 27 };
+            case 5:
+                return { x: -13, y: 145, w: 40, h: 27 };
+            case 6:
+                return { x: -32, y: 175, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 12;
+        switch (mod) {
+            case 0:
+                return { x: 59, y: -7, w: 40, h: 27 };
+            case 1:
+                return { x: 54, y: 8, w: 40, h: 27 };
+            case 2:
+                return { x: 48, y: 23, w: 40, h: 27 };
+            case 3:
+                return { x: 38, y: 39, w: 40, h: 27 };
+            case 4:
+                return { x: 28, y: 55, w: 40, h: 27 };
+            case 5:
+                return { x: 17, y: 72, w: 40, h: 27 };
+            case 6:
+                return { x: 10, y: 90, w: 40, h: 27 };
+            case 7:
+                return { x: 2, y: 108, w: 40, h: 27 };
+            case 8:
+                return { x: -4, y: 125, w: 40, h: 27 };
+            case 9:
+                return { x: -12, y: 141, w: 40, h: 27 };
+            case 10:
+                return { x: -22, y: 163, w: 40, h: 27 };
+            case 11:
+                return { x: -35, y: 178, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternKandaharPunjab = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 3) {
+        switch (i) {
+            case 0:
+                return { x: -2, y: 16, w: 40, h: 27 };
+            case 1:
+                return { x: 8, y: 45, w: 40, h: 27 };
+            case 2:
+                return { x: 17, y: 75, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 6) {
+        switch (i) {
+            case 0:
+                return { x: -26, y: -36, w: 40, h: 27 };
+            case 1:
+                return { x: -12, y: -9, w: 40, h: 27 };
+            case 2:
+                return { x: -3, y: 15, w: 40, h: 27 };
+            case 3:
+                return { x: 5, y: 40, w: 40, h: 27 };
+            case 4:
+                return { x: 15, y: 70, w: 40, h: 27 };
+            case 5:
+                return { x: 22, y: 97, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 12;
+        switch (mod) {
+            case 0:
+                return { x: -25, y: -40, w: 40, h: 27 };
+            case 1:
+                return { x: -20, y: -29, w: 40, h: 27 };
+            case 2:
+                return { x: -14, y: -17, w: 40, h: 27 };
+            case 3:
+                return { x: -8, y: -5, w: 40, h: 27 };
+            case 4:
+                return { x: -4, y: 6, w: 40, h: 27 };
+            case 5:
+                return { x: 0, y: 19, w: 40, h: 27 };
+            case 6:
+                return { x: 2, y: 30, w: 40, h: 27 };
+            case 7:
+                return { x: 10, y: 42, w: 40, h: 27 };
+            case 8:
+                return { x: 12, y: 55, w: 40, h: 27 };
+            case 9:
+                return { x: 16, y: 70, w: 40, h: 27 };
+            case 10:
+                return { x: 21, y: 85, w: 40, h: 27 };
+            case 11:
+                return { x: 24, y: 100, w: 40, h: 27 };
+        }
+    }
+};
+var customPatternPersiaTranscaspia = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    if (numberOfItems <= 2) {
+        switch (i) {
+            case 0:
+                return { x: 41, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: 88, y: 5, w: 40, h: 27 };
+        }
+    }
+    else if (numberOfItems <= 4) {
+        switch (i) {
+            case 0:
+                return { x: -2, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: 38, y: -2, w: 40, h: 27 };
+            case 2:
+                return { x: 78, y: 1, w: 40, h: 27 };
+            case 3:
+                return { x: 115, y: 9, w: 40, h: 27 };
+        }
+    }
+    else {
+        var mod = i % 9;
+        switch (mod) {
+            case 0:
+                return { x: -8, y: -2, w: 40, h: 27 };
+            case 1:
+                return { x: 9, y: -1, w: 40, h: 27 };
+            case 2:
+                return { x: 26, y: 0, w: 40, h: 27 };
+            case 3:
+                return { x: 45, y: 0, w: 40, h: 27 };
+            case 4:
+                return { x: 67, y: 2, w: 40, h: 27 };
+            case 5:
+                return { x: 89, y: 4, w: 40, h: 27 };
+            case 6:
+                return { x: 109, y: 8, w: 40, h: 27 };
+            case 7:
+                return { x: 126, y: 13, w: 40, h: 27 };
+            case 8:
+                return { x: 141, y: 20, w: 40, h: 27 };
+        }
+    }
+};
+var tribesHeratPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: 39 + multiplier * 12, y: 10 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 53 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 85 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 117 + multiplier * 12, y: -18 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 129 + multiplier * 12, y: 13 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 115 + multiplier * 12, y: 44 + multiplier * 18, w: 30, h: 30 };
+    }
+};
+var tribesKabulPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: 39 + multiplier * 12, y: 26 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 53 + multiplier * 12, y: -5 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 85 + multiplier * 12, y: -15 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 117 + multiplier * 12, y: -3 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 129 + multiplier * 12, y: 28 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 115 + multiplier * 12, y: 59 + multiplier * 18, w: 30, h: 30 };
+    }
+};
+var tribesKandaharPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: 33 + multiplier * 12, y: 20 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 47 + multiplier * 12, y: -11 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 79 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 111 + multiplier * 12, y: -8 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 123 + multiplier * 12, y: 23 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 109 + multiplier * 12, y: 54 + multiplier * 18, w: 30, h: 30 };
+    }
+};
+var tribesPersiaPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: 27 + multiplier * 12, y: 10 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 41 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 73 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 105 + multiplier * 12, y: -18 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 117 + multiplier * 12, y: 13 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 103 + multiplier * 12, y: 44 + multiplier * 18, w: 30, h: 30 };
+    }
+};
+var tribesPunjabPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: -5 + multiplier * 12, y: 20 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 9 + multiplier * 12, y: -11 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 41 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 73 + multiplier * 12, y: -8 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 84 + multiplier * 12, y: 23 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 71 + multiplier * 12, y: 54 + multiplier * 18, w: 30, h: 30 };
+    }
+};
+var tribesTranscaspiaPattern = function (_a) {
+    var i = _a.index, numberOfItems = _a.itemCount;
+    var multiplier = Math.floor(i / 6);
+    var mod = i % 6;
+    switch (mod) {
+        case 0:
+            return { x: 72 + multiplier * 12, y: 0 + multiplier * 18, w: 30, h: 30 };
+        case 1:
+            return { x: 86 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
+        case 2:
+            return { x: 118 + multiplier * 12, y: -41 + multiplier * 18, w: 30, h: 30 };
+        case 3:
+            return { x: 150 + multiplier * 12, y: -28 + multiplier * 18, w: 30, h: 30 };
+        case 4:
+            return { x: 162 + multiplier * 12, y: 3 + multiplier * 18, w: 30, h: 30 };
+        case 5:
+            return { x: 148 + multiplier * 12, y: 34 + multiplier * 18, w: 30, h: 30 };
+    }
+};
 var Region = (function () {
     function Region(_a) {
         var game = _a.game, region = _a.region;
@@ -4093,69 +5472,44 @@ var Region = (function () {
     Region.prototype.setupArmyZone = function (_a) {
         var _this = this;
         var regionGamedatas = _a.regionGamedatas;
-        this.armyZone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_".concat(this.region, "_armies"),
-            itemWidth: ARMY_WIDTH,
-            itemHeight: ARMY_HEIGHT,
-            pattern: 'custom',
-            customPattern: this.getPatternForArmyZone(),
+        this.armyZone = new TokenManualPositionStock(this.game.coalitionBlockManager, document.getElementById("pp_".concat(this.region, "_armies")), {}, function (element, cards, lastCard, stock) {
+            return updateZoneDislay(_this.getPatternForArmyZone(), element, cards, lastCard, stock);
         });
-        regionGamedatas.armies.forEach(function (_a) {
-            var id = _a.id;
-            _this.armyZone.setupItems({
-                id: id,
-                element: tplArmy({
-                    id: id,
-                    coalition: id.split('_')[1],
-                }),
-            });
-        });
+        this.armyZone.addCards(regionGamedatas.armies.map(function (token) { return (__assign(__assign({}, token), { coalition: token.id.split('_')[1], type: 'army' })); }));
+    };
+    Region.prototype.createRuleToken = function () {
+        return {
+            id: "pp_ruler_token_".concat(this.region),
+            region: this.region,
+            state: 0,
+            used: 0,
+            location: this.region,
+        };
     };
     Region.prototype.setupRulerZone = function (_a) {
         var gamedatas = _a.gamedatas;
-        this.rulerZone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_position_ruler_token_".concat(this.region),
-            itemWidth: RULER_TOKEN_WIDTH,
-            itemHeight: RULER_TOKEN_HEIGHT,
+        this.rulerZone = new LineStock(this.game.rulerTokenManager, document.getElementById("pp_position_ruler_token_".concat(this.region)), {
+            center: false,
         });
         this.ruler = gamedatas.map.rulers[this.region];
         if (this.ruler === null) {
-            this.rulerZone.setupItems({
-                id: "pp_ruler_token_".concat(this.region),
-                element: tplRulerToken({ id: "pp_ruler_token_".concat(this.region), region: this.region }),
-            });
+            this.rulerZone.addCard(this.createRuleToken());
         }
     };
     Region.prototype.setupTribeZone = function (_a) {
         var _this = this;
         var regionGamedatas = _a.regionGamedatas;
-        this.tribeZone = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: "pp_".concat(this.region, "_tribes"),
-            itemWidth: TRIBE_WIDTH,
-            itemHeight: TRIBE_HEIGHT,
-            pattern: 'custom',
-            customPattern: this.getPatternForTribeZone(),
+        this.tribeZone = new TokenManualPositionStock(this.game.cylinderManager, document.getElementById("pp_".concat(this.region, "_tribes")), {}, function (element, cards, lastCard, stock) {
+            return updateZoneDislay(_this.getPatternForTribeZone(), element, cards, lastCard, stock);
         });
-        regionGamedatas.tribes.forEach(function (_a) {
-            var id = _a.id;
-            _this.tribeZone.setupItems({
-                id: id,
-                element: tplCylinder({
-                    id: id,
-                    color: _this.game.gamedatas.paxPamirPlayers[id.split('_')[1]].color,
-                }),
-            });
-        });
+        this.tribeZone.addCards(regionGamedatas.tribes.map(function (token) { return (__assign(__assign({}, token), { color: _this.game.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color })); }));
     };
     Region.prototype.clearInterface = function () {
-        dojo.empty(this.armyZone.getContainerId());
+        this.armyZone.removeAll();
         this.armyZone = undefined;
-        dojo.empty(this.rulerZone.getContainerId());
+        this.rulerZone.removeAll();
         this.rulerZone = undefined;
-        dojo.empty(this.tribeZone.getContainerId());
+        this.tribeZone.removeAll();
         this.tribeZone = undefined;
     };
     Region.prototype.getArmyZone = function () {
@@ -4168,9 +5522,14 @@ var Region = (function () {
         var _this = this;
         if (this.ruler) {
             return this.getTribeZone()
-                .getItems()
-                .filter(function (id) {
+                .getCards()
+                .filter(function (_a) {
+                var id = _a.id;
                 return Number(id.split('_')[1]) === _this.ruler;
+            })
+                .map(function (_a) {
+                var id = _a.id;
+                return id;
             });
         }
         return [];
@@ -4188,33 +5547,33 @@ var Region = (function () {
     Region.prototype.getPatternForArmyZone = function () {
         switch (this.region) {
             case HERAT:
-                return this.armiesHeratPattern;
+                return armiesHeratPattern;
             case KABUL:
-                return this.armiesKabulPattern;
+                return armiesKabulPattern;
             case KANDAHAR:
-                return this.armiesKandaharPattern;
+                return armiesKandaharPattern;
             case PERSIA:
-                return this.armiesPersiaPattern;
+                return armiesPersiaPattern;
             case PUNJAB:
-                return this.armiesPunjabPattern;
+                return armiesPunjabPattern;
             case TRANSCASPIA:
-                return this.armiesTranscaspiaPattern;
+                return armiesTranscaspiaPattern;
         }
     };
     Region.prototype.getPatternForTribeZone = function () {
         switch (this.region) {
             case HERAT:
-                return this.tribesHeratPattern;
+                return tribesHeratPattern;
             case KABUL:
-                return this.tribesKabulPattern;
+                return tribesKabulPattern;
             case KANDAHAR:
-                return this.tribesKandaharPattern;
+                return tribesKandaharPattern;
             case PERSIA:
-                return this.tribesPersiaPattern;
+                return tribesPersiaPattern;
             case PUNJAB:
-                return this.tribesPunjabPattern;
+                return tribesPunjabPattern;
             case TRANSCASPIA:
-                return this.tribesTranscaspiaPattern;
+                return tribesTranscaspiaPattern;
         }
     };
     Region.prototype.removeAllArmies = function (armies) {
@@ -4223,28 +5582,21 @@ var Region = (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, Promise.all(__spreadArray(__spreadArray([], Object.entries(armies).map(function (_a) {
+                    case 0: return [4, Promise.all(__spreadArray([], Object.entries(armies).map(function (_a) {
                             var key = _a[0], value = _a[1];
                             return __awaiter(_this, void 0, void 0, function () {
                                 return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0: return [4, this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: key }).moveToZone({
-                                                elements: value.map(function (_a) {
-                                                    var tokenId = _a.tokenId, weight = _a.weight;
-                                                    return ({ id: tokenId, weight: weight });
-                                                }),
-                                                classesToAdd: [PP_COALITION_BLOCK],
-                                                classesToRemove: [PP_ARMY],
-                                            })];
-                                        case 1:
-                                            _b.sent();
-                                            return [2];
-                                    }
+                                    return [2, this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: key }).addCards(value.map(function (block) { return ({
+                                            id: block.tokenId,
+                                            state: block.weight,
+                                            used: 0,
+                                            location: "supply_".concat(key),
+                                            coalition: key,
+                                            type: 'supply',
+                                        }); }))];
                                 });
                             });
-                        }), true), [
-                            this.getArmyZone().removeAll(),
-                        ], false))];
+                        }), true))];
                     case 1:
                         _a.sent();
                         return [2];
@@ -4262,16 +5614,20 @@ var Region = (function () {
                             var key = _a[0], value = _a[1];
                             return __awaiter(_this, void 0, void 0, function () {
                                 var player;
+                                var _this = this;
                                 return __generator(this, function (_b) {
                                     switch (_b.label) {
                                         case 0:
                                             player = this.game.playerManager.getPlayer({ playerId: Number(key) });
-                                            return [4, player.getCylinderZone().moveToZone({
-                                                    elements: value.map(function (_a) {
-                                                        var tokenId = _a.tokenId, weight = _a.weight;
-                                                        return ({ id: tokenId, weight: weight });
-                                                    }),
-                                                })];
+                                            return [4, player.getCylinderZone().addCards(value.map(function (_a) {
+                                                    var tokenId = _a.tokenId, weight = _a.weight;
+                                                    return _this.game.getCylinder({
+                                                        id: tokenId,
+                                                        state: weight,
+                                                        used: 0,
+                                                        location: "cylinders_".concat(player.getPlayerId()),
+                                                    });
+                                                }))];
                                         case 1:
                                             _b.sent();
                                             player.incCounter({ counter: 'cylinders', value: -value.length });
@@ -4289,21 +5645,34 @@ var Region = (function () {
             });
         });
     };
+    Region.prototype.createTempArmy = function (coalition, index) {
+        var id = "temp_army_".concat(index);
+        return {
+            id: id,
+            state: 1000,
+            location: this.region,
+            coalition: coalition,
+            type: 'army',
+            used: 0,
+        };
+    };
     Region.prototype.addTempArmy = function (_a) {
         var coalition = _a.coalition, index = _a.index;
-        var id = "temp_army_".concat(index);
-        this.armyZone.placeInZone({
-            id: id,
-            element: tplArmy({ id: id, coalition: coalition, classesToAdd: [PP_TEMPORARY] }),
-        });
+        this.armyZone.addCard(this.createTempArmy(coalition, index));
     };
     Region.prototype.getCoalitionArmies = function (_a) {
         var coalitionId = _a.coalitionId;
-        return this.armyZone.getItems().filter(function (blockId) { return blockId.split('_')[1] === coalitionId; });
+        return this.armyZone
+            .getCards()
+            .filter(function (block) { return block.id.split('_')[1] === coalitionId; })
+            .map(function (block) { return block.id; });
     };
     Region.prototype.getEnemyArmies = function (_a) {
         var coalitionId = _a.coalitionId;
-        return this.armyZone.getItems().filter(function (blockId) { return blockId.split('_')[1] !== coalitionId; });
+        return this.armyZone
+            .getCards()
+            .filter(function (block) { return block.id.split('_')[1] !== coalitionId; })
+            .map(function (block) { return block.id; });
     };
     Region.prototype.getEnemyPieces = function (args) {
         return __spreadArray(__spreadArray(__spreadArray([], this.getEnemyArmies(args), true), this.getEnemyRoads(args), true), this.getEnemyTribes(args), true);
@@ -4321,21 +5690,27 @@ var Region = (function () {
     Region.prototype.getEnemyTribes = function (_a) {
         var _this = this;
         var coalitionId = _a.coalitionId;
-        return this.tribeZone.getItems().filter(function (cylinderId) {
-            var playerId = Number(cylinderId.split('_')[1]);
+        return this.tribeZone
+            .getCards()
+            .filter(function (cylinder) {
+            var playerId = Number(cylinder.id.split('_')[1]);
             return coalitionId !== _this.game.playerManager.getPlayer({ playerId: playerId }).getLoyalty();
-        });
+        })
+            .map(extractId);
     };
     Region.prototype.getPlayerTribes = function (_a) {
         var playerId = _a.playerId;
-        return this.tribeZone.getItems().filter(function (cylinderId) {
-            var cylinderPlayerId = Number(cylinderId.split('_')[1]);
+        return this.tribeZone
+            .getCards()
+            .filter(function (cylinder) {
+            var cylinderPlayerId = Number(cylinder.id.split('_')[1]);
             return cylinderPlayerId === playerId;
-        });
+        })
+            .map(extractId);
     };
     Region.prototype.removeTempArmy = function (_a) {
         var index = _a.index;
-        this.armyZone.remove({ input: "temp_army_".concat(index), destroy: true });
+        this.armyZone.removeCard(this.createTempArmy('afghan', index));
     };
     Region.prototype.setSelectable = function (_a) {
         var _this = this;
@@ -4354,384 +5729,6 @@ var Region = (function () {
         var armySelect = document.getElementById("pp_".concat(this.region, "_armies_select"));
         if (armySelect) {
             armySelect.classList.remove(PP_SELECTABLE, PP_SELECTED);
-        }
-    };
-    Region.prototype.tribesHeratPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: 39 + multiplier * 12, y: 10 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 53 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 85 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 117 + multiplier * 12, y: -18 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 129 + multiplier * 12, y: 13 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 115 + multiplier * 12, y: 44 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.tribesKabulPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: 39 + multiplier * 12, y: 26 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 53 + multiplier * 12, y: -5 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 85 + multiplier * 12, y: -15 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 117 + multiplier * 12, y: -3 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 129 + multiplier * 12, y: 28 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 115 + multiplier * 12, y: 59 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.tribesKandaharPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: 33 + multiplier * 12, y: 20 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 47 + multiplier * 12, y: -11 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 79 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 111 + multiplier * 12, y: -8 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 123 + multiplier * 12, y: 23 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 109 + multiplier * 12, y: 54 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.tribesPersiaPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: 27 + multiplier * 12, y: 10 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 41 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 73 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 105 + multiplier * 12, y: -18 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 117 + multiplier * 12, y: 13 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 103 + multiplier * 12, y: 44 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.tribesPunjabPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: -5 + multiplier * 12, y: 20 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 9 + multiplier * 12, y: -11 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 41 + multiplier * 12, y: -21 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 73 + multiplier * 12, y: -8 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 84 + multiplier * 12, y: 23 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 71 + multiplier * 12, y: 54 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.tribesTranscaspiaPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 6);
-        console.log('multiplier', multiplier);
-        var mod = i % 6;
-        switch (mod) {
-            case 0:
-                return { x: 72 + multiplier * 12, y: 0 + multiplier * 18, w: 30, h: 30 };
-            case 1:
-                return { x: 86 + multiplier * 12, y: -31 + multiplier * 18, w: 30, h: 30 };
-            case 2:
-                return { x: 118 + multiplier * 12, y: -41 + multiplier * 18, w: 30, h: 30 };
-            case 3:
-                return { x: 150 + multiplier * 12, y: -28 + multiplier * 18, w: 30, h: 30 };
-            case 4:
-                return { x: 162 + multiplier * 12, y: 3 + multiplier * 18, w: 30, h: 30 };
-            case 5:
-                return { x: 148 + multiplier * 12, y: 34 + multiplier * 18, w: 30, h: 30 };
-        }
-    };
-    Region.prototype.defaultPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        var multiplier = Math.floor(i / 5);
-        console.log('multiplier', multiplier);
-        var mod = i % 5;
-        return { x: mod * 22, y: multiplier * 15, w: 40, h: 27 };
-    };
-    Region.prototype.armiesHeratPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 11) {
-            switch (i) {
-                case 0:
-                    return { x: 1, y: -43, w: 25, h: 40 };
-                case 1:
-                    return { x: 22, y: -5, w: 25, h: 40 };
-                case 2:
-                    return { x: 6, y: 46, w: 25, h: 40 };
-                case 3:
-                    return { x: 40, y: 48, w: 25, h: 40 };
-                case 4:
-                    return { x: 68, y: 56, w: 25, h: 40 };
-                case 5:
-                    return { x: 163, y: -47, w: 25, h: 40 };
-                case 6:
-                    return { x: 98, y: 46, w: 25, h: 40 };
-                case 7:
-                    return { x: 151, y: 5, w: 25, h: 40 };
-                case 8:
-                    return { x: 177, y: 14, w: 25, h: 40 };
-                case 9:
-                    return { x: 125, y: 46, w: 25, h: 40 };
-                case 10:
-                    return { x: 152, y: 55, w: 25, h: 40 };
-            }
-        }
-        else if (i <= 7) {
-            switch (i) {
-                case 0:
-                    return { x: 0, y: -20, w: 25, h: 40 };
-                case 1:
-                    return { x: 22, y: -20, w: 25, h: 40 };
-                case 2:
-                    return { x: 1, y: 5, w: 25, h: 40 };
-                case 3:
-                    return { x: 23, y: 5, w: 25, h: 40 };
-                case 4:
-                    return { x: 151, y: -16, w: 25, h: 40 };
-                case 5:
-                    return { x: 173, y: -16, w: 25, h: 40 };
-                case 6:
-                    return { x: 151, y: 6, w: 25, h: 40 };
-                case 7:
-                    return { x: 173, y: 6, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor((i - 8) / 8);
-            console.log('multiplier', multiplier);
-            var mod = (i - 8) % 8;
-            return { x: 3 + mod * 22, y: 46 + multiplier * 16, w: 25, h: 40 };
-        }
-    };
-    Region.prototype.armiesKabulPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (i <= 23) {
-            switch (i) {
-                case 0:
-                    return { x: 1, y: -43, w: 25, h: 40 };
-                case 1:
-                    return { x: 22, y: -5, w: 25, h: 40 };
-                case 2:
-                    return { x: 6, y: 46, w: 25, h: 40 };
-                case 3:
-                    return { x: 40, y: 48, w: 25, h: 40 };
-                case 4:
-                    return { x: 68, y: 56, w: 25, h: 40 };
-                case 5:
-                    return { x: 163, y: -47, w: 25, h: 40 };
-                case 6:
-                    return { x: 98, y: 46, w: 25, h: 40 };
-                case 7:
-                    return { x: 151, y: 5, w: 25, h: 40 };
-                case 8:
-                    return { x: 177, y: 14, w: 25, h: 40 };
-                case 9:
-                    return { x: 125, y: 46, w: 25, h: 40 };
-                case 10:
-                    return { x: 152, y: 55, w: 25, h: 40 };
-                case 11:
-                    return { x: 12, y: -89, w: 25, h: 40 };
-                case 12:
-                    return { x: -22, y: -74, w: 25, h: 40 };
-                case 13:
-                    return { x: -50, y: -79, w: 25, h: 40 };
-                case 14:
-                    return { x: -47, y: -35, w: 25, h: 40 };
-                case 15:
-                    return { x: -12, y: 2, w: 25, h: 40 };
-                case 16:
-                    return { x: -42, y: 11, w: 25, h: 40 };
-                case 17:
-                    return { x: 178, y: -89, w: 25, h: 40 };
-                case 18:
-                    return { x: 207, y: -84, w: 25, h: 40 };
-                case 19:
-                    return { x: 194, y: -35, w: 25, h: 40 };
-                case 20:
-                    return { x: 226, y: -43, w: 25, h: 40 };
-                case 21:
-                    return { x: 242, y: -86, w: 25, h: 40 };
-                case 22:
-                    return { x: 207, y: 10, w: 25, h: 40 };
-                case 23:
-                    return { x: 184, y: 56, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor((i - 24) / 8);
-            var mod = (i - 24) % 8;
-            return { x: 3 + mod * 22, y: 46 + multiplier * 16, w: 25, h: 40 };
-        }
-    };
-    Region.prototype.armiesKandaharPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 6) {
-            switch (i) {
-                case 0:
-                    return { x: 1, y: -43, w: 25, h: 40 };
-                case 1:
-                    return { x: 22, y: -5, w: 25, h: 40 };
-                case 2:
-                    return { x: -8, y: 5, w: 25, h: 40 };
-                case 3:
-                    return { x: 144, y: -7, w: 25, h: 40 };
-                case 4:
-                    return { x: 160, y: 29, w: 25, h: 40 };
-                case 5:
-                    return { x: 12, y: -86, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor(i / 8);
-            var mod = i % 8;
-            return { x: -11 + mod * 22, y: 26 + multiplier * 16, w: 25, h: 40 };
-        }
-    };
-    Region.prototype.armiesPersiaPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (numberOfItems <= 8) {
-            switch (i) {
-                case 0:
-                    return { x: 1, y: -43, w: 25, h: 40 };
-                case 1:
-                    return { x: 24, y: -19, w: 25, h: 40 };
-                case 2:
-                    return { x: -8, y: 5, w: 25, h: 40 };
-                case 3:
-                    return { x: 139, y: -12, w: 25, h: 40 };
-                case 4:
-                    return { x: 125, y: 29, w: 25, h: 40 };
-                case 5:
-                    return { x: 12, y: -86, w: 25, h: 40 };
-                case 6:
-                    return { x: 147, y: 29, w: 25, h: 40 };
-                case 7:
-                    return { x: 13, y: 31, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor(i / 8);
-            var mod = i % 8;
-            return { x: -9 + mod * 22, y: 18 + multiplier * 16, w: 25, h: 40 };
-        }
-    };
-    Region.prototype.armiesPunjabPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (i <= 15) {
-            switch (i) {
-                case 0:
-                    return { x: 30, y: -122, w: 25, h: 40 };
-                case 1:
-                    return { x: 57, y: -122, w: 25, h: 40 };
-                case 2:
-                    return { x: -22, y: 2, w: 25, h: 40 };
-                case 3:
-                    return { x: 1, y: 53, w: 25, h: 40 };
-                case 4:
-                    return { x: 65, y: -164, w: 25, h: 40 };
-                case 5:
-                    return { x: 75, y: -208, w: 25, h: 40 };
-                case 6:
-                    return { x: 85, y: -117, w: 25, h: 40 };
-                case 7:
-                    return { x: 28, y: 54, w: 25, h: 40 };
-                case 8:
-                    return { x: 55, y: 56, w: 25, h: 40 };
-                case 9:
-                    return { x: 85, y: 52, w: 25, h: 40 };
-                case 10:
-                    return { x: 13, y: 97, w: 25, h: 40 };
-                case 11:
-                    return { x: 41, y: 99, w: 25, h: 40 };
-                case 12:
-                    return { x: 70, y: 96, w: 25, h: 40 };
-                case 13:
-                    return { x: 25, y: 141, w: 25, h: 40 };
-                case 14:
-                    return { x: 53, y: 142, w: 25, h: 40 };
-                case 15:
-                    return { x: 81, y: 140, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor((i - 16) / 5);
-            var mod = (i - 16) % 5;
-            return { x: -9 + mod * 22, y: 18 + multiplier * 16, w: 25, h: 40 };
-        }
-    };
-    Region.prototype.armiesTranscaspiaPattern = function (_a) {
-        var i = _a.index, numberOfItems = _a.itemCount;
-        if (i <= 13) {
-            switch (i) {
-                case 0:
-                    return { x: -3, y: -126, w: 25, h: 40 };
-                case 1:
-                    return { x: 25, y: -122, w: 25, h: 40 };
-                case 2:
-                    return { x: -6, y: -76, w: 25, h: 40 };
-                case 3:
-                    return { x: 22, y: -75, w: 25, h: 40 };
-                case 4:
-                    return { x: 199, y: -127, w: 25, h: 40 };
-                case 5:
-                    return { x: 229, y: -126, w: 25, h: 40 };
-                case 6:
-                    return { x: 260, y: -128, w: 25, h: 40 };
-                case 7:
-                    return { x: 198, y: -81, w: 25, h: 40 };
-                case 8:
-                    return { x: 226, y: -81, w: 25, h: 40 };
-                case 9:
-                    return { x: 252, y: -79, w: 25, h: 40 };
-                case 10:
-                    return { x: -5, y: -33, w: 25, h: 40 };
-                case 11:
-                    return { x: 23, y: -32, w: 25, h: 40 };
-                case 12:
-                    return { x: 209, y: -36, w: 25, h: 40 };
-                case 13:
-                    return { x: 237, y: -36, w: 25, h: 40 };
-            }
-        }
-        else {
-            var multiplier = Math.floor((i - 14) / 9);
-            var mod = (i - 14) % 9;
-            return { x: -5 + mod * 22, y: 13 + multiplier * 16, w: 25, h: 40 };
         }
     };
     return Region;
@@ -4804,10 +5801,13 @@ var Market = (function () {
         this.marketRupees = [];
         var gamedatas = game.gamedatas;
         this.setupMarket({ gamedatas: gamedatas });
+        this.setupDeck();
     }
+    Market.prototype.setupDeck = function () {
+        this.deck = new LineStock(this.game.cardManager, document.getElementById('pp_market_deck_stock'));
+    };
     Market.prototype.setupMarket = function (_a) {
         var gamedatas = _a.gamedatas;
-        console.log('marketCards', this.marketCards);
         for (var row = 0; row <= 1; row++) {
             if (!this.marketCards[row]) {
                 this.marketCards[row] = [];
@@ -4825,41 +5825,32 @@ var Market = (function () {
         var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
         var containerId = "pp_market_".concat(row, "_").concat(column);
         dojo.place("<div id=\"pp_market_".concat(row, "_").concat(column, "_rupees\" class=\"pp_market_rupees\"></div>"), containerId);
-        this.marketCards[row][column] = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: containerId,
-            itemHeight: CARD_HEIGHT,
-            itemWidth: CARD_WIDTH,
-        });
+        this.marketCards[row][column] = new LineStock(this.game.cardManager, document.getElementById("pp_market_".concat(row, "_").concat(column)));
         var cardInMarket = gamedatas.market.cards[row][column];
         if (cardInMarket) {
-            var cardId = cardInMarket.id;
-            this.marketCards[row][column].setupItems({ id: cardId, element: tplCard({ cardId: cardId, extraClasses: PP_MARKET_CARD }), zIndex: 0 });
-            this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+            this.marketCards[row][column].addCard(cardInMarket);
         }
     };
     Market.prototype.setupMarketRupeeZone = function (_a) {
         var row = _a.row, column = _a.column, gamedatas = _a.gamedatas;
         var rupeeContainerId = "pp_market_".concat(row, "_").concat(column, "_rupees");
-        this.marketRupees[row][column] = new PaxPamirZone({
-            animationManager: this.game.animationManager,
-            containerId: rupeeContainerId,
-            itemHeight: RUPEE_HEIGHT,
-            itemWidth: RUPEE_WIDTH,
-            itemGap: -30,
+        this.marketRupees[row][column] = new LineStock(this.game.rupeeManager, document.getElementById(rupeeContainerId), {
+            center: false,
+            gap: "calc(var(--tokenScale) * -30px)",
         });
         var rupees = gamedatas.market.rupees.filter(function (rupee) { return rupee.location === "market_".concat(row, "_").concat(column, "_rupees"); });
-        this.marketRupees[row][column].setupItems(rupees.map(function (rupee) { return ({ id: rupee.id, element: tplRupee({ rupeeId: rupee.id }), zIndex: 11 }); }));
+        this.marketRupees[row][column].addCards(rupees);
     };
     Market.prototype.clearInterface = function () {
         for (var row = 0; row <= 1; row++) {
             for (var column = 0; column <= 5; column++) {
-                dojo.empty(this.marketCards[row][column].getContainerId());
+                this.marketCards[row][column].removeAll();
+                this.marketRupees[row][column].removeAll();
                 this.marketCards[row][column] = undefined;
                 this.marketRupees[row][column] = undefined;
             }
         }
-        console.log('marketCards after clearInterface', this.marketCards);
+        this.deck.removeAll();
     };
     Market.prototype.getMarketCardZone = function (_a) {
         var row = _a.row, column = _a.column;
@@ -4885,12 +5876,25 @@ var Market = (function () {
         }
     };
     Market.prototype.removeSingleRupeeFromCard = function (_a) {
-        var row = _a.row, column = _a.column, to = _a.to, rupeeId = _a.rupeeId;
+        var row = _a.row, column = _a.column, to = _a.to, rupeeId = _a.rupeeId, index = _a.index;
         return __awaiter(this, void 0, void 0, function () {
+            var element;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.marketRupees[row][column].removeTo({ id: rupeeId, to: to })];
+                    case 0: return [4, this.game.framework().wait(index * ANIMATION_WAIT_MS)];
                     case 1:
+                        _b.sent();
+                        element = document.getElementById(rupeeId);
+                        return [4, moveToAnimation({
+                                game: this.game,
+                                element: element,
+                                toId: to,
+                                remove: true,
+                            })];
+                    case 2:
+                        _b.sent();
+                        return [4, this.marketRupees[row][column].removeCard({ id: rupeeId, state: 0, used: 0, location: '' })];
+                    case 3:
                         _b.sent();
                         return [2];
                 }
@@ -4900,78 +5904,85 @@ var Market = (function () {
     Market.prototype.removeRupeesFromCard = function (_a) {
         var row = _a.row, column = _a.column, to = _a.to;
         return __awaiter(this, void 0, void 0, function () {
-            var rupeesToRemove;
-            return __generator(this, function (_b) {
-                rupeesToRemove = this.marketRupees[row][column].getItems();
-                return [2, this.marketRupees[row][column].removeTo(rupeesToRemove.map(function (rupee) { return ({ id: rupee, to: to }); }))];
-            });
-        });
-    };
-    Market.prototype.placeRupeeOnCard = function (_a) {
-        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv, cardId = _a.cardId;
-        return __awaiter(this, void 0, void 0, function () {
+            var rupees;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.marketRupees[row][column].placeInZone({ element: tplRupee({ rupeeId: rupeeId }), id: rupeeId, from: fromDiv, zIndex: 11 })];
+                    case 0:
+                        rupees = this.marketRupees[row][column].getCards().reverse();
+                        return [4, Promise.all(rupees.map(function (rupee, index) { return _this.removeSingleRupeeFromCard({ row: row, column: column, to: to, rupeeId: rupee.id, index: index }); }))];
                     case 1:
                         _b.sent();
-                        if (cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
-                            this.marketRupees[row][column].remove({ input: rupeeId, destroy: true });
-                        }
                         return [2];
                 }
             });
         });
     };
-    Market.prototype.addCardFromDeck = function (_a) {
-        var cardId = _a.cardId, to = _a.to;
+    Market.prototype.placeRupeeOnCard = function (_a) {
+        var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, fromDiv = _a.fromDiv, cardId = _a.cardId, _b = _a.index, index = _b === void 0 ? 0 : _b;
         return __awaiter(this, void 0, void 0, function () {
+            var rupee;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        rupee = {
+                            id: rupeeId,
+                            state: 0,
+                            used: 0,
+                            location: '',
+                        };
+                        return [4, this.game.framework().wait(index * ANIMATION_WAIT_MS)];
+                    case 1:
+                        _c.sent();
+                        return [4, this.marketRupees[row][column].addCard(rupee, { fromElement: document.getElementById(fromDiv) })];
+                    case 2:
+                        _c.sent();
+                        if (!(cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID)) return [3, 4];
+                        return [4, this.marketRupees[row][column].removeCard(rupee)];
+                    case 3:
+                        _c.sent();
+                        _c.label = 4;
+                    case 4: return [2];
+                }
+            });
+        });
+    };
+    Market.prototype.addCardFromDeck = function (_a) {
+        var cardInfo = _a.card, to = _a.to;
+        return __awaiter(this, void 0, void 0, function () {
+            var card;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4, this.getMarketCardZone({ row: to.row, column: to.column }).placeInZone({
-                            element: tplCard({ cardId: cardId, extraClasses: PP_MARKET_CARD }),
-                            id: cardId,
-                            from: 'pp_market_deck',
-                        }, (this.game.animationManager.getSettings().duration || 0) / 2)];
+                    case 0:
+                        card = __assign(__assign({}, cardInfo), { state: 0, used: 0, location: 'deck' });
+                        return [4, this.deck.addCard(card)];
                     case 1:
                         _b.sent();
-                        this.game.tooltipManager.addTooltipToCard({ cardId: cardId });
+                        card.location = "market_".concat(to.row, "_").concat(to.column);
+                        return [4, this.getMarketCardZone({ row: to.row, column: to.column }).addCard(card)];
+                    case 2:
+                        _b.sent();
                         return [2];
                 }
             });
         });
     };
     Market.prototype.moveCard = function (_a) {
-        var cardId = _a.cardId, from = _a.from, to = _a.to;
+        var card = _a.card, from = _a.from, to = _a.to;
         return __awaiter(this, void 0, void 0, function () {
-            var rupeesToMove, movePromises, removePromises;
+            var rupeesToMove, movePromises;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        rupeesToMove = this.getMarketRupeesZone({ row: from.row, column: from.column }).getItems();
+                        rupeesToMove = this.getMarketRupeesZone({ row: from.row, column: from.column }).getCards();
                         movePromises = [
-                            this.getMarketCardZone({ row: to.row, column: to.column }).moveToZone({
-                                elements: { id: cardId },
-                                duration: (this.game.animationManager.getSettings().duration || 0) / 2,
-                                zIndex: 5,
-                            }),
+                            this.getMarketCardZone({ row: to.row, column: to.column }).addCard(__assign(__assign({}, card), { state: 0, used: 0, location: "market_".concat(to.row, "_").concat(to.column) })),
                         ];
                         if (rupeesToMove.length > 0) {
-                            movePromises.push(this.getMarketRupeesZone({ row: to.row, column: to.column }).moveToZone({
-                                elements: rupeesToMove.map(function (id) { return ({ id: id }); }),
-                                duration: (this.game.animationManager.getSettings().duration || 0) / 2,
-                                zIndex: 11,
-                            }));
+                            movePromises.push(this.getMarketRupeesZone({ row: to.row, column: to.column }).addCards(rupeesToMove));
                         }
                         return [4, Promise.all(movePromises)];
                     case 1:
-                        _b.sent();
-                        removePromises = [this.getMarketCardZone({ row: from.row, column: from.column }).remove({ input: cardId })];
-                        if (rupeesToMove.length > 0) {
-                            movePromises.push(this.getMarketRupeesZone({ row: from.row, column: from.column }).remove({ input: rupeesToMove }));
-                        }
-                        return [4, Promise.all(removePromises)];
-                    case 2:
                         _b.sent();
                         return [2];
                 }
@@ -4983,16 +5994,15 @@ var Market = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_c) {
                 if (to === TEMP_DISCARD) {
-                    this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                        elements: { id: cardId },
-                        classesToRemove: [PP_MARKET_CARD],
-                    });
+                    this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard({
+                        id: cardId,
+                        state: 0,
+                        used: 0,
+                        location: "market_".concat(row, "_").concat(column),
+                    }));
                 }
                 else {
-                    this.game.objectManager.discardPile.discardCardFromZone({
-                        cardId: cardId,
-                        zone: this.getMarketCardZone({ row: row, column: column }),
-                    });
+                    this.game.objectManager.discardPile.discardCardFromZone(cardId);
                 }
                 return [2];
             });
@@ -5000,6 +6010,404 @@ var Market = (function () {
     };
     return Market;
 }());
+var getSettingsConfig = function () {
+    var _a, _b;
+    return ({
+        layout: {
+            id: 'layout',
+            config: (_a = {},
+                _a[PREF_TWO_COLUMNS_LAYOUT] = {
+                    id: PREF_TWO_COLUMNS_LAYOUT,
+                    onChangeInSetup: true,
+                    defaultValue: 'disabled',
+                    label: _('Two column layout'),
+                    type: 'select',
+                    options: [
+                        {
+                            label: _('Enabled'),
+                            value: 'enabled',
+                        },
+                        {
+                            label: _('Disabled (single column)'),
+                            value: 'disabled',
+                        },
+                    ],
+                },
+                _a.columnSizes = {
+                    id: 'columnSizes',
+                    onChangeInSetup: true,
+                    label: _('Column sizes'),
+                    defaultValue: 50,
+                    visibleCondition: {
+                        id: 'twoColumnsLayout',
+                        values: [PREF_ENABLED],
+                    },
+                    sliderConfig: {
+                        step: 5,
+                        padding: 0,
+                        range: {
+                            min: 30,
+                            max: 70,
+                        },
+                    },
+                    type: 'slider',
+                },
+                _a[PREF_SINGLE_COLUMN_MAP_SIZE] = {
+                    id: PREF_SINGLE_COLUMN_MAP_SIZE,
+                    onChangeInSetup: true,
+                    label: _("Map size"),
+                    defaultValue: 100,
+                    visibleCondition: {
+                        id: "twoColumnsLayout",
+                        values: [PREF_DISABLED],
+                    },
+                    sliderConfig: {
+                        step: 5,
+                        padding: 0,
+                        range: {
+                            min: 30,
+                            max: 100,
+                        },
+                    },
+                    type: "slider",
+                },
+                _a[PREF_CARD_SIZE_IN_LOG] = {
+                    id: PREF_CARD_SIZE_IN_LOG,
+                    onChangeInSetup: true,
+                    label: _('Size of cards in log'),
+                    defaultValue: 100,
+                    sliderConfig: {
+                        step: 5,
+                        padding: 0,
+                        range: {
+                            min: 0,
+                            max: 150,
+                        },
+                    },
+                    type: 'slider',
+                },
+                _a[PREF_CARD_SIZE_IN_COURT] = {
+                    id: PREF_CARD_SIZE_IN_COURT,
+                    onChangeInSetup: true,
+                    label: _("Size of cards in court"),
+                    defaultValue: 100,
+                    sliderConfig: {
+                        step: 5,
+                        padding: 0,
+                        range: {
+                            min: 50,
+                            max: 200,
+                        },
+                    },
+                    type: "slider",
+                },
+                _a),
+        },
+        gameplay: {
+            id: 'gameplay',
+            config: (_b = {},
+                _b[PREF_SHOW_ANIMATIONS] = {
+                    id: PREF_SHOW_ANIMATIONS,
+                    onChangeInSetup: false,
+                    defaultValue: PREF_ENABLED,
+                    label: _('Show animations'),
+                    type: 'select',
+                    options: [
+                        {
+                            label: _('Enabled'),
+                            value: PREF_ENABLED,
+                        },
+                        {
+                            label: _('Disabled'),
+                            value: PREF_DISABLED,
+                        },
+                    ],
+                },
+                _b[PREF_ANIMATION_SPEED] = {
+                    id: PREF_ANIMATION_SPEED,
+                    onChangeInSetup: false,
+                    label: _('Animation speed'),
+                    defaultValue: 1600,
+                    visibleCondition: {
+                        id: PREF_SHOW_ANIMATIONS,
+                        values: [PREF_ENABLED],
+                    },
+                    sliderConfig: {
+                        step: 100,
+                        padding: 0,
+                        range: {
+                            min: 100,
+                            max: 2000,
+                        },
+                    },
+                    type: 'slider',
+                },
+                _b),
+        },
+    });
+};
+var Settings = (function () {
+    function Settings(game) {
+        this.ROOT = document.documentElement;
+        this.settings = {};
+        this.selectedTab = 'layout';
+        this.tabs = [
+            {
+                id: 'layout',
+                name: _('Layout'),
+            },
+            {
+                id: 'gameplay',
+                name: _('Gameplay'),
+            },
+        ];
+        this.game = game;
+        var gamedatas = game.gamedatas;
+        this.setup({ gamedatas: gamedatas });
+    }
+    Settings.prototype.clearInterface = function () { };
+    Settings.prototype.updateInterface = function (_a) {
+        var gamedatas = _a.gamedatas;
+    };
+    Settings.prototype.addButton = function (_a) {
+        var gamedatas = _a.gamedatas;
+        var configPanel = document.getElementById('info_panel_buttons');
+        if (configPanel) {
+            configPanel.insertAdjacentHTML('beforeend', tplSettingsButton());
+        }
+    };
+    Settings.prototype.setupModal = function (_a) {
+        var gamedatas = _a.gamedatas;
+        this.modal = new Modal("settings_modal", {
+            class: 'settings_modal',
+            closeIcon: 'fa-times',
+            titleTpl: '<h2 id="popin_${id}_title" class="${class}_title">${title}</h2>',
+            title: _('Settings'),
+            contents: tplSettingsModalContent({
+                tabs: this.tabs,
+            }),
+            closeAction: 'hide',
+            verticalAlign: 'flex-start',
+            breakpoint: 740,
+        });
+    };
+    Settings.prototype.setup = function (_a) {
+        var _this = this;
+        var gamedatas = _a.gamedatas;
+        this.addButton({ gamedatas: gamedatas });
+        this.setupModal({ gamedatas: gamedatas });
+        this.setupModalContent();
+        this.changeTab({ id: this.selectedTab });
+        dojo.connect($("show_settings_menu"), 'onclick', function () { return _this.open(); });
+        this.tabs.forEach(function (_a) {
+            var id = _a.id;
+            dojo.connect($("settings_modal_tab_".concat(id)), 'onclick', function () {
+                return _this.changeTab({ id: id });
+            });
+        });
+    };
+    Settings.prototype.setupModalContent = function () {
+        var _this = this;
+        var config = getSettingsConfig();
+        var node = document.getElementById('setting_modal_content');
+        if (!node) {
+            return;
+        }
+        Object.entries(config).forEach(function (_a) {
+            var tabId = _a[0], tabConfig = _a[1];
+            node.insertAdjacentHTML('beforeend', tplSettingsModalTabContent({ id: tabId }));
+            var tabContentNode = document.getElementById("settings_modal_tab_content_".concat(tabId));
+            if (!tabContentNode) {
+                return;
+            }
+            Object.values(tabConfig.config).forEach(function (setting) {
+                var id = setting.id, type = setting.type, defaultValue = setting.defaultValue, visibleCondition = setting.visibleCondition;
+                var localValue = localStorage.getItem(_this.getLocalStorageKey({ id: id }));
+                _this.settings[id] = localValue || defaultValue;
+                var methodName = _this.getMethodName({ id: id });
+                if (setting.onChangeInSetup && _this[methodName]) {
+                    _this[methodName](localValue ? localValue : setting.defaultValue);
+                }
+                if (setting.type === 'select') {
+                    var visible = !visibleCondition ||
+                        (visibleCondition &&
+                            visibleCondition.values.includes(_this.settings[visibleCondition.id]));
+                    tabContentNode.insertAdjacentHTML('beforeend', tplPlayerPrefenceSelectRow({
+                        setting: setting,
+                        currentValue: _this.settings[setting.id],
+                        visible: visible,
+                    }));
+                    var controlId_1 = "setting_".concat(setting.id);
+                    $(controlId_1).addEventListener('change', function () {
+                        var value = $(controlId_1).value;
+                        _this.changeSetting({ id: setting.id, value: value });
+                    });
+                }
+                else if (setting.type === 'slider') {
+                    var visible = !visibleCondition ||
+                        (visibleCondition &&
+                            visibleCondition.values.includes(_this.settings[visibleCondition.id]));
+                    tabContentNode.insertAdjacentHTML('beforeend', tplPlayerPrefenceSliderRow({
+                        id: setting.id,
+                        label: setting.label,
+                        visible: visible,
+                    }));
+                    var sliderConfig = __assign(__assign({}, setting.sliderConfig), { start: _this.settings[setting.id] });
+                    noUiSlider.create($('setting_' + setting.id), sliderConfig);
+                    $('setting_' + setting.id).noUiSlider.on('slide', function (arg) {
+                        return _this.changeSetting({ id: setting.id, value: arg[0] });
+                    });
+                }
+            });
+        });
+    };
+    Settings.prototype.changeSetting = function (_a) {
+        var id = _a.id, value = _a.value;
+        var suffix = this.getSuffix({ id: id });
+        this.settings[id] = value;
+        localStorage.setItem(this.getLocalStorageKey({ id: id }), value);
+        var methodName = this.getMethodName({ id: id });
+        if (this[methodName]) {
+            this[methodName](value);
+        }
+    };
+    Settings.prototype.onChangeTwoColumnsLayoutSetting = function (value) {
+        this.checkColumnSizesVisisble();
+        var node = document.getElementById('play_area_container');
+        if (node) {
+            node.setAttribute('data-two-columns', value);
+        }
+        this.game.updateLayout();
+    };
+    Settings.prototype.onChangeColumnSizesSetting = function (value) {
+        this.game.updateLayout();
+    };
+    Settings.prototype.onChangeSingleColumnMapSizeSetting = function (value) {
+        this.game.updateLayout();
+    };
+    Settings.prototype.onChangeCardSizeInLogSetting = function (value) {
+        var ROOT = document.documentElement;
+        ROOT.style.setProperty('--logCardScale', "".concat(Number(value) / 100));
+    };
+    Settings.prototype.onChangeCardSizeInCourtSetting = function (value) {
+        var node = document.getElementById("pp_player_tableaus");
+        if (node) {
+            node.style.setProperty("--cardInCourtScale", "".concat(Number(value) / 100));
+        }
+    };
+    Settings.prototype.onChangeAnimationSpeedSetting = function (value) {
+        var duration = 2100 - value;
+        debug('onChangeAnimationSpeedSetting', duration);
+        this.game.animationManager.getSettings().duration = duration;
+    };
+    Settings.prototype.onChangeShowAnimationsSetting = function (value) {
+        if (value === PREF_ENABLED) {
+            this.game.animationManager.getSettings().duration = Number(this.settings[PREF_ANIMATION_SPEED]);
+        }
+        else {
+            this.game.animationManager.getSettings().duration = 0;
+        }
+        this.checkAnmimationSpeedVisisble();
+    };
+    Settings.prototype.onChangeCardInfoInTooltipSetting = function (value) {
+    };
+    Settings.prototype.changeTab = function (_a) {
+        var id = _a.id;
+        var currentTab = document.getElementById("settings_modal_tab_".concat(this.selectedTab));
+        var currentTabContent = document.getElementById("settings_modal_tab_content_".concat(this.selectedTab));
+        currentTab.removeAttribute('data-state');
+        if (currentTabContent) {
+            currentTabContent.style.display = 'none';
+        }
+        this.selectedTab = id;
+        var tab = document.getElementById("settings_modal_tab_".concat(id));
+        var tabContent = document.getElementById("settings_modal_tab_content_".concat(this.selectedTab));
+        tab.setAttribute('data-state', 'selected');
+        if (tabContent) {
+            tabContent.style.display = '';
+        }
+    };
+    Settings.prototype.checkAnmimationSpeedVisisble = function () {
+        var sliderNode = document.getElementById('setting_row_animationSpeed');
+        if (!sliderNode) {
+            return;
+        }
+        if (this.settings[PREF_SHOW_ANIMATIONS] === PREF_ENABLED) {
+            sliderNode.style.display = '';
+        }
+        else {
+            sliderNode.style.display = 'none';
+        }
+    };
+    Settings.prototype.checkColumnSizesVisisble = function () {
+        var sliderNode = document.getElementById('setting_row_columnSizes');
+        var mapSizeSliderNode = document.getElementById('setting_row_singleColumnMapSize');
+        if (!(sliderNode && mapSizeSliderNode)) {
+            return;
+        }
+        if (this.settings['twoColumnsLayout'] === PREF_ENABLED) {
+            sliderNode.style.display = '';
+            mapSizeSliderNode.style.display = 'none';
+        }
+        else {
+            sliderNode.style.display = 'none';
+            mapSizeSliderNode.style.display = '';
+        }
+    };
+    Settings.prototype.getMethodName = function (_a) {
+        var id = _a.id;
+        return "onChange".concat(this.getSuffix({ id: id }), "Setting");
+    };
+    Settings.prototype.get = function (_a) {
+        var id = _a.id;
+        return this.settings[id] || null;
+    };
+    Settings.prototype.getSuffix = function (_a) {
+        var id = _a.id;
+        return id.charAt(0).toUpperCase() + id.slice(1);
+    };
+    Settings.prototype.getLocalStorageKey = function (_a) {
+        var id = _a.id;
+        return "".concat(this.game.framework().game_name, "-").concat(this.getSuffix({ id: id }));
+    };
+    Settings.prototype.open = function () {
+        this.modal.show();
+    };
+    return Settings;
+}());
+var tplSettingsButton = function () {
+    return "<div id=\"show_settings_menu\">\n  <svg  xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512\">\n    <g>\n      <path class=\"fa-secondary\" fill=\"currentColor\" d=\"M638.41 387a12.34 12.34 0 0 0-12.2-10.3h-16.5a86.33 86.33 0 0 0-15.9-27.4L602 335a12.42 12.42 0 0 0-2.8-15.7 110.5 110.5 0 0 0-32.1-18.6 12.36 12.36 0 0 0-15.1 5.4l-8.2 14.3a88.86 88.86 0 0 0-31.7 0l-8.2-14.3a12.36 12.36 0 0 0-15.1-5.4 111.83 111.83 0 0 0-32.1 18.6 12.3 12.3 0 0 0-2.8 15.7l8.2 14.3a86.33 86.33 0 0 0-15.9 27.4h-16.5a12.43 12.43 0 0 0-12.2 10.4 112.66 112.66 0 0 0 0 37.1 12.34 12.34 0 0 0 12.2 10.3h16.5a86.33 86.33 0 0 0 15.9 27.4l-8.2 14.3a12.42 12.42 0 0 0 2.8 15.7 110.5 110.5 0 0 0 32.1 18.6 12.36 12.36 0 0 0 15.1-5.4l8.2-14.3a88.86 88.86 0 0 0 31.7 0l8.2 14.3a12.36 12.36 0 0 0 15.1 5.4 111.83 111.83 0 0 0 32.1-18.6 12.3 12.3 0 0 0 2.8-15.7l-8.2-14.3a86.33 86.33 0 0 0 15.9-27.4h16.5a12.43 12.43 0 0 0 12.2-10.4 112.66 112.66 0 0 0 .01-37.1zm-136.8 44.9c-29.6-38.5 14.3-82.4 52.8-52.8 29.59 38.49-14.3 82.39-52.8 52.79zm136.8-343.8a12.34 12.34 0 0 0-12.2-10.3h-16.5a86.33 86.33 0 0 0-15.9-27.4l8.2-14.3a12.42 12.42 0 0 0-2.8-15.7 110.5 110.5 0 0 0-32.1-18.6A12.36 12.36 0 0 0 552 7.19l-8.2 14.3a88.86 88.86 0 0 0-31.7 0l-8.2-14.3a12.36 12.36 0 0 0-15.1-5.4 111.83 111.83 0 0 0-32.1 18.6 12.3 12.3 0 0 0-2.8 15.7l8.2 14.3a86.33 86.33 0 0 0-15.9 27.4h-16.5a12.43 12.43 0 0 0-12.2 10.4 112.66 112.66 0 0 0 0 37.1 12.34 12.34 0 0 0 12.2 10.3h16.5a86.33 86.33 0 0 0 15.9 27.4l-8.2 14.3a12.42 12.42 0 0 0 2.8 15.7 110.5 110.5 0 0 0 32.1 18.6 12.36 12.36 0 0 0 15.1-5.4l8.2-14.3a88.86 88.86 0 0 0 31.7 0l8.2 14.3a12.36 12.36 0 0 0 15.1 5.4 111.83 111.83 0 0 0 32.1-18.6 12.3 12.3 0 0 0 2.8-15.7l-8.2-14.3a86.33 86.33 0 0 0 15.9-27.4h16.5a12.43 12.43 0 0 0 12.2-10.4 112.66 112.66 0 0 0 .01-37.1zm-136.8 45c-29.6-38.5 14.3-82.5 52.8-52.8 29.59 38.49-14.3 82.39-52.8 52.79z\" opacity=\"0.4\"></path>\n      <path class=\"fa-primary\" fill=\"currentColor\" d=\"M420 303.79L386.31 287a173.78 173.78 0 0 0 0-63.5l33.7-16.8c10.1-5.9 14-18.2 10-29.1-8.9-24.2-25.9-46.4-42.1-65.8a23.93 23.93 0 0 0-30.3-5.3l-29.1 16.8a173.66 173.66 0 0 0-54.9-31.7V58a24 24 0 0 0-20-23.6 228.06 228.06 0 0 0-76 .1A23.82 23.82 0 0 0 158 58v33.7a171.78 171.78 0 0 0-54.9 31.7L74 106.59a23.91 23.91 0 0 0-30.3 5.3c-16.2 19.4-33.3 41.6-42.2 65.8a23.84 23.84 0 0 0 10.5 29l33.3 16.9a173.24 173.24 0 0 0 0 63.4L12 303.79a24.13 24.13 0 0 0-10.5 29.1c8.9 24.1 26 46.3 42.2 65.7a23.93 23.93 0 0 0 30.3 5.3l29.1-16.7a173.66 173.66 0 0 0 54.9 31.7v33.6a24 24 0 0 0 20 23.6 224.88 224.88 0 0 0 75.9 0 23.93 23.93 0 0 0 19.7-23.6v-33.6a171.78 171.78 0 0 0 54.9-31.7l29.1 16.8a23.91 23.91 0 0 0 30.3-5.3c16.2-19.4 33.7-41.6 42.6-65.8a24 24 0 0 0-10.5-29.1zm-151.3 4.3c-77 59.2-164.9-28.7-105.7-105.7 77-59.2 164.91 28.7 105.71 105.7z\"></path>\n    </g>\n  </svg>\n</div>";
+};
+var tplPlayerPrefenceSelectRow = function (_a) {
+    var setting = _a.setting, currentValue = _a.currentValue, _b = _a.visible, visible = _b === void 0 ? true : _b;
+    var values = setting.options
+        .map(function (option) {
+        return "<option value='".concat(option.value, "' ").concat(option.value === currentValue ? 'selected="selected"' : "", ">").concat(_(option.label), "</option>");
+    })
+        .join("");
+    return "\n    <div id=\"setting_row_".concat(setting.id, "\" class=\"player_preference_row\"").concat(!visible ? " style=\"display: none;\"" : '', ">\n      <div class=\"player_preference_row_label\">").concat(_(setting.label), "</div>\n      <div class=\"player_preference_row_value\">\n        <select id=\"setting_").concat(setting.id, "\" class=\"\" style=\"display: block;\">\n        ").concat(values, "\n        </select>\n      </div>\n    </div>\n  ");
+};
+var tplSettingsModalTabContent = function (_a) {
+    var id = _a.id;
+    return "\n  <div id=\"settings_modal_tab_content_".concat(id, "\" style=\"display: none;\"></div>");
+};
+var tplSettingsModalTab = function (_a) {
+    var id = _a.id, name = _a.name;
+    return "\n  <div id=\"settings_modal_tab_".concat(id, "\" class=\"settings_modal_tab\">\n    <span>").concat(_(name), "</span>\n  </div>");
+};
+var tplSettingsModalContent = function (_a) {
+    var tabs = _a.tabs;
+    return "<div id=\"setting_modal_content\">\n    <div class=\"settings_modal_tabs\">\n  ".concat(tabs
+        .map(function (_a) {
+        var id = _a.id, name = _a.name;
+        return tplSettingsModalTab({ id: id, name: name });
+    })
+        .join(""), "\n    </div>\n  </div>");
+};
+var tplPlayerPrefenceSliderRow = function (_a) {
+    var label = _a.label, id = _a.id, _b = _a.visible, visible = _b === void 0 ? true : _b;
+    return "\n  <div id=\"setting_row_".concat(id, "\" class=\"player_preference_row\"").concat(!visible ? " style=\"display: none;\"" : '', ">\n    <div class=\"player_preference_row_label\">").concat(_(label), "</div>\n    <div class=\"player_preference_row_value slider\">\n      <div id=\"setting_").concat(id, "\"></div>\n    </div>\n  </div>\n  ");
+};
 var AcceptPrizeState = (function () {
     function AcceptPrizeState(game) {
         this.game = game;
@@ -5040,7 +6448,7 @@ var AcceptPrizeState = (function () {
         });
     };
     AcceptPrizeState.prototype.updatePageTitle = function () {
-        var card = this.game.getCardInfo({ cardId: this.cardId });
+        var card = this.game.getCardInfo(this.cardId);
         var playerLoyalty = this.game.getCurrentPlayer().getLoyalty();
         if (card.prize !== playerLoyalty) {
             this.game.clientUpdatePageTitle({
@@ -5108,7 +6516,7 @@ var ClientCardActionBattleState = (function () {
         var coalitionId = this.game.getCurrentPlayer().getLoyalty();
         var enemyPieces = region.getEnemyPieces({ coalitionId: coalitionId }).filter(function (pieceId) { return _this.checkForCitadel({ pieceId: pieceId, region: regionId }); });
         debug('enemyPieces', enemyPieces);
-        var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
+        var cardInfo = this.game.getCardInfo(this.cardId);
         var cardRank = cardInfo.rank;
         this.maxNumberToSelect = Math.min(cardRank, this.getNumberOfFriendlyArmiesInRegion({ region: region, coalitionId: coalitionId }));
         this.numberSelected = 0;
@@ -5127,7 +6535,7 @@ var ClientCardActionBattleState = (function () {
         var cardId = _a.cardId;
         this.game.clearPossible();
         this.location = cardId;
-        var cardInfo = this.game.getCardInfo({ cardId: this.cardId });
+        var cardInfo = this.game.getCardInfo(this.cardId);
         var cardRank = cardInfo.rank;
         var _b = this.getSpies({ cardId: cardId }), enemy = _b.enemy, own = _b.own;
         this.maxNumberToSelect = Math.min(cardRank, own.length);
@@ -5229,7 +6637,7 @@ var ClientCardActionBattleState = (function () {
                 own: [],
             };
         }
-        var cylinderIds = spyZone.getItems();
+        var cylinderIds = spyZone.getCards().map(extractId);
         return {
             enemy: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId(); }),
             own: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) === _this.game.getPlayerId(); }),
@@ -5275,7 +6683,6 @@ var ClientCardActionBattleState = (function () {
             dojo.query("#".concat(cardId)).forEach(function (node, index) {
                 dojo.addClass(node, 'pp_selectable');
                 _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () {
-                    console.log('select court card click');
                     _this.updateInterfaceSelectPiecesOnCard({ cardId: cardId });
                 }));
             });
@@ -5338,7 +6745,7 @@ var ClientCardActionBetrayState = (function () {
         var _this = this;
         var betrayedCardId = _a.betrayedCardId;
         this.game.clearPossible();
-        var card = this.game.getCardInfo({ cardId: betrayedCardId });
+        var card = this.game.getCardInfo(betrayedCardId);
         var node = dojo.byId(betrayedCardId);
         dojo.addClass(node, 'pp_selected');
         this.game.clientUpdatePageTitle({
@@ -5364,7 +6771,7 @@ var ClientCardActionBetrayState = (function () {
                 own: [],
             };
         }
-        var cylinderIds = spyZone.getItems();
+        var cylinderIds = spyZone.getCards().map(extractId);
         return {
             enemy: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId(); }),
             own: cylinderIds.filter(function (cylinderId) { return Number(cylinderId.split('_')[1]) === _this.game.getPlayerId(); }),
@@ -5423,7 +6830,6 @@ var ClientCardActionBuildState = (function () {
         this.bribe = props === null || props === void 0 ? void 0 : props.bribe;
         this.tempTokens = [];
         this.setMaxNumberToPlace();
-        console.log('maxNumberToPlace', this.maxNumberToPlace);
         this.updateInterfaceInitialStep();
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
@@ -5494,7 +6900,6 @@ var ClientCardActionBuildState = (function () {
                 type: 'road',
             });
         }
-        console.log('tempTokens', this.tempTokens);
         this.updatePageTitle();
         this.updateActionButtons();
     };
@@ -5523,7 +6928,6 @@ var ClientCardActionBuildState = (function () {
         var playerRupees = player.getRupees();
         this.playerHasNationBuilding = player.ownsEventCard({ cardId: ECE_NATION_BUILDING_CARD_ID });
         var multiplier = this.playerHasNationBuilding ? 2 : 1;
-        console.log('multiplier', multiplier);
         var bribe = ((_a = this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0;
         var maxAffordable = Math.floor((playerRupees - bribe) / 2);
         this.maxNumberToPlace = Math.min(maxAffordable, 3) * multiplier;
@@ -5708,7 +7112,7 @@ var ClientCardActionGiftState = (function () {
                 .getGiftZone({
                 value: giftValue,
             })
-                .getItems().length > 0;
+                .getCards().length > 0;
             if (!hasGift && giftValue <= _this.game.getCurrentPlayer().getRupees() - (((_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) || 0)) {
                 dojo.query("#pp_gift_".concat(giftValue, "_").concat(playerId)).forEach(function (node) {
                     dojo.addClass(node, 'pp_selectable');
@@ -5732,7 +7136,7 @@ var ClientCardActionMoveState = (function () {
         this.game.clearPossible();
         this.cardId = cardId;
         this.bribe = bribe;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         this.maxNumberOfMoves = cardInfo.rank;
         this.moves = {};
         this.updateInterfaceInitialStep();
@@ -5818,10 +7222,12 @@ var ClientCardActionMoveState = (function () {
                         debug('onCardClick', pieceId, fromCardId, toCardId);
                         this.game.clearPossible();
                         this.addMove({ from: fromCardId, to: toCardId, pieceId: pieceId });
-                        return [4, Promise.all([
-                                this.game.spies[toCardId].moveToZone({ elements: { id: pieceId }, classesToRemove: [PP_SELECTABLE] }),
-                                this.game.spies[fromCardId].remove({ input: pieceId }),
-                            ])];
+                        return [4, this.game.spies[toCardId].addCard(this.game.getCylinder({
+                                id: pieceId,
+                                location: "spies_".concat(toCardId),
+                                state: 0,
+                                used: 0,
+                            }))];
                     case 1:
                         _b.sent();
                         this.nextStepAfterMove();
@@ -5846,27 +7252,32 @@ var ClientCardActionMoveState = (function () {
     ClientCardActionMoveState.prototype.onRegionClick = function (_a) {
         var fromRegionId = _a.fromRegionId, toRegionId = _a.toRegionId, pieceId = _a.pieceId;
         return __awaiter(this, void 0, void 0, function () {
-            var fromRegion, toRegion, isPieceArmy, fromZone, toZone;
+            var fromRegion, toRegion, isPieceArmy;
             return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        debug('onRegionClick', fromRegionId, toRegionId, pieceId);
-                        this.game.clearPossible();
-                        fromRegion = this.game.map.getRegion({ region: fromRegionId });
-                        toRegion = this.game.map.getRegion({ region: toRegionId });
-                        isPieceArmy = pieceId.startsWith('block');
-                        this.addMove({ from: fromRegionId, to: toRegionId, pieceId: pieceId });
-                        fromZone = isPieceArmy ? fromRegion.getArmyZone() : fromRegion.getTribeZone();
-                        toZone = isPieceArmy ? toRegion.getArmyZone() : toRegion.getTribeZone();
-                        return [4, Promise.all([
-                                toZone.moveToZone({ elements: { id: pieceId }, classesToRemove: [PP_SELECTED] }),
-                                fromZone.remove({ input: pieceId }),
-                            ])];
-                    case 1:
-                        _b.sent();
-                        this.nextStepAfterMove();
-                        return [2];
+                debug('onRegionClick', fromRegionId, toRegionId, pieceId);
+                this.game.clearPossible();
+                fromRegion = this.game.map.getRegion({ region: fromRegionId });
+                toRegion = this.game.map.getRegion({ region: toRegionId });
+                isPieceArmy = pieceId.startsWith('block');
+                this.addMove({ from: fromRegionId, to: toRegionId, pieceId: pieceId });
+                if (isPieceArmy) {
+                    toRegion.getArmyZone().addCard(getArmy({
+                        id: pieceId,
+                        location: "armies_".concat(toRegionId),
+                        state: 0,
+                        used: 0,
+                    }));
                 }
+                else {
+                    toRegion.getTribeZone().addCard(this.game.getCylinder({
+                        id: pieceId,
+                        location: "tribes_".concat(toRegionId),
+                        state: 0,
+                        used: 0,
+                    }));
+                }
+                this.nextStepAfterMove();
+                return [2];
             });
         });
     };
@@ -5911,7 +7322,11 @@ var ClientCardActionMoveState = (function () {
         var cardId = _a.cardId;
         var node = dojo.byId(cardId);
         var playerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
-        var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getItems();
+        var cardIds = this.game.playerManager
+            .getPlayer({ playerId: playerId })
+            .getCourtZone()
+            .getCards()
+            .map(function (card) { return card.id; });
         var index = cardIds.indexOf(cardId);
         if (index !== cardIds.length - 1) {
             return cardIds[index + 1];
@@ -5919,7 +7334,11 @@ var ClientCardActionMoveState = (function () {
         var currentPlayerId = playerId;
         while (true) {
             var nextPlayerId = this.getNextPlayer({ playerId: currentPlayerId });
-            var nextPlayerCardsIds = this.game.playerManager.getPlayer({ playerId: nextPlayerId }).getCourtZone().getItems();
+            var nextPlayerCardsIds = this.game.playerManager
+                .getPlayer({ playerId: nextPlayerId })
+                .getCourtZone()
+                .getCards()
+                .map(function (card) { return card.id; });
             if (nextPlayerCardsIds.length > 0) {
                 return nextPlayerCardsIds[0];
             }
@@ -5933,7 +7352,11 @@ var ClientCardActionMoveState = (function () {
         var cardId = _a.cardId;
         var node = dojo.byId(cardId);
         var playerId = Number((_b = node.closest('.pp_court')) === null || _b === void 0 ? void 0 : _b.id.split('_')[3]);
-        var cardIds = this.game.playerManager.getPlayer({ playerId: playerId }).getCourtZone().getItems();
+        var cardIds = this.game.playerManager
+            .getPlayer({ playerId: playerId })
+            .getCourtZone()
+            .getCards()
+            .map(function (card) { return card.id; });
         var index = cardIds.indexOf(cardId);
         if (index !== 0) {
             return cardIds[index - 1];
@@ -5941,7 +7364,11 @@ var ClientCardActionMoveState = (function () {
         var currentPlayerId = playerId;
         while (true) {
             var previousPlayerId = this.getPreviousPlayer({ playerId: currentPlayerId });
-            var previousPlayerCardIds = this.game.playerManager.getPlayer({ playerId: previousPlayerId }).getCourtZone().getItems();
+            var previousPlayerCardIds = this.game.playerManager
+                .getPlayer({ playerId: previousPlayerId })
+                .getCourtZone()
+                .getCards()
+                .map(function (card) { return card.id; });
             if (previousPlayerCardIds.length > 0) {
                 return previousPlayerCardIds[previousPlayerCardIds.length - 1];
             }
@@ -5982,7 +7409,7 @@ var ClientCardActionMoveState = (function () {
                         _i = 0, _a = Object.entries(this.moves);
                         _b.label = 1;
                     case 1:
-                        if (!(_i < _a.length)) return [3, 8];
+                        if (!(_i < _a.length)) return [3, 7];
                         record = _a[_i];
                         key = record[0], value = record[1];
                         if (value.length === 0) {
@@ -5995,38 +7422,40 @@ var ClientCardActionMoveState = (function () {
                             return [2];
                         }
                         if (!key.includes('block')) return [3, 3];
-                        return [4, Promise.all([
-                                this.game.map
-                                    .getRegion({ region: to })
-                                    .getArmyZone()
-                                    .moveToZone({ elements: { id: key } }),
-                                this.game.map.getRegion({ region: from }).getArmyZone().remove({ input: key }),
-                            ])];
+                        return [4, this.game.map
+                                .getRegion({ region: to })
+                                .getArmyZone()
+                                .addCard(getArmy({
+                                id: key,
+                                location: "armies_".concat(to),
+                                state: 0,
+                                used: 0,
+                            }))];
                     case 2:
                         _b.sent();
-                        return [3, 7];
+                        return [3, 6];
                     case 3:
-                        if (!(key.includes('cylinder') && !from.startsWith('card'))) return [3, 5];
-                        return [4, Promise.all([
-                                this.game.map
-                                    .getRegion({ region: to })
-                                    .getTribeZone()
-                                    .moveToZone({ elements: { id: key } }),
-                                this.game.map.getRegion({ region: from }).getTribeZone().remove({ input: key }),
-                            ])];
+                        if (!(key.includes('cylinder') && !from.startsWith('card'))) return [3, 4];
+                        this.game.map
+                            .getRegion({ region: to })
+                            .getTribeZone()
+                            .addCard(this.game.getCylinder({ id: key, location: "tribes_".concat(to), state: 0, used: 0 }));
+                        return [3, 6];
                     case 4:
-                        _b.sent();
-                        return [3, 7];
+                        if (!key.includes('cylinder')) return [3, 6];
+                        return [4, this.game.spies[to].addCard(this.game.getCylinder({
+                                id: key,
+                                location: "spies_".concat(to),
+                                state: 0,
+                                used: 0,
+                            }))];
                     case 5:
-                        if (!key.includes('cylinder')) return [3, 7];
-                        return [4, Promise.all([this.game.spies[to].moveToZone({ elements: { id: key } }), this.game.spies[from].remove({ input: key })])];
-                    case 6:
                         _b.sent();
-                        _b.label = 7;
-                    case 7:
+                        _b.label = 6;
+                    case 6:
                         _i++;
                         return [3, 1];
-                    case 8: return [2];
+                    case 7: return [2];
                 }
             });
         });
@@ -6072,7 +7501,7 @@ var ClientCardActionMoveState = (function () {
     };
     ClientCardActionMoveState.prototype.getSingleMoveDestinationsForSpy = function (_a) {
         var cardId = _a.cardId;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         var destinationCards = [];
         destinationCards.push(this.getNextCardId({ cardId: cardId }));
         var previousCardId = this.getPreviousCardId({ cardId: cardId });
@@ -6135,7 +7564,10 @@ var ClientCardActionMoveState = (function () {
     };
     ClientCardActionMoveState.prototype.getSpiesToMove = function () {
         var _this = this;
-        if (this.game.playerManager.getPlayers().map(function (player) { return player.getCourtCards(); }).flat().length <= 1) {
+        if (this.game.playerManager
+            .getPlayers()
+            .map(function (player) { return player.getCourtCards(); })
+            .flat().length <= 1) {
             return [];
         }
         var spies = [];
@@ -6144,7 +7576,8 @@ var ClientCardActionMoveState = (function () {
             if (!zone) {
                 return;
             }
-            zone.getItems().forEach(function (cylinderId) {
+            zone.getCards().forEach(function (_a) {
+                var cylinderId = _a.id;
                 if (Number(cylinderId.split('_')[1]) !== _this.game.getPlayerId()) {
                     return;
                 }
@@ -6191,7 +7624,7 @@ var ClientCardActionTaxState = (function () {
     ClientCardActionTaxState.prototype.onEnteringState = function (args) {
         this.cardId = args.cardId;
         this.bribe = args.bribe;
-        var cardInfo = this.game.getCardInfo(args);
+        var cardInfo = this.game.getCardInfo(args.cardId);
         this.maxNumberToSelect = cardInfo.rank;
         this.numberSelected = 0;
         this.maxPerPlayer = {};
@@ -6310,9 +7743,9 @@ var ClientCardActionTaxState = (function () {
             if (!hasClaimOfAncientLineage) {
                 var hasCardRuledByPlayer = player
                     .getCourtZone()
-                    .getItems()
-                    .some(function (cardId) {
-                    var cardRegion = _this.game.getCardInfo({ cardId: cardId }).region;
+                    .getCards()
+                    .some(function (_a) {
+                    var cardRegion = _a.region;
                     if (_this.game.map.getRegion({ region: cardRegion }).getRuler() === _this.game.getPlayerId()) {
                         return true;
                     }
@@ -6321,7 +7754,7 @@ var ClientCardActionTaxState = (function () {
                     return false;
                 }
             }
-            else if (hasClaimOfAncientLineage && player.getCourtZone().getItemCount() === 0) {
+            else if (hasClaimOfAncientLineage && player.getCourtZone().getCards().length === 0) {
                 return false;
             }
             var taxShelter = player.getTaxShelter();
@@ -6477,7 +7910,7 @@ var ClientInitialBribeCheckState = (function () {
                 callback: function () { return next({ bribe: { amount: amount } }); },
             });
         }
-        var _loop_1 = function (i) {
+        var _loop_3 = function (i) {
             if (i > maxAvailableRupees || bribee.isWakhan() || bribeLimitReached) {
                 return "continue";
             }
@@ -6498,7 +7931,7 @@ var ClientInitialBribeCheckState = (function () {
         };
         var this_1 = this;
         for (var i = amount - 1; i >= 1; i--) {
-            _loop_1(i);
+            _loop_3(i);
         }
         if (this.game.getCurrentPlayer().ownsEventCard({ cardId: 'card_107' })) {
             this.game.addPrimaryActionButton({
@@ -6552,7 +7985,7 @@ var ClientInitialBribeCheckState = (function () {
         if (!spyZone) {
             return null;
         }
-        var cylinderIds = spyZone.getItems();
+        var cylinderIds = spyZone.getCards().map(extractId);
         var totals = {};
         cylinderIds.forEach(function (cylinderId) {
             var playerId = cylinderId.split('_')[1];
@@ -6572,7 +8005,6 @@ var ClientInitialBribeCheckState = (function () {
             });
         })
             .sort(function (a, b) { return b.numberOfSpies - a.numberOfSpies; });
-        console.log('sortedTotals', sortedTotals);
         var currentPlayerId = this.game.getPlayerId();
         var numberOfPlayersWithSpies = sortedTotals.length;
         if (numberOfPlayersWithSpies === 1 && sortedTotals[0].playerId !== currentPlayerId) {
@@ -6597,7 +8029,7 @@ var ClientInitialBribeCheckState = (function () {
     };
     ClientInitialBribeCheckState.prototype.checkBribePlayCard = function (_a) {
         var cardId = _a.cardId;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         var region = cardInfo.region;
         var rulerId = this.game.map.getRegion({ region: region }).getRuler();
         var playerId = this.game.getPlayerId();
@@ -6628,7 +8060,7 @@ var ClientPlayCardState = (function () {
         var side = _a.side, firstCard = _a.firstCard;
         this.game.clearPossible();
         dojo.query("#pp_card_select_".concat(side)).addClass('pp_selected');
-        dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
+        document.getElementById(this.cardId).classList.add(PP_SELECTED);
         this.updatePageTitleConfirmPurchase({ side: side, firstCard: firstCard });
         this.game.addPrimaryActionButton({
             id: 'confirm_btn',
@@ -6674,11 +8106,11 @@ var ClientPlayCardState = (function () {
         var _this = this;
         var _a;
         this.game.clearPossible();
-        dojo.query(".pp_card_in_hand.pp_".concat(this.cardId)).addClass('pp_selected');
+        document.getElementById(this.cardId).classList.add(PP_SELECTED);
         this.game.clientUpdatePageTitle({
             text: _("Select which end of court to play ${name}"),
             args: {
-                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                name: _(this.game.getCardInfo(this.cardId).name),
             },
         });
         this.setSideSelectable();
@@ -6707,7 +8139,7 @@ var ClientPlayCardState = (function () {
     };
     ClientPlayCardState.prototype.updatePageTitleConfirmPurchase = function (_a) {
         var side = _a.side, firstCard = _a.firstCard;
-        var playedCardLoyalty = this.game.getCardInfo({ cardId: this.cardId }).loyalty;
+        var playedCardLoyalty = this.game.getCardInfo(this.cardId).loyalty;
         var willChangeLoyalty = playedCardLoyalty !== null && playedCardLoyalty !== this.game.getCurrentPlayer().getLoyalty();
         debug('willChangeLoyalty', willChangeLoyalty);
         var text;
@@ -6715,20 +8147,20 @@ var ClientPlayCardState = (function () {
         if (firstCard && willChangeLoyalty) {
             text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
             args = {
-                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                name: _(this.game.getCardInfo(this.cardId).name),
                 tkn_coalition: playedCardLoyalty,
             };
         }
         else if (firstCard) {
             text = _("Play ${name} to court?");
             args = {
-                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                name: _(this.game.getCardInfo(this.cardId).name),
             };
         }
         else if (!firstCard && willChangeLoyalty) {
             text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
             args = {
-                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                name: _(this.game.getCardInfo(this.cardId).name),
                 side: _(side),
                 tkn_coalition: playedCardLoyalty,
             };
@@ -6736,7 +8168,7 @@ var ClientPlayCardState = (function () {
         else {
             text = _("Play ${name} to ${side} end of court?");
             args = {
-                name: _(this.game.getCardInfo({ cardId: this.cardId }).name),
+                name: _(this.game.getCardInfo(this.cardId).name),
                 side: _(side),
             };
         }
@@ -6749,7 +8181,7 @@ var ClientPlayCardState = (function () {
         var numberOfCardsInCourt = this.game.playerManager
             .getPlayer({ playerId: this.game.getPlayerId() })
             .getCourtZone()
-            .getItems().length;
+            .getCards().length;
         if (numberOfCardsInCourt === 0) {
             this.updateInterfacePlayCardConfirm({ firstCard: true, side: 'left' });
         }
@@ -6788,9 +8220,10 @@ var ClientPurchaseCardState = (function () {
         var _this = this;
         var cardId = _a.cardId, cost = _a.cost;
         this.game.clearPossible();
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         var name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
-        dojo.query(".pp_".concat(cardId)).addClass('pp_selected');
+        var node = document.getElementById("".concat(cardId));
+        node.classList.add(PP_SELECTED);
         this.game.clientUpdatePageTitle({
             text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
             args: {
@@ -6886,7 +8319,7 @@ var DiscardState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Discard ${name}?'),
             args: {
-                name: _(this.game.getCardInfo({ cardId: cardId }).name),
+                name: _(this.game.getCardInfo(cardId).name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7000,7 +8433,7 @@ var NegotiateBribeState = (function () {
                     }, }); },
             });
         }
-        var _loop_2 = function (i) {
+        var _loop_4 = function (i) {
             var isLowerThanOfferedByBriber = i < this_2.briber.currentAmount;
             var isHigherThanDemandedByBribee = i > (this_2.bribee.currentAmount || this_2.maxAmount);
             var isCurrentOffer = i === currentOffer;
@@ -7025,7 +8458,7 @@ var NegotiateBribeState = (function () {
         };
         var this_2 = this;
         for (var i = this.maxAmount; i >= 0; i--) {
-            _loop_2(i);
+            _loop_4(i);
         }
     };
     return NegotiateBribeState;
@@ -7084,14 +8517,14 @@ var PlaceSpyState = (function () {
         var _this = this;
         var cardId = _a.cardId;
         this.game.clearPossible();
-        dojo.query(".pp_card_in_court.pp_".concat(cardId)).addClass('pp_selected');
+        document.getElementById(cardId).classList.add('pp_selected');
         if (this.selectedPiece) {
             this.setPieceSelected();
         }
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}'),
             args: {
-                cardName: _(this.game.getCardInfo({ cardId: cardId }).name),
+                cardName: _(this.game.getCardInfo(cardId).name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7114,7 +8547,7 @@ var PlaceSpyState = (function () {
     PlaceSpyState.prototype.setPlaceSpyCardsSelectable = function (_a) {
         var _this = this;
         var regionId = _a.regionId;
-        dojo.query(".pp_card_in_court.pp_".concat(regionId)).forEach(function (node, index) {
+        dojo.query(".pp_court .pp_card.pp_".concat(regionId)).forEach(function (node, index) {
             var cardId = node.id;
             dojo.addClass(node, 'pp_selectable');
             _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmPlaceSpy({ cardId: cardId }); }));
@@ -7127,12 +8560,16 @@ var PlayerActionsState = (function () {
         this.game = game;
     }
     PlayerActionsState.prototype.onEnteringState = function (args) {
+        var _this = this;
         this.game.updateLocalState(args);
         if (args.bribe !== null) {
             this.handleNegotiatedBribe(args.bribe);
             return;
         }
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     PlayerActionsState.prototype.onLeavingState = function () {
         debug('Leaving PlayerActionsState');
@@ -7174,7 +8611,7 @@ var PlayerActionsState = (function () {
     };
     PlayerActionsState.prototype.isCardFavoredSuit = function (_a) {
         var cardId = _a.cardId;
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         if (cardInfo.suit === this.game.objectManager.favoredSuit.get()) {
             return true;
         }
@@ -7182,7 +8619,11 @@ var PlayerActionsState = (function () {
             return true;
         }
         var player = this.game.getCurrentPlayer();
-        if (cardInfo.suit === MILITARY && player.getEventsZone().getItems().includes('card_105')) {
+        if (cardInfo.suit === MILITARY &&
+            player
+                .getEventsZone()
+                .getCards()
+                .some(function (card) { return card.id === 'card_105'; })) {
             return true;
         }
         return false;
@@ -7293,7 +8734,7 @@ var PlayerActionsState = (function () {
         });
     };
     PlayerActionsState.prototype.currentPlayerHasHandCards = function () {
-        return this.game.getCurrentPlayer().getHandZone().getItemCount() > 0;
+        return this.game.getCurrentPlayer().getHandZone().getCards().length > 0;
     };
     PlayerActionsState.prototype.handleNegotiatedBribe = function (_a) {
         var action = _a.action, cardId = _a.cardId, briber = _a.briber;
@@ -7345,7 +8786,7 @@ var PlayerActionsState = (function () {
         var cardId = _a.cardId, column = _a.column;
         var baseCardCost = this.game.objectManager.favoredSuit.get() === MILITARY ? 2 : 1;
         var player = this.game.getCurrentPlayer();
-        var cardInfo = this.game.getCardInfo({ cardId: cardId });
+        var cardInfo = this.game.getCardInfo(cardId);
         if (cardInfo.type === 'courtCard' && cardInfo.region === HERAT && player.hasSpecialAbility({ specialAbility: SA_HERAT_INFLUENCE })) {
             return 0;
         }
@@ -7381,9 +8822,9 @@ var PlayerActionsState = (function () {
     };
     PlayerActionsState.prototype.setMarketCardsSelectable = function () {
         var _this = this;
-        dojo.query('.pp_market_card').forEach(function (node) {
+        dojo.query('.pp_market .pp_card').forEach(function (node) {
             var cardId = node.id;
-            var cardInfo = _this.game.getCardInfo({ cardId: cardId });
+            var cardInfo = _this.game.getCardInfo(cardId);
             if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
                 return;
             }
@@ -7727,7 +9168,6 @@ var SelectPieceState = (function () {
     SelectPieceState.prototype.setPiecesSelectable = function () {
         var _this = this;
         this.availablePieces.forEach(function (pieceId) {
-            console.log('pieceId', pieceId);
             var node = dojo.byId(pieceId);
             if (node) {
                 dojo.addClass(node, PP_SELECTABLE);
@@ -7808,7 +9248,7 @@ var StartOfTurnAbilitiesState = (function () {
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}?'),
             args: {
-                cardName: _(this.game.getCardInfo({ cardId: cardId }).name),
+                cardName: _(this.game.getCardInfo(cardId).name),
             },
         });
         this.game.addPrimaryActionButton({
@@ -7835,13 +9275,12 @@ var StartOfTurnAbilitiesState = (function () {
     StartOfTurnAbilitiesState.prototype.setCourtCardsSelectable = function () {
         var _this = this;
         var region = this.specialAbility === SA_BLACKMAIL_HERAT ? HERAT : KANDAHAR;
-        dojo.query(".pp_card_in_court").forEach(function (node, index) {
-            var _a;
-            var cardId = node.id;
-            var cardInfo = _this.game.getCardInfo({ cardId: cardId });
-            if (cardInfo.region === region && (((_a = _this.game.spies[cardId]) === null || _a === void 0 ? void 0 : _a.getItems()) || []).length === 0) {
-                dojo.addClass(node, 'pp_selectable');
-                _this.game._connections.push(dojo.connect(node, 'onclick', _this, function () { return _this.updateInterfaceConfirmPlaceSpy({ cardId: cardId }); }));
+        this.game.playerManager.getAllCourtCards().forEach(function (_a) {
+            var _b;
+            var cardId = _a.id, cardRegion = _a.region;
+            if (cardRegion === region && (((_b = _this.game.spies[cardId]) === null || _b === void 0 ? void 0 : _b.getCards()) || []).length === 0) {
+                dojo.addClass($(cardId), 'pp_selectable');
+                _this.game._connections.push(dojo.connect($(cardId), 'onclick', _this, function () { return _this.updateInterfaceConfirmPlaceSpy({ cardId: cardId }); }));
             }
         });
     };
@@ -7948,12 +9387,12 @@ var NotificationManager = (function () {
                 switch (_b.label) {
                     case 0:
                         _a = notif.args, playerId = _a.playerId, rupeesOnCards = _a.rupeesOnCards, removedRupees = _a.removedRupees;
-                        return [4, Promise.all((rupeesOnCards || []).map(function (item) { return __awaiter(_this, void 0, void 0, function () {
+                        return [4, Promise.all((rupeesOnCards || []).map(function (item, index) { return __awaiter(_this, void 0, void 0, function () {
                                 var row, column, rupeeId, cardId;
                                 return __generator(this, function (_a) {
                                     row = item.row, column = item.column, rupeeId = item.rupeeId, cardId = item.cardId;
                                     this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -1 });
-                                    this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId });
+                                    this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId, index: index });
                                     return [2];
                                 });
                             }); }))];
@@ -7977,7 +9416,6 @@ var NotificationManager = (function () {
                         playerId = Number(argsPlayerId);
                         player = this.getPlayer({ playerId: playerId });
                         player.updatePlayerLoyalty({ coalition: coalition });
-                        console.log('playerInfluence', player.getInfluence());
                         if (player.getInfluence() === 0) {
                             player.setCounter({ counter: 'influence', value: 1 });
                         }
@@ -7993,30 +9431,35 @@ var NotificationManager = (function () {
         return __awaiter(this, void 0, void 0, function () {
             var to;
             return __generator(this, function (_a) {
-                to = notif.args.to;
-                this.game.objectManager.favoredSuit.changeTo({ suit: to });
-                return [2];
+                switch (_a.label) {
+                    case 0:
+                        to = notif.args.to;
+                        return [4, this.game.objectManager.favoredSuit.changeTo({ suit: to })];
+                    case 1:
+                        _a.sent();
+                        return [2];
+                }
             });
         });
     };
     NotificationManager.prototype.notif_changeRuler = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, oldRuler, newRuler, region, from, to;
+            var _a, newRuler, region, to;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = notif.args, oldRuler = _a.oldRuler, newRuler = _a.newRuler, region = _a.region;
-                        from = oldRuler === null
-                            ? this.game.map.getRegion({ region: region }).getRulerZone()
-                            : this.game.playerManager.getPlayer({ playerId: oldRuler }).getRulerTokensZone();
+                        _a = notif.args, newRuler = _a.newRuler, region = _a.region;
                         to = newRuler === null
                             ? this.game.map.getRegion({ region: region }).getRulerZone()
                             : this.game.playerManager.getPlayer({ playerId: newRuler }).getRulerTokensZone();
                         this.game.map.getRegion({ region: region }).setRuler({ playerId: newRuler });
-                        return [4, Promise.all([
-                                to.moveToZone({ elements: { id: "pp_ruler_token_".concat(region) } }),
-                                from.remove({ input: "pp_ruler_token_".concat(region) }),
-                            ])];
+                        return [4, to.addCard({
+                                id: "pp_ruler_token_".concat(region),
+                                state: 0,
+                                used: 0,
+                                location: newRuler ? "rulerTokens_".concat(newRuler) : "rulerTokens_".concat(region),
+                                region: region,
+                            })];
                     case 1:
                         _b.sent();
                         return [2];
@@ -8037,7 +9480,7 @@ var NotificationManager = (function () {
                     case 0:
                         this.game.clearPossible();
                         cardId = notif.args.cardId;
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({ cardId: cardId, zone: this.game.objectManager.tempDiscardPile.getZone() })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 1:
                         _a.sent();
                         return [2];
@@ -8100,9 +9543,7 @@ var NotificationManager = (function () {
                     case 2:
                         if (!(to === ACTIVE_EVENTS)) return [3, 4];
                         return [4, this.game.activeEvents.addCardFromMarket({ cardId: cardId, row: row, column: column })];
-                    case 3:
-                        _b.sent();
-                        _b.label = 4;
+                    case 3: return [2, _b.sent()];
                     case 4: return [2];
                 }
             });
@@ -8179,10 +9620,13 @@ var NotificationManager = (function () {
                         else {
                             this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
                         }
-                        return [4, Promise.all([
-                                this.game.objectManager.vpTrack.getZone("".concat(scores[playerId].newScore)).moveToZone({ elements: { id: "vp_cylinder_".concat(playerId) } }),
-                                this.game.objectManager.vpTrack.getZone("".concat(scores[playerId].currentScore)).remove({ input: "vp_cylinder_".concat(playerId) }),
-                            ])];
+                        return [4, this.game.objectManager.vpTrack.getZone("".concat(scores[playerId].newScore)).addCard({
+                                id: "vp_cylinder_".concat(playerId),
+                                color: this.game.gamedatas.paxPamirPlayers[playerId].color,
+                                state: 0,
+                                used: 0,
+                                location: "vp_track_".concat(scores[playerId].newScore),
+                            })];
                     case 2:
                         _b.sent();
                         _b.label = 3;
@@ -8202,13 +9646,6 @@ var NotificationManager = (function () {
                 switch (_b.label) {
                     case 0:
                         _a = notif.args, blocks = _a.blocks, fromLocations = _a.fromLocations;
-                        return [4, Promise.all(COALITIONS.map(function (coalition) {
-                                return _this.game.objectManager.supply
-                                    .getCoalitionBlocksZone({ coalition: coalition })
-                                    .moveToZone({ elements: blocks[coalition], classesToAdd: [PP_COALITION_BLOCK], classesToRemove: [PP_ARMY, PP_ROAD] });
-                            }))];
-                    case 1:
-                        _b.sent();
                         return [4, Promise.all(fromLocations.map(function (location) { return __awaiter(_this, void 0, void 0, function () {
                                 var splitLocation;
                                 return __generator(this, function (_a) {
@@ -8231,7 +9668,7 @@ var NotificationManager = (function () {
                                     }
                                 });
                             }); }))];
-                    case 2:
+                    case 1:
                         _b.sent();
                         this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
@@ -8254,7 +9691,7 @@ var NotificationManager = (function () {
                                     row: row,
                                     column: column,
                                 },
-                                cardId: cardId,
+                                card: this.game.getCardInfo(cardId),
                             })];
                     case 1:
                         _b.sent();
@@ -8281,7 +9718,7 @@ var NotificationManager = (function () {
                         }
                         return [3, 3];
                     case 1: return [4, Promise.all([
-                            this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addCardToEvents({ cardId: cardId, from: fromZone }),
+                            this.game.playerManager.getPlayer({ playerId: Number(to.split('_')[1]) }).addCardToEvents({ cardId: cardId }),
                             this.game.playerManager.getPlayer({ playerId: Number(from.split('_')[1]) }).checkEventContainerHeight(),
                         ])];
                     case 2:
@@ -8303,7 +9740,9 @@ var NotificationManager = (function () {
                     case 0:
                         move = notif.args.move;
                         return [4, this.performTokenMove({ move: move })];
-                    case 1: return [2, _a.sent()];
+                    case 1:
+                        _a.sent();
+                        return [2];
                 }
             });
         });
@@ -8332,37 +9771,79 @@ var NotificationManager = (function () {
                         this.game.clearPossible();
                         _a = notif.args, playerId = _a.playerId, card = _a.card;
                         player = this.getPlayer({ playerId: playerId });
-                        return [4, player.playCard({
-                                card: card,
-                            })];
-                    case 1: return [2, _b.sent()];
+                        return [4, player.playCard(card)];
+                    case 1:
+                        _b.sent();
+                        return [2];
                 }
             });
         });
     };
     NotificationManager.prototype.notif_placeArmy = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.performTokenMove({ move: notif.args.move })];
+            var _a, tokenId, to, weight, region, coalition;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = notif.args.move, tokenId = _a.tokenId, to = _a.to, weight = _a.weight;
+                        region = to.split('_')[1];
+                        coalition = getCoalitionForBlock(tokenId);
+                        return [4, this.game.map
+                                .getRegion({ region: region })
+                                .getArmyZone()
+                                .addCard({
+                                id: tokenId,
+                                state: weight,
+                                used: 0,
+                                coalition: coalition,
+                                type: 'army',
+                                location: "armies_".concat(region),
+                            })];
                     case 1:
-                        _a.sent();
+                        _b.sent();
                         this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
             });
         });
     };
+    NotificationManager.prototype.getCylinderZone = function (location) {
+        var splitLocation = location.split('_');
+        switch (splitLocation[0]) {
+            case 'cylinders':
+                return this.game.playerManager.getPlayer({ playerId: Number(splitLocation[1]) }).getCylinderZone();
+            case 'gift':
+                return this.game.playerManager.getPlayer({ playerId: Number(splitLocation[2]) }).getGiftZone({ value: Number(splitLocation[1]) });
+            case 'spies':
+                var cardId = "".concat(splitLocation[1], "_").concat(splitLocation[2]);
+                return this.game.spies[cardId];
+            case 'tribes':
+                return this.game.map.getRegion({ region: splitLocation[1] }).getTribeZone();
+            default:
+                debug('cannot find zone for cylinder');
+                break;
+        }
+    };
     NotificationManager.prototype.notif_placeCylinder = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var move, playerId, player, value;
+            var move, to, from, tokenId, weight, toZone, playerId, player, value;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         move = notif.args.move;
-                        return [4, this.performTokenMove({ move: move })];
+                        to = move.to, from = move.from, tokenId = move.tokenId, weight = move.weight;
+                        toZone = this.getCylinderZone(to);
+                        if (!(from !== to)) return [3, 2];
+                        return [4, toZone.addCard(this.game.getCylinder({
+                                id: tokenId,
+                                state: weight,
+                                used: 0,
+                                location: to,
+                            }))];
                     case 1:
                         _a.sent();
+                        _a.label = 2;
+                    case 2:
                         playerId = Number(move.tokenId.split('_')[1]);
                         player = this.getPlayer({ playerId: playerId });
                         if (move.from.startsWith('cylinders_') && !move.to.startsWith('cylinders_')) {
@@ -8399,11 +9880,29 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_placeRoad = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.performTokenMove({ move: notif.args.move })];
+            var _a, from, to, tokenId, weight, _b, type, region1, region2, border;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _a = notif.args.move, from = _a.from, to = _a.to, tokenId = _a.tokenId, weight = _a.weight;
+                        _b = notif.args.move.to.split('_'), type = _b[0], region1 = _b[1], region2 = _b[2];
+                        border = "".concat(region1, "_").concat(region2);
+                        if (!(from !== to)) return [3, 2];
+                        return [4, this.game.map
+                                .getBorder({ border: border })
+                                .getRoadZone()
+                                .addCard({
+                                id: tokenId,
+                                state: weight,
+                                used: 0,
+                                location: to,
+                                type: 'road',
+                                coalition: getCoalitionForBlock(tokenId),
+                            })];
                     case 1:
-                        _a.sent();
+                        _c.sent();
+                        _c.label = 2;
+                    case 2:
                         this.game.objectManager.supply.checkDominantCoalition();
                         return [2];
                 }
@@ -8414,16 +9913,11 @@ var NotificationManager = (function () {
         return __awaiter(this, void 0, void 0, function () {
             var marketLocation, row, column;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        marketLocation = notif.args.marketLocation;
-                        row = Number(marketLocation.split('_')[1]);
-                        column = Number(marketLocation.split('_')[2]);
-                        return [4, this.game.market.getMarketRupeesZone({ row: row, column: column }).removeAll({ destroy: true })];
-                    case 1:
-                        _a.sent();
-                        return [2];
-                }
+                marketLocation = notif.args.marketLocation;
+                row = Number(marketLocation.split('_')[1]);
+                column = Number(marketLocation.split('_')[2]);
+                this.game.market.getMarketRupeesZone({ row: row, column: column }).removeAll({ destroy: true });
+                return [2];
             });
         });
     };
@@ -8439,9 +9933,11 @@ var NotificationManager = (function () {
                         row = Number(marketLocation.split('_')[1]);
                         col = Number(marketLocation.split('_')[2]);
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
-                        return [4, Promise.all(rupeesOnCards.map(function (_a) {
+                        return [4, Promise.all(rupeesOnCards
+                                .reverse()
+                                .map(function (_a, index) {
                                 var row = _a.row, column = _a.column, rupeeId = _a.rupeeId, cardId = _a.cardId;
-                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId });
+                                return _this.game.market.placeRupeeOnCard({ row: row, column: column, rupeeId: rupeeId, fromDiv: "rupees_".concat(playerId), cardId: cardId, index: index });
                             }))];
                     case 1:
                         _b.sent();
@@ -8451,7 +9947,7 @@ var NotificationManager = (function () {
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
                         cardId = notif.args.card.id;
                         if (!newLocation.startsWith('events_')) return [3, 4];
-                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
+                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId })];
                     case 3:
                         _b.sent();
                         if (cardId === 'card_109') {
@@ -8460,26 +9956,17 @@ var NotificationManager = (function () {
                         return [3, 10];
                     case 4:
                         if (!(newLocation === DISCARD)) return [3, 6];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.game.market.getMarketCardZone({ row: row, column: col }),
-                            })];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 5:
                         _b.sent();
                         return [3, 10];
                     case 6:
                         if (!(newLocation === TEMP_DISCARD)) return [3, 8];
-                        return [4, Promise.all([
-                                this.game.objectManager.tempDiscardPile.getZone().moveToZone({
-                                    elements: { id: cardId },
-                                    classesToRemove: [PP_MARKET_CARD],
-                                }),
-                                this.game.market.getMarketCardZone({ row: row, column: col }).remove({ input: cardId }),
-                            ])];
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(notif.args.card))];
                     case 7:
                         _b.sent();
                         return [3, 10];
-                    case 8: return [4, this.getPlayer({ playerId: playerId }).addCardToHand({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
+                    case 8: return [4, this.getPlayer({ playerId: playerId }).addCardToHand(notif.args.card)];
                     case 9:
                         _b.sent();
                         _b.label = 10;
@@ -8496,29 +9983,32 @@ var NotificationManager = (function () {
         player.toValueCounter({ counter: 'cards', value: hand.length });
     };
     NotificationManager.prototype.notif_returnAllSpies = function (notif) {
-        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var _b, spies, cardId;
+            var _a, spies, cardId;
             var _this = this;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         this.game.clearPossible();
-                        _b = notif.args, spies = _b.spies, cardId = _b.cardId;
-                        return [4, Promise.all(__spreadArray(__spreadArray([], Object.entries(spies).map(function (_a) {
+                        _a = notif.args, spies = _a.spies, cardId = _a.cardId;
+                        return [4, Promise.all(__spreadArray([], Object.entries(spies).map(function (_a) {
                                 var key = _a[0], value = _a[1];
                                 return __awaiter(_this, void 0, void 0, function () {
                                     var player;
+                                    var _this = this;
                                     return __generator(this, function (_b) {
                                         switch (_b.label) {
                                             case 0:
                                                 player = this.getPlayer({ playerId: Number(key) });
-                                                return [4, player.getCylinderZone().moveToZone({
-                                                        elements: value.map(function (_a) {
-                                                            var tokenId = _a.tokenId, weight = _a.weight;
-                                                            return ({ id: tokenId, weight: weight });
-                                                        }),
-                                                    })];
+                                                return [4, player.getCylinderZone().addCards(value.map(function (_a) {
+                                                        var tokenId = _a.tokenId, weight = _a.weight;
+                                                        return _this.game.getCylinder({
+                                                            id: tokenId,
+                                                            state: weight,
+                                                            used: 0,
+                                                            location: "cylinders_".concat(player.getPlayerId()),
+                                                        });
+                                                    }))];
                                             case 1:
                                                 _b.sent();
                                                 player.incCounter({ counter: 'cylinders', value: -value.length });
@@ -8526,11 +10016,9 @@ var NotificationManager = (function () {
                                         }
                                     });
                                 });
-                            }), true), [
-                                (_a = this.game.spies) === null || _a === void 0 ? void 0 : _a[cardId].removeAll(),
-                            ], false))];
+                            }), true))];
                     case 1:
-                        _c.sent();
+                        _b.sent();
                         return [2];
                 }
             });
@@ -8556,28 +10044,21 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_returnCoalitionBlock = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, from, blockId, weight, coalition, type, toZone, splitFrom, fromZone;
+            var _a, blockId, weight, coalition, toZone;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         this.game.clearPossible();
-                        _a = notif.args, from = _a.from, blockId = _a.blockId, weight = _a.weight, coalition = _a.coalition, type = _a.type;
+                        _a = notif.args, blockId = _a.blockId, weight = _a.weight, coalition = _a.coalition;
                         toZone = this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: coalition });
-                        splitFrom = from.split('_');
-                        fromZone = from.startsWith('roads_')
-                            ? this.game.map.getBorder({ border: "".concat(splitFrom[1], "_").concat(splitFrom[2]) }).getRoadZone()
-                            : this.game.map.getRegion({ region: splitFrom[1] }).getArmyZone();
-                        return [4, Promise.all([
-                                toZone.moveToZone({
-                                    elements: {
-                                        id: blockId,
-                                        weight: weight,
-                                    },
-                                    classesToRemove: [PP_ARMY, PP_ROAD],
-                                    classesToAdd: [PP_COALITION_BLOCK],
-                                }),
-                                fromZone.remove({ input: blockId }),
-                            ])];
+                        return [4, toZone.addCard({
+                                id: blockId,
+                                state: weight,
+                                used: 0,
+                                location: "blocks_".concat(coalition),
+                                type: 'supply',
+                                coalition: coalition,
+                            })];
                     case 1:
                         _b.sent();
                         this.game.objectManager.supply.checkDominantCoalition();
@@ -8588,37 +10069,20 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_returnCylinder = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var getCylinderFromZone, _a, from, cylinderId, weight, playerId, player, fromZone, value;
-            var _this = this;
+            var _a, from, cylinderId, weight, playerId, player, value;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        getCylinderFromZone = function (from) {
-                            if (from.startsWith('card_')) {
-                                return _this.game.spies[from];
-                            }
-                            else if (from.startsWith('gift_')) {
-                                var splitFrom = from.split('_');
-                                return _this.getPlayer({ playerId: Number(splitFrom[2]) }).getGiftZone({ value: Number(splitFrom[1]) });
-                            }
-                            else {
-                                return _this.game.map.getRegion({ region: from }).getTribeZone();
-                            }
-                        };
                         this.game.clearPossible();
                         _a = notif.args, from = _a.from, cylinderId = _a.cylinderId, weight = _a.weight;
                         playerId = Number(cylinderId.split('_')[1]);
                         player = this.getPlayer({ playerId: playerId });
-                        fromZone = getCylinderFromZone(from);
-                        return [4, Promise.all([
-                                player.getCylinderZone().moveToZone({
-                                    elements: {
-                                        id: cylinderId,
-                                        weight: weight,
-                                    },
-                                }),
-                                fromZone.remove({ input: cylinderId }),
-                            ])];
+                        return [4, player.getCylinderZone().addCard(this.game.getCylinder({
+                                id: cylinderId,
+                                state: weight,
+                                used: 0,
+                                location: "cylinders_".concat(player.getPlayerId()),
+                            }))];
                     case 1:
                         _b.sent();
                         player.incCounter({ counter: 'cylinders', value: -1 });
@@ -8637,18 +10101,20 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_shiftMarket = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var move, fromRow, fromCol, toRow, toCol;
+            var move, animationDurationBefore, fromRow, fromCol, toRow, toCol;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         this.game.clearPossible();
                         move = notif.args.move;
+                        animationDurationBefore = this.game.animationManager.getSettings().duration;
                         fromRow = Number(move.from.split('_')[1]);
                         fromCol = Number(move.from.split('_')[2]);
                         toRow = Number(move.to.split('_')[1]);
                         toCol = Number(move.to.split('_')[2]);
+                        this.game.animationManager.getSettings().duration = animationDurationBefore / 2;
                         return [4, this.game.market.moveCard({
-                                cardId: move.cardId,
+                                card: this.game.getCardInfo(move.cardId),
                                 from: {
                                     row: fromRow,
                                     column: fromCol,
@@ -8665,7 +10131,9 @@ var NotificationManager = (function () {
                     case 2:
                         _a.sent();
                         _a.label = 3;
-                    case 3: return [2];
+                    case 3:
+                        this.game.animationManager.getSettings().duration = animationDurationBefore;
+                        return [2];
                 }
             });
         });
@@ -8688,14 +10156,24 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_takePrize = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, cardId, playerId;
+            var _a, cardId, playerId, loyaltyDial, zIndexBefore;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         this.game.clearPossible();
                         _a = notif.args, cardId = _a.cardId, playerId = _a.playerId;
+                        loyaltyDial = document.getElementById("pp_loyalty_dial_container_".concat(playerId));
+                        zIndexBefore = (loyaltyDial === null || loyaltyDial === void 0 ? void 0 : loyaltyDial.style.zIndex) || null;
+                        if (loyaltyDial) {
+                            loyaltyDial.style.zIndex = "".concat(11);
+                        }
                         return [4, this.game.playerManager.getPlayer({ playerId: playerId }).takePrize({ cardId: cardId })];
-                    case 1: return [2, _b.sent()];
+                    case 1:
+                        _b.sent();
+                        if (loyaltyDial) {
+                            loyaltyDial.style.zIndex = zIndexBefore;
+                        }
+                        return [2];
                 }
             });
         });
@@ -8729,13 +10207,13 @@ var NotificationManager = (function () {
                 switch (_b.label) {
                     case 0:
                         _a = notif.args, selectedRupees = _a.selectedRupees, playerId = _a.playerId, amount = _a.amount;
-                        return [4, Promise.all(selectedRupees.map(function (rupee) { return __awaiter(_this, void 0, void 0, function () {
+                        return [4, Promise.all(selectedRupees.map(function (rupee, index) { return __awaiter(_this, void 0, void 0, function () {
                                 var row, column, rupeeId;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
                                             row = rupee.row, column = rupee.column, rupeeId = rupee.rupeeId;
-                                            return [4, this.game.market.removeSingleRupeeFromCard({ row: row, column: column, rupeeId: rupeeId, to: "rupees_".concat(playerId) })];
+                                            return [4, this.game.market.removeSingleRupeeFromCard({ row: row, column: column, rupeeId: rupeeId, to: "rupees_".concat(playerId), index: index })];
                                         case 1:
                                             _a.sent();
                                             return [2];
@@ -8835,25 +10313,22 @@ var NotificationManager = (function () {
                         _b.sent();
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
                         cardId = card.id;
-                        if (!newLocation.startsWith('events_')) return [3, 4];
-                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId, from: this.game.market.getMarketCardZone({ row: row, column: col }) })];
-                    case 3:
-                        _b.sent();
+                        if (!newLocation.startsWith('events_')) return [3, 3];
                         if (cardId === 'card_109') {
                             this.game.objectManager.supply.checkDominantCoalition();
                         }
                         return [3, 9];
+                    case 3:
+                        if (!(newLocation === DISCARD)) return [3, 5];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 4:
-                        if (!(newLocation === DISCARD)) return [3, 6];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone({
-                                cardId: cardId,
-                                zone: this.game.market.getMarketCardZone({ row: row, column: col }),
-                            })];
-                    case 5:
                         _b.sent();
                         return [3, 9];
-                    case 6:
+                    case 5:
                         if (!(newLocation === TEMP_DISCARD)) return [3, 7];
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(card))];
+                    case 6:
+                        _b.sent();
                         return [3, 9];
                     case 7:
                         player = this.getPlayer({ playerId: playerId });
@@ -8923,63 +10398,52 @@ var NotificationManager = (function () {
         var playerId = _a.playerId;
         return this.game.playerManager.getPlayer({ playerId: playerId });
     };
-    NotificationManager.prototype.getClassChanges = function (_a) {
-        var from = _a.from, to = _a.to;
-        var classesToAdd = [];
-        var classesToRemove = [];
-        if (to.startsWith('armies')) {
-            classesToAdd.push(PP_ARMY);
-        }
-        else if (to.startsWith('roads')) {
-            classesToAdd.push(PP_ROAD);
-        }
-        else if (to.startsWith('blocks')) {
-            classesToAdd.push(PP_COALITION_BLOCK);
-        }
-        if (from.startsWith('blocks')) {
-            classesToRemove.push(PP_COALITION_BLOCK);
-        }
-        else if (from.startsWith('armies') && !to.startsWith('armies')) {
-            classesToRemove.push(PP_ARMY);
-        }
-        else if (from.startsWith('roads')) {
-            classesToRemove.push(PP_ROAD);
-        }
-        return { classesToAdd: classesToAdd, classesToRemove: classesToRemove };
-    };
     NotificationManager.prototype.performTokenMove = function (_a) {
         var move = _a.move;
         return __awaiter(this, void 0, void 0, function () {
-            var tokenId, from, to, weight, fromZone, toZone, _b, classesToRemove, classesToAdd;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var tokenId, from, to, weight, toZone, token, zoneType;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         tokenId = move.tokenId, from = move.from, to = move.to, weight = move.weight;
                         if (from === to) {
                             return [2];
                         }
-                        fromZone = this.game.getZoneForLocation({ location: from });
                         toZone = this.game.getZoneForLocation({ location: to });
                         if (this.game.framework().isCurrentPlayerActive() &&
-                            toZone.getItems().includes(tokenId)) {
+                            toZone.getCards().some(function (item) { return item.id === tokenId; })) {
                             debug('no need to execute move');
                             return [2];
                         }
-                        _b = this.getClassChanges({ from: from, to: to }), classesToRemove = _b.classesToRemove, classesToAdd = _b.classesToAdd;
-                        return [4, Promise.all([
-                                toZone.moveToZone({
-                                    elements: {
-                                        id: tokenId,
-                                        weight: weight,
-                                    },
-                                    classesToAdd: classesToAdd,
-                                    classesToRemove: classesToRemove,
-                                    zIndex: 10,
-                                }),
-                                fromZone.remove({ input: tokenId }),
-                            ])];
+                        token = {
+                            id: tokenId,
+                            state: weight,
+                            used: 0,
+                            location: to,
+                        };
+                        zoneType = to.split('_')[0];
+                        switch (zoneType) {
+                            case 'armies':
+                                token['type'] = 'army';
+                                token['coalition'] = getCoalitionForBlock(tokenId);
+                                break;
+                            case 'roads':
+                                token['type'] = 'road';
+                                token['coalition'] = getCoalitionForBlock(tokenId);
+                                break;
+                            case 'blocks':
+                                token['type'] = 'supply';
+                                token['coalition'] = getCoalitionForBlock(tokenId);
+                                break;
+                            case 'gift':
+                            case 'tribes':
+                            case 'spies':
+                                token = this.game.getCylinder(token);
+                                break;
+                        }
+                        return [4, toZone.addCard(token)];
                     case 1:
-                        _c.sent();
+                        _b.sent();
                         return [2];
                 }
             });
@@ -9000,6 +10464,7 @@ var PaxPamir = (function () {
         var _a;
         var _this = this;
         dojo.place("<div id='customActions' style='display:inline-block'></div>", $('generalactions'), 'after');
+        this.setAlwaysFixTopActions();
         this.gamedatas = gamedatas;
         this.gameOptions = gamedatas.gameOptions;
         debug('gamedatas', gamedatas);
@@ -9047,8 +10512,20 @@ var PaxPamir = (function () {
             _a.startOfTurnAbilities = new StartOfTurnAbilitiesState(this),
             _a.wakhanPause = new WakhanPauseState(this),
             _a);
-        this.animationManager = new AnimationManager(this, { duration: 500 });
+        this.infoPanel = new InfoPanel(this);
+        this.settings = new Settings(this);
+        this.animationManager = new AnimationManager(this, {
+            duration: this.settings.get({ id: PREF_SHOW_ANIMATIONS }) === PREF_DISABLED
+                ? 0
+                : 2100 - this.settings.get({ id: PREF_ANIMATION_SPEED }),
+        });
         this.tooltipManager = new PPTooltipManager(this);
+        this.cylinderManager = new CylinderManager(this);
+        this.favoredSuitMarkerManager = new FavoredSuitMarkerManager(this);
+        this.cardManager = new PPCardManager(this);
+        this.coalitionBlockManager = new CoalitionBlockManager(this);
+        this.rulerTokenManager = new RulerTokenManager(this);
+        this.rupeeManager = new RupeeManager(this);
         this.activeEvents = new PPActiveEvents(this);
         this.playerManager = new PlayerManager(this);
         this.playerManager.setupAdjacentPlayerColors();
@@ -9150,11 +10627,9 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.clearInterface = function () {
         var _this = this;
-        console.log('clear interface');
         Object.keys(this.spies).forEach(function (key) {
-            var _a;
-            if (((_a = _this.spies[key]) === null || _a === void 0 ? void 0 : _a.getContainerId()) && $(_this.spies[key].getContainerId())) {
-                dojo.empty(_this.spies[key].getContainerId());
+            if (_this.spies[key]) {
+                _this.spies[key].removeAll();
             }
             _this.spies[key] = undefined;
         });
@@ -9173,8 +10648,13 @@ var PaxPamir = (function () {
         dojo.query('.pp_selected').removeClass('pp_selected');
         this.map.clearSelectable();
     };
-    PaxPamir.prototype.getCardInfo = function (_a) {
-        var cardId = _a.cardId;
+    PaxPamir.prototype.getCard = function (token) {
+        return __assign(__assign({}, token), this.getCardInfo(token.id));
+    };
+    PaxPamir.prototype.getCylinder = function (token) {
+        return __assign(__assign({}, token), { color: this.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color });
+    };
+    PaxPamir.prototype.getCardInfo = function (cardId) {
         return this.gamedatas.staticData.cards[cardId];
     };
     PaxPamir.prototype.getWakhanCardInfo = function (_a) {
@@ -9214,9 +10694,9 @@ var PaxPamir = (function () {
         var callback = _a.callback, loyalty = _a.loyalty, region = _a.region, suit = _a.suit;
         debug('setCourtCardsSelectable', loyalty, region, suit);
         var playerId = this.getPlayerId();
-        dojo.query(".pp_card_in_court.pp_player_".concat(playerId)).forEach(function (node, index) {
+        dojo.query(".pp_court.pp_court_player_".concat(playerId, " .pp_card")).forEach(function (node, index) {
             var cardId = 'card_' + node.id.split('_')[1];
-            var card = _this.getCardInfo({ cardId: cardId });
+            var card = _this.getCardInfo(cardId);
             var loyaltyFilter = !loyalty || card.loyalty === loyalty;
             var regionFilter = !region || card.region === region;
             var suitFilter = !suit || card.suit === suit;
@@ -9230,7 +10710,7 @@ var PaxPamir = (function () {
         var _this = this;
         var callback = _a.callback;
         debug('setHandCardsSelectable');
-        dojo.query('.pp_card_in_hand').forEach(function (node, index) {
+        document.querySelectorAll('.pp_player_hand_cards .pp_card').forEach(function (node, index) {
             var cardId = node.id;
             debug('cardId', cardId);
             dojo.addClass(node, 'pp_selectable');
@@ -9258,6 +10738,38 @@ var PaxPamir = (function () {
         var text = _a.text, args = _a.args;
         this.gamedatas.gamestate.description = dojo.string.substitute(_(text), args);
         this.framework().updatePageTitle();
+    };
+    PaxPamir.prototype.updateLayout = function () {
+        if (!this.settings) {
+            return;
+        }
+        $('play_area_container').setAttribute('data-two-columns', this.settings.get({ id: 'twoColumnsLayout' }));
+        var ROOT = document.documentElement;
+        var WIDTH = $('play_area_container').getBoundingClientRect()['width'] - 8;
+        var LEFT_COLUMN = 1000;
+        var RIGHT_COLUMN = 1000;
+        if (this.settings.get({ id: 'twoColumnsLayout' }) === PREF_ENABLED) {
+            WIDTH = WIDTH - 8;
+            var size = Number(this.settings.get({ id: 'columnSizes' }));
+            var proportions = [size, 100 - size];
+            var LEFT_SIZE = (proportions[0] * WIDTH) / 100;
+            var leftColumnScale = LEFT_SIZE / LEFT_COLUMN;
+            ROOT.style.setProperty('--leftColumnScale', "".concat(leftColumnScale));
+            ROOT.style.setProperty('--mapSizeMultiplier', '1');
+            var RIGHT_SIZE = (proportions[1] * WIDTH) / 100;
+            var rightColumnScale = RIGHT_SIZE / RIGHT_COLUMN;
+            ROOT.style.setProperty('--rightColumnScale', "".concat(rightColumnScale));
+            $('play_area_container').style.gridTemplateColumns = "".concat(LEFT_SIZE, "px ").concat(RIGHT_SIZE, "px");
+        }
+        else {
+            var LEFT_SIZE = WIDTH;
+            var leftColumnScale = LEFT_SIZE / LEFT_COLUMN;
+            ROOT.style.setProperty('--leftColumnScale', "".concat(leftColumnScale));
+            ROOT.style.setProperty('--mapSizeMultiplier', "".concat(Number(this.settings.get({ id: PREF_SINGLE_COLUMN_MAP_SIZE })) / 100));
+            var RIGHT_SIZE = WIDTH;
+            var rightColumnScale = RIGHT_SIZE / RIGHT_COLUMN;
+            ROOT.style.setProperty('--rightColumnScale', "".concat(rightColumnScale));
+        }
     };
     PaxPamir.prototype.format_string_recursive = function (log, args) {
         var _this = this;
@@ -9295,6 +10807,9 @@ var PaxPamir = (function () {
             this.cancelLogs([notifId]);
         }
     };
+    PaxPamir.prototype.onScreenWidthChange = function () {
+        this.updateLayout();
+    };
     PaxPamir.prototype.cancelLogs = function (notifIds) {
         var _this = this;
         notifIds.forEach(function (uid) {
@@ -9327,10 +10842,47 @@ var PaxPamir = (function () {
         this.cancelLogs(this.gamedatas.canceledNotifIds);
     };
     PaxPamir.prototype.updatePlayerOrdering = function () {
-        console.log('updatePlayerOrdering', this.playerOrder);
         this.playerOrder.forEach(function (playerId, index) {
             dojo.place('overall_player_board_' + playerId, 'player_boards', index);
         });
+        var container = document.getElementById('player_boards');
+        var infoPanel = document.getElementById('info_panel');
+        if (!container) {
+            return;
+        }
+        container.insertAdjacentElement('afterbegin', infoPanel);
+    };
+    PaxPamir.prototype.setAlwaysFixTopActions = function (alwaysFixed, maximum) {
+        if (alwaysFixed === void 0) { alwaysFixed = true; }
+        if (maximum === void 0) { maximum = 30; }
+        this.alwaysFixTopActions = alwaysFixed;
+        this.alwaysFixTopActionsMaximum = maximum;
+        this.adaptStatusBar();
+    };
+    PaxPamir.prototype.adaptStatusBar = function () {
+        this.inherited(arguments);
+        if (this.alwaysFixTopActions) {
+            var afterTitleElem = document.getElementById('after-page-title');
+            var titleElem = document.getElementById('page-title');
+            var zoom = getComputedStyle(titleElem).zoom;
+            if (!zoom) {
+                zoom = 1;
+            }
+            var titleRect = afterTitleElem.getBoundingClientRect();
+            if (titleRect.top < 0 &&
+                titleElem.offsetHeight <
+                    (window.innerHeight * this.alwaysFixTopActionsMaximum) / 100) {
+                var afterTitleRect = afterTitleElem.getBoundingClientRect();
+                titleElem.classList.add('fixed-page-title');
+                titleElem.style.width = (afterTitleRect.width - 10) / zoom + 'px';
+                afterTitleElem.style.height = titleRect.height + 'px';
+            }
+            else {
+                titleElem.classList.remove('fixed-page-title');
+                titleElem.style.width = 'auto';
+                afterTitleElem.style.height = '0px';
+            }
+        }
     };
     PaxPamir.prototype.getZoneForLocation = function (_a) {
         var location = _a.location;
@@ -9361,26 +10913,8 @@ var PaxPamir = (function () {
             case 'tribes':
                 return this.map.getRegion({ region: splitLocation[1] }).getTribeZone();
             default:
-                console.log('no zone determined');
+                debug('no zone determined');
                 break;
-        }
-    };
-    PaxPamir.prototype.createSpyZone = function (_a) {
-        var cardId = _a.cardId;
-        var spyZoneId = 'spies_' + cardId;
-        dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), cardId);
-        this.setupCardSpyZone({ nodeId: spyZoneId, cardId: cardId });
-    };
-    PaxPamir.prototype.setupCardSpyZone = function (_a) {
-        var nodeId = _a.nodeId, cardId = _a.cardId;
-        if (!this.spies[cardId]) {
-            this.spies[cardId] = new PaxPamirZone({
-                animationManager: this.animationManager,
-                containerId: nodeId,
-                itemHeight: CYLINDER_HEIGHT,
-                itemWidth: CYLINDER_WIDTH,
-                itemGap: 4,
-            });
         }
     };
     PaxPamir.prototype.updateCard = function (_a) {
@@ -9393,7 +10927,6 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.takeAction = function (_a) {
         var action = _a.action, _b = _a.data, data = _b === void 0 ? {} : _b;
-        console.log("takeAction ".concat(action), data);
         if (!this.framework().checkAction(action)) {
             this.actionError(action);
             return;
@@ -9407,13 +10940,16 @@ var PaxPamir = (function () {
 define([
     'dojo',
     'dojo/_base/declare',
+    g_gamethemeurl + 'modules/js/vendor/nouislider.min.js',
     'dojo/fx',
     'dojox/fx/ext-dojo/complex',
     'ebg/core/gamegui',
     'ebg/counter',
     'ebg/stock',
     'ebg/zone',
-    g_gamethemeurl + "modules/js/bga-animations.js",
-], function (dojo, declare) {
+], function (dojo, declare, noUiSliderDefined) {
+    if (noUiSliderDefined) {
+        noUiSlider = noUiSliderDefined;
+    }
     return declare('bgagame.paxpamir', ebg.core.gamegui, new PaxPamir());
 });

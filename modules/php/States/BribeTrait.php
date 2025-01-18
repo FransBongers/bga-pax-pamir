@@ -192,7 +192,6 @@ trait BribeTrait
       
     }
 
-    // Notifications::log('currentAmount',$bribeState['bribee']['currentAmount']);
     $isBribeAccepted = $bribeeCurrentAmount === $briberCurrentAmount;
 
     Globals::setNegotiatedBribe($bribeState);
@@ -255,7 +254,6 @@ trait BribeTrait
     $offeredBribeAmount = $offeredBribeAmount !== null ? intval($offeredBribeAmount) : null;
     $playerId = $player->getId();
     $determineBribeResult = $this->determineBribe($card, $player, $offeredBribeAmount, $action);
-    Notifications::log('determineBribe', $determineBribeResult);
 
     // Bribe is required and player decided to pay it 
     if ($determineBribeResult !== null && $offeredBribeAmount === $determineBribeResult['amount']) {
@@ -270,7 +268,6 @@ trait BribeTrait
       // Note: theoretically a false verifyResult should not be possible
       // but just in case act like it was declined bribe and turn player back to playerActions
       if (!$verifyResult) {
-        Notifications::log('verifyResult false - Check why this is happening', $verifyResult);
         Globals::setNegotiatedBribe([]);
         return false;
       }

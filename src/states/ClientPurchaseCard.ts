@@ -29,9 +29,12 @@ class ClientPurchaseCardState implements State {
 
   private updateInterfaceInitialStep({ cardId, cost }: ClientPurchaseCardStateArgs) {
     this.game.clearPossible();
-    const cardInfo = this.game.getCardInfo({ cardId });
+    const cardInfo = this.game.getCardInfo(cardId);
     const name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
-    dojo.query(`.pp_${cardId}`).addClass('pp_selected');
+
+    const node = document.getElementById(`${cardId}`);
+
+    node.classList.add(PP_SELECTED)
     this.game.clientUpdatePageTitle({
       text: _("Purchase ${name} for ${cost} ${tkn_rupee}?"),
       args: {

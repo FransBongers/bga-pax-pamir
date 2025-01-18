@@ -121,7 +121,6 @@ class Wakhan
       return Utils::getImpactIconCount($card, [TRIBE, SPY]);
     }, $cards);
     $mostCylinders = max($numberOfCylindersPlaced);
-    Notifications::log('mostCylinders', $mostCylinders);
 
     // Return all cards that place most cylinde4rs
     $cardsThatPlaceMostCylinders = Utils::filter($cards, function ($card) use ($mostCylinders) {

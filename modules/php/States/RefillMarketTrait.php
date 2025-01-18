@@ -87,7 +87,6 @@ trait RefillMarketTrait
             Cards::move($card['id'], $toLocaction);
             if (explode('_',$toLocaction)[2] === '0' && $card['type'] === EVENT_CARD && $card['purchased']['effect'] === ECE_PUBLIC_WITHDRAWAL) {
               $rupeesInLocation = Tokens::getInLocation([$toLocaction, 'rupees']);
-              Notifications::log('public withdrawal shifted into first position. Check if there are rupees there',$rupeesInLocation);
               Tokens::moveAllInLocation([$toLocaction, 'rupees'], RUPEE_SUPPLY);
             }
             Tokens::moveAllInLocation([$fromLocation, 'rupees'], [$toLocaction, 'rupees']);

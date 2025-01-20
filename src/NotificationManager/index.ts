@@ -202,7 +202,7 @@ class NotificationManager {
     return await Promise.resolve(); // check if necessary
   }
 
-  async notif_discardFromMarket(notif: Notif<NotifDiscardFromMarketArgs>): Promise<unknown> {
+  async notif_discardFromMarket(notif: Notif<NotifDiscardFromMarketArgs>): Promise<void> {
     this.game.clearPossible();
     const { from, cardId, to } = notif.args;
     const splitFrom = from.split('_');
@@ -210,9 +210,9 @@ class NotificationManager {
     const column = Number(splitFrom[2]);
 
     if (to === DISCARD || to === TEMP_DISCARD) {
-      return await this.game.market.discardCard({ cardId, row, column, to });
+      await this.game.market.discardCard({ cardId, row, column, to });
     } else if (to === ACTIVE_EVENTS) {
-      return await this.game.activeEvents.addCardFromMarket({ cardId, row, column });
+      await this.game.activeEvents.addCardFromMarket({ cardId, row, column });
     }
   }
 
@@ -283,26 +283,24 @@ class NotificationManager {
 
   async notif_dominanceCheckReturnCoalitionBlocks(notif: Notif<NotifDominanceCheckReturnBlocksArgs>) {
     const { blocks, fromLocations } = notif.args;
-    // await Promise.all(
-    // COALITIONS.map((coalition: string) =>
-    //   this.game.objectManager.supply
-    //     .getCoalitionBlocksZone({ coalition })
-    //     .moveToZone({ elements: blocks[coalition], classesToAdd: [PP_COALITION_BLOCK], classesToRemove: [PP_ARMY, PP_ROAD] })
-    // )
-    // );
+
     await Promise.all(
-      fromLocations.map(async (location: string) => {
-        const splitLocation = location.split('_');
-        if (location.startsWith('armies_')) {
-          await this.game.map.getRegion({ region: splitLocation[1] }).getArmyZone().removeAll();
-        } else {
-          await this.game.map
-            .getBorder({ border: `${splitLocation[1]}_${splitLocation[2]}` })
-            .getRoadZone()
-            .removeAll();
-        }
-      })
+      COALITIONS.map((coalition: string) =>
+        this.game.objectManager.supply
+          .getCoalitionBlocksZone({ coalition })
+          .addCards(
+            blocks[coalition].map(({ id, weight }: TokenZoneInfo) => ({
+              id,
+              state: weight,
+              used: 0,
+              location: `supply_${coalition}`,
+              coalition,
+              type: 'supply',
+            }))
+          )
+      )
     );
+
     this.game.objectManager.supply.checkDominantCoalition();
   }
 

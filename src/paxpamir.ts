@@ -490,7 +490,6 @@ class PaxPamir implements PaxPamirGame {
     debug('setHandCardsSelectable');
     document.querySelectorAll('.pp_player_hand_cards .pp_card').forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
-      debug('cardId', cardId);
       dojo.addClass(node, 'pp_selectable');
       this._connections.push(dojo.connect(node, 'onclick', this, () => callback({ cardId })));
     });

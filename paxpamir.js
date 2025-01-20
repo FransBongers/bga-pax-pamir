@@ -9539,11 +9539,15 @@ var NotificationManager = (function () {
                         column = Number(splitFrom[2]);
                         if (!(to === DISCARD || to === TEMP_DISCARD)) return [3, 2];
                         return [4, this.game.market.discardCard({ cardId: cardId, row: row, column: column, to: to })];
-                    case 1: return [2, _b.sent()];
+                    case 1:
+                        _b.sent();
+                        return [3, 4];
                     case 2:
                         if (!(to === ACTIVE_EVENTS)) return [3, 4];
                         return [4, this.game.activeEvents.addCardFromMarket({ cardId: cardId, row: row, column: column })];
-                    case 3: return [2, _b.sent()];
+                    case 3:
+                        _b.sent();
+                        _b.label = 4;
                     case 4: return [2];
                 }
             });
@@ -9646,28 +9650,21 @@ var NotificationManager = (function () {
                 switch (_b.label) {
                     case 0:
                         _a = notif.args, blocks = _a.blocks, fromLocations = _a.fromLocations;
-                        return [4, Promise.all(fromLocations.map(function (location) { return __awaiter(_this, void 0, void 0, function () {
-                                var splitLocation;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            splitLocation = location.split('_');
-                                            if (!location.startsWith('armies_')) return [3, 2];
-                                            return [4, this.game.map.getRegion({ region: splitLocation[1] }).getArmyZone().removeAll()];
-                                        case 1:
-                                            _a.sent();
-                                            return [3, 4];
-                                        case 2: return [4, this.game.map
-                                                .getBorder({ border: "".concat(splitLocation[1], "_").concat(splitLocation[2]) })
-                                                .getRoadZone()
-                                                .removeAll()];
-                                        case 3:
-                                            _a.sent();
-                                            _a.label = 4;
-                                        case 4: return [2];
-                                    }
-                                });
-                            }); }))];
+                        return [4, Promise.all(COALITIONS.map(function (coalition) {
+                                return _this.game.objectManager.supply
+                                    .getCoalitionBlocksZone({ coalition: coalition })
+                                    .addCards(blocks[coalition].map(function (_a) {
+                                    var id = _a.id, weight = _a.weight;
+                                    return ({
+                                        id: id,
+                                        state: weight,
+                                        used: 0,
+                                        location: "supply_".concat(coalition),
+                                        coalition: coalition,
+                                        type: 'supply',
+                                    });
+                                }));
+                            }))];
                     case 1:
                         _b.sent();
                         this.game.objectManager.supply.checkDominantCoalition();
@@ -10712,7 +10709,6 @@ var PaxPamir = (function () {
         debug('setHandCardsSelectable');
         document.querySelectorAll('.pp_player_hand_cards .pp_card').forEach(function (node, index) {
             var cardId = node.id;
-            debug('cardId', cardId);
             dojo.addClass(node, 'pp_selectable');
             _this._connections.push(dojo.connect(node, 'onclick', _this, function () { return callback({ cardId: cardId }); }));
         });

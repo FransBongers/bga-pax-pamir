@@ -39,7 +39,7 @@ class NotificationManager {
       ['changeLoyalty', undefined],
       ['changeFavoredSuit', undefined],
       ['changeRuler', undefined],
-      ['clearTurn', 1],
+      ['clearTurn', undefined],
       ['declinePrize', undefined],
       ['discard', undefined],
       ['discardFromMarket', undefined],
@@ -47,7 +47,7 @@ class NotificationManager {
       ['dominanceCheckScores', undefined],
       ['dominanceCheckReturnCoalitionBlocks', undefined],
       ['drawMarketCard', undefined],
-      ['exchangeHand', 1],
+      ['exchangeHand', undefined],
       ['moveCard', undefined],
       ['moveToken', undefined],
       ['payBribe', undefined],
@@ -58,24 +58,24 @@ class NotificationManager {
       ['playCard', undefined],
       ['publicWithdrawal', undefined],
       ['purchaseCard', undefined],
-      ['replaceHand', 1],
+      ['replaceHand', undefined],
       ['returnAllSpies', undefined], // TODO: check if returnSpies can be added to returnToSupply?
       ['returnAllToSupply', undefined],
       ['returnCoalitionBlock', undefined],
       ['returnCylinder', undefined],
-      ['returnRupeesToSupply', 1],
+      ['returnRupeesToSupply', undefined],
       ['shiftMarket', undefined],
-      ['smallRefreshHand', 1],
-      ['smallRefreshInterface', 1],
+      ['smallRefreshHand', undefined],
+      ['smallRefreshInterface', undefined],
       ['takePrize', undefined],
-      ['takeRupeesFromSupply', 1],
+      ['takeRupeesFromSupply', undefined],
       ['taxMarket', undefined],
       ['taxPlayer', undefined],
-      ['updateInfluence', 1],
+      ['updateInfluence', undefined],
       ['wakhanDrawCard', undefined],
       ['wakhanRadicalize', undefined],
       ['wakhanReshuffleDeck', undefined],
-      ['wakhanUpdatePragmaticLoyalty', 1],
+      ['wakhanUpdatePragmaticLoyalty', undefined],
     ];
 
     // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
@@ -173,7 +173,7 @@ class NotificationManager {
     });
   }
 
-  notif_clearTurn(notif) {
+  async notif_clearTurn(notif) {
     const { args } = notif;
     const notifIds = args.notifIds;
     this.game.cancelLogs(notifIds);
@@ -229,7 +229,7 @@ class NotificationManager {
     }
   }
 
-  notif_exchangeHand(notif: Notif<NotifExchangeHandArgs>) {
+  async notif_exchangeHand(notif: Notif<NotifExchangeHandArgs>) {
     const { newHandCounts, newHandCards } = notif.args;
     Object.entries(newHandCounts).forEach(([key, value]) => {
       const playerId = Number(key);
@@ -286,18 +286,16 @@ class NotificationManager {
 
     await Promise.all(
       COALITIONS.map((coalition: string) =>
-        this.game.objectManager.supply
-          .getCoalitionBlocksZone({ coalition })
-          .addCards(
-            blocks[coalition].map(({ id, weight }: TokenZoneInfo) => ({
-              id,
-              state: weight,
-              used: 0,
-              location: `supply_${coalition}`,
-              coalition,
-              type: 'supply',
-            }))
-          )
+        this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }).addCards(
+          blocks[coalition].map(({ id, weight }: TokenZoneInfo) => ({
+            id,
+            state: weight,
+            used: 0,
+            location: `supply_${coalition}`,
+            coalition,
+            type: 'supply',
+          }))
+        )
       )
     );
 
@@ -508,7 +506,7 @@ class NotificationManager {
     }
   }
 
-  notif_replaceHand(notif: Notif<NotifReplaceHandArgs>) {
+  async notif_replaceHand(notif: Notif<NotifReplaceHandArgs>) {
     const { hand } = notif.args;
     const player = this.game.getCurrentPlayer();
     player.clearHand();
@@ -589,7 +587,7 @@ class NotificationManager {
     }
   }
 
-  notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {
+  async notif_returnRupeesToSupply(notif: Notif<NotifReturnRupeesToSupplyArgs>) {
     const { playerId, amount } = notif.args;
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -amount });
   }
@@ -625,14 +623,14 @@ class NotificationManager {
     this.game.animationManager.getSettings().duration = animationDurationBefore;
   }
 
-  notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
+  async notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
     const { hand, playerId } = notif.args;
     const player = this.getPlayer({ playerId });
     player.clearHand();
     player.setupHand({ hand });
   }
 
-  notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {
+  async notif_smallRefreshInterface(notif: Notif<NotifSmallRefreshInterfaceArgs>) {
     const updatedGamedatas = {
       ...this.game.gamedatas,
       ...notif.args,
@@ -661,7 +659,7 @@ class NotificationManager {
     }
   }
 
-  notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
+  async notif_takeRupeesFromSupply(notif: Notif<NotifTakeRupeesFromSupplyArgs>) {
     const { playerId, amount } = notif.args;
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
@@ -684,7 +682,7 @@ class NotificationManager {
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
 
-  notif_updateInfluence({ args }: Notif<NotifUpdateInfluenceArgs>) {
+  async notif_updateInfluence({ args }: Notif<NotifUpdateInfluenceArgs>) {
     args.updates.forEach((update) => {
       if (update.type === 'playerInfluence') {
         const { playerId, value } = update;
@@ -765,7 +763,7 @@ class NotificationManager {
     // Move card from markt
     const cardId = card.id;
     if (newLocation.startsWith('events_')) {
-      // await this.getPlayer({ playerId }).addCardToEvents({ cardId, from: this.game.market.getMarketCardZone({ row, column: col }) });
+      await this.getPlayer({ playerId }).addCardToEvents({ cardId });
       if (cardId === 'card_109') {
         this.game.objectManager.supply.checkDominantCoalition();
       }
@@ -808,7 +806,7 @@ class NotificationManager {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  notif_wakhanUpdatePragmaticLoyalty({ args }: Notif<NotifWakhanUpdatePragmaticLoyalty>) {
+  async notif_wakhanUpdatePragmaticLoyalty({ args }: Notif<NotifWakhanUpdatePragmaticLoyalty>) {
     const { pragmaticLoyalty } = args;
     if (pragmaticLoyalty !== null) {
       (this.getPlayer({ playerId: WAKHAN_PLAYER_ID }) as PPWakhanPlayer).updateLoyaltyIcon({ pragmaticLoyalty });

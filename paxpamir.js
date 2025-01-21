@@ -9215,10 +9215,14 @@ var StartOfTurnAbilitiesState = (function () {
         this.game = game;
     }
     StartOfTurnAbilitiesState.prototype.onEnteringState = function (args) {
+        var _this = this;
         debug('Entering StartOfTurnAbilitiesState', args);
         var specialAbility = args.specialAbility;
         this.specialAbility = specialAbility;
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     StartOfTurnAbilitiesState.prototype.onLeavingState = function () {
         debug('Leaving StartOfTurnAbilitiesState');
@@ -9324,7 +9328,7 @@ var NotificationManager = (function () {
             ['changeLoyalty', undefined],
             ['changeFavoredSuit', undefined],
             ['changeRuler', undefined],
-            ['clearTurn', 1],
+            ['clearTurn', undefined],
             ['declinePrize', undefined],
             ['discard', undefined],
             ['discardFromMarket', undefined],
@@ -9332,7 +9336,7 @@ var NotificationManager = (function () {
             ['dominanceCheckScores', undefined],
             ['dominanceCheckReturnCoalitionBlocks', undefined],
             ['drawMarketCard', undefined],
-            ['exchangeHand', 1],
+            ['exchangeHand', undefined],
             ['moveCard', undefined],
             ['moveToken', undefined],
             ['payBribe', undefined],
@@ -9343,24 +9347,24 @@ var NotificationManager = (function () {
             ['playCard', undefined],
             ['publicWithdrawal', undefined],
             ['purchaseCard', undefined],
-            ['replaceHand', 1],
+            ['replaceHand', undefined],
             ['returnAllSpies', undefined],
             ['returnAllToSupply', undefined],
             ['returnCoalitionBlock', undefined],
             ['returnCylinder', undefined],
-            ['returnRupeesToSupply', 1],
+            ['returnRupeesToSupply', undefined],
             ['shiftMarket', undefined],
-            ['smallRefreshHand', 1],
-            ['smallRefreshInterface', 1],
+            ['smallRefreshHand', undefined],
+            ['smallRefreshInterface', undefined],
             ['takePrize', undefined],
-            ['takeRupeesFromSupply', 1],
+            ['takeRupeesFromSupply', undefined],
             ['taxMarket', undefined],
             ['taxPlayer', undefined],
-            ['updateInfluence', 1],
+            ['updateInfluence', undefined],
             ['wakhanDrawCard', undefined],
             ['wakhanRadicalize', undefined],
             ['wakhanReshuffleDeck', undefined],
-            ['wakhanUpdatePragmaticLoyalty', 1],
+            ['wakhanUpdatePragmaticLoyalty', undefined],
         ];
         notifs.forEach(function (notif) {
             _this.subscriptions.push(dojo.subscribe(notif[0], _this, function (notifDetails) {
@@ -9468,9 +9472,15 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_clearTurn = function (notif) {
-        var args = notif.args;
-        var notifIds = args.notifIds;
-        this.game.cancelLogs(notifIds);
+        return __awaiter(this, void 0, void 0, function () {
+            var args, notifIds;
+            return __generator(this, function (_a) {
+                args = notif.args;
+                notifIds = args.notifIds;
+                this.game.cancelLogs(notifIds);
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_declinePrize = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -9581,29 +9591,35 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_exchangeHand = function (notif) {
-        var _this = this;
-        var _a = notif.args, newHandCounts = _a.newHandCounts, newHandCards = _a.newHandCards;
-        Object.entries(newHandCounts).forEach(function (_a) {
-            var key = _a[0], value = _a[1];
-            var playerId = Number(key);
-            if (playerId === _this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
-                return;
-            }
-            var player = _this.getPlayer({ playerId: Number(key) });
-            player.toValueCounter({ counter: 'cards', value: value });
-        });
-        if (newHandCards === null) {
-            return;
-        }
-        Object.entries(newHandCards).forEach(function (_a) {
-            var key = _a[0], value = _a[1];
-            var playerId = Number(key);
-            if (playerId === WAKHAN_PLAYER_ID) {
-                return;
-            }
-            var player = _this.getPlayer({ playerId: playerId });
-            player.resetHandCards();
-            value.forEach(function (card) { return player.updateHandCards({ cardId: card.id, action: 'ADD' }); });
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, newHandCounts, newHandCards;
+            var _this = this;
+            return __generator(this, function (_b) {
+                _a = notif.args, newHandCounts = _a.newHandCounts, newHandCards = _a.newHandCards;
+                Object.entries(newHandCounts).forEach(function (_a) {
+                    var key = _a[0], value = _a[1];
+                    var playerId = Number(key);
+                    if (playerId === _this.game.getPlayerId() || playerId === WAKHAN_PLAYER_ID) {
+                        return;
+                    }
+                    var player = _this.getPlayer({ playerId: Number(key) });
+                    player.toValueCounter({ counter: 'cards', value: value });
+                });
+                if (newHandCards === null) {
+                    return [2];
+                }
+                Object.entries(newHandCards).forEach(function (_a) {
+                    var key = _a[0], value = _a[1];
+                    var playerId = Number(key);
+                    if (playerId === WAKHAN_PLAYER_ID) {
+                        return;
+                    }
+                    var player = _this.getPlayer({ playerId: playerId });
+                    player.resetHandCards();
+                    value.forEach(function (card) { return player.updateHandCards({ cardId: card.id, action: 'ADD' }); });
+                });
+                return [2];
+            });
         });
     };
     NotificationManager.prototype.notif_dominanceCheckScores = function (notif) {
@@ -9651,9 +9667,7 @@ var NotificationManager = (function () {
                     case 0:
                         _a = notif.args, blocks = _a.blocks, fromLocations = _a.fromLocations;
                         return [4, Promise.all(COALITIONS.map(function (coalition) {
-                                return _this.game.objectManager.supply
-                                    .getCoalitionBlocksZone({ coalition: coalition })
-                                    .addCards(blocks[coalition].map(function (_a) {
+                                return _this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: coalition }).addCards(blocks[coalition].map(function (_a) {
                                     var id = _a.id, weight = _a.weight;
                                     return ({
                                         id: id,
@@ -9973,11 +9987,17 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_replaceHand = function (notif) {
-        var hand = notif.args.hand;
-        var player = this.game.getCurrentPlayer();
-        player.clearHand();
-        player.setupHand({ hand: hand });
-        player.toValueCounter({ counter: 'cards', value: hand.length });
+        return __awaiter(this, void 0, void 0, function () {
+            var hand, player;
+            return __generator(this, function (_a) {
+                hand = notif.args.hand;
+                player = this.game.getCurrentPlayer();
+                player.clearHand();
+                player.setupHand({ hand: hand });
+                player.toValueCounter({ counter: 'cards', value: hand.length });
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_returnAllSpies = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -10093,8 +10113,14 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_returnRupeesToSupply = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, amount = _a.amount;
-        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -amount });
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, playerId, amount;
+            return __generator(this, function (_b) {
+                _a = notif.args, playerId = _a.playerId, amount = _a.amount;
+                this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: -amount });
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_shiftMarket = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -10136,20 +10162,32 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_smallRefreshHand = function (notif) {
-        var _a = notif.args, hand = _a.hand, playerId = _a.playerId;
-        var player = this.getPlayer({ playerId: playerId });
-        player.clearHand();
-        player.setupHand({ hand: hand });
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, hand, playerId, player;
+            return __generator(this, function (_b) {
+                _a = notif.args, hand = _a.hand, playerId = _a.playerId;
+                player = this.getPlayer({ playerId: playerId });
+                player.clearHand();
+                player.setupHand({ hand: hand });
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_smallRefreshInterface = function (notif) {
-        var updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
-        this.game.clearInterface();
-        this.game.gamedatas = updatedGamedatas;
-        this.game.activeEvents.setupActiveEvents({ gamedatas: updatedGamedatas });
-        this.game.market.setupMarket({ gamedatas: updatedGamedatas });
-        this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
-        this.game.map.updateMap({ gamedatas: updatedGamedatas });
-        this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
+        return __awaiter(this, void 0, void 0, function () {
+            var updatedGamedatas;
+            return __generator(this, function (_a) {
+                updatedGamedatas = __assign(__assign({}, this.game.gamedatas), notif.args);
+                this.game.clearInterface();
+                this.game.gamedatas = updatedGamedatas;
+                this.game.activeEvents.setupActiveEvents({ gamedatas: updatedGamedatas });
+                this.game.market.setupMarket({ gamedatas: updatedGamedatas });
+                this.game.playerManager.updatePlayers({ gamedatas: updatedGamedatas });
+                this.game.map.updateMap({ gamedatas: updatedGamedatas });
+                this.game.objectManager.updateInterface({ gamedatas: updatedGamedatas });
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_takePrize = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -10176,8 +10214,14 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_takeRupeesFromSupply = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, amount = _a.amount;
-        this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: amount });
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, playerId, amount;
+            return __generator(this, function (_b) {
+                _a = notif.args, playerId = _a.playerId, amount = _a.amount;
+                this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: amount });
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.notif_taxPlayer = function (notif) {
         return __awaiter(this, void 0, void 0, function () {
@@ -10226,16 +10270,21 @@ var NotificationManager = (function () {
         });
     };
     NotificationManager.prototype.notif_updateInfluence = function (_a) {
-        var _this = this;
         var args = _a.args;
-        args.updates.forEach(function (update) {
-            if (update.type === 'playerInfluence') {
-                var playerId = update.playerId, value = update.value;
-                _this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value: value });
-            }
-            else if (update.type === 'wakhanInfluence') {
-                _this.getPlayer({ playerId: WAKHAN_PLAYER_ID }).toValueWakhanInfluence({ wakhanInfluence: update });
-            }
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_b) {
+                args.updates.forEach(function (update) {
+                    if (update.type === 'playerInfluence') {
+                        var playerId = update.playerId, value = update.value;
+                        _this.getPlayer({ playerId: Number(playerId) }).toValueCounter({ counter: 'influence', value: value });
+                    }
+                    else if (update.type === 'wakhanInfluence') {
+                        _this.getPlayer({ playerId: WAKHAN_PLAYER_ID }).toValueWakhanInfluence({ wakhanInfluence: update });
+                    }
+                });
+                return [2];
+            });
         });
     };
     NotificationManager.prototype.notif_wakhanDrawCard = function (_a) {
@@ -10310,34 +10359,37 @@ var NotificationManager = (function () {
                         _b.sent();
                         this.getPlayer({ playerId: playerId }).incCounter({ counter: 'rupees', value: receivedRupees });
                         cardId = card.id;
-                        if (!newLocation.startsWith('events_')) return [3, 3];
+                        if (!newLocation.startsWith('events_')) return [3, 4];
+                        return [4, this.getPlayer({ playerId: playerId }).addCardToEvents({ cardId: cardId })];
+                    case 3:
+                        _b.sent();
                         if (cardId === 'card_109') {
                             this.game.objectManager.supply.checkDominantCoalition();
                         }
-                        return [3, 9];
-                    case 3:
-                        if (!(newLocation === DISCARD)) return [3, 5];
-                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
+                        return [3, 10];
                     case 4:
-                        _b.sent();
-                        return [3, 9];
+                        if (!(newLocation === DISCARD)) return [3, 6];
+                        return [4, this.game.objectManager.discardPile.discardCardFromZone(cardId)];
                     case 5:
-                        if (!(newLocation === TEMP_DISCARD)) return [3, 7];
-                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(card))];
-                    case 6:
                         _b.sent();
-                        return [3, 9];
+                        return [3, 10];
+                    case 6:
+                        if (!(newLocation === TEMP_DISCARD)) return [3, 8];
+                        return [4, this.game.objectManager.tempDiscardPile.getZone().addCard(this.game.getCard(card))];
                     case 7:
+                        _b.sent();
+                        return [3, 10];
+                    case 8:
                         player = this.getPlayer({ playerId: playerId });
-                        if (!(player instanceof PPWakhanPlayer)) return [3, 9];
+                        if (!(player instanceof PPWakhanPlayer)) return [3, 10];
                         return [4, player.radicalizeCardWakhan({
                                 card: card,
                                 from: this.game.market.getMarketCardZone({ row: row, column: col }),
                             })];
-                    case 8:
+                    case 9:
                         _b.sent();
-                        _b.label = 9;
-                    case 9: return [2];
+                        _b.label = 10;
+                    case 10: return [2];
                 }
             });
         });
@@ -10377,10 +10429,16 @@ var NotificationManager = (function () {
     };
     NotificationManager.prototype.notif_wakhanUpdatePragmaticLoyalty = function (_a) {
         var args = _a.args;
-        var pragmaticLoyalty = args.pragmaticLoyalty;
-        if (pragmaticLoyalty !== null) {
-            this.getPlayer({ playerId: WAKHAN_PLAYER_ID }).updateLoyaltyIcon({ pragmaticLoyalty: pragmaticLoyalty });
-        }
+        return __awaiter(this, void 0, void 0, function () {
+            var pragmaticLoyalty;
+            return __generator(this, function (_b) {
+                pragmaticLoyalty = args.pragmaticLoyalty;
+                if (pragmaticLoyalty !== null) {
+                    this.getPlayer({ playerId: WAKHAN_PLAYER_ID }).updateLoyaltyIcon({ pragmaticLoyalty: pragmaticLoyalty });
+                }
+                return [2];
+            });
+        });
     };
     NotificationManager.prototype.destroy = function () {
         dojo.forEach(this.subscriptions, dojo.unsubscribe);

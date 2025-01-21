@@ -10,7 +10,16 @@ class StartOfTurnAbilitiesState implements State {
     debug('Entering StartOfTurnAbilitiesState', args);
     const { specialAbility } = args;
     this.specialAbility = specialAbility;
-    this.updateInterfaceInitialStep();
+
+    // TODO: find another solution for this?
+    // Right now it's needed because initial setup is not yet done due to some async function
+    // and availability of actions is determined based on incorrect data
+    // => Add spies on card in same place as adding card
+    // => add log texts to title bar
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {

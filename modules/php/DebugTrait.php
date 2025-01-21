@@ -92,7 +92,7 @@ trait DebugTrait
     Notifications::log('stack',ActionStack::get());
   }
 
-  function debugAddCardToCourt($cardId, $playerId = null)
+  function debug_addCardToCourt(string $cardId, int $playerId = null)
   {
     $card = Cards::get($cardId);
     $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
@@ -100,7 +100,7 @@ trait DebugTrait
     // $this->reassignCourtState($playerId);
   }
 
-  function debugAddCardToHand($cardId, $playerId = null)
+  function debug_addCardToHand(string $cardId, int $playerId = null)
   {
     $card = Cards::get($cardId);
     $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
@@ -188,7 +188,7 @@ trait DebugTrait
     }
   }
 
-  function debugCreateSpy($cardId, $playerId = null)
+  function debug_createSpy(string $cardId, int $playerId = null)
   {
     $card = Cards::get($cardId);
     if (!Utils::startsWith($card['location'], "court")) {

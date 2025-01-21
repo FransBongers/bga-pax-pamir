@@ -474,12 +474,6 @@ html {
   margin-top: calc(var(--cardScale) * -16px);
 }
 
-.pp_card_in_court:hover,
-.pp_card_in_court:active {
-  z-index: 100 !important;
-  /* border: 2px blue solid; */
-}
-
 .pp_tax_counter {
   // color: white;
   color: base.$selected-color;

@@ -458,7 +458,7 @@ class ClientCardActionMoveState implements State {
     }
     const player = this.game.getCurrentPlayer();
     if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
-      dojo.query(`.pp_card_in_court.pp_${cardInfo.region}`).forEach((node) => {
+      dojo.query(`.pp_court .pp_card.pp_${cardInfo.region}`).forEach((node) => {
         const nodeId = node.id;
         if (!destinationCards.includes(nodeId)) {
           destinationCards.push(nodeId);

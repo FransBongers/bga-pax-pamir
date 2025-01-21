@@ -7510,7 +7510,7 @@ var ClientCardActionMoveState = (function () {
         }
         var player = this.game.getCurrentPlayer();
         if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
-            dojo.query(".pp_card_in_court.pp_".concat(cardInfo.region)).forEach(function (node) {
+            dojo.query(".pp_court .pp_card.pp_".concat(cardInfo.region)).forEach(function (node) {
                 var nodeId = node.id;
                 if (!destinationCards.includes(nodeId)) {
                     destinationCards.push(nodeId);
@@ -9248,7 +9248,7 @@ var StartOfTurnAbilitiesState = (function () {
         var _this = this;
         var cardId = _a.cardId;
         this.game.clearPossible();
-        dojo.query(".pp_card_in_court.pp_".concat(cardId)).addClass('pp_selected');
+        document.getElementById(cardId).classList.add('pp_selected');
         this.game.clientUpdatePageTitle({
             text: _('Place a spy on ${cardName}?'),
             args: {

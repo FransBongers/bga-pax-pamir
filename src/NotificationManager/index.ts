@@ -14,6 +14,8 @@
 //  .##.....##.##.....##.##...###.##.....##.##....##..##.......##....##.
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
+const MIN_NOTIFICATION_MS = 1000;
+
 class NotificationManager {
   private game: PaxPamirGame;
   private subscriptions: unknown[];
@@ -33,71 +35,87 @@ class NotificationManager {
 
   setupNotifications() {
     console.log('notifications subscriptions setup');
-    const notifs: [id: string, wait: number][] = [
-      // checked
-      ['log', undefined],
-      ['changeLoyalty', undefined],
-      ['changeFavoredSuit', undefined],
-      ['changeRuler', undefined],
-      ['clearTurn', undefined],
-      ['declinePrize', undefined],
-      ['discard', undefined],
-      ['discardFromMarket', undefined],
-      ['discardPrizes', undefined],
-      ['dominanceCheckScores', undefined],
-      ['dominanceCheckReturnCoalitionBlocks', undefined],
-      ['drawMarketCard', undefined],
-      ['exchangeHand', undefined],
-      ['moveCard', undefined],
-      ['moveToken', undefined],
-      ['payBribe', undefined],
-      ['payRupeesToMarket', undefined],
-      ['placeArmy', undefined],
-      ['placeCylinder', undefined],
-      ['placeRoad', undefined],
-      ['playCard', undefined],
-      ['publicWithdrawal', undefined],
-      ['purchaseCard', undefined],
-      ['replaceHand', undefined],
-      ['returnAllSpies', undefined], // TODO: check if returnSpies can be added to returnToSupply?
-      ['returnAllToSupply', undefined],
-      ['returnCoalitionBlock', undefined],
-      ['returnCylinder', undefined],
-      ['returnRupeesToSupply', undefined],
-      ['shiftMarket', undefined],
-      ['smallRefreshHand', undefined],
-      ['smallRefreshInterface', undefined],
-      ['takePrize', undefined],
-      ['takeRupeesFromSupply', undefined],
-      ['taxMarket', undefined],
-      ['taxPlayer', undefined],
-      ['updateInfluence', undefined],
-      ['wakhanDrawCard', undefined],
-      ['wakhanRadicalize', undefined],
-      ['wakhanReshuffleDeck', undefined],
-      ['wakhanUpdatePragmaticLoyalty', undefined],
+    const notifs: string[] = [
+      'log',
+      'battle',
+      'changeLoyalty',
+      'changeFavoredSuit',
+      'changeRuler',
+      'clearTurn',
+      'declinePrize',
+      'discard',
+      'discardFromMarket',
+      'discardPrizes',
+      'dominanceCheckScores',
+      'dominanceCheckReturnCoalitionBlocks',
+      'drawMarketCard',
+      'exchangeHand',
+      'moveCard',
+      'moveToken',
+      'payBribe',
+      'payRupeesToMarket',
+      'placeArmy',
+      'placeCylinder',
+      'placeRoad',
+      'playCard',
+      'publicWithdrawal',
+      'purchaseCard',
+      'purchaseGift',
+      'replaceHand',
+      'returnAllSpies', // TODO: check if returnSpies can be added to returnToSupply?
+      'returnAllToSupply',
+      'returnCoalitionBlock',
+      'returnCylinder',
+      'returnRupeesToSupply',
+      'shiftMarket',
+      'smallRefreshHand',
+      'smallRefreshInterface',
+      'takePrize',
+      'takeRupeesFromSupply',
+      'taxMarket',
+      'taxPlayer',
+      'updateInfluence',
+      'wakhanDrawCard',
+      'wakhanRadicalize',
+      'wakhanReshuffleDeck',
+      'wakhanUpdatePragmaticLoyalty',
     ];
 
-    // example: https://github.com/thoun/knarr/blob/main/src/knarr.ts
-    notifs.forEach((notif) => {
+    notifs.forEach((notifName) => {
       this.subscriptions.push(
-        dojo.subscribe(notif[0], this, (notifDetails: Notif<unknown>) => {
-          debug(`notif_${notif[0]}`, notifDetails); // log notif params (with Tisaac log method, so only studio side)
+        dojo.subscribe(notifName, this, (notifDetails: Notif<unknown>) => {
+          debug(`notif_${notifName}`, notifDetails); // log notif params (with Tisaac log method, so only studio side)
 
-          const promise = this[`notif_${notif[0]}`](notifDetails);
+          const promise = this[`notif_${notifName}`](notifDetails);
+          const promises = promise ? [promise] : [];
+          let minDuration = 1;
 
-          // tell the UI notification ends
-          promise?.then(() => this.game.framework().notifqueue.onSynchronousNotificationEnd());
+          // Show log messags in page title
+          let msg = this.game.format_string_recursive(notifDetails.log, notifDetails.args as Record<string, unknown>);
+          // TODO: check if this clearPossible causes any issues?
+          this.game.clearPossible();
+          if (msg != '' && notifName !== 'dominanceCheckScores') {
+            $('gameaction_status').innerHTML = msg;
+            $('pagemaintitletext').innerHTML = msg;
+            $('generalactions').innerHTML = '';
+
+            // If there is some text, we let the message some time, to be read
+            minDuration = MIN_NOTIFICATION_MS;
+          }
+
+          // tell the UI notification ends, if the function returned a promise.
+          if (this.game.animationManager.animationsActive()) {
+            Promise.all([...promises, this.game.framework().wait(minDuration)]).then(() =>
+              this.game.framework().notifqueue.onSynchronousNotificationEnd()
+            );
+          } else {
+            // TODO: check what this does
+            this.game.framework().notifqueue.setSynchronousDuration(0);
+          }
         })
       );
-      // make all notif as synchronous
-      this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
+      this.game.framework().notifqueue.setSynchronous(notifName, undefined);
     });
-
-    // Use below to add tooltips to the log
-    // dojo.connect(this.game.framework().notifqueue, 'addToLog', () => {
-    //   // do stuff here
-    // });
   }
 
   // Example code to show log messags in page title
@@ -116,6 +134,10 @@ class NotificationManager {
   // .##..####.##.....##....##.....##..##.............##
   // .##...###.##.....##....##.....##..##.......##....##
   // .##....##..#######.....##....####.##........######.
+
+  // Notifs added to show message in title bar
+  async notif_battle(notif: Notif<unknown>) {}
+  async notif_purchaseGift(notif: Notif<unknown>) {}
 
   async notif_log(notif: Notif<unknown>) {
     // this is for debugging php side

@@ -4,7 +4,7 @@
 
 interface Game {
   instantaneousMode?: boolean; // cannot add it here, else TS build will say Game interface isn't fulfilled
-  gamedatas: any;
+  gamedatas: PaxPamirGamedatas;
   setup: (gamedatas: any) => void;
   onEnteringState: (stateName: string, args: any) => void;
   onLeavingState: (stateName: string) => void;
@@ -12,6 +12,12 @@ interface Game {
   // setupNotifications: () => void;
   //format_string_recursive: (log: string, args: any) => void;
   framework: () => Framework; // Function just to have TS casting in one place, should return this
+}
+
+interface Tooltip {
+  id: string;
+  destroy: Function;
+  getContent: Function;
 }
 
 // TODO (Frans): check if thre is a better way to define these so we don't need to cast.
@@ -30,16 +36,22 @@ interface Framework {
   ) => void;
   attachToNewParent: (mobile_obj: string | Element, target_obj: string | Element) => void;
   checkAction: (action: string) => boolean;
+  defaultTooltipPosition: string[];
+  dontPreloadImage: (filename: string) => void;
   format_block: (jstpl: string, args: Record<string, unknown>) => string;
   game_name: string;
   isCurrentPlayerActive: () => boolean;
+  isInterfaceLocked: () => boolean; // Where does this come from? Cannot see with console.log but returns value
   isLoadingComplete: boolean;
   inherited(args: any); // TODO: check what this does?
   isSpectator: boolean;
+  next_log_id: string; // actually a number?
   notifqueue: {
-    next_log_id: string;
+    next_log_id: string; // actually a number?
     setSynchronous: (notifId: string, waitMilliSeconds: number) => void;
+    setSynchronousDuration: (waitMilliSeconds: number) => void;
     onSynchronousNotificationEnd: () => void;
+    setIgnoreNotificationCheck: (notifId: string, predicate: (notif: Notif<unknown>) => void) => void;
   };
   placeOnObject: (mobileObject: string | Element, targetObj: string | Element) => void;
   player_id: string;
@@ -60,6 +72,7 @@ interface Framework {
     duration?: number,
     delay?: number
   ) => Animation;
+  tooltips: Record<string, Tooltip>
   updatePageTitle: () => void;
   wait: (ms: number) => Promise<void>;
 }

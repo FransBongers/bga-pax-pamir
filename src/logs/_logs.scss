@@ -46,6 +46,8 @@
 
 .log > .roundedbox,
 .log > .roundedboxinner {
+  --tokenScale: 1;
+
   .pp_log_token {
     top: -2px;
     margin-top: 2px;
@@ -87,6 +89,8 @@
 
 #pagemaintitletext,
 #gameaction_status {
+  --tokenScale: 1;
+
   .pp_log_token {
     top: -3px;
     margin-top: 3px;
@@ -103,38 +107,52 @@
   .pp_coalition_block_side[data-type='road'] {
     --tokenScale: 1;
   }
+
+  .pp_cylinder_side {
+    --tokenScale: 1;
+  }
+
+  .pp_card_side {
+    display: none;
+  }
+
+  br {
+    display: none;
+  }
+
+  .pp_log_token.pp_region_icon {
+    --tokenScale: 1;
+  }
 }
 
 
 .pp_log_token.pp_leverage {
+  --tokenScale: 1;
   background-image: url('img/impact_icons.webp');
   background-size: 1500% 100%;
-  width: 25px;
-  height: 25px;
+  height: calc(var(--tokenScale) * 25px);
+  width: calc(var(--tokenScale) * 25px);
   background-position-x: math.div(4, 14) * 100%;
   background-repeat: no-repeat;
 }
 
 .pp_log_token.pp_loyalty_icon.pp_afghan, .pp_log_token.pp_loyalty_icon_black.pp_afghan {
-  height: 20px;
-  width: 38px;
+  height: calc(var(--tokenScale) * 20px);
+  width: calc(var(--tokenScale) * 38px);
   padding-bottom: 0px;
 }
 
 .pp_log_token.pp_loyalty_icon.pp_british, .pp_log_token.pp_loyalty_icon_black.pp_british {
-  height: 20px;
-  width: 34px;
+  height: calc(var(--tokenScale) * 20px);
+  width: calc(var(--tokenScale) * 34px);
   padding-bottom: 0px;
 }
 
 .pp_log_token.pp_loyalty_icon.pp_russian, .pp_log_token.pp_loyalty_icon_black.pp_russian {
-  height: 20px;
-  width: 35px;
+  height: calc(var(--tokenScale) * 20px);
+  width: calc(var(--tokenScale) * 35px);
   padding-bottom: 0px;
 }
-
-
-
 
 
 .pp_log_token.pp_road {
@@ -149,8 +167,8 @@
 }
 
 .pp_log_token.pp_impact_icon_suit {
-  width: 30px;
-  height: 30px;
+  height: calc(var(--tokenScale) * 30px);
+  width: calc(var(--tokenScale) * 30px);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -177,9 +195,4 @@
   background-image: url('img/impact_icons.webp');
   background-size: 1500% 100%;
   background-position-x: math.div(11, 14) * 100%;
-}
-
-#pagemaintitletext,
-#gameaction_status {
-
 }

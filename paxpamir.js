@@ -9315,6 +9315,7 @@ var WakhanPauseState = (function () {
     };
     return WakhanPauseState;
 }());
+var MIN_NOTIFICATION_MS = 1000;
 var NotificationManager = (function () {
     function NotificationManager(game) {
         this.game = game;
@@ -9324,56 +9325,85 @@ var NotificationManager = (function () {
         var _this = this;
         console.log('notifications subscriptions setup');
         var notifs = [
-            ['log', undefined],
-            ['changeLoyalty', undefined],
-            ['changeFavoredSuit', undefined],
-            ['changeRuler', undefined],
-            ['clearTurn', undefined],
-            ['declinePrize', undefined],
-            ['discard', undefined],
-            ['discardFromMarket', undefined],
-            ['discardPrizes', undefined],
-            ['dominanceCheckScores', undefined],
-            ['dominanceCheckReturnCoalitionBlocks', undefined],
-            ['drawMarketCard', undefined],
-            ['exchangeHand', undefined],
-            ['moveCard', undefined],
-            ['moveToken', undefined],
-            ['payBribe', undefined],
-            ['payRupeesToMarket', undefined],
-            ['placeArmy', undefined],
-            ['placeCylinder', undefined],
-            ['placeRoad', undefined],
-            ['playCard', undefined],
-            ['publicWithdrawal', undefined],
-            ['purchaseCard', undefined],
-            ['replaceHand', undefined],
-            ['returnAllSpies', undefined],
-            ['returnAllToSupply', undefined],
-            ['returnCoalitionBlock', undefined],
-            ['returnCylinder', undefined],
-            ['returnRupeesToSupply', undefined],
-            ['shiftMarket', undefined],
-            ['smallRefreshHand', undefined],
-            ['smallRefreshInterface', undefined],
-            ['takePrize', undefined],
-            ['takeRupeesFromSupply', undefined],
-            ['taxMarket', undefined],
-            ['taxPlayer', undefined],
-            ['updateInfluence', undefined],
-            ['wakhanDrawCard', undefined],
-            ['wakhanRadicalize', undefined],
-            ['wakhanReshuffleDeck', undefined],
-            ['wakhanUpdatePragmaticLoyalty', undefined],
+            'log',
+            'battle',
+            'changeLoyalty',
+            'changeFavoredSuit',
+            'changeRuler',
+            'clearTurn',
+            'declinePrize',
+            'discard',
+            'discardFromMarket',
+            'discardPrizes',
+            'dominanceCheckScores',
+            'dominanceCheckReturnCoalitionBlocks',
+            'drawMarketCard',
+            'exchangeHand',
+            'moveCard',
+            'moveToken',
+            'payBribe',
+            'payRupeesToMarket',
+            'placeArmy',
+            'placeCylinder',
+            'placeRoad',
+            'playCard',
+            'publicWithdrawal',
+            'purchaseCard',
+            'purchaseGift',
+            'replaceHand',
+            'returnAllSpies',
+            'returnAllToSupply',
+            'returnCoalitionBlock',
+            'returnCylinder',
+            'returnRupeesToSupply',
+            'shiftMarket',
+            'smallRefreshHand',
+            'smallRefreshInterface',
+            'takePrize',
+            'takeRupeesFromSupply',
+            'taxMarket',
+            'taxPlayer',
+            'updateInfluence',
+            'wakhanDrawCard',
+            'wakhanRadicalize',
+            'wakhanReshuffleDeck',
+            'wakhanUpdatePragmaticLoyalty',
         ];
-        notifs.forEach(function (notif) {
-            _this.subscriptions.push(dojo.subscribe(notif[0], _this, function (notifDetails) {
-                debug("notif_".concat(notif[0]), notifDetails);
-                var promise = _this["notif_".concat(notif[0])](notifDetails);
-                promise === null || promise === void 0 ? void 0 : promise.then(function () { return _this.game.framework().notifqueue.onSynchronousNotificationEnd(); });
+        notifs.forEach(function (notifName) {
+            _this.subscriptions.push(dojo.subscribe(notifName, _this, function (notifDetails) {
+                debug("notif_".concat(notifName), notifDetails);
+                var promise = _this["notif_".concat(notifName)](notifDetails);
+                var promises = promise ? [promise] : [];
+                var minDuration = 1;
+                var msg = _this.game.format_string_recursive(notifDetails.log, notifDetails.args);
+                _this.game.clearPossible();
+                if (msg != '' && notifName !== 'dominanceCheckScores') {
+                    $('gameaction_status').innerHTML = msg;
+                    $('pagemaintitletext').innerHTML = msg;
+                    $('generalactions').innerHTML = '';
+                    minDuration = MIN_NOTIFICATION_MS;
+                }
+                if (_this.game.animationManager.animationsActive()) {
+                    Promise.all(__spreadArray(__spreadArray([], promises, true), [_this.game.framework().wait(minDuration)], false)).then(function () {
+                        return _this.game.framework().notifqueue.onSynchronousNotificationEnd();
+                    });
+                }
+                else {
+                    _this.game.framework().notifqueue.setSynchronousDuration(0);
+                }
             }));
-            _this.game.framework().notifqueue.setSynchronous(notif[0], notif[1]);
+            _this.game.framework().notifqueue.setSynchronous(notifName, undefined);
         });
+    };
+    NotificationManager.prototype.notif_battle = function (notif) {
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2];
+        }); });
+    };
+    NotificationManager.prototype.notif_purchaseGift = function (notif) {
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2];
+        }); });
     };
     NotificationManager.prototype.notif_log = function (notif) {
         return __awaiter(this, void 0, void 0, function () {

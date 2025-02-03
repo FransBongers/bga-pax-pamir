@@ -175,6 +175,17 @@ trait WakhanActionMoveTrait
       if (!in_array($region, $adjacentRegions)) {
         continue;
       }
+      $tribes = Tokens::getInLocation(Locations::tribes($region))->toArray();
+      // Wakhan will only move armies to locations where other players have tribes
+      $opponentTribes = count(Utils::filter($tribes, function ($tribe) {
+        return !Utils::startsWith($tribe['id'],'cylinder_1_');
+      }));
+
+      if ($opponentTribes === 0) {
+        continue;
+      }
+      // Wakhan will seek to have only as many armies as there are tribes in the region, so
+      // including Wakhan tribes
       $numberOfTribes = count(Tokens::getInLocation(Locations::tribes($region))->toArray());
       $numberOfloyalArmies = count(Map::getLoyalArmiesInRegion($region, Wakhan::getPragmaticLoyalty()));
       if ($numberOfTribes > $numberOfloyalArmies) {

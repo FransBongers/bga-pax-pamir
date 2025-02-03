@@ -5,6 +5,7 @@ namespace PaxPamir\States;
 use PaxPamir\Core\Game;
 use PaxPamir\Core\Globals;
 use PaxPamir\Core\Notifications;
+use PaxPamir\Helpers\Locations;
 use PaxPamir\Helpers\Utils;
 use PaxPamir\Helpers\Wakhan;
 use PaxPamir\Managers\ActionStack;
@@ -18,6 +19,7 @@ use PaxPamir\Models\PaxPamirPlayer;
 
 trait WakhanActionTrait
 {
+  public $logWakhanActions = false;
 
   // .########..####..######..########.....###....########..######..##.....##
   // .##.....##..##..##....##.##.....##...##.##......##....##....##.##.....##
@@ -52,6 +54,10 @@ trait WakhanActionTrait
 
     $wakhanAmbition = $this->wakhanCheckAmbition();
 
+    if ($this->logWakhanActions) {
+      Notifications::log('wakhanAmbition',$wakhanAmbition);
+    }
+
     // check Wakhan's Ambition
     if ($wakhanAmbition !== null) {
       Wakhan::actionValid();
@@ -70,6 +76,11 @@ trait WakhanActionTrait
     $currentAction = Globals::getWakhanCurrentAction();
     $action = $topOfWakhanDiscard['front']['actions'][$currentAction];
 
+    if ($this->logWakhanActions) {
+      Notifications::log('currentAction',$currentAction);
+      Notifications::log('action',$action);
+    }
+
     $this->wakhanPerformAction($action, $topOfWakhanDeck, $topOfWakhanDiscard);
 
     Globals::setWakhanCurrentAction(($currentAction + 1) % 3);
@@ -83,7 +94,18 @@ trait WakhanActionTrait
     $action = array_pop($actionStack);
     $cardId = $action['data']['cardId'];
     $card = Cards::get($cardId);
+
+    if($this->logWakhanActions) {
+      Notifications::log('dispatchWakhanBonusAction card', $card);
+    }
+
     ActionStack::set($actionStack);
+    
+    // Handle case where another Wakhan action caused the card to be removed from court
+    if ($card['location'] !== Locations::court(WAKHAN_PLAYER_ID)) {
+      $this->nextState('dispatchAction');
+      return;
+    }
 
     $result = false;
     foreach ($card['actions'] as $action => $actionInfo) {

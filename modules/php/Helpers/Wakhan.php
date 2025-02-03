@@ -129,16 +129,16 @@ class Wakhan
     return $cardsThatPlaceMostCylinders;
   }
 
-  public static function getCourtCardsWakhanCanPurchase()
+  public static function getCardsWakhanCanPurchase($courtCardsOnly = true)
   {
     $wakhanRupees = PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getRupees();
     // Get all court cards that Wakhan can afford and have not been used yet
-    $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees) {
+    $courtCardsInMarket = Utils::filter(Cards::getOfTypeInLocation('card', 'market'), function ($card) use ($wakhanRupees, $courtCardsOnly) {
       $isCourtCard = $card['type'] === COURT_CARD;
       $cost = Utils::getCardCost(PaxPamirPlayers::get(WAKHAN_PLAYER_ID), $card);
       $wakhanCanAfforCard = $cost <= $wakhanRupees;
       $notUsed = $card['used'] === 0;
-      return $isCourtCard && $wakhanCanAfforCard && $notUsed;
+      return $courtCardsOnly ? $isCourtCard && $wakhanCanAfforCard && $notUsed : $wakhanCanAfforCard && $notUsed;
     });
     return $courtCardsInMarket;
   }

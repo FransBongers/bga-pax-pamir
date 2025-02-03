@@ -124,6 +124,11 @@ class PaxPamirPlayers extends \PaxPamir\Helpers\DB_Manager
     return self::DB()->update(['player_rupees' => $value], $pId);
   }
 
+  public static function setRupees($pId, $value)
+  {
+    return self::DB()->update(['player_rupees' => $value], $pId);
+  }
+
   public static function incScore($pId, $increment)
   {
     $value = self::get($pId)->getScore() + $increment;

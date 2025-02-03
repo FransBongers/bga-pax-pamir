@@ -170,6 +170,17 @@ const HERAT = 'herat';
 const KANDAHAR = 'kandahar';
 const PUNJAB = 'punjab';
 
+// borders (for all borders regions are in alphabetical order)
+const HERAT_KABUL = 'herat_kabul';
+const HERAT_KANDAHAR = 'herat_kandahar';
+const HERAT_PERSIA = 'herat_persia';
+const HERAT_TRANSCASPIA = 'herat_transcaspia';
+const KABUL_KANDAHAR = 'kabul_kandahar';
+const KABUL_PUNJAB = 'kabul_punjab';
+const KABUL_TRANSCASPIA = 'kabul_transcaspia';
+const KANDAHAR_PUNJAB = 'kandahar_punjab';
+const PERSIA_TRANSCASPIA = 'persia_transcaspia';
+
 
 /**
  * Special abilities
@@ -384,4 +395,3 @@ const STAT_SUCCESSFUL_DOMINANCE_CHECK = 30;
 const STAT_UNSUCCESSFUL_DOMINANCE_CHECK = 31;
 const STAT_WAKHAN_ENABLED = 32;
 const STAT_WAKHAN_WINS = 33;
-

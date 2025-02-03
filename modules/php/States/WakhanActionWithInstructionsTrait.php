@@ -48,7 +48,7 @@ trait WakhanActionWithInstructionsTrait
       Wakhan::actionNotValid();
       return;
     }
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $card = $this->wakhanGetHighestRankedCardOfSuit($availableCards, MILITARY);
 
@@ -70,7 +70,7 @@ trait WakhanActionWithInstructionsTrait
       Wakhan::actionNotValid();
       return;
     }
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $card = $this->wakhanGetHighestRankedCardOfSuit($availableCards, ECONOMIC);
 
@@ -88,7 +88,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanRadicalizeHighestRankedOfSuit($suit)
   {
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $card = $this->wakhanGetHighestRankedCardOfSuit($availableCards, $suit);
 
@@ -114,9 +114,17 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase(false);
+
+    if ($this->logWakhanActions) {
+      Notifications::log('availableCards',$availableCards);
+    }
 
     $selectedCard = $this->selectCardThatWouldNetMostRupees($availableCards);
+
+    if ($this->logWakhanActions) {
+      Notifications::log('selectedCard',$selectedCard);
+    }
 
     if ($selectedCard === null || $selectedCard['netRupees'] <= 0) {
       Wakhan::actionNotValid();
@@ -132,7 +140,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanRadicalizeCardThatGivesControlOfARegion()
   {
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $rulers = Globals::getRulers();
     $wakhanLoyalty = Wakhan::getPragmaticLoyalty();
@@ -177,7 +185,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanRadicalizeCardOfSuit($suit)
   {
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $cardsOfSuit = Utils::filter($availableCards, function ($card) use ($suit) {
       return $card['suit'] === $suit;
@@ -199,7 +207,7 @@ trait WakhanActionWithInstructionsTrait
    */
   function wakhanRadicalizeCardThatWouldPlaceMostBlocks()
   {
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $cardsThatWouldPlaceMostBlocks = Wakhan::getCourtCardsThatWouldPlaceMostBlocks($availableCards);
 
@@ -225,7 +233,7 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $cardsThatWouldPlaceMostCylinders = Wakhan::getCourtCardsThatWouldPlaceMostCylinders($availableCards);
 
@@ -255,7 +263,7 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $cardsWithMoveAction = Utils::filter($availableCards, function ($card) {
       return in_array(MOVE, array_keys($card['actions']));
@@ -283,7 +291,7 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $cardsWithMatchingPatriot = Utils::filter($availableCards, function ($card) use ($dominantCoalition) {
       return $card['loyalty'] === $dominantCoalition;
@@ -311,7 +319,7 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $card = $this->wakhanGetHighestRankedCardOfSuit($availableCards, POLITICAL);
 
@@ -346,7 +354,7 @@ trait WakhanActionWithInstructionsTrait
       return;
     }
 
-    $availableCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availableCards = Wakhan::getCardsWakhanCanPurchase();
 
     $card = $this->wakhanGetHighestRankedCardOfSuit($availableCards, INTELLIGENCE);
 
@@ -456,7 +464,7 @@ trait WakhanActionWithInstructionsTrait
     $row = explode('_', $card['location'])[1];
     $column = explode('_', $card['location'])[2];
     $receivedRupees = count(Tokens::getInLocation(Locations::marketRupees($row, $column)));
-    $leverageGain = in_array(LEVERAGE, $card['impactIcons']) ? 2 : 0;
+    $leverageGain = in_array(LEVERAGE, isset($card['impactIcons']) ? $card['impactIcons'] : []) ? 2 : 0;
     return $receivedRupees - $cost + $leverageGain;
   }
 

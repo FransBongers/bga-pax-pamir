@@ -142,7 +142,7 @@ trait WakhanRadicalizeTrait
     }
     $wakhanPlayer = PaxPamirPlayers::get(WAKHAN_PLAYER_ID);
     $selectedCardCost = Utils::getCardCost($wakhanPlayer, $selectedCard);
-    $availbleCards = Wakhan::getCourtCardsWakhanCanPurchase();
+    $availbleCards = Wakhan::getCardsWakhanCanPurchase();
 
     // cheaper card of same suit and equal or higher rank
     $alternativeCards = [];
@@ -227,7 +227,12 @@ trait WakhanRadicalizeTrait
   function radicalizeSelectCardDominanceCheckInMarket()
   {
     // Get all court cards that Wakhan can afford and have not been used yet
-    $courtCardsInMarket = Wakhan::getCourtCardsWakhanCanPurchase();
+    $courtCardsInMarket = Wakhan::getCardsWakhanCanPurchase(false);
+
+    if ($this->logWakhanActions) {
+      Notifications::log('radicalizeSelectCardDominanceCheckInMarket cards', $courtCardsInMarket);
+    }
+
     if (count($courtCardsInMarket) === 0) {
       return null;
     }
@@ -267,7 +272,7 @@ trait WakhanRadicalizeTrait
   {
     $patriots = Utils::filter($courtCardsInMarket, function ($card) use ($dominantCoalition) {
 
-      $cardIsLoyalToDominantCoalition = $card['loyalty'] === $dominantCoalition;
+      $cardIsLoyalToDominantCoalition = isset($card['loyalty']) && $card['loyalty'] === $dominantCoalition;
 
       return $cardIsLoyalToDominantCoalition;
     });

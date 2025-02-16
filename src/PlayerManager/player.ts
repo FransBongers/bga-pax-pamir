@@ -876,6 +876,8 @@ class PPPlayer {
         remove: true,
       });
       this.game.cardManager.removeCard(card);
+      this.game.spies[card.id].remove();
+      this.game.spies[card.id] = undefined;
     }
     this.incCounter({ counter: 'cards', value: 1 });
     this.updateHandCards({ cardId: card.id, action: 'ADD' });

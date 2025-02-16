@@ -4126,6 +4126,8 @@ var PPPlayer = (function () {
                     case 3:
                         _a.sent();
                         this.game.cardManager.removeCard(card);
+                        this.game.spies[card.id].remove();
+                        this.game.spies[card.id] = undefined;
                         _a.label = 4;
                     case 4:
                         this.incCounter({ counter: 'cards', value: 1 });

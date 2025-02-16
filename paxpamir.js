@@ -2211,6 +2211,7 @@ var PREF_SINGLE_COLUMN_MAP_SIZE = 'singleColumnMapSize';
 var PREF_TWO_COLUMNS_LAYOUT = 'twoColumnsLayout';
 var PREF_CONFIRM_END_OF_TURN_AND_PLAYER_SWITCH_ONLY = 'confirmEndOfTurnPlayerSwitchOnly';
 var PREF_SHOW_ANIMATIONS = 'showAnimations';
+var PREF_SHOW_UNDO_LOGS = 'showUndoLogs';
 var PREF_ANIMATION_SPEED = 'animationSpeed';
 var PREF_CARD_INFO_IN_TOOLTIP = 'cardInfoInTooltip';
 var PREF_CARD_SIZE_IN_LOG = 'cardSizeInLog';
@@ -6143,6 +6144,23 @@ var getSettingsConfig = function () {
                         },
                     },
                     type: 'slider',
+                },
+                _b[PREF_SHOW_UNDO_LOGS] = {
+                    id: PREF_SHOW_UNDO_LOGS,
+                    onChangeInSetup: false,
+                    defaultValue: PREF_DISABLED,
+                    label: _('Show undone logs'),
+                    type: 'select',
+                    options: [
+                        {
+                            label: _('Enabled'),
+                            value: PREF_ENABLED,
+                        },
+                        {
+                            label: _('Disabled'),
+                            value: PREF_DISABLED,
+                        },
+                    ],
                 },
                 _b),
         },
@@ -10898,11 +10916,18 @@ var PaxPamir = (function () {
     };
     PaxPamir.prototype.cancelLogs = function (notifIds) {
         var _this = this;
+        var showUndoneLogs = this.settings.get({ id: PREF_SHOW_UNDO_LOGS }) === PREF_ENABLED;
         notifIds.forEach(function (uid) {
             if (_this._notif_uid_to_log_id.hasOwnProperty(uid)) {
                 var logId = _this._notif_uid_to_log_id[uid];
-                if ($('log_' + logId))
-                    dojo.addClass('log_' + logId, 'cancel');
+                var element = document.getElementById('log_' + logId);
+                if (element) {
+                    element.classList.add('cancel');
+                    if (!showUndoneLogs) {
+                        element.classList.add('no_undo_logs');
+                    }
+                }
+                ;
             }
         });
     };

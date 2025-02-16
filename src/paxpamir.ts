@@ -636,10 +636,17 @@ class PaxPamir implements PaxPamirGame {
   }
 
   public cancelLogs(notifIds: string[]) {
+    const showUndoneLogs = this.settings.get({id: PREF_SHOW_UNDO_LOGS}) === PREF_ENABLED;
     notifIds.forEach((uid) => {
       if (this._notif_uid_to_log_id.hasOwnProperty(uid)) {
         let logId = this._notif_uid_to_log_id[uid];
-        if ($('log_' + logId)) dojo.addClass('log_' + logId, 'cancel');
+        const element = document.getElementById('log_' + logId);
+        if (element) {
+          element.classList.add('cancel');
+          if (!showUndoneLogs) {
+            element.classList.add('no_undo_logs');
+          }
+        };
       }
     });
   }

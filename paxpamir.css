@@ -887,6 +887,10 @@
   text-decoration: line-through;
 }
 
+.log.cancel.no_undo_logs {
+  display: none !important;
+}
+
 /* Desktop logs */
 .log.cancel .roundedbox {
   background-color: rgba(240, 186, 117, 0.6) !important;

@@ -207,6 +207,23 @@ const getSettingsConfig = (): Record<string, PlayerPreferenceTab> => ({
         },
         type: 'slider',
       },
+      [PREF_SHOW_UNDO_LOGS]: {
+        id: PREF_SHOW_UNDO_LOGS,
+        onChangeInSetup: false,
+        defaultValue: PREF_DISABLED,
+        label: _('Show undone logs'),
+        type: 'select',
+        options: [
+          {
+            label: _('Enabled'),
+            value: PREF_ENABLED,
+          },
+          {
+            label: _('Disabled'),
+            value: PREF_DISABLED,
+          },
+        ],
+      },
     },
   },
 });

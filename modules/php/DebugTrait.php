@@ -210,10 +210,11 @@ trait DebugTrait
 
   function debug_test()
   {
+    Cards::insertOnTop('card_8', DECK);
     // $this->debug_createRoad(KABUL_TRANSCASPIA, RUSSIAN);
     // $this->debug_addCardToHand($this->debugCardId(80), 2371052);
     // $this->debug_addCardToCourt($this->debugCardId(80), 2371052);
-    $this->debugWakhanGameState();
+    // $this->debugWakhanGameState();
     // Globals::setWakhanCurrentAction(0);
     // Cards::insertOnTop('card_24',Locations::market(1,0));
     // Tokens::move('block_russian_8',Locations::pool(RUSSIAN));
@@ -255,7 +256,7 @@ trait DebugTrait
     Notifications::log('stack', ActionStack::get());
   }
 
-  function debug_addCardToCourt(string $cardId, int $playerId = null)
+  function debug_addCardToCourt(string $cardId, int|null $playerId = null)
   {
     $card = Cards::get($cardId);
     $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
@@ -263,14 +264,14 @@ trait DebugTrait
     // $this->reassignCourtState($playerId);
   }
 
-  function debug_addCardToHand(string $cardId, int $playerId = null)
+  function debug_addCardToHand(string $cardId, int|null $playerId = null)
   {
     $card = Cards::get($cardId);
     $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
     Cards::move($cardId, ['hand', $playerId]);
   }
 
-  function debug_createArmy(string $region, string $coalition = null)
+  function debug_createArmy(string $region, string|null $coalition = null)
   {
     $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->regions[$region] && $this->loyalty[$coalition])) {
@@ -297,7 +298,7 @@ trait DebugTrait
     }
   }
 
-  function debug_createRoad(string $border, string $coalition = null)
+  function debug_createRoad(string $border, string|null $coalition = null)
   {
     $coalition = $coalition === null ? PaxPamirPlayers::get()->getLoyalty() : $coalition;
     if (!($this->borders[$border] && $this->loyalty[$coalition])) {
@@ -325,7 +326,7 @@ trait DebugTrait
     }
   }
 
-  function debug_createTribe(string $region, string $playerId = null)
+  function debug_createTribe(string $region, string|null $playerId = null)
   {
     if (!($this->regions[$region])) {
       return;
@@ -351,7 +352,7 @@ trait DebugTrait
     }
   }
 
-  function debug_createSpy(string $cardId, int $playerId = null)
+  function debug_createSpy(string $cardId, int|null $playerId = null)
   {
     $card = Cards::get($cardId);
     if (!Utils::startsWith($card['location'], "court")) {
@@ -381,7 +382,7 @@ trait DebugTrait
     }
   }
 
-  function debug_incPlayerRupees(int $rupees, string $playerId = null)
+  function debug_incPlayerRupees(int $rupees, string|null $playerId = null)
   {
     $rupees = intval($rupees);
     $playerId = $playerId === null ? PaxPamirPlayers::get()->getId() : intval($playerId);
@@ -408,7 +409,7 @@ trait DebugTrait
     Notifications::log('state', $state);
   }
 
-  function debug_createGift(int $value, string $playerId = null)
+  function debug_createGift(int $value, string|null $playerId = null)
   {
     $playerId = $this->debugGetPlayerId($playerId);
     $value = intval($value);
@@ -425,7 +426,7 @@ trait DebugTrait
     Tokens::move($cylinder['id'], $to);
   }
 
-  function debug_createPrize(string $cardId, string $playerId = null)
+  function debug_createPrize(string $cardId, string|null $playerId = null)
   {
     $playerId = $this->debugGetPlayerId($playerId);
     Cards::move($cardId, Locations::prizes($playerId));

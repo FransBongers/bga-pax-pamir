@@ -124,9 +124,8 @@ trait PlayerActionTrait
     unset($datas['canceledNotifIds']);
 
     $player = PaxPamirPlayers::getCurrent();
-    Notifications::smallRefreshHand($player);
     Notifications::smallRefreshInterface($datas);
-    
+    Notifications::smallRefreshHand($player);
 
     $this->gamestate->jumpToState(Globals::getLogState());
   }

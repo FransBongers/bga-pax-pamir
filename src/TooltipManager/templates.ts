@@ -299,7 +299,7 @@ const tplFavoredSuitMarkerToolTip = (): string => {
   );
 
   return `<div class="pp_suit_tooltip">
-            <div class="pp_favored_suit_marker" style="min-width: 30px; background-position: center; margin-left: -4px;"></div>
+            <div class="pp_favored_suit_marker_side" style="min-width: 30px; background-position: center; margin-left: -4px;"></div>
             <div class="pp_suit_tooltip_content">  
               <span class="pp_tooltip_title" >${title}</span>
               <span class="pp_tooltip_text">${text}</span>

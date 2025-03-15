@@ -1808,12 +1808,10 @@ var PPCardManager = (function (_super) {
             });
             var spyZoneId = 'spies_' + card.id;
             dojo.place("<div id=\"".concat(spyZoneId, "\" class=\"pp_spy_zone\"></div>"), card.id);
-            if (!this.game.spies[card.id]) {
-                this.game.spies[card.id] = new LineStock(this.game.cylinderManager, document.getElementById(spyZoneId), {
-                    center: false,
-                    gap: '0px',
-                });
-            }
+            this.game.spies[card.id] = new LineStock(this.game.cylinderManager, document.getElementById(spyZoneId), {
+                center: false,
+                gap: '0px',
+            });
         }
         div.classList.add('pp_card');
         if (card.id.includes('select')) {
@@ -2818,7 +2816,7 @@ var tplSuitToolTip = function (_a) {
 var tplFavoredSuitMarkerToolTip = function () {
     var title = _('FAVORED SUIT MARKER');
     var text = _('This marker is on the currently favored suit. This suit determines which cards take bonus actions and makes cards more expensive when the favored suit is military.');
-    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_favored_suit_marker\" style=\"min-width: 30px; background-position: center; margin-left: -4px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >".concat(title, "</span>\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
+    return "<div class=\"pp_suit_tooltip\">\n            <div class=\"pp_favored_suit_marker_side\" style=\"min-width: 30px; background-position: center; margin-left: -4px;\"></div>\n            <div class=\"pp_suit_tooltip_content\">  \n              <span class=\"pp_tooltip_title\" >".concat(title, "</span>\n              <span class=\"pp_tooltip_text\">").concat(text, "</span>\n            </div>\n          </div>");
 };
 var tplMarketMilitaryCostToolTip = function () {
     var title = _('CARD COST DOUBLED');

@@ -28,13 +28,13 @@ class PPCardManager extends CardManager<Card> {
 
       const spyZoneId = 'spies_' + card.id;
       dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, card.id);
-      if (!this.game.spies[card.id]) {
-        // ** setup for zone
-        this.game.spies[card.id] = new LineStock<Cylinder>(this.game.cylinderManager, document.getElementById(spyZoneId), {
-          center: false,
-          gap: '0px',
-        });
-      }
+      // if (!this.game.spies[card.id]) {
+      // ** setup for zone
+      this.game.spies[card.id] = new LineStock<Cylinder>(this.game.cylinderManager, document.getElementById(spyZoneId), {
+        center: false,
+        gap: '0px',
+      });
+      // }
     }
 
     // div.style.position = 'relative';

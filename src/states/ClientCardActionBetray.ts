@@ -10,7 +10,10 @@ class ClientCardActionBetrayState implements State {
   onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
     this.bribe = bribe;
     this.cardId = cardId;
-    this.updateInterfaceInitialStep();
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -59,7 +62,7 @@ class ClientCardActionBetrayState implements State {
     }
   }
 
-  private updateInterfaceConfirm({ betrayedCardId }: { betrayedCardId: string; }) {
+  private updateInterfaceConfirm({ betrayedCardId }: { betrayedCardId: string }) {
     this.game.clearPossible();
     const card = this.game.getCardInfo(betrayedCardId) as CourtCard;
     const node = dojo.byId(betrayedCardId);
@@ -102,7 +105,7 @@ class ClientCardActionBetrayState implements State {
     };
   }
 
-  private handleConfirm({ betrayedCardId }: { betrayedCardId: string;}) {
+  private handleConfirm({ betrayedCardId }: { betrayedCardId: string }) {
     debug('handleConfirm', betrayedCardId);
     this.game.takeAction({
       action: 'betray',
@@ -141,6 +144,6 @@ class ClientCardActionBetrayState implements State {
           this.updateInterfaceConfirm({ betrayedCardId: card.id });
         })
       );
-    })
+    });
   }
 }

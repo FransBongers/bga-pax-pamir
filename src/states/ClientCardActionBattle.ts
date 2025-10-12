@@ -13,7 +13,10 @@ class ClientCardActionBattleState implements State {
   onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
     this.bribe = bribe;
     this.cardId = cardId;
-    this.updateInterfaceInitialStep();
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -190,8 +193,8 @@ class ClientCardActionBattleState implements State {
     return REGIONS.filter((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
       const coalitionId = this.game.getCurrentPlayer().getLoyalty();
-      const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }))
-      
+      const enemyPieces = region.getEnemyPieces({ coalitionId }).filter((pieceId) => this.checkForCitadel({ pieceId, region: regionId }));
+
       if (enemyPieces.length === 0 || this.getNumberOfFriendlyArmiesInRegion({ region, coalitionId }) === 0) {
         return false;
       }

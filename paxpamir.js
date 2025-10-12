@@ -6493,10 +6493,14 @@ var ClientCardActionBattleState = (function () {
         this.game = game;
     }
     ClientCardActionBattleState.prototype.onEnteringState = function (_a) {
+        var _this = this;
         var cardId = _a.cardId, bribe = _a.bribe;
         this.bribe = bribe;
         this.cardId = cardId;
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     ClientCardActionBattleState.prototype.onLeavingState = function () { };
     ClientCardActionBattleState.prototype.updateInterfaceInitialStep = function () {
@@ -6727,10 +6731,14 @@ var ClientCardActionBetrayState = (function () {
         this.game = game;
     }
     ClientCardActionBetrayState.prototype.onEnteringState = function (_a) {
+        var _this = this;
         var cardId = _a.cardId, bribe = _a.bribe;
         this.bribe = bribe;
         this.cardId = cardId;
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     ClientCardActionBetrayState.prototype.onLeavingState = function () { };
     ClientCardActionBetrayState.prototype.updateInterfaceInitialStep = function () {
@@ -6844,11 +6852,15 @@ var ClientCardActionBuildState = (function () {
         this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
     }
     ClientCardActionBuildState.prototype.onEnteringState = function (props) {
+        var _this = this;
         this.cardId = (props === null || props === void 0 ? void 0 : props.cardId) ? props.cardId : null;
         this.bribe = props === null || props === void 0 ? void 0 : props.bribe;
         this.tempTokens = [];
         this.setMaxNumberToPlace();
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     ClientCardActionBuildState.prototype.onLeavingState = function () { };
     ClientCardActionBuildState.prototype.updateInterfaceInitialStep = function () {
@@ -7063,8 +7075,12 @@ var ClientCardActionGiftState = (function () {
         this.game = game;
     }
     ClientCardActionGiftState.prototype.onEnteringState = function (args) {
+        var _this = this;
         this.bribe = args.bribe;
-        this.updateInterfaceInitialStep(args);
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(args); });
     };
     ClientCardActionGiftState.prototype.onLeavingState = function () { };
     ClientCardActionGiftState.prototype.updateInterfaceInitialStep = function (_a) {
@@ -7107,7 +7123,7 @@ var ClientCardActionGiftState = (function () {
                 var _a, _b;
                 return _this.game.takeAction({
                     action: 'purchaseGift',
-                    data: { value: value, cardId: cardId, bribeAmount: (_b = (_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null, },
+                    data: { value: value, cardId: cardId, bribeAmount: (_b = (_a = _this.bribe) === null || _a === void 0 ? void 0 : _a.amount) !== null && _b !== void 0 ? _b : null },
                 });
             },
         });
@@ -7150,6 +7166,7 @@ var ClientCardActionMoveState = (function () {
         this.game = game;
     }
     ClientCardActionMoveState.prototype.onEnteringState = function (_a) {
+        var _this = this;
         var cardId = _a.cardId, bribe = _a.bribe;
         this.game.clearPossible();
         this.cardId = cardId;
@@ -7157,7 +7174,10 @@ var ClientCardActionMoveState = (function () {
         var cardInfo = this.game.getCardInfo(cardId);
         this.maxNumberOfMoves = cardInfo.rank;
         this.moves = {};
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     ClientCardActionMoveState.prototype.onLeavingState = function () { };
     ClientCardActionMoveState.prototype.updateInterfaceInitialStep = function () {
@@ -7640,13 +7660,17 @@ var ClientCardActionTaxState = (function () {
         this.maxPerPlayer = {};
     }
     ClientCardActionTaxState.prototype.onEnteringState = function (args) {
+        var _this = this;
         this.cardId = args.cardId;
         this.bribe = args.bribe;
         var cardInfo = this.game.getCardInfo(args.cardId);
         this.maxNumberToSelect = cardInfo.rank;
         this.numberSelected = 0;
         this.maxPerPlayer = {};
-        this.updateInterfaceInitialStep();
+        this.game
+            .framework()
+            .wait(1)
+            .then(function () { return _this.updateInterfaceInitialStep(); });
     };
     ClientCardActionTaxState.prototype.onLeavingState = function () { };
     ClientCardActionTaxState.prototype.updateInterfaceInitialStep = function () {
@@ -7853,7 +7877,7 @@ var ClientCardActionTaxState = (function () {
                 you: '${you}',
                 number: this.maxNumberToSelect,
                 remaining: this.maxNumberToSelect - this.numberSelected,
-                tkn_rupee: _('rupee(s)')
+                tkn_rupee: _('rupee(s)'),
             },
         });
     };

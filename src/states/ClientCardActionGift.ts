@@ -8,7 +8,10 @@ class ClientCardActionGiftState implements State {
 
   onEnteringState(args: ClientCardActionStateArgs) {
     this.bribe = args.bribe;
-    this.updateInterfaceInitialStep(args);
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep(args));
   }
 
   onLeavingState() {}
@@ -62,7 +65,7 @@ class ClientCardActionGiftState implements State {
       callback: () =>
         this.game.takeAction({
           action: 'purchaseGift',
-          data: { value, cardId, bribeAmount: this.bribe?.amount ?? null, },
+          data: { value, cardId, bribeAmount: this.bribe?.amount ?? null },
         }),
     });
     this.game.addDangerActionButton({

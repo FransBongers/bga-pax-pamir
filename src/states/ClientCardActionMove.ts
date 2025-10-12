@@ -22,7 +22,10 @@ class ClientCardActionMoveState implements State {
     const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     this.maxNumberOfMoves = cardInfo.rank;
     this.moves = {};
-    this.updateInterfaceInitialStep();
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}

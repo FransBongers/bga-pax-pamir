@@ -17,7 +17,10 @@ class ClientCardActionBuildState implements State {
     this.bribe = props?.bribe;
     this.tempTokens = [];
     this.setMaxNumberToPlace();
-    this.updateInterfaceInitialStep();
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}

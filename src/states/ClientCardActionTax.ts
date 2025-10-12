@@ -29,7 +29,10 @@ class ClientCardActionTaxState implements State {
     this.maxNumberToSelect = cardInfo.rank;
     this.numberSelected = 0;
     this.maxPerPlayer = {};
-    this.updateInterfaceInitialStep();
+    this.game
+      .framework()
+      .wait(1)
+      .then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -183,7 +186,7 @@ class ClientCardActionTaxState implements State {
         const hasCardRuledByPlayer = player
           .getCourtZone()
           .getCards()
-          .some(({region: cardRegion}: CourtCard) => {
+          .some(({ region: cardRegion }: CourtCard) => {
             // const cardRegion = (this.game.getCardInfo(cardId) as CourtCard).region;
             if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {
               return true;
@@ -216,7 +219,7 @@ class ClientCardActionTaxState implements State {
           this.handleMarketRupeeClicked({ rupeeId: node.id });
         })
       );
-    })
+    });
 
     this.getPlayersToTax().forEach((playerId) => {
       const node = dojo.byId(`rupees_tableau_${playerId}`);
@@ -227,7 +230,7 @@ class ClientCardActionTaxState implements State {
           this.handlePlayerRupeeClicked({ rupeeId: node.id });
         })
       );
-    })
+    });
   }
 
   private updateNumberSelected() {
@@ -280,7 +283,7 @@ class ClientCardActionTaxState implements State {
         you: '${you}',
         number: this.maxNumberToSelect,
         remaining: this.maxNumberToSelect - this.numberSelected,
-        tkn_rupee: _('rupee(s)')
+        tkn_rupee: _('rupee(s)'),
       },
     });
   }

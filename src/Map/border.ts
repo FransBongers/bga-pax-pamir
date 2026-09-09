@@ -7,18 +7,18 @@
 // .########...#######..##.....##.########..########.##.....##
 
 class Border {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private border: string;
-  private roadZone: TokenManualPositionStock<CoalitionBlock>;
+  private roadZone!: TokenManualPositionStock<CoalitionBlock>;
 
-  constructor({ game, border }: { game: PaxPamirGame; border: string }) {
+  constructor({ game, border }: { game: GameAlias; border: string }) {
     this.game = game;
     this.border = border;
 
     this.setupBorder({ gamedatas: game.gamedatas });
   }
 
-  setupBorder({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupBorder({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const borderGamedatas = gamedatas.map.borders[this.border];
     this.createBorderZone();
     this.roadZone.addCards(
@@ -26,24 +26,26 @@ class Border {
         ...token,
         coalition: token.id.split('_')[1] as Coalition,
         type: 'road',
-      }))
+      })),
     );
   }
 
   clearInterface() {
     this.roadZone.removeAll();
-    this.roadZone = undefined;
   }
 
   // TODO: implement custom pattern and update.
   createBorderZone() {
-    const border = this.border;
+    // const border = this.border;
+    if (this.roadZone) {
+      return;
+    }
     this.roadZone = new TokenManualPositionStock<CoalitionBlock>(
       this.game.coalitionBlockManager,
-      document.getElementById(`pp_${this.border}_border`),
+      document.getElementById(`pp_${this.border}_border`)!,
       {},
       (element: HTMLElement, cards: CoalitionBlock[], lastCard: CoalitionBlock, stock: TokenManualPositionStock<CoalitionBlock>) =>
-        this.updateDislay(element, cards, lastCard, stock)
+        this.updateDislay(element, cards, lastCard, stock),
     );
   }
 
@@ -151,11 +153,12 @@ class Border {
     element: HTMLElement,
     blocks: CoalitionBlock[],
     lastCard: CoalitionBlock,
-    stock: TokenManualPositionStock<CoalitionBlock>
+    stock: TokenManualPositionStock<CoalitionBlock>,
   ) {
     const pattern = this.getCustomPattern({ border: this.border });
     const itemCount = blocks.length;
     blocks.forEach((block, index) => {
+      // @ts-ignore
       const { x: left, y: top } = pattern({ index, itemCount });
       const div = stock.getCardElement(block);
       div.style.top = `calc(var(--tokenScale) * ${top}px)`;

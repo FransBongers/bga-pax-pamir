@@ -7,20 +7,20 @@
 //  .##........########.##.....##....##....########.##.....##
 
 class PPPlayer {
-  protected court: LineStock<Card>;
-  private events: LineStock<Card>;
-  private cylinders: LineStock<Cylinder>;
-  private handCards: string[];
-  private hand: LineStock<Card>;
-  private handVoid: VoidStock<Card>;
-  protected game: PaxPamirGame;
+  protected court!: LineStock<Card>;
+  private events!: LineStock<Card>;
+  private cylinders!: LineStock<Cylinder>;
+  private handCards!: string[];
+  private hand!: LineStock<Card>;
+  private handVoid!: VoidStock<Card>;
+  protected game: GameAlias;
   private gifts: Record<string, LineStock<Cylinder>> = {};
-  private modal: Modal;
+  private modal!: Modal;
   protected playerColor: string;
   private playerHexColor: string;
   protected playerId: number;
   private playerName: string;
-  private prizes: LineStock<Card>;
+  protected prizes!: LineStock<Card>;
   protected counters: {
     cards: Counter;
     cardsTableau: Counter;
@@ -54,10 +54,10 @@ class PPPlayer {
   };
 
   // private player: PaxPamirPlayer;
-  private rulerTokens: LineStock<RulerToken>;
-  private loyalty: Coalition; // TODO: check start of game value?
+  private rulerTokens!: LineStock<RulerToken>;
+  private loyalty!: Coalition; // TODO: check start of game value?
 
-  constructor({ game, player }: { game: PaxPamirGame; player: PaxPamirPlayer }) {
+  constructor({ game, player }: { game: GameAlias; player: PaxPamirPlayer }) {
     this.game = game;
     const playerId = player.id;
     this.playerId = Number(playerId);
@@ -68,7 +68,9 @@ class PPPlayer {
     const gamedatas = game.gamedatas;
 
     if (this.playerId === this.game.getPlayerId()) {
-      dojo.place(tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }), 'pp_player_tableaus', 1);
+      document
+        .getElementById('pp_player_tableaus')
+        ?.insertAdjacentHTML('afterbegin', tplPlayerHand({ playerId: this.playerId, playerName: this.playerName }));
     }
 
     this.setupPlayer({ gamedatas });
@@ -82,7 +84,7 @@ class PPPlayer {
   // .##....##.##..........##....##.....##.##.......
   // ..######..########....##.....#######..##.......
 
-  updatePlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  updatePlayer({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     this.setupCourt({ playerGamedatas });
@@ -108,7 +110,7 @@ class PPPlayer {
   }
 
   // Setup functions
-  setupPlayer({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupPlayer({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const playerGamedatas = gamedatas.paxPamirPlayers[this.playerId];
 
     this.setupCourt({ playerGamedatas });
@@ -162,7 +164,7 @@ class PPPlayer {
     this.modal.updateContent(
       tplPlayerHandModal({
         cards: this.handCards,
-      })
+      }),
     );
     this.handCards.forEach((cardId) => {
       this.game.tooltipManager.addTooltipToCard({ cardId, cardIdSuffix: '_modal' });
@@ -200,35 +202,40 @@ class PPPlayer {
   }
 
   async setupCourt({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.court = new LineStock<Card>(this.game.cardManager, document.getElementById(`pp_court_player_${this.playerId}`), {
-      gap: '8px',
-      sort: sortFunction('state'),
-    });
+    if (!this.court) {
+      this.court = new LineStock<Card>(this.game.cardManager, document.getElementById(`pp_court_player_${this.playerId}`)!, {
+        gap: '8px',
+        sort: sortFunction('state'),
+      });
+    }
 
     await this.court.addCards(
       playerGamedatas.court.cards.map((data) => ({
         ...data,
         ...this.game.getCardInfo(data.id),
-      }))
+      })),
     );
 
     playerGamedatas.court.cards.map(async (card: Token) => {
       const cardId = card.id;
 
-      this.game.spies[cardId].addCards(
+      this.game.cardManager.spies[cardId].addCards(
         (playerGamedatas.court.spies[cardId] || []).map((token) => ({
           ...token,
+          // @ts-ignore
           color: this.game.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color,
-        }))
+        })),
       );
     });
   }
 
   setupEvents({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.events = new LineStock<Card>(this.game.cardManager, document.getElementById(`player_tableau_events_${this.playerId}`), {
-      center: false,
-      gap: '8px',
-    });
+    if (!this.events) {
+      this.events = new LineStock<Card>(this.game.cardManager, document.getElementById(`player_tableau_events_${this.playerId}`)!, {
+        center: false,
+        gap: '8px',
+      });
+    }
 
     const node = dojo.byId(`pp_player_events_container_${this.playerId}`);
     if (playerGamedatas.events.length > 0) {
@@ -240,44 +247,52 @@ class PPPlayer {
       playerGamedatas.events.map((token) => ({
         ...token,
         ...this.game.getCardInfo(token.id),
-      }))
+      })),
     );
   }
 
   setupCylinders({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.cylinders = new LineStock<Cylinder>(this.game.cylinderManager, document.getElementById(`pp_cylinders_player_${this.playerId}`), {
-      center: false,
-      gap: '0px',
-      sort: sortFunction('state'),
-    });
+    if (!this.cylinders) {
+      this.cylinders = new LineStock<Cylinder>(
+        this.game.cylinderManager,
+        document.getElementById(`pp_cylinders_player_${this.playerId}`)!,
+        {
+          center: false,
+          gap: '0px',
+          sort: sortFunction('state'),
+        },
+      );
+    }
     this.cylinders.addCards(
       playerGamedatas.cylinders.map((cylinder) => ({
         ...cylinder,
         color: playerGamedatas.color,
-      }))
+      })),
     );
   }
 
   setupGifts({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up gift zones
     ['2', '4', '6'].forEach((value) => {
-      this.gifts[value] = new LineStock<Cylinder>(
-        this.game.cylinderManager,
-        document.getElementById(`pp_gift_${value}_zone_${this.playerId}`)
-      );
+      if (!this.gifts[value]) {
+        this.gifts[value] = new LineStock<Cylinder>(
+          this.game.cylinderManager,
+          document.getElementById(`pp_gift_${value}_zone_${this.playerId}`)!,
+        );
+      }
     });
 
     // Add gifts to zones
     const playerGifts = playerGamedatas.gifts;
     Object.keys(playerGifts).forEach((giftValue) => {
-      Object.keys(playerGifts[giftValue]).forEach((cylinderId) => {
+      Object.keys(playerGifts[giftValue as '2' | '4' | '6']).forEach((cylinderId) => {
         this.gifts[giftValue].addCard(
           this.game.getCylinder({
             id: cylinderId,
             state: 0,
             used: 0,
             location: `gifts_${this.playerId}`,
-          })
+          }),
         );
       });
     });
@@ -287,7 +302,6 @@ class PPPlayer {
     this.handCards = [];
     if (this.playerId === this.game.getPlayerId()) {
       this.hand.removeAll();
-      this.hand = undefined;
     }
   }
 
@@ -299,9 +313,11 @@ class PPPlayer {
     if (!(this.playerId === this.game.getPlayerId())) {
       return;
     }
-    this.hand = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_player_hand_cards'), {
-      center: false,
-    });
+    if (!this.hand) {
+      this.hand = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_player_hand_cards')!, {
+        center: false,
+      });
+    }
 
     this.hand.addCards(hand.map((token) => ({ ...token, ...this.game.getCardInfo(token.id) })));
   }
@@ -309,6 +325,7 @@ class PPPlayer {
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     // Set up panels
     const player_board_div = $('player_board_' + this.playerId);
+    // @ts-ignore
     dojo.place(tplPlayerBoard({ playerId: this.playerId }), player_board_div);
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
@@ -346,8 +363,8 @@ class PPPlayer {
   updatePlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
     const counts = playerGamedatas.counts;
 
-    if (this.game.framework().scoreCtrl?.[this.playerId]) {
-      this.game.framework().scoreCtrl[this.playerId].setValue(Number(playerGamedatas.score));
+    if (this.game.bga.playerPanels.getScoreCounter(this.playerId)) {
+      this.game.bga.playerPanels.getScoreCounter(this.playerId).setValue(Number(playerGamedatas.score));
     }
 
     // Set all values in player panels
@@ -376,11 +393,13 @@ class PPPlayer {
   }
 
   setupPrizes({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
-    this.prizes = new LineStock<Card>(this.game.cardManager, document.getElementById(`pp_prizes_${this.playerId}`), {
-      direction: 'column',
-      center: false,
-      wrap: 'nowrap'
-    });
+    if (!this.prizes) {
+      this.prizes = new LineStock<Card>(this.game.cardManager, document.getElementById(`pp_prizes_${this.playerId}`)!, {
+        direction: 'column',
+        center: false,
+        wrap: 'nowrap',
+      });
+    }
 
     const numberOfPrizes = playerGamedatas.prizes.length;
     this.updatePrizesStyle({ numberOfPrizes });
@@ -389,12 +408,12 @@ class PPPlayer {
       playerGamedatas.prizes.map((token) => ({
         ...token,
         ...this.game.getCardInfo(token.id),
-      }))
+      })),
     );
   }
 
   updatePrizesStyle({ numberOfPrizes }: { numberOfPrizes: number }) {
-    const node = document.getElementById(`pp_prizes_${this.playerId}`);
+    const node = document.getElementById(`pp_prizes_${this.playerId}`)!;
     let height = 0;
     let marginBottom = 0;
     if (numberOfPrizes > 0) {
@@ -405,14 +424,16 @@ class PPPlayer {
     node.style.height = `calc(var(--cardScale) * ${height}px)`;
   }
 
-  setupRulerTokens({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    this.rulerTokens = new LineStock<RulerToken>(
-      this.game.rulerTokenManager,
-      document.getElementById(`pp_ruler_tokens_player_${this.playerId}`),
-      {
-        center: false,
-      }
-    );
+  setupRulerTokens({ gamedatas }: { gamedatas: GamedatasAlias }) {
+    if (!this.rulerTokens) {
+      this.rulerTokens = new LineStock<RulerToken>(
+        this.game.rulerTokenManager,
+        document.getElementById(`pp_ruler_tokens_player_${this.playerId}`)!,
+        {
+          center: false,
+        },
+      );
+    }
 
     Object.keys(gamedatas.map.rulers).forEach((region: string) => {
       if (gamedatas.map.rulers[region] === Number(this.playerId)) {
@@ -427,13 +448,13 @@ class PPPlayer {
     });
   }
 
-  setupWakhanDeck({ wakhanCards }: { wakhanCards: PaxPamirGamedatas['wakhanCards'] }) {
+  setupWakhanDeck({ wakhanCards }: { wakhanCards: GamedatasAlias['wakhanCards'] }) {
     const deckNode = dojo.byId('pp_wakhan_deck');
 
     deckNode.classList.value = '';
     deckNode.classList.add('pp_wakhan_card');
-    if (wakhanCards.deck.topCard !== null) {
-      const wakhanCardId = wakhanCards.deck.topCard.id;
+    if (wakhanCards?.deck.topCard !== null) {
+      const wakhanCardId = wakhanCards?.deck.topCard.id;
       deckNode.classList.add(`pp_${wakhanCardId}_back`);
       // this.game.tooltipManager.addWakhanCardTooltip({ wakhanCardId, location: 'deck' });
     } else {
@@ -441,13 +462,13 @@ class PPPlayer {
     }
 
     const discardNode = dojo.byId('pp_wakhan_discard');
-    if (wakhanCards.discardPile.topCard) {
+    if (wakhanCards?.discardPile.topCard) {
       discardNode.classList.value = '';
       discardNode.classList.add('pp_wakhan_card', `pp_${wakhanCards.discardPile.topCard.id}_front`);
     } else {
       discardNode.style.opacity = '0';
     }
-    if (wakhanCards.deck.topCard && wakhanCards.discardPile.topCard) {
+    if (wakhanCards?.deck.topCard && wakhanCards.discardPile.topCard) {
       this.game.tooltipManager.addWakhanCardTooltip({
         wakhanDeckCardId: wakhanCards.deck.topCard.id,
         wakhanDiscardCardId: wakhanCards.discardPile.topCard.id,
@@ -457,23 +478,15 @@ class PPPlayer {
 
   clearInterface() {
     this.court.removeAll();
-    // dojo.empty(this.court.getContainerId());
-    this.court = undefined;
     this.cylinders.removeAll();
-    this.cylinders = undefined;
     this.rulerTokens.removeAll();
-    this.rulerTokens = undefined;
     ['2', '4', '6'].forEach((value) => {
       this.gifts[value].removeAll();
-      this.gifts[value] = undefined;
     });
     this.events.removeAll();
-    this.events = undefined;
     this.prizes.removeAll();
-    this.prizes = undefined;
     if (this.game.gameOptions.openHands && this.playerId === this.game.getPlayerId()) {
       this.hand.removeAll();
-      this.hand = undefined;
     }
   }
 
@@ -572,13 +585,18 @@ class PPPlayer {
   }
 
   getTaxShelter(): number {
-    return this.court
-      .getCards()
-      .map(({ id }) => this.game.getCardInfo(id))
-      .filter((card: CourtCard) => card.suit === ECONOMIC)
-      .reduce((total: number, current: CourtCard) => {
-        return total + current.rank;
-      }, 0);
+    // @ts-ignore
+    return (
+      this.court
+        .getCards()
+        .map(({ id }) => this.game.getCardInfo(id))
+        // @ts-ignore
+        .filter((card: CourtCard) => card.suit === ECONOMIC)
+        // @ts-ignore
+        .reduce((total: number, current: CourtCard) => {
+          return total + current.rank;
+        }, 0)
+    );
   }
 
   setCounter({ counter, value }: PlayerCounterInput): void {
@@ -729,7 +747,7 @@ class PPPlayer {
   }
 
   hasSpecialAbility({ specialAbility }: { specialAbility: string }): boolean {
-    return this.court.getCards().some((card: CourtCard) => card.specialAbility === specialAbility);
+    return (this.court.getCards() as CourtCard[]).some((card: CourtCard) => card.specialAbility === specialAbility);
   }
 
   public isWakhan(): boolean {
@@ -829,7 +847,7 @@ class PPPlayer {
   }
 
   async payToPlayer({ playerId, rupees }: { playerId: number; rupees: number }): Promise<void> {
-    const element = dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${playerId}`);
+    const element: HTMLElement = dojo.place(tplRupee({ rupeeId: 'tempRupee' }), `rupees_${playerId}`)! as unknown as HTMLElement;
     const fromRect = $(`rupees_${this.playerId}`)?.getBoundingClientRect();
     this.incCounter({ counter: 'rupees', value: -rupees });
     await this.game.animationManager.play(
@@ -837,7 +855,7 @@ class PPPlayer {
         element,
         transitionTimingFunction: 'linear',
         fromRect,
-      })
+      }),
     );
     element.remove();
     this.game.playerManager.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: rupees });
@@ -851,7 +869,7 @@ class PPPlayer {
       await this.removeSideSelectFromCourt();
       await this.court.addCard(cardInfo);
     } else {
-      await this.court.addCard(cardInfo, { fromElement: document.getElementById(`cards_${this.playerId}`) });
+      await this.court.addCard(cardInfo, { fromElement: document.getElementById(`cards_${this.playerId}`)! });
     }
 
     this.incCounter({ counter: suit, value: rank });
@@ -876,8 +894,9 @@ class PPPlayer {
         remove: true,
       });
       this.game.cardManager.removeCard(card);
-      this.game.spies[card.id].remove();
-      this.game.spies[card.id] = undefined;
+      this.game.cardManager.spies[card.id].remove();
+      // @ts-ignore
+      this.game.cardManager.spies[card.id] = undefined;
     }
     this.incCounter({ counter: 'cards', value: 1 });
     this.updateHandCards({ cardId: card.id, action: 'ADD' });
@@ -909,19 +928,20 @@ class PPPlayer {
   async takePrize({ cardId }: { cardId: string }): Promise<void> {
     this.updatePrizesStyle({ numberOfPrizes: this.prizes.getCards().length + 1 });
     const node = $(cardId);
-    node.style.zIndex = 0;
+    node.style.zIndex = '0';
     await this.prizes.addCard(
       this.game.getCard({
         id: cardId,
         state: 0,
         used: 0,
         location: `prizes_${this.playerId}`,
-      })
+      }),
     );
     this.incCounter({ counter: 'influence', value: 1 });
   }
 
   // TODO (remove cards of other loyalties, remove gifts, remove prizes)
+  // @ts-ignore
   updatePlayerLoyalty({ coalition }) {
     this.loyalty = coalition;
     dojo

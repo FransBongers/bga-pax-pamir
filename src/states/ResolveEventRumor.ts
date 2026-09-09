@@ -1,7 +1,7 @@
 class ResolveEventRumor implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -31,9 +31,6 @@ class ResolveEventRumor implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a player'),
-      args: {
-        you: '${you}',
-      },
     });
     const players = this.game.playerManager.getPlayers();
     players.forEach((player) => {

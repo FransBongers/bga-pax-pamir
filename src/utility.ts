@@ -7,7 +7,6 @@ const capitalizeFirstLetter = (string: string) => {
 
 const getKeywords = ({ playerColor = '#000' }: { playerColor?: string }) => {
   return {
-    you: '${you}',
     playerName: `<span style="font-weight:bold;color:#${playerColor};">\${playerName}</span>`,
     herat: '<div class="pp_keyword_token pp_herat_icon"></div>',
     kabul: '<div class="pp_keyword_token pp_kabul_icon"></div>',
@@ -53,6 +52,17 @@ const pxNumber = (px?: string): number => {
   } else {
     return 0;
   }
-}
+};
 
 const getCoalitionForBlock = (coalitionBlockId: string): Coalition => coalitionBlockId.split('_')[1] as Coalition;
+
+const wait = async (ms: number): Promise<void> => {
+  return Interaction.use().wait(ms);
+};
+
+const formatStringRecursive = (
+  log: string,
+  args: Record<string, unknown>,
+): string => {
+  return Interaction.use().formatStringRecursive(log, args);
+};

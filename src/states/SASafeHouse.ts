@@ -1,7 +1,7 @@
 class SASafeHouseState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -34,26 +34,24 @@ class SASafeHouseState implements State {
     const player = this.game.getCurrentPlayer();
     const safeHouseCards = player.getCourtCardsWithSpecialAbility({ specialAbility: SA_SAFE_HOUSE });
     if (safeHouseCards.length === 1) {
-      this.updateInterfaceConfirmSafeHouse({card: safeHouseCards[0], showCancelButton: false});
+      this.updateInterfaceConfirmSafeHouse({ card: safeHouseCards[0], showCancelButton: false });
     } else {
       this.game.clientUpdatePageTitle({
         text: _('${you} may select a card to place a spy on'),
-        args: {
-          you: '${you}',
-        },
       });
       safeHouseCards.forEach((card: CourtCard) => {
         const node = dojo.byId(card.id);
-        dojo.addClass(node, PP_SELECTABLE);
-        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmSafeHouse({ card, showCancelButton: true })));
-      })
+        node.classList.add(PP_SELECTABLE);
+        this.game._connections.push(
+          dojo.connect(node, 'onclick', () => this.updateInterfaceConfirmSafeHouse({ card, showCancelButton: true })),
+        );
+      });
       this.game.addDangerActionButton({
         id: 'do_not_place_btn',
         text: _('Do not place spy'),
         callback: () => this.game.takeAction({ action: 'specialAbilitySafeHouse', data: { cardId: null } }),
       });
-      // If player has both cards enable step where player selects on which card to place spy 
-
+      // If player has both cards enable step where player selects on which card to place spy
     }
 
     // this.setPlaceSpyCardsSelectable({ regionId });
@@ -61,8 +59,8 @@ class SASafeHouseState implements State {
 
   private updateInterfaceConfirmSafeHouse({ card, showCancelButton }: { card: CourtCard; showCancelButton: boolean }) {
     this.game.clearPossible();
-    const node = dojo.byId(card.id)
-    dojo.addClass(node, PP_SELECTED);
+    const node = dojo.byId(card.id);
+    node.classList.add(PP_SELECTED);
     this.game.clientUpdatePageTitle({
       text: _('Place spy on ${cardName}?'),
       args: {

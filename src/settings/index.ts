@@ -1,7 +1,7 @@
 class Settings {
-  protected game: PaxPamirGame;
+  protected game: GameAlias;
 
-  private modal: Modal;
+  private modal!: Modal;
   private ROOT: HTMLElement = document.documentElement;
   public settings: Record<string, string | number> = {};
 
@@ -17,7 +17,7 @@ class Settings {
     },
   ];
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     const gamedatas = game.gamedatas;
 
@@ -37,7 +37,7 @@ class Settings {
   updateInterface({
     gamedatas,
   }: {
-    gamedatas: PaxPamirGamedatas;
+    gamedatas: GamedatasAlias;
   }) {}
 
   // ..######..########.########.##.....##.########.
@@ -51,7 +51,7 @@ class Settings {
   private addButton({
     gamedatas,
   }: {
-    gamedatas: PaxPamirGamedatas;
+    gamedatas: GamedatasAlias;
   }) {
     const configPanel = document.getElementById('info_panel_buttons');
     if (configPanel) {
@@ -62,7 +62,7 @@ class Settings {
   private setupModal({
     gamedatas,
   }: {
-    gamedatas: PaxPamirGamedatas;
+    gamedatas: GamedatasAlias;
   }) {
     this.modal = new Modal(`settings_modal`, {
       class: 'settings_modal',
@@ -80,7 +80,7 @@ class Settings {
   }
 
   // Setup functions
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.addButton({ gamedatas });
     this.setupModal({ gamedatas });
     this.setupModalContent();
@@ -141,8 +141,8 @@ class Settings {
 
         // Call change method to update interface based on current value
         const methodName = this.getMethodName({ id });
-        if (setting.onChangeInSetup && this[methodName]) {
-          this[methodName](localValue ? localValue : setting.defaultValue);
+        if (setting.onChangeInSetup && this[methodName as keyof this]) {
+          (this[methodName as keyof this] as Function)(localValue ? localValue : setting.defaultValue);
         }
 
         // Add content to modal
@@ -164,6 +164,7 @@ class Settings {
           );
           const controlId = `setting_${setting.id}`;
           $(controlId).addEventListener('change', () => {
+            // @ts-ignore
             const value = $(controlId).value;
             this.changeSetting({ id: setting.id, value });
           });
@@ -189,6 +190,7 @@ class Settings {
           };
 
           noUiSlider.create($('setting_' + setting.id), sliderConfig);
+          // @ts-ignore
           $('setting_' + setting.id).noUiSlider.on('slide', (arg) =>
             this.changeSetting({ id: setting.id, value: arg[0] as string })
           );
@@ -211,8 +213,8 @@ class Settings {
     localStorage.setItem(this.getLocalStorageKey({ id }), value);
     const methodName = this.getMethodName({ id });
 
-    if (this[methodName]) {
-      this[methodName](value);
+    if (this[methodName as keyof this]) {
+      (this[methodName as keyof this] as Function)(value);
     }
   }
 
@@ -252,16 +254,16 @@ class Settings {
   public onChangeAnimationSpeedSetting(value: number) {
     const duration = 2100 - value;
     debug('onChangeAnimationSpeedSetting', duration);
-    this.game.animationManager.getSettings().duration = duration;
+    this.game.animationManager.getSettings()!.duration = duration;
   }
 
   public onChangeShowAnimationsSetting(value: string) {
     if (value === PREF_ENABLED) {
-      this.game.animationManager.getSettings().duration = Number(
+      this.game.animationManager.getSettings()!.duration = Number(
         this.settings[PREF_ANIMATION_SPEED]
       );
     } else {
-      this.game.animationManager.getSettings().duration = 0;
+      this.game.animationManager.getSettings()!.duration = 0;
     }
     this.checkAnmimationSpeedVisisble();
   }
@@ -293,7 +295,7 @@ class Settings {
   private changeTab({ id }: { id: SettingsTabId }) {
     const currentTab = document.getElementById(
       `settings_modal_tab_${this.selectedTab}`
-    );
+    )!;
     const currentTabContent = document.getElementById(
       `settings_modal_tab_content_${this.selectedTab}`
     );
@@ -303,7 +305,7 @@ class Settings {
     }
 
     this.selectedTab = id;
-    const tab = document.getElementById(`settings_modal_tab_${id}`);
+    const tab = document.getElementById(`settings_modal_tab_${id}`)!;
     const tabContent = document.getElementById(
       `settings_modal_tab_content_${this.selectedTab}`
     );

@@ -1,7 +1,7 @@
 // class ResolveEventConfidenceFailureState implements State {
-//   private game: PaxPamirGame;
+//   private game: GameAlias;
 
-//   constructor(game: PaxPamirGame) {
+//   constructor(game: GameAlias) {
 //     this.game = game;
 //   }
 

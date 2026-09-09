@@ -1,7 +1,7 @@
 class ResolveEventPashtunwaliValuesState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -31,9 +31,6 @@ class ResolveEventPashtunwaliValuesState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a suit to favor'),
-      args: {
-        you: '${you}',
-      },
     });
     SUITS.forEach((suit) => {
       const name = this.game.gamedatas.staticData.suits[suit].name;

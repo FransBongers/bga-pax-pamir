@@ -1,8 +1,8 @@
 class PlaceSpyState implements State {
-  private game: PaxPamirGame;
-  private selectedPiece: string | null;
+  private game: GameAlias;
+  private selectedPiece!: string | null;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -40,7 +40,7 @@ class PlaceSpyState implements State {
 
   private updateInterfaceConfirmPlaceSpy({ cardId }: { cardId: string }) {
     this.game.clearPossible();
-    document.getElementById(cardId).classList.add('pp_selected');
+    document.getElementById(cardId)!.classList.add('pp_selected');
     if (this.selectedPiece) {
       this.setPieceSelected();
     }
@@ -71,17 +71,17 @@ class PlaceSpyState implements State {
   //  ..#######.....##....####.########.####....##.......##...
 
   private setPieceSelected() {
-    const node = dojo.byId(this.selectedPiece);
+    const node = dojo.byId(this.selectedPiece as string);
     if (node) {
-      dojo.addClass(node, PP_SELECTED);
+      node.classList.add(PP_SELECTED);
     }
   }
 
   setPlaceSpyCardsSelectable({ regionId }: { regionId: string }) {
     dojo.query(`.pp_court .pp_card.pp_${regionId}`).forEach((node: HTMLElement, index: number) => {
       const cardId = node.id;
-      dojo.addClass(node, 'pp_selectable');
-      this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
+      node.classList.add(PP_SELECTABLE);
+      this.game._connections.push(dojo.connect(node, 'onclick', () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
     });
   }
 }

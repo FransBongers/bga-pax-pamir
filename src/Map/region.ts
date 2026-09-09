@@ -7,18 +7,18 @@
 // .##.....##.########..######...####..#######..##....##
 
 class Region {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private region: string;
-  private ruler: number | null;
-  private armyZone: TokenManualPositionStock<CoalitionBlock>;
-  private tribeZone: TokenManualPositionStock<Cylinder>;
-  private rulerZone: LineStock<RulerToken>;
+  private ruler!: number | null;
+  private armyZone!: TokenManualPositionStock<CoalitionBlock>;
+  private tribeZone!: TokenManualPositionStock<Cylinder>;
+  private rulerZone!: LineStock<RulerToken>;
   // clienttranslated name of region
-  private name: string;
+  private name!: string;
   // array with ids of all connected borders
-  public borders: string[];
+  public borders!: string[];
 
-  constructor({ game, region }: { game: PaxPamirGame; region: string }) {
+  constructor({ game, region }: { game: GameAlias; region: string }) {
     // console.log('constructor Region ', region);
     this.game = game;
     this.region = region;
@@ -34,7 +34,7 @@ class Region {
   // .##....##.##..........##....##.....##.##.......
   // ..######..########....##.....#######..##.......
 
-  setupRegion({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupRegion({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const regionGamedatas: RegionGamedatas = gamedatas.map.regions[this.region];
     this.name = regionGamedatas.name;
     this.borders = regionGamedatas.borders;
@@ -44,20 +44,23 @@ class Region {
   }
 
   setupArmyZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
-    this.armyZone = new TokenManualPositionStock<CoalitionBlock>(
-      this.game.coalitionBlockManager,
-      document.getElementById(`pp_${this.region}_armies`),
-      {},
-      (element: HTMLElement, cards: CoalitionBlock[], lastCard: CoalitionBlock, stock: TokenManualPositionStock<CoalitionBlock>) =>
-        updateZoneDislay(this.getPatternForArmyZone(), element, cards, lastCard, stock)
-    );
+    if (!this.armyZone) {
+      this.armyZone = new TokenManualPositionStock<CoalitionBlock>(
+        this.game.coalitionBlockManager,
+        document.getElementById(`pp_${this.region}_armies`)!,
+        {},
+        (element: HTMLElement, cards: CoalitionBlock[], lastCard: CoalitionBlock, stock: TokenManualPositionStock<CoalitionBlock>) =>
+          // @ts-ignore
+          updateZoneDislay(this.getPatternForArmyZone(), element, cards, lastCard, stock),
+      );
+    }
 
     this.armyZone.addCards(
       regionGamedatas.armies.map((token) => ({
         ...token,
         coalition: token.id.split('_')[1] as Coalition,
         type: 'army',
-      }))
+      })),
     );
   }
 
@@ -71,14 +74,16 @@ class Region {
     };
   }
 
-  setupRulerZone({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    this.rulerZone = new LineStock<RulerToken>(
-      this.game.rulerTokenManager,
-      document.getElementById(`pp_position_ruler_token_${this.region}`),
-      {
-        center: false,
-      }
-    );
+  setupRulerZone({ gamedatas }: { gamedatas: GamedatasAlias }) {
+    if (!this.rulerZone) {
+      this.rulerZone = new LineStock<RulerToken>(
+        this.game.rulerTokenManager,
+        document.getElementById(`pp_position_ruler_token_${this.region}`)!,
+        {
+          center: false,
+        },
+      );
+    }
 
     this.ruler = gamedatas.map.rulers[this.region];
     if (this.ruler === null) {
@@ -87,29 +92,33 @@ class Region {
   }
 
   setupTribeZone({ regionGamedatas }: { regionGamedatas: RegionGamedatas }) {
-    this.tribeZone = new TokenManualPositionStock<Cylinder>(
-      this.game.cylinderManager,
-      document.getElementById(`pp_${this.region}_tribes`),
-      {},
-      (element: HTMLElement, cards: Cylinder[], lastCard: Cylinder, stock: TokenManualPositionStock<Cylinder>) =>
-        updateZoneDislay(this.getPatternForTribeZone(), element, cards, lastCard, stock)
-    );
+    if (!this.tribeZone) {
+      this.tribeZone = new TokenManualPositionStock<Cylinder>(
+        this.game.cylinderManager,
+        document.getElementById(`pp_${this.region}_tribes`)!,
+        {},
+        (element: HTMLElement, cards: Cylinder[], lastCard: Cylinder, stock: TokenManualPositionStock<Cylinder>) =>
+          // @ts-ignore
+          updateZoneDislay(this.getPatternForTribeZone(), element, cards, lastCard, stock),
+      );
+    }
 
     this.tribeZone.addCards(
       regionGamedatas.tribes.map((token) => ({
         ...token,
+        // @ts-ignore
         color: this.game.gamedatas.paxPamirPlayers[token.id.split('_')[1]].color,
-      }))
+      })),
     );
   }
 
   clearInterface() {
     this.armyZone.removeAll();
-    this.armyZone = undefined;
+    // this.armyZone = undefined;
     this.rulerZone.removeAll();
-    this.rulerZone = undefined;
+    // this.rulerZone = undefined;
     this.tribeZone.removeAll();
-    this.tribeZone = undefined;
+    // this.tribeZone = undefined;
   }
 
   // ..######...########.########.########.########.########.
@@ -208,11 +217,12 @@ class Region {
         tokenId: string;
         weight?: number;
       }[];
-    } = {}
+    } = {},
   ) {
     await Promise.all([
       ...Object.entries(armies).map(async ([key, value]) =>
         this.game.objectManager.supply.getCoalitionBlocksZone({ coalition: key }).addCards(
+          // @ts-ignore
           value.map((block) => ({
             id: block.tokenId,
             state: block.weight,
@@ -220,8 +230,8 @@ class Region {
             location: `supply_${key}`,
             coalition: key as Coalition,
             type: 'supply',
-          }))
-        )
+          })),
+        ),
       ),
     ]);
   }
@@ -232,7 +242,7 @@ class Region {
         tokenId: string;
         weight?: number;
       }[];
-    } = {}
+    } = {},
   ) {
     await Promise.all([
       ...Object.entries(tribes).map(async ([key, value]) => {
@@ -241,11 +251,11 @@ class Region {
           value.map(({ tokenId, weight }) =>
             this.game.getCylinder({
               id: tokenId,
-              state: weight,
+              state: weight as number,
               used: 0,
               location: `cylinders_${player.getPlayerId()}`,
-            })
-          )
+            }),
+          ),
         );
         player.incCounter({ counter: 'cylinders', value: -value.length });
       }),
@@ -294,7 +304,7 @@ class Region {
   }
 
   private getEnemyRoads({ coalitionId }: { coalitionId: string }): string[] {
-    let roads = [];
+    let roads: string[] = [];
     this.borders.forEach((border: string) => {
       const enemyRoads = this.game.map.getBorder({ border }).getEnemyRoads({ coalitionId });
       roads = roads.concat(enemyRoads);
@@ -330,6 +340,7 @@ class Region {
     const element = document.getElementById(`pp_region_${this.region}`);
     if (element) {
       element.classList.add('pp_selectable');
+      // @ts-ignore
       this.game._connections.push(dojo.connect(element, 'onclick', this, () => callback({ regionId: this.region })));
     }
   }

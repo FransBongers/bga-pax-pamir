@@ -1,11 +1,11 @@
 class PlayerActionsState implements State {
-  private game: PaxPamirGame;
-  private availableCardActions: {
+  private game: GameAlias;
+  private availableCardActions!: {
     cardId: string;
     action: string;
   }[];
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -19,10 +19,7 @@ class PlayerActionsState implements State {
     // TODO: find another solution for this?
     // Right now it's needed because initial setup is not yet done due to some async function
     // and availability of actions is determined based on incorrect data
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {
@@ -154,8 +151,7 @@ class PlayerActionsState implements State {
       titleText += _(' (2 actions remaining)');
     }
 
-    this.game.gamedatas.gamestate.descriptionmyturn = titleText;
-    this.game.framework().updatePageTitle();
+    this.game.clientUpdatePageTitle({ text: titleText });
   }
 
   private activePlayerHasActions(): boolean {
@@ -181,6 +177,7 @@ class PlayerActionsState implements State {
       case BUILD:
         return this.game.activeStates.clientCardActionBuild.getRegionsToBuild().length > 0;
       case GIFT:
+        // @ts-ignore
         return this.game.getCurrentPlayer().getLowestAvailableGift() > 0;
       case MOVE:
         const hasArmiesToMove = this.game.activeStates.clientCardActionMove.getArmiesToMove().length > 0;
@@ -218,12 +215,12 @@ class PlayerActionsState implements State {
         if (this.game.gameOptions.wakhanEnabled) {
           const bribe = this.game.activeStates.clientInitialBribeCheck.calulateBribe({ cardId: id, action });
           minActionCost =
-            minActionCost +
+            minActionCost! +
             (bribe !== null && bribe.bribeeId === WAKHAN_PLAYER_ID && !player.ownsEventCard({ cardId: ECE_COURTLY_MANNERS_CARD_ID })
               ? bribe.amount
               : 0);
         }
-        if (rupees < minActionCost) {
+        if (rupees < minActionCost!) {
           this.game.tooltipManager.addTextToolTip({ nodeId, text: _('You do not have enough rupees to pay for this') });
           return;
         }
@@ -251,9 +248,9 @@ class PlayerActionsState implements State {
       negotiated: true,
     };
     if (action === 'playCard') {
-      this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId, bribe } });
+      this.game.bga.states.setClientState(CLIENT_PLAY_CARD, { args: { cardId, bribe } });
     } else if (Object.keys(cardActionClientStateMap).includes(action)) {
-      this.game.framework().setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[action], {
+      this.game.bga.states.setClientState(cardActionClientStateMap[action], {
         args: {
           cardId,
           bribe,
@@ -270,23 +267,24 @@ class PlayerActionsState implements State {
         return;
       }
       // this.game.tooltipManager.addTextToolTip({nodeId: `${action}_${cardId}`,text: _('explanation text')});
-      dojo.addClass(node, 'pp_selectable');
+      node.classList.add(PP_SELECTABLE);
       this.game._connections.push(
-        dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
+        dojo.connect(node, 'onclick', (event: PointerEvent) => {
           event.preventDefault();
           event.stopPropagation();
-          this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
+          this.game.bga.states.setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
             args: {
               bribeLimitReached: this.game.localState.bribeLimitReached,
               cardId,
               action: action as PlayerAction,
               next: ({ bribe }: { bribe: BribeArgs }) =>
-                this.game
-                  .framework()
-                  .setClientState<ClientCardActionStateArgs>(cardActionClientStateMap[action], { args: { cardId, bribe } }),
+                // @ts-ignore
+                this.game.bga.states.setClientState(cardActionClientStateMap[action], {
+                  args: { cardId, bribe },
+                }),
             },
           });
-        })
+        }),
       );
     });
   }
@@ -315,7 +313,7 @@ class PlayerActionsState implements State {
     this.game.setHandCardsSelectable({
       callback: ({ cardId }: { cardId: string }) => {
         debug('callback triggered', cardId);
-        this.game.framework().setClientState<ClientInitialBribeCheckArgs>(CLIENT_INITIAL_BRIBE_CHECK, {
+        this.game.bga.states.setClientState(CLIENT_INITIAL_BRIBE_CHECK, {
           args: {
             bribeLimitReached: this.game.localState.bribeLimitReached,
             cardId,
@@ -327,7 +325,7 @@ class PlayerActionsState implements State {
                 amount: number;
                 negotiated?: boolean;
               } | null;
-            }) => this.game.framework().setClientState<ClientPlayCardStateArgs>(CLIENT_PLAY_CARD, { args: { cardId, bribe } }),
+            }) => this.game.bga.states.setClientState(CLIENT_PLAY_CARD, { args: { cardId, bribe } }),
           },
         });
       },
@@ -341,14 +339,12 @@ class PlayerActionsState implements State {
       if (cardInfo.type === 'eventCard' && cardInfo.purchased.effect === ECE_PUBLIC_WITHDRAWAL) {
         return;
       }
-      const cost = this.getCardCost({ cardId, column: Number(node.parentElement.id.split('_')[3]) });
+      const cost = this.getCardCost({ cardId, column: Number(node.parentElement!.id.split('_')[3]) });
       if (cost <= this.game.getCurrentPlayer().getRupees() && !this.game.localState.usedCards.includes(cardId)) {
-        dojo.addClass(node, 'pp_selectable');
+        node.classList.add(PP_SELECTABLE);
         this.game._connections.push(
           // dojo.connect(node, 'onclick', this, () => this.updateInterfacePurchaseCardConfirm({ cardId, cost }))
-          dojo.connect(node, 'onclick', this, () =>
-            this.game.framework().setClientState<ClientPurchaseCardStateArgs>(CLIENT_PURCHASE_CARD, { args: { cardId, cost } })
-          )
+          dojo.connect(node, 'onclick', () => this.game.bga.states.setClientState(CLIENT_PURCHASE_CARD, { args: { cardId, cost } })),
         );
       }
     });
@@ -357,7 +353,7 @@ class PlayerActionsState implements State {
   public setCardActionSelected({ cardId, action }: { cardId: string; action: string }) {
     const node = dojo.byId(`${action}_${cardId}`);
     if (node) {
-      dojo.addClass(node, PP_SELECTED);
+      node.classList.add(PP_SELECTED);
     }
   }
 
@@ -493,7 +489,7 @@ class PlayerActionsState implements State {
   // .##.....##.##.....##.##....##.########..########.########..######.
 
   onPass() {
-    if (!this.game.framework().checkAction('pass') || !this.game.framework().isCurrentPlayerActive()) return;
+    if (!this.game.bga.actions.checkAction('pass') || !this.game.bga.players.isCurrentPlayerActive()) return;
     if (Number(this.game.localState.remainingActions) > 0) {
       this.updateInterfacePass();
       return;

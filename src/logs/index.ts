@@ -17,7 +17,7 @@ const LOG_TOKEN_RUPEE = 'rupee';
 
 let tooltipIdCounter = 0;
 
-const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: PaxPamirGame }) => {
+const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: GameAlias }) => {
   const splitKey = key.split('_');
   const type = splitKey[1];
   switch (type) {
@@ -59,7 +59,7 @@ const getTokenDiv = ({ key, value, game }: { key: string; value: string; game: P
   }
 };
 
-const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGame }) => {
+const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: GameAlias }) => {
   const [type, data] = logToken.split(':');
 
   switch (type) {
@@ -104,9 +104,10 @@ const getLogTokenDiv = ({ logToken, game }: { logToken: string; game: PaxPamirGa
   }
 };
 
-const tplLogTokenArmy = ({ coalition }: { coalition: string }) => `<div class="pp_coalition_block_side pp_log_token" data-type="army" data-coalition="${coalition}"></div>`;
+const tplLogTokenArmy = ({ coalition }: { coalition: string }) =>
+  `<div class="pp_coalition_block_side pp_log_token" data-type="army" data-coalition="${coalition}"></div>`;
 
-const tlpLogTokenBoldText = ({ text }) => `<span style="font-weight: 700;">${_(text)}</span>`;
+const tlpLogTokenBoldText = ({ text }: { text: string }) => `<span style="font-weight: 700;">${_(text)}</span>`;
 
 const tplLogTokenCard = ({ cardId, large, cardIdSuffix }: { cardId: string; large?: boolean; cardIdSuffix: number }) =>
   `<div id="${cardId}_${cardIdSuffix}" class="pp_card_side pp_log_token pp_${cardId}${!large ? ' pp_small' : ''}"></div>`;
@@ -133,9 +134,10 @@ const tplLogTokenPlayerName = ({ name, color }: { name: string; color: string })
 
 const tplLogTokenRegionName = ({ name, regionId }: { name: string; regionId: string }) =>
   `<div style="display: inline-block;"><span style="font-weight: 700;">${_(
-    name
+    name,
   )}</span><div class="pp_log_token pp_${regionId} pp_region_icon"></div></div>`;
 
-const tplLogTokenRoad = ({ coalition }: { coalition: string }) => `<div class="pp_coalition_block_side pp_log_token" data-type="road" data-coalition="${coalition}"></div>`;
+const tplLogTokenRoad = ({ coalition }: { coalition: string }) =>
+  `<div class="pp_coalition_block_side pp_log_token" data-type="road" data-coalition="${coalition}"></div>`;
 
 const tplLogTokenRupee = () => `<div class="pp_rupee_side pp_log_token"></div>`;

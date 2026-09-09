@@ -1,3 +1,11 @@
+interface NotifWithPlayerArgs {
+  playerId: number;
+}
+
+interface NotifClearTurnArgs extends NotifWithPlayerArgs {
+  notifIds: string[];
+}
+
 /**
  * Note: we need to keep player_name in snake case, because the framework uses
  * it to add player colors to the log messages.
@@ -301,7 +309,7 @@ interface WakhanInfluence {
     afghan: number;
     british: number;
     russian: number;
-  }
+  };
 }
 
 interface NotifUpdateInfluenceArgs {
@@ -312,11 +320,11 @@ interface NotifWakhanDrawCardArgs {
   deck: {
     from: string;
     to: string | null;
-  },
+  };
   discardPile: {
     from: string | null;
     to: string;
-  }
+  };
 }
 
 interface NotifWakhanRadicalizeArgs {
@@ -336,4 +344,4 @@ interface NotifWakhanUpdatePragmaticLoyalty {
   pragmaticLoyalty: string | null;
 }
 
-type NotifSmallRefreshInterfaceArgs = Omit<PaxPamirGamedatas, 'staticData'>;
+type NotifSmallRefreshInterfaceArgs = Omit<GamedatasAlias, 'staticData'>;

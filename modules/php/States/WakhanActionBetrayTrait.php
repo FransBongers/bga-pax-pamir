@@ -72,7 +72,7 @@ trait WakhanActionBetrayTrait
     if ($card === null) {
       $card = $this->wakhanGetCourtCardToPerformAction(BETRAY);
     }
-    
+
     if ($card === null) {
       Wakhan::actionNotValid();
       return false;
@@ -133,7 +133,7 @@ trait WakhanActionBetrayTrait
       if (!$hasWakhanSpy) {
         return false;
       }
-      $cardOwnerId = intval(explode('_', $card['location'][1]));
+      $cardOwnerId = intval(explode('_', $card['location'])[1]);
       if ($card['suit'] === POLITICAL && PaxPamirPlayers::get($cardOwnerId)->hasSpecialAbility(SA_BODYGUARDS)) {
         return false;
       }

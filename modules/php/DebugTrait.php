@@ -24,6 +24,50 @@ use PaxPamir\Models\Player;
 
 trait DebugTrait
 {
+    function debug_test()
+  {
+    Notifications::log('cardToBestray', $this->wakhanGetCardToBetray());
+    // Cards::insertOnTop('card_8', DECK);
+    // $this->debug_createRoad(KABUL_TRANSCASPIA, RUSSIAN);
+    // $this->debug_addCardToHand($this->debugCardId(80), 2371052);
+    // $this->debug_addCardToCourt($this->debugCardId(80), 2371052);
+    // $this->debugWakhanGameState();
+    // Globals::setWakhanCurrentAction(0);
+    // Cards::insertOnTop('card_24',Locations::market(1,0));
+    // Tokens::move('block_russian_8',Locations::pool(RUSSIAN));
+    // WakhanCards::insertOnTop('wakhan_card_12',DECK);
+    // WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
+
+    // Cards::insertOnTop('card_101',DECK);
+    // Cards::insertOnTop('card_31',DISCARD);
+    // Cards::insertOnTop('card_64',Locations::market(0,1));
+    // Cards::insertOnTop('card_107',DISCARD);
+    // Cards::insertOnTop('card_104',DISCARD);
+    // Globals::setDominanceChecksResolved(3);
+    // PaxPamirPlayers::incScore(2371052,3);
+    // Players::incScore(2371052,3);
+    // $this->debugIncPlayerRupees(10,WAKHAN_PLAYER_ID);
+    // Notifications::log('log',Log::getAll());
+    // Notifications::log('canUndo',!Log::getAll()->empty());
+    // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
+    // Globals::setFavoredSuit(MILITARY);
+
+
+    // Cards::move('card_106',ACTIVE_EVENTS);
+
+    // Cards::move('card_99',DISCARD);
+    // Cards::move('card_112',DECK);
+    // Cards::move('card_99',DISCARD);
+    // Cards::move('card_83',DISCARD);
+    // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCardsWakhanCanPurchase());
+    // Notifications::log('result',$result);
+    // Cards::move('card_68', ['court', WAKHAN_PLAYER_ID],-10);
+    // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
+    // Cards::move('card_26', DISCARD);
+    // Cards::move('card_116', Locations::market(0,5));
+
+  }
+
   function debugCardId(int $cardId)
   {
     return implode('_', ['card', $cardId]);
@@ -41,7 +85,7 @@ trait DebugTrait
 
 
 
-  function debugWakhanGameState()
+  function debug_WakhanGameState()
   {
     $gamestate1 = [
       'armies' => [
@@ -208,48 +252,7 @@ trait DebugTrait
     // $this->debugCreateTribe(TRANSCASPIA);
   }
 
-  function debug_test()
-  {
-    Cards::insertOnTop('card_8', DECK);
-    // $this->debug_createRoad(KABUL_TRANSCASPIA, RUSSIAN);
-    // $this->debug_addCardToHand($this->debugCardId(80), 2371052);
-    // $this->debug_addCardToCourt($this->debugCardId(80), 2371052);
-    // $this->debugWakhanGameState();
-    // Globals::setWakhanCurrentAction(0);
-    // Cards::insertOnTop('card_24',Locations::market(1,0));
-    // Tokens::move('block_russian_8',Locations::pool(RUSSIAN));
-    // WakhanCards::insertOnTop('wakhan_card_12',DECK);
-    // WakhanCards::insertOnTop('wakhan_card_15',DISCARD);
 
-    // Cards::insertOnTop('card_101',DECK);
-    // Cards::insertOnTop('card_31',DISCARD);
-    // Cards::insertOnTop('card_64',Locations::market(0,1));
-    // Cards::insertOnTop('card_107',DISCARD);
-    // Cards::insertOnTop('card_104',DISCARD);
-    // Globals::setDominanceChecksResolved(3);
-    // PaxPamirPlayers::incScore(2371052,3);
-    // Players::incScore(2371052,3);
-    // $this->debugIncPlayerRupees(10,WAKHAN_PLAYER_ID);
-    // Notifications::log('log',Log::getAll());
-    // Notifications::log('canUndo',!Log::getAll()->empty());
-    // Notifications::log('ruler',Map::determineRuler(TRANSCASPIA));
-    // Globals::setFavoredSuit(MILITARY);
-
-
-    // Cards::move('card_106',ACTIVE_EVENTS);
-
-    // Cards::move('card_99',DISCARD);
-    // Cards::move('card_112',DECK);
-    // Cards::move('card_99',DISCARD);
-    // Cards::move('card_83',DISCARD);
-    // $result = $this->wakhanRadicalizeGetCardWithMostCylinders(Wakhan::getCardsWakhanCanPurchase());
-    // Notifications::log('result',$result);
-    // Cards::move('card_68', ['court', WAKHAN_PLAYER_ID],-10);
-    // WakhanCards::insertOnTop("wakhan_card_17",DISCARD);
-    // Cards::move('card_26', DISCARD);
-    // Cards::move('card_116', Locations::market(0,5));
-
-  }
 
   function debug_stack()
   {

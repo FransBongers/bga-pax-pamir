@@ -1,5 +1,5 @@
 class FavoredSuitMarkerManager extends CardManager<Token> {
-  constructor(public game: PaxPamirGame) {
+  constructor(public game: GameAlias) {
     super(game, {
       getId: (card) => `${card.id}`,
       setupDiv: (card, div) => this.setupDiv(card, div),

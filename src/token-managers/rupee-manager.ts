@@ -1,5 +1,5 @@
-class RupeeManager extends CardManager<Cylinder> {
-  constructor(public game: PaxPamirGame) {
+class RupeeManager extends CardManager<Token> {
+  constructor(public game: GameAlias) {
     super(game, {
       getId: (card) => `${card.id}`,
       setupDiv: (card, div) => this.setupDiv(card, div),
@@ -12,20 +12,18 @@ class RupeeManager extends CardManager<Cylinder> {
 
   clearInterface() {}
 
-  setupDiv(cylinder: Cylinder, div: HTMLElement) {
+  setupDiv(cylinder: Token, div: HTMLElement) {
     div.classList.add('pp_rupee');
-    div.setAttribute('data-color', cylinder.color);
+    // div.setAttribute('data-color', cylinder.color);
   }
 
-  setupFrontDiv(cylinder: Cylinder, div: HTMLElement) {
+  setupFrontDiv(cylinder: Token, div: HTMLElement) {
     div.classList.add('pp_rupee_side');
   }
 
-  setupBackDiv(cylinder: Cylinder, div: HTMLElement) {
+  setupBackDiv(cylinder: Token, div: HTMLElement) {}
 
-  }
-
-  isCardVisible(cylinder: Cylinder) {
+  isCardVisible(cylinder: Token) {
     return true;
   }
 }

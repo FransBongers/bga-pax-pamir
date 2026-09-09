@@ -15,46 +15,46 @@
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class PPTooltipManager {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   // This can't be used since some versions of safari don't support it
   // private idRegex = /(?<=id=")[a-z]*_[0-9]*_[0-9]*(?=")/;
   private idRegex = /id="[a-z]*_[0-9]*_[0-9]*"/;
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
   // Player panels
   public addPlayerIconToolTips({ playerColor, playerId }: { playerColor: string; playerId: number }) {
-    this.game.framework().addTooltipHtml(`cylinders_${playerId}`, tplCylinderCountToolTip({ playerColor }), 500);
-    this.game.framework().addTooltipHtml(`rupees_${playerId}`, tplRupeeCountToolTip(), 500);
+    this.game.bga.gameui.addTooltipHtml(`cylinders_${playerId}`, tplCylinderCountToolTip({ playerColor }), 500);
+
+    this.game.bga.gameui.addTooltipHtml(`rupees_${playerId}`, tplRupeeCountToolTip(), 500);
     if (playerId !== WAKHAN_PLAYER_ID) {
-      this.game.framework().addTooltipHtml(`cards_${playerId}`, tplHandCountCountToolTip(), 500);
+      this.game.bga.gameui.addTooltipHtml(`cards_${playerId}`, tplHandCountCountToolTip(), 500);
     }
   }
 
-
   public setupFavoredSuitMarkerTooltip() {
     const html = tplFavoredSuitMarkerToolTip();
-    this.game.framework().addTooltipHtml('favored_suit_marker', html, 500);
+    this.game.bga.gameui.addTooltipHtml('favored_suit_marker', html, 500);
   }
 
   public addSuitTooltip({ suit, nodeId }: { suit: 'economic' | 'intelligence' | 'military' | 'political'; nodeId: string }) {
     const html = tplSuitToolTip({ suit });
-    this.game.framework().addTooltipHtml(nodeId, html, 500);
+    this.game.bga.gameui.addTooltipHtml(nodeId, html, 500);
   }
 
-  public addInfluenceCountTooltip({playerId, coalition}: {playerId: number; coalition: string;}) {
-    this.game.framework().addTooltipHtml(`loyalty_icon_${playerId}`, tplInfluenceCountToolTip({ coalition }), 500);
+  public addInfluenceCountTooltip({ playerId, coalition }: { playerId: number; coalition: string }) {
+    this.game.bga.gameui.addTooltipHtml(`loyalty_icon_${playerId}`, tplInfluenceCountToolTip({ coalition }), 500);
   }
 
-  public removeInfluenceCountTooltip({playerId}: {playerId: number}) {
-    this.removeTooltip(`loyalty_icon_${playerId}`)
+  public removeInfluenceCountTooltip({ playerId }: { playerId: number }) {
+    this.removeTooltip(`loyalty_icon_${playerId}`);
   }
 
   public addMiltiarySuitIndicatorMarketTooltip() {
     const html = tplMarketMilitaryCostToolTip();
-    this.game.framework().addTooltipHtml('pp_market_board_military_suit_icon', html, 500);
-    
+    this.game.bga.gameui.addTooltipHtml('pp_market_board_military_suit_icon', html, 500);
+
     // this.addTextToolTip({nodeId: 'pp_market_board_military_suit_icon', text: _('The cost to purchase cards is doubled. Two rupees are placed on each card instead of one.')})
   }
 
@@ -62,21 +62,25 @@ class PPTooltipManager {
     this.removeTooltip('pp_market_board_military_suit_icon');
   }
 
-  public addWakhanInfluenceCountTooltips({pragmaticLoyalty}: {pragmaticLoyalty: string;}) {
+  public addWakhanInfluenceCountTooltips({ pragmaticLoyalty }: { pragmaticLoyalty: string }) {
     COALITIONS.forEach((coalition) => {
-      this.game.framework().addTooltipHtml(`loyalty_icon_1_${coalition}`, tplInfluenceCountToolTip({ coalition, black: coalition !== pragmaticLoyalty }), 500);
-    })
+      this.game.bga.gameui.addTooltipHtml(
+        `loyalty_icon_1_${coalition}`,
+        tplInfluenceCountToolTip({ coalition, black: coalition !== pragmaticLoyalty }),
+        500,
+      );
+    });
   }
 
   public removeWakhanInfluenceCountTooltips() {
     COALITIONS.forEach((coalition) => {
       this.removeTooltip(`loyalty_icon_1_${coalition}`);
-    })
+    });
   }
-  
+
   // Generic text
   public addTextToolTip({ nodeId, text }: { nodeId: string; text: string }) {
-    this.game.framework().addTooltip(nodeId, _(text), '', 500);
+    this.game.bga.gameui.addTooltip(nodeId, _(text), '', 500);
   }
 
   public addTooltipToCard({ cardId, cardIdSuffix = '' }: { cardId: string; cardIdSuffix?: string }): void {
@@ -84,21 +88,21 @@ class PPTooltipManager {
 
     if (cardInfo.type === COURT_CARD) {
       const html = tplCourtCardTooltip({ cardId, cardInfo, specialAbilities: this.game.gamedatas.staticData.specialAbilities });
-      this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
+      this.game.bga.gameui.addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     } else {
       const html = tplEventCardTooltip({ cardId, cardInfo });
-      this.game.framework().addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
+      this.game.bga.gameui.addTooltipHtml(`${cardId}${cardIdSuffix}`, html, 500);
     }
   }
 
   public addWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId }: { wakhanDeckCardId: string; wakhanDiscardCardId: string }): void {
     const html = tplWakhanCardTooltip({ wakhanDeckCardId, wakhanDiscardCardId, game: this.game });
-    this.game.framework().addTooltipHtml(`pp_wakhan_deck`, html, 500);
-    this.game.framework().addTooltipHtml(`pp_wakhan_discard`, html, 500);
+    this.game.bga.gameui.addTooltipHtml(`pp_wakhan_deck`, html, 500);
+    this.game.bga.gameui.addTooltipHtml(`pp_wakhan_discard`, html, 500);
   }
 
   public removeTooltip(nodeId: string) {
-    this.game.framework().removeTooltip(nodeId);
+    this.game.bga.gameui.removeTooltip(nodeId);
   }
 
   public checkLogTooltip(lastNotif: { logId: number; msg: Notif<unknown> }) {
@@ -109,6 +113,7 @@ class PPTooltipManager {
       if (!(key.startsWith('logTokenLargeCard') || key.startsWith('tkn_largeCard'))) {
         return;
       }
+      // @ts-ignore
       const id = this.idRegex.exec(lastNotif.msg.args[key])?.[0]?.slice(0, -1).slice(4);
 
       if (!id || !id.startsWith('card_')) {
@@ -131,14 +136,15 @@ class PPTooltipManager {
   }
 
   private setupCardCounterTooltips() {
-    this.game.framework().addTooltip('pp_deck_counter_container', _('Total number of cards in the deck'), '', 500);
-    this.game
-      .framework()
-      .addTooltip('pp_deck_counter_dominance_check_container', _('Number of Dominance Check cards in the deck'), '', 500);
-    this.game.framework().addTooltip('pp_discard_pile_counter_container', _('Total number of cards in the discard pile'), '', 500);
-    this.game
-      .framework()
-      .addTooltip('pp_discard_pile_counter_dominance_check_container', _('Number of Dominance Check cards in the discard pile'), '', 500);
+    this.game.bga.gameui.addTooltip('pp_deck_counter_container', _('Total number of cards in the deck'), '', 500);
+    this.game.bga.gameui.addTooltip('pp_deck_counter_dominance_check_container', _('Number of Dominance Check cards in the deck'), '', 500);
+    this.game.bga.gameui.addTooltip('pp_discard_pile_counter_container', _('Total number of cards in the discard pile'), '', 500);
+    this.game.bga.gameui.addTooltip(
+      'pp_discard_pile_counter_dominance_check_container',
+      _('Number of Dominance Check cards in the discard pile'),
+      '',
+      500,
+    );
   }
 
   // private setupDominanceCheckScoresTooltip() {

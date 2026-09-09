@@ -7,12 +7,12 @@
 //  .##.....##.##.....##.##.....##.##....##.########....##...
 
 class Market {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private marketCards: LineStock<Card>[][];
   private marketRupees: LineStock<Token>[][];
-  private deck: LineStock<Card>;
+  private deck!: LineStock<Card>;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     this.marketCards = [];
     this.marketRupees = [];
@@ -23,10 +23,13 @@ class Market {
   }
 
   setupDeck() {
-    this.deck = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_market_deck_stock'));
+    if (this.deck) {
+      return;
+    }
+    this.deck = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_market_deck_stock')!);
   }
 
-  setupMarket({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupMarket({ gamedatas }: { gamedatas: GamedatasAlias }) {
     // Set up market
     for (let row = 0; row <= 1; row++) {
       if (!this.marketCards[row]) {
@@ -42,11 +45,17 @@ class Market {
     }
   }
 
-  setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
+  setupMarketCardZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: GamedatasAlias }) {
     const containerId = `pp_market_${row}_${column}`;
-    dojo.place(`<div id="pp_market_${row}_${column}_rupees" class="pp_market_rupees"></div>`, containerId);
+    const container = document.getElementById(containerId)!;
 
-    this.marketCards[row][column] = new LineStock(this.game.cardManager, document.getElementById(`pp_market_${row}_${column}`));
+    if (!document.getElementById(`pp_market_${row}_${column}_rupees`)) {
+      container.insertAdjacentHTML('afterbegin', `<div id="pp_market_${row}_${column}_rupees" class="pp_market_rupees"></div>`);
+    }
+
+    if (!this.marketCards[row][column]) {
+      this.marketCards[row][column] = new LineStock(this.game.cardManager, document.getElementById(`pp_market_${row}_${column}`)!);
+    }
 
     // add cards
     const cardInMarket = gamedatas.market.cards[row][column];
@@ -55,14 +64,16 @@ class Market {
     }
   }
 
-  setupMarketRupeeZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: PaxPamirGamedatas }) {
+  setupMarketRupeeZone({ row, column, gamedatas }: { row: number; column: number; gamedatas: GamedatasAlias }) {
     // Set up zone for all rupees in the market
     const rupeeContainerId = `pp_market_${row}_${column}_rupees`;
 
-    this.marketRupees[row][column] = new LineStock<Token>(this.game.rupeeManager, document.getElementById(rupeeContainerId), {
-      center: false,
-      gap: `calc(var(--tokenScale) * -30px)`,
-    });
+    if (!this.marketRupees[row][column]) {
+      this.marketRupees[row][column] = new LineStock<Token>(this.game.rupeeManager, document.getElementById(rupeeContainerId)!, {
+        center: false,
+        gap: `calc(var(--tokenScale) * -30px)`,
+      });
+    }
 
     const rupees = gamedatas.market.rupees.filter((rupee: Token) => rupee.location === `market_${row}_${column}_rupees`);
     this.marketRupees[row][column].addCards(rupees);
@@ -74,8 +85,8 @@ class Market {
         this.marketCards[row][column].removeAll();
         this.marketRupees[row][column].removeAll();
         // dojo.empty(this.marketCards[row][column].getContainerId());
-        this.marketCards[row][column] = undefined;
-        this.marketRupees[row][column] = undefined;
+        // this.marketCards[row][column] = undefined;
+        // this.marketRupees[row][column] = undefined;
       }
     }
     this.deck.removeAll();
@@ -114,11 +125,11 @@ class Market {
     column: number;
     to: string;
     rupeeId: string;
-    index?: number;
+    index: number;
   }) {
-    await this.game.framework().wait(index * ANIMATION_WAIT_MS);
+    await wait(index * ANIMATION_WAIT_MS);
     // TODO: animate to
-    const element = document.getElementById(rupeeId);
+    const element = document.getElementById(rupeeId)!;
 
     await moveToAnimation({
       game: this.game,
@@ -155,8 +166,8 @@ class Market {
       used: 0,
       location: '',
     };
-    await this.game.framework().wait(index * ANIMATION_WAIT_MS);
-    await this.marketRupees[row][column].addCard(rupee, { fromElement: document.getElementById(fromDiv) });
+    wait(index * ANIMATION_WAIT_MS);
+    await this.marketRupees[row][column].addCard(rupee, { fromElement: document.getElementById(fromDiv)! });
     if (cardId === ECE_PUBLIC_WITHDRAWAL_CARD_ID) {
       await this.marketRupees[row][column].removeCard(rupee);
     }
@@ -215,7 +226,7 @@ class Market {
           state: 0,
           used: 0,
           location: `market_${row}_${column}`,
-        })
+        }),
       );
     } else {
       this.game.objectManager.discardPile.discardCardFromZone(cardId);

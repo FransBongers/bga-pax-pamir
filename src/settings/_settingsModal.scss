@@ -7,30 +7,33 @@
   justify-content: center;
   align-items: center;
 
+  fill: black;
+
   &:hover {
-      color: grey;
+    color: grey;
+    fill: grey;
   }
   cursor: pointer;
 
   svg {
-      width: auto;
-      height: 40px;
+    width: auto;
+    height: 40px;
   }
 }
 
 #show_settings_menu {
   .fa-primary {
-      transform-origin: 216px 255px;
-      transition: transform 1s;
+    transform-origin: 216px 255px;
+    transition: transform 1s;
   }
 
   &:hover .fa-primary {
-      transform: rotate(180deg);
+    transform: rotate(180deg);
   }
 }
 
 #popin_settings_modal_underlay {
-  background-color: #000!important;
+  background-color: #000 !important;
 }
 
 .settings_modal {
@@ -45,7 +48,7 @@
 
   .settings_modal_title {
     // background-color: rgb(29, 14 ,32);
-    background-color: rgb(83, 33 ,77);
+    background-color: rgb(83, 33, 77);
   }
 
   .settings_modal_closeicon {
@@ -125,7 +128,7 @@
         border-right: none;
       }
 
-      .settings_modal_tab[data-state="selected"] {
+      .settings_modal_tab[data-state='selected'] {
         background-color: ivory;
         border-bottom: none;
         cursor: auto;
@@ -146,20 +149,17 @@
       // }
     }
 
-
     .player_preference_row {
       display: flex;
       flex-direction: row;
       margin-bottom: 4px;
       margin-top: 4px;
 
-
       .player_preference_row_label {
         flex-grow: 1;
         text-align: center;
         align-self: center;
         font-weight: 400;
-
       }
 
       .player_preference_row_value {
@@ -172,7 +172,6 @@
         }
       }
     }
-
   }
 
   .reserve {

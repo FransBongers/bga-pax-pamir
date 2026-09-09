@@ -30,6 +30,7 @@
 @use 'token-managers/ruler-tokens';
 @use 'token-managers/rupees';
 @use 'nouislider';
+@use './dark-mode';
 @import '../node_modules/bga-cards/bga-cards';
 
 html {
@@ -41,8 +42,10 @@ html {
 //   filter: none;
 // } //
 
-.player-board {
-  background-color: antiquewhite;
+html:not([data-theme='dark']) {
+  .player-board {
+    background-color: antiquewhite;
+  }
 }
 
 /* Hide the "You may note something for next time..." popup that would appear. */
@@ -182,7 +185,6 @@ html {
     margin-top: 2px;
   }
 
-
   .pp_discard_pile_border {
     position: absolute;
     box-sizing: border-box;
@@ -201,8 +203,8 @@ html {
   width: calc(var(--adjustedLeftColumnScale) * 150px);
   height: calc(var(--adjustedLeftColumnScale) * 209px);
   box-sizing: border-box;
-  box-shadow: rgb(0, 0, 0) calc(var(--adjustedLeftColumnScale) * 2px) calc(var(--adjustedLeftColumnScale) * 2px) calc(var(--adjustedLeftColumnScale) * 5px)
-    calc(var(--adjustedLeftColumnScale) * -1px);
+  box-shadow: rgb(0, 0, 0) calc(var(--adjustedLeftColumnScale) * 2px) calc(var(--adjustedLeftColumnScale) * 2px)
+    calc(var(--adjustedLeftColumnScale) * 5px) calc(var(--adjustedLeftColumnScale) * -1px);
   border-radius: calc(var(--adjustedLeftColumnScale) * 10px); //10px;
   background-repeat: no-repeat;
   border: calc(var(--adjustedLeftColumnScale) * 1px) black solid;
@@ -224,7 +226,8 @@ html {
   background-image: url('img/cards2.webp');
   background-position-x: calc(2 / 3) * 100%;
   background-position-y: 100%;
-  box-shadow: calc(var(--adjustedLeftColumnScale) * 1px) calc(var(--adjustedLeftColumnScale) * 1px) calc(var(--adjustedLeftColumnScale) * 4px);
+  box-shadow: calc(var(--adjustedLeftColumnScale) * 1px) calc(var(--adjustedLeftColumnScale) * 1px)
+    calc(var(--adjustedLeftColumnScale) * 4px);
   border-radius: calc(var(--adjustedLeftColumnScale) * 10px);
   display: flex;
   flex-direction: column;
@@ -265,8 +268,6 @@ html {
     margin-left: calc(var(--deckCounterScale) * 2px);
   }
 }
-
-
 
 .pp_court_card_icon {
   background-position-x: calc(2 / 3) * 100%;
@@ -480,7 +481,10 @@ html {
   font-size: xx-large;
   font-weight: 700;
   // text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.6), -1px 1px 0px rgba(0, 0, 0, 0.6), 1px -1px 0px rgba(0, 0, 0, 0.6);
-  text-shadow: -1px -1px 0px rgba(255, 255, 255, 1), 1px 1px 0px rgba(255, 255, 255, 1), -1px 1px 0px rgba(255, 255, 255, 1),
+  text-shadow:
+    -1px -1px 0px rgba(255, 255, 255, 1),
+    1px 1px 0px rgba(255, 255, 255, 1),
+    -1px 1px 0px rgba(255, 255, 255, 1),
     1px -1px 0px rgba(255, 255, 255, 1);
   // text-shadow: -2px -2px 0px base.$selected-color, 2px 2px 0px base.$selected-color, -2px 2px 0px base.$selected-color, 2px -2px 0px base.$selected-color;
   // text-shadow: -2px -2px 2px base.$selected-color, 2px 2px 2px base.$selected-color, -2px 2px 2px base.$selected-color, 2px -2px 2px base.$selected-color;
@@ -568,19 +572,38 @@ html {
 }
 
 #afghan_button {
+  background: none;
   background-color: base.$afghan-color;
+
+  &:hover {
+    background-color: rgba(base.$afghan-color, 0.8);
+  }
 }
 
 #british_button {
+  background: none;
   background-color: base.$british-color;
+
+  &:hover {
+    background-color: rgba(base.$british-color, 0.8);
+  }
 }
 
 #russian_button {
+  background: none;
   background-color: base.$russian-color;
+
+  &:hover {
+    background-color: rgba(base.$russian-color, 0.6);
+  }
 }
 
 .loyalty_button {
-  text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
+  text-shadow:
+    -1px -1px 0px #00000099,
+    1px 1px 0px#00000099,
+    -1px 1px 0px #00000099,
+    1px -1px 0px #00000099;
 }
 
 /* Blue */
@@ -615,7 +638,11 @@ html {
 
 .pp_player_button {
   border: 1px solid black;
-  text-shadow: -1px -1px 0px #00000099, 1px 1px 0px#00000099, -1px 1px 0px #00000099, 1px -1px 0px #00000099;
+  text-shadow:
+    -1px -1px 0px #00000099,
+    1px 1px 0px#00000099,
+    -1px 1px 0px #00000099,
+    1px -1px 0px #00000099;
 }
 
 /* ------- WAKHAN CARDS ------- */

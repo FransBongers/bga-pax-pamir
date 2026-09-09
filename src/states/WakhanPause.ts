@@ -1,8 +1,8 @@
 class WakhanPauseState implements State {
-  private game: PaxPamirGame;
-  private availablePieces: string[];
+  private game: GameAlias;
+  private availablePieces!: string[];
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -32,14 +32,11 @@ class WakhanPauseState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must click next to let Wakhan continue her turn'),
-      args: {
-        you: '${you}',
-      }
-    })
+    });
     this.game.addPrimaryActionButton({
       id: 'wakhan_next_button',
       text: _('Next'),
-      callback: () => this.game.takeAction({action: 'wakhanNext'})
+      callback: () => this.game.takeAction({ action: 'wakhanNext' }),
     });
   }
 
@@ -50,6 +47,4 @@ class WakhanPauseState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
-
-
 }

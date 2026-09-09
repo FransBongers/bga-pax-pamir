@@ -1,8 +1,8 @@
 class AcceptPrizeState implements State {
-  private game: PaxPamirGame;
-  private cardId: string;
+  private game: GameAlias;
+  private cardId!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 

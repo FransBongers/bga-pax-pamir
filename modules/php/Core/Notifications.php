@@ -114,7 +114,7 @@ class Notifications
     ]);
   }
 
-  public static function battleRegion($player,$regionId)
+  public static function battleRegion($player, $regionId)
   {
     $message = clienttranslate('${tkn_playerName} battles in ${tkn_regionName}');
     self::notifyAll('battle', $message, [
@@ -295,7 +295,7 @@ class Notifications
     $message = clienttranslate('${tkn_playerName} places ${tkn_army} in ${tkn_regionName}');
     self::notifyAll('placeArmy', $message, [
       'player' => $player,
-      'tkn_army' => $coalition.'_army',
+      'tkn_army' => $coalition . '_army',
       'tkn_regionName' => $regionId,
       'move' => [
         'from' => $from,
@@ -310,7 +310,7 @@ class Notifications
     $message = clienttranslate('${tkn_playerName} places ${tkn_road} on the border between ${tkn_regionName_0} and ${tkn_regionName_1}');
     self::notifyAll('placeRoad', $message, [
       'player' => $player,
-      'tkn_road' => $coalition.'_road',
+      'tkn_road' => $coalition . '_road',
       'tkn_regionName_0' => $regionId0,
       'tkn_regionName_1' => $regionId1,
       'move' => [
@@ -355,7 +355,7 @@ class Notifications
     $message = $type === 'army' ? clienttranslate('${tkn_playerName} removes ${tkn_army}') : clienttranslate('${tkn_playerName} removes ${tkn_road}');
     self::notifyAll("returnCoalitionBlock", $message, [
       'player' => $player,
-      'tkn_'.$type => $coalition.'_'.$type,
+      'tkn_' . $type => $coalition . '_' . $type,
       'type' => $type,
       'coalition' => $coalition,
       'from' => $from,
@@ -372,7 +372,7 @@ class Notifications
 
     self::notifyAll("returnCylinder", $message, [
       'player' => $player,
-      'tkn_cylinder' => $cylinderOwnerId.'_cylinder',
+      'tkn_cylinder' => $cylinderOwnerId . '_cylinder',
       'from' => $from,
       'cylinderId' => $cylinderId,
       'weight' => $weight
@@ -388,7 +388,7 @@ class Notifications
       // $playerId = explode("_", $move['tokenId'])[1];
       foreach ($playerSpies as $index => $spy) {
         $logs[] = '${tkn_cylinder_' . $playerId . $index . '}';
-        $args['tkn_cylinder_' . $playerId . $index] = $playerId.'_cylinder';
+        $args['tkn_cylinder_' . $playerId . $index] = $playerId . '_cylinder';
       }
     }
 
@@ -489,7 +489,7 @@ class Notifications
       'tkn_newLine' => '<br>',
     ));
   }
-  
+
 
   public static function discard($card, $player, $from, $to)
   {
@@ -606,7 +606,7 @@ class Notifications
 
   public static function startBribeNegotiation($player, $card,  $amount, $action)
   {
-    $message =  $action === 'playCard' ?
+    $message = $action === 'playCard' ?
       clienttranslate('${tkn_playerName} wants to play ${tkn_cardName} and offers bribe of ${amount} rupee(s)${tkn_newLine}${tkn_largeCard}') :
       clienttranslate('${tkn_playerName} wants to use ${tkn_cardName} to ${action} and offers bribe of ${amount} rupee(s)${tkn_newLine}${tkn_largeCard}');
 
@@ -677,7 +677,7 @@ class Notifications
     self::notifyAll('placeCylinder', $message, [
       'player' => $player,
       'tkn_largeCard' => $cardId,
-      'tkn_cylinder' => PaxPamirPlayers::get()->getId().'_cylinder',
+      'tkn_cylinder' => PaxPamirPlayers::get()->getId() . '_cylinder',
       'tkn_cardName' => Cards::get($cardId)['name'],
       'tkn_newLine' => '<br>',
       'move' => [
@@ -693,7 +693,7 @@ class Notifications
     $message = clienttranslate('${tkn_playerName} places ${tkn_cylinder} in ${tkn_regionName}');
     self::notifyAll('placeCylinder', $message, [
       'player' => $player,
-      'tkn_cylinder' => $player->getId().'_cylinder',
+      'tkn_cylinder' => $player->getId() . '_cylinder',
       'tkn_regionName' => $regionId,
       'move' =>
       [
@@ -837,7 +837,7 @@ class Notifications
     ));
   }
 
-  public static function wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
+  public static function wakhanRadicalize($card, $type, $side, $rupeesOnCards, $receivedRupees, $marketLocation, $newLocation)
   {
     $messages = [
       'firstCourtCard' => clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} and plays it to her court ${tkn_newLine}${tkn_largeCard}'),
@@ -862,7 +862,7 @@ class Notifications
     ));
   }
 
-  public static function wakhanRadicalizeDiscard($card, $rupeesOnCards, $receivedRupees, $marketLocation,$newLocation)
+  public static function wakhanRadicalizeDiscard($card, $rupeesOnCards, $receivedRupees, $marketLocation, $newLocation)
   {
     $message = clienttranslate('${tkn_playerName} radicalizes ${tkn_cardName} and discards it ${tkn_newLine}${tkn_largeCard}');
     $cardId = $card['id'];
@@ -898,7 +898,7 @@ class Notifications
 
   public static function wakhansAmbition()
   {
-    Notifications::message(clienttranslate('${tkn_playerName}\'s Ambition triggers'),[
+    Notifications::message(clienttranslate('${tkn_playerName}\'s Ambition triggers'), [
       'tkn_playerName' => PaxPamirPlayers::get(WAKHAN_PLAYER_ID)->getName(),
     ]);
   }

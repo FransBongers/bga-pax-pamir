@@ -7,11 +7,11 @@
 // .##.....##.##.....##.##...........##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class PPMap {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private borders: Record<string, Border>;
   private regions: Record<string, Region>;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     this.borders = {};
     this.regions = {};
@@ -33,7 +33,7 @@ class PPMap {
     });
   }
 
-  updateMap({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  updateMap({ gamedatas }: { gamedatas: GamedatasAlias }) {
     Object.values(this.borders).forEach((border) => {
       border.setupBorder({gamedatas});
     });
@@ -51,7 +51,7 @@ class PPMap {
   }
 
   setSelectable() {
-    const container = document.getElementById(`pp_map_areas`);
+    const container = document.getElementById(`pp_map_areas`)!;
     container.classList.add('pp_selectable');
   }
 

@@ -1,13 +1,13 @@
 class ClientCardActionBuildState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private cardId: string | null;
-  private tempTokens: { location: string; type: 'army' | 'road' }[];
-  private maxNumberToPlace: number;
-  private playerHasNationBuilding: boolean;
+  private cardId!: string | null;
+  private tempTokens!: { location: string; type: 'army' | 'road' }[];
+  private maxNumberToPlace!: number;
+  private playerHasNationBuilding!: boolean;
   private isSpecialAbilityInfrastructure: boolean;
 
-  constructor(game: PaxPamirGame, specialAbilityInfrastructure: boolean) {
+  constructor(game: GameAlias, specialAbilityInfrastructure: boolean) {
     this.game = game;
     this.isSpecialAbilityInfrastructure = specialAbilityInfrastructure;
   }
@@ -17,10 +17,7 @@ class ClientCardActionBuildState implements State {
     this.bribe = props?.bribe;
     this.tempTokens = [];
     this.setMaxNumberToPlace();
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -53,7 +50,7 @@ class ClientCardActionBuildState implements State {
 
   private createTokenLog() {
     let log = '';
-    const args = {};
+    const args: Record<string, string> = {};
     const coalition = this.game.getCurrentPlayer().getLoyalty();
     this.tempTokens.forEach((tempToken, index) => {
       const key = `tkn_${tempToken.type}_${index}`;
@@ -199,7 +196,7 @@ class ClientCardActionBuildState implements State {
 
   private setLocationsSelectable() {
     debug('setRegionsSelectable');
-    const container = document.getElementById(`pp_map_areas_borders_regions`);
+    const container = document.getElementById(`pp_map_areas_borders_regions`)!;
     container.classList.add('pp_selectable');
     this.getRegionsToBuild().forEach((regionId) => {
       const region = this.game.map.getRegion({ region: regionId });
@@ -209,14 +206,14 @@ class ClientCardActionBuildState implements State {
 
       if (element) {
         element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ id: regionId, type: 'army' })));
+        this.game._connections.push(dojo.connect(element, 'onclick', () => this.onLocationClick({ id: regionId, type: 'army' })));
       }
       region.borders.forEach((borderId: string) => {
         const borderLocation = `pp_${borderId}_border_select`;
         const element = document.getElementById(borderLocation);
         if (element && !element.classList.contains('pp_selectable')) {
           element.classList.add('pp_selectable');
-          this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.onLocationClick({ id: borderId, type: 'road' })));
+          this.game._connections.push(dojo.connect(element, 'onclick', () => this.onLocationClick({ id: borderId, type: 'road' })));
         }
       });
     });
@@ -226,15 +223,11 @@ class ClientCardActionBuildState implements State {
     if (this.isSpecialAbilityInfrastructure) {
       this.game.clientUpdatePageTitle({
         text: _('${you} may place one additional block'),
-        args: {
-          you: '${you}',
-        },
       });
     } else {
       this.game.clientUpdatePageTitle({
         text: _('${you} must select regions to place ${tkn_army} and/or ${tkn_road} (up to ${number} remaining)'),
         args: {
-          you: '${you}',
           number: this.maxNumberToPlace - this.tempTokens.length,
           tkn_army: `${this.game.getCurrentPlayer().getLoyalty()}_army`,
           tkn_road: `${this.game.getCurrentPlayer().getLoyalty()}_road`,
@@ -244,7 +237,7 @@ class ClientCardActionBuildState implements State {
   }
 
   private updateActionButtons() {
-    this.game.framework().removeActionButtons();
+    this.game.bga.statusBar.removeActionButtons();
     dojo.empty('customActions');
     this.game.addPrimaryActionButton({
       id: 'done_button',

@@ -7,13 +7,13 @@ const moveToAnimation = async ({
   toId,
   remove = false,
 }: {
-  game: PaxPamirGame;
+  game: GameAlias;
   element: HTMLElement;
   toId: string;
   remove?: boolean;
 }): Promise<void> => {
-  console.log('move to animation');
-  const toElement = document.getElementById(toId);
+
+  const toElement = document.getElementById(toId)!;
   // Get the top, left coordinates of two elements
   const fromRect = element.getBoundingClientRect();
   const toRect = toElement.getBoundingClientRect();

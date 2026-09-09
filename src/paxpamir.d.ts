@@ -202,6 +202,9 @@ interface PaxPamirGamedatas extends Gamedatas {
   // rupees: Token[];
 }
 
+type GameAlias = PaxPamir;
+type GamedatasAlias = PaxPamirGamedatas;
+
 interface AddButtonProps {
   id: string;
   text: string;
@@ -213,81 +216,81 @@ interface AddActionButtonProps extends AddButtonProps {
   color?: 'blue' | 'gray' | 'red' | 'none';
 }
 
-interface PaxPamirGame extends Game {
-  activeEvents: PPActiveEvents;
-  activeStates: {
-    clientCardActionBattle: ClientCardActionBattleState;
-    clientCardActionBetray: ClientCardActionBetrayState;
-    clientCardActionBuild: ClientCardActionBuildState;
-    clientCardActionGift: ClientCardActionGiftState;
-    clientCardActionMove: ClientCardActionMoveState;
-    clientCardActionTax: ClientCardActionTaxState;
-    clientInitialBribeCheck: ClientInitialBribeCheckState;
-    clientPlayCard: ClientPlayCardState;
-    clientPurchaseCard: ClientPurchaseCardState;
-    negotiateBribe: NegotiateBribeState;
-    placeRoad: PlaceRoadState;
-    placeSpy: PlaceSpyState;
-    playerActions: PlayerActionsState;
-    setup: SetupState;
-    specialAbilityInfrastructure: ClientCardActionBuildState;
-    specialAbilitySafeHouse: SASafeHouseState;
-    startOfTurnAbilities: StartOfTurnAbilitiesState;
-  };
-  animationManager: AnimationManager;
-  cardManager: PPCardManager
-  gamedatas: PaxPamirGamedatas;
-  gameOptions: PaxPamirGamedatas['gameOptions'];
-  map: PPMap;
-  market: Market;
-  notificationManager: NotificationManager;
-  objectManager: ObjectManager;
-  playerManager: PlayerManager;
-  playerCounts: Record<string, number>;
-  playerOrder: number[];
-  spies: {
-    [cardId: string]: LineStock<Cylinder>;
-  };
-  coalitionBlockManager: CoalitionBlockManager;
-  cylinderManager: CylinderManager;
-  favoredSuitMarkerManager: FavoredSuitMarkerManager;
-  rulerTokenManager: RulerTokenManager;
-  rupeeManager: RupeeManager;
-  tooltipManager: PPTooltipManager;
-  _connections: unknown[];
-  localState: LocalState;
-  addActionButtonClient: (props: AddActionButtonProps) => void;
-  addCancelButton: () => void;
-  addUndoButton: ({undoPossible}: {undoPossible: boolean}) => void;
-  addPlayerButton: (props: { callback: () => void; player: PPPlayer }) => void;
-  addPrimaryActionButton: (props: AddButtonProps) => void;
-  addSecondaryActionButton: (props: AddButtonProps) => void;
-  addDangerActionButton: (props: AddButtonProps) => void;
-  cancelLogs: (notifIds: string[]) => void;
-  clearInterface: () => void;
-  clearPossible: () => void;
-  format_string_recursive: (log: string, args: Record<string,unknown>) => string;
-  getCard: (token: Token) => Card;
-  getCardInfo: (cardId: string) => CardStaticData;
-  getCylinder(token: Token): Cylinder
-  getCurrentPlayer: () => PPPlayer;
-  getMinimumActionCost: (props: {action: string;}) => number | null;
-  getPlayerId: () => number;
-  getWakhanCardInfo: ({wakhanCardId}: {wakhanCardId: string;}) => WakhanCard;
-  getZoneForLocation: ({ location }: { location: string }) => CardStock<any>;
-  // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
-  // move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
-  onCancel: () => void;
-  // returnSpiesFromCard: (props: { cardId: string }) => void;
-  setCourtCardsSelectable: (props: { callback: (props: { cardId: string }) => void; loyalty?: string; suit?: string; region?: string; }) => void;
-  setHandCardsSelectable: (props: { callback: (props: { cardId: string }) => void }) => void;
-  // AJAX calls
-  takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
-  updateLayout: () => void;
-  updateLocalState: (updates: Partial<LocalState>) => void;
-  clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, unknown> }) => void;
-  clientUpdatePageTitleOtherPlayers: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
-}
+// interface PaxPamirGame extends Game {
+//   activeEvents: PPActiveEvents;
+//   activeStates: {
+//     clientCardActionBattle: ClientCardActionBattleState;
+//     clientCardActionBetray: ClientCardActionBetrayState;
+//     clientCardActionBuild: ClientCardActionBuildState;
+//     clientCardActionGift: ClientCardActionGiftState;
+//     clientCardActionMove: ClientCardActionMoveState;
+//     clientCardActionTax: ClientCardActionTaxState;
+//     clientInitialBribeCheck: ClientInitialBribeCheckState;
+//     clientPlayCard: ClientPlayCardState;
+//     clientPurchaseCard: ClientPurchaseCardState;
+//     negotiateBribe: NegotiateBribeState;
+//     placeRoad: PlaceRoadState;
+//     placeSpy: PlaceSpyState;
+//     playerActions: PlayerActionsState;
+//     setup: SetupState;
+//     specialAbilityInfrastructure: ClientCardActionBuildState;
+//     specialAbilitySafeHouse: SASafeHouseState;
+//     startOfTurnAbilities: StartOfTurnAbilitiesState;
+//   };
+//   animationManager: AnimationManager;
+//   cardManager: PPCardManager
+//   gamedatas: PaxPamirGamedatas;
+//   gameOptions: PaxPamirGamedatas['gameOptions'];
+//   map: PPMap;
+//   market: Market;
+//   notificationManager: NotificationManager;
+//   objectManager: ObjectManager;
+//   playerManager: PlayerManager;
+//   playerCounts: Record<string, number>;
+//   playerOrder: number[];
+//   spies: {
+//     [cardId: string]: LineStock<Cylinder>;
+//   };
+//   coalitionBlockManager: CoalitionBlockManager;
+//   cylinderManager: CylinderManager;
+//   favoredSuitMarkerManager: FavoredSuitMarkerManager;
+//   rulerTokenManager: RulerTokenManager;
+//   rupeeManager: RupeeManager;
+//   tooltipManager: PPTooltipManager;
+//   _connections: unknown[];
+//   localState: LocalState;
+//   addActionButtonClient: (props: AddActionButtonProps) => void;
+//   addCancelButton: () => void;
+//   addUndoButton: ({undoPossible}: {undoPossible: boolean}) => void;
+//   addPlayerButton: (props: { callback: () => void; player: PPPlayer }) => void;
+//   addPrimaryActionButton: (props: AddButtonProps) => void;
+//   addSecondaryActionButton: (props: AddButtonProps) => void;
+//   addDangerActionButton: (props: AddButtonProps) => void;
+//   cancelLogs: (notifIds: string[]) => void;
+//   clearInterface: () => void;
+//   clearPossible: () => void;
+//   format_string_recursive: (log: string, args: Record<string,unknown>) => string;
+//   getCard: (token: Token) => Card;
+//   getCardInfo: (cardId: string) => CardStaticData;
+//   getCylinder(token: Token): Cylinder
+//   getCurrentPlayer: () => PPPlayer;
+//   getMinimumActionCost: (props: {action: string;}) => number | null;
+//   getPlayerId: () => number;
+//   getWakhanCardInfo: ({wakhanCardId}: {wakhanCardId: string;}) => WakhanCard;
+//   getZoneForLocation: ({ location }: { location: string }) => CardStock<any>;
+//   // discardCard: (props: { id: string; from: Zone; order?: number }) => void;
+//   // move: (props: { id: string; to: Zone; from: Zone; weight?: number; addClass?: string[]; removeClass?: string[] }) => void;
+//   onCancel: () => void;
+//   // returnSpiesFromCard: (props: { cardId: string }) => void;
+//   setCourtCardsSelectable: (props: { callback: (props: { cardId: string }) => void; loyalty?: string; suit?: string; region?: string; }) => void;
+//   setHandCardsSelectable: (props: { callback: (props: { cardId: string }) => void }) => void;
+//   // AJAX calls
+//   takeAction: (props: { action: string; data?: Record<string, unknown> }) => void;
+//   updateLayout: () => void;
+//   updateLocalState: (updates: Partial<LocalState>) => void;
+//   clientUpdatePageTitle: ({ text, args }: { text: string; args: Record<string, unknown> }) => void;
+//   clientUpdatePageTitleOtherPlayers: ({ text, args }: { text: string; args: Record<string, string | number> }) => void;
+// }
 
 interface PaxPamirPlayer extends BgaPlayer {
   counts: Omit<PlayerCounts, 'rupees'>;

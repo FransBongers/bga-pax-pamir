@@ -9,11 +9,11 @@
 
 class Modal {
   private id: string;
-  private isClosing: boolean;
-  private isOpening: boolean;
+  private isClosing!: boolean;
+  private isOpening!: boolean;
   private open: boolean = false;
   private resizeListener: unknown; // listener: return value of dojo.connect
-  private runningAnimation: DojoAnimation;
+  private runningAnimation!: DojoAnimation;
   // config
   private container: string = 'ebd-body';
   private class: string = 'custom_popin';
@@ -36,8 +36,8 @@ class Modal {
   private closeIcon: string | null = 'fa-times-circle';
   private closeIconTpl: string =
     '<a id="popin_${id}_close" class="${class}_closeicon"><i class="fa ${closeIcon} fa-2x" aria-hidden="true"></i></a>';
-    // private closeIconTpl: string =
-    // '<a href="#" id="popin_${id}_close" class="${class}_closeicon"><i class="fa ${closeIcon} fa-2x" aria-hidden="true"></i></a>';
+  // private closeIconTpl: string =
+  // '<a href="#" id="popin_${id}_close" class="${class}_closeicon"><i class="fa ${closeIcon} fa-2x" aria-hidden="true"></i></a>';
   private closeAction: 'destroy' | 'hide' = 'destroy';
   private closeWhenClickOnUnderlay: boolean = true;
 
@@ -47,7 +47,8 @@ class Modal {
     '<a href="${helpLink}" target="_blank" id="popin_${id}_help" class="${class}_helpicon"><i class="fa ${helpIcon} fa-2x" aria-hidden="true"></i></a>';
 
   private title: string | null = null; // Set to null if you don't want a title
-  private titleTpl: string = '<h2 id="popin_${id}_title" class="${class}_title">${title}</h2>';
+  private titleTpl: string =
+    '<h2 id="popin_${id}_title" class="${class}_title">${title}</h2>';
 
   private contentsTpl: string = `
       <div id="popin_\${id}_contents" class="\${class}_contents">
@@ -61,8 +62,8 @@ class Modal {
   private openAnimation: boolean = false;
   private openAnimationTarget: string | null = null;
   private openAnimationDelta: number = 200;
-  private onShow: () => void | null = null;
-  private onHide: () => void | null = null;
+  private onShow: () => void | null = () => null;
+  private onHide: () => void | null = () => null;
   private statusElt: string | null = null;
   private scale: number = 1;
   private breakpoint: number | null = null;
@@ -77,6 +78,7 @@ class Modal {
     // Load other parameters
     Object.entries(config).forEach(([key, value]) => {
       if (value !== undefined) {
+        // @ts-ignore
         this[key] = value;
       }
     });
@@ -99,9 +101,16 @@ class Modal {
    */
   create() {
     dojo.destroy('popin_' + this.id + '_container');
-    let titleTpl = this.title == null ? '' : dojo.string.substitute(this.titleTpl, this);
-    let closeIconTpl = this.closeIcon == null ? '' : dojo.string.substitute(this.closeIconTpl, this);
-    let helpIconTpl = this.helpIcon == null ? '' : dojo.string.substitute(this.helpIconTpl, this);
+    let titleTpl =
+      this.title == null ? '' : dojo.string.substitute(this.titleTpl, this);
+    let closeIconTpl =
+      this.closeIcon == null
+        ? ''
+        : dojo.string.substitute(this.closeIconTpl, this);
+    let helpIconTpl =
+      this.helpIcon == null
+        ? ''
+        : dojo.string.substitute(this.helpIconTpl, this);
     let contentsTpl = dojo.string.substitute(this.contentsTpl, this);
 
     let modalTpl = dojo.string.substitute(this.modalTpl, {
@@ -153,16 +162,27 @@ class Modal {
     });
 
     this.adjustSize();
-    this.resizeListener = dojo.connect(window, 'resize', () => this.adjustSize());
+    // @ts-ignore
+    this.resizeListener = dojo.connect(window, 'resize', () =>
+      this.adjustSize(),
+    );
 
     // Connect events
     if (this.closeIcon != null && $('popin_' + this.id + '_close')) {
-      dojo.connect($('popin_' + this.id + '_close'), 'click', () => this[this.closeAction]());
+      dojo.connect($('popin_' + this.id + '_close'), 'click', () =>
+        this[this.closeAction](),
+      );
     }
     if (this.closeWhenClickOnUnderlay) {
-      dojo.connect($('popin_' + this.id + '_underlay'), 'click', () => this[this.closeAction]());
-      dojo.connect($('popin_' + this.id + '_wrapper'), 'click', () => this[this.closeAction]());
-      dojo.connect($('popin_' + this.id), 'click', (evt) => evt.stopPropagation());
+      dojo.connect($('popin_' + this.id + '_underlay'), 'click', () =>
+        this[this.closeAction](),
+      );
+      dojo.connect($('popin_' + this.id + '_wrapper'), 'click', () =>
+        this[this.closeAction](),
+      );
+      dojo.connect($('popin_' + this.id), 'click', (evt: PointerEvent) =>
+        evt.stopPropagation(),
+      );
     }
   }
 
@@ -185,7 +205,8 @@ class Modal {
       if (modalScale > 1) modalScale = 1;
       dojo.style('popin_' + this.id, {
         transform: `scale(${modalScale})`,
-        transformOrigin: this.verticalAlign == 'center' ? 'center center' : 'top center',
+        transformOrigin:
+          this.verticalAlign == 'center' ? 'center center' : 'top center',
       });
     }
   }
@@ -193,8 +214,16 @@ class Modal {
   getOpeningTargetCenter() {
     let startTop: number, startLeft: number;
     if (this.openAnimationTarget == null) {
-      startLeft = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) / 2;
-      startTop = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) / 2;
+      startLeft =
+        Math.max(
+          document.documentElement.clientWidth || 0,
+          window.innerWidth || 0,
+        ) / 2;
+      startTop =
+        Math.max(
+          document.documentElement.clientHeight || 0,
+          window.innerHeight || 0,
+        ) / 2;
     } else {
       let target = dojo.position(this.openAnimationTarget);
       startLeft = target.x + target.w / 2;
@@ -215,6 +244,7 @@ class Modal {
       let containerId = 'popin_' + this.id + '_container';
       if (!$(containerId)) reject();
 
+      // @ts-ignore
       if (this.runningAnimation) this.runningAnimation.stop();
       let duration = this.fadeIn ? this.animationDuration : 0;
       var animations = [];
@@ -224,21 +254,23 @@ class Modal {
         dojo.fadeIn({
           node: 'popin_' + this.id + '_wrapper',
           duration: duration,
-        })
+        }),
       );
       // Underlay fade in background
       animations.push(
+        // @ts-ignore
         dojo.animateProperty({
           node: 'popin_' + this.id + '_underlay',
           duration: duration,
           properties: { opacity: { start: 0, end: 0.7 } },
-        })
+        }),
       );
 
       // Opening animation
       if (this.openAnimation) {
         var pos = this.getOpeningTargetCenter();
         animations.push(
+          // @ts-ignore
           dojo.animateProperty({
             node: 'popin_' + this.id + '_wrapper',
             properties: {
@@ -247,16 +279,18 @@ class Modal {
               left: { start: pos.x, end: 0 },
             },
             duration: this.animationDuration + this.openAnimationDelta,
-          })
+          }),
         );
       }
 
       // Create the overall animation
       this.runningAnimation = dojo.fx.combine(animations);
+      // @ts-ignore
       dojo.connect(this.runningAnimation, 'onEnd', () => resolve());
       this.runningAnimation.play();
       setTimeout(() => {
-        if ($('popin_' + this.id + '_container')) dojo.style('popin_' + this.id + '_container', 'display', 'block');
+        if ($('popin_' + this.id + '_container'))
+          dojo.style('popin_' + this.id + '_container', 'display', 'block');
       }, 10);
     });
   }
@@ -289,31 +323,38 @@ class Modal {
     return new Promise<void>((resolve, reject) => {
       let containerId = 'popin_' + this.id + '_container';
       if (!$(containerId)) reject();
+      // @ts-ignore
       if (this.runningAnimation) this.runningAnimation.stop();
 
-      let duration = this.fadeOut ? this.animationDuration + (this.openAnimation ? this.openAnimationDelta : 0) : 0;
+      let duration = this.fadeOut
+        ? this.animationDuration +
+          (this.openAnimation ? this.openAnimationDelta : 0)
+        : 0;
       var animations = [];
 
       // Modals fade out
       animations.push(
+        // @ts-ignore
         dojo.fadeOut({
           node: 'popin_' + this.id + '_wrapper',
           duration: duration,
-        })
+        }),
       );
       // Underlay fade out background
       animations.push(
+        // @ts-ignore
         dojo.animateProperty({
           node: 'popin_' + this.id + '_underlay',
           duration: duration,
           properties: { opacity: { start: 0.7, end: 0 } },
-        })
+        }),
       );
 
       // Closing animation
       if (this.openAnimation) {
         var pos = this.getOpeningTargetCenter();
         animations.push(
+          // @ts-ignore
           dojo.animateProperty({
             node: 'popin_' + this.id + '_wrapper',
             properties: {
@@ -322,12 +363,13 @@ class Modal {
               left: { start: 0, end: pos.x },
             },
             duration: this.animationDuration,
-          })
+          }),
         );
       }
 
       // Create the overall animation
       this.runningAnimation = dojo.fx.combine(animations);
+      // @ts-ignore
       dojo.connect(this.runningAnimation, 'onEnd', () => resolve());
       this.runningAnimation.play();
     });
@@ -379,11 +421,13 @@ class Modal {
    * Kill : destroy the object and all DOM elements
    */
   kill() {
+    // @ts-ignore
     if (this.runningAnimation) this.runningAnimation.stop();
     let underlayId = 'popin_' + this.id + '_container';
     dojo.destroy(underlayId);
 
     dojo.disconnect(this.resizeListener);
+    // @ts-ignore
     this.id = null;
 
     if (this.statusElt !== null) {

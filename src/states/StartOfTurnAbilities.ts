@@ -1,8 +1,8 @@
 class StartOfTurnAbilitiesState implements State {
-  private game: PaxPamirGame;
-  private specialAbility: string;
+  private game: GameAlias;
+  private specialAbility!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -16,10 +16,7 @@ class StartOfTurnAbilitiesState implements State {
     // and availability of actions is determined based on incorrect data
     // => Add spies on card in same place as adding card
     // => add log texts to title bar
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {
@@ -47,7 +44,6 @@ class StartOfTurnAbilitiesState implements State {
     this.game.clientUpdatePageTitle({
       text: _('${you} may place a spy on any ${regionName} court card without a spy'),
       args: {
-        you: '${you}',
         regionName: this.getRegionNameForSpecialAbility(),
       },
     });
@@ -61,7 +57,7 @@ class StartOfTurnAbilitiesState implements State {
 
   private updateInterfaceConfirmPlaceSpy({ cardId }: { cardId: string }) {
     this.game.clearPossible();
-    document.getElementById(cardId).classList.add('pp_selected');
+    document.getElementById(cardId)!.classList.add('pp_selected');
     this.game.clientUpdatePageTitle({
       text: _('Place a spy on ${cardName}?'),
       args: {
@@ -101,9 +97,9 @@ class StartOfTurnAbilitiesState implements State {
   setCourtCardsSelectable() {
     const region = this.specialAbility === SA_BLACKMAIL_HERAT ? HERAT : KANDAHAR;
     this.game.playerManager.getAllCourtCards().forEach(({ id: cardId, region: cardRegion }: CourtCard) => {
-      if (cardRegion === region && (this.game.spies[cardId]?.getCards() || []).length === 0) {
-        dojo.addClass($(cardId), 'pp_selectable');
-        this.game._connections.push(dojo.connect($(cardId), 'onclick', this, () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
+      if (cardRegion === region && (this.game.cardManager.spies[cardId]?.getCards() || []).length === 0) {
+        document.getElementById(cardId)?.classList.add(PP_SELECTABLE);
+        this.game._connections.push(dojo.connect($(cardId), 'onclick', () => this.updateInterfaceConfirmPlaceSpy({ cardId })));
       }
     });
   }

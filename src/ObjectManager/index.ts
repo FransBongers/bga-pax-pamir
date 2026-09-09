@@ -7,26 +7,26 @@
 // .########..####..######...######..##.....##.##.....##.########.
 
 class DiscardPile {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private visibleCardId?: string = undefined;
   private containterId: string;
-  private stock: VoidStock<Card>;
+  private stock!: VoidStock<Card>;
 
-  constructor({ game, containerId }: { game: PaxPamirGame; containerId: string }) {
+  constructor({ game, containerId }: { game: GameAlias; containerId: string }) {
     this.game = game;
     this.containterId = containerId;
 
     this.setup({ gamedatas: game.gamedatas });
   }
 
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const discardPileTitle = $('pp_discard_pile_title');
     if (!discardPileTitle) {
       const discardPile: HTMLElement = $('pp_discard_pile');
       discardPile.insertAdjacentHTML('afterbegin', `<span id="pp_discard_pile_title">${_('Discard')}</span>`);
     }
 
-    this.stock = new VoidStock<Card>(this.game.cardManager, document.getElementById(this.containterId));
+    this.stock = new VoidStock<Card>(this.game.cardManager, document.getElementById(this.containterId)!);
 
     if (gamedatas.discardPile.topCard) {
       this.setVisibleCard({ cardId: gamedatas.discardPile.topCard.id });
@@ -58,7 +58,7 @@ class DiscardPile {
       {
         id: cardId,
       } as Card,
-      { fromElement: document.getElementById(from) }
+      { fromElement: document.getElementById(from)! },
     );
     this.setVisibleCard({ cardId });
     this.game.objectManager.incCardCounter({ cardId, location: 'discardPile' });
@@ -74,17 +74,20 @@ class DiscardPile {
 }
 
 class TempDiscardPile {
-  private game: PaxPamirGame;
-  private zone: LineStock<Card>;
+  private game: GameAlias;
+  private zone!: LineStock<Card>;
 
-  constructor({ game }: { game: PaxPamirGame }) {
+  constructor({ game }: { game: GameAlias }) {
     this.game = game;
 
     this.setup({ gamedatas: game.gamedatas });
   }
 
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
-    this.zone = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_temp_discarded_card'), { center: false });
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
+    if (!this.zone) {
+      this.zone = new LineStock<Card>(this.game.cardManager, document.getElementById('pp_temp_discarded_card')!, { center: false });
+    }
+
     if (gamedatas.tempDiscardPile) {
       this.zone.addCard({
         ...gamedatas.tempDiscardPile,
@@ -95,7 +98,6 @@ class TempDiscardPile {
 
   clearInterface() {
     this.zone.removeAll();
-    this.zone = undefined;
   }
 
   getZone(): LineStock<Card> {
@@ -120,25 +122,27 @@ class TempDiscardPile {
 // ..######...#######..####....##...
 
 class FavoredSuit {
-  private game: PaxPamirGame;
-  private favoredSuitZones: Record<string, LineStock<Token>>;
-  private favoredSuit: string;
+  private game: GameAlias;
+  private favoredSuitZones!: Record<string, LineStock<Token>>;
+  private favoredSuit!: string;
 
-  constructor({ game }: { game: PaxPamirGame }) {
+  constructor({ game }: { game: GameAlias }) {
     this.game = game;
 
     this.setup({ gamedatas: game.gamedatas });
   }
 
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.favoredSuitZones = {};
 
     // Setup zones for favored suit marker
     Object.keys(this.game.gamedatas.staticData.suits).forEach((suit) => {
-      this.favoredSuitZones[suit] = new LineStock<Token>(
-        this.game.favoredSuitMarkerManager,
-        document.getElementById(`pp_favored_suit_${suit}`)
-      );
+      if (!this.favoredSuitZones[suit]) {
+        this.favoredSuitZones[suit] = new LineStock<Token>(
+          this.game.favoredSuitMarkerManager,
+          document.getElementById(`pp_favored_suit_${suit}`)!,
+        );
+      }
     });
 
     this.favoredSuit = gamedatas.favoredSuit;
@@ -154,11 +158,10 @@ class FavoredSuit {
   clearInterface() {
     Object.keys(this.favoredSuitZones).forEach((key) => {
       this.favoredSuitZones[key].removeAll();
-      this.favoredSuitZones[key] = undefined;
     });
   }
 
-  getFavoredSuitZone({ suit }) {
+  getFavoredSuitZone({ suit }: { suit: string }) {
     return this.favoredSuitZones[suit];
   }
 
@@ -193,30 +196,32 @@ class FavoredSuit {
 // ..######...#######..##........##........########....##...
 
 class Supply {
-  private game: PaxPamirGame;
-  private coalitionBlocks: Record<string, LineStock<CoalitionBlock>>;
+  private game: GameAlias;
+  private coalitionBlocks!: Record<string, LineStock<CoalitionBlock>>;
 
-  constructor({ game }: { game: PaxPamirGame }) {
+  constructor({ game }: { game: GameAlias }) {
     this.game = game;
 
     this.setup({ gamedatas: game.gamedatas });
   }
 
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.coalitionBlocks = {};
     COALITIONS.forEach((coalition) => {
-      this.coalitionBlocks[coalition] = new LineStock<CoalitionBlock>(
-        this.game.coalitionBlockManager,
-        document.getElementById(`pp_${coalition}_coalition_blocks`),
-        { center: false }
-      );
+      if (!this.coalitionBlocks[coalition]) {
+        this.coalitionBlocks[coalition] = new LineStock<CoalitionBlock>(
+          this.game.coalitionBlockManager,
+          document.getElementById(`pp_${coalition}_coalition_blocks`)!,
+          { center: false },
+        );
+      }
 
       this.coalitionBlocks[coalition].addCards(
         gamedatas.coalitionBlocks[coalition].map((token) => ({
           ...token,
           type: 'supply',
           coalition,
-        }))
+        })),
       );
     });
     this.checkDominantCoalition();
@@ -225,7 +230,6 @@ class Supply {
   clearInterface() {
     Object.keys(this.coalitionBlocks).forEach((key) => {
       this.coalitionBlocks[key].removeAll();
-      this.coalitionBlocks[key] = undefined;
     });
   }
 
@@ -260,7 +264,7 @@ class Supply {
       const dominantCoalition = coalitions[0].coalition;
       // Update UI dominant coalition
       const log = _('Dominant coalition: ${tkn_coalitionBlack}');
-      node.innerHTML = this.game.format_string_recursive(log, {
+      node.innerHTML = formatStringRecursive(log, {
         tkn_coalitionBlack: dominantCoalition,
       });
       node.classList.remove(PP_AFGHAN, PP_BRITISH, PP_RUSSIAN);
@@ -282,10 +286,10 @@ class Supply {
 // ....###....##..............##....##.....##.##.....##..######..##....##
 
 class VpTrack {
-  private game: PaxPamirGame;
-  private vpTrackZones: Record<string, TokenManualPositionStock<Cylinder>>;
+  private game: GameAlias;
+  private vpTrackZones!: Record<string, TokenManualPositionStock<Cylinder>>;
 
-  constructor({ game }: { game: PaxPamirGame }) {
+  constructor({ game }: { game: GameAlias }) {
     this.game = game;
     this.setupVpTrack({ gamedatas: game.gamedatas });
   }
@@ -293,21 +297,23 @@ class VpTrack {
   clearInterface() {
     for (let i = 0; i <= 23; i++) {
       this.vpTrackZones[i].removeAll();
-      this.vpTrackZones[i] = undefined;
     }
   }
 
-  setupVpTrack({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupVpTrack({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.vpTrackZones = {};
     // Create VP track
     for (let i = 0; i <= 23; i++) {
-      this.vpTrackZones[i] = new TokenManualPositionStock(
-        this.game.cylinderManager,
-        document.getElementById(`pp_vp_track_${i}`),
-        {},
-        (element: HTMLElement, cards: Cylinder[], lastCard: Cylinder, stock: TokenManualPositionStock<Cylinder>) =>
-          updateZoneDislay(this.customPatternVpTrack, element, cards, lastCard, stock)
-      );
+      if (!this.vpTrackZones[i]) {
+        this.vpTrackZones[i] = new TokenManualPositionStock(
+          this.game.cylinderManager,
+          document.getElementById(`pp_vp_track_${i}`)!,
+          {},
+          (element: HTMLElement, cards: Cylinder[], lastCard: Cylinder, stock: TokenManualPositionStock<Cylinder>) =>
+            // @ts-ignore
+            updateZoneDislay(this.customPatternVpTrack, element, cards, lastCard, stock),
+        );
+      }
     }
 
     // Add cylinders
@@ -340,6 +346,8 @@ class VpTrack {
         return { x: 0, y: 34, w: 40, h: 27 };
       case 4:
         return { x: 30, y: 30, w: 40, h: 27 };
+      default:
+        throw new Error('FE_ERROR_002');
     }
   }
 }
@@ -361,7 +369,7 @@ class VpTrack {
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class ObjectManager {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   public discardPile: DiscardPile;
   public tempDiscardPile: TempDiscardPile;
   public favoredSuit: FavoredSuit;
@@ -388,7 +396,7 @@ class ObjectManager {
     },
   };
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
 
     this.discardPile = new DiscardPile({ game, containerId: 'pp_pile_discarded_card' });
@@ -399,7 +407,7 @@ class ObjectManager {
     this.setupCardCounters({ gamedatas: game.gamedatas });
   }
 
-  updateInterface({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  updateInterface({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.discardPile.setup({ gamedatas });
     this.favoredSuit.setup({ gamedatas });
     this.supply.setup({ gamedatas });
@@ -416,7 +424,7 @@ class ObjectManager {
     this.vpTrack.clearInterface();
   }
 
-  setupCardCounters({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupCardCounters({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.counters.deck.cards.create('pp_deck_counter');
     this.counters.deck.dominanceCheckCards.create('pp_deck_counter_dominance_check');
     this.counters.discardPile.cards.create('pp_discard_pile_counter');
@@ -424,7 +432,7 @@ class ObjectManager {
     this.updateCardCounters({ gamedatas });
   }
 
-  updateCardCounters({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  updateCardCounters({ gamedatas }: { gamedatas: GamedatasAlias }) {
     this.counters.deck.cards.setValue(gamedatas.deck.cardCount);
     this.counters.deck.dominanceCheckCards.setValue(gamedatas.deck.dominanceCheckCount);
     this.counters.discardPile.cards.setValue(gamedatas.discardPile.cardCount);

@@ -1,19 +1,16 @@
 class ClientCardActionBetrayState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private cardId: string;
+  private cardId!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
   onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
     this.bribe = bribe;
     this.cardId = cardId;
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -43,9 +40,6 @@ class ClientCardActionBetrayState implements State {
      */
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a court card to betray'),
-      args: {
-        you: '${you}',
-      },
     });
     this.setCourtCardsSelectable();
     if (this.bribe?.negotiated) {
@@ -66,7 +60,7 @@ class ClientCardActionBetrayState implements State {
     this.game.clearPossible();
     const card = this.game.getCardInfo(betrayedCardId) as CourtCard;
     const node = dojo.byId(betrayedCardId);
-    dojo.addClass(node, 'pp_selected');
+    node.classList.add('pp_selected');
     this.game.clientUpdatePageTitle({
       text: _('Betray ${cardName}?'),
       args: {
@@ -91,7 +85,7 @@ class ClientCardActionBetrayState implements State {
 
   // TODO (centralize spy functionality)
   getSpies({ cardId }: { cardId: string }): { enemy: string[]; own: string[] } {
-    const spyZone = this.game.spies[cardId];
+    const spyZone = this.game.cardManager.spies[cardId];
     if (!spyZone) {
       return {
         enemy: [],
@@ -118,7 +112,7 @@ class ClientCardActionBetrayState implements State {
   }
 
   public getCourtCardsToBetray(): CourtCard[] {
-    const courtCards = [];
+    const courtCards: CourtCard[] = [];
     this.game.playerManager.getPlayers().forEach((player: PPPlayer) => {
       player.getCourtCards().forEach((card: CourtCard) => {
         const { enemy, own } = this.getSpies({ cardId: card.id });
@@ -138,11 +132,11 @@ class ClientCardActionBetrayState implements State {
     const cardsToBetray = this.getCourtCardsToBetray();
     cardsToBetray.forEach((card) => {
       const node = dojo.byId(card.id);
-      dojo.addClass(node, 'pp_selectable');
+      node.classList.add('pp_selectable');
       this.game._connections.push(
-        dojo.connect(node, 'onclick', this, () => {
+        dojo.connect(node, 'onclick', () => {
           this.updateInterfaceConfirm({ betrayedCardId: card.id });
-        })
+        }),
       );
     });
   }

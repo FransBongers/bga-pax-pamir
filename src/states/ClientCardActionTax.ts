@@ -1,14 +1,14 @@
 class ClientCardActionTaxState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private maxNumberToSelect: number;
-  private numberSelected: number;
-  private cardId: string;
+  private maxNumberToSelect!: number;
+  private numberSelected!: number;
+  private cardId!: string;
   private maxPerPlayer: {
     [playerId: number]: number;
   };
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     // Need to set this here as well since it is used when checking
     // possible actions.
@@ -20,7 +20,7 @@ class ClientCardActionTaxState implements State {
    * 1. Determine which rupees can be taxed
    *  => everything in market, players with card for which taxer is ruler minus tax protection
    * 2. Let player select rupees
-   * 3. Send to backens
+   * 3. Send to backend
    */
   onEnteringState(args: ClientCardActionStateArgs) {
     this.cardId = args.cardId;
@@ -29,10 +29,7 @@ class ClientCardActionTaxState implements State {
     this.maxNumberToSelect = cardInfo.rank;
     this.numberSelected = 0;
     this.maxPerPlayer = {};
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -137,6 +134,7 @@ class ClientCardActionTaxState implements State {
     }
 
     if (!taxCounter) {
+      // @ts-ignore
       dojo.place(`<span id="${node.id}_tax_counter" class="pp_tax_counter">1</span>`, node);
     } else {
       const playerId = Number(node.id.split('_')[2]);
@@ -167,7 +165,7 @@ class ClientCardActionTaxState implements State {
   public getMarketRupeesToTax(): string[] {
     const rupees: string[] = [];
     dojo.query('.pp_rupee').forEach((node: HTMLElement) => {
-      const parentId = node.parentElement.id;
+      const parentId = node.parentElement!.id;
       if (parentId.startsWith('pp_market')) {
         rupees.push(node.id);
       }
@@ -186,6 +184,7 @@ class ClientCardActionTaxState implements State {
         const hasCardRuledByPlayer = player
           .getCourtZone()
           .getCards()
+          // @ts-ignore
           .some(({ region: cardRegion }: CourtCard) => {
             // const cardRegion = (this.game.getCardInfo(cardId) as CourtCard).region;
             if (this.game.map.getRegion({ region: cardRegion }).getRuler() === this.game.getPlayerId()) {
@@ -212,23 +211,23 @@ class ClientCardActionTaxState implements State {
     // Market
     this.getMarketRupeesToTax().forEach((rupeeId) => {
       const node = dojo.byId(rupeeId);
-      dojo.addClass(node, 'pp_selectable');
+      node.classList.add('pp_selectable');
       this.game._connections.push(
-        dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
+        dojo.connect(node, 'onclick', (event: PointerEvent) => {
           event.stopPropagation();
           this.handleMarketRupeeClicked({ rupeeId: node.id });
-        })
+        }),
       );
     });
 
     this.getPlayersToTax().forEach((playerId) => {
       const node = dojo.byId(`rupees_tableau_${playerId}`);
-      dojo.addClass(node, 'pp_selectable');
+      node.classList.add('pp_selectable');
       this.game._connections.push(
-        dojo.connect(node, 'onclick', this, (event: PointerEvent) => {
+        dojo.connect(node, 'onclick', (event: PointerEvent) => {
           event.stopPropagation();
           this.handlePlayerRupeeClicked({ rupeeId: node.id });
-        })
+        }),
       );
     });
   }
@@ -251,7 +250,7 @@ class ClientCardActionTaxState implements State {
   }
 
   private updateActionButtons() {
-    this.game.framework().removeActionButtons();
+    this.game.bga.statusBar.removeActionButtons();
     dojo.empty('customActions');
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
@@ -280,7 +279,6 @@ class ClientCardActionTaxState implements State {
     this.game.clientUpdatePageTitle({
       text: _('${you} may take ${number} ${tkn_rupee} (${remaining} remaining)'),
       args: {
-        you: '${you}',
         number: this.maxNumberToSelect,
         remaining: this.maxNumberToSelect - this.numberSelected,
         tkn_rupee: _('rupee(s)'),
@@ -301,6 +299,7 @@ class ClientCardActionTaxState implements State {
       }
 
       const currentValue = taxCounter ? Number(taxCounter.innerText) : 0;
+      // @ts-ignore
       const playerMax = this.maxPerPlayer[playerId];
       if (hasSelectableClass && (this.maxNumberToSelect <= this.numberSelected || currentValue >= playerMax)) {
         this.toggleSelected(rupeeNode);

@@ -30,7 +30,7 @@ class TokenManualPositionStock<T> extends CardStock<T> {
   ): Promise<boolean> {
     let promise: Promise<boolean>;
 
-    const element = animation.fromStock.contains(card)
+    const element = animation.fromStock?.contains(card)
       ? this.manager.getCardElement(card)
       : // @ts-ignore
         animation.fromStock.element;

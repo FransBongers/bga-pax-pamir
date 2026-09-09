@@ -1,8 +1,8 @@
 class ConfirmPartialTurnState implements State {
-  private game: PaxPamirGame;
-  private args: OnEnteringConfirmPartialTurnArgs;
+  private game: GameAlias;
+  private args!: OnEnteringConfirmPartialTurnArgs;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -33,19 +33,16 @@ class ConfirmPartialTurnState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must confirm the switch of active player. You will not be able to restart your turn'),
-      args: {
-        you: '${you}',
-      }
-    })
+    });
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
       text: _('Confirm'),
       callback: () =>
-      this.game.takeAction({
-        action: 'actConfirmPartialTurn',
-      }),
+        this.game.takeAction({
+          action: 'actConfirmPartialTurn',
+        }),
     });
-    this.game.addUndoButton({undoPossible: this.args.undoPossible});
+    this.game.addUndoButton({ undoPossible: this.args.undoPossible });
   }
 
   //  .##.....##.########.####.##.......####.########.##....##
@@ -55,6 +52,4 @@ class ConfirmPartialTurnState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
-
-
 }

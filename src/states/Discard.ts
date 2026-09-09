@@ -1,12 +1,12 @@
 class DiscardState implements State {
-  private game: PaxPamirGame;
-  private from: OnEnteringDiscardArgs['from'];
+  private game: GameAlias;
+  private from!: OnEnteringDiscardArgs['from'];
   private loyalty: OnEnteringDiscardArgs['loyalty'];
   private region: OnEnteringDiscardArgs['region'];
   private suit: OnEnteringDiscardArgs['suit'];
-  private undoPossible: boolean;
+  private undoPossible!: boolean;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -104,9 +104,6 @@ class DiscardState implements State {
 
     this.game.clientUpdatePageTitle({
       text,
-      args: {
-        you: '${you}',
-      },
     });
   }
 }

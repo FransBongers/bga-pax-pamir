@@ -1,5 +1,7 @@
 class PPCardManager extends CardManager<Card> {
-  constructor(public game: PaxPamirGame) {
+  public spies: Record<string, LineStock<Cylinder>> = {}; // spies per cards
+
+  constructor(public game: GameAlias) {
     super(game, {
       getId: (card) => card.id,
       setupDiv: (card, div) => this.setupDiv(card, div),
@@ -10,7 +12,13 @@ class PPCardManager extends CardManager<Card> {
     });
   }
 
-  clearInterface() {}
+  public clearInterface() {
+    Object.keys(this.spies).forEach((key) => {
+      if (this.spies[key]) {
+        this.spies[key].removeAll();
+      }
+    });
+  }
 
   setupDiv(card: Card, div: HTMLElement) {
     if (card.type === 'courtCard') {
@@ -22,19 +30,17 @@ class PPCardManager extends CardManager<Card> {
         const actionId = action + '_' + id;
         dojo.place(
           `<div id="${actionId}" class="pp_card_action" style="left: calc(var(--cardScale) * ${actions[action].left}px); top: calc(var(--cardScale) * ${actions[action].top}px);"></div>`,
-          id
+          id,
         );
       });
 
       const spyZoneId = 'spies_' + card.id;
       dojo.place(`<div id="${spyZoneId}" class="pp_spy_zone"></div>`, card.id);
-      // if (!this.game.spies[card.id]) {
-      // ** setup for zone
-      this.game.spies[card.id] = new LineStock<Cylinder>(this.game.cylinderManager, document.getElementById(spyZoneId), {
+
+      this.spies[card.id] = new LineStock<Cylinder>(this.game.cylinderManager, document.getElementById(spyZoneId)!, {
         center: false,
         gap: '0px',
       });
-      // }
     }
 
     // div.style.position = 'relative';

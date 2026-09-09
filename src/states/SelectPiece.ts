@@ -1,8 +1,8 @@
 class SelectPieceState implements State {
-  private game: PaxPamirGame;
-  private availablePieces: string[];
+  private game: GameAlias;
+  private availablePieces!: string[];
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -38,7 +38,7 @@ class SelectPieceState implements State {
     this.game.clearPossible();
     const node = dojo.byId(pieceId);
     if (node) {
-      dojo.addClass(node, PP_SELECTED);
+      node.classList.add(PP_SELECTED);
     }
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
@@ -60,8 +60,8 @@ class SelectPieceState implements State {
     this.availablePieces.forEach((pieceId) => {
       const node = dojo.byId(pieceId);
       if (node) {
-        dojo.addClass(node, PP_SELECTABLE);
-        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirm({ pieceId })));
+        node.classList.add(PP_SELECTABLE);
+        this.game._connections.push(dojo.connect(node, 'onclick', () => this.updateInterfaceConfirm({ pieceId })));
       }
     });
   }

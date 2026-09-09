@@ -1,12 +1,12 @@
 class PPWakhanPlayer extends PPPlayer {
-  public wakhanScore: Counter;
-  private wakhanInfluence: {
+  public wakhanScore!: Counter;
+  private wakhanInfluence!: {
     afghan: Counter;
     british: Counter;
     russian: Counter;
   };
 
-  constructor({ game, player }: { game: PaxPamirGame; player: PaxPamirPlayer }) {
+  constructor({ game, player }: { game: GameAlias; player: PaxPamirPlayer }) {
     super({ game, player });
   }
 
@@ -19,6 +19,7 @@ class PPWakhanPlayer extends PPPlayer {
   // ..######..########....##.....#######..##.......
 
   setupPlayerPanel({ playerGamedatas }: { playerGamedatas: PaxPamirPlayer }) {
+    console.log('wakhan player data', playerGamedatas);
     this.wakhanInfluence = {
       afghan: new ebg.counter(),
       british: new ebg.counter(),
@@ -26,8 +27,7 @@ class PPWakhanPlayer extends PPPlayer {
     };
     this.wakhanScore = new ebg.counter();
     // Set up panels
-    const player_board_div = $('player_board_' + this.playerId);
-    dojo.place(tplPlayerBoardWakhan({ playerId: this.playerId }), player_board_div);
+    dojo.place(tplPlayerBoardWakhan({ playerId: this.playerId }), 'player_board_' + this.playerId);
 
     $(`cylinders_${this.playerId}`).classList.add(`pp_player_color_${this.playerColor}`);
 
@@ -111,6 +111,21 @@ class PPWakhanPlayer extends PPPlayer {
   // .##.....##.##....##....##.....##..##.....##.##...###.##....##
   // .##.....##..######.....##....####..#######..##....##..######.
 
+  async takePrize({ cardId }: { cardId: string }): Promise<void> {
+    this.updatePrizesStyle({ numberOfPrizes: this.prizes.getCards().length + 1 });
+    const node = $(cardId);
+    node.style.zIndex = '0';
+    const card = this.game.getCard({
+      id: cardId,
+      state: 0,
+      used: 0,
+      location: `prizes_${this.playerId}`,
+    }) as CourtCard;
+    await this.prizes.addCard(card);
+
+    this.wakhanInfluence[card.prize as keyof typeof this.wakhanInfluence].incValue(1);
+  }
+
   async discardCourtCard({ cardId, to = DISCARD }: { cardId: string; to?: 'discardPile' | 'tempDiscardPile' }) {
     const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     this.incCounter({ counter: cardInfo.suit, value: cardInfo.rank * -1 });
@@ -124,7 +139,7 @@ class PPWakhanPlayer extends PPPlayer {
           [RUSSIAN]: 0,
         },
       };
-      wakhanInfluence.influence[cardInfo.loyalty] = -1;
+      wakhanInfluence.influence[cardInfo.loyalty as keyof typeof wakhanInfluence.influence] = -1;
       this.incWakhanInfluence({ wakhanInfluence });
     }
     const node = dojo.byId(cardId);
@@ -138,7 +153,7 @@ class PPWakhanPlayer extends PPPlayer {
           state: 0,
           used: 0,
           location: to,
-        })
+        }),
       );
     }
   }
@@ -154,7 +169,7 @@ class PPWakhanPlayer extends PPPlayer {
           state: 0,
           used: 0,
           location: `cylinders_${this.playerId}`,
-        })
+        }),
       );
     }
   }
@@ -173,7 +188,7 @@ class PPWakhanPlayer extends PPPlayer {
     this.incCounter({ counter: 'courtCount', value: 1 });
     if (cardInfo.type === 'courtCard' && cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
       // TODO: check for loyalty change and then set Counter to 2?
-      this.wakhanInfluence[cardInfo.loyalty].incValue(1);
+      this.wakhanInfluence[cardInfo.loyalty as keyof typeof this.wakhanInfluence].incValue(1);
     }
   }
 
@@ -189,7 +204,7 @@ class PPWakhanPlayer extends PPPlayer {
     this.incCounter({ counter: suit, value: rank });
     this.incCounter({ counter: 'courtCount', value: 1 });
     if (cardInfo.loyalty && !this.ownsEventCard({ cardId: ECE_RUMOR_CARD_ID })) {
-      this.wakhanInfluence[cardInfo.loyalty].incValue(1);
+      this.wakhanInfluence[cardInfo.loyalty as keyof typeof this.wakhanInfluence].incValue(1);
     }
   }
 

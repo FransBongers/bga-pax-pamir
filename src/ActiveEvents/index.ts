@@ -15,22 +15,24 @@
 // .########....###....########.##....##....##.....######.
 
 class PPActiveEvents {
-  private game: PaxPamirGame;
-  private zone: LineStock<Card>;
+  private game: GameAlias;
+  private zone!: LineStock<Card>;
   private zoneId: string = 'pp_active_events';
   private containerId: string = 'pp_active_events_container';
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
-    dojo.place(tplActiveEvents(), 'pp_player_tableaus', 1);
+    document.getElementById('pp_player_tableaus')!.insertAdjacentHTML('afterbegin', tplActiveEvents());
     this.setupActiveEvents({ gamedatas: game.gamedatas });
   }
 
-  setupActiveEvents({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setupActiveEvents({ gamedatas }: { gamedatas: GamedatasAlias }) {
     // Events
-    this.zone = new LineStock<Card>(this.game.cardManager, document.getElementById(this.zoneId), {
-      center: false,
-    });
+    if (!this.zone) {
+      this.zone = new LineStock<Card>(this.game.cardManager, document.getElementById(this.zoneId)!, {
+        center: false,
+      });
+    }
 
     // Add current event cards
     const events = gamedatas.activeEvents || [];
@@ -44,7 +46,6 @@ class PPActiveEvents {
 
   clearInterface() {
     this.zone.removeAll();
-    this.zone = undefined;
   }
 
   private makeVisible() {
@@ -68,7 +69,7 @@ class PPActiveEvents {
   public async addCardFromMarket({ cardId, row, column }: { cardId: string; row: number; column: number }) {
     this.makeVisible();
 
-    const isSpectator = this.game.framework().isSpectator;
+    const isSpectator = this.game.bga.players.isCurrentPlayerSpectator();
     const playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
     const player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
     const originalZIndex = player.elevateTableau();
@@ -80,14 +81,14 @@ class PPActiveEvents {
           state: 0,
           used: 0,
           location: 'activeEvents',
-        })
+        }),
       ),
     ]);
     player.removeTableauElevation(originalZIndex);
   }
 
   public async discardCard({ cardId }: { cardId: string }) {
-    const isSpectator = this.game.framework().isSpectator;
+    const isSpectator = this.game.bga.players.isCurrentPlayerSpectator();
     const playerIdTopTableau = !isSpectator ? this.game.getPlayerId() : this.game.gamedatas.paxPamirPlayerOrder[0];
     const player = this.game.playerManager.getPlayer({ playerId: playerIdTopTableau });
     const originalZIndex = player.elevateTableau();

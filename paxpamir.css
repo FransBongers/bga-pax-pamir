@@ -2360,10 +2360,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  fill: black;
   cursor: pointer;
 }
 #show_settings_menu:hover {
   color: grey;
+  fill: grey;
 }
 #show_settings_menu svg {
   width: auto;
@@ -3054,6 +3056,48 @@
   right: 28px;
 }
 
+html[data-theme=dark] #pp_discard_pile_title,
+html[data-theme=dark] #pp_dominant_coalition_banner,
+html[data-theme=dark] .pp_player_tableau_title,
+html[data-theme=dark] .pp_deck_counters_container,
+html[data-theme=dark] .pp_player_tableau_court_size,
+html[data-theme=dark] .pp_player_hand_size,
+html[data-theme=dark] .pp_tableau_title {
+  color: black;
+}
+html[data-theme=dark] .pp_player_color_block {
+  border-color: black !important;
+}
+html[data-theme=dark] a[style*="color: #8A70B2"],
+html[data-theme=dark] a[style*="color:#8A70B2"],
+html[data-theme=dark] span[style*="color: #8A70B2"],
+html[data-theme=dark] span[style*="color:#8A70B2"],
+html[data-theme=dark] a[style*="color: #006A8F"],
+html[data-theme=dark] a[style*="color:#006A8F"],
+html[data-theme=dark] span[style*="color: #006A8F"],
+html[data-theme=dark] span[style*="color:#006A8F"],
+html[data-theme=dark] a[style*="color: #231F20"],
+html[data-theme=dark] a[style*="color:#231F20"],
+html[data-theme=dark] span[style*="color: #231F20"],
+html[data-theme=dark] span[style*="color:#231F20"],
+html[data-theme=dark] a[style*="color: #7A6E66"],
+html[data-theme=dark] a[style*="color:#7A6E66"],
+html[data-theme=dark] span[style*="color: #7A6E66"],
+html[data-theme=dark] span[style*="color:#7A6E66"],
+html[data-theme=dark] a[style*="color: #D7A461"],
+html[data-theme=dark] a[style*="color:#D7A461"],
+html[data-theme=dark] span[style*="color: #D7A461"],
+html[data-theme=dark] span[style*="color:#D7A461"],
+html[data-theme=dark] a[style*="color: #AB2C29"],
+html[data-theme=dark] a[style*="color:#AB2C29"],
+html[data-theme=dark] span[style*="color: #AB2C29"],
+html[data-theme=dark] span[style*="color:#AB2C29"] {
+  text-shadow: 0 0 1px var(--game-bga-color-white), 0 0 2px var(--game-bga-color-white), 0 0 3px var(--game-bga-color-white);
+}
+html[data-theme=dark] .settings_modal {
+  color: black;
+}
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -3313,7 +3357,7 @@ html {
   background: url("") rgb(192, 192, 192);
 }
 
-.player-board {
+html:not([data-theme=dark]) .player-board {
   background-color: antiquewhite;
 }
 
@@ -3736,15 +3780,27 @@ html {
 }
 
 #afghan_button {
+  background: none;
   background-color: #58c1a6;
+}
+#afghan_button:hover {
+  background-color: rgba(88, 193, 166, 0.8);
 }
 
 #british_button {
+  background: none;
   background-color: #e8a9cc;
+}
+#british_button:hover {
+  background-color: rgba(232, 169, 204, 0.8);
 }
 
 #russian_button {
+  background: none;
   background-color: #f7f079;
+}
+#russian_button:hover {
+  background-color: rgba(247, 240, 121, 0.6);
 }
 
 .loyalty_button {

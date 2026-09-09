@@ -1,7 +1,7 @@
 class ClientPurchaseCardState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -32,7 +32,7 @@ class ClientPurchaseCardState implements State {
     const cardInfo = this.game.getCardInfo(cardId);
     const name = cardInfo.type === COURT_CARD ? cardInfo.name : cardInfo.purchased.title;
 
-    const node = document.getElementById(`${cardId}`);
+    const node = document.getElementById(`${cardId}`)!;
 
     node.classList.add(PP_SELECTED)
     this.game.clientUpdatePageTitle({

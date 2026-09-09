@@ -17,10 +17,10 @@
 const MIN_NOTIFICATION_MS = 1000;
 
 class NotificationManager {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private subscriptions: unknown[];
 
-  constructor(game) {
+  constructor(game: GameAlias) {
     this.game = game;
     this.subscriptions = [];
   }
@@ -86,12 +86,13 @@ class NotificationManager {
         dojo.subscribe(notifName, this, (notifDetails: Notif<unknown>) => {
           debug(`notif_${notifName}`, notifDetails); // log notif params (with Tisaac log method, so only studio side)
 
+          // @ts-ignore
           const promise = this[`notif_${notifName}`](notifDetails);
           const promises = promise ? [promise] : [];
           let minDuration = 1;
 
           // Show log messags in page title
-          let msg = this.game.format_string_recursive(notifDetails.log, notifDetails.args as Record<string, unknown>);
+          let msg = formatStringRecursive(notifDetails.log, notifDetails.args as Record<string, unknown>);
           // TODO: check if this clearPossible causes any issues?
           this.game.clearPossible();
           if (msg != '' && notifName !== 'dominanceCheckScores') {
@@ -105,15 +106,14 @@ class NotificationManager {
 
           // tell the UI notification ends, if the function returned a promise.
           if (this.game.animationManager.animationsActive()) {
-            Promise.all([...promises, this.game.framework().wait(minDuration)]).then(() =>
-              this.game.framework().notifqueue.onSynchronousNotificationEnd()
-            );
+            Promise.all([...promises, wait(minDuration)]).then(() => this.game.framework().notifqueue.onSynchronousNotificationEnd());
           } else {
             // TODO: check what this does
             this.game.framework().notifqueue.setSynchronousDuration(0);
           }
-        })
+        }),
       );
+      // @ts-ignore
       this.game.framework().notifqueue.setSynchronous(notifName, undefined);
     });
   }
@@ -153,7 +153,7 @@ class NotificationManager {
         const { row, column, rupeeId, cardId } = item;
         this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -1 });
         this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId, index });
-      })
+      }),
     );
     if (removedRupees > 0) {
       this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -removedRupees });
@@ -195,7 +195,7 @@ class NotificationManager {
     });
   }
 
-  async notif_clearTurn(notif) {
+  async notif_clearTurn(notif: Notif<NotifClearTurnArgs>) {
     const { args } = notif;
     const notifIds = args.notifIds;
     this.game.cancelLogs(notifIds);
@@ -284,14 +284,14 @@ class NotificationManager {
     for (let playerId of Object.keys(scores)) {
       if (Number(playerId) === WAKHAN_PLAYER_ID) {
         (this.game.playerManager.getPlayer({ playerId: Number(playerId) }) as PPWakhanPlayer).wakhanScore.toValue(
-          scores[playerId].newScore
+          scores[playerId].newScore,
         );
       } else {
-        this.game.framework().scoreCtrl[playerId].toValue(scores[playerId].newScore);
+        this.game.bga.playerPanels.getScoreCounter(Number(playerId)).toValue(scores[playerId].newScore);
       }
       await this.game.objectManager.vpTrack.getZone(`${scores[playerId].newScore}`).addCard({
         id: `vp_cylinder_${playerId}`,
-        color: this.game.gamedatas.paxPamirPlayers[playerId].color,
+        color: this.game.gamedatas.paxPamirPlayers[Number(playerId)].color,
         state: 0,
         used: 0,
         location: `vp_track_${scores[playerId].newScore}`,
@@ -309,6 +309,7 @@ class NotificationManager {
     await Promise.all(
       COALITIONS.map((coalition: string) =>
         this.game.objectManager.supply.getCoalitionBlocksZone({ coalition }).addCards(
+          // @ts-ignore
           blocks[coalition].map(({ id, weight }: TokenZoneInfo) => ({
             id,
             state: weight,
@@ -316,9 +317,9 @@ class NotificationManager {
             location: `supply_${coalition}`,
             coalition,
             type: 'supply',
-          }))
-        )
-      )
+          })),
+        ),
+      ),
     );
 
     this.game.objectManager.supply.checkDominantCoalition();
@@ -387,7 +388,7 @@ class NotificationManager {
       .getArmyZone()
       .addCard({
         id: tokenId,
-        state: weight,
+        state: weight as number,
         used: 0,
         coalition,
         type: 'army',
@@ -408,12 +409,13 @@ class NotificationManager {
       case 'spies':
         // spies_card_38
         const cardId = `${splitLocation[1]}_${splitLocation[2]}`;
-        return this.game.spies[cardId];
+        return this.game.cardManager.spies[cardId];
       case 'tribes':
         // tribes_kabul
         return this.game.map.getRegion({ region: splitLocation[1] }).getTribeZone();
       default:
         debug('cannot find zone for cylinder');
+        throw new Error('FE_ERROR_003');
         break;
     }
   }
@@ -426,10 +428,10 @@ class NotificationManager {
       await toZone.addCard(
         this.game.getCylinder({
           id: tokenId,
-          state: weight,
+          state: weight as number,
           used: 0,
           location: to,
-        })
+        }),
       );
     }
     const playerId = Number(move.tokenId.split('_')[1]);
@@ -473,7 +475,7 @@ class NotificationManager {
         .getRoadZone()
         .addCard({
           id: tokenId,
-          state: weight,
+          state: weight as number,
           used: 0,
           location: to,
           type: 'road',
@@ -504,8 +506,8 @@ class NotificationManager {
       rupeesOnCards
         .reverse()
         .map(({ row, column, rupeeId, cardId }, index) =>
-          this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId, index })
-        )
+          this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId, index }),
+        ),
     );
 
     // Remove all rupees that were on the purchased card
@@ -547,11 +549,11 @@ class NotificationManager {
           value.map(({ tokenId, weight }) =>
             this.game.getCylinder({
               id: tokenId,
-              state: weight,
+              state: weight as number,
               used: 0,
               location: `cylinders_${player.getPlayerId()}`,
-            })
-          )
+            }),
+          ),
         );
 
         player.incCounter({ counter: 'cylinders', value: -value.length });
@@ -576,7 +578,7 @@ class NotificationManager {
 
     await toZone.addCard({
       id: blockId,
-      state: weight,
+      state: weight as number,
       used: 0,
       location: `blocks_${coalition}`,
       type: 'supply',
@@ -595,10 +597,10 @@ class NotificationManager {
     await player.getCylinderZone().addCard(
       this.game.getCylinder({
         id: cylinderId,
-        state: weight,
+        state: weight as number,
         used: 0,
         location: `cylinders_${player.getPlayerId()}`,
-      })
+      }),
     );
     player.incCounter({ counter: 'cylinders', value: -1 });
 
@@ -617,14 +619,14 @@ class NotificationManager {
   async notif_shiftMarket(notif: Notif<NotifShiftMarketArgs>): Promise<void> {
     this.game.clearPossible();
     const { move } = notif.args;
-    const animationDurationBefore = this.game.animationManager.getSettings().duration;
+    const animationDurationBefore = this.game.animationManager.getSettings()?.duration ?? 0;
 
     const fromRow = Number(move.from.split('_')[1]);
     const fromCol = Number(move.from.split('_')[2]);
     const toRow = Number(move.to.split('_')[1]);
     const toCol = Number(move.to.split('_')[2]);
 
-    this.game.animationManager.getSettings().duration = animationDurationBefore / 2;
+    this.game.animationManager.getSettings()!.duration = animationDurationBefore / 2;
 
     await this.game.market.moveCard({
       card: this.game.getCardInfo(move.cardId),
@@ -642,7 +644,7 @@ class NotificationManager {
       await this.game.market.getMarketRupeesZone({ row: toRow, column: toCol }).removeAll({ destroy: true });
     }
 
-    this.game.animationManager.getSettings().duration = animationDurationBefore;
+    this.game.animationManager.getSettings()!.duration = animationDurationBefore;
   }
 
   async notif_smallRefreshHand(notif: Notif<NotifSmallRefreshHandArgs>) {
@@ -677,6 +679,7 @@ class NotificationManager {
     }
     await this.game.playerManager.getPlayer({ playerId }).takePrize({ cardId });
     if (loyaltyDial) {
+      // @ts-ignore
       loyaltyDial.style.zIndex = zIndexBefore;
     }
   }
@@ -699,7 +702,7 @@ class NotificationManager {
       selectedRupees.map(async (rupee, index) => {
         const { row, column, rupeeId } = rupee;
         await this.game.market.removeSingleRupeeFromCard({ row, column, rupeeId, to: `rupees_${playerId}`, index });
-      })
+      }),
     );
     this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: amount });
   }
@@ -717,8 +720,8 @@ class NotificationManager {
 
   async notif_wakhanDrawCard({ args }: Notif<NotifWakhanDrawCardArgs>) {
     const { deck, discardPile } = args;
-    this.game.framework().removeTooltip('pp_wakhan_deck');
-    this.game.framework().removeTooltip('pp_wakhan_discard');
+    this.game.bga.gameui.removeTooltip('pp_wakhan_deck');
+    this.game.bga.gameui.removeTooltip('pp_wakhan_discard');
     const deckNode = dojo.byId('pp_wakhan_deck');
     const discardNode = dojo.byId('pp_wakhan_discard');
 
@@ -726,7 +729,10 @@ class NotificationManager {
 
     const element = !discardPile.from
       ? discardNode
-      : dojo.place(`<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`, `pp_wakhan_discard`);
+      : (dojo.place(
+          `<div id="temp_wakhan_card" class="pp_wakhan_card pp_${discardPile.to}_front"></div>`,
+          `pp_wakhan_discard`,
+        ) as unknown as HTMLElement);
     // Execute move animation from deck
     const fromRect = $(`pp_wakhan_deck`)?.getBoundingClientRect();
 
@@ -747,7 +753,7 @@ class NotificationManager {
         element,
         transitionTimingFunction: 'linear',
         fromRect,
-      })
+      }),
     );
 
     // discardNode.classList.add(`pp_${discardPile.to}_front`);
@@ -771,11 +777,11 @@ class NotificationManager {
     const col = Number(marketLocation.split('_')[2]);
 
     // Place paid rupees on market cards
-    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards.length });
+    this.getPlayer({ playerId }).incCounter({ counter: 'rupees', value: -rupeesOnCards!.length });
     await Promise.all(
-      rupeesOnCards.map(({ row, column, rupeeId, cardId }) =>
-        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId })
-      )
+      rupeesOnCards!.map(({ row, column, rupeeId, cardId }) =>
+        this.game.market.placeRupeeOnCard({ row, column, rupeeId, fromDiv: `rupees_${playerId}`, cardId }),
+      ),
     );
 
     // Remove all rupees that were on the purchased card
@@ -819,7 +825,7 @@ class NotificationManager {
         element: deckNode,
         transitionTimingFunction: 'linear',
         fromRect,
-      })
+      }),
     );
     discardNode.classList.remove(`pp_${topOfDiscardPile}_front`);
     // const deckNode = dojo.byId('pp_wakhan_deck');
@@ -844,6 +850,7 @@ class NotificationManager {
   //  ..#######.....##....####.########.####....##.......##...
 
   destroy() {
+    // @ts-ignore
     dojo.forEach(this.subscriptions, dojo.unsubscribe);
   }
 
@@ -867,7 +874,7 @@ class NotificationManager {
     // Still send notification so it is handled during replays => check if this is actually the case
     // check if to already has the token
     if (
-      this.game.framework().isCurrentPlayerActive() &&
+      this.game.bga.players.isCurrentPlayerActive() &&
       toZone.getCards().some((item) => item.id === tokenId) // Perhaps we just make this a generic check?
     ) {
       debug('no need to execute move');
@@ -876,7 +883,7 @@ class NotificationManager {
 
     let token: Token | Cylinder | CoalitionBlock = {
       id: tokenId,
-      state: weight,
+      state: weight as number,
       used: 0,
       location: to,
     };
@@ -884,16 +891,16 @@ class NotificationManager {
 
     switch (zoneType) {
       case 'armies':
-        token['type'] = 'army';
-        token['coalition'] = getCoalitionForBlock(tokenId);
+        (token as CoalitionBlock)['type'] = 'army';
+        (token as CoalitionBlock)['coalition'] = getCoalitionForBlock(tokenId);
         break;
       case 'roads':
-        token['type'] = 'road';
-        token['coalition'] = getCoalitionForBlock(tokenId);
+        (token as CoalitionBlock)['type'] = 'road';
+        (token as CoalitionBlock)['coalition'] = getCoalitionForBlock(tokenId);
         break;
       case 'blocks':
-        token['type'] = 'supply';
-        token['coalition'] = getCoalitionForBlock(tokenId);
+        (token as CoalitionBlock)['type'] = 'supply';
+        (token as CoalitionBlock)['coalition'] = getCoalitionForBlock(tokenId);
         break;
       case 'gift':
       case 'tribes':

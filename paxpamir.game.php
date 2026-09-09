@@ -130,12 +130,6 @@ class Paxpamir extends Table
         Stats::checkExistence();
     }
 
-    protected function getGameName()
-    {
-        // Used for translations and stuff. Please do not modify.
-        return "paxpamir";
-    }
-
     public function getGameOptionValue($optionId)
     {
         $query = new PaxPamir\Helpers\QueryBuilder('global', null, 'global_id');
@@ -156,7 +150,6 @@ class Paxpamir extends Table
     protected function setupNewGame($players, $options = array())
     {
         Globals::setupNewGame($players, $options);
-        Preferences::setupNewGame($players, $options);
         Players::setupNewGame($players, $options);
         foreach (Players::getAll() as $playerId => $player) {
             PaxPamirPlayers::setupPlayer($player);
@@ -188,6 +181,7 @@ class Paxpamir extends Table
 
         $this->activeNextPlayer();
         ActionStack::set($this->createSetupActions());
+        return ST_DISPATCH_ACTION;
     }
 
     public function createSetupActions()
@@ -440,7 +434,7 @@ class Paxpamir extends Table
     // Exposing protected method translation
     public function translate($text)
     {
-        return $this->_($text);
+        return clienttranslate($text);
     }
 
     // public functuio

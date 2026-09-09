@@ -1,0 +1,49 @@
+html[data-theme='dark'] {
+  #pp_discard_pile_title,
+  #pp_dominant_coalition_banner,
+  .pp_player_tableau_title,
+  .pp_deck_counters_container,
+  .pp_player_tableau_court_size,
+  .pp_player_hand_size,
+  .pp_tableau_title {
+    color: black;
+  }
+
+  .pp_player_color_block {
+    border-color: black !important;
+  }
+
+  a[style*='color: #8A70B2'],
+  a[style*='color:#8A70B2'],
+  span[style*='color: #8A70B2'],
+  span[style*='color:#8A70B2'],
+  a[style*='color: #006A8F'],
+  a[style*='color:#006A8F'],
+  span[style*='color: #006A8F'],
+  span[style*='color:#006A8F'],
+  a[style*='color: #231F20'],
+  a[style*='color:#231F20'],
+  span[style*='color: #231F20'],
+  span[style*='color:#231F20'],
+  a[style*='color: #7A6E66'],
+  a[style*='color:#7A6E66'],
+  span[style*='color: #7A6E66'],
+  span[style*='color:#7A6E66'],
+  a[style*='color: #D7A461'],
+  a[style*='color:#D7A461'],
+  span[style*='color: #D7A461'],
+  span[style*='color:#D7A461'],
+  a[style*='color: #AB2C29'],
+  a[style*='color:#AB2C29'],
+  span[style*='color: #AB2C29'],
+  span[style*='color:#AB2C29'] {
+    text-shadow:
+      0 0 1px var(--game-bga-color-white),
+      0 0 2px var(--game-bga-color-white),
+      0 0 3px var(--game-bga-color-white);
+  }
+
+  .settings_modal {
+    color: black;
+  }
+}

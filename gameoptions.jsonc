@@ -1,0 +1,133 @@
+{
+    "100": {
+        "name": "Open hands",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Enabled",
+                "tmdisplay": "Open hands"
+            }
+        ]
+    },
+    "101": {
+        "name": "Wakhan opponent",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Rulebook",
+                "description": "Wakhan opponent following the rules in the rulebook",
+                "tmdisplay": "Rulebook Wakhan"
+            },
+            {
+                "name": "Improved",
+                "description": "Wakhan opponent with all variants enabled",
+                "tmdisplay": "Improved Wakhan"
+            },
+            {
+                "name": "Custom",
+                "description": "Wakhan opponent where each variant can be enabled separately",
+                "tmdisplay": "Custom Wakhan"
+            }
+        ],
+        "displaycondition": [
+            {
+                "type": "maxplayers",
+                "value": [
+                    1,
+                    2
+                ]
+            }
+        ]
+    },
+    "102": {
+        "name": "Wakhan variant: Savvy Purchasing",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Enabled",
+                "tmdisplay": "Wakhan variant: Savvy Purchasing"
+            }
+        ],
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 101,
+                "value": [
+                    3
+                ]
+            }
+        ]
+    },
+    "103": {
+        "name": "Wakhan variant: Spy Movement",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Enabled",
+                "tmdisplay": "Wakhan variant: Spy Movement"
+            }
+        ],
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 101,
+                "value": [
+                    3
+                ]
+            }
+        ]
+    },
+    "104": {
+        "name": "Wakhan variant: Steadfast Pragmatic Loyalty",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Enabled",
+                "tmdisplay": "Wakhan variant: Steadfast Pragmatic Loyalty"
+            }
+        ],
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 101,
+                "value": [
+                    3
+                ]
+            }
+        ]
+    },
+    "105": {
+        "name": "Fully automated Wakhan actions",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "Enabled",
+                "description": "Wakhan opponent will perform all her actions without manual intervention",
+                "tmdisplay": "Fully automated Wakhan actions"
+            }
+        ],
+        "displaycondition": [
+            {
+                "type": "otheroption",
+                "id": 101,
+                "value": [
+                    1,
+                    3,
+                    2
+                ]
+            }
+        ]
+    }
+}

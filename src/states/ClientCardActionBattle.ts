@@ -1,22 +1,19 @@
 class ClientCardActionBattleState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private cardId: string;
-  private numberSelected: number;
-  private maxNumberToSelect: number;
-  private location: string;
+  private cardId!: string;
+  private numberSelected!: number;
+  private maxNumberToSelect!: number;
+  private location!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
   onEnteringState({ cardId, bribe }: ClientCardActionStateArgs) {
     this.bribe = bribe;
     this.cardId = cardId;
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -41,9 +38,6 @@ class ClientCardActionBattleState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a region or court card to start a battle in'),
-      args: {
-        you: '${you}',
-      },
     });
     if (this.bribe?.negotiated) {
       this.game.addDangerActionButton({
@@ -203,7 +197,7 @@ class ClientCardActionBattleState implements State {
   }
 
   getSpies({ cardId }: { cardId: string }): { enemy: string[]; own: string[] } {
-    const spyZone = this.game.spies[cardId];
+    const spyZone = this.game.cardManager.spies[cardId];
     if (!spyZone) {
       return {
         enemy: [],
@@ -232,8 +226,8 @@ class ClientCardActionBattleState implements State {
   setPiecesSelectable({ pieces }: { pieces: string[] }) {
     pieces.forEach((pieceId: string) => {
       dojo.query(`#${pieceId}`).forEach((node: HTMLElement, index: number) => {
-        dojo.addClass(node, 'pp_selectable');
-        this.game._connections.push(dojo.connect(node, 'onclick', this, () => this.handlePieceClicked({ pieceId })));
+        node.classList.add('pp_selectable');
+        this.game._connections.push(dojo.connect(node, 'onclick', () => this.handlePieceClicked({ pieceId })));
       });
     });
   }
@@ -242,14 +236,14 @@ class ClientCardActionBattleState implements State {
     debug('setLocationsSelectable');
 
     // Regions
-    const container = document.getElementById(`pp_map_areas`);
+    const container = document.getElementById(`pp_map_areas`)!;
     container.classList.add('pp_selectable');
 
     this.getRegionBattleSites().forEach((regionId) => {
       const element = document.getElementById(`pp_region_${regionId}`);
       if (element) {
         element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceSelectPiecesInRegion({ regionId })));
+        this.game._connections.push(dojo.connect(element, 'onclick', () => this.updateInterfaceSelectPiecesInRegion({ regionId })));
       }
     });
 
@@ -257,11 +251,11 @@ class ClientCardActionBattleState implements State {
     const courtBattleSites = this.getCourtCardBattleSites();
     courtBattleSites.forEach((cardId: string) => {
       dojo.query(`#${cardId}`).forEach((node: HTMLElement, index: number) => {
-        dojo.addClass(node, 'pp_selectable');
+        node.classList.add('pp_selectable');
         this.game._connections.push(
-          dojo.connect(node, 'onclick', this, () => {
+          dojo.connect(node, 'onclick', () => {
             this.updateInterfaceSelectPiecesOnCard({ cardId });
-          })
+          }),
         );
       });
     });
@@ -276,7 +270,6 @@ class ClientCardActionBattleState implements State {
     this.game.clientUpdatePageTitle({
       text: mainText[location] + _(' (${remaining} remaining)'),
       args: {
-        you: '${you}',
         number: this.maxNumberToSelect,
         remaining: this.maxNumberToSelect - this.numberSelected,
       },

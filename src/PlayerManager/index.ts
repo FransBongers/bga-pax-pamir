@@ -15,10 +15,10 @@
 //  .##.....##.##.....##.##....##.##.....##..######...########.##.....##
 
 class PlayerManager {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private players: Record<number, PPPlayer>;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     this.players = {};
 
@@ -33,9 +33,9 @@ class PlayerManager {
   }
 
   getAllCourtCards(): CourtCard[] {
-    let cards = [];
+    let cards: CourtCard[] = [];
     Object.values(this.players).forEach((player) => {
-      cards = cards.concat(player.getCourtZone().getCards());
+      cards = cards.concat(player.getCourtZone().getCards() as CourtCard[]);
     });
     return cards;
   }
@@ -52,7 +52,7 @@ class PlayerManager {
     return Object.keys(this.players).map(Number);
   }
 
-  updatePlayers({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  updatePlayers({ gamedatas }: { gamedatas: GamedatasAlias }) {
     for (const playerId in gamedatas.paxPamirPlayers) {
       this.players[playerId].updatePlayer({ gamedatas });
     }
@@ -113,6 +113,7 @@ class PlayerManager {
 
   clearInterface() {
     Object.keys(this.players).forEach((playerId) => {
+      // @ts-ignore
       this.players[playerId].clearInterface();
     });
   }

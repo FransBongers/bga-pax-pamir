@@ -1,17 +1,17 @@
 class ClientCardActionMoveState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private cardId: string;
-  private moves: Record<
+  private cardId!: string;
+  private moves!: Record<
     string,
     {
       from: string;
       to: string;
     }[]
   >;
-  private maxNumberOfMoves: number;
+  private maxNumberOfMoves!: number;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -22,10 +22,7 @@ class ClientCardActionMoveState implements State {
     const cardInfo = this.game.getCardInfo(cardId) as CourtCard;
     this.maxNumberOfMoves = cardInfo.rank;
     this.moves = {};
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep());
+    wait(1).then(() => this.updateInterfaceInitialStep());
   }
 
   onLeavingState() {}
@@ -80,9 +77,6 @@ class ClientCardActionMoveState implements State {
     this.setDestinationRegionsSelectable({ pieceId, regionId });
     this.game.clientUpdatePageTitle({
       text: _('${you} must select the region to move the army to'),
-      args: {
-        you: '${you}',
-      },
     });
     this.addCancelButton();
   }
@@ -94,9 +88,6 @@ class ClientCardActionMoveState implements State {
     this.setDestinationCardsSelectable({ pieceId, cardId });
     this.game.clientUpdatePageTitle({
       text: _('${you} must select the card to move the spy to'),
-      args: {
-        you: '${you}',
-      },
     });
     this.addCancelButton();
   }
@@ -136,13 +127,13 @@ class ClientCardActionMoveState implements State {
     this.game.clearPossible();
 
     this.addMove({ from: fromCardId, to: toCardId, pieceId });
-    await this.game.spies[toCardId].addCard(
+    await this.game.cardManager.spies[toCardId].addCard(
       this.game.getCylinder({
         id: pieceId,
         location: `spies_${toCardId}`,
         state: 0,
         used: 0,
-      })
+      }),
     );
     this.nextStepAfterMove();
   }
@@ -175,7 +166,7 @@ class ClientCardActionMoveState implements State {
           location: `armies_${toRegionId}`,
           state: 0,
           used: 0,
-        })
+        }),
       );
     } else {
       toRegion.getTribeZone().addCard(
@@ -184,7 +175,7 @@ class ClientCardActionMoveState implements State {
           location: `tribes_${toRegionId}`,
           state: 0,
           used: 0,
-        })
+        }),
       );
     }
 
@@ -382,7 +373,7 @@ class ClientCardActionMoveState implements State {
               location: `armies_${to}`,
               state: 0,
               used: 0,
-            })
+            }),
           );
       } else if (key.includes('cylinder') && !from.startsWith('card')) {
         // Moved cylinders with nationalism
@@ -391,13 +382,13 @@ class ClientCardActionMoveState implements State {
           .getTribeZone()
           .addCard(this.game.getCylinder({ id: key, location: `tribes_${to}`, state: 0, used: 0 }));
       } else if (key.includes('cylinder')) {
-        await this.game.spies[to].addCard(
+        await this.game.cardManager.spies[to].addCard(
           this.game.getCylinder({
             id: key,
             location: `spies_${to}`,
             state: 0,
             used: 0,
-          })
+          }),
         );
       }
     }
@@ -447,7 +438,7 @@ class ClientCardActionMoveState implements State {
     this.getArmiesToMove().forEach(({ pieceId, regionId }) => {
       const element = dojo.byId(pieceId);
       element.classList.add('pp_selectable');
-      this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceArmySelected({ pieceId, regionId })));
+      this.game._connections.push(dojo.connect(element, 'onclick', () => this.updateInterfaceArmySelected({ pieceId, regionId })));
     });
   }
 
@@ -461,7 +452,7 @@ class ClientCardActionMoveState implements State {
     }
     const player = this.game.getCurrentPlayer();
     if (player.hasSpecialAbility({ specialAbility: SA_STRANGE_BEDFELLOWS })) {
-      dojo.query(`.pp_court .pp_card.pp_${cardInfo.region}`).forEach((node) => {
+      dojo.query(`.pp_court .pp_card.pp_${cardInfo.region}`).forEach((node: HTMLElement) => {
         const nodeId = node.id;
         if (!destinationCards.includes(nodeId)) {
           destinationCards.push(nodeId);
@@ -497,7 +488,7 @@ class ClientCardActionMoveState implements State {
         const destinationCardNode = dojo.byId(toCardId);
         destinationCardNode.classList.add(PP_SELECTABLE);
         this.game._connections.push(
-          dojo.connect(destinationCardNode, 'onclick', this, () => this.onCardClick({ toCardId, fromCardId: inputCardId, pieceId }))
+          dojo.connect(destinationCardNode, 'onclick', () => this.onCardClick({ toCardId, fromCardId: inputCardId, pieceId })),
         );
       });
   }
@@ -537,7 +528,7 @@ class ClientCardActionMoveState implements State {
      * Set selectable
      */
     const spies: { cylinderId: string; cardId: string }[] = [];
-    Object.entries(this.game.spies).forEach(([cardId, zone]) => {
+    Object.entries(this.game.cardManager.spies).forEach(([cardId, zone]) => {
       if (!zone) {
         return;
       }
@@ -558,9 +549,7 @@ class ClientCardActionMoveState implements State {
     this.getSpiesToMove().forEach(({ cardId, cylinderId }) => {
       const node = dojo.byId(cylinderId);
       node.classList.add(PP_SELECTABLE);
-      this.game._connections.push(
-        dojo.connect(node, 'onclick', this, () => this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId }))
-      );
+      this.game._connections.push(dojo.connect(node, 'onclick', () => this.updateIntefaceSpySelected({ pieceId: cylinderId, cardId })));
     });
   }
 
@@ -576,7 +565,6 @@ class ClientCardActionMoveState implements State {
     this.game.clientUpdatePageTitle({
       text: _('${you} must select an army or spy to move (${number} remaining)'),
       args: {
-        you: '${you}',
         number: this.maxNumberOfMoves - this.totalNumberOfMoves(),
       },
     });

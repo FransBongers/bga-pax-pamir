@@ -1,9 +1,9 @@
 class ClientInitialBribeCheckState implements State {
-  private game: PaxPamirGame;
-  private cardId: string;
-  private action: string;
+  private game: GameAlias;
+  private cardId!: string;
+  private action!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -50,12 +50,13 @@ class ClientInitialBribeCheckState implements State {
     const bribee = this.game.playerManager.getPlayer({ playerId: bribeeId });
     if (bribeLimitReached) {
       this.game.clientUpdatePageTitle({
-        text: _('${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName}. ${you} have reached your limit of declined bribes and cannot start a new bribe negotiation this turn'),
+        text: _(
+          '${you} must pay a bribe of ${amount} ${tkn_rupee} to ${tkn_playerName}. ${you} have reached your limit of declined bribes and cannot start a new bribe negotiation this turn',
+        ),
         args: {
           amount,
           tkn_playerName: bribee.getName(),
           tkn_rupee: _('rupee(s)'),
-          you: '${you}',
         },
       });
     } else {
@@ -65,7 +66,6 @@ class ClientInitialBribeCheckState implements State {
           amount,
           tkn_playerName: bribee.getName(),
           tkn_rupee: _('rupee(s)'),
-          you: '${you}',
         },
       });
     }
@@ -131,7 +131,7 @@ class ClientInitialBribeCheckState implements State {
   //  .##.....##....##.....##..##........##.....##.......##...
   //  ..#######.....##....####.########.####....##.......##...
 
-  public calulateBribe({ cardId, action }): { bribeeId: number; amount: number } | null {
+  public calulateBribe({ cardId, action }: { cardId: string; action: string }): { bribeeId: number; amount: number } | null {
     const disregardForCustomsActive = this.game.activeEvents.hasCard({ cardId: 'card_107' });
     const charismaticCourtiersAcitve =
       action === 'playCard' && this.game.getCurrentPlayer().hasSpecialAbility({ specialAbility: SA_CHARISMATIC_COURTIERS });
@@ -161,7 +161,7 @@ class ClientInitialBribeCheckState implements State {
 
   private checkBribeCardAction({ cardId }: { cardId: string }): { bribeeId: number; amount: number } | null {
     // Get spies on card
-    const spyZone = this.game.spies[cardId];
+    const spyZone = this.game.cardManager.spies[cardId];
     if (!spyZone) {
       return null;
     }

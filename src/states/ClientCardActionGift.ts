@@ -1,17 +1,14 @@
 class ClientCardActionGiftState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
   onEnteringState(args: ClientCardActionStateArgs) {
     this.bribe = args.bribe;
-    this.game
-      .framework()
-      .wait(1)
-      .then(() => this.updateInterfaceInitialStep(args));
+    wait(1).then(() => this.updateInterfaceInitialStep(args));
   }
 
   onLeavingState() {}
@@ -36,9 +33,6 @@ class ClientCardActionGiftState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a gift to purchase'),
-      args: {
-        you: '${you}',
-      },
     });
     this.setGiftsSelectable({ cardId });
     if (this.bribe?.negotiated) {
@@ -97,9 +91,9 @@ class ClientCardActionGiftState implements State {
           .getCards().length > 0;
       if (!hasGift && giftValue <= this.game.getCurrentPlayer().getRupees() - (this.bribe?.amount || 0)) {
         dojo.query(`#pp_gift_${giftValue}_${playerId}`).forEach((node: HTMLElement) => {
-          dojo.addClass(node, 'pp_selectable');
+          node.classList.add('pp_selectable');
           this.game._connections.push(
-            dojo.connect(node, 'onclick', this, () => this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId }))
+            dojo.connect(node, 'onclick', () => this.updateInterfaceConfirmSelectGift({ value: giftValue, cardId })),
           );
         });
       }

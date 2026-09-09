@@ -1,7 +1,7 @@
 class InfoPanel {
-  protected game: PaxPamirGame;
+  protected game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
     const gamedatas = game.gamedatas;
 
@@ -18,7 +18,7 @@ class InfoPanel {
 
   clearInterface() {}
 
-  updateInterface({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {}
+  updateInterface({ gamedatas }: { gamedatas: GamedatasAlias }) {}
 
   // ..######..########.########.##.....##.########.
   // .##....##.##..........##....##.....##.##.....##
@@ -29,7 +29,7 @@ class InfoPanel {
   // ..######..########....##.....#######..##.......
 
   // Setup functions
-  setup({ gamedatas }: { gamedatas: PaxPamirGamedatas }) {
+  setup({ gamedatas }: { gamedatas: GamedatasAlias }) {
     const node = document.getElementById("player_boards");
     if (!node) {
       return;

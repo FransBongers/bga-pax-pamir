@@ -1,7 +1,7 @@
 class ResolveEventRebukeState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -31,9 +31,6 @@ class ResolveEventRebukeState implements State {
     // this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} must select a region'),
-      args: {
-        you: '${you}',
-      },
     });
 
     this.game.map.setSelectable();
@@ -42,7 +39,7 @@ class ResolveEventRebukeState implements State {
       const element = document.getElementById(`pp_region_${regionId}`);
       if (element) {
         element.classList.add('pp_selectable');
-        this.game._connections.push(dojo.connect(element, 'onclick', this, () => this.updateInterfaceRegionSelected({ regionId })));
+        this.game._connections.push(dojo.connect(element, 'onclick', () => this.updateInterfaceRegionSelected({ regionId })));
       }
     });
   }

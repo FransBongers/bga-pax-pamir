@@ -9,8 +9,9 @@
     "removeComments": true
   },
   "files": [
-    "modules/js/modal/modal.ts",
-    "modules/js/modal/modal.d.ts",
+    "bga-framework.d.ts",
+    "src/modal/modal.ts",
+    "src/modal/modal.d.ts",
     "node_modules/bga-animations/src/animations.ts",
     "node_modules/bga-animations/src/animations/attach-with-animation.ts",
     "node_modules/bga-animations/src/animations/cumulated-animations.ts",
@@ -49,6 +50,7 @@
     "src/utility.ts",
     "src/info-panel/index.ts",
     "src/info-panel/templates.ts",
+    "src/interaction/index.ts",
     "src/ActiveEvents/index.ts",
     "src/TooltipManager/templates.ts",
     "src/TooltipManager/index.ts",

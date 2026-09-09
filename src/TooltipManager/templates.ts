@@ -352,7 +352,7 @@ const tplWakhanCardTooltip = ({
 }: {
   wakhanDeckCardId: string;
   wakhanDiscardCardId: string;
-  game: PaxPamirGame;
+  game: GameAlias;
 }) => {
   const WAKHAN_ARROW_DESCRIPTION = {
     [BOTTOM_RIGHT]: _('Bottom (right)'),

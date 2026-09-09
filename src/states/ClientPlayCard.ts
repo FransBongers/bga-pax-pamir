@@ -1,9 +1,9 @@
 class ClientPlayCardState implements State {
-  private game: PaxPamirGame;
+  private game: GameAlias;
   private bribe: BribeArgs;
-  private cardId: string;
+  private cardId!: string;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -34,7 +34,7 @@ class ClientPlayCardState implements State {
   private updateInterfacePlayCardConfirm({ side, firstCard }: { side: 'left' | 'right'; firstCard: boolean }) {
     this.game.clearPossible();
     dojo.query(`#pp_card_select_${side}`).addClass('pp_selected');
-    document.getElementById(this.cardId).classList.add(PP_SELECTED);
+    document.getElementById(this.cardId)!.classList.add(PP_SELECTED);
     this.updatePageTitleConfirmPurchase({ side, firstCard });
     this.game.addPrimaryActionButton({
       id: 'confirm_btn',
@@ -73,9 +73,12 @@ class ClientPlayCardState implements State {
            * 2. Select side, then click cancel
            * 3. Check why side selects dont have a click handler
            */
-          setTimeout(() => {
-            this.game.onCancel();
-          },this.bribe?.negotiated ? 20 : 0)
+          setTimeout(
+            () => {
+              this.game.onCancel();
+            },
+            this.bribe?.negotiated ? 20 : 0,
+          );
         },
       });
     }
@@ -83,9 +86,9 @@ class ClientPlayCardState implements State {
 
   private updateInterfacePlayCardSelectSide() {
     this.game.clearPossible();
-    document.getElementById(this.cardId).classList.add(PP_SELECTED);
+    document.getElementById(this.cardId)!.classList.add(PP_SELECTED);
     this.game.clientUpdatePageTitle({
-      text: _("Select which end of court to play ${name}"),
+      text: _('Select which end of court to play ${name}'),
       args: {
         name: _((this.game.getCardInfo(this.cardId) as CourtCard).name),
       },
@@ -125,29 +128,29 @@ class ClientPlayCardState implements State {
   private updatePageTitleConfirmPurchase({ side, firstCard }: { side: 'left' | 'right'; firstCard: boolean }) {
     const playedCardLoyalty = (this.game.getCardInfo(this.cardId) as CourtCard).loyalty;
     const willChangeLoyalty = playedCardLoyalty !== null && playedCardLoyalty !== this.game.getCurrentPlayer().getLoyalty();
-    debug('willChangeLoyalty',willChangeLoyalty);
+    debug('willChangeLoyalty', willChangeLoyalty);
     let text: string;
     let args: Record<string, string | number>;
     if (firstCard && willChangeLoyalty) {
-      text = _("Play ${name} to court and change loyalty to ${tkn_coalition} ?");
+      text = _('Play ${name} to court and change loyalty to ${tkn_coalition} ?');
       args = {
         name: _((this.game.getCardInfo(this.cardId) as CourtCard).name),
         tkn_coalition: playedCardLoyalty,
       };
     } else if (firstCard) {
-      text = _("Play ${name} to court?");
+      text = _('Play ${name} to court?');
       args = {
         name: _((this.game.getCardInfo(this.cardId) as CourtCard).name),
       };
     } else if (!firstCard && willChangeLoyalty) {
-      text = _("Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?");
+      text = _('Play ${name} to ${side} end of court and change loyalty to ${tkn_coalition} ?');
       args = {
         name: _((this.game.getCardInfo(this.cardId) as CourtCard).name),
         side: _(side),
         tkn_coalition: playedCardLoyalty,
       };
     } else {
-      text = _("Play ${name} to ${side} end of court?");
+      text = _('Play ${name} to ${side} end of court?');
       args = {
         name: _((this.game.getCardInfo(this.cardId) as CourtCard).name),
         side: _(side),
@@ -160,10 +163,7 @@ class ClientPlayCardState implements State {
   }
 
   private playCardNextStep() {
-    const numberOfCardsInCourt = this.game.playerManager
-      .getPlayer({ playerId: this.game.getPlayerId() })
-      .getCourtZone()
-      .getCards().length;
+    const numberOfCardsInCourt = this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).getCourtZone().getCards().length;
     if (numberOfCardsInCourt === 0) {
       this.updateInterfacePlayCardConfirm({ firstCard: true, side: 'left' });
     } else {
@@ -178,12 +178,12 @@ class ClientPlayCardState implements State {
   private setSideSelectable() {
     this.game.playerManager.getPlayer({ playerId: this.game.getPlayerId() }).addSideSelectToCourt();
     dojo.query('#pp_card_select_left').forEach((node: HTMLElement) => {
-      dojo.connect(node, 'onclick', this, () => {
+      dojo.connect(node, 'onclick', () => {
         this.updateInterfacePlayCardConfirm({ firstCard: false, side: 'left' });
       });
     });
     dojo.query('#pp_card_select_right').forEach((node: HTMLElement) => {
-      dojo.connect(node, 'onclick', this, () => {
+      dojo.connect(node, 'onclick', () => {
         this.updateInterfacePlayCardConfirm({ firstCard: false, side: 'right' });
       });
     });

@@ -1,0 +1,91 @@
+{
+    "table": {
+        "turnCount": {
+            "id": 29,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "successfulDominanceChecks": {
+            "id": 30,
+            "name": "Number of successful Dominance Checks",
+            "type": "int"
+        },
+        "unsuccessfulDominanceChecks": {
+            "id": 31,
+            "name": "Number of unsuccessful Dominance Checks",
+            "type": "int"
+        },
+        "wakhanEnabled": {
+            "id": 32,
+            "name": "Wakhan enabled",
+            "type": "int"
+        },
+        "wakhanWins": {
+            "id": 33,
+            "name": "Wakhan wins",
+            "type": "int"
+        }
+    },
+    "player": {
+        "playerTurnCount": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "purchaseCardCount": {
+            "id": 11,
+            "name": "Number of cards purchased",
+            "type": "int"
+        },
+        "playCardCount": {
+            "id": 12,
+            "name": "Number of cards played",
+            "type": "int"
+        },
+        "battleCount": {
+            "id": 13,
+            "name": "Number of battle actions",
+            "type": "int"
+        },
+        "betrayCount": {
+            "id": 14,
+            "name": "Number of betray actions",
+            "type": "int"
+        },
+        "buildCount": {
+            "id": 15,
+            "name": "Number of build actions",
+            "type": "int"
+        },
+        "giftCount": {
+            "id": 16,
+            "name": "Number of gift actions",
+            "type": "int"
+        },
+        "moveCount": {
+            "id": 17,
+            "name": "Number of move actions",
+            "type": "int"
+        },
+        "taxCount": {
+            "id": 18,
+            "name": "Number of tax actions",
+            "type": "int"
+        },
+        "loyaltyChangeCount": {
+            "id": 19,
+            "name": "Number of loyalty changes",
+            "type": "int"
+        }
+    },
+    "value_labels": {
+        "32": [
+            "No",
+            "Yes"
+        ],
+        "33": [
+            "No",
+            "Yes"
+        ]
+    }
+}

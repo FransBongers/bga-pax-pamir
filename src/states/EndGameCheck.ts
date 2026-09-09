@@ -1,8 +1,8 @@
 class EndGameCheckState implements State {
-  private game: PaxPamirGame;
-  private args: OnEnteringEndGameCheckArgs;
+  private game: GameAlias;
+  private args!: OnEnteringEndGameCheckArgs;
 
-  constructor(game: PaxPamirGame) {
+  constructor(game: GameAlias) {
     this.game = game;
   }
 
@@ -33,9 +33,6 @@ class EndGameCheckState implements State {
     this.game.clearPossible();
     this.game.clientUpdatePageTitle({
       text: _('${you} may end the game or undo'),
-      args: {
-        you: '${you}',
-      },
     });
     this.game.addPrimaryActionButton({
       id: 'end_game_btn',
